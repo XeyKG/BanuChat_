@@ -3,12 +3,21 @@
 ## Qué es este proyecto
 Sistema de automatización inteligente para el Centro de Competencias Digitales (CCD) de la
 UNAB. Combina arquitectura RAG sobre pgvector, un núcleo agéntico (ciclo ReAct) expuesto vía
-MCP, orquestación de flujos con N8N (BPM + RPA de scraping) y una app móvil en React Native.
-Despliegue on-premise con Docker. Proyecto de grado (Ingeniería de Sistemas, UNAB) — es un
-anteproyecto en Fase 1 (diseño de arquitectura), todavía sin código productivo.
+MCP, orquestación de flujos con N8N (BPM + generación/ingesta de datos sintéticos) y una app
+móvil en React Native. Proyecto de grado (Ingeniería de Sistemas, UNAB) — es un anteproyecto en
+Fase 1 (diseño de arquitectura), todavía sin código productivo.
 
 Nombre del sistema en el código/UI/commits: **BanuChat**. "Route AI" solo aparece en el
 anteproyecto académico; no lo uses como nombre de paquete, carpeta ni variable.
+
+**Cambio de alcance frente al anteproyecto escrito (ya aprobado por el director):** el sistema
+NO se desplegará en servidores UNAB ni consumirá datos, APIs o el sitio web real del CCD. Todo
+el corpus documental (PDFs, calendarios, convocatorias, "noticias") es **sintético**, creado
+por el equipo con formato realista para simular el contexto institucional. El módulo antes
+descrito como "RPA de scraping" pasa a ser un generador/ingestor de datos sintéticos, no un
+scraper real. El anteproyecto justifica el despliegue on-premise en UNAB como parte de su
+viabilidad (sección 3.5) — ese punto quedó desactualizado por esta decisión y debe explicarse
+así en la documentación final, no disimularse como si el despliegue fuera institucional real.
 
 ## Estructura del repo (monorepo)
 Aún no existe código; este es el layout objetivo que debes crear/respetar:
@@ -19,11 +28,12 @@ Aún no existe código; este es el layout objetivo que debes crear/respetar:
   /rag/               # Ingesta, chunking, embeddings, retrieval
   /api/               # Endpoints REST que consume la app móvil
 /n8n/
-  /workflows/          # Flujos exportados (JSON) de N8N: scraping RPA, sync calendario, BPM
+  /workflows/          # Flujos exportados (JSON) de N8N: generación de datos sintéticos, sync calendario, BPM
 /mobile/              # App React Native (TypeScript)
 /infra/
-  docker-compose.yml   # Orquestación on-premise de todos los contenedores
+  docker-compose.yml   # Orquestación local (Docker) de todos los contenedores
   /db/                 # Migraciones SQL (PostgreSQL + extensión pgvector)
+/data/synthetic/      # Documentos y datasets sintéticos (fuente de verdad del RAG)
 /docs/                # Documentación técnica, diagramas de arquitectura, decisiones (ADR)
 /eval/                # Scripts y datasets de evaluación RAGAS, casos de prueba SUS
 ```
@@ -34,11 +44,12 @@ Si necesitas desviarte de este layout, actualiza esta sección en el mismo commi
 - **Backend / agente**: LLM vía API (OpenAI u Ollama local) orquestado con ciclo ReAct, Model
   Context Protocol (MCP) para exponer herramientas (consulta a pgvector, PostgreSQL, Sheets).
 - **Base de datos**: PostgreSQL + pgvector (embeddings, similitud coseno).
-- **Orquestación**: N8N self-hosted (Apache 2.0) — BPM para reglas de negocio, RPA para
-  scraping periódico del sitio del CCD.
+- **Orquestación**: N8N self-hosted (Apache 2.0) — BPM para reglas de negocio, generación e
+  ingesta periódica de datos sintéticos (ya NO scraping del sitio real del CCD).
 - **Móvil**: React Native + TypeScript, consumo de API REST.
-- **Infraestructura**: Docker Compose, despliegue on-premise en servidores UNAB (sin nube
-  pública).
+- **Infraestructura**: Docker Compose, corriendo localmente en las máquinas del equipo durante
+  el desarrollo (sin servidores UNAB). Si más adelante se necesita disponibilidad remota, se
+  puede mover el mismo `docker-compose.yml` a una VM en la nube sin rediseñar nada.
 
 ## Cómo correr el proyecto (actualizar a medida que exista código real)
 ```bash
@@ -64,25 +75,36 @@ pregunta o propón el comando y añádelo a esta sección.
 - Commits en español, formato imperativo corto (`Agrega endpoint de búsqueda semántica`).
 
 ## Datos sensibles y ética (obligatorio — no negociable)
-- No usar datos personales reales de estudiantes en pruebas sin consentimiento explícito;
-  usar datos sintéticos/anonimizados por defecto.
-- Cumplir Ley 1581 de 2012 (Colombia) sobre tratamiento de datos personales.
+- Todo el corpus (documentos institucionales, calendarios, perfiles de estudiante) es
+  **100% sintético**. Nunca uses, busques ni incorpores datos reales de personas, de la UNAB o
+  del CCD real — ni como ejemplo, ni como "inspiración" de contenido.
+- Todo dato/documento sintético debe quedar marcado como tal en metadatos y en la
+  documentación (`/data/synthetic`), para que quede clara la diferencia frente a lo que diría
+  el sistema en un despliegue institucional real.
+- Aun siendo sintético, no hay datos personales reales que proteger bajo Ley 1581 en esta
+  iteración; si en el futuro se migra a datos reales, hay que revisar esta sección de nuevo.
 - Si el sistema no tiene información suficiente para responder, debe decirlo explícitamente
   en vez de especular — nunca "completar" con conocimiento no verificado del LLM.
 
 ## Qué NO debe hacer el agente sin aprobación explícita
 - No modificar el esquema de la base de datos vectorial ni los nombres de las tools MCP sin
   avisar (son el contrato entre agente, backend y N8N).
-- No introducir dependencias de nube pública (AWS/GCP/Azure) — el despliegue es on-premise
-  por decisión de diseño (ver sección 3.5 y 9 del anteproyecto).
+- No contratar ni configurar servicios de nube de pago sin aprobación explícita; el entorno de
+  desarrollo por defecto es Docker local. Una VM gratuita/de bajo costo para demo se decide
+  aparte, no por iniciativa del agente.
+- No hacer scraping ni llamadas a sitios/APIs reales de la UNAB o el CCD bajo ningún motivo —
+  todo dato de entrada debe originarse en `/data/synthetic`.
 - No commitear credenciales, API keys ni tokens de N8N/PostgreSQL.
 - No borrar ni sobreescribir `/docs` o `/eval` sin confirmación.
 
 ## Definición de "hecho" (alineada a los objetivos específicos del anteproyecto)
 - **Motor RAG (OE1)**: faithfulness ≥ 0.80, context precision ≥ 0.80, context recall ≥ 0.75,
   answer relevancy ≥ 0.80, MRR ≥ 0.70 (framework RAGAS, evaluado en `/eval`).
-- **Scraping/RPA (OE2)**: ejecución automática sin intervención manual, latencia de
-  actualización del corpus < 24h, tasa de extracción correcta > 90%.
+- **Generación/ingesta de datos sintéticos (OE2, reformulado)**: pipelines de N8N que generan
+  e ingieren el corpus sintético automáticamente, sin intervención manual repetitiva; latencia
+  de actualización del corpus < 24h desde que se agrega un nuevo documento sintético; tasa de
+  ingesta correcta > 90% sobre el conjunto de documentos de prueba (ya no aplica "sitio real
+  del CCD").
 - **Núcleo agéntico + MCP (OE3)**: el agente selecciona dinámicamente la tool correcta según
   intención, no responde de forma pasiva/genérica.
 - **Orquestación N8N (OE4)**: pruebas de integración end-to-end sin pérdida de datos entre
