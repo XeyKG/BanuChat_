@@ -2,8 +2,8 @@
 
 ## Qué es este proyecto
 Sistema de automatización inteligente para el Centro de Competencias Digitales (CCD) de la
-UNAB. Combina arquitectura RAG sobre pgvector, un núcleo agéntico (ciclo ReAct) expuesto vía
-MCP, orquestación de flujos con N8N (BPM + generación/ingesta de datos sintéticos) y una app
+UNAB. Combina arquitectura RAG sobre pgvector, un núcleo agéntico (ciclo ReAct) que actúa como cliente
+MCP de un servidor interno, orquestación asíncrona con N8N sobre datos sintéticos y una app
 móvil en React Native. Proyecto de grado (Ingeniería de Sistemas, UNAB) — es un anteproyecto en
 Fase 1 (diseño de arquitectura), todavía sin código productivo.
 
@@ -14,26 +14,28 @@ anteproyecto académico; no lo uses como nombre de paquete, carpeta ni variable.
 NO se desplegará en servidores UNAB ni consumirá datos, APIs o el sitio web real del CCD. Todo
 el corpus documental (PDFs, calendarios, convocatorias, "noticias") es **sintético**, creado
 por el equipo con formato realista para simular el contexto institucional. El módulo antes
-descrito como "RPA de scraping" pasa a ser un generador/ingestor de datos sintéticos, no un
-scraper real. El anteproyecto justifica el despliegue on-premise en UNAB como parte de su
+descrito como "RPA de scraping" pasa a ser orquestación asíncrona de ingesta y sincronización
+sobre `/data/synthetic`, fuente de verdad versionada. PostgreSQL conserva su representación
+procesada. N8N no genera arbitrariamente ni modifica esa fuente de verdad.
+El anteproyecto justifica el despliegue on-premise en UNAB como parte de su
 viabilidad (sección 3.5) — ese punto quedó desactualizado por esta decisión y debe explicarse
 así en la documentación final, no disimularse como si el despliegue fuera institucional real.
 
 ## Estructura del repo (monorepo)
-Aún no existe código; este es el layout objetivo que debes crear/respetar:
+Existen borradores SQL y contratos; todavía no hay aplicaciones implementadas. Layout objetivo:
 
 ```
 /backend/            # API + orquestación del agente (ciclo ReAct)
-  /mcp-server/        # Servidor MCP: expone tools sobre pgvector, PostgreSQL, Google Sheets
+  /mcp-server/        # Servidor MCP interno: herramientas controladas sobre PostgreSQL + pgvector
   /rag/               # Ingesta, chunking, embeddings, retrieval
   /api/               # Endpoints REST que consume la app móvil
 /n8n/
-  /workflows/          # Flujos exportados (JSON) de N8N: generación de datos sintéticos, sync calendario, BPM
+  /workflows/          # Flujos JSON de N8N: ingesta y sincronización asíncrona de datos sintéticos
 /mobile/              # App React Native (TypeScript)
 /infra/
   docker-compose.yml   # Orquestación local (Docker) de todos los contenedores
   /db/                 # Migraciones SQL (PostgreSQL + extensión pgvector)
-/data/synthetic/      # Documentos y datasets sintéticos (fuente de verdad del RAG)
+/data/synthetic/      # Documentos y datasets sintéticos (fuente de verdad de todo el prototipo)
 /docs/                # Documentación técnica, diagramas de arquitectura, decisiones (ADR)
 /eval/                # Scripts y datasets de evaluación RAGAS, casos de prueba SUS
 ```
@@ -41,22 +43,29 @@ Aún no existe código; este es el layout objetivo que debes crear/respetar:
 Si necesitas desviarte de este layout, actualiza esta sección en el mismo commit.
 
 ## Stack técnico
-- **Backend / agente**: LLM vía API (OpenAI u Ollama local) orquestado con ciclo ReAct, Model
-  Context Protocol (MCP) para exponer herramientas (consulta a pgvector, PostgreSQL, Sheets).
-- **Base de datos**: PostgreSQL + pgvector (embeddings, similitud coseno).
-- **Orquestación**: N8N self-hosted (Apache 2.0) — BPM para reglas de negocio, generación e
-  ingesta periódica de datos sintéticos (ya NO scraping del sitio real del CCD).
-- **Móvil**: React Native + TypeScript, consumo de API REST.
+- **Backend / agente**: frontera síncrona Mobile → REST Backend API → Agent/RAG.
+  El agente consume herramientas controladas del servidor MCP interno; la app no llama a MCP
+  ni a N8N. Proveedores y modelos de generación y embeddings siguen abiertos.
+- **Base de datos**: una sola instancia PostgreSQL con pgvector para relaciones y embeddings
+  (similitud coseno); almacena datos procesados de `/data/synthetic`.
+- **Orquestación**: N8N self-hosted para ingesta y sincronización asíncrona de datos sintéticos.
+  No es gateway conversacional ni autor arbitrario del dataset.
+- **Móvil**: React Native + TypeScript, consumo exclusivo de la API REST pública.
+- **Calendario**: fuente sintética versionada en `/data/synthetic/calendars`; Google Sheets
+  queda fuera del MVP.
+- **Usuarios**: perfiles de demostración sintéticos; autenticación local pendiente de diseño,
+  sin autenticación institucional. Notificaciones push reales pendientes de diseño explícito.
 - **Infraestructura**: Docker Compose, corriendo localmente en las máquinas del equipo durante
-  el desarrollo (sin servidores UNAB). Si más adelante se necesita disponibilidad remota, se
-  puede mover el mismo `docker-compose.yml` a una VM en la nube sin rediseñar nada.
+  el desarrollo y las demostraciones iniciales (sin servidores UNAB). Disponibilidad remota
+  requiere una decisión posterior y no es un requisito de esta iteración.
 
 ## Cómo correr el proyecto (actualizar a medida que exista código real)
 ```bash
-# Backend + base de datos + n8n
-docker compose -f infra/docker-compose.yml up --build
+# Solo infraestructura local, cuando se autorice su ejecución y se complete .env.
+# El Compose actual aún no incluye backend ni móvil.
+docker compose --env-file .env -f infra/docker-compose.yml up --build
 
-# App móvil (una vez exista /mobile)
+# App móvil (solo cuando existan package.json y el script start)
 cd mobile && npm install && npm run start
 ```
 No asumas comandos que no estén aquí: si necesitas ejecutar algo que no está documentado,
@@ -81,8 +90,10 @@ pregunta o propón el comando y añádelo a esta sección.
 - Todo dato/documento sintético debe quedar marcado como tal en metadatos y en la
   documentación (`/data/synthetic`), para que quede clara la diferencia frente a lo que diría
   el sistema en un despliegue institucional real.
-- Aun siendo sintético, no hay datos personales reales que proteger bajo Ley 1581 en esta
-  iteración; si en el futuro se migra a datos reales, hay que revisar esta sección de nuevo.
+- Los datos funcionales sintéticos se distinguen de posibles registros recogidos en pruebas
+  de usabilidad con participantes humanos. Estos últimos requieren diseño previo de
+  consentimiento, minimización, anonimización y acceso; no se incorporan al corpus funcional
+  ni a `/data/synthetic` y no se versionan registros identificables.
 - Si el sistema no tiene información suficiente para responder, debe decirlo explícitamente
   en vez de especular — nunca "completar" con conocimiento no verificado del LLM.
 
@@ -100,8 +111,8 @@ pregunta o propón el comando y añádelo a esta sección.
 ## Definición de "hecho" (alineada a los objetivos específicos del anteproyecto)
 - **Motor RAG (OE1)**: faithfulness ≥ 0.80, context precision ≥ 0.80, context recall ≥ 0.75,
   answer relevancy ≥ 0.80, MRR ≥ 0.70 (framework RAGAS, evaluado en `/eval`).
-- **Generación/ingesta de datos sintéticos (OE2, reformulado)**: pipelines de N8N que generan
-  e ingieren el corpus sintético automáticamente, sin intervención manual repetitiva; latencia
+- **Ingesta de datos sintéticos (OE2, reformulado)**: pipelines asíncronos de N8N que ingieren
+  versiones del corpus sintético aprobado, sin intervención manual repetitiva; latencia
   de actualización del corpus < 24h desde que se agrega un nuevo documento sintético; tasa de
   ingesta correcta > 90% sobre el conjunto de documentos de prueba (ya no aplica "sitio real
   del CCD").
@@ -111,7 +122,7 @@ pregunta o propón el comando y añádelo a esta sección.
   nodos, sincronización de calendario con latencia máx. 30 min.
 - **App móvil (OE5)**: SUS promedio > 70/100, ningún usuario individual < 50/100, tasa de
   completación de tareas > 85%.
-- **Despliegue (OE6)**: contenedores estables sin caídas > 5 min, respuesta promedio < 5s.
+- **Despliegue local (OE6)**: contenedores estables sin caídas > 5 min, respuesta promedio < 5s.
 
 Antes de dar una tarea por terminada, verifica contra el criterio del objetivo específico que
 corresponda, no solo "compila y corre".
@@ -121,4 +132,5 @@ El foco ahora es: especificación de requerimientos, diseño del modelo de datos
 especificación de los flujos N8N y el documento de arquitectura — todavía NO construcción de
 funcionalidad final. Pide a Codex que te ayude a producir estos entregables de diseño antes
 de generar código de producción, y que valide cada decisión contra lo ya definido en el
-anteproyecto en vez de reinventar la arquitectura.
+anteproyecto solo cuando sea compatible con las decisiones vigentes de este archivo.
+Los contratos MCP concretos siguen en borrador y no quedan congelados en esta fase.

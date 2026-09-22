@@ -1,0 +1,66 @@
+# Entorno y secretos locales
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+secrets/
+.secrets/
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+*.keystore
+*.jks
+credentials*.json
+
+# Dependencias, compilados y caches
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.cache/
+.parcel-cache/
+.turbo/
+.npm/
+.pnpm-store/
+.yarn/cache/
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# React Native y herramientas locales
+.expo/
+.metro-health-check*
+android/.gradle/
+android/local.properties
+ios/Pods/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Estado local Docker/N8N y resultados regenerables
+.n8n/
+infra/local/
+eval/results/
+eval/reports/
+artifacts/
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# data/synthetic y workflows JSON se versionan.

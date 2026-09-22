@@ -1,9 +1,8 @@
 # Mobile
 
-Aplicación React Native con TypeScript.
+Futura aplicación React Native con TypeScript para consulta y personalización con
+datos y perfiles completamente sintéticos. Consume exclusivamente la API REST pública
+del backend; no accede directamente a MCP, N8N ni PostgreSQL.
 
-## Objetivo
-
-- experiencia móvil para usuarios finales
-- consumo de la API REST
-- integración con notificaciones y flujo de conversación
+La aplicación aún no está inicializada. La autenticación local requiere diseño.
+Las notificaciones push reales quedan como funcionalidad deseable pendiente.

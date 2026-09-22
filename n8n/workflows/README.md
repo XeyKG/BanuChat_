@@ -1,10 +1,8 @@
 # Workflows
 
-Aquí se almacenarán los flujos exportados de N8N en formato JSON.
+Ubicación de futuras exportaciones JSON de N8N para ingesta y sincronización
+asíncrona de versiones aprobadas de `/data/synthetic`.
 
-## Estructura sugerida
-
-- scraping/
-- calendar-sync/
-- bpm/
-- monitoring/
+Cada flujo deberá identificar la versión de entrada y actualizar su representación
+procesada, sin reemplazar la fuente de verdad ni consultar sistemas institucionales.
+No hay flujos implementados.
