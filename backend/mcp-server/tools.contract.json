@@ -1,0 +1,454 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contractVersion": "1.0.0-draft",
+  "mcpProtocolRevision": "2026-07-28",
+  "serverName": "banuchat-mcp-server",
+  "tools": [
+    {
+      "name": "search_institutional_knowledge",
+      "title": "Buscar conocimiento institucional",
+      "description": "Recupera fragmentos del corpus institucional del CCD mediante similitud coseno y devuelve evidencia citable. Úsala para preguntas institucionales; no para calendario, historial personal ni guías completas.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 2000
+          },
+          "top_k": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5
+          },
+          "max_cosine_distance": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "maximum": 2,
+            "default": null
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "source_types": {
+                "type": "array",
+                "uniqueItems": true,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "enum": ["website", "pdf", "excel", "google_sheet", "manual"]
+                }
+              },
+              "document_types": {
+                "type": "array",
+                "uniqueItems": true,
+                "maxItems": 5,
+                "items": {
+                  "type": "string",
+                  "enum": ["pdf", "excel", "html", "google_sheet", "other"]
+                }
+              },
+              "language_code": {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 10,
+                "default": "es"
+              },
+              "extracted_after": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "retrieval_run_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "query": {
+            "type": "string"
+          },
+          "model": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "name": { "type": "string" },
+              "provider": { "type": "string" }
+            },
+            "required": ["id", "name", "provider"]
+          },
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": ["found", "not_found"]
+              },
+              "match_count": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 20
+              }
+            },
+            "required": ["status", "match_count"]
+          },
+          "matches": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "rank": { "type": "integer", "minimum": 1 },
+                "chunk_id": { "type": "string", "format": "uuid" },
+                "content": { "type": "string" },
+                "cosine_distance": { "type": "number", "minimum": 0, "maximum": 2 },
+                "cosine_similarity": { "type": "number", "minimum": -1, "maximum": 1 },
+                "citation": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "document_id": { "type": "string", "format": "uuid" },
+                    "document_version_id": { "type": "string", "format": "uuid" },
+                    "document_title": { "type": "string" },
+                    "source_authority": { "type": "string" },
+                    "section_title": { "type": ["string", "null"] },
+                    "section_path": { "type": ["string", "null"] },
+                    "page_start": { "type": ["integer", "null"], "minimum": 1 },
+                    "page_end": { "type": ["integer", "null"], "minimum": 1 },
+                    "canonical_uri": { "type": ["string", "null"], "format": "uri" },
+                    "version_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                    "chunk_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                    "extracted_at": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "document_id",
+                    "document_version_id",
+                    "document_title",
+                    "source_authority",
+                    "section_title",
+                    "section_path",
+                    "page_start",
+                    "page_end",
+                    "canonical_uri",
+                    "version_sha256",
+                    "chunk_sha256",
+                    "extracted_at"
+                  ]
+                }
+              },
+              "required": [
+                "rank",
+                "chunk_id",
+                "content",
+                "cosine_distance",
+                "cosine_similarity",
+                "citation"
+              ]
+            }
+          }
+        },
+        "required": ["retrieval_run_id", "query", "model", "evidence", "matches"]
+      }
+    },
+    {
+      "name": "find_official_documents",
+      "title": "Encontrar documentos oficiales",
+      "description": "Busca metadata y enlaces de documentos institucionales activos. Úsala para localizar archivos oficiales y guías de cátedra, que se entregan como enlace completo y no se vectorizan.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 500
+          },
+          "document_types": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "enum": ["pdf", "excel", "html", "google_sheet", "other"]
+            }
+          },
+          "vectorization_policy": {
+            "type": "string",
+            "enum": ["chunk", "full_document_link"]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 10
+          },
+          "cursor": {
+            "type": ["string", "null"],
+            "maxLength": 2048,
+            "default": null
+          }
+        },
+        "required": ["query"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "documents": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "document_id": { "type": "string", "format": "uuid" },
+                "document_version_id": { "type": "string", "format": "uuid" },
+                "title": { "type": "string" },
+                "document_type": {
+                  "type": "string",
+                  "enum": ["pdf", "excel", "html", "google_sheet", "other"]
+                },
+                "vectorization_policy": {
+                  "type": "string",
+                  "enum": ["chunk", "full_document_link"]
+                },
+                "canonical_uri": { "type": ["string", "null"], "format": "uri" },
+                "source_name": { "type": "string" },
+                "source_authority": { "type": "string" },
+                "version_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+                "source_updated_at": { "type": ["string", "null"], "format": "date-time" },
+                "extracted_at": { "type": "string", "format": "date-time" }
+              },
+              "required": [
+                "document_id",
+                "document_version_id",
+                "title",
+                "document_type",
+                "vectorization_policy",
+                "canonical_uri",
+                "source_name",
+                "source_authority",
+                "version_sha256",
+                "source_updated_at",
+                "extracted_at"
+              ]
+            }
+          },
+          "next_cursor": {
+            "type": ["string", "null"]
+          }
+        },
+        "required": ["documents", "next_cursor"]
+      }
+    },
+    {
+      "name": "get_academic_calendar",
+      "title": "Consultar calendario académico",
+      "description": "Consulta eventos académicos sincronizados desde la fuente institucional y devuelve su estado de frescura. No permite leer rangos arbitrarios de Google Sheets.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date_from": { "type": "string", "format": "date" },
+          "date_to": { "type": "string", "format": "date" },
+          "event_types": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 20,
+            "items": { "type": "string", "minLength": 1, "maxLength": 50 }
+          },
+          "academic_program_code": {
+            "type": ["string", "null"],
+            "maxLength": 50,
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 50
+          },
+          "cursor": {
+            "type": ["string", "null"],
+            "maxLength": 2048,
+            "default": null
+          }
+        },
+        "required": ["date_from", "date_to"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "event_id": { "type": "string" },
+                "title": { "type": "string" },
+                "description": { "type": ["string", "null"] },
+                "event_type": { "type": "string" },
+                "starts_at": { "type": "string", "format": "date-time" },
+                "ends_at": { "type": ["string", "null"], "format": "date-time" },
+                "all_day": { "type": "boolean" },
+                "registration_deadline": { "type": ["string", "null"], "format": "date-time" },
+                "academic_program_code": { "type": ["string", "null"] },
+                "canonical_uri": { "type": ["string", "null"], "format": "uri" },
+                "source_updated_at": { "type": ["string", "null"], "format": "date-time" }
+              },
+              "required": [
+                "event_id",
+                "title",
+                "description",
+                "event_type",
+                "starts_at",
+                "ends_at",
+                "all_day",
+                "registration_deadline",
+                "academic_program_code",
+                "canonical_uri",
+                "source_updated_at"
+              ]
+            }
+          },
+          "freshness": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "status": { "type": "string", "enum": ["fresh", "stale"] },
+              "source_name": { "type": "string" },
+              "last_synced_at": { "type": "string", "format": "date-time" },
+              "age_minutes": { "type": "integer", "minimum": 0 },
+              "maximum_age_minutes": { "type": "integer", "const": 30 }
+            },
+            "required": [
+              "status",
+              "source_name",
+              "last_synced_at",
+              "age_minutes",
+              "maximum_age_minutes"
+            ]
+          },
+          "next_cursor": { "type": ["string", "null"] }
+        },
+        "required": ["events", "freshness", "next_cursor"]
+      }
+    },
+    {
+      "name": "get_student_course_history",
+      "title": "Consultar historial propio de cursos",
+      "description": "Consulta el historial de cursos del estudiante autenticado. La identidad se obtiene del contexto de seguridad y nunca de un identificador proporcionado por el modelo.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "statuses": {
+            "type": "array",
+            "uniqueItems": true,
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "enum": ["completed", "in_progress", "planned"]
+            }
+          },
+          "completed_from": {
+            "type": ["string", "null"],
+            "format": "date",
+            "default": null
+          },
+          "completed_to": {
+            "type": ["string", "null"],
+            "format": "date",
+            "default": null
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 20
+          },
+          "cursor": {
+            "type": ["string", "null"],
+            "maxLength": 2048,
+            "default": null
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "student_ref": { "type": "string" },
+          "courses": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "course_code": { "type": "string" },
+                "course_title": { "type": "string" },
+                "status": {
+                  "type": "string",
+                  "enum": ["completed", "in_progress", "planned"]
+                },
+                "started_on": { "type": ["string", "null"], "format": "date" },
+                "completed_on": { "type": ["string", "null"], "format": "date" },
+                "source_updated_at": { "type": "string", "format": "date-time" }
+              },
+              "required": [
+                "course_code",
+                "course_title",
+                "status",
+                "started_on",
+                "completed_on",
+                "source_updated_at"
+              ]
+            }
+          },
+          "next_cursor": { "type": ["string", "null"] }
+        },
+        "required": ["student_ref", "courses", "next_cursor"]
+      }
+    }
+  ]
+}
