@@ -41,8 +41,9 @@ vectores puede requerir artefactos si un proveedor no ofrece revisiones estables
 Un eventual retorno a una release anterior exige que pueda operarse con su configuración
 compatible. No se decide aquí cómo almacenar dimensiones vectoriales diferentes.
 
-El modelo y dimensión concretos de embeddings, y después el DDL físico, siguen pendientes.
-Este ADR no define SQL, índices, migraciones ni contratos MCP, ni autoriza su implementación.
+Al aprobar este ADR, modelo/dimensión y DDL físico estaban pendientes. La decisión posterior
+de embeddings y autorización del esquema se registran en el [ADR 0003](0003-embedding-local-qwen3.md).
+Este ADR no define SQL, índices, migraciones ni contratos MCP.
 El [modelo lógico candidato](../modelo-datos.md) desarrolla las entidades y restricciones.
 
 ## Alternativas descartadas para el MVP

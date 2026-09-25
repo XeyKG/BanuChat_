@@ -41,7 +41,8 @@ flowchart LR
 ```
 
 N8N queda fuera del camino síncrono. La app no consume MCP, N8N ni PostgreSQL
-directamente. El proveedor y los modelos de generación y embeddings siguen abiertos.
+directamente. El generador sigue abierto; embeddings usa Ollama local con
+`qwen3-embedding:0.6b`, 1024 dimensiones y coseno ([ADR 0003](adr/0003-embedding-local-qwen3.md)).
 
 El agente debe citar documento y sección del corpus sintético y declarar falta de
 información cuando no tenga evidencia suficiente. No debe presentar la simulación
@@ -121,14 +122,14 @@ su cumplimiento experimental.
 
 ## Artefactos que requieren revisión posterior
 
-Se conservan sin modificación `infra/db/001_initial_schema.sql`,
-`backend/mcp-server/tools-contract.md` y `backend/mcp-server/tools.contract.json`.
-Son borradores heredados, no contratos congelados ni autorización para implementar:
+El esquema inicial `infra/db/001_initial_schema.sql` fue reescrito con autorización,
+sin ejecutarlo; véase [su documentación física](../infra/db/README.md).
+Los contratos `backend/mcp-server/tools-contract.md` y
+`backend/mcp-server/tools.contract.json` siguen intactos y en borrador:
 
-- SQL: exigir origen sintético, definir calendario e historial, procedencia de archivos,
-  vigencia de versiones y trazabilidad de citas.
+- SQL: pendiente validación ejecutada de migración, integridad, permisos y concurrencia.
 - MCP: retirar dependencia de Sheets, identificar datos sintéticos, revisar identidad local,
   evidencia, enlaces y responsabilidad sobre persistencia de trazas.
-- Proveedores/modelos LLM, transporte MCP y autenticación local: pendientes de diseño.
+- Modelo generador, transporte MCP y autenticación local: pendientes de diseño.
 
 Las decisiones confirmadas en `AGENTS.md` prevalecen sobre esos borradores.

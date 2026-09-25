@@ -1,10 +1,12 @@
 # Modelo de datos conceptual y lógico del MVP
 
-Estado: versión candidata final del modelo lógico, Fase 1. Incorpora las decisiones de
-revisión arquitectónica aprobadas; no constituye una migración ni autorización de implementación.
+Estado: modelo lógico aprobado, Fase 1. Su traducción al esquema físico inicial fue
+autorizada y escrita, pero no ejecutada; no autoriza implementar aplicaciones.
 La decisión de publicaciones se registra en el [ADR 0002](adr/0002-publicaciones-sinteticas-inmutables.md).
-Base de contraste: lectura completa de `infra/db/001_initial_schema.sql`, reglas vigentes
-de `AGENTS.md` y arquitectura documentada. El SQL y los contratos MCP no se modifican.
+Base de contraste original: el borrador anterior de `infra/db/001_initial_schema.sql`,
+reglas de `AGENTS.md` y arquitectura documentada. La sección 7 conserva ese análisis
+histórico; el SQL actual ya fue reescrito. Véanse el [esquema físico](../infra/db/README.md)
+y el [ADR 0003](adr/0003-embedding-local-qwen3.md). Los contratos MCP siguen sin cambios.
 
 ## 1. Alcance
 
@@ -146,7 +148,7 @@ Se elimina `chunk_embeddings` como entidad; su contenido útil se integra aquí.
 varios embeddings por chunk ni selección entre espacios vectoriales durante retrieval.
 Una regeneración distinta de material publicado requiere otra release.
 
-### 2.6 `embedding_configs` — configuración reproducible, no proveedor elegido
+### 2.6 `embedding_configs` — configuración reproducible
 
 - **Responsabilidad:** describir la configuración única utilizada por cada release.
 - **Campos/ID:** `id`, proveedor, modelo, revisión cuando aplique, `dimension` positiva,
@@ -160,10 +162,10 @@ Una regeneración distinta de material publicado requiere otra release.
 - **Justificación:** igual dimensión no implica compatibilidad semántica; modelo,
   revisión disponible, parámetros y preprocesamiento deben corresponder en consulta y corpus.
 
-No se elige modelo ni dimensión ahora. El **DDL físico del vector se decidirá después de
-seleccionar el modelo de embeddings**; este documento no prescribe dimensión variable,
-particiones ni índices HNSW/IVFFlat. La dimensión lógica permite validar compatibilidad,
-no obliga a soportar dimensiones distintas simultáneamente en retrieval operacional.
+Decisión posterior aprobada: Ollama local con `qwen3-embedding:0.6b`, 1024 dimensiones
+y coseno. El esquema físico usa `vector(1024)` y búsqueda exacta, sin HNSW/IVFFlat ni
+dimensiones simultáneas. La ingesta registrará revisión/digest y receta efectivos; no
+se crea un seed ficticio. Véase el [ADR 0003](adr/0003-embedding-local-qwen3.md).
 
 Cambiar configuración/modelo produce otra release completa. Se valida antes de activar
 atómicamente el puntero, y cada consulta utiliza solo la configuración de su release.
@@ -527,7 +529,8 @@ erDiagram
 4. Resuelve identidad documental estable y crea versión por publicación. Extrae contenido
    y localizadores con receta fijada. Las guías se conservan únicamente como archivos completos.
 5. Fragmenta solo documentos permitidos; genera embeddings con la configuración elegida
-   para esa publicación; registra fecha y ejecución de generación. No hay modelo elegido aquí.
+   para esa publicación; registra fecha y ejecución de generación con la configuración
+   local aprobada en el ADR 0003.
 6. Valida cobertura completa y restricciones. Fallos dejan staging sin reemplazar la versión
    vigente. Reintentos conservan sus resultados separados y no duplican entidades de dominio.
 7. Publica atómicamente. Una reconstrucción repite la selección de revisión y receta; los
@@ -559,10 +562,12 @@ de chunks y publicación independiente por documento quedan fuera hasta demostra
   evidencias al ejecutor de evaluación. La autorización de evaluación no habilita que la
   ruta normal consulte versiones históricas.
 
-## 7. Comparación exhaustiva con el borrador SQL
+## 7. Comparación histórica con el borrador SQL anterior
 
-Las acciones de esta sección son recomendaciones para una futura migración, no cambios
-efectuados. Se inspeccionaron 14 tablas, 6 funciones, 8 triggers y 13 índices explícitos.
+Esta sección preserva la revisión que motivó la reescritura, no describe el SQL actual.
+El borrador inspeccionado tenía 14 tablas, 6 funciones, 8 triggers y 13 índices explícitos.
+Las recomendaciones sobre DDL pendiente se resolvieron posteriormente según el ADR 0003
+y la documentación física; no se deben interpretar como decisiones aún abiertas.
 
 ### 7.1 Tablas
 
@@ -661,25 +666,29 @@ actual que conservar: HNSW/IVFFlat no son requisitos de este diseño.
   y protección del catálogo de modelos. ON DELETE CASCADE/SET NULL actuales pueden destruir
   trazabilidad; revisar cada FK conforme a las reglas de conservación propuestas.
 
-## 8. Decisiones pendientes antes de transformar el diseño en SQL
+## 8. Decisiones pendientes y concreción física
 
 Ya están aprobados: publicaciones completas, inmutabilidad, activación atómica por puntero
 único, conservación histórica, una configuración por release, embedding integrado al chunk,
 regla documental única y trazas de evaluación fuera del modelo operacional. No se reabren
 esas decisiones. Véase [ADR 0002](adr/0002-publicaciones-sinteticas-inmutables.md).
 
-1. Seleccionar modelo/configuración de embeddings y su dimensión; después decidir el DDL
-   físico compatible. No diseñar soporte simultáneo de dimensiones distintas ni ANN ahora.
-2. Concretar manifiesto mínimo, claves estables y vocabularios de dominio propuestos; validar
-   el progreso de perfil como instantánea de solo lectura y los kinds de citas de perfil.
-3. Definir retención/eliminación del historial de demo y protección del texto libre antes
+El SQL autorizado concreta PostgreSQL 16, embeddings locales de 1024 dimensiones,
+FK compuestas, publicación protegida e inmutabilidad. El manifiesto procesado se copia
+como JSONB dentro de la release para comprobar completitud sin una entidad adicional.
+La receta/hash efectivo del modelo se registra en ingesta. El contrato de manifiesto,
+hashes y orden de reintentos se documenta en [infra/db](../infra/db/README.md).
+
+1. Registrar revisión/digest y parámetros efectivos del modelo cuando se autorice la ingesta.
+2. Definir retención/eliminación del historial de demo y protección del texto libre antes
    de persistir sesiones de participantes. Sus datos de usabilidad no pertenecen al corpus.
-4. Al preparar la migración, fijar versión compatible de PostgreSQL/pgvector, verificar
-   necesidad de pgcrypto y concretar las garantías transaccionales y permisos del diseño.
+3. Fijar versión/digest reproducible de la imagen pgvector y aprovisionar roles/credenciales
+   antes de ejecutar. PostgreSQL 16 proporciona UUID/SHA-256 sin pgcrypto.
+4. Ejecutar pruebas de aplicación de la migración, integridad, permisos y concurrencia
+   únicamente cuando se autorice una base desechable.
 
 Modelo de generación, autenticación local y notificaciones siguen abiertos según AGENTS.md,
-pero no exigen nuevas entidades en esta candidata. La selección del modelo de embeddings
-no bloquea el modelo lógico; sí precede a la decisión del DDL vectorial físico.
+pero no exigen nuevas entidades en este esquema. Ninguno se implementa en esta tarea.
 
 ## 9. Validación de diseño y límites de esta entrega
 
@@ -689,12 +698,12 @@ no bloquea el modelo lógico; sí precede a la decisión del DDL vectorial físi
 | Sin fuente de hojas remotas ni scraping | No existen en entidades/flujo propuestos; menciones anteriores solo identifican defectos del SQL heredado. |
 | Una sola base | Relacional y vectorial comparten PostgreSQL + pgvector. |
 | Entidades justificadas | Las 16 entidades tienen escenario y restricciones en sección 2. |
-| Embedding único | Un embedding por chunk y una configuración por release; DDL vectorial diferido hasta seleccionar modelo. |
+| Embedding único | Un embedding vector(1024) por chunk y una configuración Ollama/Qwen3 aprobada por release. |
 | Política documental | Únicamente documents.retrieval_mode; sin is_active documental ni política contradictoria por versión. |
 | Retrieval vigente | Puntero único + unicidad documento/publicación + superficie de consulta restringida; histórico explícito. |
 | Sin CoT | Solo mensajes visibles user/assistant; sin tabla de razonamiento ni payloads internos. |
 | Reproducibilidad | Revisión, manifiesto, claves, receta, configuración de embeddings y procedencia; límites bit a bit declarados. |
-| SQL y ejecución | Solo diseño; no migración, PostgreSQL, contenedores ni prueba de ejecución. |
+| SQL y ejecución | Esquema físico escrito y revisado estáticamente; no se ejecutaron migraciones, PostgreSQL ni contenedores. |
 
 OE1 queda respaldado por origen/citas y propuesta de artefactos de evaluación; no se afirma
 alcanzar sus umbrales sin ejecutar evaluaciones futuras. OE2/OE4 disponen de tiempos e items;
