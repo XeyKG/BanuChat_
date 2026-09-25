@@ -1,0 +1,1311 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "BanuChat REST API",
+    "version": "1.0.0-draft",
+    "description": "Especificación REST v1 para demostración sintética local. No implementada. Mobile consume solo REST; MCP es una frontera interna distinta. Objetos JSON snake_case cerrados. No hay autenticación real. Consultar api-contract.md para concurrencia, reintentos, pertenencia de release y resolución de artefactos. Se rechazan query parameters desconocidos y cuerpos en GET/DELETE. No se implementa catálogo de cursos."
+  },
+  "servers": [
+    {
+      "url": "/api/v1",
+      "description": "Base relativa del futuro backend local; host/puerto no fijados por este contrato."
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/profiles": {
+      "get": {
+        "operationId": "list_profiles",
+        "summary": "Listar perfiles sintéticos de demostración",
+        "description": "Solo perfiles de la release vigente ready, orden profile_key ascendente. 200 con lista vacía si no hay perfiles; 404 si no hay release vigente. No consulta al agente.",
+        "responses": {
+          "200": {
+            "description": "Perfiles disponibles; no son cuentas autenticadas.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/profiles_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/conversations": {
+      "post": {
+        "operationId": "create_conversation",
+        "summary": "Crear conversación para un perfil sintético",
+        "description": "Valida el perfil en la release vigente y guarda la relación exacta release/perfil. created_at es la proyección de conversations.started_at, sin columna adicional. No idempotente.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_conversation_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Conversación creada y confirmada.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Location": {
+                "description": "Ruta REST relativa de la conversación creada.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^/api/v1/conversations/[0-9a-fA-F-]{36}$"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/created_conversation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_conversations",
+        "summary": "Listar historial del perfil elegido por la app demo",
+        "description": "Filtra por clave estable a través de todas las releases de apertura conservadas; no requiere que el perfil siga vigente. Orden started_at DESC, conversation_id DESC. Clave bien formada sin historial: 200 y lista vacía. Conteos/último mensaje derivados.",
+        "parameters": [
+          {
+            "name": "profile_key",
+            "in": "query",
+            "required": true,
+            "description": "Selección explícita de la app; no autenticación.",
+            "schema": {
+              "$ref": "#/components/schemas/stable_key"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversaciones, hasta el límite indicado.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/conversations/{conversation_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/conversation_id"
+        }
+      ],
+      "get": {
+        "operationId": "get_conversation",
+        "summary": "Obtener conversación y mensajes visibles",
+        "description": "Perfil/alias de la release de apertura, no de la vigente. Mensajes ordenados por ordinal interno ascendente; citas ordenadas por index. Historial completo del prototipo, sin truncamiento silencioso ni paginación.",
+        "responses": {
+          "200": {
+            "description": "Historial visible y perfil sintético de apertura.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversation_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_conversation",
+        "summary": "Eliminar exclusivamente historial conversacional",
+        "description": "Elimina conversación, mensajes y citas mediante las cascadas existentes. 204 también si ya no existe un UUID válido. Si se está procesando un mensaje en esa conversación: 409 sin borrar. No elimina corpus ni perfiles.",
+        "responses": {
+          "204": {
+            "description": "Historial ausente después de la operación; sin cuerpo ni Content-Type.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/conversations/{conversation_id}/messages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/conversation_id"
+        }
+      ],
+      "post": {
+        "operationId": "send_message",
+        "summary": "Enviar mensaje y recibir respuesta del agente",
+        "description": "Solo content, de 1 a 4000 caracteres Unicode y no solo espacios. Contexto de perfil derivado de la conversación. Fija release vigente; todas las evidencias del turno deben coincidir. 201 únicamente tras confirmar user, assistant y citas. Puede quedar user sin assistant ante un fallo posterior al primer commit; consultar historial, nunca reenviar ciegamente. Un turno concurrente o cambio incompatible de release/perfil produce 409. No admite Idempotency-Key en v1.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/send_message_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Turno completado; mensajes persistidos y citas verificadas.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/send_message_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/calendar/events": {
+      "get": {
+        "operationId": "list_calendar_events",
+        "summary": "Consultar calendario sintético sin invocar al agente",
+        "description": "Misma semántica que MCP: fechas inclusivas UTC, date_to >= date_from, diferencia + 1 <= 366 días. Selecciona starts_at desde 00:00 date_from hasta antes de 00:00 del día posterior a date_to, no solapamiento. Orden starts_at y event_key ascendentes. Solo release vigente.",
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": true,
+            "description": "Primer día UTC incluido.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": true,
+            "description": "Último día UTC incluido; máximo 366 días contando ambos extremos.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "event_types",
+            "in": "query",
+            "required": false,
+            "description": "Parámetro repetido por valor. Omitido: todos; vacío, duplicados o valores desconocidos: 400.",
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "course_session",
+                  "announcement_deadline",
+                  "general"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eventos estructurados; array vacío es éxito.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/calendar_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/profiles/{profile_key}/progress": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/profile_key"
+        }
+      ],
+      "get": {
+        "operationId": "get_profile_progress",
+        "summary": "Consultar progreso del perfil seleccionado por la app",
+        "description": "Selección explícita de la app demo, no argumento libre del LLM. Perfil y cursos de la release vigente; perfil ausente: 404, perfil existente sin cursos coincidentes: 200 con courses vacío. Orden course_key ascendente. No invoca al agente.",
+        "parameters": [
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "description": "Parámetro repetido por valor. Omitido: todos; vacío, duplicados o valores desconocidos: 400.",
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "enrolled",
+                  "in_progress",
+                  "completed"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil y progreso sintéticos, sin procedencia interna.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/progress_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/announcements": {
+      "get": {
+        "operationId": "list_announcements",
+        "summary": "Consultar anuncios sintéticos sin invocar al agente",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "description": "Texto literal, no expresión ni SQL.",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 500,
+              "pattern": "\\S"
+            }
+          },
+          {
+            "name": "temporal_status",
+            "in": "query",
+            "required": false,
+            "description": "Estado temporal derivado; all no es un estado de salida.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "upcoming",
+                "expired",
+                "all"
+              ],
+              "default": "active"
+            }
+          },
+          {
+            "name": "reference_time",
+            "in": "query",
+            "required": false,
+            "description": "Instante con zona horaria. Omitido: instante actual del servidor.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anuncios y referencia temporal efectiva.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/announcements_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    },
+    "/documents/{document_version_id}/artifact": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/document_version_id"
+        }
+      ],
+      "get": {
+        "operationId": "get_document_artifact",
+        "summary": "Descargar un documento sintético por versión",
+        "description": "Solo UUID; no acepta rutas ni selectores de release. Resuelve versión ready de una release publicada ready, vigente o histórica, y bytes exactos de su revisión. Verifica contención real dentro de /data/synthetic, incluidos symlinks/junctions, y checksum interno antes de servir. Si no se conservan los bytes históricos exactos: 404, nunca sustituir por el archivo actual. No invoca al agente.",
+        "responses": {
+          "200": {
+            "description": "Bytes completos del artefacto. Descarga, sin URLs externas, redirecciones ni soporte Range en v1.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Content-Disposition": {
+                "description": "attachment; filename generado con el UUID, sin rutas ni texto libre.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string",
+                  "const": "nosniff"
+                }
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "uuid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "stable_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+      },
+      "nonblank": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "date_time": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "source_kind": {
+        "type": "string",
+        "enum": [
+          "document",
+          "course",
+          "calendar_event",
+          "announcement",
+          "profile",
+          "profile_course"
+        ]
+      },
+      "event_type": {
+        "type": "string",
+        "enum": [
+          "course_session",
+          "announcement_deadline",
+          "general"
+        ]
+      },
+      "progress_status": {
+        "type": "string",
+        "enum": [
+          "enrolled",
+          "in_progress",
+          "completed"
+        ]
+      },
+      "profile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "alias": {
+            "$ref": "#/components/schemas/nonblank"
+          }
+        },
+        "required": [
+          "profile_key",
+          "alias"
+        ]
+      },
+      "profiles_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/profile"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "profiles"
+        ]
+      },
+      "create_conversation_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          }
+        },
+        "required": [
+          "profile_key"
+        ]
+      },
+      "created_conversation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "profile_alias": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "profile_key",
+          "profile_alias",
+          "created_at"
+        ]
+      },
+      "conversation_summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "started_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "message_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "conversation_id",
+          "profile_key",
+          "started_at",
+          "last_message_at",
+          "message_count"
+        ]
+      },
+      "conversations_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/conversation_summary"
+            }
+          }
+        },
+        "required": [
+          "conversations"
+        ]
+      },
+      "citation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/source_kind"
+          },
+          "label": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "document_version_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "artifact_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^/api/v1/documents/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/artifact$",
+            "maxLength": 63
+          }
+        },
+        "required": [
+          "index",
+          "source_kind",
+          "label",
+          "locator",
+          "release_id",
+          "document_version_id",
+          "artifact_url"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "source_kind": {
+                  "const": "document"
+                }
+              },
+              "required": [
+                "source_kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "document_version_id": {
+                  "$ref": "#/components/schemas/uuid"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "document_version_id": {
+                  "type": "null"
+                },
+                "artifact_url": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "user_message": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "role": {
+            "type": "string",
+            "const": "user"
+          },
+          "content": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          }
+        },
+        "required": [
+          "message_id",
+          "role",
+          "content",
+          "created_at"
+        ]
+      },
+      "assistant_message": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "role": {
+            "type": "string",
+            "const": "assistant"
+          },
+          "content": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "insufficient_evidence": {
+            "type": "boolean"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/citation"
+            }
+          }
+        },
+        "required": [
+          "message_id",
+          "role",
+          "content",
+          "created_at",
+          "insufficient_evidence",
+          "citations"
+        ]
+      },
+      "visible_message": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/user_message"
+          },
+          {
+            "$ref": "#/components/schemas/assistant_message"
+          }
+        ]
+      },
+      "conversation_detail": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "started_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/profile"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/visible_message"
+            }
+          }
+        },
+        "required": [
+          "conversation_id",
+          "started_at",
+          "profile",
+          "messages"
+        ]
+      },
+      "send_message_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "send_message_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "user_message": {
+            "$ref": "#/components/schemas/user_message"
+          },
+          "assistant_message": {
+            "$ref": "#/components/schemas/assistant_message"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "user_message",
+          "assistant_message"
+        ]
+      },
+      "calendar_event": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "event_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "title": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "description": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/event_type"
+          },
+          "starts_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "ends_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "course_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+          },
+          "announcement_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+          }
+        },
+        "required": [
+          "event_key",
+          "title",
+          "description",
+          "event_type",
+          "starts_at",
+          "ends_at",
+          "course_key",
+          "announcement_key"
+        ]
+      },
+      "calendar_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "events": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/calendar_event"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "events"
+        ]
+      },
+      "course_progress": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "course_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "course_name": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "status": {
+            "$ref": "#/components/schemas/progress_status"
+          },
+          "progress_percent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "course_key",
+          "course_name",
+          "status",
+          "progress_percent",
+          "started_at",
+          "completed_at"
+        ]
+      },
+      "progress_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/profile"
+          },
+          "courses": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/course_progress"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "profile",
+          "courses"
+        ]
+      },
+      "announcement": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "announcement_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "title": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "description": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "valid_from": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "valid_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "temporal_status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "upcoming",
+              "expired"
+            ]
+          }
+        },
+        "required": [
+          "announcement_key",
+          "title",
+          "description",
+          "valid_from",
+          "valid_until",
+          "temporal_status"
+        ]
+      },
+      "announcements_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "reference_time": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "announcements": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/announcement"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "reference_time",
+          "announcements"
+        ]
+      },
+      "error_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "INVALID_ARGUMENT",
+                  "NOT_FOUND",
+                  "CONFLICT",
+                  "DEPENDENCY_UNAVAILABLE",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "$ref": "#/components/schemas/nonblank"
+              },
+              "request_id": {
+                "$ref": "#/components/schemas/uuid"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "request_id"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    },
+    "parameters": {
+      "conversation_id": {
+        "name": "conversation_id",
+        "in": "path",
+        "required": true,
+        "description": "UUID de la conversación; no representa autorización.",
+        "schema": {
+          "$ref": "#/components/schemas/uuid"
+        }
+      },
+      "profile_key": {
+        "name": "profile_key",
+        "in": "path",
+        "required": true,
+        "description": "Clave del personaje sintético elegido por la app demo.",
+        "schema": {
+          "$ref": "#/components/schemas/stable_key"
+        }
+      },
+      "document_version_id": {
+        "name": "document_version_id",
+        "in": "path",
+        "required": true,
+        "description": "UUID de versión documental publicada.",
+        "schema": {
+          "$ref": "#/components/schemas/uuid"
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Máximo de elementos; no indica el total disponible.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20
+        }
+      }
+    },
+    "headers": {
+      "no_store": {
+        "description": "Evita cachés de historial y resultados de demostración.",
+        "schema": {
+          "type": "string",
+          "const": "no-store"
+        }
+      }
+    },
+    "responses": {
+      "error_400": {
+        "description": "INVALID_ARGUMENT: Request inválido; mensaje seguro, sin valores sensibles.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "error_404": {
+        "description": "NOT_FOUND: Recurso o publicación no disponible.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "error_409": {
+        "description": "CONFLICT: Operación concurrente o contexto incompatible; actualizar historial/contexto antes de decidir.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "error_503": {
+        "description": "DEPENDENCY_UNAVAILABLE: Dependencia temporalmente indisponible; POST requiere reconciliación antes de reintentar.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      },
+      "error_500": {
+        "description": "INTERNAL_ERROR: Fallo inesperado, sin detalles internos.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_response"
+            }
+          }
+        }
+      }
+    }
+  }
+}

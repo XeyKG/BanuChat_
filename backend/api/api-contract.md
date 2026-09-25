@@ -1,0 +1,260 @@
+# Contrato REST v1
+
+Versión: **1.0.0-draft**, especificación para aprobación, sin implementación.
+La fuente machine-readable es [openapi.yaml](openapi.yaml), OpenAPI 3.1.0 con
+JSON Schema 2020-12. Está serializada en JSON, subconjunto válido de YAML 1.2,
+para permitir validación sintáctica con las herramientas locales sin dependencias.
+MCP 2.0 permanece congelado e independiente de esta propuesta REST.
+
+## Frontera y alcance
+
+Mobile → REST Backend API → Agent/RAG para mensajes. El agente es cliente del
+servidor MCP interno; la app nunca consume MCP. Calendario, progreso y anuncios
+podrán consultar una capa de servicios compartida con MCP, sin ejecutar el agente.
+Esa capa tampoco se implementa aquí. No se ejecuta infraestructura.
+
+Base relativa `/api/v1`; host y puerto no se fijan. Requests/responses son JSON
+con campos `snake_case`, salvo descarga binaria y respuestas sin contenido.
+Los nombres estándar de OpenAPI y las cabeceras HTTP conservan su sintaxis.
+Todos los objetos de datos se cierran con `additionalProperties: false`.
+Los parámetros query desconocidos, escalares repetidos, valores vacíos, fechas
+inválidas y cuerpos en GET/DELETE producen 400. No hay paginación por cursor.
+Los timestamps usan RFC 3339 con zona explícita; las fechas usan `YYYY-MM-DD`.
+
+Solo hay perfiles de demostración y corpus 100% sintéticos. Seleccionar un
+`profile_key` no autentica ni autoriza a una persona. Conocer un UUID tampoco
+constituye control de acceso. Esta especificación sirve para demostración local
+controlada: exposición remota y autenticación requieren diseño posterior.
+No hay JWT, OAuth, autenticación institucional ni datos académicos reales.
+UNAB no es fuente funcional. Google Sheets, push y servicios externos quedan fuera.
+
+## Operaciones
+
+| Método | Ruta relativa a `/api/v1` | Necesidad móvil |
+| --- | --- | --- |
+| GET | `/profiles` | Seleccionar perfil sintético vigente. |
+| POST | `/conversations` | Abrir conversación para un perfil. |
+| GET | `/conversations` | Listar historial del perfil seleccionado. |
+| GET | `/conversations/{conversation_id}` | Leer conversación y mensajes visibles. |
+| DELETE | `/conversations/{conversation_id}` | Borrar exclusivamente historial. |
+| POST | `/conversations/{conversation_id}/messages` | Enviar consulta y recibir respuesta fundamentada. |
+| GET | `/calendar/events` | Consultar calendario sintético. |
+| GET | `/profiles/{profile_key}/progress` | Consultar avance sintético en cursos. |
+| GET | `/announcements` | Consultar convocatorias y novedades sintéticas. |
+| GET | `/documents/{document_version_id}/artifact` | Descargar documento sintético verificado. |
+
+**No existe `/courses` en v1**: aunque MCP ofrece `get_courses`, no existe una
+pantalla de catálogo aprobada. Es una exclusión deliberada, no un olvido.
+
+### Perfiles y conversaciones
+
+GET profiles devuelve `release_id` y `profiles[]`, con `profile_key` y `alias`.
+Orden por clave ascendente. Sin perfiles devuelve 200 con lista vacía; sin release
+vigente publicada devuelve 404. Nunca devuelve correos, identificaciones o rutas.
+
+POST conversations acepta solamente `profile_key`, existente en la release
+vigente publicada. Devuelve 201 con `conversation_id`, `profile_key`,
+`profile_alias` y `created_at`, más Location relativa. `created_at` es una
+proyección de `conversations.started_at`, no una columna nueva. La relación
+persistida conserva `release_id` y `profile_key` de apertura. El alias procede de
+esa versión del perfil; no se sustituye por el alias de otra release.
+
+GET conversations exige query `profile_key`; `limit` es 20 por defecto, 1–50.
+Busca la misma clave estable en todas las releases históricas. Una clave válida
+sin conversaciones devuelve 200 con `conversations: []`, aunque ya no exista en
+la release actual. Orden: `started_at DESC, conversation_id DESC`. Cada elemento
+contiene `conversation_id`, `profile_key`, `started_at`, `last_message_at`
+nullable y `message_count`. Los dos últimos se derivan de mensajes visibles;
+sin mensajes son null y 0. No se inventa un título persistido.
+
+GET detalle devuelve `conversation_id`, `started_at`, `profile` (clave y alias
+históricos) y `messages[]`. Orden por ordinal persistido y, dentro del assistant,
+por índice de cita. El ordinal es interno. El historial completo no se trunca
+silenciosamente; la ausencia de paginación limita esta versión a la demostración.
+Solo se exponen roles `user` y `assistant`, ambos con ID, contenido y timestamp.
+Solo assistant incluye `insufficient_evidence` y `citations`, incluso si es vacío.
+Nunca se exponen system/tool messages, prompts, chain-of-thought, scratchpads,
+argumentos de tools, SQL ni vectores.
+
+DELETE devuelve 204 sin cuerpo tanto al borrar como si el UUID ya no existe.
+Un UUID inválido produce 400; una conversación ocupada puede producir 409.
+La cascada es exclusivamente conversations → messages → message_citations.
+No borra perfiles, corpus, releases, documentos, chunks, cursos, eventos o anuncios.
+
+### Enviar mensaje y consistencia futura
+
+POST messages acepta únicamente `content`: string de 1–4000 caracteres Unicode,
+no compuesto solo por espacios. No se recorta ni transforma silenciosamente.
+Este límite controla el tamaño del turno sin depender del límite de la consulta
+interna de retrieval. El cliente no elige perfil, release, tool, modelo, prompt
+ni embedding. La conversación determina la clave de perfil del contexto.
+
+El futuro backend deberá:
+
+1. Validar request y conversación, impedir turnos/borrados concurrentes para la
+   misma conversación, fijar la release vigente publicada y resolver allí el
+   perfil de la conversación. Si esa clave ya no existe, devolver 409 sin insertar.
+2. Persistir el mensaje user con su siguiente ordinal en una transacción corta.
+3. Ejecutar Agent/RAG con contexto de perfil controlado y obtener evidencia
+   estructurada de MCP/servicios. El backend valida que pertenezca a la release
+   fijada; no mezcla releases. Si un refresco interno MCP cambia la release del
+   turno, falla con 409, sin alterar el contrato MCP ni publicar respuesta mezclada.
+4. Generar respuesta y verificar procedencia e IDs; insuficiencia de evidencia
+   se declara explícitamente. Un resultado encontrado no prueba suficiencia.
+5. Persistir assistant y todas sus citas verificadas atómicamente, con
+   `answer_release_id` de ese turno, y después responder 201 con
+   `conversation_id`, `user_message` y `assistant_message`.
+6. Liberar la exclusión de conversación incluso si falla la ejecución.
+
+La release de respuesta puede diferir de la de apertura. Las citas históricas
+conservan la release original. No se cambia la relación de perfil de apertura.
+La exclusión deberá funcionar entre procesos, no solo mediante un mutex en memoria;
+una opción acotada para implementación posterior es un advisory lock PostgreSQL
+por conversación en una conexión dedicada, con adquisición no bloqueante (409),
+liberación garantizada y sin mantener una transacción abierta durante generación.
+Esta opción no añade tablas ni constituye implementación o cambio del DDL.
+
+Si falla el agente después del commit del user, ese mensaje puede quedar sin
+assistant. No se crean respuestas ficticias, estados pendientes ni tablas nuevas.
+GET puede mostrar ese estado incluso mientras un turno sigue ejecutándose.
+Un fallo al persistir citas revierte también assistant. Tras un timeout puede
+existir un commit aunque el cliente no haya recibido 201.
+
+### Consultas directas
+
+Cada consulta resuelve una única release vigente publicada para todas sus filas.
+Sin release disponible: 404; sin resultados: 200 con lista vacía. Se proyectan
+campos de presentación, no objetos de procedencia internos. No necesitan agente.
+
+Calendario exige `date_from` y `date_to`. Selecciona por `starts_at` en días UTC,
+desde las 00:00 del primer día hasta antes de las 00:00 del día posterior al último;
+no es una búsqueda por solapamiento. Rango inclusivo de como máximo 366 días,
+con inicio no posterior al fin. `event_types` permite `course_session`,
+`announcement_deadline`, `general`. Orden `starts_at`, `event_key`, ascendente.
+Cada evento expone clave, título, descripción, tipo, inicio, fin nullable y claves
+de curso/anuncio nullable. No existe campo freshness.
+
+Progreso acepta `statuses`: `enrolled`, `in_progress`, `completed`. La app elige
+el perfil explícitamente; esto no habilita al LLM a elegirlo. Perfil inexistente
+en release vigente: 404. Sin cursos coincidentes: 200. Orden `course_key` ascendente.
+Devuelve perfil y cursos con clave, nombre, estado, porcentaje 0–100 y timestamps
+de inicio/finalización nullable. Las restricciones de consistencia y precisión
+decimal de la persistencia siguen vigentes; no se reinterpretan estados.
+
+Anuncios acepta `query` opcional de 2–500 caracteres no blancos, búsqueda literal
+sin distinguir mayúsculas sobre título/descripción. `temporal_status` acepta
+`active` (default), `upcoming`, `expired`, `all`. `reference_time` RFC 3339 se
+captura una sola vez al inicio si se omite, y siempre se devuelve. Un anuncio es:
+
+- upcoming si referencia < valid_from;
+- active si referencia >= valid_from y valid_until es null o referencia <= valid_until;
+- expired si valid_until no es null y referencia > valid_until.
+
+`all` solo es filtro, nunca estado de una fila. Orden `valid_from`,
+`announcement_key`, ascendente. No hay push implementado ni requerido.
+
+Las tres consultas usan `limit` default 20, mínimo 1, máximo 50. Los arrays query
+se codifican repitiendo el nombre: `statuses=enrolled&statuses=completed`.
+Solo admiten valores únicos, entre 1 y 3. Omitir el filtro incluye todos; valores
+vacíos o listas separadas por comas producen 400. MCP puede representar `[]` en
+JSON como selección vacía; REST no ofrece esa representación query en v1. Es
+una restricción de transporte explícita, no un cambio de los estados compartidos.
+
+## Citas de presentación
+
+Cada cita contiene `index` (entero desde 0, correspondiente a citation_index),
+`source_kind`, `label`, `locator`, `release_id`, `document_version_id` nullable y
+`artifact_url` nullable. Los índices pueden mostrarse como index + 1 en la UI;
+no se exige que no tengan huecos. Kinds: document, course, calendar_event,
+announcement, profile y profile_course.
+
+El backend deriva label y locator legibles de metadatos verificados (documento y
+sección, o título/alias y localizador estructurado). El LLM no inventa IDs ni rutas.
+Toda cita document tiene document_version_id no nulo; las estructuradas tienen
+ese campo y artifact_url nulos. En documentos, el enlace opcional es exactamente
+`/api/v1/documents/{document_version_id}/artifact`, con el mismo UUID de la cita.
+Se permite especialmente para full_document, cuyas guías no se fragmentan ni
+vectorizan; también puede enlazarse el artefacto original de un documento chunked.
+Si no hay artefacto disponible, el enlace es null. La disponibilidad puede cambiar
+entre lectura y descarga: el cliente debe manejar 404.
+
+No se devuelve `source_path`, rutas internas, hashes, `canonical_uri` ni URLs
+externas. `release_id` identifica la evidencia, no es un selector enviado por la
+app. Las filas de consultas directas no duplican el objeto interno source de MCP.
+
+## Descarga segura
+
+El único selector de entrada es document_version_id. El backend comprueba versión
+ready y pertenencia a release publicada ready, también histórica. Resuelve
+internamente source_path y la revisión sintética exacta, comprueba contención real
+en `/data/synthetic` (incluidos enlaces simbólicos/junctions y traversal), y verifica
+integridad antes de enviar bytes. No acepta paths del cliente ni redirige fuera.
+Los hashes sirven para validación interna, nunca como campos de presentación.
+
+Una referencia en PostgreSQL no garantiza que existan los bytes. Si la revisión
+histórica exacta no está disponible, se devuelve 404; no se sustituye por el
+archivo de la release actual. La futura resolución/preservación de revisiones
+debe respetar la fuente versionada y no consultar fuentes institucionales.
+
+200 descarga el archivo completo como `application/octet-stream`, con
+Content-Disposition attachment y nombre seguro derivado del UUID,
+X-Content-Type-Options nosniff y Cache-Control no-store. No se promete Range:
+si se recibe, se ignora y se sirve el archivo completo. Los errores previos al
+stream son JSON seguros; si falla un stream ya iniciado se interrumpe, no se le
+añade un cuerpo JSON ni se finge una descarga completa. No hay URLs públicas externas.
+
+## Errores y reintentos
+
+Objeto común cerrado:
+
+```json
+{"error":{"code":"INVALID_ARGUMENT","message":"Mensaje seguro para el cliente.","request_id":"00000000-0000-4000-8000-000000000001"}}
+```
+
+| HTTP | code | Uso |
+| --- | --- | --- |
+| 400 | INVALID_ARGUMENT | Campo desconocido, tipo, tamaño, filtro o rango inválido. |
+| 404 | NOT_FOUND | Recurso/release no disponible; no equivale a lista vacía. |
+| 409 | CONFLICT | Conversación ocupada o contexto/release incompatible al procesar turno. |
+| 503 | DEPENDENCY_UNAVAILABLE | Dependencia necesaria temporalmente no disponible. |
+| 500 | INTERNAL_ERROR | Fallo no clasificable de manera segura. |
+
+El código debe coincidir con HTTP, aunque el schema común enumere los cinco.
+request_id lo genera el backend y permite correlación local. El mensaje describe
+la validación sin SQL, paths, credenciales, stack traces o argumentos internos.
+No existen códigos de autenticación. El error MCP PROFILE_CONTEXT_REQUIRED no se
+traslada como solicitud de autenticación: el backend debe entregar ese contexto.
+Su omisión por un bug es interna; la desaparición del perfil actual es conflicto.
+
+GET es seguro e idempotente, aunque cambien los datos o la hora entre peticiones.
+Todas las respuestas usan Cache-Control no-store. DELETE es funcionalmente
+idempotente y repite 204 cuando ya no existe. Un conflicto permite revisar/reintentar
+una vez que termine la operación concurrente.
+
+**No se incluye Idempotency-Key**: no hay almacenamiento durable de claves/resultados
+en el modelo aprobado, y una caché de memoria no cubre reinicios. Esta cabecera no
+está soportada; enviarla en POST messages produce 400, nunca una falsa garantía.
+POST messages no debe reintentarse ciegamente. Tras fallo/timeout, consultar el
+historial y solicitar decisión explícita antes de enviar otro mensaje; una lectura
+sin respuesta todavía no prueba que el turno anterior haya terminado. Tampoco POST
+conversations ofrece deduplicación. La exclusión concurrente no evita duplicados
+secuenciales. Una garantía durable de idempotencia requiere aprobación posterior.
+
+## Trazabilidad y límites de verificación
+
+| Persistencia / MCP vigente | Proyección o regla REST |
+| --- | --- |
+| conversations(release_id, profile_key), profiles por release | Perfil histórico fijo; clave controlada desde la app demo. |
+| messages.role, ordinal, answer_release_id | Roles user/assistant; orden estable; release por respuesta. |
+| message_citations y sus validaciones | Citas derivadas, seis kinds, índice y versión verificables; sin procedencia privada. |
+| Cascadas de historial | DELETE solo historial, sin dirección de cascada hacia corpus. |
+| calendar_events / get_calendar_events | Mismos tipos, selección UTC y rango inclusivo máximo 366 días. |
+| profile_courses / get_profile_progress | Mismos estados, porcentaje y perfil vigente. |
+| announcements / get_announcements | Misma búsqueda literal y fronteras temporales inclusivas. |
+| document_versions / find_documents | Artefacto por UUID publicado, sin paths públicos ni vectorización full_document. |
+| MCP release_id / contexto SQL de retrieval | Release fijada y evidencia coherente por turno; sin selector móvil. |
+
+No se modifica SQL, sus 16 entidades, contratos MCP 2.0, modelo de datos o datasets.
+El texto histórico de otras fuentes no introduce dependencias en este contrato.
+La validación estática no demuestra ejecución de rutas ni resultados de RAGAS/SUS:
+los objetivos OE1/OE3/OE5 se evaluarán cuando exista implementación autorizada.
