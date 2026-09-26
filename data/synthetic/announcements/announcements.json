@@ -5,10 +5,59 @@
   "announcements": [
     {
       "announcement_key": "announcement-001",
-      "title": "Muestra ficticia de mosaicos",
-      "description": "Convocatoria inventada para presentar combinaciones de fichas imaginarias.",
-      "valid_from": "2032-04-01T08:00:00-05:00",
-      "valid_until": "2032-04-30T18:00:00-05:00"
+      "title": "Apertura del ejercicio de organización",
+      "description": "Ventana ficticia para proponer participación en un ejercicio de ordenamiento de fichas. No constituye registro automático.",
+      "valid_from": "2026-10-01T08:00:00-05:00",
+      "valid_until": "2026-10-10T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-002",
+      "title": "Jornada de práctica guiada",
+      "description": "Invitación sintética a preparar una copia de trabajo y revisar instrucciones completas antes de una práctica.",
+      "valid_from": "2026-10-10T08:00:00-05:00",
+      "valid_until": "2026-10-25T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-003",
+      "title": "Ventana para compartir observaciones",
+      "description": "Convocatoria ficticia para reunir comentarios sobre claridad de los materiales, sin recopilar información personal.",
+      "valid_from": "2026-10-20T08:00:00-05:00",
+      "valid_until": "2026-11-10T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-004",
+      "title": "Encuentro informativo del programa demo",
+      "description": "Comunicación sintética para explicar la diferencia entre catálogo, calendario y progreso. No modifica asociaciones de perfiles.",
+      "valid_from": "2026-11-01T08:00:00-05:00",
+      "valid_until": "2026-11-20T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-005",
+      "title": "Actividad opcional de composición",
+      "description": "Invitación ficticia a explorar combinaciones de formas y describir decisiones; la participación no altera automáticamente el progreso.",
+      "valid_from": "2026-11-15T08:00:00-05:00",
+      "valid_until": "2026-11-30T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-006",
+      "title": "Actualización de material de orientación",
+      "description": "Aviso sintético de disponibilidad del material de orientación revisado; no tiene cierre programado en esta instantánea.",
+      "valid_from": "2026-10-05T08:00:00-05:00",
+      "valid_until": null
+    },
+    {
+      "announcement_key": "announcement-007",
+      "title": "Cierre de recepción de propuestas iniciales",
+      "description": "Aviso ficticio sobre el cierre de una ventana de propuestas del escenario demo, sin efectos administrativos reales.",
+      "valid_from": "2026-10-01T08:00:00-05:00",
+      "valid_until": "2026-10-05T18:00:00-05:00"
+    },
+    {
+      "announcement_key": "announcement-008",
+      "title": "Mantenimiento simulado del espacio de práctica",
+      "description": "Aviso ficticio para representar una ventana de mantenimiento. No afirma que exista una interrupción técnica real.",
+      "valid_from": "2026-11-25T08:00:00-05:00",
+      "valid_until": "2026-11-27T18:00:00-05:00"
     }
   ]
 }

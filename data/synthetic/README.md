@@ -1,9 +1,10 @@
 # Fuente de verdad sintética de BanuChat — contrato v1
 
 Contrato de datos `1.0.0`, adaptado al SQL vigente por aprobación expresa.
-Los archivos presentes son un **ejemplo mínimo pendiente de revisión humana**,
-no el corpus definitivo ni una release PostgreSQL publicada. No se ha ejecutado
-ingesta ni se han demostrado métricas de calidad.
+Estado del contenido: **candidate dataset v1 — pending human review**.
+El contrato permanece congelado; el contenido candidato no es corpus aprobado
+ni una release PostgreSQL publicada. No se ha ejecutado ingesta ni se han demostrado
+métricas de calidad. Universo único: **Programa Demo de Aprendizaje Digital**.
 
 ## Propósito y ficción
 
@@ -17,7 +18,7 @@ La marca `synthetic: true` no prueba por sí sola el carácter ficticio del text
 La asistencia de IA para redactar es admisible, pero el equipo debe revisar el
 contenido y aprobar una revisión Git antes de usarlo como versión aprobada.
 La aprobación se registra en la revisión del cambio, fuera de los datos funcionales;
-no se inventan aprobadores ni se considera este ejemplo aprobado automáticamente.
+no se inventan aprobadores ni se considera esta candidata aprobada automáticamente.
 
 ## Estructura
 
@@ -26,6 +27,7 @@ data/synthetic/
   .gitattributes
   .gitignore
   README.md
+  HUMAN_REVIEW.md
   manifest.json
   schemas/
     README.md
@@ -39,7 +41,7 @@ data/synthetic/
   documents/
     README.md
     documents.json
-    artifacts/doc-001.md
+    artifacts/doc-001.md … doc-012.md
   courses/
     README.md
     courses.json
@@ -55,9 +57,16 @@ data/synthetic/
     progress.json
 ```
 
-Hay un documento full_document, un curso, un evento de sesión, un anuncio, un perfil
-y una asociación de progreso: seis items y siete archivos funcionales, incluido el
-catálogo documental. El ejemplo no pretende cubrir todas las variantes de contenido.
+La candidata contiene 12 documentos (10 chunked y 2 full_document), 12 cursos,
+22 eventos, 8 anuncios, 4 perfiles y 18 asociaciones: 76 items en 18 archivos
+funcionales (seis catálogos JSON y doce artefactos Markdown). La matriz de
+[revisión humana](HUMAN_REVIEW.md) mantiene pendientes las comprobaciones editoriales.
+
+Se reemplaza el fixture mínimo no publicado, incluida su antigua guía doc-001,
+por el conjunto solicitado. No es una actualización sobre una identidad SQL ya
+publicada: no se ha ejecutado ingesta de esta candidata. La inmutabilidad de
+identidades publicadas sigue vigente; no reutilizar esta sustitución para alterar
+un corpus que ya exista en PostgreSQL.
 Las colecciones permiten estar vacías, pero el manifest requiere al menos un item,
 como `validate_manifest`; un esqueleto totalmente vacío no es una candidata SQL.
 
@@ -97,7 +106,7 @@ Cursos: available / closed / archived. Eventos: course_session /
 announcement_deadline / general. Progreso: enrolled / in_progress / completed.
 No se almacena is_active ni temporal_status: la vigencia de anuncios se deriva
 respecto al instante de consulta. Progreso es una instantánea, no un historial de
-transiciones. Alias como “Personaje sintético Prisma-01” no representan usuarios
+transiciones. Alias como “Perfil Demo Alfa” no representan usuarios
 autenticados y nunca incluyen contacto, identificación o datos académicos reales.
 
 ### Claves y tiempos
@@ -113,7 +122,9 @@ Los timestamps son RFC 3339 con zona; al redactar se usa el offset correspondien
 a America/Bogota para ese instante. El schema valida date-time con formatos
 habilitados; la correspondencia del offset con la zona IANA requiere validación
 cruzada. No se confunde el nombre de zona con un timestamp sin offset.
-Las fechas 2032 del ejemplo son inventadas y no representan una programación real.
+La programación inventada abarca del 2026-10-01 al 2026-11-30; todos los timestamps
+funcionales se serializan con offset -05:00. No representa una programación real.
+Hay un inicio a 00:00 y otro a 23:45 para revisar límites civiles; no recurrencias.
 
 Los intervalos se comparan como instantes, no como strings. ends_at >= starts_at;
 valid_until >= valid_from; completed_at >= started_at cuando ambos existan.
@@ -221,7 +232,7 @@ content_sha256 y config_sha256 tampoco equivalen a source_sha256.
    rechazar filtros de Git o cambios de fin de línea que alteren esa equivalencia.
 6. Someter el cambio a revisión humana del equipo. Solo una revisión Git aprobada,
    con schemas y artefactos conservados, puede ser seleccionada posteriormente.
-   Esta tarea no hace commit ni declara aprobado el contenido del ejemplo.
+   Esta tarea no hace commit ni declara aprobado el contenido candidato.
 7. N8N/importador leerá esa revisión, validará y producirá derivados técnicos.
    No reescribirá fuentes ni “arreglará” silenciosamente datos en runtime.
    Un cambio fuente/receta/configuración crea otra candidata; una release publicada
@@ -260,12 +271,41 @@ Debe mapear las siete URN a schemas locales de la revisión aprobada.
 Los campos de procedencia permiten construir message_citations posteriormente;
 el dataset no incluye mensajes, conversaciones ni citas prefabricadas.
 
-## Objetivo de contenido posterior
+## Cobertura de la candidata v1 y autoridad por dominio
 
-Preparar 10 documentos chunked, 2 full_document, 12 cursos, 20–24 eventos,
-8 anuncios, 4 perfiles y 16–20 asociaciones profile/course. Se busca variedad
-suficiente para integración y evaluación, sin inflar el alcance. Estos números
-son objetivos de autoría, no minItems de los schemas ni requisitos extra del SQL.
+| Fuente | Cantidad / distribución | Autoridad |
+| --- | --- | --- |
+| documents/documents.json + artifacts | 10 chunked, 2 full_document | Metadata documental; reglas/procedimientos y guías completas |
+| courses/courses.json | 12: 6 available, 4 closed, 2 archived | Nombre, descripción y disponibilidad |
+| calendars/events.json | 22: 12 course_session, 5 announcement_deadline, 5 general | Fechas de eventos y relaciones |
+| announcements/announcements.json | 8; uno sin final | Texto y vigencia de comunicaciones |
+| profiles/profiles.json | 4 alias Perfil Demo Alfa/Beta/Gamma/Delta | Identidad ficticia |
+| profiles/progress.json | 18: 5 enrolled, 5 in_progress, 8 completed | Instantánea de avance, no historial |
+
+Cada perfil tiene los tres estados representados; los pares perfil/curso son únicos.
+Las asociaciones previas pueden permanecer en cursos closed; archived conserva
+referencias de actividades completadas. Ningún curso archived tiene course_session
+en esta candidata. Las sesiones de
+refuerzo pueden repetir cursos available o closed; no se exige una sesión por curso.
+Las fechas de progreso son anteriores al 2026-09-26, variadas entre julio y septiembre
+de 2026 e independientes de los eventos futuros del calendario.
+Los cinco hitos announcement_deadline coinciden con valid_until de su anuncio.
+La vigencia se calcula al consultar: hay ventanas distintas y no se persiste temporal_status.
+
+Los documentos no duplican fechas de eventos/anuncios ni porcentajes individuales.
+Las dos guías conservan full_document y no deben fragmentarse/vectorizarse.
+El catálogo no contiene contenido documental extenso. Las referencias cruzadas
+orientan hacia la autoridad de cada tema, sin sustituirla ni crear otra fuente paralela.
+
+## Ausencias deliberadas
+
+No se incluyen calificaciones, costos, matrículas reales, profesores, certificados
+reales, emails, teléfonos, ubicaciones reales, códigos institucionales, cuentas,
+credenciales, información personal ni procedimientos administrativos reales.
+Estas categorías ausentes permiten demostrar evidencia insuficiente sin fabricar
+respuestas. Tampoco hay asistencia individual, tickets de soporte o historiales de
+transición: los documentos explican esos límites, no afirman que existan módulos
+para gestionarlos. Ninguna descripción de una práctica implementa acciones de escritura.
 
 No generar aquí preguntas de evaluación, gold answers, relevance labels, resultados
 RAGAS, expected tool calls o SUS. Todo ello pertenece a /eval, que no se modifica.
@@ -293,3 +333,18 @@ Observaciones históricas, sin modificar contratos:
 
 No se implementan N8N, ingesta o backend. Este contrato respalda trazabilidad para
 OE1/OE2/OE4, pero no acredita sus métricas ni una publicación SQL ejecutada.
+
+## Ajuste editorial previo a la revisión final
+
+Se conservan claves, contratos y conteos. Los documentos doc-001 a doc-009 se
+centran en procedimientos y orientaciones del programa ficticio, reduciendo
+explicaciones de arquitectura. doc-010 es una FAQ más breve: duda, respuesta
+acotada y fuente autoritativa, sin añadir reglas. Las guías completas no se reescriben.
+La menor longitud de la FAQ es deliberada para evitar duplicación y relleno.
+
+El banner inicial de ficción y la línea `synthetic: true` permanecen en cada
+artefacto Markdown. La futura ingesta deberá poder excluir únicamente ese banner
+repetitivo del contenido enviado a chunking/embeddings, preservándolo intacto en el
+artefacto fuente. Esa extracción deberá ser explícita y reproducible; los SHA-256
+de procedencia siguen correspondiendo a los bytes completos del archivo fuente.
+No se implementa extracción ni se modifica el tratamiento full_document aquí.

@@ -4,7 +4,19 @@
   "profiles": [
     {
       "profile_key": "profile-001",
-      "alias": "Personaje sintético Prisma-01"
+      "alias": "Perfil Demo Alfa"
+    },
+    {
+      "profile_key": "profile-002",
+      "alias": "Perfil Demo Beta"
+    },
+    {
+      "profile_key": "profile-003",
+      "alias": "Perfil Demo Gamma"
+    },
+    {
+      "profile_key": "profile-004",
+      "alias": "Perfil Demo Delta"
     }
   ]
 }

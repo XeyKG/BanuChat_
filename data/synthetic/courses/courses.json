@@ -4,9 +4,75 @@
   "courses": [
     {
       "course_key": "course-001",
-      "name": "Taller ficticio de mosaicos simbólicos",
-      "description": "Escenario sintético: ordenar fichas imaginarias por forma y color.",
+      "name": "Fundamentos de trabajo digital",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Reconocer entradas, acciones y resultados en un espacio de trabajo ficticio; distinguir un borrador de una copia revisada.",
       "status": "available"
+    },
+    {
+      "course_key": "course-002",
+      "name": "Seguridad digital cotidiana",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Identificar señales de contenido riesgoso en mensajes inventados y practicar decisiones de protección sin utilizar cuentas.",
+      "status": "available"
+    },
+    {
+      "course_key": "course-003",
+      "name": "Búsqueda y verificación de información",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Comparar fichas ficticias, separar afirmaciones de evidencia y reconocer cuándo falta información para sostener una conclusión.",
+      "status": "available"
+    },
+    {
+      "course_key": "course-004",
+      "name": "Organización de archivos digitales",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Clasificar archivos imaginarios mediante nombres descriptivos, versiones y criterios de agrupación reproducibles.",
+      "status": "available"
+    },
+    {
+      "course_key": "course-005",
+      "name": "Comunicación y colaboración digital",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Redactar mensajes breves de coordinación y distinguir solicitudes, acuerdos y comentarios dentro de un ejercicio simulado.",
+      "status": "available"
+    },
+    {
+      "course_key": "course-006",
+      "name": "Introducción al análisis de datos",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Organizar pequeñas tablas de cantidades inventadas y describir diferencias sin atribuirlas a personas o poblaciones reales.",
+      "status": "available"
+    },
+    {
+      "course_key": "course-007",
+      "name": "Visualización de información",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Elegir representaciones visuales para comparar categorías ficticias y explicar sus límites de lectura.",
+      "status": "closed"
+    },
+    {
+      "course_key": "course-008",
+      "name": "Automatización de tareas digitales",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Describir secuencias repetibles y condiciones de parada mediante tarjetas de tareas simuladas, sin ejecutar integraciones.",
+      "status": "closed"
+    },
+    {
+      "course_key": "course-009",
+      "name": "Pensamiento computacional aplicado",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Descomponer un problema de distribución de piezas imaginarias en pasos, decisiones y comprobaciones.",
+      "status": "closed"
+    },
+    {
+      "course_key": "course-010",
+      "name": "Introducción a inteligencia artificial generativa",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Distinguir una sugerencia generada de una afirmación respaldada y revisar textos sintéticos sin atribuirles autoridad factual.",
+      "status": "closed"
+    },
+    {
+      "course_key": "course-011",
+      "name": "Laboratorio de productividad digital",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Combinar organización de tareas y revisión de resultados en un tablero ficticio de trabajo local.",
+      "status": "archived"
+    },
+    {
+      "course_key": "course-012",
+      "name": "Exploración de medios digitales",
+      "description": "Actividad sintética del Programa Demo de Aprendizaje Digital. Experimentar con descripciones de formas, colores y secuencias narrativas creadas para la demostración.",
+      "status": "archived"
     }
   ]
 }

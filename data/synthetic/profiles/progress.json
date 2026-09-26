@@ -10,6 +10,142 @@
       "progress_percent": 0,
       "started_at": null,
       "completed_at": null
+    },
+    {
+      "profile_key": "profile-001",
+      "course_key": "course-002",
+      "status": "in_progress",
+      "progress_percent": 25,
+      "started_at": "2026-09-03T09:15:00-05:00",
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-001",
+      "course_key": "course-003",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-06T14:00:00-05:00",
+      "completed_at": "2026-08-14T16:30:00-05:00"
+    },
+    {
+      "profile_key": "profile-001",
+      "course_key": "course-007",
+      "status": "enrolled",
+      "progress_percent": 0,
+      "started_at": null,
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-001",
+      "course_key": "course-011",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-01T08:30:00-05:00",
+      "completed_at": "2026-08-05T11:15:00-05:00"
+    },
+    {
+      "profile_key": "profile-002",
+      "course_key": "course-002",
+      "status": "enrolled",
+      "progress_percent": 0,
+      "started_at": null,
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-002",
+      "course_key": "course-003",
+      "status": "in_progress",
+      "progress_percent": 45.5,
+      "started_at": "2026-08-19T15:00:00-05:00",
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-002",
+      "course_key": "course-004",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-20T10:45:00-05:00",
+      "completed_at": "2026-09-02T17:00:00-05:00"
+    },
+    {
+      "profile_key": "profile-002",
+      "course_key": "course-008",
+      "status": "in_progress",
+      "progress_percent": 60,
+      "started_at": "2026-09-08T18:00:00-05:00",
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-002",
+      "course_key": "course-012",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-13T09:00:00-05:00",
+      "completed_at": "2026-08-27T12:00:00-05:00"
+    },
+    {
+      "profile_key": "profile-003",
+      "course_key": "course-001",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-09T11:30:00-05:00",
+      "completed_at": "2026-08-18T15:45:00-05:00"
+    },
+    {
+      "profile_key": "profile-003",
+      "course_key": "course-005",
+      "status": "enrolled",
+      "progress_percent": 0,
+      "started_at": null,
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-003",
+      "course_key": "course-006",
+      "status": "in_progress",
+      "progress_percent": 75,
+      "started_at": "2026-09-14T08:45:00-05:00",
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-003",
+      "course_key": "course-009",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-08-03T13:15:00-05:00",
+      "completed_at": "2026-09-17T16:15:00-05:00"
+    },
+    {
+      "profile_key": "profile-004",
+      "course_key": "course-004",
+      "status": "enrolled",
+      "progress_percent": 0,
+      "started_at": null,
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-004",
+      "course_key": "course-005",
+      "status": "in_progress",
+      "progress_percent": 35,
+      "started_at": "2026-09-21T16:00:00-05:00",
+      "completed_at": null
+    },
+    {
+      "profile_key": "profile-004",
+      "course_key": "course-010",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-08-10T10:00:00-05:00",
+      "completed_at": "2026-09-23T18:30:00-05:00"
+    },
+    {
+      "profile_key": "profile-004",
+      "course_key": "course-011",
+      "status": "completed",
+      "progress_percent": 100,
+      "started_at": "2026-07-27T14:30:00-05:00",
+      "completed_at": "2026-09-10T09:45:00-05:00"
     }
   ]
 }

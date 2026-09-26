@@ -4,11 +4,99 @@
   "documents": [
     {
       "document_key": "doc-001",
-      "title": "Guía sintética del taller de mosaicos simbólicos",
+      "title": "Orientación general del programa demo",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-001.md"
+    },
+    {
+      "document_key": "doc-002",
+      "title": "Inscripción, cambios y retiro de actividades",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-002.md"
+    },
+    {
+      "document_key": "doc-003",
+      "title": "Participación y asistencia",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-003.md"
+    },
+    {
+      "document_key": "doc-004",
+      "title": "Progreso y finalización de actividades",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-004.md"
+    },
+    {
+      "document_key": "doc-005",
+      "title": "Evaluación formativa y entrega de evidencias",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-005.md"
+    },
+    {
+      "document_key": "doc-006",
+      "title": "Uso del calendario y tipos de eventos",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-006.md"
+    },
+    {
+      "document_key": "doc-007",
+      "title": "Convocatorias y comunicaciones",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-007.md"
+    },
+    {
+      "document_key": "doc-008",
+      "title": "Soporte y reporte de incidencias",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-008.md"
+    },
+    {
+      "document_key": "doc-009",
+      "title": "Uso responsable y seguridad digital",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-009.md"
+    },
+    {
+      "document_key": "doc-010",
+      "title": "Preguntas frecuentes del programa demo",
+      "retrieval_mode": "chunked",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-010.md"
+    },
+    {
+      "document_key": "doc-011",
+      "title": "Guía completa de actividad integradora",
       "retrieval_mode": "full_document",
       "mime_type": "text/markdown",
-      "version_label": null,
-      "artifact_path": "documents/artifacts/doc-001.md"
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-011.md"
+    },
+    {
+      "document_key": "doc-012",
+      "title": "Guía completa para sesiones prácticas",
+      "retrieval_mode": "full_document",
+      "mime_type": "text/markdown",
+      "version_label": "v1-candidate",
+      "artifact_path": "documents/artifacts/doc-012.md"
     }
   ]
 }

@@ -9,42 +9,97 @@
       "path": "announcements/announcements.json",
       "kind": "announcements",
       "schema": "schemas/announcements.schema.json",
-      "sha256": "5b759cc1b313749a9e145bd7110f6cbb80aceebc686a709b42b00061d23c1309"
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
     },
     {
       "path": "calendars/events.json",
       "kind": "calendar_events",
       "schema": "schemas/calendar-events.schema.json",
-      "sha256": "9b8a617b89f269399b557892b27247c2937914a818e8ed72b74a1eff895f4a59"
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
     },
     {
       "path": "courses/courses.json",
       "kind": "courses",
       "schema": "schemas/courses.schema.json",
-      "sha256": "a525ff7762068b5159489b3ca568ae522ad2eb7880679cc4796697b828456258"
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
     },
     {
       "path": "documents/artifacts/doc-001.md",
       "kind": "document_artifact",
-      "sha256": "c7dc539e55808497af52e50f5281a621b33fe177ed266f0ee41f31f3d7fc8b7e"
+      "sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"
+    },
+    {
+      "path": "documents/artifacts/doc-002.md",
+      "kind": "document_artifact",
+      "sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"
+    },
+    {
+      "path": "documents/artifacts/doc-003.md",
+      "kind": "document_artifact",
+      "sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"
+    },
+    {
+      "path": "documents/artifacts/doc-004.md",
+      "kind": "document_artifact",
+      "sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"
+    },
+    {
+      "path": "documents/artifacts/doc-005.md",
+      "kind": "document_artifact",
+      "sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"
+    },
+    {
+      "path": "documents/artifacts/doc-006.md",
+      "kind": "document_artifact",
+      "sha256": "6c568f7df0305602ac79080853673bf1bf9909a19b35c19cc09fda05ec0b6e50"
+    },
+    {
+      "path": "documents/artifacts/doc-007.md",
+      "kind": "document_artifact",
+      "sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"
+    },
+    {
+      "path": "documents/artifacts/doc-008.md",
+      "kind": "document_artifact",
+      "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"
+    },
+    {
+      "path": "documents/artifacts/doc-009.md",
+      "kind": "document_artifact",
+      "sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"
+    },
+    {
+      "path": "documents/artifacts/doc-010.md",
+      "kind": "document_artifact",
+      "sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"
+    },
+    {
+      "path": "documents/artifacts/doc-011.md",
+      "kind": "document_artifact",
+      "sha256": "df12056ba8d9c8c1bb3eb7cbdc610c3e325c0aa3b96670f351cc838cb85d3e08"
+    },
+    {
+      "path": "documents/artifacts/doc-012.md",
+      "kind": "document_artifact",
+      "sha256": "70c681f937c26b576e8430f6badbd30f299cf9a911e588c7a0d26cc453851241"
     },
     {
       "path": "documents/documents.json",
       "kind": "documents",
       "schema": "schemas/documents.schema.json",
-      "sha256": "66a6cb81969afd7631d6b5fe825e0faa8371c7e8fbbc4226374f68730d348f92"
+      "sha256": "f663e1a94dacb3e92bfe993b6693417ab3ec83030d1d884c114cb96f5b9b1e25"
     },
     {
       "path": "profiles/profiles.json",
       "kind": "profiles",
       "schema": "schemas/profiles.schema.json",
-      "sha256": "6e6e0d8672076e40e12d48864a6d8f7e853edc4205d549e3d6f27f2da7ab8e0d"
+      "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
     },
     {
       "path": "profiles/progress.json",
       "kind": "profile_progress",
       "schema": "schemas/profile-progress.schema.json",
-      "sha256": "78fd2893ec1e37dcf409004a7a201f06a86d1ce00eada1592c8c94eecb2c64cb"
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
     }
   ],
   "items": [
@@ -53,7 +108,95 @@
       "key": "doc-001",
       "path": "documents/artifacts/doc-001.md",
       "locator": "document",
-      "sha256": "c7dc539e55808497af52e50f5281a621b33fe177ed266f0ee41f31f3d7fc8b7e",
+      "sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-002",
+      "path": "documents/artifacts/doc-002.md",
+      "locator": "document",
+      "sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-003",
+      "path": "documents/artifacts/doc-003.md",
+      "locator": "document",
+      "sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-004",
+      "path": "documents/artifacts/doc-004.md",
+      "locator": "document",
+      "sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-005",
+      "path": "documents/artifacts/doc-005.md",
+      "locator": "document",
+      "sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-006",
+      "path": "documents/artifacts/doc-006.md",
+      "locator": "document",
+      "sha256": "6c568f7df0305602ac79080853673bf1bf9909a19b35c19cc09fda05ec0b6e50",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-007",
+      "path": "documents/artifacts/doc-007.md",
+      "locator": "document",
+      "sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-008",
+      "path": "documents/artifacts/doc-008.md",
+      "locator": "document",
+      "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-009",
+      "path": "documents/artifacts/doc-009.md",
+      "locator": "document",
+      "sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-010",
+      "path": "documents/artifacts/doc-010.md",
+      "locator": "document",
+      "sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390",
+      "retrieval_mode": "chunked"
+    },
+    {
+      "kind": "document",
+      "key": "doc-011",
+      "path": "documents/artifacts/doc-011.md",
+      "locator": "document",
+      "sha256": "df12056ba8d9c8c1bb3eb7cbdc610c3e325c0aa3b96670f351cc838cb85d3e08",
+      "retrieval_mode": "full_document"
+    },
+    {
+      "kind": "document",
+      "key": "doc-012",
+      "path": "documents/artifacts/doc-012.md",
+      "locator": "document",
+      "sha256": "70c681f937c26b576e8430f6badbd30f299cf9a911e588c7a0d26cc453851241",
       "retrieval_mode": "full_document"
     },
     {
@@ -61,35 +204,448 @@
       "key": "course-001",
       "path": "courses/courses.json",
       "locator": "/courses/0",
-      "sha256": "a525ff7762068b5159489b3ca568ae522ad2eb7880679cc4796697b828456258"
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-002",
+      "path": "courses/courses.json",
+      "locator": "/courses/1",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-003",
+      "path": "courses/courses.json",
+      "locator": "/courses/2",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-004",
+      "path": "courses/courses.json",
+      "locator": "/courses/3",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-005",
+      "path": "courses/courses.json",
+      "locator": "/courses/4",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-006",
+      "path": "courses/courses.json",
+      "locator": "/courses/5",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-007",
+      "path": "courses/courses.json",
+      "locator": "/courses/6",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-008",
+      "path": "courses/courses.json",
+      "locator": "/courses/7",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-009",
+      "path": "courses/courses.json",
+      "locator": "/courses/8",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-010",
+      "path": "courses/courses.json",
+      "locator": "/courses/9",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-011",
+      "path": "courses/courses.json",
+      "locator": "/courses/10",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+    },
+    {
+      "kind": "course",
+      "key": "course-012",
+      "path": "courses/courses.json",
+      "locator": "/courses/11",
+      "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
     },
     {
       "kind": "calendar_event",
       "key": "event-001",
       "path": "calendars/events.json",
       "locator": "/events/0",
-      "sha256": "9b8a617b89f269399b557892b27247c2937914a818e8ed72b74a1eff895f4a59"
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-002",
+      "path": "calendars/events.json",
+      "locator": "/events/1",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-003",
+      "path": "calendars/events.json",
+      "locator": "/events/2",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-004",
+      "path": "calendars/events.json",
+      "locator": "/events/3",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-005",
+      "path": "calendars/events.json",
+      "locator": "/events/4",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-006",
+      "path": "calendars/events.json",
+      "locator": "/events/5",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-007",
+      "path": "calendars/events.json",
+      "locator": "/events/6",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-008",
+      "path": "calendars/events.json",
+      "locator": "/events/7",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-009",
+      "path": "calendars/events.json",
+      "locator": "/events/8",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-010",
+      "path": "calendars/events.json",
+      "locator": "/events/9",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-011",
+      "path": "calendars/events.json",
+      "locator": "/events/10",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-012",
+      "path": "calendars/events.json",
+      "locator": "/events/11",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-013",
+      "path": "calendars/events.json",
+      "locator": "/events/12",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-014",
+      "path": "calendars/events.json",
+      "locator": "/events/13",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-015",
+      "path": "calendars/events.json",
+      "locator": "/events/14",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-016",
+      "path": "calendars/events.json",
+      "locator": "/events/15",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-017",
+      "path": "calendars/events.json",
+      "locator": "/events/16",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-018",
+      "path": "calendars/events.json",
+      "locator": "/events/17",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-019",
+      "path": "calendars/events.json",
+      "locator": "/events/18",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-020",
+      "path": "calendars/events.json",
+      "locator": "/events/19",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-021",
+      "path": "calendars/events.json",
+      "locator": "/events/20",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-022",
+      "path": "calendars/events.json",
+      "locator": "/events/21",
+      "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
     },
     {
       "kind": "announcement",
       "key": "announcement-001",
       "path": "announcements/announcements.json",
       "locator": "/announcements/0",
-      "sha256": "5b759cc1b313749a9e145bd7110f6cbb80aceebc686a709b42b00061d23c1309"
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-002",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/1",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-003",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/2",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-004",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/3",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-005",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/4",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-006",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/5",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-007",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/6",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-008",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/7",
+      "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
     },
     {
       "kind": "profile",
       "key": "profile-001",
       "path": "profiles/profiles.json",
       "locator": "/profiles/0",
-      "sha256": "6e6e0d8672076e40e12d48864a6d8f7e853edc4205d549e3d6f27f2da7ab8e0d"
+      "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
+    },
+    {
+      "kind": "profile",
+      "key": "profile-002",
+      "path": "profiles/profiles.json",
+      "locator": "/profiles/1",
+      "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
+    },
+    {
+      "kind": "profile",
+      "key": "profile-003",
+      "path": "profiles/profiles.json",
+      "locator": "/profiles/2",
+      "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
+    },
+    {
+      "kind": "profile",
+      "key": "profile-004",
+      "path": "profiles/profiles.json",
+      "locator": "/profiles/3",
+      "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
     },
     {
       "kind": "profile_course",
       "key": "profile-001/course-001",
       "path": "profiles/progress.json",
       "locator": "/progress/0",
-      "sha256": "78fd2893ec1e37dcf409004a7a201f06a86d1ce00eada1592c8c94eecb2c64cb"
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-001/course-002",
+      "path": "profiles/progress.json",
+      "locator": "/progress/1",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-001/course-003",
+      "path": "profiles/progress.json",
+      "locator": "/progress/2",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-001/course-007",
+      "path": "profiles/progress.json",
+      "locator": "/progress/3",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-001/course-011",
+      "path": "profiles/progress.json",
+      "locator": "/progress/4",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-002/course-002",
+      "path": "profiles/progress.json",
+      "locator": "/progress/5",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-002/course-003",
+      "path": "profiles/progress.json",
+      "locator": "/progress/6",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-002/course-004",
+      "path": "profiles/progress.json",
+      "locator": "/progress/7",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-002/course-008",
+      "path": "profiles/progress.json",
+      "locator": "/progress/8",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-002/course-012",
+      "path": "profiles/progress.json",
+      "locator": "/progress/9",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-003/course-001",
+      "path": "profiles/progress.json",
+      "locator": "/progress/10",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-003/course-005",
+      "path": "profiles/progress.json",
+      "locator": "/progress/11",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-003/course-006",
+      "path": "profiles/progress.json",
+      "locator": "/progress/12",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-003/course-009",
+      "path": "profiles/progress.json",
+      "locator": "/progress/13",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-004/course-004",
+      "path": "profiles/progress.json",
+      "locator": "/progress/14",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-004/course-005",
+      "path": "profiles/progress.json",
+      "locator": "/progress/15",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-004/course-010",
+      "path": "profiles/progress.json",
+      "locator": "/progress/16",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-004/course-011",
+      "path": "profiles/progress.json",
+      "locator": "/progress/17",
+      "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
     }
   ]
 }

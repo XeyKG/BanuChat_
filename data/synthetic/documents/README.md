@@ -1,6 +1,6 @@
 # documents
 
-documents.json contiene metadata; artifacts/ contiene Markdown UTF-8 sintético. El ejemplo es una guía full_document: no se fragmenta ni vectoriza. Manifest inventaría catálogo y artefacto, pero el item documental referencia solo el artefacto.
+documents.json contiene los metadatos de 12 documentos; artifacts/ contiene sus Markdown UTF-8 sintéticos. Diez documentos son chunked. Las dos guías (doc-011 y doc-012) son full_document: no se fragmentan ni vectorizan. El manifest incluye en su inventario el catálogo y los artefactos, pero cada item documental referencia únicamente su artefacto.
 
-Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
-Véanse las reglas y validaciones de [datos sintéticos](../README.md).
+Estado: **candidate dataset v1 — pending human review**; contenido no aprobado.
+Véanse el [contrato](../README.md) y la [matriz de revisión humana](../HUMAN_REVIEW.md).

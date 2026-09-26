@@ -1,6 +1,6 @@
 # courses
 
-courses.json define únicamente clave, nombre, descripción y estado del catálogo ficticio. El registro mínimo no representa un curso real.
+courses.json contiene 12 cursos ficticios: 6 available, 4 closed y 2 archived. Define únicamente clave, nombre, descripción breve y estado del catálogo. La disponibilidad no sustituye el progreso de un perfil.
 
-Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
-Véanse las reglas y validaciones de [datos sintéticos](../README.md).
+Estado: **candidate dataset v1 — pending human review**; contenido no aprobado.
+Véanse el [contrato](../README.md) y la [matriz de revisión humana](../HUMAN_REVIEW.md).
