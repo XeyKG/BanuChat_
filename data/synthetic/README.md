@@ -1,10 +1,20 @@
 # Fuente de verdad sintética de BanuChat — contrato v1
 
 Contrato de datos `1.0.0`, adaptado al SQL vigente por aprobación expresa.
-Estado del contenido: **candidate dataset v1 — pending human review**.
-El contrato permanece congelado; el contenido candidato no es corpus aprobado
-ni una release PostgreSQL publicada. No se ha ejecutado ingesta ni se han demostrado
-métricas de calidad. Universo único: **Programa Demo de Aprendizaje Digital**.
+Estado del contenido: **BanuChat Synthetic Dataset v1 — approved / frozen for ingestion**.
+Aprobación humana explícita registrada para el proyecto BanuChat el 2026-09-26.
+El contenido v1 fue revisado y aprobado para la ingesta del prototipo; sigue siendo
+100 % sintético. Esta aprobación del proyecto no es una validación institucional
+de UNAB/CCD. No significa que se haya ingerido a PostgreSQL ni demuestra métricas
+RAG, RAGAS, rendimiento o usabilidad. No se ejecuta ingesta en este cierre.
+Universo único: **Programa Demo de Aprendizaje Digital**.
+
+Los **18 archivos funcionales y 76 items lógicos** identificados por manifest.json
+constituyen el contenido funcional de v1 congelado para ingesta. Cualquier cambio
+posterior de contenido debe producir una nueva revisión candidata, con validación
+y aprobación propias; no puede alterar silenciosamente la versión congelada.
+README.md y HUMAN_REVIEW.md no pertenecen al inventario funcional: este cierre
+documental no modifica manifest.json ni ninguno de sus hashes.
 
 ## Propósito y ficción
 
@@ -15,10 +25,16 @@ Nunca se usan datos, nombres de personas, cursos, sitios, APIs, fechas ni hechos
 de UNAB/CCD, ni como inspiración factual. Tampoco URLs externas o credenciales.
 La marca `synthetic: true` no prueba por sí sola el carácter ficticio del texto.
 
-La asistencia de IA para redactar es admisible, pero el equipo debe revisar el
-contenido y aprobar una revisión Git antes de usarlo como versión aprobada.
-La aprobación se registra en la revisión del cambio, fuera de los datos funcionales;
-no se inventan aprobadores ni se considera esta candidata aprobada automáticamente.
+La asistencia de IA para redactar es admisible, pero no sustituye la revisión humana.
+La aprobación explícita de v1 se registra en HUMAN_REVIEW.md, fuera de los datos
+funcionales, sin inventar aprobadores, firmas ni cargos. Las revisiones futuras
+requieren su propia aprobación; este cierre no hace commit ni crea una release SQL.
+
+Este README y HUMAN_REVIEW.md establecen el estado vigente. Las menciones previas
+de candidatura en README de subdirectorios, la etiqueta documental v1-candidate y
+la referencia a la candidata en doc-006 quedan como antecedentes de preparación,
+no como estado de aprobación actual. Se conservan sin cambios por el alcance
+exclusivamente documental de este cierre y la congelación del contenido funcional.
 
 ## Estructura
 
@@ -57,14 +73,14 @@ data/synthetic/
     progress.json
 ```
 
-La candidata contiene 12 documentos (10 chunked y 2 full_document), 12 cursos,
+La versión v1 aprobada contiene 12 documentos (10 chunked y 2 full_document), 12 cursos,
 22 eventos, 8 anuncios, 4 perfiles y 18 asociaciones: 76 items en 18 archivos
 funcionales (seis catálogos JSON y doce artefactos Markdown). La matriz de
-[revisión humana](HUMAN_REVIEW.md) mantiene pendientes las comprobaciones editoriales.
+[revisión humana](HUMAN_REVIEW.md) registra la aceptación editorial y para futura ingesta.
 
 Se reemplaza el fixture mínimo no publicado, incluida su antigua guía doc-001,
 por el conjunto solicitado. No es una actualización sobre una identidad SQL ya
-publicada: no se ha ejecutado ingesta de esta candidata. La inmutabilidad de
+publicada: no se ha ejecutado ingesta de este dataset. La inmutabilidad de
 identidades publicadas sigue vigente; no reutilizar esta sustitución para alterar
 un corpus que ya exista en PostgreSQL.
 Las colecciones permiten estar vacías, pero el manifest requiere al menos un item,
@@ -232,7 +248,8 @@ content_sha256 y config_sha256 tampoco equivalen a source_sha256.
    rechazar filtros de Git o cambios de fin de línea que alteren esa equivalencia.
 6. Someter el cambio a revisión humana del equipo. Solo una revisión Git aprobada,
    con schemas y artefactos conservados, puede ser seleccionada posteriormente.
-   Esta tarea no hace commit ni declara aprobado el contenido candidato.
+   V1 ya tiene aprobación humana explícita; cualquier revisión candidata posterior
+   requiere una nueva aprobación. Este cierre documental no hace commit.
 7. N8N/importador leerá esa revisión, validará y producirá derivados técnicos.
    No reescribirá fuentes ni “arreglará” silenciosamente datos en runtime.
    Un cambio fuente/receta/configuración crea otra candidata; una release publicada
@@ -271,7 +288,7 @@ Debe mapear las siete URN a schemas locales de la revisión aprobada.
 Los campos de procedencia permiten construir message_citations posteriormente;
 el dataset no incluye mensajes, conversaciones ni citas prefabricadas.
 
-## Cobertura de la candidata v1 y autoridad por dominio
+## Cobertura de v1 aprobado y autoridad por dominio
 
 | Fuente | Cantidad / distribución | Autoridad |
 | --- | --- | --- |
@@ -285,7 +302,7 @@ el dataset no incluye mensajes, conversaciones ni citas prefabricadas.
 Cada perfil tiene los tres estados representados; los pares perfil/curso son únicos.
 Las asociaciones previas pueden permanecer en cursos closed; archived conserva
 referencias de actividades completadas. Ningún curso archived tiene course_session
-en esta candidata. Las sesiones de
+en v1. Las sesiones de
 refuerzo pueden repetir cursos available o closed; no se exige una sesión por curso.
 Las fechas de progreso son anteriores al 2026-09-26, variadas entre julio y septiembre
 de 2026 e independientes de los eventos futuros del calendario.
@@ -334,7 +351,7 @@ Observaciones históricas, sin modificar contratos:
 No se implementan N8N, ingesta o backend. Este contrato respalda trazabilidad para
 OE1/OE2/OE4, pero no acredita sus métricas ni una publicación SQL ejecutada.
 
-## Ajuste editorial previo a la revisión final
+## Ajuste editorial aceptado en la revisión final
 
 Se conservan claves, contratos y conteos. Los documentos doc-001 a doc-009 se
 centran en procedimientos y orientaciones del programa ficticio, reduciendo

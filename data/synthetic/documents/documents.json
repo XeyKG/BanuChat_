@@ -7,7 +7,7 @@
       "title": "Orientación general del programa demo",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-001.md"
     },
     {
@@ -15,7 +15,7 @@
       "title": "Inscripción, cambios y retiro de actividades",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-002.md"
     },
     {
@@ -23,7 +23,7 @@
       "title": "Participación y asistencia",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-003.md"
     },
     {
@@ -31,7 +31,7 @@
       "title": "Progreso y finalización de actividades",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-004.md"
     },
     {
@@ -39,7 +39,7 @@
       "title": "Evaluación formativa y entrega de evidencias",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-005.md"
     },
     {
@@ -47,7 +47,7 @@
       "title": "Uso del calendario y tipos de eventos",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-006.md"
     },
     {
@@ -55,7 +55,7 @@
       "title": "Convocatorias y comunicaciones",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-007.md"
     },
     {
@@ -63,7 +63,7 @@
       "title": "Soporte y reporte de incidencias",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-008.md"
     },
     {
@@ -71,7 +71,7 @@
       "title": "Uso responsable y seguridad digital",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-009.md"
     },
     {
@@ -79,7 +79,7 @@
       "title": "Preguntas frecuentes del programa demo",
       "retrieval_mode": "chunked",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-010.md"
     },
     {
@@ -87,7 +87,7 @@
       "title": "Guía completa de actividad integradora",
       "retrieval_mode": "full_document",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-011.md"
     },
     {
@@ -95,7 +95,7 @@
       "title": "Guía completa para sesiones prácticas",
       "retrieval_mode": "full_document",
       "mime_type": "text/markdown",
-      "version_label": "v1-candidate",
+      "version_label": "v1",
       "artifact_path": "documents/artifacts/doc-012.md"
     }
   ]

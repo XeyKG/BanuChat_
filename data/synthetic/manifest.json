@@ -51,7 +51,7 @@
     {
       "path": "documents/artifacts/doc-006.md",
       "kind": "document_artifact",
-      "sha256": "6c568f7df0305602ac79080853673bf1bf9909a19b35c19cc09fda05ec0b6e50"
+      "sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"
     },
     {
       "path": "documents/artifacts/doc-007.md",
@@ -87,7 +87,7 @@
       "path": "documents/documents.json",
       "kind": "documents",
       "schema": "schemas/documents.schema.json",
-      "sha256": "f663e1a94dacb3e92bfe993b6693417ab3ec83030d1d884c114cb96f5b9b1e25"
+      "sha256": "62bb4bf5c650aae378d3f1df88c267b2dc97f44d559789b20c842b89cc5d8524"
     },
     {
       "path": "profiles/profiles.json",
@@ -148,7 +148,7 @@
       "key": "doc-006",
       "path": "documents/artifacts/doc-006.md",
       "locator": "document",
-      "sha256": "6c568f7df0305602ac79080853673bf1bf9909a19b35c19cc09fda05ec0b6e50",
+      "sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e",
       "retrieval_mode": "chunked"
     },
     {
