@@ -48,7 +48,9 @@ Si necesitas desviarte de este layout, actualiza esta sección en el mismo commi
 ## Stack técnico
 - **Backend / agente**: frontera síncrona Mobile → REST Backend API → Agent/RAG.
   El agente consume herramientas controladas del servidor MCP interno; la app no llama a MCP
-  ni a N8N. Proveedores y modelos de generación y embeddings siguen abiertos.
+  ni a N8N. El proveedor/modelo de generación permanece abierto. Para embeddings del MVP
+  se fija Ollama local con `qwen3-embedding:0.6b`, dimensión 1024 y similitud/distancia
+  coseno; la recuperación inicial usa búsqueda exacta, sin índices ANN (HNSW/IVFFlat).
 - **Base de datos**: una sola instancia PostgreSQL con pgvector para relaciones y embeddings
   (similitud coseno); almacena datos procesados de `/data/synthetic`.
 - **Orquestación**: N8N self-hosted para ingesta y sincronización asíncrona de datos sintéticos.
@@ -76,18 +78,19 @@ pregunta o propón el comando y añádelo a esta sección.
 
 ## Convenciones de ingeniería
 - TypeScript estricto en backend y móvil; tipar entradas/salidas de cada tool MCP.
-- Toda respuesta del agente que cite información institucional debe incluir la fuente
-  (documento + sección). No generes respuestas sin anclaje documental — es un requisito de
-  diseño del proyecto (mitigación de alucinaciones), no un detalle opcional.
-- Las guías de cátedra NUNCA se fragmentan/vectorizan; se sirven como enlace al documento
-  completo (ver sección 13.3 del anteproyecto).
+- Toda respuesta del agente que dependa del corpus debe citar evidencia verificable del
+  corpus sintético, como documento/sección o procedencia estructurada. Si no existe evidencia
+  suficiente, el sistema debe indicarlo explícitamente y no completar con conocimiento propio del LLM.
+- Los documentos con `retrieval_mode=full_document` no se fragmentan ni vectorizan.
+  Cuando deban presentarse al cliente, se resuelven como artefactos completos verificados
+  mediante la ruta REST interna aprobada; no mediante URLs externas.
 - Migraciones de base de datos versionadas en `/infra/db`, nunca cambios manuales a schema.
 - Cada flujo de N8N exportado a `/n8n/workflows` como JSON versionado — no dejar lógica de
   negocio solo dentro de la UI de N8N sin respaldo en el repo.
 - Commits en español, formato imperativo corto (`Agrega endpoint de búsqueda semántica`).
 
 ## Datos sensibles y ética (obligatorio — no negociable)
-- Todo el corpus (documentos institucionales, calendarios, perfiles de estudiante) es
+- Todo el corpus funcional (documentos, calendarios y perfiles de demostración) es
   **100% sintético**. Nunca uses, busques ni incorpores datos reales de personas, de la UNAB o
   del CCD real — ni como ejemplo, ni como "inspiración" de contenido.
 - Todo dato/documento sintético debe quedar marcado como tal en metadatos y en la
