@@ -1,6 +1,6 @@
 # profiles
 
-Perfiles e historiales completamente sintéticos para personalización y demostraciones. No se incluyen personas reales ni registros de participantes de usabilidad.
+profiles.json contiene solo claves y alias ficticios; progress.json es una instantánea de asociaciones con cursos. No hay personas reales, credenciales ni historial de transiciones.
 
-Solo documentación en esta etapa; no hay datasets generados. Todo contenido futuro
-seguirá las reglas de [datos sintéticos](../README.md).
+Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
+Véanse las reglas y validaciones de [datos sintéticos](../README.md).

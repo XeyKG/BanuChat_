@@ -245,10 +245,17 @@ Consulta eventos estructurados de la release vigente.
 | `limit` | No | integer, 1–50 | 20 |
 
 Regla semántica de servidor: `date_to >= date_from` y número de días inclusivos
-`(date_to - date_from) + 1 <= 366`. Las fechas delimitan días UTC:
-se incluyen eventos cuyo `starts_at` esté desde 00:00 de date_from hasta antes
-de 00:00 del día posterior a date_to. No se filtra por fecha de finalización ni
+`(date_to - date_from) + 1 <= 366`. Las fechas delimitan días civiles en
+`America/Bogota`, zona canónica técnica del MVP, no afirmación institucional.
+Transformar las 00:00 de date_from y las 00:00 del día posterior a date_to en esa
+zona a instantes con zona. Se incluyen eventos cuyo `starts_at` sea mayor o igual
+al primer límite y menor que el segundo. No se filtra por fecha de finalización ni
 por solapamiento de eventos iniciados antes. Orden: starts_at, event_key ascendentes.
+
+Corrección preimplementación del draft: se conserva `2.0.0-draft`, sin nueva
+funcionalidad, nombres o formatos. La interpretación anterior por días UTC queda
+como antecedente histórico sustituido por America/Bogota, compartida con REST y
+la autoría del dataset. Los timestamps de salida siguen siendo RFC 3339 con zona/offset.
 
 Salida requerida: `release_id`, `events` (array, máximo 50).
 Cada evento requiere `event_key` (clave), `title`, `description` (textos no vacíos),

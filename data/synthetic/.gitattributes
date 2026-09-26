@@ -1,0 +1,3 @@
+# Los hashes funcionales deben coincidir con los bytes de Git en cualquier checkout.
+*.json text eol=lf
+*.md text eol=lf

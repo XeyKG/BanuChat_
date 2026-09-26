@@ -1,6 +1,6 @@
 # schemas
 
-Definiciones futuras de formato, identificadores, marca sintética y procedencia versionada. Los esquemas se diseñarán antes de producir datasets.
+Siete JSON Schemas Draft 2020-12 definen el contrato v1. Todos se resuelven localmente; los identificadores URN no se descargan. Activar validación de formatos. Los límites de validación cruzada se explican en el README raíz.
 
-Solo documentación en esta etapa; no hay datasets generados. Todo contenido futuro
-seguirá las reglas de [datos sintéticos](../README.md).
+Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
+Véanse las reglas y validaciones de [datos sintéticos](../README.md).

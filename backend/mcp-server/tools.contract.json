@@ -577,7 +577,7 @@
     {
       "name": "get_calendar_events",
       "title": "Consultar eventos sintéticos",
-      "description": "Consulta eventos de la release vigente cuyo inicio cae en el rango inclusivo de fechas UTC, de hasta 366 días.",
+      "description": "Corrección preimplementación del draft 2.0.0-draft: date_from y date_to delimitan días civiles inclusivos en America/Bogota, zona canónica técnica del MVP, no afirmación institucional. Máximo 366 días, date_to >= date_from. Transformar 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona; filtrar starts_at con inicio incluido y fin excluido, sin solapamiento. Solo release vigente. Timestamps de salida RFC 3339 con zona/offset.",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,

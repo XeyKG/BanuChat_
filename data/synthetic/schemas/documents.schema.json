@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:banuchat:synthetic:v1:documents",
+  "title": "BanuChat synthetic v1: documents",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "document_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "retrieval_mode": {
+            "type": "string",
+            "enum": [
+              "chunked",
+              "full_document"
+            ]
+          },
+          "mime_type": {
+            "const": "text/markdown"
+          },
+          "version_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "artifact_path": {
+            "type": "string",
+            "pattern": "^documents/artifacts/[a-z0-9][a-z0-9_-]{0,127}\\.md$",
+            "not": {
+              "pattern": "[\\r\\n]"
+            }
+          }
+        },
+        "required": [
+          "document_key",
+          "title",
+          "retrieval_mode",
+          "mime_type",
+          "version_label",
+          "artifact_path"
+        ]
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "synthetic",
+    "documents"
+  ]
+}

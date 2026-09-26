@@ -277,7 +277,7 @@
       "get": {
         "operationId": "list_calendar_events",
         "summary": "Consultar calendario sintético sin invocar al agente",
-        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. A diferencia del calendario MCP vigente, REST no interpreta fechas civiles por días UTC; una futura capa compartida deberá recibir límites normalizados sin modificar MCP. Orden starts_at y event_key ascendentes. Solo release vigente.",
+        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente.",
         "parameters": [
           {
             "name": "date_from",

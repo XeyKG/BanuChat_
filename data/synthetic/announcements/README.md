@@ -1,6 +1,6 @@
 # announcements
 
-Convocatorias y anuncios completamente ficticios, creados por el equipo y marcados como sintéticos.
+announcements.json define ventanas temporales ficticias. No persiste is_active ni temporal_status; esos valores se derivan al consultar.
 
-Solo documentación en esta etapa; no hay datasets generados. Todo contenido futuro
-seguirá las reglas de [datos sintéticos](../README.md).
+Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
+Véanse las reglas y validaciones de [datos sintéticos](../README.md).

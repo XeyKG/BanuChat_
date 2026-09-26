@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "timezone": "America/Bogota",
+  "progress": [
+    {
+      "profile_key": "profile-001",
+      "course_key": "course-001",
+      "status": "enrolled",
+      "progress_percent": 0,
+      "started_at": null,
+      "completed_at": null
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "courses": [
+    {
+      "course_key": "course-001",
+      "name": "Taller ficticio de mosaicos simbólicos",
+      "description": "Escenario sintético: ordenar fichas imaginarias por forma y color.",
+      "status": "available"
+    }
+  ]
+}

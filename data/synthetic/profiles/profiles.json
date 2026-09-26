@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "profiles": [
+    {
+      "profile_key": "profile-001",
+      "alias": "Personaje sintético Prisma-01"
+    }
+  ]
+}

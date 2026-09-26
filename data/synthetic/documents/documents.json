@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "documents": [
+    {
+      "document_key": "doc-001",
+      "title": "Guía sintética del taller de mosaicos simbólicos",
+      "retrieval_mode": "full_document",
+      "mime_type": "text/markdown",
+      "version_label": null,
+      "artifact_path": "documents/artifacts/doc-001.md"
+    }
+  ]
+}

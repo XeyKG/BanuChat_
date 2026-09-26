@@ -1,0 +1,95 @@
+{
+  "manifest_version": "1.0.0",
+  "dataset_key": "banuchat-synthetic",
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "timezone": "America/Bogota",
+  "files": [
+    {
+      "path": "announcements/announcements.json",
+      "kind": "announcements",
+      "schema": "schemas/announcements.schema.json",
+      "sha256": "5b759cc1b313749a9e145bd7110f6cbb80aceebc686a709b42b00061d23c1309"
+    },
+    {
+      "path": "calendars/events.json",
+      "kind": "calendar_events",
+      "schema": "schemas/calendar-events.schema.json",
+      "sha256": "9b8a617b89f269399b557892b27247c2937914a818e8ed72b74a1eff895f4a59"
+    },
+    {
+      "path": "courses/courses.json",
+      "kind": "courses",
+      "schema": "schemas/courses.schema.json",
+      "sha256": "a525ff7762068b5159489b3ca568ae522ad2eb7880679cc4796697b828456258"
+    },
+    {
+      "path": "documents/artifacts/doc-001.md",
+      "kind": "document_artifact",
+      "sha256": "c7dc539e55808497af52e50f5281a621b33fe177ed266f0ee41f31f3d7fc8b7e"
+    },
+    {
+      "path": "documents/documents.json",
+      "kind": "documents",
+      "schema": "schemas/documents.schema.json",
+      "sha256": "66a6cb81969afd7631d6b5fe825e0faa8371c7e8fbbc4226374f68730d348f92"
+    },
+    {
+      "path": "profiles/profiles.json",
+      "kind": "profiles",
+      "schema": "schemas/profiles.schema.json",
+      "sha256": "6e6e0d8672076e40e12d48864a6d8f7e853edc4205d549e3d6f27f2da7ab8e0d"
+    },
+    {
+      "path": "profiles/progress.json",
+      "kind": "profile_progress",
+      "schema": "schemas/profile-progress.schema.json",
+      "sha256": "78fd2893ec1e37dcf409004a7a201f06a86d1ce00eada1592c8c94eecb2c64cb"
+    }
+  ],
+  "items": [
+    {
+      "kind": "document",
+      "key": "doc-001",
+      "path": "documents/artifacts/doc-001.md",
+      "locator": "document",
+      "sha256": "c7dc539e55808497af52e50f5281a621b33fe177ed266f0ee41f31f3d7fc8b7e",
+      "retrieval_mode": "full_document"
+    },
+    {
+      "kind": "course",
+      "key": "course-001",
+      "path": "courses/courses.json",
+      "locator": "/courses/0",
+      "sha256": "a525ff7762068b5159489b3ca568ae522ad2eb7880679cc4796697b828456258"
+    },
+    {
+      "kind": "calendar_event",
+      "key": "event-001",
+      "path": "calendars/events.json",
+      "locator": "/events/0",
+      "sha256": "9b8a617b89f269399b557892b27247c2937914a818e8ed72b74a1eff895f4a59"
+    },
+    {
+      "kind": "announcement",
+      "key": "announcement-001",
+      "path": "announcements/announcements.json",
+      "locator": "/announcements/0",
+      "sha256": "5b759cc1b313749a9e145bd7110f6cbb80aceebc686a709b42b00061d23c1309"
+    },
+    {
+      "kind": "profile",
+      "key": "profile-001",
+      "path": "profiles/profiles.json",
+      "locator": "/profiles/0",
+      "sha256": "6e6e0d8672076e40e12d48864a6d8f7e853edc4205d549e3d6f27f2da7ab8e0d"
+    },
+    {
+      "kind": "profile_course",
+      "key": "profile-001/course-001",
+      "path": "profiles/progress.json",
+      "locator": "/progress/0",
+      "sha256": "78fd2893ec1e37dcf409004a7a201f06a86d1ce00eada1592c8c94eecb2c64cb"
+    }
+  ]
+}

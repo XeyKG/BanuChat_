@@ -1,0 +1,3 @@
+# El Markdown fuente no es un derivado regenerable: debe versionarse.
+!documents/artifacts/
+!documents/artifacts/*.md

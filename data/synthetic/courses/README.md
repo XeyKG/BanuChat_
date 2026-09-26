@@ -1,6 +1,6 @@
 # courses
 
-Catálogo ficticio de cursos y sus atributos, con identificadores reproducibles. No se usarán catálogos institucionales reales.
+courses.json define únicamente clave, nombre, descripción y estado del catálogo ficticio. El registro mínimo no representa un curso real.
 
-Solo documentación en esta etapa; no hay datasets generados. Todo contenido futuro
-seguirá las reglas de [datos sintéticos](../README.md).
+Contrato y ejemplo mínimo pendientes de revisión humana de contenido, no corpus definitivo.
+Véanse las reglas y validaciones de [datos sintéticos](../README.md).

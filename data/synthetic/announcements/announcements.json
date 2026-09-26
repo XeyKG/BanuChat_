@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "timezone": "America/Bogota",
+  "announcements": [
+    {
+      "announcement_key": "announcement-001",
+      "title": "Muestra ficticia de mosaicos",
+      "description": "Convocatoria inventada para presentar combinaciones de fichas imaginarias.",
+      "valid_from": "2032-04-01T08:00:00-05:00",
+      "valid_until": "2032-04-30T18:00:00-05:00"
+    }
+  ]
+}

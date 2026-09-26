@@ -156,9 +156,8 @@ canónica técnica del prototipo, no una afirmación institucional sobre la UNAB
 El backend transforma las 00:00 del primer día y las 00:00 del día posterior al
 último en esa zona a instantes con zona. Selecciona por `starts_at` desde el
 primer límite incluido hasta el segundo excluido; la salida sigue siendo RFC 3339
-con offset. A diferencia del calendario MCP vigente, REST no interpreta estos
-días civiles en UTC. Una futura capa compartida deberá recibir límites normalizados,
-sin cambiar el contrato MCP ni delegarle directamente las mismas fechas civiles;
+con offset. REST y MCP comparten esta misma semántica civil en America/Bogota.
+Una futura capa compartida recibirá los límites transformados a instantes;
 no es una búsqueda por solapamiento. Rango inclusivo de como máximo 366 días,
 con inicio no posterior al fin. `event_types` permite `course_session`,
 `announcement_deadline`, `general`. Orden `starts_at`, `event_key`, ascendente.
@@ -284,7 +283,7 @@ secuenciales. Una garantía durable de idempotencia requiere aprobación posteri
 | messages.role, ordinal, answer_release_id | Roles user/assistant; orden estable; release por respuesta. |
 | message_citations y sus validaciones | Citas derivadas, seis kinds, índice y versión verificables; sin procedencia privada. |
 | Cascadas de historial | DELETE solo historial, sin dirección de cascada hacia corpus. |
-| calendar_events / get_calendar_events | Mismos tipos y rango inclusivo máximo 366 días; REST usa días civiles America/Bogota, MCP conserva su interpretación UTC. Límites normalizados en la futura capa compartida. |
+| calendar_events / get_calendar_events | Mismos tipos, días civiles en America/Bogota y rango inclusivo máximo 366 días en REST y MCP. Límites transformados a instantes; filtro por starts_at, sin solapamiento; salida RFC 3339 con offset. |
 | profile_courses / get_profile_progress | Mismos estados, porcentaje y perfil vigente. |
 | announcements / get_announcements | Misma búsqueda literal y fronteras temporales inclusivas. |
 | document_versions / find_documents | Artefacto por UUID publicado, sin paths públicos ni vectorización full_document. |

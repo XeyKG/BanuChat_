@@ -1,0 +1,562 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:banuchat:synthetic:v1:manifest",
+  "title": "BanuChat synthetic v1: manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "manifest_version": {
+      "const": "1.0.0"
+    },
+    "dataset_key": {
+      "const": "banuchat-synthetic"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "timezone": {
+      "const": "America/Bogota"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "documents/documents.json"
+              },
+              "kind": {
+                "const": "documents"
+              },
+              "schema": {
+                "const": "schemas/documents.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "courses/courses.json"
+              },
+              "kind": {
+                "const": "courses"
+              },
+              "schema": {
+                "const": "schemas/courses.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "calendars/events.json"
+              },
+              "kind": {
+                "const": "calendar_events"
+              },
+              "schema": {
+                "const": "schemas/calendar-events.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "announcements/announcements.json"
+              },
+              "kind": {
+                "const": "announcements"
+              },
+              "schema": {
+                "const": "schemas/announcements.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "profiles/profiles.json"
+              },
+              "kind": {
+                "const": "profiles"
+              },
+              "schema": {
+                "const": "schemas/profiles.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "const": "profiles/progress.json"
+              },
+              "kind": {
+                "const": "profile_progress"
+              },
+              "schema": {
+                "const": "schemas/profile-progress.schema.json"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "schema",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^documents/artifacts/[a-z0-9][a-z0-9_-]{0,127}\\.md$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "kind": {
+                "const": "document_artifact"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "path",
+              "kind",
+              "sha256"
+            ]
+          }
+        ]
+      },
+      "allOf": [
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "documents/documents.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "courses/courses.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "calendars/events.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "announcements/announcements.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "profiles/profiles.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "properties": {
+              "path": {
+                "const": "profiles/progress.json"
+              }
+            },
+            "required": [
+              "path"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ]
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "document"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^documents/artifacts/[a-z0-9][a-z0-9_-]{0,127}\\.md$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "locator": {
+                "const": "document"
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "retrieval_mode": {
+                "type": "string",
+                "enum": [
+                  "chunked",
+                  "full_document"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256",
+              "retrieval_mode"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "course"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "const": "courses/courses.json"
+              },
+              "locator": {
+                "type": "string",
+                "pattern": "^/courses/(0|[1-9][0-9]*)$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "calendar_event"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "const": "calendars/events.json"
+              },
+              "locator": {
+                "type": "string",
+                "pattern": "^/events/(0|[1-9][0-9]*)$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "announcement"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "const": "announcements/announcements.json"
+              },
+              "locator": {
+                "type": "string",
+                "pattern": "^/announcements/(0|[1-9][0-9]*)$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "profile"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "const": "profiles/profiles.json"
+              },
+              "locator": {
+                "type": "string",
+                "pattern": "^/profiles/(0|[1-9][0-9]*)$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "const": "profile_course"
+              },
+              "key": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 257,
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,127}/[a-z0-9][a-z0-9_-]{0,127}$"
+              },
+              "path": {
+                "const": "profiles/progress.json"
+              },
+              "locator": {
+                "type": "string",
+                "pattern": "^/progress/(0|[1-9][0-9]*)$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              "sha256": {
+                "type": "string",
+                "minLength": 64,
+                "maxLength": 64,
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "required": [
+              "kind",
+              "key",
+              "path",
+              "locator",
+              "sha256"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "manifest_version",
+    "dataset_key",
+    "schema_version",
+    "synthetic",
+    "timezone",
+    "files",
+    "items"
+  ]
+}

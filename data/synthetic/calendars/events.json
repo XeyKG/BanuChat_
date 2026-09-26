@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "timezone": "America/Bogota",
+  "events": [
+    {
+      "event_key": "event-001",
+      "title": "Sesión ficticia de mosaicos",
+      "description": "Encuentro imaginario del escenario mínimo; no corresponde a una agenda real.",
+      "event_type": "course_session",
+      "starts_at": "2032-04-15T09:00:00-05:00",
+      "ends_at": "2032-04-15T10:00:00-05:00",
+      "course_key": "course-001",
+      "announcement_key": null
+    }
+  ]
+}

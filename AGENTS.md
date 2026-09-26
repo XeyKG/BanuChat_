@@ -16,7 +16,10 @@ el corpus documental (PDFs, calendarios, convocatorias, "noticias") es **sintét
 por el equipo con formato realista para simular el contexto institucional. El módulo antes
 descrito como "RPA de scraping" pasa a ser orquestación asíncrona de ingesta y sincronización
 sobre `/data/synthetic`, fuente de verdad versionada. PostgreSQL conserva su representación
-procesada. N8N no genera arbitrariamente ni modifica esa fuente de verdad.
+procesada. El contenido funcional es creado/revisado por el equipo y versionado antes
+de la ingesta. N8N valida, procesa e ingiere automáticamente revisiones aprobadas de
+`/data/synthetic` y genera derivados técnicos cuando corresponda. No inventa ni publica
+automáticamente hechos funcionales como fuente de verdad ni modifica silenciosamente sus archivos.
 El anteproyecto justifica el despliegue on-premise en UNAB como parte de su
 viabilidad (sección 3.5) — ese punto quedó desactualizado por esta decisión y debe explicarse
 así en la documentación final, no disimularse como si el despliegue fuera institucional real.
@@ -113,13 +116,17 @@ pregunta o propón el comando y añádelo a esta sección.
   answer relevancy ≥ 0.80, MRR ≥ 0.70 (framework RAGAS, evaluado en `/eval`).
 - **Ingesta de datos sintéticos (OE2, reformulado)**: pipelines asíncronos de N8N que ingieren
   versiones del corpus sintético aprobado, sin intervención manual repetitiva; latencia
-  de actualización del corpus < 24h desde que se agrega un nuevo documento sintético; tasa de
+  de actualización del corpus < 24h desde que una revisión sintética aprobada queda
+  disponible para ingesta; tasa de
   ingesta correcta > 90% sobre el conjunto de documentos de prueba (ya no aplica "sitio real
   del CCD").
 - **Núcleo agéntico + MCP (OE3)**: el agente selecciona dinámicamente la tool correcta según
   intención, no responde de forma pasiva/genérica.
 - **Orquestación N8N (OE4)**: pruebas de integración end-to-end sin pérdida de datos entre
   nodos, sincronización de calendario con latencia máx. 30 min.
+  Esta métrica de calendario se conserva por ahora, pero requiere revisión en la siguiente
+  etapa de diseño N8N: ya no existe Google Sheets ni una fuente institucional externa.
+  No se define todavía una métrica sustituta.
 - **App móvil (OE5)**: SUS promedio > 70/100, ningún usuario individual < 50/100, tasa de
   completación de tareas > 85%.
 - **Despliegue local (OE6)**: contenedores estables sin caídas > 5 min, respuesta promedio < 5s.
@@ -133,4 +140,4 @@ especificación de los flujos N8N y el documento de arquitectura — todavía NO
 funcionalidad final. Pide a Codex que te ayude a producir estos entregables de diseño antes
 de generar código de producción, y que valide cada decisión contra lo ya definido en el
 anteproyecto solo cuando sea compatible con las decisiones vigentes de este archivo.
-Los contratos MCP concretos siguen en borrador y no quedan congelados en esta fase.
+Los contratos MCP `2.0.0-draft` están congelados para implementación. Cualquier cambio incompatible requiere revisión explícita y actualización coordinada del contrato, agente y pruebas. El sufijo `draft` se conserva hasta que exista una implementación validada.
