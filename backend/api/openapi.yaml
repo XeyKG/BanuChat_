@@ -76,7 +76,7 @@
                 "description": "Ruta REST relativa de la conversación creada.",
                 "schema": {
                   "type": "string",
-                  "pattern": "^/api/v1/conversations/[0-9a-fA-F-]{36}$"
+                  "pattern": "^/api/v1/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
                 }
               }
             },
@@ -277,13 +277,13 @@
       "get": {
         "operationId": "list_calendar_events",
         "summary": "Consultar calendario sintético sin invocar al agente",
-        "description": "Misma semántica que MCP: fechas inclusivas UTC, date_to >= date_from, diferencia + 1 <= 366 días. Selecciona starts_at desde 00:00 date_from hasta antes de 00:00 del día posterior a date_to, no solapamiento. Orden starts_at y event_key ascendentes. Solo release vigente.",
+        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. A diferencia del calendario MCP vigente, REST no interpreta fechas civiles por días UTC; una futura capa compartida deberá recibir límites normalizados sin modificar MCP. Orden starts_at y event_key ascendentes. Solo release vigente.",
         "parameters": [
           {
             "name": "date_from",
             "in": "query",
             "required": true,
-            "description": "Primer día UTC incluido.",
+            "description": "Primer día civil incluido en America/Bogota.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -293,7 +293,7 @@
             "name": "date_to",
             "in": "query",
             "required": true,
-            "description": "Último día UTC incluido; máximo 366 días contando ambos extremos.",
+            "description": "Último día civil incluido en America/Bogota; máximo 366 días contando ambos extremos.",
             "schema": {
               "type": "string",
               "format": "date"
@@ -1241,7 +1241,22 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/error_response"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "INVALID_ARGUMENT"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1256,7 +1271,22 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/error_response"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "NOT_FOUND"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1271,7 +1301,22 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/error_response"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "CONFLICT"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1286,7 +1331,22 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/error_response"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "DEPENDENCY_UNAVAILABLE"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }
@@ -1301,7 +1361,22 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/error_response"
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "INTERNAL_ERROR"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
             }
           }
         }

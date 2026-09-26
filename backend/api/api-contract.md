@@ -46,6 +46,26 @@ UNAB no es fuente funcional. Google Sheets, push y servicios externos quedan fue
 **No existe `/courses` en v1**: aunque MCP ofrece `get_courses`, no existe una
 pantalla de catálogo aprobada. Es una exclusión deliberada, no un olvido.
 
+### Códigos HTTP por operación
+
+| operationId | Éxito | Errores documentados |
+| --- | --- | --- |
+| list_profiles | 200 | 400, 404, 500, 503 |
+| create_conversation | 201 | 400, 404, 409, 500, 503 |
+| list_conversations | 200 | 400, 500, 503 |
+| get_conversation | 200 | 400, 404, 500, 503 |
+| delete_conversation | 204 | 400, 409, 500, 503 |
+| send_message | 201 | 400, 404, 409, 500, 503 |
+| list_calendar_events | 200 | 400, 404, 500, 503 |
+| get_profile_progress | 200 | 400, 404, 500, 503 |
+| list_announcements | 200 | 400, 404, 500, 503 |
+| get_document_artifact | 200 | 400, 404, 500, 503 |
+
+Crear una conversación puede devolver 409 si cambia incompatiblemente el contexto
+de publicación durante su validación. No debe guardar una relación de perfil
+distinta de la validada. Los recursos individuales ausentes devuelven 404 salvo
+la convención idempotente explícita de DELETE.
+
 ### Perfiles y conversaciones
 
 GET profiles devuelve `release_id` y `profiles[]`, con `profile_key` y `alias`.
@@ -54,7 +74,8 @@ vigente publicada devuelve 404. Nunca devuelve correos, identificaciones o rutas
 
 POST conversations acepta solamente `profile_key`, existente en la release
 vigente publicada. Devuelve 201 con `conversation_id`, `profile_key`,
-`profile_alias` y `created_at`, más Location relativa. `created_at` es una
+`profile_alias` y `created_at`, más Location relativa, exclusivamente
+`/api/v1/conversations/{uuid}` con UUID hexadecimal de forma 8-4-4-4-12. `created_at` es una
 proyección de `conversations.started_at`, no una columna nueva. La relación
 persistida conserva `release_id` y `profile_key` de apertura. El alias procede de
 esa versión del perfil; no se sustituye por el alias de otra release.
@@ -108,6 +129,10 @@ El futuro backend deberá:
 
 La release de respuesta puede diferir de la de apertura. Las citas históricas
 conservan la release original. No se cambia la relación de perfil de apertura.
+La release efectiva se conserva en `messages.answer_release_id` incluso cuando
+no haya citas; no se añade un campo REST nuevo al assistant por ese motivo.
+Ninguna nueva consulta admite seleccionar una release histórica. `reference_time`
+solo clasifica anuncios de la release vigente, no selecciona una versión del corpus.
 La exclusión deberá funcionar entre procesos, no solo mediante un mutex en memoria;
 una opción acotada para implementación posterior es un advisory lock PostgreSQL
 por conversación en una conexión dedicada, con adquisición no bloqueante (409),
@@ -126,8 +151,14 @@ Cada consulta resuelve una única release vigente publicada para todas sus filas
 Sin release disponible: 404; sin resultados: 200 con lista vacía. Se proyectan
 campos de presentación, no objetos de procedencia internos. No necesitan agente.
 
-Calendario exige `date_from` y `date_to`. Selecciona por `starts_at` en días UTC,
-desde las 00:00 del primer día hasta antes de las 00:00 del día posterior al último;
+Calendario exige `date_from` y `date_to`: días civiles en `America/Bogota`, zona
+canónica técnica del prototipo, no una afirmación institucional sobre la UNAB.
+El backend transforma las 00:00 del primer día y las 00:00 del día posterior al
+último en esa zona a instantes con zona. Selecciona por `starts_at` desde el
+primer límite incluido hasta el segundo excluido; la salida sigue siendo RFC 3339
+con offset. A diferencia del calendario MCP vigente, REST no interpreta estos
+días civiles en UTC. Una futura capa compartida deberá recibir límites normalizados,
+sin cambiar el contrato MCP ni delegarle directamente las mismas fechas civiles;
 no es una búsqueda por solapamiento. Rango inclusivo de como máximo 366 días,
 con inicio no posterior al fin. `event_types` permite `course_session`,
 `announcement_deadline`, `general`. Orden `starts_at`, `event_key`, ascendente.
@@ -170,6 +201,9 @@ announcement, profile y profile_course.
 
 El backend deriva label y locator legibles de metadatos verificados (documento y
 sección, o título/alias y localizador estructurado). El LLM no inventa IDs ni rutas.
+Estos textos también se sanitizan: no se copia un localizador interno que contenga
+paths, hashes o URLs externas. La prohibición cubre valores de texto, no solo nombres
+de propiedades; un schema string por sí solo no garantiza esa sanitización.
 Toda cita document tiene document_version_id no nulo; las estructuradas tienen
 ese campo y artifact_url nulos. En documentos, el enlace opcional es exactamente
 `/api/v1/documents/{document_version_id}/artifact`, con el mismo UUID de la cita.
@@ -219,7 +253,9 @@ Objeto común cerrado:
 | 503 | DEPENDENCY_UNAVAILABLE | Dependencia necesaria temporalmente no disponible. |
 | 500 | INTERNAL_ERROR | Fallo no clasificable de manera segura. |
 
-El código debe coincidir con HTTP, aunque el schema común enumere los cinco.
+El código debe coincidir con HTTP: cada respuesta especializa mediante `allOf`
+la estructura cerrada de `error_response` y restringe `error.code` con `const`.
+Así, el schema de respuesta 404 admite NOT_FOUND y rechaza INTERNAL_ERROR.
 request_id lo genera el backend y permite correlación local. El mensaje describe
 la validación sin SQL, paths, credenciales, stack traces o argumentos internos.
 No existen códigos de autenticación. El error MCP PROFILE_CONTEXT_REQUIRED no se
@@ -248,7 +284,7 @@ secuenciales. Una garantía durable de idempotencia requiere aprobación posteri
 | messages.role, ordinal, answer_release_id | Roles user/assistant; orden estable; release por respuesta. |
 | message_citations y sus validaciones | Citas derivadas, seis kinds, índice y versión verificables; sin procedencia privada. |
 | Cascadas de historial | DELETE solo historial, sin dirección de cascada hacia corpus. |
-| calendar_events / get_calendar_events | Mismos tipos, selección UTC y rango inclusivo máximo 366 días. |
+| calendar_events / get_calendar_events | Mismos tipos y rango inclusivo máximo 366 días; REST usa días civiles America/Bogota, MCP conserva su interpretación UTC. Límites normalizados en la futura capa compartida. |
 | profile_courses / get_profile_progress | Mismos estados, porcentaje y perfil vigente. |
 | announcements / get_announcements | Misma búsqueda literal y fronteras temporales inclusivas. |
 | document_versions / find_documents | Artefacto por UUID publicado, sin paths públicos ni vectorización full_document. |
