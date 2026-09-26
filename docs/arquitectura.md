@@ -18,9 +18,11 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 | Componente | Responsabilidad | Ubicación |
 | --- | --- | --- |
 | Mobile App | React Native + TypeScript; consume únicamente la API REST pública. | `mobile/` |
-| REST Backend API | Entrada síncrona de consultas; invoca Agent/RAG y devuelve respuestas citadas. | `backend/api/` |
+| REST Backend API | Entrada síncrona; fija contexto, evalúa Intent Router y persiste respuesta/citas de la misma release. | `backend/api/` |
+| Intent Router | Catálogo determinista: fast path seguro o fallback Agent/RAG; sin LLM, embeddings ni N8N para clasificar. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
+| Application Services | Lógica compartida por fast path y tools MCP, con acceso consistente a PostgreSQL; sin implementación todavía. | Capa lógica interna prevista del backend |
 | Agent/RAG | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; el agente es cliente MCP. | `backend/`, `backend/rag/` |
-| MCP Server interno | Expone herramientas controladas sobre la representación procesada de datos sintéticos. | `backend/mcp-server/` |
+| MCP Server interno | Expone herramientas controladas mediante los mismos servicios de aplicación que usa el fast path. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
 | N8N | Orquesta ingesta y sincronización asíncrona de versiones aprobadas del dataset. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
@@ -30,24 +32,37 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 
 ```mermaid
 flowchart LR
-    M["Mobile App"] -->|"REST"| API["Backend API"]
-    API --> AR["Agent/RAG"]
-    AR -->|"Cliente MCP"| MCP["MCP Server interno"]
-    MCP --> DB[("Una instancia PostgreSQL + pgvector")]
-    DB -->|"Datos sintéticos procesados"| MCP
-    MCP -->|"Evidencia"| AR
-    AR -->|"Respuesta y fuentes"| API
-    API --> M
+    mobile["Mobile App"] -->|"REST"| api["Backend API"]
+    api --> router["Intent Router determinista"]
+    router -->|"Fast path estructurado"| services["Application Services"]
+    router -->|"Fallback"| agent["Agent/RAG"]
+    agent -->|"Cliente MCP"| mcp["MCP Server interno"]
+    mcp --> services
+    services --> db[("PostgreSQL + pgvector")]
+    services -->|"Datos y procedencia para fast path"| renderer["Renderer determinista"]
+    services -->|"Evidencia para fallback"| mcp
+    mcp -->|"Evidencia"| agent
+    router -->|"Ayuda, social o límite conocido"| renderer
+    renderer --> reply["Validación y persistencia de respuesta y citas"]
+    agent --> reply
+    reply -->|"Mismo contrato REST"| mobile
 ```
 
 N8N queda fuera del camino síncrono. La app no consume MCP, N8N ni PostgreSQL
 directamente. El generador sigue abierto; embeddings usa Ollama local con
 `qwen3-embedding:0.6b`, 1024 dimensiones y coseno ([ADR 0003](adr/0003-embedding-local-qwen3.md)).
 
-El agente debe citar documento y sección del corpus sintético y declarar falta de
-información cuando no tenga evidencia suficiente. No debe presentar la simulación
-como información institucional vigente. Las guías de cátedra sintéticas se sirven
-mediante enlace al documento completo, sin fragmentación ni embeddings.
+El [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md) introduce el router.
+El fast path no llama a MCP ni al LLM generador; usa servicios compartidos y renderers.
+Ante ambigüedad, conflicto, texto residual o consulta compuesta se utiliza Agent/RAG.
+El diagrama muestra dependencias lógicas y retornos, no nuevos contenedores ni código.
+Las consultas REST directas siguen pudiendo utilizar servicios sin router ni agente.
+
+Ambas rutas citan evidencia verificable del corpus sintético, documental o estructurada,
+y declaran evidencia insuficiente cuando corresponda. Mantienen una release por turno.
+No presentan la simulación como información institucional vigente. Los documentos con
+`retrieval_mode=full_document` no se fragmentan ni vectorizan; se resuelven como
+artefactos completos verificados por la ruta REST interna aprobada, no URLs externas.
 
 ## Ingesta y sincronización asíncrona
 
@@ -55,8 +70,8 @@ mediante enlace al documento completo, sin fragmentación ni embeddings.
 flowchart LR
     DATA["/data/synthetic: versión aprobada"] --> N["N8N: orquestación asíncrona"]
     N --> R["Procesamiento de ingesta RAG"]
-    R --> Q{"Guía de cátedra"}
-    Q -->|"Sí"| L["Referencia al archivo completo"]
+    R --> Q{"retrieval_mode = full_document"}
+    Q -->|"Sí"| L["Artefacto completo para resolución REST interna"]
     Q -->|"No"| E["Chunks y embeddings"]
     E --> DB[("PostgreSQL + pgvector")]
     L --> DB
@@ -76,10 +91,12 @@ diseñarán en la siguiente etapa. Actualmente solo existen directorios document
 
 ```mermaid
 flowchart TB
-    M["App móvil"] -->|"REST"| B["Backend API y Agent/RAG previstos"]
+    M["App móvil"] -->|"REST"| B["Backend API, Intent Router y Agent/RAG previstos"]
     subgraph LOCAL["Equipo local: entorno previsto de Docker Compose"]
-        B -->|"MCP interno"| C["MCP Server previsto"]
-        C --> P[("Única instancia PostgreSQL + pgvector")]
+        B -->|"Fallback MCP interno"| C["MCP Server previsto"]
+        B -->|"Fast path"| S["Servicios compartidos previstos"]
+        C --> S
+        S --> P[("Única instancia PostgreSQL + pgvector")]
         N["N8N asíncrono"] -->|"Datos derivados"| P
         D["/data/synthetic versionado"] --> N
     end

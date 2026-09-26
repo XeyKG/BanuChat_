@@ -1,0 +1,1933 @@
+{
+  "artifact_type": "intent_routing_catalog",
+  "catalog_version": "1.0.0-draft",
+  "language": "es",
+  "normalization": {
+    "unicode": "NFC",
+    "lowercase": true,
+    "accent_comparison": "NFD_remove_acute_diaeresis_then_NFC_preserve_enye",
+    "collapse_whitespace": true,
+    "ignored_punctuation": [
+      "¿",
+      "?",
+      "¡",
+      "!",
+      ",",
+      ".",
+      ":",
+      ";"
+    ],
+    "punctuation_mode": "replace_with_space_after_clause_guard",
+    "preserve_original": true,
+    "strip_optional_suffixes": [
+      "por favor"
+    ],
+    "strip_limit": 1
+  },
+  "decision_policy": {
+    "version": "1",
+    "exact_score": 100,
+    "combination_score": 80,
+    "generic_token_score": 0,
+    "threshold": 80,
+    "min_margin": 20,
+    "score_aggregation": "max_not_sum",
+    "full_utterance_required": true,
+    "multiple_strong_intents": "agent_fallback",
+    "conflicting_parameters": "agent_fallback",
+    "unconsumed_text": "agent_fallback",
+    "priority_usage": "evaluation_order_only",
+    "fallback_route": "agent_fallback",
+    "standalone_social_allowlist": [
+      "hola",
+      "gracias",
+      "adios"
+    ],
+    "compound_markers": [
+      "y",
+      "ademas",
+      "tambien",
+      "pero",
+      "segun",
+      "compara",
+      "comparar",
+      "versus"
+    ],
+    "global_exclusions": [
+      "no",
+      "nunca",
+      "excepto",
+      "sin",
+      "ignora",
+      "olvida",
+      "instrucciones",
+      "prompt",
+      "sql"
+    ],
+    "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline"
+  },
+  "temporal_policy": {
+    "timezone": "America/Bogota",
+    "reference_clock": "trusted_turn_now",
+    "week_start": "monday",
+    "max_inclusive_days": 366,
+    "selection": "starts_at_half_open",
+    "undated_calendar": "agent_fallback",
+    "rules": [
+      {
+        "id": "today",
+        "operation": "civil_today"
+      },
+      {
+        "id": "tomorrow",
+        "operation": "civil_tomorrow"
+      },
+      {
+        "id": "this_week",
+        "operation": "monday_to_sunday_containing_today"
+      },
+      {
+        "id": "next_week",
+        "operation": "next_monday_to_sunday"
+      }
+    ],
+    "absolute_patterns": [
+      {
+        "id": "calendar_day",
+        "intent_id": "calendar_events",
+        "pattern": "eventos del {date}",
+        "date_format": "YYYY-MM-DD",
+        "parameters": {
+          "limit": 20
+        },
+        "score": 100
+      },
+      {
+        "id": "calendar_range",
+        "intent_id": "calendar_events",
+        "pattern": "eventos del {date_from} al {date_to}",
+        "date_format": "YYYY-MM-DD",
+        "parameters": {
+          "limit": 20
+        },
+        "score": 100
+      }
+    ]
+  },
+  "intents": [
+    {
+      "id": "profile_progress",
+      "priority": 80,
+      "route_type": "application_service",
+      "logical_service": "ProfileProgressService",
+      "requires_profile": true,
+      "default_parameters": {
+        "limit": 20
+      },
+      "exclusions": [
+        "otro perfil",
+        "perfil alfa",
+        "perfil beta",
+        "perfil gamma",
+        "perfil delta",
+        "de otra persona"
+      ],
+      "strong_expressions": [
+        {
+          "id": "profile_progress_e01",
+          "text": "mi progreso",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e02",
+          "text": "quiero ver mi progreso",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e03",
+          "text": "muestrame mi avance",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e04",
+          "text": "cuanto he avanzado",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e05",
+          "text": "como va mi progreso",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e06",
+          "text": "que cursos he completado",
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e07",
+          "text": "mis actividades completadas",
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e08",
+          "text": "muestrame mis cursos completados",
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e09",
+          "text": "cuales actividades termine",
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e10",
+          "text": "que cursos ya termine",
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e11",
+          "text": "mis cursos en progreso",
+          "parameters": {
+            "statuses": [
+              "in_progress"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e12",
+          "text": "que actividades tengo en curso",
+          "parameters": {
+            "statuses": [
+              "in_progress"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e13",
+          "text": "muestrame mis actividades en progreso",
+          "parameters": {
+            "statuses": [
+              "in_progress"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e14",
+          "text": "que cursos estoy cursando",
+          "parameters": {
+            "statuses": [
+              "in_progress"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e15",
+          "text": "quiero ver mi avance parcial",
+          "parameters": {
+            "statuses": [
+              "in_progress"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e16",
+          "text": "mis actividades inscritas",
+          "parameters": {
+            "statuses": [
+              "enrolled"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e17",
+          "text": "en que cursos estoy inscrito",
+          "parameters": {
+            "statuses": [
+              "enrolled"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e18",
+          "text": "en que actividades estoy inscrita",
+          "parameters": {
+            "statuses": [
+              "enrolled"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e19",
+          "text": "muestrame mis cursos inscritos",
+          "parameters": {
+            "statuses": [
+              "enrolled"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_e20",
+          "text": "cuales son mis inscripciones",
+          "parameters": {
+            "statuses": [
+              "enrolled"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "profile_progress_c1",
+          "segments": [
+            [
+              "consulta",
+              "revisa"
+            ],
+            [
+              "mi"
+            ],
+            [
+              "progreso",
+              "avance"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_c2",
+          "segments": [
+            [
+              "lista",
+              "enseñame"
+            ],
+            [
+              "mis"
+            ],
+            [
+              "cursos",
+              "actividades"
+            ],
+            [
+              "completados",
+              "completadas"
+            ]
+          ],
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ]
+    },
+    {
+      "id": "course_catalog",
+      "priority": 75,
+      "route_type": "application_service",
+      "logical_service": "CourseCatalogService",
+      "requires_profile": false,
+      "default_parameters": {
+        "limit": 20
+      },
+      "exclusions": [
+        "mis cursos",
+        "mis actividades",
+        "estoy inscrito",
+        "estoy inscrita"
+      ],
+      "strong_expressions": [
+        {
+          "id": "course_catalog_e01",
+          "text": "que cursos existen",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e02",
+          "text": "que cursos hay",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e03",
+          "text": "muestrame el catalogo de cursos",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e04",
+          "text": "quiero conocer la oferta de cursos",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e05",
+          "text": "lista los cursos del programa",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e06",
+          "text": "que cursos estan disponibles",
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e07",
+          "text": "cursos disponibles",
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e08",
+          "text": "muestrame los cursos disponibles",
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e09",
+          "text": "que actividades estan disponibles",
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e10",
+          "text": "quiero ver cursos disponibles",
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e11",
+          "text": "que cursos estan cerrados",
+          "parameters": {
+            "statuses": [
+              "closed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e12",
+          "text": "cursos cerrados",
+          "parameters": {
+            "statuses": [
+              "closed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e13",
+          "text": "muestrame los cursos cerrados",
+          "parameters": {
+            "statuses": [
+              "closed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e14",
+          "text": "lista las actividades cerradas",
+          "parameters": {
+            "statuses": [
+              "closed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e15",
+          "text": "quiero consultar cursos cerrados",
+          "parameters": {
+            "statuses": [
+              "closed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e16",
+          "text": "que cursos estan archivados",
+          "parameters": {
+            "statuses": [
+              "archived"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e17",
+          "text": "cursos archivados",
+          "parameters": {
+            "statuses": [
+              "archived"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e18",
+          "text": "muestrame los cursos archivados",
+          "parameters": {
+            "statuses": [
+              "archived"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e19",
+          "text": "lista las actividades archivadas",
+          "parameters": {
+            "statuses": [
+              "archived"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_e20",
+          "text": "quiero ver el catalogo archivado",
+          "parameters": {
+            "statuses": [
+              "archived"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "course_catalog_c1",
+          "segments": [
+            [
+              "consulta",
+              "enseñame"
+            ],
+            [
+              "el"
+            ],
+            [
+              "catalogo",
+              "listado"
+            ],
+            [
+              "de cursos"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "course_catalog_c2",
+          "segments": [
+            [
+              "lista",
+              "consulta"
+            ],
+            [
+              "los cursos"
+            ],
+            [
+              "disponibles"
+            ]
+          ],
+          "parameters": {
+            "statuses": [
+              "available"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ]
+    },
+    {
+      "id": "calendar_events",
+      "priority": 70,
+      "route_type": "application_service",
+      "logical_service": "CalendarEventsService",
+      "requires_profile": false,
+      "default_parameters": {
+        "limit": 20
+      },
+      "exclusions": [
+        "cancelar",
+        "cambiar fecha",
+        "reprogramar"
+      ],
+      "strong_expressions": [
+        {
+          "id": "calendar_events_e01",
+          "text": "que eventos hay hoy",
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e02",
+          "text": "calendario de hoy",
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e03",
+          "text": "muestrame las actividades de hoy",
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e04",
+          "text": "que sesiones hay hoy",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e05",
+          "text": "fechas de eventos de hoy",
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e06",
+          "text": "que eventos hay mañana",
+          "parameters": {},
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e07",
+          "text": "calendario de mañana",
+          "parameters": {},
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e08",
+          "text": "actividades de mañana",
+          "parameters": {},
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e09",
+          "text": "muestrame las sesiones de mañana",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e10",
+          "text": "proximas sesiones de mañana",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e11",
+          "text": "eventos de esta semana",
+          "parameters": {},
+          "temporal_rule": "this_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e12",
+          "text": "calendario de esta semana",
+          "parameters": {},
+          "temporal_rule": "this_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e13",
+          "text": "que actividades hay esta semana",
+          "parameters": {},
+          "temporal_rule": "this_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e14",
+          "text": "muestrame las sesiones de esta semana",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "this_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e15",
+          "text": "fechas de eventos de esta semana",
+          "parameters": {},
+          "temporal_rule": "this_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e16",
+          "text": "eventos de la proxima semana",
+          "parameters": {},
+          "temporal_rule": "next_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e17",
+          "text": "calendario de la proxima semana",
+          "parameters": {},
+          "temporal_rule": "next_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e18",
+          "text": "que actividades hay la semana que viene",
+          "parameters": {},
+          "temporal_rule": "next_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e19",
+          "text": "proximas sesiones de la proxima semana",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "next_week",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_e20",
+          "text": "muestrame las sesiones de la semana que viene",
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "next_week",
+          "response_variant": null
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "calendar_events_c1",
+          "segments": [
+            [
+              "consulta",
+              "lista"
+            ],
+            [
+              "los eventos"
+            ],
+            [
+              "de hoy"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_c2",
+          "segments": [
+            [
+              "consulta",
+              "lista"
+            ],
+            [
+              "las sesiones"
+            ],
+            [
+              "de mañana"
+            ]
+          ],
+          "parameters": {
+            "event_types": [
+              "course_session"
+            ]
+          },
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        }
+      ]
+    },
+    {
+      "id": "announcements",
+      "priority": 65,
+      "route_type": "application_service",
+      "logical_service": "AnnouncementsService",
+      "requires_profile": false,
+      "default_parameters": {
+        "limit": 20
+      },
+      "exclusions": [
+        "inscribeme",
+        "recomiendame"
+      ],
+      "strong_expressions": [
+        {
+          "id": "announcements_e01",
+          "text": "que anuncios hay",
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e02",
+          "text": "muestrame los avisos vigentes",
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e03",
+          "text": "convocatorias vigentes",
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e04",
+          "text": "que comunicaciones estan vigentes",
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e05",
+          "text": "avisos activos",
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e06",
+          "text": "proximas convocatorias",
+          "parameters": {
+            "temporal_status": "upcoming"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e07",
+          "text": "que anuncios vienen",
+          "parameters": {
+            "temporal_status": "upcoming"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e08",
+          "text": "muestrame los avisos futuros",
+          "parameters": {
+            "temporal_status": "upcoming"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e09",
+          "text": "comunicaciones proximas",
+          "parameters": {
+            "temporal_status": "upcoming"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e10",
+          "text": "que convocatorias estan por abrir",
+          "parameters": {
+            "temporal_status": "upcoming"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e11",
+          "text": "convocatorias vencidas",
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e12",
+          "text": "que anuncios expiraron",
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e13",
+          "text": "muestrame los avisos vencidos",
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e14",
+          "text": "comunicaciones expiradas",
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e15",
+          "text": "que convocatorias ya cerraron",
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e16",
+          "text": "muestrame todos los anuncios",
+          "parameters": {
+            "temporal_status": "all"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e17",
+          "text": "lista todas las convocatorias",
+          "parameters": {
+            "temporal_status": "all"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e18",
+          "text": "quiero ver todos los avisos",
+          "parameters": {
+            "temporal_status": "all"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e19",
+          "text": "todas las comunicaciones",
+          "parameters": {
+            "temporal_status": "all"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_e20",
+          "text": "consulta el listado completo de anuncios",
+          "parameters": {
+            "temporal_status": "all"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "announcements_c1",
+          "segments": [
+            [
+              "consulta",
+              "lista"
+            ],
+            [
+              "los anuncios",
+              "los avisos"
+            ],
+            [
+              "vigentes"
+            ]
+          ],
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_c2",
+          "segments": [
+            [
+              "consulta",
+              "lista"
+            ],
+            [
+              "las convocatorias"
+            ],
+            [
+              "vencidas"
+            ]
+          ],
+          "parameters": {
+            "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ]
+    },
+    {
+      "id": "document_lookup",
+      "priority": 60,
+      "route_type": "application_service",
+      "logical_service": "DocumentLookupService",
+      "requires_profile": false,
+      "default_parameters": {
+        "limit": 10
+      },
+      "exclusions": [
+        "resumeme",
+        "explicame",
+        "interpreta",
+        "compara"
+      ],
+      "strong_expressions": [
+        {
+          "id": "document_lookup_e01",
+          "text": "busca la guia de actividad integradora",
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e02",
+          "text": "muestrame la guia integradora completa",
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e03",
+          "text": "quiero el archivo de la actividad integradora",
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e04",
+          "text": "donde encuentro la guia integradora",
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e05",
+          "text": "localiza el material completo de actividad integradora",
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e06",
+          "text": "busca la guia de sesiones practicas",
+          "parameters": {
+            "query": "Guía completa para sesiones prácticas",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e07",
+          "text": "muestrame la guia completa para sesiones practicas",
+          "parameters": {
+            "query": "Guía completa para sesiones prácticas",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e08",
+          "text": "quiero el archivo de sesiones practicas",
+          "parameters": {
+            "query": "Guía completa para sesiones prácticas",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e09",
+          "text": "donde encuentro la guia de practicas",
+          "parameters": {
+            "query": "Guía completa para sesiones prácticas",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e10",
+          "text": "localiza el material completo de sesiones practicas",
+          "parameters": {
+            "query": "Guía completa para sesiones prácticas",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e11",
+          "text": "busca el documento de orientacion general",
+          "parameters": {
+            "query": "Orientación general del programa demo"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e12",
+          "text": "muestrame el documento de inscripcion",
+          "parameters": {
+            "query": "Inscripción, cambios y retiro de actividades"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e13",
+          "text": "quiero el archivo sobre participacion",
+          "parameters": {
+            "query": "Participación y asistencia"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e14",
+          "text": "localiza el documento de progreso",
+          "parameters": {
+            "query": "Progreso y finalización de actividades"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e15",
+          "text": "busca el material de evaluacion formativa",
+          "parameters": {
+            "query": "Evaluación formativa y entrega de evidencias"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e16",
+          "text": "muestrame el documento de calendario",
+          "parameters": {
+            "query": "Uso del calendario y tipos de eventos"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e17",
+          "text": "quiero el documento de convocatorias",
+          "parameters": {
+            "query": "Convocatorias y comunicaciones"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e18",
+          "text": "localiza el material sobre soporte",
+          "parameters": {
+            "query": "Soporte y reporte de incidencias"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e19",
+          "text": "busca el documento de seguridad digital",
+          "parameters": {
+            "query": "Uso responsable y seguridad digital"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_e20",
+          "text": "muestrame el archivo de preguntas frecuentes",
+          "parameters": {
+            "query": "Preguntas frecuentes del programa demo"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "document_lookup_c1",
+          "segments": [
+            [
+              "encuentra",
+              "localiza"
+            ],
+            [
+              "la guia"
+            ],
+            [
+              "de actividad integradora"
+            ]
+          ],
+          "parameters": {
+            "query": "Guía completa de actividad integradora",
+            "retrieval_mode": "full_document"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "document_lookup_c2",
+          "segments": [
+            [
+              "encuentra",
+              "consulta"
+            ],
+            [
+              "el documento"
+            ],
+            [
+              "de seguridad digital"
+            ]
+          ],
+          "parameters": {
+            "query": "Uso responsable y seguridad digital"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ]
+    },
+    {
+      "id": "capabilities_help",
+      "priority": 55,
+      "route_type": "static_renderer",
+      "logical_service": null,
+      "requires_profile": false,
+      "default_parameters": {},
+      "exclusions": [],
+      "strong_expressions": [
+        {
+          "id": "capabilities_help_e01",
+          "text": "que puedes hacer",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e02",
+          "text": "que informacion tienes",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e03",
+          "text": "en que me puedes ayudar",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e04",
+          "text": "que puedo consultar",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e05",
+          "text": "para que sirve este asistente",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e06",
+          "text": "cuales son tus funciones",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e07",
+          "text": "que consultas admites",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e08",
+          "text": "que datos puedo consultar aqui",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e09",
+          "text": "dime que puedes consultar",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e10",
+          "text": "que temas puedes atender",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e11",
+          "text": "explicame tus capacidades",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e12",
+          "text": "muestrame tus funciones",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e13",
+          "text": "que opciones de consulta tengo",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e14",
+          "text": "para que te puedo usar",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e15",
+          "text": "como me ayudas en este programa",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e16",
+          "text": "que permite consultar el prototipo",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e17",
+          "text": "que puedo preguntarte",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e18",
+          "text": "cual es el alcance del asistente",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e19",
+          "text": "dime tus limites de consulta",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_e20",
+          "text": "que tipo de ayuda ofreces",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "capabilities_help_c1",
+          "segments": [
+            [
+              "describe",
+              "indica"
+            ],
+            [
+              "tus"
+            ],
+            [
+              "funciones",
+              "capacidades"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        },
+        {
+          "id": "capabilities_help_c2",
+          "segments": [
+            [
+              "muestra",
+              "enumera"
+            ],
+            [
+              "las opciones"
+            ],
+            [
+              "de consulta"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "capabilities"
+        }
+      ]
+    },
+    {
+      "id": "basic_social",
+      "priority": 50,
+      "route_type": "static_renderer",
+      "logical_service": null,
+      "requires_profile": false,
+      "default_parameters": {},
+      "exclusions": [],
+      "strong_expressions": [
+        {
+          "id": "basic_social_e01",
+          "text": "hola",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e02",
+          "text": "buenos dias",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e03",
+          "text": "buenas tardes",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e04",
+          "text": "buenas noches",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e05",
+          "text": "hola que tal",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e06",
+          "text": "hola buen dia",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e07",
+          "text": "hey hola",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e08",
+          "text": "muy buenas",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "greeting"
+        },
+        {
+          "id": "basic_social_e09",
+          "text": "gracias",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e10",
+          "text": "muchas gracias",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e11",
+          "text": "te agradezco la ayuda",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e12",
+          "text": "mil gracias",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e13",
+          "text": "gracias por tu ayuda",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e14",
+          "text": "muy amable gracias",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_e15",
+          "text": "adios",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        },
+        {
+          "id": "basic_social_e16",
+          "text": "hasta luego",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        },
+        {
+          "id": "basic_social_e17",
+          "text": "nos vemos",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        },
+        {
+          "id": "basic_social_e18",
+          "text": "hasta pronto",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        },
+        {
+          "id": "basic_social_e19",
+          "text": "me despido",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        },
+        {
+          "id": "basic_social_e20",
+          "text": "chao hasta luego",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "basic_social_c1",
+          "segments": [
+            [
+              "muchisimas",
+              "muchas"
+            ],
+            [
+              "gracias"
+            ],
+            [
+              "por la ayuda"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "thanks"
+        },
+        {
+          "id": "basic_social_c2",
+          "segments": [
+            [
+              "hasta"
+            ],
+            [
+              "otra ocasion",
+              "la proxima"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "farewell"
+        }
+      ]
+    },
+    {
+      "id": "known_out_of_scope",
+      "priority": 45,
+      "route_type": "static_renderer",
+      "logical_service": null,
+      "requires_profile": false,
+      "default_parameters": {},
+      "exclusions": [
+        "tomar notas",
+        "organizar notas",
+        "notas de trabajo"
+      ],
+      "strong_expressions": [
+        {
+          "id": "known_out_of_scope_e01",
+          "text": "cuales son mis calificaciones",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e02",
+          "text": "muestrame mis notas academicas",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e03",
+          "text": "cual es mi promedio academico",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e04",
+          "text": "quiero ver mis calificaciones",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e05",
+          "text": "dime mis notas del semestre",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e06",
+          "text": "cuanto cuestan los cursos",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e07",
+          "text": "cual es el precio de inscripcion",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e08",
+          "text": "como pago la matricula real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e09",
+          "text": "donde puedo pagar el curso",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e10",
+          "text": "muestrame los costos de los cursos",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e11",
+          "text": "quienes son los profesores reales",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e12",
+          "text": "dame el nombre del profesor real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e13",
+          "text": "necesito un certificado oficial real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e14",
+          "text": "descarga mi certificado real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e15",
+          "text": "dame un telefono de contacto",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e16",
+          "text": "cual es el correo de contacto",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e17",
+          "text": "cual es la direccion real del programa",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e18",
+          "text": "en que salon real es la clase",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e19",
+          "text": "quiero consultar mi matricula real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_e20",
+          "text": "como hago un tramite administrativo real",
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        }
+      ],
+      "token_combinations": [
+        {
+          "id": "known_out_of_scope_c1",
+          "segments": [
+            [
+              "consulta",
+              "dime"
+            ],
+            [
+              "mi"
+            ],
+            [
+              "promedio academico"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        },
+        {
+          "id": "known_out_of_scope_c2",
+          "segments": [
+            [
+              "necesito",
+              "quiero"
+            ],
+            [
+              "el telefono"
+            ],
+            [
+              "de contacto"
+            ]
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": "not_available"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1422 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:banuchat:intent-routing:1.0.0-draft",
+  "title": "BanuChat: catálogo y casos de diseño del Intent Router",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/catalog"
+    },
+    {
+      "$ref": "#/$defs/cases"
+    }
+  ],
+  "$defs": {
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "enrolled",
+              "in_progress",
+              "completed",
+              "available",
+              "closed",
+              "archived"
+            ]
+          }
+        },
+        "event_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "course_session",
+              "announcement_deadline",
+              "general"
+            ]
+          }
+        },
+        "temporal_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "upcoming",
+            "expired",
+            "all"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 500,
+          "pattern": "\\S"
+        },
+        "retrieval_mode": {
+          "type": "string",
+          "enum": [
+            "chunked",
+            "full_document"
+          ]
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date"
+        },
+        "reference_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": []
+    },
+    "expression": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]+$"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 500
+        },
+        "parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "temporal_rule": {
+          "enum": [
+            null,
+            "today",
+            "tomorrow",
+            "this_week",
+            "next_week"
+          ]
+        },
+        "response_variant": {
+          "enum": [
+            null,
+            "greeting",
+            "thanks",
+            "farewell",
+            "capabilities",
+            "not_available"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "parameters",
+        "temporal_rule",
+        "response_variant"
+      ]
+    },
+    "combination": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]+$"
+        },
+        "segments": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "temporal_rule": {
+          "enum": [
+            null,
+            "today",
+            "tomorrow",
+            "this_week",
+            "next_week"
+          ]
+        },
+        "response_variant": {
+          "enum": [
+            null,
+            "greeting",
+            "thanks",
+            "farewell",
+            "capabilities",
+            "not_available"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "segments",
+        "parameters",
+        "temporal_rule",
+        "response_variant"
+      ]
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "profile_progress",
+            "course_catalog",
+            "calendar_events",
+            "announcements",
+            "document_lookup",
+            "capabilities_help",
+            "basic_social",
+            "known_out_of_scope"
+          ]
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "route_type": {
+          "type": "string",
+          "enum": [
+            "application_service",
+            "static_renderer"
+          ]
+        },
+        "logical_service": {
+          "enum": [
+            null,
+            "ProfileProgressService",
+            "CourseCatalogService",
+            "CalendarEventsService",
+            "AnnouncementsService",
+            "DocumentLookupService"
+          ]
+        },
+        "requires_profile": {
+          "type": "boolean"
+        },
+        "default_parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "exclusions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "strong_expressions": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 30,
+          "items": {
+            "$ref": "#/$defs/expression"
+          }
+        },
+        "token_combinations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/combination"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "priority",
+        "route_type",
+        "logical_service",
+        "requires_profile",
+        "default_parameters",
+        "exclusions",
+        "strong_expressions",
+        "token_combinations"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "profile_progress"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": "ProfileProgressService"
+              },
+              "route_type": {
+                "const": "application_service"
+              },
+              "requires_profile": {
+                "const": true
+              },
+              "default_parameters": {
+                "const": {
+                  "limit": 20
+                }
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/profile_progress_parameters"
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/profile_progress_parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "course_catalog"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": "CourseCatalogService"
+              },
+              "route_type": {
+                "const": "application_service"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {
+                  "limit": 20
+                }
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/course_catalog_parameters"
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/course_catalog_parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "calendar_events"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": "CalendarEventsService"
+              },
+              "route_type": {
+                "const": "application_service"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {
+                  "limit": 20
+                }
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/calendar_events_parameters"
+                    },
+                    "temporal_rule": {
+                      "enum": [
+                        "today",
+                        "tomorrow",
+                        "this_week",
+                        "next_week"
+                      ]
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/calendar_events_parameters"
+                    },
+                    "temporal_rule": {
+                      "enum": [
+                        "today",
+                        "tomorrow",
+                        "this_week",
+                        "next_week"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "announcements"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": "AnnouncementsService"
+              },
+              "route_type": {
+                "const": "application_service"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {
+                  "limit": 20
+                }
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/announcements_parameters"
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/announcements_parameters"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "document_lookup"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": "DocumentLookupService"
+              },
+              "route_type": {
+                "const": "application_service"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {
+                  "limit": 10
+                }
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/document_lookup_parameters",
+                      "required": [
+                        "query"
+                      ]
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/document_lookup_parameters",
+                      "required": [
+                        "query"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "capabilities_help"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": null
+              },
+              "route_type": {
+                "const": "static_renderer"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {}
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/capabilities_help_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "capabilities"
+                      ]
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/capabilities_help_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "capabilities"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "basic_social"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": null
+              },
+              "route_type": {
+                "const": "static_renderer"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {}
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/basic_social_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "greeting",
+                        "thanks",
+                        "farewell"
+                      ]
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/basic_social_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "greeting",
+                        "thanks",
+                        "farewell"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "const": "known_out_of_scope"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "properties": {
+              "logical_service": {
+                "const": null
+              },
+              "route_type": {
+                "const": "static_renderer"
+              },
+              "requires_profile": {
+                "const": false
+              },
+              "default_parameters": {
+                "const": {}
+              },
+              "strong_expressions": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/known_out_of_scope_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "not_available"
+                      ]
+                    }
+                  }
+                }
+              },
+              "token_combinations": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/known_out_of_scope_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "not_available"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile_selected": {
+              "type": "boolean"
+            },
+            "now": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "profile_selected",
+            "now"
+          ]
+        },
+        "expected_route": {
+          "type": "string",
+          "enum": [
+            "profile_progress",
+            "course_catalog",
+            "calendar_events",
+            "announcements",
+            "document_lookup",
+            "capabilities_help",
+            "basic_social",
+            "known_out_of_scope",
+            "agent_fallback"
+          ]
+        },
+        "expected_parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "expected_response_variant": {
+          "enum": [
+            null,
+            "greeting",
+            "thanks",
+            "farewell",
+            "capabilities",
+            "not_available"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "positive",
+              "near_negative",
+              "ambiguous",
+              "compound",
+              "colloquial",
+              "uppercase",
+              "accents",
+              "punctuation",
+              "whitespace",
+              "temporal",
+              "context",
+              "safety"
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "input",
+        "context",
+        "expected_route",
+        "expected_parameters",
+        "expected_response_variant",
+        "reason",
+        "tags"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "agent_fallback"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "const": {}
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "profile_progress"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/profile_progress_parameters",
+                "required": [
+                  "limit"
+                ]
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "course_catalog"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/course_catalog_parameters",
+                "required": [
+                  "limit"
+                ]
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "calendar_events"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/calendar_events_parameters",
+                "required": [
+                  "limit",
+                  "date_from",
+                  "date_to"
+                ]
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "announcements"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/announcements_parameters",
+                "required": [
+                  "limit",
+                  "temporal_status",
+                  "reference_time"
+                ]
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "document_lookup"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/document_lookup_parameters",
+                "required": [
+                  "limit",
+                  "query"
+                ]
+              },
+              "expected_response_variant": {
+                "const": null
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "capabilities_help"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/capabilities_help_parameters"
+              },
+              "expected_response_variant": {
+                "enum": [
+                  "capabilities"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "basic_social"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/basic_social_parameters"
+              },
+              "expected_response_variant": {
+                "enum": [
+                  "greeting",
+                  "thanks",
+                  "farewell"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "expected_route": {
+                "const": "known_out_of_scope"
+              }
+            },
+            "required": [
+              "expected_route"
+            ]
+          },
+          "then": {
+            "properties": {
+              "expected_parameters": {
+                "$ref": "#/$defs/known_out_of_scope_parameters"
+              },
+              "expected_response_variant": {
+                "enum": [
+                  "not_available"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "intent_routing_catalog"
+        },
+        "catalog_version": {
+          "const": "1.0.0-draft"
+        },
+        "language": {
+          "const": "es"
+        },
+        "normalization": {
+          "const": {
+            "unicode": "NFC",
+            "lowercase": true,
+            "accent_comparison": "NFD_remove_acute_diaeresis_then_NFC_preserve_enye",
+            "collapse_whitespace": true,
+            "ignored_punctuation": [
+              "¿",
+              "?",
+              "¡",
+              "!",
+              ",",
+              ".",
+              ":",
+              ";"
+            ],
+            "punctuation_mode": "replace_with_space_after_clause_guard",
+            "preserve_original": true,
+            "strip_optional_suffixes": [
+              "por favor"
+            ],
+            "strip_limit": 1
+          }
+        },
+        "decision_policy": {
+          "const": {
+            "version": "1",
+            "exact_score": 100,
+            "combination_score": 80,
+            "generic_token_score": 0,
+            "threshold": 80,
+            "min_margin": 20,
+            "score_aggregation": "max_not_sum",
+            "full_utterance_required": true,
+            "multiple_strong_intents": "agent_fallback",
+            "conflicting_parameters": "agent_fallback",
+            "unconsumed_text": "agent_fallback",
+            "priority_usage": "evaluation_order_only",
+            "fallback_route": "agent_fallback",
+            "standalone_social_allowlist": [
+              "hola",
+              "gracias",
+              "adios"
+            ],
+            "compound_markers": [
+              "y",
+              "ademas",
+              "tambien",
+              "pero",
+              "segun",
+              "compara",
+              "comparar",
+              "versus"
+            ],
+            "global_exclusions": [
+              "no",
+              "nunca",
+              "excepto",
+              "sin",
+              "ignora",
+              "olvida",
+              "instrucciones",
+              "prompt",
+              "sql"
+            ],
+            "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline"
+          }
+        },
+        "temporal_policy": {
+          "const": {
+            "timezone": "America/Bogota",
+            "reference_clock": "trusted_turn_now",
+            "week_start": "monday",
+            "max_inclusive_days": 366,
+            "selection": "starts_at_half_open",
+            "undated_calendar": "agent_fallback",
+            "rules": [
+              {
+                "id": "today",
+                "operation": "civil_today"
+              },
+              {
+                "id": "tomorrow",
+                "operation": "civil_tomorrow"
+              },
+              {
+                "id": "this_week",
+                "operation": "monday_to_sunday_containing_today"
+              },
+              {
+                "id": "next_week",
+                "operation": "next_monday_to_sunday"
+              }
+            ],
+            "absolute_patterns": [
+              {
+                "id": "calendar_day",
+                "intent_id": "calendar_events",
+                "pattern": "eventos del {date}",
+                "date_format": "YYYY-MM-DD",
+                "parameters": {
+                  "limit": 20
+                },
+                "score": 100
+              },
+              {
+                "id": "calendar_range",
+                "intent_id": "calendar_events",
+                "pattern": "eventos del {date_from} al {date_to}",
+                "date_format": "YYYY-MM-DD",
+                "parameters": {
+                  "limit": 20
+                },
+                "score": 100
+              }
+            ]
+          }
+        },
+        "intents": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/intent"
+          }
+        }
+      },
+      "required": [
+        "artifact_type",
+        "catalog_version",
+        "language",
+        "normalization",
+        "decision_policy",
+        "temporal_policy",
+        "intents"
+      ]
+    },
+    "cases": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "artifact_type": {
+          "const": "intent_routing_cases"
+        },
+        "catalog_version": {
+          "const": "1.0.0-draft"
+        },
+        "language": {
+          "const": "es"
+        },
+        "purpose": {
+          "const": "design_expectations_not_execution_results"
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 80,
+          "items": {
+            "$ref": "#/$defs/case"
+          }
+        }
+      },
+      "required": [
+        "artifact_type",
+        "catalog_version",
+        "language",
+        "purpose",
+        "cases"
+      ]
+    },
+    "profile_progress_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "enrolled",
+              "in_progress",
+              "completed"
+            ]
+          }
+        }
+      },
+      "required": []
+    },
+    "course_catalog_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "statuses": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "available",
+              "closed",
+              "archived"
+            ]
+          }
+        }
+      },
+      "required": []
+    },
+    "calendar_events_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "event_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "course_session",
+              "announcement_deadline",
+              "general"
+            ]
+          }
+        },
+        "date_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_to": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [],
+      "dependentRequired": {
+        "date_from": [
+          "date_to"
+        ],
+        "date_to": [
+          "date_from"
+        ]
+      }
+    },
+    "announcements_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "temporal_status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "upcoming",
+            "expired",
+            "all"
+          ]
+        },
+        "reference_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": []
+    },
+    "document_lookup_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "query": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 500,
+          "pattern": "\\S"
+        },
+        "retrieval_mode": {
+          "type": "string",
+          "enum": [
+            "chunked",
+            "full_document"
+          ]
+        }
+      },
+      "required": []
+    },
+    "capabilities_help_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    },
+    "basic_social_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    },
+    "known_out_of_scope_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {},
+      "required": []
+    }
+  }
+}

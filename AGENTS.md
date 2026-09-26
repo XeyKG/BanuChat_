@@ -51,6 +51,10 @@ Si necesitas desviarte de este layout, actualiza esta sección en el mismo commi
   ni a N8N. El proveedor/modelo de generación permanece abierto. Para embeddings del MVP
   se fija Ollama local con `qwen3-embedding:0.6b`, dimensión 1024 y similitud/distancia
   coseno; la recuperación inicial usa búsqueda exacta, sin índices ANN (HNSW/IVFFlat).
+- **Enrutamiento de chat**: antes de Agent/RAG existe un Intent Router determinista.
+  Las consultas estructuradas reconocidas con seguridad usan servicios de aplicación
+  compartidos con MCP; la clasificación no usa LLM ni embeddings. Ante ambigüedad,
+  conflicto o consulta compuesta se usa Agent/RAG. N8N no participa en este camino.
 - **Base de datos**: una sola instancia PostgreSQL con pgvector para relaciones y embeddings
   (similitud coseno); almacena datos procesados de `/data/synthetic`.
 - **Orquestación**: N8N self-hosted para ingesta y sincronización asíncrona de datos sintéticos.

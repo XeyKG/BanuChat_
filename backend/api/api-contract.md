@@ -8,7 +8,8 @@ MCP 2.0 permanece congelado e independiente de esta propuesta REST.
 
 ## Frontera y alcance
 
-Mobile → REST Backend API → Agent/RAG para mensajes. El agente es cliente del
+Mobile → REST Backend API → Intent Router para mensajes: fast path determinista
+o fallback Agent/RAG. El agente es cliente del
 servidor MCP interno; la app nunca consume MCP. Calendario, progreso y anuncios
 podrán consultar una capa de servicios compartida con MCP, sin ejecutar el agente.
 Esa capa tampoco se implementa aquí. No se ejecuta infraestructura.
@@ -116,16 +117,30 @@ El futuro backend deberá:
    misma conversación, fijar la release vigente publicada y resolver allí el
    perfil de la conversación. Si esa clave ya no existe, devolver 409 sin insertar.
 2. Persistir el mensaje user con su siguiente ordinal en una transacción corta.
-3. Ejecutar Agent/RAG con contexto de perfil controlado y obtener evidencia
-   estructurada de MCP/servicios. El backend valida que pertenezca a la release
-   fijada; no mezcla releases. Si un refresco interno MCP cambia la release del
-   turno, falla con 409, sin alterar el contrato MCP ni publicar respuesta mezclada.
-4. Generar respuesta y verificar procedencia e IDs; insuficiencia de evidencia
-   se declara explícitamente. Un resultado encontrado no prueba suficiencia.
-5. Persistir assistant y todas sus citas verificadas atómicamente, con
+3. Evaluar el Intent Router sobre una copia normalizada del mensaje, sin modificar
+   el original persistido; usar contexto controlado y un instante de referencia
+   capturado una sola vez. La clasificación no usa LLM, embeddings ni N8N.
+4. Si hay una intención segura, ejecutar el servicio compartido y renderer
+   determinista; ayuda/social/límites conocidos pueden usar un renderer estático.
+   El fast path no llama al servidor MCP ni al generador.
+5. De lo contrario ejecutar Agent/RAG con contexto de perfil controlado y obtener
+   evidencia estructurada de MCP/servicios. Ambigüedad y consultas compuestas
+   siempre hacen fallback, no una clasificación forzada.
+6. Verificar procedencia e IDs en ambas rutas; toda evidencia debe pertenecer a
+   la release fijada. Si un servicio o refresco interno MCP cambia la release del
+   turno, falla con 409, sin alterar MCP ni publicar respuesta mezclada.
+   Insuficiencia de evidencia se declara explícitamente; encontrar un resultado
+   no prueba suficiencia. Renderers vacíos/estáticos no fabrican citas.
+7. Persistir assistant y todas sus citas verificadas atómicamente, con
    `answer_release_id` de ese turno, y después responder 201 con
    `conversation_id`, `user_message` y `assistant_message`.
-6. Liberar la exclusión de conversación incluso si falla la ejecución.
+8. Liberar la exclusión de conversación incluso si falla la ejecución.
+
+Este cambio es interno: véanse [ADR 0004](../../docs/adr/0004-enrutamiento-determinista-intenciones.md)
+y la [especificación del router](../../docs/enrutamiento-intenciones.md). No modifica
+OpenAPI, rutas, payloads, códigos HTTP ni idempotencia. Los servicios compartidos
+son diseño, no implementación. `answer_release_id` designa conceptualmente la
+release de respuesta; la columna SQL vigente es `messages.answer_dataset_release_id`.
 
 La release de respuesta puede diferir de la de apertura. Las citas históricas
 conservan la release original. No se cambia la relación de perfil de apertura.
@@ -139,7 +154,7 @@ por conversación en una conexión dedicada, con adquisición no bloqueante (409
 liberación garantizada y sin mantener una transacción abierta durante generación.
 Esta opción no añade tablas ni constituye implementación o cambio del DDL.
 
-Si falla el agente después del commit del user, ese mensaje puede quedar sin
+Si falla el agente, servicio o renderer después del commit del user, ese mensaje puede quedar sin
 assistant. No se crean respuestas ficticias, estados pendientes ni tablas nuevas.
 GET puede mostrar ese estado incluso mientras un turno sigue ejecutándose.
 Un fallo al persistir citas revierte también assistant. Tras un timeout puede
