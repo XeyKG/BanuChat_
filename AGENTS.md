@@ -46,7 +46,9 @@ Existen borradores SQL y contratos; todavía no hay aplicaciones implementadas. 
 Si necesitas desviarte de este layout, actualiza esta sección en el mismo commit.
 
 ## Stack técnico
-- **Backend / agente**: frontera síncrona Mobile → REST Backend API → Agent/RAG.
+- **Backend / agente**: frontera síncrona Mobile → REST Backend API → Intent Router,
+  con fast path mediante servicios de aplicación para intenciones seguras y fallback
+  a Agent/RAG para consultas ambiguas, compuestas o no reconocidas.
   El agente consume herramientas controladas del servidor MCP interno; la app no llama a MCP
   ni a N8N. El proveedor/modelo de generación permanece abierto. Para embeddings del MVP
   se fija Ollama local con `qwen3-embedding:0.6b`, dimensión 1024 y similitud/distancia
