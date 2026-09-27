@@ -2,12 +2,15 @@
 
 Documentación técnica y decisiones de arquitectura.
 
-- [Modelo de datos conceptual y lógico del MVP](modelo-datos.md) — propuesta de Fase 1 y comparación con el borrador SQL.
+- [Modelo de datos conceptual y lógico del MVP](modelo-datos.md) — aprobado; conserva la comparación histórica con el borrador SQL.
+- [Arquitectura vigente](arquitectura.md) — camino síncrono e ingesta asíncrona.
+- [Intent Router](enrutamiento-intenciones.md) — especificación del enrutamiento determinista.
+- [Ingesta reproducible](ingesta-reproducible.md) — especificación del diseño aprobado en ADR 0005, todavía sin implementación.
 
-## Contenido sugerido
+## Decisiones de arquitectura disponibles
 
-- diseño de arquitectura
-- diagramas Mermaid
-- guías operativas
-- ADRs
-- decisiones técnicas relevantes
+- [ADR 0001: alcance sintético y despliegue local](adr/0001-alcance-sintetico-y-despliegue-local.md).
+- [ADR 0002: publicaciones sintéticas inmutables](adr/0002-publicaciones-sinteticas-inmutables.md).
+- [ADR 0003: embeddings locales con Qwen3](adr/0003-embedding-local-qwen3.md).
+- [ADR 0004: enrutamiento determinista de intenciones](adr/0004-enrutamiento-determinista-intenciones.md).
+- [ADR 0005: ingesta reproducible y N8N](adr/0005-ingesta-reproducible-n8n.md) — aceptado para implementación del MVP; sin implementación ejecutada ni pruebas E2E de ingesta.

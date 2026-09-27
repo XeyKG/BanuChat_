@@ -1,6 +1,9 @@
 # ADR 0005 — Ingesta reproducible y orquestación N8N
 
-Fecha: 2026-09-26. Estado: propuesta de diseño para revisión, sin implementación.
+Fecha: 2026-09-26. Estado: aceptado para implementación del MVP; todavía sin implementación ejecutada.
+
+El diseño está aprobado; la implementación todavía no existe. No se han ejecutado
+pruebas E2E de ingesta ni demostrado métricas de ingesta, recuperación o rendimiento.
 
 ## Contexto y autoridad
 
@@ -30,7 +33,7 @@ en autor del corpus ni en dueño de reglas que solo existan en su UI.
 | Mantenimiento en 16 semanas | Aumenta con reglas y excepciones | Menos interfaz, más acoplamiento operativo | Coste acotado; sin plataforma genérica de jobs |
 | Versionado fuera de UI | Exige disciplina en cada nodo Code | Script versionado, configuración de comando también | Núcleo versionado; workflow exportado solo orquesta |
 
-## Decisión propuesta
+## Decisión aceptada
 
 Elegir **opción 3**: N8N maneja triggers manual/retry, llamada interna, condiciones
 simples, correlación y resumen. TypeScript bajo `backend/rag` posee preflight,
@@ -91,4 +94,4 @@ despliegue; N8N no ejecuta checkout, pull, fetch ni comandos de red Git.
   Las pruebas propuestas están en [el plan](../../eval/ingestion/plan.md).
 
 No se implementa ninguna alternativa ni se aprueba implícitamente infraestructura
-externa. La aprobación de este diseño precede a su construcción.
+externa. El diseño aprobado queda listo para una tarea posterior de implementación.

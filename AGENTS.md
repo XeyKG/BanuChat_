@@ -14,8 +14,8 @@ anteproyecto académico; no lo uses como nombre de paquete, carpeta ni variable.
 NO se desplegará en servidores UNAB ni consumirá datos, APIs o el sitio web real del CCD. Todo
 el corpus documental (PDFs, calendarios, convocatorias, "noticias") es **sintético**, creado
 por el equipo con formato realista para simular el contexto institucional. El módulo antes
-descrito como "RPA de scraping" pasa a ser orquestación asíncrona de ingesta y sincronización
-sobre `/data/synthetic`, fuente de verdad versionada. PostgreSQL conserva su representación
+descrito como "RPA de scraping" pasa a ser orquestación de ingesta asíncrona de releases
+sintéticas completas sobre `/data/synthetic`, fuente de verdad versionada. PostgreSQL conserva su representación
 procesada. El contenido funcional es creado/revisado por el equipo y versionado antes
 de la ingesta. N8N valida, procesa e ingiere automáticamente revisiones aprobadas de
 `/data/synthetic` y genera derivados técnicos cuando corresponda. No inventa ni publica
@@ -25,7 +25,7 @@ viabilidad (sección 3.5) — ese punto quedó desactualizado por esta decisión
 así en la documentación final, no disimularse como si el despliegue fuera institucional real.
 
 ## Estructura del repo (monorepo)
-Existen borradores SQL y contratos; todavía no hay aplicaciones implementadas. Layout objetivo:
+Existen un esquema físico inicial validado y contratos; todavía no hay aplicaciones implementadas. Layout objetivo:
 
 ```
 /backend/            # API + orquestación del agente (ciclo ReAct)
@@ -33,7 +33,7 @@ Existen borradores SQL y contratos; todavía no hay aplicaciones implementadas. 
   /rag/               # Ingesta, chunking, embeddings, retrieval
   /api/               # Endpoints REST que consume la app móvil
 /n8n/
-  /workflows/          # Flujos JSON de N8N: ingesta y sincronización asíncrona de datos sintéticos
+  /workflows/          # Flujos JSON de N8N: ingesta asíncrona de releases sintéticas completas
 /mobile/              # App React Native (TypeScript)
 /infra/
   docker-compose.yml   # Orquestación local (Docker) de todos los contenedores
@@ -59,8 +59,10 @@ Si necesitas desviarte de este layout, actualiza esta sección en el mismo commi
   conflicto o consulta compuesta se usa Agent/RAG. N8N no participa en este camino.
 - **Base de datos**: una sola instancia PostgreSQL con pgvector para relaciones y embeddings
   (similitud coseno); almacena datos procesados de `/data/synthetic`.
-- **Orquestación**: N8N self-hosted para ingesta y sincronización asíncrona de datos sintéticos.
-  No es gateway conversacional ni autor arbitrario del dataset.
+- **Orquestación**: N8N self-hosted para orquestar la ingesta asíncrona de releases
+  sintéticas completas y aprobadas. No participa en el camino conversacional ni genera
+  contenido funcional. La lógica compleja de ingesta pertenece al componente TypeScript
+  de `backend/rag`, no a N8N.
 - **Móvil**: React Native + TypeScript, consumo exclusivo de la API REST pública.
 - **Calendario**: fuente sintética versionada en `/data/synthetic/calendars`; Google Sheets
   queda fuera del MVP.

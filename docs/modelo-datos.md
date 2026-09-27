@@ -1,7 +1,9 @@
 # Modelo de datos conceptual y lógico del MVP
 
 Estado: modelo lógico aprobado, Fase 1. Su traducción al esquema físico inicial fue
-autorizada y escrita, pero no ejecutada; no autoriza implementar aplicaciones.
+realizada; la migración inicial y la suite A–K fueron ejecutadas en PostgreSQL local
+desechable. Esto no valida todavía ingesta, backend, roles runtime ni concurrencia
+avanzada, ni autoriza implementar aplicaciones.
 La decisión de publicaciones se registra en el [ADR 0002](adr/0002-publicaciones-sinteticas-inmutables.md).
 Base de contraste original: el borrador anterior de `infra/db/001_initial_schema.sql`,
 reglas de `AGENTS.md` y arquitectura documentada. La sección 7 conserva ese análisis

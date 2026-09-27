@@ -31,5 +31,11 @@ protege su configuración; no sustituye autenticación.
   inicialización no modifica credenciales de una base ya creada.
 
 El dataset original reside en `/data/synthetic`; PostgreSQL guarda su representación
-procesada. Habilitar la extensión y diseñar la conexión asíncrona de N8N son trabajos
-posteriores. No hay Google Sheets ni sistemas institucionales dentro del MVP.
+procesada. La imagen PostgreSQL incluye pgvector y la migración vigente habilita
+`vector` mediante `CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;`.
+Compose no ejecuta automáticamente la migración: una base nueva sin aplicar
+`001_initial_schema.sql` no debe suponerse migrada.
+
+La conexión N8N → componente de ingesta mediante HTTP interno tiene diseño aprobado
+en el [ADR 0005](../docs/adr/0005-ingesta-reproducible-n8n.md), pero todavía no está
+implementada. No hay Google Sheets ni sistemas institucionales dentro del MVP.
