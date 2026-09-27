@@ -74,7 +74,7 @@ flowchart LR
     ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
 ```
 
-El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) propone esta frontera, sin implementarla.
+El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) define esta frontera aceptada para implementación, todavía sin implementarla.
 N8N orquesta triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
 hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
 de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,

@@ -147,10 +147,27 @@ pregunta o propón el comando y añádelo a esta sección.
 Antes de dar una tarea por terminada, verifica contra el criterio del objetivo específico que
 corresponda, no solo "compila y corre".
 
-## Fase actual: Fase 1 — Análisis y Diseño (semanas 1–4)
-El foco ahora es: especificación de requerimientos, diseño del modelo de datos vectorial,
-especificación de los flujos N8N y el documento de arquitectura — todavía NO construcción de
-funcionalidad final. Pide a Codex que te ayude a producir estos entregables de diseño antes
-de generar código de producción, y que valide cada decisión contra lo ya definido en el
-anteproyecto solo cuando sea compatible con las decisiones vigentes de este archivo.
+## Fase técnica actual: implementación incremental
+
+El diseño base de arquitectura, SQL, MCP, REST, Intent Router, dataset e ingesta
+reproducible está aprobado para comenzar implementación incremental. Se trabajará
+por componentes pequeños, probados y auditables, sin reabrir silenciosamente decisiones
+congeladas. Esta es la fase técnica del repositorio; no afirma que el anteproyecto
+académico ya haya sido actualizado.
+
+Orden inicial autorizado:
+
+1. Foundation TypeScript de `backend/rag`.
+2. Preflight puro del dataset.
+3. Extracción/chunking determinista.
+4. Pruebas unitarias.
+5. Posteriormente, persistencia PostgreSQL.
+6. Posteriormente, Ollama/embeddings/publicación.
+7. Posteriormente, adaptador HTTP interno + N8N.
+
+Esta autorización no permite construir todo el sistema de una vez: cada tarea debe
+respetar su alcance específico. REST y dataset v1 permanecen congelados; SQL no cambia
+sin futura autorización explícita. Intent Router se rige por ADR 0004 e ingesta por
+ADR 0005. No se implementa funcionalidad durante este cierre documental.
+
 Los contratos MCP `2.0.0-draft` están congelados para implementación. Cualquier cambio incompatible requiere revisión explícita y actualización coordinada del contrato, agente y pruebas. El sufijo `draft` se conserva hasta que exista una implementación validada.

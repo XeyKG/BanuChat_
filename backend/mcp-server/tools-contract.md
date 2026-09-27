@@ -11,8 +11,10 @@ El modelo físico validado de [PostgreSQL](../../infra/db/001_initial_schema.sql
 [su documentación](../../infra/db/README.md) prevalecen sobre campos heredados.
 Se conservan las fronteras de [AGENTS.md](../../AGENTS.md),
 [arquitectura](../../docs/arquitectura.md) y [modelo lógico](../../docs/modelo-datos.md):
-Mobile → REST Backend API → Agent/RAG → MCP interno → PostgreSQL + pgvector.
-El agente es cliente MCP; la app no consume MCP. N8N queda fuera del camino síncrono.
+La ruta fallback relevante para MCP es:
+Mobile → REST Backend API → Intent Router → Agent/RAG → MCP interno → Application Services / PostgreSQL + pgvector.
+El fast path no consume MCP; MCP corresponde al fallback Agent/RAG, cuyo agente es
+cliente MCP. La app no consume MCP. N8N sigue fuera del camino síncrono.
 
 Todo contenido funcional es sintético, originado en `/data/synthetic`, fuente
 versionada; PostgreSQL contiene sus derivados. No hay consultas a infraestructura

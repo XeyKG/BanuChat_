@@ -681,13 +681,17 @@ como JSONB dentro de la release para comprobar completitud sin una entidad adici
 La receta/hash efectivo del modelo se registra en ingesta. El contrato de manifiesto,
 hashes y orden de reintentos se documenta en [infra/db](../infra/db/README.md).
 
+La migración inicial y la suite A–K ya fueron ejecutadas en PostgreSQL local desechable;
+véanse [evidencia y límites](../infra/db/tests/README.md). Esto no demuestra permisos
+runtime, concurrencia avanzada, ingesta, backend ni aplicación implementados o validados.
+
 1. Registrar revisión/digest y parámetros efectivos del modelo cuando se autorice la ingesta.
 2. Definir retención/eliminación del historial de demo y protección del texto libre antes
    de persistir sesiones de participantes. Sus datos de usabilidad no pertenecen al corpus.
 3. Fijar versión/digest reproducible de la imagen pgvector y aprovisionar roles/credenciales
-   antes de ejecutar. PostgreSQL 16 proporciona UUID/SHA-256 sin pgcrypto.
-4. Ejecutar pruebas de aplicación de la migración, integridad, permisos y concurrencia
-   únicamente cuando se autorice una base desechable.
+   para las siguientes ejecuciones. PostgreSQL 16 proporciona UUID/SHA-256 sin pgcrypto.
+4. Implementar y probar roles mínimos, permisos runtime, concurrencia avanzada y
+   reintentos de ingesta en tareas posteriores autorizadas; la migración y A–K ya fueron ejecutadas.
 
 Modelo de generación, autenticación local y notificaciones siguen abiertos según AGENTS.md,
 pero no exigen nuevas entidades en este esquema. Ninguno se implementa en esta tarea.
@@ -705,10 +709,11 @@ pero no exigen nuevas entidades en este esquema. Ninguno se implementa en esta t
 | Retrieval vigente | Puntero único + unicidad documento/publicación + superficie de consulta restringida; histórico explícito. |
 | Sin CoT | Solo mensajes visibles user/assistant; sin tabla de razonamiento ni payloads internos. |
 | Reproducibilidad | Revisión, manifiesto, claves, receta, configuración de embeddings y procedencia; límites bit a bit declarados. |
-| SQL y ejecución | Esquema físico escrito y revisado estáticamente; no se ejecutaron migraciones, PostgreSQL ni contenedores. |
+| SQL y ejecución | Migración inicial y suite A–K ejecutadas en PostgreSQL local desechable; no acreditan todavía permisos runtime, concurrencia avanzada, ingesta, backend ni aplicación. |
 
 OE1 queda respaldado por origen/citas y propuesta de artefactos de evaluación; no se afirma
 alcanzar sus umbrales sin ejecutar evaluaciones futuras. OE2/OE4 disponen de tiempos e items;
 sus latencias/tasas tampoco se han medido. Los diagramas se revisan textualmente: no se instala
-un renderizador ni se afirma validación visual automática. La candidata incorpora decisiones aprobadas;
-los detalles pendientes y pruebas de integridad/transacciones corresponden a una fase posterior autorizada.
+un renderizador ni se afirma validación visual automática. El modelo incorpora decisiones aprobadas;
+siguen pendientes roles mínimos, concurrencia avanzada e implementación funcional, sin
+presentar nuevamente la migración y la suite A–K como pruebas no ejecutadas.

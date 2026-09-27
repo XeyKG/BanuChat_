@@ -1,7 +1,8 @@
 # Ingesta reproducible del dataset sintético
 
-Estado: diseño propuesto, 2026-09-26; no ingesta, chunks, vectores ni workflows
-ejecutados. Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
+Estado: diseño aceptado para implementación del MVP; implementación todavía pendiente.
+Fecha del diseño: 2026-09-26; no ingesta, chunks, vectores ni workflows ejecutados.
+Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
 [contrato físico](../infra/db/README.md) y [plan de pruebas](../eval/ingestion/plan.md).
 
 ## 1. Base inspeccionada y alcance
@@ -20,7 +21,7 @@ Solo `/data/synthetic` es fuente de verdad; PostgreSQL almacena derivados.
 No fuentes institucionales, scraping, Google Sheets ni generación de hechos por N8N.
 Calendario es parte de la release completa, no un flujo de sincronización separado.
 
-## 2. Fronteras e invocación interna propuesta
+## 2. Fronteras e invocación interna: diseño aceptado para implementación
 
 | Responsable | Qué hace | Qué no hace |
 | --- | --- | --- |
@@ -29,7 +30,7 @@ Calendario es parte de la release completa, no un flujo de sincronización separ
 | TypeScript en backend/rag | Preflight, receta, adaptadores Ollama/PostgreSQL, estados, consistencia y errores | No modifica fuentes ni inventa hechos |
 | PostgreSQL | Identidad, hashes canónicos, FK, estados, inmutabilidad y completitud/publicación | No comprueba Git, filesystem, ficción ni autoría real del vector |
 
-Se propone un adaptador HTTP **privado**, separado del REST público y MCP:
+El diseño aceptado define un adaptador HTTP **privado**, separado del REST público y MCP:
 
 - `POST /internal/ingestion/execute`: entrada cerrada con `approval_ref`,
   `git_revision` completo, `pipeline_version`, `trigger_type` (`manual` o `retry`
@@ -185,8 +186,9 @@ dimension `1024`, distance_metric `cosine`. `parameters` incluye:
 - `query`: objeto con preprocesamiento versionado de consulta, texto UTF-8 íntegro
   sin prefijo para esta receta inicial, sin truncamiento silencioso y opciones efectivas.
 
-La receta sin prefijo es una propuesta inicial explícita, no una afirmación sobre el
-formato óptimo de Qwen. Debe evaluarse antes de congelar la implementación. El futuro
+La receta sin prefijo es el diseño inicial aceptado para implementación, no una afirmación sobre el
+formato óptimo de Qwen. Su calidad deberá evaluarse durante la implementación, sin cambiar
+silenciosamente la receta aceptada. El futuro
 retrieval debe aplicar exactamente la receta query almacenada, no defaults divergentes.
 Resolver y registrar las opciones efectivas de runtime/contexto en ambos objetos;
 si no se conocen, no registrar una configuración como reproducible. No se inventan
@@ -205,11 +207,11 @@ Un único vector por chunk, cosine exacto, sin HNSW/IVFFlat. La reproducibilidad
 receta no promete igualdad bit a bit entre hardware/runtimes; conservar vectores
 publicados y artefactos efectivos si se requiere repetición exacta.
 
-### pipeline_config propuesto
+### pipeline_config: diseño aceptado para implementación
 
 Objeto JSONB estable, resuelto desde código versionado, con estos campos:
 
-| Campo | Valor/semántica propuesta |
+| Campo | Valor/semántica del diseño aceptado |
 | --- | --- |
 | pipeline_version | `synthetic-v1-section-v1`; implementación fijará además build/revisión real |
 | implementation_revision | Revisión/build verificable del código realmente ejecutado, independiente de source_git_revision; nunca placeholder ni HEAD tomado de la raíz fuente |
@@ -231,7 +233,7 @@ La implementación efectiva forma parte de la receta canónica: cambiarla cambia
 pipeline_sha256 aunque no cambie el dataset aprobado. No rellenar
 implementation_revision con source_git_revision por conveniencia.
 
-## 6. Auditoría documental y chunking v1 propuesto
+## 6. Auditoría documental y chunking v1 aceptado para implementación
 
 Se leyeron los diez artefactos congelados chunked. Cada uno tiene un H1 y seis H2,
 sin contenido sustantivo entre H1 y primer H2, secciones vacías ni bloques de código
@@ -257,7 +259,7 @@ el tamaño de la futura entrada, sin cambiar el número de secciones.
 | doc-010 | 6 | 72–94 | 464–686 |
 | Total | **60** | 72–153 por sección | 464–1080 por sección |
 
-Algoritmo propuesto, sin ejecutarlo como pipeline:
+Algoritmo aceptado para implementación, sin ejecutarlo como pipeline:
 
 1. Conservar bytes completos para `source_sha256`. Eliminar solo este prefijo exacto
    del texto procesado: línea `Contenido sintético de demostración; no representa
@@ -383,7 +385,7 @@ Tras rollback, cerrar todos los pending como failed y luego run failed mientras 
 candidata aún está staging; después marcar candidata failed en la misma transacción
 de cierre. Las filas procesadas permanecen para retry. Current anterior intacto.
 
-| Clase | Código seguro propuesto | Tratamiento |
+| Clase | Código seguro del diseño aceptado | Tratamiento |
 | --- | --- | --- |
 | Fuente/revisión/aprobación | SOURCE_REJECTED | Corregir selección fuera del proceso, sin modificar archivos |
 | Schema/relaciones/contenido | VALIDATION_FAILED | No retry automático del mismo defecto |
