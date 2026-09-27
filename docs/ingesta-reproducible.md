@@ -10,7 +10,9 @@ Se contrastaron AGENTS, arquitectura, modelo lógico, ADR 0002/0003, SQL complet
 README de base y de tests, README/manifest sintéticos, README RAG/N8N y Compose.
 La auditoría documental corresponde a la revisión
 `4882806e657783f5e0dd5eed1a194074023823eb`; no declara ese SHA como aprobación operativa
-de una ingesta futura. El estado inicial de trabajo estaba limpio.
+de una ingesta futura. El estado inicial de trabajo estaba limpio. Esa es la revisión
+de la auditoría original, no la fuente congelada: para v1, `source_git_revision` es
+`af7ac711e1da3426e1f5fbe8b2892cec1344ce8b`, según la aprobación del proyecto.
 
 V1: 18 archivos funcionales, 76 items: 12 documentos (10 chunked, 2 full_document),
 12 cursos, 22 eventos, 8 anuncios, 4 perfiles y 18 asociaciones de progreso.
@@ -32,12 +34,14 @@ Se propone un adaptador HTTP **privado**, separado del REST público y MCP:
 - `POST /internal/ingestion/execute`: entrada cerrada con `approval_ref`,
   `git_revision` completo, `pipeline_version`, `trigger_type` (`manual` o `retry`
   inicialmente), `workflow_ref` y `retry_run_id` obligatorio solo para retry.
+  `git_revision` significa `source_git_revision`, no revisión del runtime.
   No admite paths, URLs, SQL, comandos, modelo arbitrario ni manifest enviado.
 - `POST /internal/ingestion/status`: consulta sin mutación con los mismos selectores
   de aprobación/revisión/receta; permite `run_id` conocido. Resuelve también la
-  configuración fijada por el registro operativo de aprobación. No descubre
+  configuración efectiva fijada por el control operativo de la ejecución, separado
+  del registro de aprobación de contenido. No descubre
   nuevos trabajos ni activa releases. No necesita Ollama para leer estado ya guardado.
-- El servidor resuelve raíz local, receta y configuración autorizadas desde su
+- El servidor resuelve las dos raíces (runtime y fuente separada), receta y configuración autorizadas desde su
   configuración controlada; N8N solo envía referencias allowlisted. `workflow_ref`
   debe coincidir con la definición desplegada, no aceptarse como afirmación libre.
 - Éxito HTTP 200: `outcome` (`published`, `already_current`,
@@ -62,44 +66,77 @@ Despliegue futuro: listener solo en red local privada entre N8N y componente, si
 puerto público ni proxy hacia mobile; secreto de servicio fuera de Git y de payloads/
 logs, credencial N8N protegida. Solo el componente posee credencial de ingesta y acceso
 Ollama. Sin privilegios DDL/TRUNCATE/superusuario ni acceso a historial conversacional.
-No se implementan listener, credenciales, roles, dependencias ni montajes en esta tarea.
+El runtime ejecuta su propio código/build identificado; lee un source checkout
+separado, preparado por el operador como worktree Git o checkout equivalente y
+montado/configurado read-only. Ambas raíces son configuración controlada del servidor,
+no parámetros HTTP. `/data/synthetic` se resuelve dentro de la raíz fuente, nunca
+por defecto dentro del checkout del backend. No se implementan listener, credenciales,
+roles, dependencias, worktrees ni montajes en esta tarea.
 
-## 3. Aprobación y revisión Git
+## 3. Aprobación y revisiones Git independientes
+
+| Identidad | Significado | Persistencia |
+| --- | --- | --- |
+| source_git_revision | Commit exacto del dataset aprobado leído desde la raíz fuente | dataset_releases.git_revision, sin renombrar SQL |
+| implementation_revision | Revisión/build real del código TypeScript que ejecuta validación, extracción, chunking, integración Ollama y persistencia/publicación | pipeline_config.implementation_revision |
+
+Para v1, la fuente congelada es `af7ac711e1da3426e1f5fbe8b2892cec1344ce8b`.
+El futuro runtime estará en una revisión propia, normalmente posterior: no se exige
+igualdad entre las dos identidades ni que un working tree esté en ambas revisiones.
+La revisión concreta de v1 no es un default universal para futuros datasets.
 
 La aprobación humana de v1 ya existe; no se vuelve a inferir ni a inventar una firma.
 Antes de la primera ejecución, el operador deberá vincularla a un SHA completo
 en un registro operativo local de aprobaciones, de solo lectura para el componente,
 fuera de `/data/synthetic`. `approval_ref` identifica esa entrada, no una ruta.
-Contendrá SHA fuente, dataset_key, SHA-256 de bytes de manifest aprobado, referencia
-a la evidencia humana, instante real de disponibilidad y receta autorizada.
+Contendrá source_git_revision, dataset_key, SHA-256 de bytes de manifest aprobado,
+referencia a la evidencia humana e instante real de disponibilidad.
+No vincula automáticamente implementation_revision ni aprueba código o receta.
+La autorización de runtime/pipeline y configuración efectiva se mantiene por separado.
 No se crea ese registro ahora. Evita incluir en el propio commit su SHA autorreferente.
 Los valores se suministran por el operador; N8N no puede escribir la aprobación.
 Para otro contenido se exige nueva aprobación. Un SHA distinto no hereda aprobación
 solo porque un README conserve la palabra «approved».
 
-El equipo deja localmente checkout de la revisión aprobada. El componente obtiene
-HEAD completo, verifica que sea commit identificable (40 o 64 hex minúsculos),
-coincida con la revisión declarada/autorizada y comprueba índice/working tree.
-No acepta cambios funcionales staged, unstaged, untracked ni extras ocultos; compara
+Una nueva implementación puede ingerir la misma fuente aprobada sin una nueva
+aprobación de contenido. Si cambia solo implementación/pipeline, cambia pipeline_sha256
+y puede resultar otra release con el mismo source_git_revision. Si cambia
+`/data/synthetic`, se requiere otra aprobación. Un retry de una candidata existente
+sigue exigiendo la misma receta efectiva, incluida implementation_revision.
+
+El equipo deja localmente un checkout fuente separado de la raíz runtime. El componente
+obtiene HEAD completo **de ese source checkout**, verifica que sea commit identificable
+(40 o 64 hex minúsculos) y que HEAD = source_git_revision declarada y aprobada.
+Exige checkout fuente limpio: sin cambios staged, unstaged ni archivos untracked;
+también detecta cambios funcionales o extras ocultos/ignorados. Compara
 bytes con blobs de esa revisión, incluidos manifest, siete schemas y atributos Git.
-La receta ejecutada también debe proceder de una versión identificable e intacta.
-Cambios documentales ajenos a la fuente/receta no se ingieren ni invalidan sus bytes;
-la revisión funcional debe estar limpia. Rechazar filtros o conversiones que hagan
+Por separado verifica que el código ejecutado corresponda a implementation_revision
+y que la receta versionada sea la de ese runtime/build. Un checkout de código debe
+estar intacto; un build debe tener procedencia verificable a su revisión real.
+La limpieza del runtime no demuestra aprobación del dataset ni sustituye los controles
+del source checkout. Rechazar filtros o conversiones que hagan
 diferir bytes versionados y leídos. No confiar solo en el resultado vacío de Git status.
 
-Sin Git pull, fetch automático ni credenciales GitHub en N8N. No se cambia de branch
+Sin git checkout, git pull, git fetch, comandos de red Git ni credenciales GitHub en N8N. No se cambia de branch
 desde una petición. Se verifica el checkout preseleccionado, no se gestiona colaboración.
 Revisión no resoluble, mismatch o manifest postcommit modificado: rechazo antes de DML.
 
 ## 4. Preflight, antes de crear/reabrir candidata
 
 TypeScript lee una instantánea verificada en memoria de este pequeño corpus y usa
-esos mismos bytes durante el procesamiento; el checkout se monta read-only. Verifica
+esos mismos bytes durante el procesamiento; el **source checkout separado** se monta
+read-only. Todo el preflight del dataset opera sobre esa raíz, no sobre el checkout
+donde corre el backend. La verificación de runtime/receta es independiente. Verifica
 nuevamente identidad/bytes antes de publicar; no acepta cambios concurrentes del host.
-Esto evita validar un archivo y procesar después otro. Se conservará la revisión Git
-con sus artefactos para resolver citas históricas, nunca sustituyéndolos por actuales.
+Esto evita validar un archivo y procesar después otro. Se conservará source_git_revision
+con sus artefactos, manifest y schemas para resolver citas históricas, nunca sustituidos
+por archivos del runtime o del checkout fuente actual. Conservar por separado el
+código/build de implementation_revision y su receta para reproducir los derivados;
+actualizar runtime no mueve ni reescribe la fuente histórica.
 
-1. Resolver aprobación y Git; mapear `banuchat-synthetic` a `datasets.id=1`.
+1. Resolver approval_ref y comprobar HEAD fuente = source_git_revision aprobada,
+   limpieza y bytes fuente; verificar runtime/implementation_revision por separado.
+   Rechazar discrepancias antes de DML; mapear `banuchat-synthetic` a `datasets.id=1`.
 2. Decodificar UTF-8 estricta, sin BOM, LF y salto final; rechazar JSON con claves
    duplicadas, no reserializar antes de calcular SHA-256 de fuente.
 3. Validar manifest con `manifest.schema.json` y seis catálogos con sus schemas:
@@ -175,7 +212,7 @@ Objeto JSONB estable, resuelto desde código versionado, con estos campos:
 | Campo | Valor/semántica propuesta |
 | --- | --- |
 | pipeline_version | `synthetic-v1-section-v1`; implementación fijará además build/revisión real |
-| implementation_revision | SHA real del código ejecutado; nunca placeholder persistido |
+| implementation_revision | Revisión/build verificable del código realmente ejecutado, independiente de source_git_revision; nunca placeholder ni HEAD tomado de la raíz fuente |
 | markdown_extraction | Versión 1, texto Markdown conservado; un H1 seguido de H2, sin ejecutar HTML/enlaces |
 | synthetic_banner | Retirar únicamente el prefijo inicial exacto descrito en sección 6 |
 | chunking | `h2_sections`, versión 1, ordinal base 0, overlap 0, título H1 como contexto |
@@ -190,6 +227,9 @@ Misma fuente y receta efectiva producen mismo `pipeline_sha256`. Es calculado po
 PostgreSQL sobre `jsonb::text` UTF-8, igual que `manifest_sha256`: **no** usar el SHA
 del archivo bruto o `JSON.stringify` como sustituto. El hash bruto de manifest del
 registro de aprobación sirve para verificar bytes, no para la identidad SQL.
+La implementación efectiva forma parte de la receta canónica: cambiarla cambia
+pipeline_sha256 aunque no cambie el dataset aprobado. No rellenar
+implementation_revision con source_git_revision por conveniencia.
 
 ## 6. Auditoría documental y chunking v1 propuesto
 
@@ -255,6 +295,8 @@ real del modelo. No se ajusta corpus ni se crean golds en esta tarea.
 
 Identidad exacta: `dataset_id + git_revision + manifest_sha256 + pipeline_sha256 +
 embedding_config_id`. No se sustituye por dataset_key, fecha o etiqueta v1.
+Aquí `git_revision` es la columna SQL que registra source_git_revision;
+implementation_revision interviene mediante pipeline_config/pipeline_sha256.
 Config resuelta tras preflight; dataset único creado si falta; luego candidata/run.
 
 | Caso | Estado encontrado | Acción normal |
@@ -408,13 +450,14 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
   de la receta sin prefijo se verificarán al implementar; no se ejecutó Ollama aquí.
 - Auditar roles no propietarios, concurrencia y procedencia en retries con el plan;
   las pruebas SQL existentes no acreditan esos escenarios avanzados.
-- Conservar checkout/artefactos históricos y respaldo del registro de aprobación;
+- Conservar checkout/artefactos fuente históricos, código/build y receta del runtime
+  por sus respectivas revisiones, y respaldo del registro de aprobación de contenido;
   sin ellos no se puede prometer reproducción ni descarga histórica disponible.
 - Modelo lógico conserva `item_key` e indicaciones antiguas; ADR 0003 dice DEFAULT/CHECK
   del nombre, pero SQL solo fija dimensión/cosine y defaults de proveedor/modelo.
   Prevalece SQL. No se corrigen esos documentos fuera del alcance autorizado.
-- Arquitectura conserva notas históricas de SQL/MCP pendientes ajenas al camino
-  asíncrono; no se interpretan como reapertura de contratos congelados.
+- La arquitectura refleja SQL y suite A–K ya ejecutados, y MCP congelado para
+  implementación; esas evidencias no acreditan todavía la ingesta aquí diseñada.
 
 Esta entrega valida diseño/trazabilidad, no métricas OE1/OE2/OE4, rendimiento,
 publicación real ni capacidad del hardware. No contiene resultados PASS de ingesta.

@@ -24,7 +24,7 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 | Agent/RAG | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; el agente es cliente MCP. | `backend/`, `backend/rag/` |
 | MCP Server interno | Expone herramientas controladas mediante los mismos servicios de aplicación que usa el fast path. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
-| N8N | Orquesta ingesta y sincronización asíncrona de versiones aprobadas del dataset. | `n8n/workflows/` |
+| N8N | Orquesta ingesta asíncrona de releases sintéticas completas y aprobadas. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
 | Docker Compose local | Entorno de desarrollo y demostraciones iniciales. | `infra/docker-compose.yml` |
 
@@ -64,22 +64,30 @@ No presentan la simulación como información institucional vigente. Los documen
 `retrieval_mode=full_document` no se fragmentan ni vectorizan; se resuelven como
 artefactos completos verificados por la ruta REST interna aprobada, no URLs externas.
 
-## Ingesta y sincronización asíncrona
+## Ingesta asíncrona de releases sintéticas completas
 
 ```mermaid
 flowchart LR
-    source["/data/synthetic: revisión Git aprobada"] -->|"Selección de revisión"| orchestrator["N8N: manual / retry"]
-    orchestrator -->|"HTTP privado de control"| ingestion["Componente TypeScript backend/rag"]
-    source -->|"Bytes verificados de solo lectura"| ingestion
+    orchestrator["N8N: manual / retry"] -->|"HTTP privado de control"| ingestion["Componente TypeScript: implementation_revision"]
+    source["Source checkout read-only: source_git_revision"] -->|"Bytes verificados de /data/synthetic"| ingestion
     ingestion -->|"Embeddings de chunked"| ollama["Ollama local: Qwen3"]
     ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
 ```
 
 El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) propone esta frontera, sin implementarla.
 N8N orquesta triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
-hashes y relaciones, procesa documentos y gobierna intentos/publicación. La flecha
-fuente → N8N representa selección, no carga ni modificación del corpus desde nodos.
-El componente lee directamente el checkout aprobado y no ejecuta Git pull.
+hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
+de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,
+nunca paths enviados por HTTP. El operador prepara la fuente en un worktree o checkout
+equivalente read-only; no se crea aquí. N8N no ejecuta checkout, pull, fetch ni red Git.
+
+HEAD del source checkout debe coincidir con source_git_revision aprobada; sus bytes,
+manifest y schemas se validan allí. Para v1 es
+`af7ac711e1da3426e1f5fbe8b2892cec1344ce8b`, registrado en dataset_releases.git_revision.
+El código/build ejecutado tiene su propia implementation_revision en pipeline_config,
+que puede ser posterior. approval_ref aprueba la fuente, no automáticamente el runtime.
+Cambiar solo implementación puede producir otra release por pipeline_sha256 sin
+alterar ni volver a aprobar el contenido. No se exige un checkout en dos revisiones.
 
 El calendario se carga como parte de una release completa desde `/data/synthetic/calendars`;
 no sincronización independiente, Google Sheets ni fuente institucional. Full_document
@@ -105,15 +113,16 @@ flowchart TB
         N["N8N asíncrono"] -->|"HTTP privado previsto"| I["Componente de ingesta backend/rag"]
         I -->|"Publicación completa"| P
         I -->|"Embeddings"| O["Ollama local previsto"]
-        D["/data/synthetic versionado"] --> N
+        D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
     end
 ```
 
 Este diagrama describe límites lógicos, no fija un contenedor por módulo.
 El Compose actual solo declara PostgreSQL con una imagen que incluye pgvector y N8N.
-La extensión deberá habilitarse en la base mediante una migración revisada en una
-etapa posterior; disponer de la imagen no significa que la extensión esté activada.
-No hay servicios backend o mobile en Compose ni inicialización automática del SQL.
+El SQL vigente ya incluye `CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;`
+y la migración fue ejecutada en PostgreSQL local desechable. Compose por sí solo no
+aplica automáticamente esa migración; disponer de la imagen no significa que toda
+base nueva esté migrada. No hay servicios backend o mobile en el Compose actual.
 
 Las credenciales se suministrarán localmente mediante variables; los puertos publicados
 se restringen a `127.0.0.1`. No existe despliegue institucional.
@@ -144,16 +153,22 @@ pendiente de diseño explícito y no se incorpora un proveedor en esta iteració
 Estos son criterios para evaluaciones futuras; este cambio documental no acredita
 su cumplimiento experimental.
 
-## Artefactos que requieren revisión posterior
+## Estado validado y trabajo pendiente
 
-El esquema inicial `infra/db/001_initial_schema.sql` fue reescrito con autorización,
-sin ejecutarlo; véase [su documentación física](../infra/db/README.md).
+La migración inicial `infra/db/001_initial_schema.sql` ya fue ejecutada sobre PostgreSQL
+local desechable y la suite A–K fue ejecutada. Véanse
+[documentación física](../infra/db/README.md) y [evidencia/límites](../infra/db/tests/README.md).
+Esto no acredita ingesta funcional, permisos runtime ni concurrencia avanzada.
+
 Los contratos `backend/mcp-server/tools-contract.md` y
-`backend/mcp-server/tools.contract.json` siguen intactos y en borrador:
+`backend/mcp-server/tools.contract.json`, versión `2.0.0-draft`, están congelados para
+implementación. La eliminación de Google Sheets, identidad sintética y diseño de
+evidencia/enlaces ya están resueltos; no son pendientes de rediseño. El sufijo draft
+se conserva hasta disponer de implementación validada.
 
-- SQL: pendiente validación ejecutada de migración, integridad, permisos y concurrencia.
-- MCP: retirar dependencia de Sheets, identificar datos sintéticos, revisar identidad local,
-  evidencia, enlaces y responsabilidad sobre persistencia de trazas.
+- SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y
+  reintentos avanzados descritos en su documentación; no repetir como pendiente A–K.
+- MCP: implementación y pruebas de integración de los contratos congelados.
 - Modelo generador, transporte MCP y autenticación local: pendientes de diseño.
 
-Las decisiones confirmadas en `AGENTS.md` prevalecen sobre esos borradores.
+Las decisiones confirmadas en `AGENTS.md` prevalecen sobre referencias históricas.

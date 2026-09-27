@@ -49,12 +49,35 @@ cooperativo. No se mantienen transacciones abiertas durante llamadas a Ollama.
 La persistencia de seguimiento se limita a `ingestion_runs`/`ingestion_items`;
 no se añade cola durable, tabla de jobs ni una garantía ficticia de exactly-once.
 
+## Revisiones y raíces operativas distintas
+
+`source_git_revision` identifica el commit exacto de la fuente sintética aprobada;
+se persiste en la columna existente `dataset_releases.git_revision`. Para v1 es
+`af7ac711e1da3426e1f5fbe8b2892cec1344ce8b`, no una constante universal.
+`implementation_revision` identifica el código/build real que ejecuta validación,
+extracción, chunking, integración Ollama y persistencia/publicación; vive dentro de
+`pipeline_config` y puede ser posterior y diferente de la revisión fuente.
+
+El runtime tiene su propia raíz/revisión. Lee una raíz fuente separada, preparada
+por el operador como Git worktree o checkout equivalente de solo lectura. El
+servidor configura ambas raíces; ninguna petición HTTP admite paths. El campo de
+control `git_revision` designa exclusivamente `source_git_revision`, nunca HEAD
+del runtime. Preflight comprueba HEAD, limpieza y bytes en el checkout **fuente**;
+por separado verifica código/build y receta efectivos del runtime.
+
+`approval_ref` vincula source_git_revision, dataset_key, hash bruto del manifest y
+evidencia humana, no automáticamente implementation_revision. La autorización de
+receta/runtime se controla aparte: cambiar solo implementación/pipeline puede
+crear otra release por pipeline_sha256 sin otra aprobación de contenido. Cambiar
+la fuente requiere nueva aprobación. No se crea un worktree ni se implementa este
+despliegue; N8N no ejecuta checkout, pull, fetch ni comandos de red Git.
+
 ## Consecuencias y límites
 
 - El equipo prepara localmente una revisión aprobada; ni Git pull ni credenciales
   GitHub en N8N. El componente verifica Git y bytes, nunca modifica la fuente.
 - El futuro despliegue deberá conectar N8N con el adaptador privado, montar el
-  checkout de solo lectura y aprovisionar permisos mínimos. El Compose actual no
+  checkout fuente separado de solo lectura y aprovisionar permisos mínimos. El Compose actual no
   implementa esas conexiones; no se cambia aquí ni se fija un framework HTTP.
 - Se conserva la distinción entre fuente aprobada y release SQL publicada.
   `ready` histórica no se reactiva desde una ingesta normal aunque SQL permita
