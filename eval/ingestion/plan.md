@@ -1,0 +1,66 @@
+# Plan de pruebas de ingesta reproducible
+
+Estado: diseño, **no ejecutado**. Ninguna fila es un resultado PASS/FAIL.
+Especificación: [ingesta reproducible](../../docs/ingesta-reproducible.md).
+Este plan no modifica ni reemplaza la suite SQL A–K existente.
+
+## Preparación futura, con autorización separada
+
+Usar entorno desechable con SQL vigente, roles mínimos y READ COMMITTED, revisión
+sintética aprobada identificable, manifest 18 files/76 items y receta fijada.
+Conservar una release anterior current para pruebas de fallo/cambio. Las variantes
+inválidas se prepararán en copias aisladas de prueba, nunca sobre el corpus congelado.
+Habrá pruebas unitarias de adaptadores y E2E con PostgreSQL/Ollama/N8N reales; no
+confundir dobles de prueba con evidencia de generación real o rendimiento.
+
+Captura común: SHA fuente/código/workflow, hashes canónicos y brutos distinguidos,
+configuración/digest/runtime efectivos, IDs release/run y attempt_no, conteos por
+kind/estado, current antes/después, tiempos y códigos seguros. No secretos, stacks,
+payloads completos ni supuestos resultados. Conservar salida de catálogo y consultas
+de verificación; no basta que el workflow aparezca verde.
+
+## Escenarios críticos
+
+| ID | Precondición | Acción futura | Resultado esperado | Evidencia a capturar | Tabla / función relevante |
+| --- | --- | --- | --- | --- | --- |
+| I01 | Base migrada vacía, aprobación/receta válidas | Ejecutar manual v1 | Dataset/config reales; una release ready/current; run succeeded y 76 processed; 12 versiones, 60 chunks con vectores | Catálogo, manifest↔registros, digest, conteos y puntero | datasets, embedding_configs, dataset_releases, ingestion_runs/items, release_records, publish_release |
+| I02 | Misma identidad ready/current | Repetir ejecución | already_current; ningún run/release/embedding nuevo | Conteos antes/después y cero llamadas de generación | dataset_releases, datasets, ingestion_runs |
+| I03 | Bytes de fuente no coinciden con SHA | Solicitar ingesta de copia alterada | SOURCE_REJECTED en preflight, sin tocar candidata/current | Hash declarado/real y ausencia de DML | manifest y controles TS; dataset_releases/datasets sin cambios |
+| I04 | Catálogo inválido; variante aislada con hashes coherentes | Validar schema | VALIDATION_FAILED antes de candidata | Error de propiedad seguro y ausencia de escrituras | Preflight TS, validate_manifest complementario |
+| I05 | Working tree funcional dirty, manifest postcommit, SHA distinto o imposible de resolver | Probar cada variante | Rechazo aun si README dice approved | HEAD declarado/observado, comparación de blobs y estado intacto | Preflight Git; dataset_releases.git_revision |
+| I06 | Run abierto con parte ya persistida | Interrumpir Ollama durante generación | Pending cerrados failed, run failed, candidata failed; current anterior intacto | Llamadas fallidas, tiempos, estados y puntero | ingestion_items/runs, document_chunks, datasets |
+| I07 | Candidata staging parcialmente procesada | Inyectar fallo tras commit de un item | Parciales conservados, sin publicación; no borrar evidencia | Filas parciales e intento fallido conservados | guard_corpus_write, validate_ingestion, dataset_releases |
+| I08 | I07 fallida, misma identidad y dependencias restauradas | Retry explícito | Nueva attempt_no; estructurados exactos skipped, faltantes processed; documentos/vectores de run fallido reprocesados; 76 resultados del nuevo run succeeded | Lista completa de 76, result_code, origen/tiempos de versiones y vectores; ningún relabel ficticio | ingestion_items/runs, document_versions/chunks, assert_release_complete |
+| I09 | Doc-011/doc-012 full_document | Ingerir y tratar de producir chunk en prueba negativa | Dos versiones ready, hash de archivo, cero chunks/embeddings; inserción prohibida | Consulta por modo y error esperado | documents, document_versions, validate_chunk |
+| I10 | Diez documentos chunked congelados | Procesar receta H2 | Seis ordinales 0–5 por documento, 60 vectores finitos no cero de 1024; hashes/localizadores/textos exactos | Conteos, hashes de extracción/chunks y dimensiones; fuente intacta | document_chunks, validate_chunk, text_sha256 |
+| I11 | Falta item, registro, vector o existe extra | Intentar cierre/publicación | Rechazo; rollback de succeeded; run luego failed; current intacto | Estado antes/después y error de completitud | assert_release_complete, guard_release, publish_release |
+| I12 | Candidata completa y current anterior | Publicar mientras otra sesión observa | Un cambio atómico; lectores ven anterior o nueva completa, nunca mezcla | Dos sesiones, secuencia de lecturas y límites commit | datasets, guard_dataset_pointer, publish_release |
+| I13 | Current publicada y otra candidata | Fallar antes y durante transacción final | Current anterior conservada, histórica inmutable | Puntero/hashes antes/después y rollback | datasets, dataset_releases, guard_corpus_write |
+| I14 | Ready histórica con receta idéntica, otra current | Solicitar su ingesta normal | already_ready_not_current; cero calls publish_release/embeddings, sin nuevo run | Resumen y puntero sin cambio | Política TS, datasets, publish_release (permite rollback administrativo, no impone esta política) |
+| I15 | Dos triggers para mismo dataset | Ejecutarlos concurrentemente | Uno procesa; otro ocupado, sin runs simultáneos o attempt_no duplicada | Locks, responses y orden de intentos | Lock cooperativo TS/PG, ingestion_runs, validate_ingestion |
+| I16 | Proceso cae dejando pending/run running | Reconciliar sin dueño activo y retry | Cierre fallido anterior antes de nuevo intento; nunca alterar run terminal | Exclusión adquirida, estados y attempt_no | ingestion_items/runs, validate_ingestion |
+| I17 | Respuesta HTTP perdida alrededor de COMMIT | Consultar status antes de retry | Reconocer publicación si confirmó; no marcar ready como failed; incertidumbre detiene retry | Estado durable y current, respuesta de reconciliación | datasets, dataset_releases, ingestion_runs |
+| I18 | Config con distinto digest/runtime/opciones o vector inválido | Retry con cambio / generar cero, NaN o dimensión distinta | No continuar identidad anterior; vector inválido rechazado, current intacto | Config observada/autorizada, errores seguros | embedding_configs, validate_embedding_config, document_chunks |
+| I19 | Pointer/FK/path inválido, symlink/junction o fecha imposible | Preflight de variantes aisladas | Rechazo sin reparación ni DML; comprobar también offset America/Bogota | Diagnóstico seguro, bytes fuente sin cambio | Preflight TS; FK y dominios SQL complementarios |
+| I20 | Derivados con origen failed pero contenido correcto | Intentar skipped documental y publicar; luego reprocesar realmente | Negativa de completitud en primer caso; procedencia válida solo tras reprocesar/generar en nuevo run | FK de origen, timestamps y llamadas reales de generación | assert_release_complete, document_versions, document_chunks |
+| I21 | Representación exacta con origen succeeded en staging, preparada como fixture aislado | Retry validando todos los campos | Skipped permitido y 76 resultados nuevos; discrepancia obliga reprocesar o fallar | Comparación de bytes/receta/campos y cobertura por nuevo run | release_records, ingestion_items, assert_release_complete |
+| I22 | Credencial de ingesta mínima y adaptador privado | Intentar TRUNCATE/DDL, entrada de ruta/SQL libre y acceso no autorizado | Rechazo; ninguna fuente o tabla destruida | Privilegios efectivos, respuestas saneadas | Roles futuros; tablas/funciones existentes sin modificar DDL |
+
+I21 usa preparación de prueba porque la transacción final normal evita dejar un run
+succeeded sin publicación tras un fallo. No se propone crear ese estado como paso
+habitual de operación. Los errores deliberados se validan por resultado y estado,
+no por depender de un texto de excepción PostgreSQL no contractual.
+
+## Criterio y medición
+
+Todos estos escenarios críticos deben cumplir el resultado esperado, incluidas
+negativas. Eso no significa que todas las ingestas deliberadamente inválidas deban
+publicarse. OE4 comprueba atomicidad, trazabilidad, ausencia de pérdida/mezcla y
+preservación de current; registrar duración observada, sin umbral nuevo ni 30 minutos.
+
+OE2: medir aparte tiempo humano previo, disponibilidad→trigger, trigger→publicación,
+total desde disponibilidad aprobada y retries. Reportar tasa de documentos correctos
+y cobertura de 76 items por intento, con denominadores explícitos y no-op separado.
+Objetivos heredados >90% y <24h todavía sin medición; publicación exige 100% de unidades.
+Las métricas RAG/RAGAS/usabilidad no se derivan de estas pruebas. La actualización
+académica de OE4 queda pendiente; aquí no se ejecutan servicios ni escenarios.

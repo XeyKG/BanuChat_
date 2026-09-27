@@ -131,11 +131,13 @@ pregunta o propón el comando y añádelo a esta sección.
   del CCD").
 - **Núcleo agéntico + MCP (OE3)**: el agente selecciona dinámicamente la tool correcta según
   intención, no responde de forma pasiva/genérica.
-- **Orquestación N8N (OE4)**: pruebas de integración end-to-end sin pérdida de datos entre
-  nodos, sincronización de calendario con latencia máx. 30 min.
-  Esta métrica de calendario se conserva por ahora, pero requiere revisión en la siguiente
-  etapa de diseño N8N: ya no existe Google Sheets ni una fuente institucional externa.
-  No se define todavía una métrica sustituta.
+- **Orquestación N8N (OE4)**: pruebas end-to-end de orquestación que verifiquen publicación
+  atómica, trazabilidad, ausencia de pérdida/mezcla de items y preservación de la release
+  vigente ante fallos. Para los escenarios críticos definidos, todos deben cumplir el
+  resultado esperado. La duración del workflow se registrará como métrica observada,
+  sin fijar todavía un umbral. Se descarta técnicamente la antigua sincronización de
+  calendario de 30 minutos porque no existe una fuente externa independiente.
+  La redacción académica de OE4 deberá actualizarse posteriormente.
 - **App móvil (OE5)**: SUS promedio > 70/100, ningún usuario individual < 50/100, tasa de
   completación de tareas > 85%.
 - **Despliegue local (OE6)**: contenedores estables sin caídas > 5 min, respuesta promedio < 5s.

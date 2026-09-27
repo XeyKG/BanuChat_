@@ -68,24 +68,29 @@ artefactos completos verificados por la ruta REST interna aprobada, no URLs exte
 
 ```mermaid
 flowchart LR
-    DATA["/data/synthetic: versión aprobada"] --> N["N8N: orquestación asíncrona"]
-    N --> R["Procesamiento de ingesta RAG"]
-    R --> Q{"retrieval_mode = full_document"}
-    Q -->|"Sí"| L["Artefacto completo para resolución REST interna"]
-    Q -->|"No"| E["Chunks y embeddings"]
-    E --> DB[("PostgreSQL + pgvector")]
-    L --> DB
-    N -->|"Sincronización de calendario y datos estructurados"| DB
+    source["/data/synthetic: revisión Git aprobada"] -->|"Selección de revisión"| orchestrator["N8N: manual / retry"]
+    orchestrator -->|"HTTP privado de control"| ingestion["Componente TypeScript backend/rag"]
+    source -->|"Bytes verificados de solo lectura"| ingestion
+    ingestion -->|"Embeddings de chunked"| ollama["Ollama local: Qwen3"]
+    ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
 ```
 
-El calendario procede de `/data/synthetic/calendars`. Google Sheets queda fuera del MVP.
-N8N consume versiones identificables del dataset: no genera arbitrariamente la fuente
-de verdad ni sustituye su revisión y versionado. La base procesada nunca introduce
-datos funcionales sin correspondencia con los archivos sintéticos.
+El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) propone esta frontera, sin implementarla.
+N8N orquesta triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
+hashes y relaciones, procesa documentos y gobierna intentos/publicación. La flecha
+fuente → N8N representa selección, no carga ni modificación del corpus desde nodos.
+El componente lee directamente el checkout aprobado y no ejecuta Git pull.
 
-Los flujos futuros se exportarán como JSON y deberán registrar qué versión procesaron,
-el resultado y los fallos. El formato exacto de los datasets y el modelo de datos se
-diseñarán en la siguiente etapa. Actualmente solo existen directorios documentales.
+El calendario se carga como parte de una release completa desde `/data/synthetic/calendars`;
+no sincronización independiente, Google Sheets ni fuente institucional. Full_document
+produce versiones sin chunks/embeddings y conserva el artefacto exacto para REST.
+Chunked v1 propone secciones H2, sin overlap: 60 chunks estimados, todavía no generados.
+
+Se conservan 76 items por intento exitoso, incluidos skipped verificados. Solo
+publish_release promueve atómicamente; un fallo mantiene current. Ready actual es
+no-op y una ready histórica no se reactiva mediante ingesta normal. La
+[especificación](ingesta-reproducible.md) detalla receta, locking, retry y fallos.
+Los workflows se exportarán como JSON versionado al implementar, sin secretos.
 
 ## Despliegue local
 
@@ -97,7 +102,9 @@ flowchart TB
         B -->|"Fast path"| S["Servicios compartidos previstos"]
         C --> S
         S --> P[("Única instancia PostgreSQL + pgvector")]
-        N["N8N asíncrono"] -->|"Datos derivados"| P
+        N["N8N asíncrono"] -->|"HTTP privado previsto"| I["Componente de ingesta backend/rag"]
+        I -->|"Publicación completa"| P
+        I -->|"Embeddings"| O["Ollama local previsto"]
         D["/data/synthetic versionado"] --> N
     end
 ```
@@ -128,9 +135,9 @@ pendiente de diseño explícito y no se incorpora un proveedor en esta iteració
 | Objetivo | Interpretación vigente |
 | --- | --- |
 | OE1 | RAG sobre corpus sintético: faithfulness ≥ 0,80; context precision ≥ 0,80; context recall ≥ 0,75; answer relevancy ≥ 0,80; MRR ≥ 0,70. |
-| OE2 reformulado | Ingesta asíncrona: actualización menor de 24 horas desde incorporación de un documento sintético; éxito mayor de 90 %. |
+| OE2 reformulado | Ingesta de revisión sintética aprobada: objetivo <24h desde disponibilidad para ingesta y éxito >90 %, no medidos; separar espera y duración trigger→publicación del trabajo humano previo. |
 | OE3 | Selección controlada y dinámica de herramientas MCP por el agente. |
-| OE4 | Integración sin pérdida de datos; sincronización del calendario sintético en máximo 30 minutos. |
+| OE4 | Orquestación E2E: publicación atómica, trazabilidad, sin pérdida/mezcla de items y current preservada ante fallos; todos los casos críticos deben cumplir lo esperado. Duración observada sin nuevo umbral. Se descarta la sincronización independiente de 30 min; redacción académica pendiente de actualización. |
 | OE5 | SUS promedio > 70/100, ningún resultado < 50/100 y completación de tareas > 85 %. |
 | OE6 | Estabilidad de contenedores locales, sin caídas > 5 minutos, y respuesta promedio < 5 segundos. |
 
