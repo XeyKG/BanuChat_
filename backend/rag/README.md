@@ -1,26 +1,139 @@
-# RAG
+# RAG — implementación 1
 
-Estado: diseño, sin código ni ingesta ejecutada. Este directorio contendrá la lógica
-TypeScript de ingesta, chunking, embeddings y retrieval sobre `/data/synthetic`,
-fuente de verdad versionada. PostgreSQL + pgvector conserva derivados por release.
+Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
+Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
+SHA-256 físico, identidades/relaciones, verificador Git local separado y extracción/
+chunking determinista en memoria. Usa `node:test`, sin frameworks ni servicios.
+Fuente de verdad: `/data/synthetic`, solo lectura. Contratos congelados sin cambios.
 
-N8N orquesta; no implementa esa lógica. Según el
-[ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md), un adaptador HTTP privado
-previsto invocará el componente controlado: preflight de revisión aprobada, schemas,
-hashes/relaciones, configuración efectiva, intentos/items, procesamiento y publicación.
-No es una ruta REST pública, tool MCP, webhook público ni Execute Command.
-El [diseño completo](../../docs/ingesta-reproducible.md) fija controles y retries;
-el [plan](../../eval/ingestion/plan.md) describe pruebas todavía no ejecutadas.
+## Ejecutar
 
-Embeddings del MVP: Ollama local, `qwen3-embedding:0.6b`, 1024 dimensiones,
-`cosine`, búsqueda exacta sin HNSW/IVFFlat. Registrar digest/runtime y parámetros
-efectivos; PostgreSQL deriva config_sha256. El LLM generador sigue abierto.
+Requiere Node >=22 y npm; validado con Node 24.19.0 y npm 12.1.0 en Windows.
+Git solo es necesario para el adaptador Git y sus pruebas. Desde este directorio:
 
-Documentos `full_document`: cero chunks y embeddings; artefacto completo verificado
-resuelto posteriormente por la ruta REST interna aprobada, nunca una URL externa.
-Propuesta chunked v1: una sección H2 por chunk, sin overlap, ordinal desde cero;
-auditoría estima 60 chunks para los diez documentos actuales, sin generarlos aquí.
+```bash
+npm ci
+npm run typecheck
+npm run build
+npm test
+npm run validate:dataset
+```
 
-Las respuestas citan evidencia verificable documental o estructurada. Ante evidencia
-insuficiente se declara la limitación. No se ingiere historial conversacional ni se
-modifican fuentes desde el componente. No hay librerías, handlers o servicios creados.
+El build emite JS y declaraciones en `dist/` (ignorado por Git); no escribe en la
+fuente. `validate:dataset` lee el dataset actual del monorepo, valida contenido y
+genera derivados en memoria; no exige que HEAD sea el commit de fuente aprobado.
+Imprime solo contadores o un error seguro. No persiste chunks ni genera embeddings.
+No hay workspace npm raíz. `package-lock.json` fija las dependencias reproducibles.
+
+## API interna
+
+Exportada por `src/index.ts` (build `dist/index.js`):
+
+| Función | Frontera |
+| --- | --- |
+| `validateSyntheticContent({ syntheticRoot, profile? })` | Lectura local, sin Git/DB; devuelve catálogos y snapshot de bytes |
+| `verifySourceCheckout({ sourceCheckoutRoot, expectedSourceRevision, requiredRelativePaths })` | Git local y comparación física; raíz/paths internos, no entrada HTTP |
+| `extractMarkdownDocument(bytes, expectedSections=6)` | Receta Markdown v1; extracción y estructura verificadas |
+| `chunkMarkdownDocument(extracted)` | Una sección H2 por chunk, sobre extracción ya validada |
+| `deriveDocument(document, bytes)` | Rama chunked o full_document; hashes documentales |
+| `buildDocumentDerivatives(validated)` | Usa únicamente los bytes del preflight, sin releer archivos |
+
+También se exportan tipos, `PreflightError`, `safeError`, `SafeReader`, SHA-256,
+parser/decoder, JSON Pointer y validadores temporales para pruebas y composición.
+No mutar los catálogos, buffers ni derivados devueltos; el snapshot es de uso interno.
+`SYNTHETIC_V1_PROFILE` se pasa explícitamente para exigir 18 files / 76 items,
+distribución 12 documentos, 12 cursos, 22 eventos, 8 anuncios, 4 perfiles y 18
+asociaciones; 10 chunked y 2 full_document. Sin ese perfil no se imponen esos
+conteos. El dialecto/shape local sigue siendo el contrato v1, no un migrador de schemas.
+
+## Controles implementados
+
+- Rutas relativas con `/`: sin absolutos, traversal, separadores Windows, ADS ni
+  alias de dispositivos. `lstat` en la cadena, comprobación de `realpath`, archivos
+  regulares, detección de symlinks/junctions expuestos por Node y comprobaciones
+  de identidad/cambio al leer. No se escribe en la fuente.
+- UTF-8 fatal, sin BOM ni CR/CRLF y con LF final; SHA sobre bytes originales.
+- JSON estricto con árbol `jsonc-parser`: sin claves duplicadas (incluidas escapadas),
+  comentarios ni trailing commas. No se pierden duplicados con `JSON.parse`.
+- Ajv 8 Draft 2020-12 + formatos, siete `$id` esperados, compilación de todos los
+  schemas, referencias locales únicamente; no descargas ni coerción/defaults.
+  `strictTypes` y `strictRequired` de Ajv se desactivan como reglas de lint porque
+  los schemas congelados heredan tipos/propiedades de subschemas exteriores;
+  la validación JSON Schema permanece habilitada. La precisión decimal se comprueba
+  además sin corregir/redondear el porcentaje fuente.
+- Inventario físico exacto contra manifest, incluyendo extras ocultos/ignorados.
+  Solo se excluyen ubicaciones conocidas de README, HUMAN_REVIEW, manifest, siete
+  schemas, `.gitattributes` y `.gitignore`. Un archivo nuevo no se ignora por tener
+  extensión Markdown o por llamarse README en otra ubicación.
+- `item.sha256 == file.sha256 == SHA256(bytes)`, sin reserializar JSON ni confundir
+  hashes físicos con los futuros hashes canónicos JSONB de PostgreSQL.
+- Identidad bidireccional `(kind,key)`, JSON Pointer RFC6901 con `~0`/`~1`, índices
+  canónicos y propiedades propias; pares de progreso únicos, FK de eventos/progreso.
+  El catálogo es autoridad de título/MIME/version_label; el manifest repite solo
+  clave/path/modo. Se verifica H1 contra título, sin inventar metadata ausente.
+- Fechas reales, RFC3339 con offset consistente con `America/Bogota`, intervalos
+  ordenados incluyendo fracciones submilisegundo, null y estados según schemas.
+  No se usa el reloj actual como regla funcional ni se añaden reglas editoriales.
+
+Los errores tipados distinguen `SOURCE_REJECTED`, `VALIDATION_FAILED` e
+`INTERNAL_ERROR`, con categoría y archivo lógico permitido. `toJSON()`/`safeError`
+no serializan stack, stderr, paths arbitrarios, contenido fuente ni secretos.
+No hay envelope HTTP ni logger productivo.
+
+## Verificación Git separada
+
+SHA completo (40/64 hex minúsculos) suministrado por el operador, nunca constante
+universal ni HEAD del runtime asumido como fuente. Se exige raíz del checkout,
+HEAD exacto, limpieza staged/unstaged/untracked/ignored en `data/synthetic` y
+comparación binaria con blobs de toda esa carpeta más `requiredRelativePaths`
+(incluir los atributos Git relevantes externos a ella). Se rechazan symlinks/
+gitlinks. La comparación detecta divergencias ocultas por `assume-unchanged` o
+conversiones, aunque Git status esté limpio. HEAD/status se revisan también al final.
+
+Git se invoca con argumentos separados, sin shell, locks opcionales ni variables
+`GIT_*` heredadas que redirijan repositorio/índice. No checkout/pull/fetch/branch/red.
+Las pruebas crean commits exclusivamente en repositorios temporales aislados,
+que se eliminan al finalizar; no crean un worktree persistente del proyecto.
+No se implementan approval registry ni verificación de `implementation_revision`.
+
+## Receta Markdown v1
+
+Se retira solo el prefijo literal aprobado (línea de ficción, LF vacío,
+`synthetic: true`, LF vacío). Se conserva íntegro el resto para `content_sha256`.
+Un H1 inicial, ningún preámbulo sustantivo, seis H2 no vacíos y sin fenced code.
+Estructura distinta falla: no se aplican heurísticas de recuperación.
+
+Cada chunk = H1 exacto + dos LF + sección H2 completa, quitando únicamente los
+LF finales de sección y añadiendo exactamente uno. Sin overlap de cuerpo, HTML,
+descargas, normalización Unicode, cambios de espacios interiores o minúsculas.
+Ordinal 0–5; locator `section:<ordinal>:<texto H2>`; páginas null; SHA-256 UTF-8
+del contenido. El hash documental no es el hash de concatenar los chunks.
+
+`full_document` evita extracción/chunking: cero chunks, cero embeddings y
+`content_sha256 = source_sha256`. Preflight puede leerlo para verificar bytes,
+UTF-8 y título; nunca se pasa al extractor. El artefacto histórico se resolverá
+posteriormente por REST interno aprobado, no por URL externa.
+
+El corpus actual produce **18 archivos, 76 items, 12 documentos y 60 chunks** en
+memoria. La suite cubre positivos, fallos con copias temporales, primitivas, receta
+y Git; si el SO impide crear enlaces, solo ese caso se marca SKIP con causa técnica.
+
+## Límites y siguiente implementación
+
+Todavía NO implementado: PostgreSQL, releases/runs/items, Ollama, embeddings reales,
+publicación, HTTP interno, N8N, retrieval, Intent Router ni Agent/RAG.
+Embeddings futuros: Ollama local, `qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
+búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
+No se han demostrado métricas OE1/OE2/OE4, calidad RAGAS, rendimiento o ingesta SQL.
+
+La raíz debe ser controlada, estable y montada read-only en el despliegue futuro.
+Las comprobaciones portables de Node no equivalen a un sandbox del SO ni garantizan
+ausencia de carreras contra un host que cambie enlaces/ancestros concurrentemente;
+Node tampoco expone todos los tipos de reparse point de Windows. Revalidar fuente
+antes de publicar y conservar por separado fuente histórica/runtime, según
+[ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
+[diseño de ingesta](../../docs/ingesta-reproducible.md).
+
+Antes de integrar PostgreSQL quedan registro de aprobación, procedencia runtime,
+montajes read-only, transacciones/locks/retry y pruebas de adaptadores pendientes.
+N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.
