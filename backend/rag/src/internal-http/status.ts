@@ -142,6 +142,9 @@ export async function isDatasetWriterLeaseHeld(pool: Pool): Promise<boolean> {
       SELECT 1 FROM pg_catalog.pg_locks
       WHERE locktype='advisory' AND granted
         AND classid=$1::integer::oid AND objid=$2::integer::oid AND objsubid=2
+        AND database=(
+          SELECT oid FROM pg_catalog.pg_database WHERE datname=current_database()
+        )
     ) AS held`, [WRITER_LOCK_NAMESPACE, DATASET_ID]);
   if (rows.length !== 1 || typeof rows[0]?.['held'] !== 'boolean') {
     throw new IngestionStatusError('invalid_database_result');
@@ -247,4 +250,3 @@ export function notStartedStatus(): IngestionStatus {
     embedding_config_sha256: null, item_counts: null,
   };
 }
-

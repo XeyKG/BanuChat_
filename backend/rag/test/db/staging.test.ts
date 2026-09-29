@@ -4,10 +4,12 @@ import { test } from 'node:test';
 import { Pool } from 'pg';
 import { validateSyntheticContent, SYNTHETIC_V1_PROFILE, buildDocumentDerivatives,
   WriterLease, withWriterLease, stageCandidate, resolveRelease, DatabaseError, buildPipelineConfigV1, finalizeAndPublish,
-  resolveEmbeddingConfig, generateEmbeddings, ingestApprovedCandidate, OllamaError } from '../../src/index.js';
+  resolveEmbeddingConfig, generateEmbeddings, ingestApprovedCandidate, OllamaError,
+  isDatasetWriterLeaseHeld } from '../../src/index.js';
 import { effectiveConfig } from '../../src/ollama/config.js';
 import type { StageInput } from '../../src/index.js';
 import { resolveDocument } from '../../src/db/documents.js';
+import { DATASET_ID, WRITER_LOCK_NAMESPACE } from '../../src/db/writer-lock.js';
 import { realSource } from '../helpers.js';
 import { recoveryScenarios } from './recovery-scenarios.js';
 
@@ -53,6 +55,36 @@ test('PostgreSQL disposable staging integration', async t => {
   const input: StageInput = { datasetId: 1, sourceGitRevision: 'af7ac711e1da3426e1f5fbe8b2892cec1344ce8b',
     embeddingConfigId: config.rows[0]!.id, workflowRef: 'TEST_ONLY_NO_N8N', validated, derivatives,
     pipelineConfig: buildPipelineConfigV1('b'.repeat(40)) };
+  await t.test('status observes this database writer lease from another session', async t => {
+    assert.equal(await isDatasetWriterLeaseHeld(pool), false);
+    const observed = await WriterLease.acquire(pool);
+    try {
+      assert.equal(await isDatasetWriterLeaseHeld(pool), true);
+      const physical = await pool.query<{
+        classid: string; objid: string; objsubid: number;
+        database: string; current_database_oid: string;
+      }>(`SELECT classid::bigint::text AS classid,objid::bigint::text AS objid,objsubid,
+          database::text AS database,
+          (SELECT oid::text FROM pg_catalog.pg_database WHERE datname=current_database()) AS current_database_oid
+        FROM pg_catalog.pg_locks
+        WHERE locktype='advisory' AND granted
+          AND classid=$1::integer::oid AND objid=$2::integer::oid AND objsubid=2
+          AND database=(SELECT oid FROM pg_catalog.pg_database WHERE datname=current_database())`,
+      [WRITER_LOCK_NAMESPACE, DATASET_ID]);
+      assert.equal(physical.rows.length, 1);
+      assert.deepEqual(physical.rows[0], {
+        classid: String(WRITER_LOCK_NAMESPACE), objid: String(DATASET_ID), objsubid: 2,
+        database: physical.rows[0]!.current_database_oid,
+        current_database_oid: physical.rows[0]!.current_database_oid,
+      });
+      t.diagnostic(JSON.stringify({ classid: physical.rows[0]!.classid,
+        objid: physical.rows[0]!.objid, objsubid: physical.rows[0]!.objsubid,
+        database_matches_current: physical.rows[0]!.database === physical.rows[0]!.current_database_oid }));
+    } finally {
+      await observed.release();
+    }
+    assert.equal(await isDatasetWriterLeaseHeld(pool), false);
+  });
   const lease = await WriterLease.acquire(pool);
   let release = '', run = '';
   try {
