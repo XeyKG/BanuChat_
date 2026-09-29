@@ -30,42 +30,107 @@ Calendario es parte de la release completa, no un flujo de sincronización separ
 | TypeScript en backend/rag | Preflight, receta, adaptadores Ollama/PostgreSQL, estados, consistencia y errores | No modifica fuentes ni inventa hechos |
 | PostgreSQL | Identidad, hashes canónicos, FK, estados, inmutabilidad y completitud/publicación | No comprueba Git, filesystem, ficción ni autoría real del vector |
 
-El diseño aceptado define un adaptador HTTP **privado**, separado del REST público y MCP:
+El diseño aceptado define un adaptador HTTP **privado**, separado del REST público
+y MCP. Cada request es un objeto cerrado: los campos no documentados se rechazan.
+La frontera refleja las operaciones explícitas del core y no reimplementa en HTTP
+su lógica de negocio.
 
-- `POST /internal/ingestion/execute`: entrada cerrada con `approval_ref`,
-  `git_revision` completo, `pipeline_version`, `trigger_type` (`manual` o `retry`
-  inicialmente), `workflow_ref` y `retry_run_id` obligatorio solo para retry.
-  `git_revision` significa `source_git_revision`, no revisión del runtime.
-  No admite paths, URLs, SQL, comandos, modelo arbitrario ni manifest enviado.
-- `POST /internal/ingestion/status`: consulta sin mutación con los mismos selectores
-  de aprobación/revisión/receta; permite `run_id` conocido. Resuelve también la
-  configuración efectiva fijada por el control operativo de la ejecución, separado
-  del registro de aprobación de contenido. No descubre
-  nuevos trabajos ni activa releases. No necesita Ollama para leer estado ya guardado.
-- El servidor resuelve las dos raíces (runtime y fuente separada), receta y configuración autorizadas desde su
-  configuración controlada; N8N solo envía referencias allowlisted. `workflow_ref`
-  debe coincidir con la definición desplegada, no aceptarse como afirmación libre.
-- Éxito HTTP 200: `outcome` (`published`, `already_current`,
-  `already_ready_not_current`), `release_id`, `run_id` nullable, `attempt_no`
-  nullable, revisión/hashes/configuración y contadores derivados por estado.
-  Consulta de estado: 200 con `outcome` (`not_started`, `running`, `failed`,
-  `succeeded`, `already_current`, `already_ready_not_current`), IDs disponibles
-  y `recovery_required`; `not_started` solo después de resolver la identidad.
-- Rechazos: 400 entrada, 409 fuente/identidad incompatible o trabajo activo,
-  503 dependencia no disponible, 500 inesperado. Cuerpo técnico saneado con
-  `error_code`, `retryable`, IDs conocidos y correlación; sin stacks ni secretos.
-  No se está extendiendo el schema de errores REST público.
+### `POST /internal/ingestion/execute`
 
-El POST de ejecución espera el resultado para este corpus pequeño. No devuelve
-202 prometiendo una cola inexistente. Timeout configurado y medido al implementar;
-no se deduce del objetivo conversacional <5s. Ante pérdida de respuesta, N8N consulta
-estado antes de decidir retry: el servidor puede haber terminado y publicado.
-La desconexión HTTP no cancela automáticamente el intento. No hay reintento ciego
-del nodo de escritura; una nueva ejecución es siempre reconciliada por el componente.
+Inicia exclusivamente una ingesta nueva y delega en
+`ingestApprovedCandidate(...)`. Su entrada conceptual mínima contiene:
+
+- `approval_ref`;
+- `source_git_revision` completo;
+- `pipeline_version`;
+- `workflow_ref`.
+
+No acepta `trigger_type` ni `retry_run_id`.
+
+### `POST /internal/ingestion/retry`
+
+Solicita el retry explícito de una release fallida y delega en
+`retryFailedCandidate(...)`; la capa HTTP no implementa el retry. Su entrada
+conceptual mínima contiene:
+
+- `approval_ref`;
+- `release_id`;
+- `source_git_revision` completo;
+- `pipeline_version`;
+- `workflow_ref`.
+
+La release y los selectores deben corresponder a la misma identidad reproducible.
+Una identidad incompatible o un estado que no admite retry se rechaza con HTTP
+`409`; no se crea una identidad nueva para acomodar la solicitud.
+
+### `POST /internal/ingestion/recover`
+
+Recupera explícitamente un intento abandonado y delega en
+`recoverOrphanedAttempt(...)`. Su entrada contiene:
+
+- `release_id`;
+- `run_id`;
+- `workflow_ref`.
+
+No acepta timeout, edad, `started_before` ni criterios automáticos para decidir
+qué intento recuperar. Recovery cierra de forma explícita el intento abandonado;
+no inicia ni implica retry.
+
+### `POST /internal/ingestion/status`
+
+Es una operación de solo lectura para reconciliar el estado, especialmente después
+de una respuesta HTTP perdida. Admite únicamente IDs o selectores cerrados: un
+`run_id`, un `release_id` o la identidad exacta formada por `approval_ref`,
+`source_git_revision` y `pipeline_version`; `workflow_ref` puede acompañar la
+consulta como correlación cuando corresponda. No activa ingesta, recovery ni retry,
+y no necesita Ollama para leer estado ya guardado. `not_started` solo es válido
+después de resolver la identidad reproducible; no puede inferirse únicamente de
+`approval_ref`.
+
+El servidor resuelve desde configuración controlada las raíces separadas del
+runtime/código y del checkout fuente, `implementation_revision`, PostgreSQL,
+Ollama y la receta efectiva del pipeline. Antes de leer el manifest verifica que
+la revisión inmutable resuelta del checkout coincida exactamente con
+`source_git_revision`. `workflow_ref` debe coincidir con la definición desplegada,
+no aceptarse como afirmación libre.
+
+Ninguno de los cuatro endpoints acepta desde N8N paths, URLs, manifest, SQL,
+comandos, modelos arbitrarios ni connection strings.
+
+Las operaciones exitosas y las consultas de estado responden HTTP `200`. El cuerpo
+incluye `outcome` y, cuando existan, `release_id`, `run_id`, `attempt_no`,
+`workflow_ref`, revisiones, hashes/configuración efectiva y conteos derivados por
+estado. `/status` distingue como mínimo:
+
+- `not_started`;
+- `running`;
+- `failed`;
+- `succeeded`;
+- `already_current`;
+- `already_ready_not_current`.
+
+Además informa `recovery_required` cuando un intento requiere recuperación
+explícita. La respuesta de `/recover` refleja el estado operacional cerrado por
+recovery; no lo presenta como nueva ejecución ni como retry.
+
+Los rechazos usan HTTP `400` para entrada inválida, `409` para conflicto de
+identidad o estado, `503` para dependencia no disponible y `500` para un error
+inesperado. El cuerpo técnico saneado expone únicamente `error_code`, `retryable`,
+`release_id` nullable, `run_id` nullable y la correlación o `workflow_ref` cuando
+corresponda; nunca stack, SQL, secretos, payloads privados ni paths. No se extiende
+el schema de errores del REST público.
+
+El POST de ejecución sigue siendo síncrono para este corpus pequeño. No se
+introducen `202`, polling automático, cola, scheduler, retry automático ni timeout
+para declarar intentos huérfanos. Una desconexión HTTP no cancela una ingesta en
+curso. Ante una respuesta perdida, el consumidor consulta `/status` antes de
+considerar `/retry`; nunca hace retry ciego.
 
 Despliegue futuro: listener solo en red local privada entre N8N y componente, sin
-puerto público ni proxy hacia mobile; secreto de servicio fuera de Git y de payloads/
-logs, credencial N8N protegida. Solo el componente posee credencial de ingesta y acceso
+puerto público ni proxy hacia mobile. Los cuatro endpoints requieren una credencial
+de servicio, cuyo mecanismo concreto todavía no se diseña; el secreto permanece
+fuera de Git y de payloads/logs, y la credencial N8N se protege. Solo el componente
+posee credencial de ingesta y acceso
 Ollama. Sin privilegios DDL/TRUNCATE/superusuario ni acceso a historial conversacional.
 El runtime ejecuta su propio código/build identificado; lee un source checkout
 separado, preparado por el operador como worktree Git o checkout equivalente y
