@@ -56,4 +56,11 @@ export { InternalControlError } from './internal-http/control-errors.js';
 export type { InternalControlReason } from './internal-http/control-errors.js';
 export { createInternalIngestionService } from './internal-http/service.js';
 export type { InternalIngestionServiceConfig, InternalIngestionServiceDependencies,
-  InternalIngestionService } from './internal-http/service.js';
+  InternalIngestionStatusDependencies, InternalIngestionService } from './internal-http/service.js';
+export { IngestionStatusError } from './internal-http/status-errors.js';
+export type { IngestionStatusReason } from './internal-http/status-errors.js';
+export { isDatasetWriterLeaseHeld, getIngestionStatusByRun,
+  getIngestionStatusByRelease, findCompatibleReleaseIds,
+  notStartedStatus } from './internal-http/status.js';
+export type { IngestionStatusOutcome, IngestionItemCounts,
+  IngestionStatus } from './internal-http/status.js';
