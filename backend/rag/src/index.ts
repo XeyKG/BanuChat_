@@ -32,3 +32,9 @@ export { failAttempt, recoverOrphanedAttempt, failureCode, FAILURE_CODES } from 
 export type { FailureCode } from './db/failure.js';
 export { prepareRetry } from './db/retry.js';
 export { retryFailedCandidate } from './retry.js';
+export { InternalRequestError } from './internal-http/errors.js';
+export type { InternalRequestReason } from './internal-http/errors.js';
+export { parseExecuteRequest, parseRetryRequest, parseRecoverRequest,
+  parseStatusRequest } from './internal-http/protocol.js';
+export type { ExecuteRequest, RetryRequest, RecoverRequest, StatusRequest,
+  InternalIngestionRequest } from './internal-http/protocol.js';
