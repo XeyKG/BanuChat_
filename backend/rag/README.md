@@ -1,4 +1,4 @@
-# RAG — implementaciones 1–3 (E2E real de 3 bloqueada)
+# RAG — implementaciones 1–3 (Implementación 3 validada E2E)
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
@@ -211,11 +211,26 @@ retira exclusivamente su contenedor desechable al terminar, sin limpieza global.
 
 ## Ollama y publicación (implementación 3)
 
-Código implementado; **Implementación 3 no está cerrada ni validada E2E real**.
-Inspección local: Ollama 0.34.4; modelos qwen3:4b y nomic-embed-text:latest.
-Falta el aprobado `qwen3-embedding:0.6b`. No se descarga ni sustituye: cero llamadas
-reales a `/api/embed`, cero embeddings reales generados. El digest aprobado y su
-dimensión real todavía no se han observado. Los fixtures no sustituyen esa evidencia.
+**Implementación 3: validada E2E dentro del alcance aprobado el 2026-09-29.**
+Ollama 0.34.4 con `qwen3-embedding:0.6b`, context length 32768 y embedding length
+1024. Digest completo del artefacto local observado en esa ejecución, no una
+constante universal:
+
+```text
+ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d
+```
+
+Se generaron 60 embeddings reales en 10 llamadas `/api/embed`, diez batches de seis.
+PostgreSQL confirmó 76 ingestion_items processed, 12 document_versions ready,
+60 chunks y 60 embeddings non-null; run succeeded y release ready/current.
+`assert_release_complete` pasó. La segunda ejecución devolvió `already_current`,
+sin nueva release, run ni embeddings. Distancia coseno propia del smoke test: 0.
+
+Resultados observados: 81 unit tests PASS, 21 PostgreSQL integration PASS y 5 E2E
+PASS; total del runner (incluidos tests contenedores): **107 PASS / 0 FAIL / 0 SKIP**.
+Duración E2E aproximada: 81 segundos, observación de esa ejecución, no garantía ni
+SLA. Estas cifras no son RAGAS, MRR ni evaluación de rendimiento del sistema.
+Véase el [registro de evidencia E2E](../../eval/ingestion/results/implementation-3-e2e-2026-09-29.md).
 
 - `buildPipelineConfigV1(implementationRevision)` construye diez campos cerrados:
   pipeline_version, implementation_revision, markdown_extraction, synthetic_banner,
@@ -230,7 +245,7 @@ dimensión real todavía no se han observado. Los fixtures no sustituyen esa evi
 - `/api/embed` recibe explícitamente modelo, input, dimensions=1024, truncate=false
   y options.num_ctx obtenido del contexto informado por `/api/show`. No añade
   prefijos ni normaliza texto. Esa opción efectiva queda en document/query junto
-  con runtime_version; su compatibilidad real está pendiente del modelo aprobado.
+  con runtime_version; su compatibilidad se validó en la E2E real del 2026-09-29.
   Referencia: [API embed](https://docs.ollama.com/api/embed) y
   [API tags](https://docs.ollama.com/api/tags).
 - `resolveEmbeddingConfig` reutiliza igualdad de campos/JSONB; inserta sin hash JS,
@@ -262,19 +277,23 @@ $env:OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
 npm run test:e2e:ingestion
 ```
 
-La precondición de modelo se comprueba antes de migrar. Cuando esté disponible,
-la suite probará 60 embeddings reales, publicación, identidad repetida sin nuevas
-generaciones y distancia coseno propia ~0. Su SHA de implementación es una fixture
-de prueba, no procedencia operacional. No mide calidad RAG ni rendimiento.
+La precondición de modelo se comprueba antes de migrar. La ejecución del 2026-09-29
+validó 60 embeddings reales, publicación, identidad repetida sin nuevas generaciones
+y distancia coseno propia 0. Usó una `implementation_revision` sintética de prueba:
+no acredita procedencia operacional automática del runtime. No mide calidad RAG
+ni rendimiento.
 
 ## Límites y siguiente implementación
 
-Todavía NO implementado: retry/recuperación, HTTP interno, N8N,
-retrieval, Intent Router ni Agent/RAG.
-Embeddings implementados, pendientes de validación real: Ollama local,
+Todavía NO implementado: recovery, retry, reapertura de failed, recuperación de runs
+huérfanos, approval registry operativo, verificación automática de
+`implementation_revision`, HTTP interno, N8N, retrieval productivo, Intent Router
+ni Agent/RAG. RAGAS/MRR no implementados ni validados.
+Embeddings implementados y validados en E2E real: Ollama local,
 `qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
 búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
-No se han demostrado métricas OE1/OE2/OE4, calidad RAGAS, rendimiento ni publicación end-to-end.
+La publicación E2E de ingesta está validada dentro de este alcance; no se han
+demostrado métricas OE1/OE2/OE4, calidad RAGAS/MRR ni rendimiento del sistema.
 
 La raíz debe ser controlada, estable y montada read-only en el despliegue futuro.
 Las comprobaciones portables de Node no equivalen a un sandbox del SO ni garantizan
@@ -285,5 +304,5 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
 Antes de la siguiente fase quedan registro de aprobación, procedencia runtime,
-montajes read-only, permisos mínimos, validación E2E real y retry pendientes.
+montajes read-only, permisos mínimos y retry pendientes.
 N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.
