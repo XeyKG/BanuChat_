@@ -5,7 +5,7 @@ Sistema de automatización inteligente para el Centro de Competencias Digitales 
 UNAB. Combina arquitectura RAG sobre pgvector, un núcleo agéntico (ciclo ReAct) que actúa como cliente
 MCP de un servidor interno, orquestación asíncrona con N8N sobre datos sintéticos y una app
 móvil en React Native. Proyecto de grado (Ingeniería de Sistemas, UNAB) — es un anteproyecto en
-implementación incremental, con foundation TypeScript, preflight local y chunking determinista en `backend/rag`.
+implementación incremental, con foundation TypeScript, preflight local, chunking determinista y persistencia PostgreSQL de staging en `backend/rag`.
 
 Nombre del sistema en el código/UI/commits: **BanuChat**. "Route AI" solo aparece en el
 anteproyecto académico; no lo uses como nombre de paquete, carpeta ni variable.

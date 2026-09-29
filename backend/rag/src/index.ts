@@ -13,3 +13,9 @@ export { validateCivilDate, parseTimestamp, validateInterval } from './preflight
 export { extractMarkdownDocument, chunkMarkdownDocument, buildDocumentDerivatives,
   deriveDocument, SYNTHETIC_BANNER } from './documents/markdown.js';
 export type { ExtractedMarkdown } from './documents/markdown.js';
+export { DatabaseError, databaseError } from './db/errors.js';
+export type { DatabaseCode } from './db/errors.js';
+export { WriterLease, withWriterLease, WRITER_LOCK_NAMESPACE } from './db/writer-lock.js';
+export { resolveRelease } from './db/releases.js';
+export { stageCandidate } from './db/stage.js';
+export type { StageInput, StageResult, ReleaseResolution } from './db/types.js';

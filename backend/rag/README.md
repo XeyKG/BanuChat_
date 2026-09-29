@@ -1,4 +1,4 @@
-# RAG — implementación 1
+# RAG — implementaciones 1 y 2
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
@@ -118,13 +118,101 @@ El corpus actual produce **18 archivos, 76 items, 12 documentos y 60 chunks** en
 memoria. La suite cubre positivos, fallos con copias temporales, primitivas, receta
 y Git; si el SO impide crear enlaces, solo ese caso se marca SKIP con causa técnica.
 
+## PostgreSQL: staging parcial (implementación 2)
+
+Adaptador `pg` sin ORM; `@types/pg` solo para desarrollo. El core recibe un `Pool`
+configurado por el caller y no lee `.env` ni resuelve secretos. SQL explícito,
+parametrizado y con identificadores fijos; no modifica la migración ni el dataset.
+
+API interna adicional:
+
+- `withWriterLease(pool, callback)` / `WriterLease.acquire(pool)`: conexión dedicada.
+  El wrapper libera en `finally`; quien use acquire debe hacer lo mismo.
+- `resolveRelease(lease, input)`: dentro de una transacción corta del lease, resuelve
+  dataset/configuración/identidad; devuelve staging, failed_requires_retry,
+  already_current o already_ready_not_current. No reabre ni publica.
+- `stageCandidate(lease, input)`: recibe contenido validado, derivados, datasetId=1,
+  sourceGitRevision, pipelineConfig con implementation_revision, embeddingConfigId
+  previamente autorizado y workflowRef explícito. No crea configuración Ollama.
+  Devuelve release/run del staging o un resultado terminal sin DML adicional.
+
+El namespace del advisory lock es ASCII `BANU`, big-endian `0x42414e55`
+(`1111576149`, int32); segunda clave dataset_id=1. Se usa
+`pg_try_advisory_lock(namespace, dataset_id)` de sesión, antes de resolver releases
+o abrir intentos. Segundo escritor: DATABASE_CONFLICT. Unlock explícito al salir;
+la conexión dedicada se descarta. Pérdida de conexión invalida el lease, sin
+reconexión transparente ni cambio a otra conexión para continuar escrituras.
+
+El lock no implica una transacción global: setup de release/run/items en una
+transacción corta READ COMMITTED; después una transacción por registro estructurado
+o documento con sus chunks. El caller futuro debe conservar el lease durante
+`stage → embeddings → finalize`, siempre liberándolo en finally. Esta fase NO es
+una ingesta standalone. Un run previo en la candidata o un run running existente
+bloquea una nueva ejecución; no se toma control de intentos huérfanos ni se hace retry.
+
+Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se comprueba
+el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
+y métrica cosine. PostgreSQL calcula los hashes JSONB de manifest/pipeline;
+el código no los sustituye por SHA de JSON.stringify. El caller entrega una receta
+JSON autorizada sin secretos; esta capa no implementa approval registry ni acredita
+que implementation_revision corresponda al runtime ejecutado.
+
+Estado esperado de v1 después de staging:
+
+| Entidad/estado | Cantidad |
+| --- | ---: |
+| Cursos / anuncios / perfiles / eventos / progreso | 12 / 8 / 4 / 22 / 18 |
+| Documentos / versiones / chunks | 12 / 12 / 60 |
+| Items processed / pending / failed / skipped | 66 / 10 / 0 / 0 |
+| Versiones ready / pending | 2 / 10 |
+| Embeddings no nulos | 0 |
+
+Release staging, run running y current_release_id intacto. Los dos full_document
+no tienen chunks; los diez chunked siguen pending. Los 60 hashes generados por SQL
+se comparan con los derivados TypeScript. No se mutan inputs ni buffers. Filas
+inesperadas/duplicadas son invariantes fallidas, no upserts o skipped silenciosos.
+
+Errores separados de preflight: DATABASE_UNAVAILABLE (conexión/dependencia),
+DATABASE_CONFLICT (lease/contención/aislamiento), DATABASE_INVARIANT (contrato,
+constraint o identidad incompatible). `toJSON()` solo expone el código; cause
+queda interno, sin SQL, contraseña, connection string ni stack contractual.
+No hay retry automático. Si falla tras algún commit parcial, se detiene y conserva
+evidencia: la recuperación/finalización del intento queda pendiente. Un error de
+COMMIT puede tener resultado incierto; no reenviar ciegamente.
+
+### Pruebas PostgreSQL separadas
+
+`npm test` conserva las 53 pruebas anteriores y añade unitarias DB sin servidor.
+`npm run test:db` exige `BANUCHAT_TEST_DATABASE_URL`; si falta, falla explícitamente.
+La base debe tener un nombre identificado como `banuchat_rag_test`, estar sin tablas
+de usuario y sin schema banuchat. Solo entonces aplica el SQL original completo.
+No DROP SCHEMA, DROP DATABASE ni TRUNCATE. No ejecutar sobre una base existente.
+
+```powershell
+# Únicamente contra una base desechable vacía preparada por el operador:
+$env:BANUCHAT_TEST_DATABASE_URL = 'postgresql://banuchat_test:TEST_ONLY_LOCAL@127.0.0.1:PUERTO/banuchat_rag_test_impl2'
+npm run test:db
+```
+
+La suite contiene fixtures de embedding_config y pipeline claramente TEST_ONLY,
+sin digest/runtime real ni vectores simulados. Usa el corpus v1 solo como input,
+comprueba conteos/procedencia/hashes/inmutabilidad de inputs, conflicto y pérdida
+de lease, identidad repetida, failed sin reopen, modo documental incompatible y
+publicación incompleta rechazada mediante SAVEPOINT. No publica ni cierra runs.
+
+Validada en PostgreSQL 16.15 / pgvector 0.8.6, imagen local `pgvector/pgvector:pg16`,
+contenedor exclusivo con `--pull never`, puerto loopback dinámico y PGDATA tmpfs,
+sin volúmenes persistentes. Cada ejecución necesita una base nueva. El operador
+retira exclusivamente su contenedor desechable al terminar, sin limpieza global.
+
 ## Límites y siguiente implementación
 
-Todavía NO implementado: PostgreSQL, releases/runs/items, Ollama, embeddings reales,
-publicación, HTTP interno, N8N, retrieval, Intent Router ni Agent/RAG.
+Todavía NO implementado: configuración efectiva Ollama, embeddings reales,
+finalización del run, publicación, retry/recuperación, HTTP interno, N8N,
+retrieval, Intent Router ni Agent/RAG.
 Embeddings futuros: Ollama local, `qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
 búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
-No se han demostrado métricas OE1/OE2/OE4, calidad RAGAS, rendimiento o ingesta SQL.
+No se han demostrado métricas OE1/OE2/OE4, calidad RAGAS, rendimiento ni publicación end-to-end.
 
 La raíz debe ser controlada, estable y montada read-only en el despliegue futuro.
 Las comprobaciones portables de Node no equivalen a un sandbox del SO ni garantizan
@@ -134,6 +222,6 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
-Antes de integrar PostgreSQL quedan registro de aprobación, procedencia runtime,
-montajes read-only, transacciones/locks/retry y pruebas de adaptadores pendientes.
+Antes de la siguiente fase quedan registro de aprobación, procedencia runtime,
+montajes read-only, permisos mínimos, embeddings, finalización y retry pendientes.
 N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.
