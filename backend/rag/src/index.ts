@@ -52,3 +52,8 @@ export { RuntimeProvenanceError } from './runtime/errors.js';
 export type { RuntimeProvenanceReason } from './runtime/errors.js';
 export { prepareRuntimeContext } from './runtime/provenance.js';
 export type { RuntimeContext, PrepareRuntimeContextOptions } from './runtime/provenance.js';
+export { InternalControlError } from './internal-http/control-errors.js';
+export type { InternalControlReason } from './internal-http/control-errors.js';
+export { createInternalIngestionService } from './internal-http/service.js';
+export type { InternalIngestionServiceConfig, InternalIngestionServiceDependencies,
+  InternalIngestionService } from './internal-http/service.js';
