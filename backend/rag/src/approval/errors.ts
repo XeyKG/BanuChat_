@@ -5,7 +5,11 @@ export type ApprovalRegistryReason =
   | 'invalid_value'
   | 'duplicate_approval_ref'
   | 'approval_not_found'
-  | 'revision_mismatch';
+  | 'revision_mismatch'
+  | 'registry_unavailable'
+  | 'registry_too_large'
+  | 'invalid_encoding'
+  | 'invalid_json';
 
 export class ApprovalRegistryError extends Error {
   readonly code = 'APPROVAL_REJECTED' as const;
@@ -19,4 +23,3 @@ export class ApprovalRegistryError extends Error {
     return { error_code: this.code, reason: this.reason };
   }
 }
-

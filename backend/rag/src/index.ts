@@ -43,3 +43,5 @@ export type { ApprovalRegistryReason } from './approval/errors.js';
 export { parseApprovalRegistry, resolveApproval,
   assertApprovalMatchesRequest } from './approval/registry.js';
 export type { ApprovalRecord, ApprovalRegistryV1 } from './approval/registry.js';
+export { loadApprovalRegistry,
+  APPROVAL_REGISTRY_MAX_BYTES } from './approval/loader.js';
