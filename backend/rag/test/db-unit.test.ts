@@ -6,7 +6,7 @@ import { validateSourceRevision, releaseOutcome } from '../src/db/releases.js';
 import { databaseError, DatabaseError } from '../src/db/errors.js';
 import { provenance } from '../src/db/runs.js';
 import { validateStageInput } from '../src/db/stage.js';
-import { validateSyntheticContent, buildDocumentDerivatives } from '../src/index.js';
+import { validateSyntheticContent, buildDocumentDerivatives, buildPipelineConfigV1 } from '../src/index.js';
 import { realSource } from './helpers.js';
 
 test('DB source revision accepts only full lowercase SHAs', () => {
@@ -38,7 +38,7 @@ test('stage input boundary preserves all bytes/catalogs/derivatives', async () =
   const derivatives = buildDocumentDerivatives(validated);
   const before = structuredClone({ manifest: validated.manifest, catalogs: validated.catalogs, bytes: validated.bytes, derivatives });
   validateStageInput({ datasetId: 1, sourceGitRevision: 'a'.repeat(40), embeddingConfigId: '00000000-0000-0000-0000-000000000001',
-    pipelineConfig: { implementation_revision: 'b'.repeat(40) }, workflowRef: 'TEST_ONLY', validated, derivatives });
+    pipelineConfig: buildPipelineConfigV1('b'.repeat(40)), workflowRef: 'TEST_ONLY', validated, derivatives });
   assert.deepEqual(structuredClone({ manifest: validated.manifest, catalogs: validated.catalogs, bytes: validated.bytes, derivatives }), before);
 });
 test('DB SQL text never interpolates data into identifiers', async () => {
@@ -49,8 +49,12 @@ test('DB SQL text never interpolates data into identifiers', async () => {
     const visit = (node: ts.Node): void => {
       // Logical record keys may be composed; SQL text may not be interpolated.
       if (ts.isTemplateExpression(node)) assert.doesNotMatch(node.getText(source), /\b(SELECT|INSERT|UPDATE|DELETE|FROM|WHERE)\b/i, file);
-      if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.PlusToken) {
-        assert.fail(`Unexpected concatenation in ${file}`);
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'query') {
+        const sql = node.arguments[0];
+        assert.ok(sql && (ts.isStringLiteralLike(sql)
+          || (file === 'writer-lock.ts' && ts.isIdentifier(sql) && sql.text === 'sql')
+          || (file === 'structured.ts' && ts.isElementAccessExpression(sql)
+            && sql.expression.getText(source) === 'STRUCTURED_SQL')), `Nonliteral SQL in ${file}`);
       }
       ts.forEachChild(node, visit);
     };

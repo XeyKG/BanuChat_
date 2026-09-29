@@ -10,6 +10,7 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "node --import tsx --test test/*.test.ts",
     "test:db": "node --import tsx --test test/db/*.test.ts",
+    "test:e2e:ingestion": "node --import tsx --test test/e2e/*.test.ts",
     "validate:dataset": "tsx src/cli.ts"
   },
   "dependencies": {

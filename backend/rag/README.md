@@ -1,4 +1,4 @@
-# RAG — implementaciones 1 y 2
+# RAG — implementaciones 1–3 (E2E real de 3 bloqueada)
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
@@ -154,7 +154,7 @@ Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se com
 el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
 y métrica cosine. PostgreSQL calcula los hashes JSONB de manifest/pipeline;
 el código no los sustituye por SHA de JSON.stringify. El caller entrega una receta
-JSON autorizada sin secretos; esta capa no implementa approval registry ni acredita
+JSON canónica v1 sin secretos; esta capa no implementa approval registry ni acredita
 que implementation_revision corresponda al runtime ejecutado.
 
 Estado esperado de v1 después de staging:
@@ -194,23 +194,85 @@ $env:BANUCHAT_TEST_DATABASE_URL = 'postgresql://banuchat_test:TEST_ONLY_LOCAL@12
 npm run test:db
 ```
 
-La suite contiene fixtures de embedding_config y pipeline claramente TEST_ONLY,
-sin digest/runtime real ni vectores simulados. Usa el corpus v1 solo como input,
+La suite contiene fixtures de embedding_config claramente TEST_ONLY y una receta
+pipeline canónica con SHA de implementación ficticio, sin digest/runtime real.
+Los vectores TEST_ONLY prueban persistencia y publicación, no son salida de Qwen.
+Usa el corpus v1 solo como input,
 comprueba conteos/procedencia/hashes/inmutabilidad de inputs, conflicto y pérdida
 de lease, identidad repetida, failed sin reopen, modo documental incompatible y
-publicación incompleta rechazada mediante SAVEPOINT. No publica ni cierra runs.
+publicación incompleta rechazada mediante SAVEPOINT. Además verifica batching 4/2,
+rollback de la transacción final mediante fallo inyectado, publicación con fixtures
+y already_current sin nuevas generaciones. No acredita publicación con Ollama real.
 
 Validada en PostgreSQL 16.15 / pgvector 0.8.6, imagen local `pgvector/pgvector:pg16`,
 contenedor exclusivo con `--pull never`, puerto loopback dinámico y PGDATA tmpfs,
 sin volúmenes persistentes. Cada ejecución necesita una base nueva. El operador
 retira exclusivamente su contenedor desechable al terminar, sin limpieza global.
 
+## Ollama y publicación (implementación 3)
+
+Código implementado; **Implementación 3 no está cerrada ni validada E2E real**.
+Inspección local: Ollama 0.34.4; modelos qwen3:4b y nomic-embed-text:latest.
+Falta el aprobado `qwen3-embedding:0.6b`. No se descarga ni sustituye: cero llamadas
+reales a `/api/embed`, cero embeddings reales generados. El digest aprobado y su
+dimensión real todavía no se han observado. Los fixtures no sustituyen esa evidencia.
+
+- `buildPipelineConfigV1(implementationRevision)` construye diez campos cerrados:
+  pipeline_version, implementation_revision, markdown_extraction, synthetic_banner,
+  chunking, locator, full_document, encoding, normalization y schema_validation.
+  Solo varía el SHA 40/64 lowercase; registra versiones instaladas de validadores.
+  `validatePipelineConfigV1` rechaza faltantes, extras y semánticas incompatibles,
+  también anidadas. PostgreSQL calcula pipeline_sha256, no JavaScript.
+- `OllamaClient` recibe URL controlada HTTP loopback, usa fetch nativo, timeout y
+  rechaza redirects. Inspecciona `/api/version`, `/api/tags` y `/api/show`.
+  Exige modelo exacto, digest completo y capacidad embedding; cambios de runtime/
+  digest/receta interrumpen la operación. No lee .env ni acepta configuración de chat.
+- `/api/embed` recibe explícitamente modelo, input, dimensions=1024, truncate=false
+  y options.num_ctx obtenido del contexto informado por `/api/show`. No añade
+  prefijos ni normaliza texto. Esa opción efectiva queda en document/query junto
+  con runtime_version; su compatibilidad real está pendiente del modelo aprobado.
+  Referencia: [API embed](https://docs.ollama.com/api/embed) y
+  [API tags](https://docs.ollama.com/api/tags).
+- `resolveEmbeddingConfig` reutiliza igualdad de campos/JSONB; inserta sin hash JS,
+  relee tras conflicto UNIQUE concurrente y nunca actualiza configuración inmutable.
+- `generateEmbeddings` limita el batch interno a 1–10 (default 10), por documento.
+  V1 tiene seis chunks/documento: default implica diez llamadas de seis inputs.
+  Comprueba cantidad, orden posicional, dimensión 1024, finitud y norma no nula
+  también tras conversión float32; valida el batch entero antes de persistir.
+  Vectores parametrizados con cast fijo `::public.vector(1024)`, timestamp SQL y run
+  actual. Solo después de verificar seis vectores marca versión ready/item processed.
+- `ingestApprovedCandidate` conserva un único WriterLease desde configuración hasta
+  publicación. Las llamadas HTTP ocurren fuera de transacciones SQL; already_current
+  no crea release/run ni llama a embed. No acredita aprobación ni procedencia runtime.
+- `finalizeAndPublish` bloquea dataset→release y comprueba 76 processed, 12 ready,
+  60 vectores del run. En una única transacción READ COMMITTED: run succeeded con
+  finished_at → assert_release_complete → publish_release → COMMIT. Fallo: ROLLBACK.
+  Un fallo anterior puede dejar staging/running parcial; no hay retry ni recovery.
+
+### E2E real separada
+
+`npm test` usa únicamente fixtures HTTP locales, sin PostgreSQL ni Ollama real.
+`test:db` usa PostgreSQL desechable y fixtures explícitos, sin descargar modelos.
+La E2E real exige otra base desechable vacía y el modelo aprobado instalado por el
+operador. Falla explícitamente si falta; nunca transforma ese bloqueo en PASS/SKIP.
+
+```powershell
+$env:BANUCHAT_TEST_DATABASE_URL = 'postgresql://banuchat_test:TEST_ONLY_LOCAL@127.0.0.1:PUERTO/banuchat_rag_test_e2e'
+$env:OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
+npm run test:e2e:ingestion
+```
+
+La precondición de modelo se comprueba antes de migrar. Cuando esté disponible,
+la suite probará 60 embeddings reales, publicación, identidad repetida sin nuevas
+generaciones y distancia coseno propia ~0. Su SHA de implementación es una fixture
+de prueba, no procedencia operacional. No mide calidad RAG ni rendimiento.
+
 ## Límites y siguiente implementación
 
-Todavía NO implementado: configuración efectiva Ollama, embeddings reales,
-finalización del run, publicación, retry/recuperación, HTTP interno, N8N,
+Todavía NO implementado: retry/recuperación, HTTP interno, N8N,
 retrieval, Intent Router ni Agent/RAG.
-Embeddings futuros: Ollama local, `qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
+Embeddings implementados, pendientes de validación real: Ollama local,
+`qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
 búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
 No se han demostrado métricas OE1/OE2/OE4, calidad RAGAS, rendimiento ni publicación end-to-end.
 
@@ -223,5 +285,5 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
 Antes de la siguiente fase quedan registro de aprobación, procedencia runtime,
-montajes read-only, permisos mínimos, embeddings, finalización y retry pendientes.
+montajes read-only, permisos mínimos, validación E2E real y retry pendientes.
 N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.

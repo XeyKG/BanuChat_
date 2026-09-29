@@ -168,6 +168,6 @@ Orden inicial autorizado:
 Esta autorización no permite construir todo el sistema de una vez: cada tarea debe
 respetar su alcance específico. REST y dataset v1 permanecen congelados; SQL no cambia
 sin futura autorización explícita. Intent Router se rige por ADR 0004 e ingesta por
-ADR 0005. No se implementa funcionalidad durante este cierre documental.
+ADR 0005.
 
 Los contratos MCP `2.0.0-draft` están congelados para implementación. Cualquier cambio incompatible requiere revisión explícita y actualización coordinada del contrato, agente y pruebas. El sufijo `draft` se conserva hasta que exista una implementación validada.

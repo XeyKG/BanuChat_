@@ -1,6 +1,7 @@
 import type { WriterLease } from './writer-lock.js';
 import type { StageInput, ReleaseResolution, ReleaseOutcome } from './types.js';
 import { invariant } from './errors.js';
+import { validatePipelineConfigV1 } from '../pipeline.js';
 
 export function validateSourceRevision(value: string): void {
   invariant((value.length === 40 || value.length === 64) && /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(value));
@@ -8,9 +9,7 @@ export function validateSourceRevision(value: string): void {
 export function validateStageIdentity(input: StageInput): void {
   invariant(input.datasetId === 1);
   validateSourceRevision(input.sourceGitRevision);
-  const revision = input.pipelineConfig['implementation_revision'];
-  invariant(typeof revision === 'string');
-  validateSourceRevision(revision);
+  validatePipelineConfigV1(input.pipelineConfig);
   invariant(input.workflowRef.trim().length > 0);
   invariant(/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(input.embeddingConfigId));
 }

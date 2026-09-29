@@ -3,7 +3,9 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { Pool } from 'pg';
 import { validateSyntheticContent, SYNTHETIC_V1_PROFILE, buildDocumentDerivatives,
-  WriterLease, withWriterLease, stageCandidate, resolveRelease, DatabaseError } from '../../src/index.js';
+  WriterLease, withWriterLease, stageCandidate, resolveRelease, DatabaseError, buildPipelineConfigV1, finalizeAndPublish,
+  resolveEmbeddingConfig, generateEmbeddings, ingestApprovedCandidate, OllamaError } from '../../src/index.js';
+import { effectiveConfig } from '../../src/ollama/config.js';
 import type { StageInput } from '../../src/index.js';
 import { resolveDocument } from '../../src/db/documents.js';
 import { realSource } from '../helpers.js';
@@ -39,22 +41,30 @@ test('PostgreSQL disposable staging integration', async t => {
   });
 
   // Fixtures only. Neither revision is a real runtime digest nor an operational approval.
+  const testConfig = effectiveConfig('0.0.0-TEST-ONLY', 'a'.repeat(64), 2048);
   const config = await pool.query<{ id: string; config_sha256: string }>(`INSERT INTO banuchat.embedding_configs
     (provider,model,model_revision,dimension,distance_metric,parameters)
     VALUES ($1,$2,$3,1024,'cosine',$4::jsonb) RETURNING id,config_sha256`,
-  ['TEST_ONLY', 'TEST_ONLY', 'TEST_ONLY_FIXTURE', JSON.stringify({ query: {}, document: {}, runtime_version: 'TEST_ONLY' })]);
+  [testConfig.provider, testConfig.model, testConfig.model_revision, JSON.stringify(testConfig.parameters)]);
   assert.match(config.rows[0]!.config_sha256, /^[0-9a-f]{64}$/);
   const validated = await validateSyntheticContent({ syntheticRoot: realSource, profile: SYNTHETIC_V1_PROFILE });
   const derivatives = buildDocumentDerivatives(validated);
   const input: StageInput = { datasetId: 1, sourceGitRevision: 'af7ac711e1da3426e1f5fbe8b2892cec1344ce8b',
     embeddingConfigId: config.rows[0]!.id, workflowRef: 'TEST_ONLY_NO_N8N', validated, derivatives,
-    pipelineConfig: { pipeline_version: 'TEST_ONLY', implementation_revision: 'b'.repeat(40),
-      markdown_extraction: 'TEST_ONLY_v1', synthetic_banner: 'TEST_ONLY_exact', chunking: 'TEST_ONLY_h2',
-      locator: 'TEST_ONLY_section', full_document: 'TEST_ONLY_artifact', encoding: 'UTF-8',
-      normalization: 'TEST_ONLY_none', schema_validation: 'TEST_ONLY_local' } };
+    pipelineConfig: buildPipelineConfigV1('b'.repeat(40)) };
   const lease = await WriterLease.acquire(pool);
   let release = '', run = '';
   try {
+    await t.test('embedding config resolver uses SQL hash, reuses equal values, never updates', async () => {
+      // Only this disposable test DB. Synthetic digest, not an inspected/approved model.
+      const fixture = effectiveConfig('0.0.0-fixture', 'a'.repeat(64), 2048);
+      const first = await resolveEmbeddingConfig(lease, fixture);
+      assert.equal(await resolveEmbeddingConfig(lease, fixture), first);
+      const other = await resolveEmbeddingConfig(lease, effectiveConfig('0.0.0-fixture', 'c'.repeat(64), 2048));
+      assert.notEqual(other, first);
+      const row = (await pool.query('SELECT model_revision,config_sha256 FROM banuchat.embedding_configs WHERE id=$1', [first])).rows[0];
+      assert.equal(row.model_revision, 'a'.repeat(64)); assert.match(row.config_sha256, /^[0-9a-f]{64}$/);
+    });
     await t.test('second session writer lock conflicts', async () => {
       await assert.rejects(WriterLease.acquire(pool), hasCode('DATABASE_CONFLICT'));
     });
@@ -109,7 +119,7 @@ test('PostgreSQL disposable staging integration', async t => {
     await t.test('failed identity is reported without reopening', async () => {
       await lease.transaction(async () => {
         await lease.query('SAVEPOINT failed_fixture');
-        const alternate = { ...input, pipelineConfig: { ...input.pipelineConfig, pipeline_version: 'TEST_ONLY_FAILED' } };
+        const alternate = { ...input, pipelineConfig: buildPipelineConfigV1('c'.repeat(40)) };
         const created = await resolveRelease(lease, alternate);
         await lease.query("UPDATE banuchat.dataset_releases SET status='failed' WHERE id=$1", [created.release_id]);
         assert.deepEqual(await resolveRelease(lease, alternate), { release_id: created.release_id, outcome: 'failed_requires_retry' });
@@ -142,6 +152,7 @@ test('PostgreSQL disposable staging integration', async t => {
         WHERE d.retrieval_mode='full_document'`)).rows[0].n, 0);
     });
     await t.test('incomplete publication rejected inside SAVEPOINT; current and states intact', async () => {
+      await assert.rejects(finalizeAndPublish(lease, release, run), hasCode('DATABASE_INVARIANT'));
       await lease.transaction(async () => {
         await lease.query('SAVEPOINT negative_publish');
         await assert.rejects(lease.query('SELECT banuchat.publish_release($1)', [release]), hasCode('DATABASE_INVARIANT'));
@@ -166,5 +177,64 @@ test('PostgreSQL disposable staging integration', async t => {
       await assert.rejects(lost.query('SELECT 1'), hasCode('DATABASE_UNAVAILABLE'));
     } finally { await lost.release(); }
     await withWriterLease(pool, async replacement => { await replacement.query('SELECT 1'); });
+  });
+  // TEST_ONLY vectors below exercise real PostgreSQL, never claim to be Qwen output.
+  let calls = 0;
+  const sizes: number[] = [];
+  const fixtureClient = {
+    inspect: async () => testConfig,
+    embed: async (texts: readonly string[]) => {
+      calls++; sizes.push(texts.length);
+      await assert.rejects(WriterLease.acquire(pool), hasCode('DATABASE_CONFLICT'));
+      return texts.map((_, index) => [index + 1, ...Array<number>(1023).fill(0)]);
+    },
+  };
+  await withWriterLease(pool, async finalLease => {
+    await t.test('invalid fixture batch persists no vectors and leaves document pending', async () => {
+      await assert.rejects(generateEmbeddings(finalLease, release, run, input,
+        { ...fixtureClient, embed: async () => [] }, testConfig, 4), OllamaError);
+      assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.document_chunks WHERE embedding IS NOT NULL')).rows[0].n, 0);
+    });
+    await t.test('TEST_ONLY vector persistence batches 4/2; finalizes only complete documents', async () => {
+      assert.equal(await generateEmbeddings(finalLease, release, run, input, fixtureClient, testConfig, 4), 60);
+      assert.deepEqual(sizes, Array.from({ length: 10 }, () => [4, 2]).flat());
+      const rows = (await pool.query(`SELECT ordinal,embedding::text AS vector,generation_run_id,embedding_generated_at,
+        content_sha256 FROM banuchat.document_chunks ORDER BY document_version_id,ordinal`)).rows;
+      for (const row of rows) {
+        assert.equal(JSON.parse(row.vector)[0], (row.ordinal % 4) + 1);
+        assert.equal(row.generation_run_id, run); assert.ok(row.embedding_generated_at);
+      }
+      assert.equal((await pool.query("SELECT count(*)::integer AS n FROM banuchat.ingestion_items WHERE status='processed'")).rows[0].n, 76);
+      assert.equal((await pool.query("SELECT count(*)::integer AS n FROM banuchat.document_versions WHERE processing_status='ready'")).rows[0].n, 12);
+    });
+    await t.test('failure at publication rolls back succeeded and finished_at in final transaction', async () => {
+      const originalQuery = finalLease.query.bind(finalLease);
+      // Test-only injected fault after real assert_release_complete, before publication.
+      finalLease.query = async (sql, values) => {
+        if (sql === 'SELECT banuchat.publish_release($1)') throw new DatabaseError('DATABASE_INVARIANT');
+        return originalQuery(sql, values);
+      };
+      try { await assert.rejects(finalizeAndPublish(finalLease, release, run), hasCode('DATABASE_INVARIANT')); }
+      finally { finalLease.query = originalQuery; }
+      assert.deepEqual((await pool.query('SELECT status,finished_at FROM banuchat.ingestion_runs WHERE id=$1', [run])).rows[0],
+        { status: 'running', finished_at: null });
+      assert.equal((await pool.query('SELECT current_release_id FROM banuchat.datasets WHERE id=1')).rows[0].current_release_id, null);
+      assert.equal((await pool.query('SELECT status FROM banuchat.dataset_releases WHERE id=$1', [release])).rows[0].status, 'staging');
+    });
+    await t.test('TEST_ONLY complete candidate publishes atomically', async () => {
+      await finalizeAndPublish(finalLease, release, run);
+      await pool.query('SELECT banuchat.assert_release_complete($1)', [release]);
+      assert.equal((await pool.query('SELECT current_release_id FROM banuchat.datasets WHERE id=1')).rows[0].current_release_id, release);
+      assert.equal((await pool.query('SELECT status FROM banuchat.dataset_releases WHERE id=$1', [release])).rows[0].status, 'ready');
+      assert.equal((await pool.query('SELECT status FROM banuchat.ingestion_runs WHERE id=$1', [run])).rows[0].status, 'succeeded');
+    });
+  });
+  await t.test('TEST_ONLY already_current orchestration creates no run/release/vector', async () => {
+    const result = await ingestApprovedCandidate(pool, fixtureClient, { validated, derivatives,
+      sourceGitRevision: input.sourceGitRevision, implementationRevision: 'b'.repeat(40), workflowRef: input.workflowRef });
+    assert.equal(result.outcome, 'already_current'); assert.equal(result.release_id, release);
+    assert.equal(calls, 20);
+    assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.ingestion_runs')).rows[0].n, 1);
+    assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.dataset_releases')).rows[0].n, 1);
   });
 });

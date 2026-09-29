@@ -19,3 +19,11 @@ export { WriterLease, withWriterLease, WRITER_LOCK_NAMESPACE } from './db/writer
 export { resolveRelease } from './db/releases.js';
 export { stageCandidate } from './db/stage.js';
 export type { StageInput, StageResult, ReleaseResolution } from './db/types.js';
+export { buildPipelineConfigV1, validatePipelineConfigV1 } from './pipeline.js';
+export { OllamaClient, validateVectors, validateEmbedResponse, vectorLiteral } from './ollama/client.js';
+export { OllamaError } from './ollama/errors.js';
+export type { EmbeddingClient, EmbeddingConfig } from './ollama/types.js';
+export { resolveEmbeddingConfig } from './db/embedding-config.js';
+export { generateEmbeddings } from './db/embeddings.js';
+export { finalizeAndPublish } from './db/finalize.js';
+export { ingestApprovedCandidate } from './ingest.js';
