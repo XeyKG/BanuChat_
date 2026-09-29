@@ -38,3 +38,8 @@ export { parseExecuteRequest, parseRetryRequest, parseRecoverRequest,
   parseStatusRequest } from './internal-http/protocol.js';
 export type { ExecuteRequest, RetryRequest, RecoverRequest, StatusRequest,
   InternalIngestionRequest } from './internal-http/protocol.js';
+export { ApprovalRegistryError } from './approval/errors.js';
+export type { ApprovalRegistryReason } from './approval/errors.js';
+export { parseApprovalRegistry, resolveApproval,
+  assertApprovalMatchesRequest } from './approval/registry.js';
+export type { ApprovalRecord, ApprovalRegistryV1 } from './approval/registry.js';
