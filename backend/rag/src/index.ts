@@ -45,3 +45,6 @@ export { parseApprovalRegistry, resolveApproval,
 export type { ApprovalRecord, ApprovalRegistryV1 } from './approval/registry.js';
 export { loadApprovalRegistry,
   APPROVAL_REGISTRY_MAX_BYTES } from './approval/loader.js';
+export { prepareApprovedSource } from './approval/source.js';
+export type { ApprovedSourceSnapshot,
+  PrepareApprovedSourceOptions } from './approval/source.js';

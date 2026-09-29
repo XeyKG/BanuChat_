@@ -9,7 +9,9 @@ export type ApprovalRegistryReason =
   | 'registry_unavailable'
   | 'registry_too_large'
   | 'invalid_encoding'
-  | 'invalid_json';
+  | 'invalid_json'
+  | 'dataset_mismatch'
+  | 'manifest_mismatch';
 
 export class ApprovalRegistryError extends Error {
   readonly code = 'APPROVAL_REJECTED' as const;
