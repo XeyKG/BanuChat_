@@ -6,6 +6,7 @@ import { resolveRelease, validateStageIdentity } from './releases.js';
 import { openRun } from './runs.js';
 import { findItem, stageStructured } from './structured.js';
 import { stageDocuments } from './documents.js';
+import { withAttemptFailure } from './failure.js';
 
 /** Pure boundary check, no writes or input mutation. Caller owns validated source trust. */
 export function validateStageInput(input: StageInput): void {
@@ -42,8 +43,10 @@ export async function stageCandidate(lease: WriterLease, input: StageInput): Pro
     });
     if (setup.release.outcome !== 'staging') return { outcome: setup.release.outcome, release_id: setup.release.release_id };
     invariant(setup.run);
-    await stageStructured(lease, setup.release.release_id, setup.run, input.validated.catalogs, input.validated.manifest.items);
-    await stageDocuments(lease, setup.release.release_id, setup.run, input.validated.catalogs.documents, input.derivatives, input.validated.manifest.items);
+    await withAttemptFailure(lease, setup.release.release_id, setup.run, async () => {
+      await stageStructured(lease, setup.release.release_id, setup.run!, input.validated.catalogs, input.validated.manifest.items);
+      await stageDocuments(lease, setup.release.release_id, setup.run!, input.validated.catalogs.documents, input.derivatives, input.validated.manifest.items);
+    });
     return { outcome: 'staged', release_id: setup.release.release_id, run_id: setup.run };
   } catch (error) { throw databaseError(error); }
 }

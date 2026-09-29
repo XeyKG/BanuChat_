@@ -70,6 +70,12 @@ export class WriterLease {
 
 export async function withWriterLease<T>(pool: Pool, work: (lease: WriterLease) => Promise<T>): Promise<T> {
   const lease = await WriterLease.acquire(pool);
-  try { return await work(lease); }
-  finally { await lease.release(); }
+  let result: T;
+  try { result = await work(lease); }
+  catch (error) {
+    try { await lease.release(); } catch { /* Preserve the original operation failure. */ }
+    throw error;
+  }
+  await lease.release();
+  return result;
 }

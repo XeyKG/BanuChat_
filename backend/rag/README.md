@@ -1,4 +1,4 @@
-# RAG — implementaciones 1–3 (Implementación 3 validada E2E)
+# RAG — implementaciones 1–4 (E2E real de 3; recovery/retry de 4 validados)
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
@@ -145,10 +145,11 @@ reconexión transparente ni cambio a otra conexión para continuar escrituras.
 
 El lock no implica una transacción global: setup de release/run/items en una
 transacción corta READ COMMITTED; después una transacción por registro estructurado
-o documento con sus chunks. El caller futuro debe conservar el lease durante
+o documento con sus chunks. Los orquestadores internos conservan el lease durante
 `stage → embeddings → finalize`, siempre liberándolo en finally. Esta fase NO es
-una ingesta standalone. Un run previo en la candidata o un run running existente
-bloquea una nueva ejecución; no se toma control de intentos huérfanos ni se hace retry.
+una ingesta standalone. Un run running bloquea una nueva ejecución. Runs terminales
+no bloquean un nuevo attempt; una release failed solo se reabre mediante retry
+explícito de identidad idéntica. No se toma control automático de intentos huérfanos.
 
 Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se comprueba
 el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
@@ -176,9 +177,10 @@ Errores separados de preflight: DATABASE_UNAVAILABLE (conexión/dependencia),
 DATABASE_CONFLICT (lease/contención/aislamiento), DATABASE_INVARIANT (contrato,
 constraint o identidad incompatible). `toJSON()` solo expone el código; cause
 queda interno, sin SQL, contraseña, connection string ni stack contractual.
-No hay retry automático. Si falla tras algún commit parcial, se detiene y conserva
-evidencia: la recuperación/finalización del intento queda pendiente. Un error de
-COMMIT puede tener resultado incierto; no reenviar ciegamente.
+No hay retry automático. Un fallo controlado después de crear run intenta cerrar
+pending/run/release como failed y conserva los resultados terminales. Si se pierde
+la conexión o falla ese cierre, se conserva la incertidumbre para recuperación
+explícita. Un error de COMMIT puede tener resultado incierto; no reenviar ciegamente.
 
 ### Pruebas PostgreSQL separadas
 
@@ -259,10 +261,12 @@ Véase el [registro de evidencia E2E](../../eval/ingestion/results/implementatio
 - `ingestApprovedCandidate` conserva un único WriterLease desde configuración hasta
   publicación. Las llamadas HTTP ocurren fuera de transacciones SQL; already_current
   no crea release/run ni llama a embed. No acredita aprobación ni procedencia runtime.
-- `finalizeAndPublish` bloquea dataset→release y comprueba 76 processed, 12 ready,
+- `finalizeAndPublish` bloquea dataset→release y comprueba 76 resultados exitosos
+  (processed o structured skipped/REUSED_EXACT), 12 ready,
   60 vectores del run. En una única transacción READ COMMITTED: run succeeded con
   finished_at → assert_release_complete → publish_release → COMMIT. Fallo: ROLLBACK.
-  Un fallo anterior puede dejar staging/running parcial; no hay retry ni recovery.
+  Un fallo controlado intenta cerrar failed; si se perdió el lease puede quedar
+  staging/running parcial, que requiere recovery explícito (implementación 4).
 
 ### E2E real separada
 
@@ -283,10 +287,62 @@ y distancia coseno propia 0. Usó una `implementation_revision` sintética de pr
 no acredita procedencia operacional automática del runtime. No mide calidad RAG
 ni rendimiento.
 
+## Failure handling, recovery y retry (implementación 4)
+
+Validada con PostgreSQL real desechable y EmbeddingClient **TEST_ONLY**: 96 pruebas
+unitarias PASS y 37 de integración PASS (incluido el test contenedor), total
+133 PASS / 0 FAIL / 0 SKIP. No se ejecutó Ollama real en esta fase ni se modificó
+la E2E real acreditada de Implementación 3. Véase la
+[evidencia de recovery/retry](../../eval/ingestion/results/implementation-4-recovery-retry-2026-09-29.md).
+
+API interna, sin HTTP ni N8N:
+
+| Operación | Responsabilidad |
+| --- | --- |
+| `failAttempt(lease, releaseId, runId, errorCode): Promise<void>` | Bajo lease vigente, transacción corta: locks dataset→release→run; exige staging/running y pertenencia; pending items→failed, run→failed y finalmente release→failed |
+| `recoverOrphanedAttempt(pool, releaseId, runId): Promise<void>` | Adquiere lease nuevo; decisión explícita del operador, sin timeout ni predicado de edad; aplica failAttempt con ORPHANED_ATTEMPT |
+| `prepareRetry(lease, releaseId, stageInput): Promise<string>` | Exige failed e identidad exacta; reabre staging y crea nuevo run retry con max(attempt_no)+1 y 76 items pending, todo en una transacción |
+| `retryFailedCandidate(pool, client, releaseId, input)` | Orquesta preparación, estructurados/documentos, generación y la misma finalizeAndPublish; devuelve published/release_id/run_id/embeddings |
+
+`input` es `IngestInput`: validated, derivatives, sourceGitRevision,
+implementationRevision, workflowRef y batchSize opcional. Dataset v1 conserva id=1.
+Ingesta nueva, recovery y retry son operaciones distintas; ninguna convierte una
+petición normal en retry implícito. La exclusión sigue usando advisory lock de
+sesión, conexión dedicada, transacciones cortas y ninguna reconexión transparente.
+
+Códigos persistibles cerrados: OLLAMA_UNAVAILABLE, INVALID_EMBEDDING,
+DATABASE_UNAVAILABLE, DATABASE_CONFLICT, DATABASE_INVARIANT, INGESTION_ABORTED y
+ORPHANED_ATTEMPT. `REUSED_EXACT` es result_code de reutilización, no error.
+No se persisten mensajes nativos, SQL, stacks, payloads, rutas libres ni secretos.
+Si cleanup falla, se propaga el error original sin afirmar un cierre inexistente.
+
+Retry compara dataset, source_git_revision, manifest JSONB, pipeline_config y
+embedding_config exactos; no cambia imported_at ni receta. Un digest/runtime/
+parámetro/implementation_revision distinto exige otra candidata, no reabre la anterior.
+Los registros estructurados se comparan completos en PostgreSQL, incluyendo toda
+procedencia: ausente→INSERT/processed; exacto→sin UPDATE/skipped REUSED_EXACT;
+distinto→DATABASE_INVARIANT y cierre fallido del nuevo intento.
+
+Los doce documentos se reprocesan, nunca skipped. Se conservan documents y el ID
+de la document_version existente tras verificar metadata fuente/contenido. Se
+renuevan ingestion_run_id e ingested_at. Los diez chunked reconstruyen sus seis
+chunks con embedding/run/timestamp nulos antes de generar seis vectores nuevos;
+los dos full_document quedan ready/processed, sin chunks ni embeddings. No se
+reciclan vectores parciales ni se cambia solamente su generation_run_id.
+
+Escenario canónico ejecutado: intento 1 manual failed con 67 processed y 9 failed,
+incluidos un documento completo y otro con 4/6 vectores antes del fallo; intento 2
+retry succeeded con 64 structured skipped y 12 documentos processed. Se conservaron
+ambos runs y los 152 items. Un caso de staging incompleto verificó 4 skipped y
+72 processed en retry: 64 skipped no es una regla universal.
+
+Runs/items anteriores son evidencia histórica inmutable. Las versiones/chunks de
+staging son representación candidata reparable, no un event log de cada vector
+parcial histórico. La limpieza de chunks no borra document_versions ni items.
+
 ## Límites y siguiente implementación
 
-Todavía NO implementado: recovery, retry, reapertura de failed, recuperación de runs
-huérfanos, approval registry operativo, verificación automática de
+Todavía NO implementado: approval registry operativo, verificación automática de
 `implementation_revision`, HTTP interno, N8N, retrieval productivo, Intent Router
 ni Agent/RAG. RAGAS/MRR no implementados ni validados.
 Embeddings implementados y validados en E2E real: Ollama local,
@@ -304,5 +360,6 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
 Antes de la siguiente fase quedan registro de aprobación, procedencia runtime,
-montajes read-only, permisos mínimos y retry pendientes.
+montajes read-only y permisos mínimos pendientes. Recovery requiere decisión explícita;
+no hay scheduler, cola, timeout automático ni reconciliación automática de COMMIT incierto.
 N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.

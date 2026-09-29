@@ -10,7 +10,8 @@ export async function finalizeAndPublish(lease: WriterLease, release: string, ru
     const attempt = await lease.query<{ status: string }>('SELECT status FROM banuchat.ingestion_runs WHERE id=$1 AND dataset_release_id=$2 FOR UPDATE', [run, release]);
     invariant(attempt.rows[0]?.status === 'running');
     const items = await lease.query<{ total: number; processed: number }>(`SELECT count(*)::integer AS total,
-      count(*) FILTER (WHERE status='processed')::integer AS processed FROM banuchat.ingestion_items
+      count(*) FILTER (WHERE status='processed' OR
+        (status='skipped' AND source_kind<>'document' AND result_code='REUSED_EXACT'))::integer AS processed FROM banuchat.ingestion_items
       WHERE ingestion_run_id=$1 AND dataset_release_id=$2`, [run, release]);
     invariant(items.rows[0]?.total === 76 && items.rows[0].processed === 76);
     const versions = await lease.query<{ total: number; ready: number }>(`SELECT count(*)::integer AS total,

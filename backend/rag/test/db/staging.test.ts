@@ -9,6 +9,7 @@ import { effectiveConfig } from '../../src/ollama/config.js';
 import type { StageInput } from '../../src/index.js';
 import { resolveDocument } from '../../src/db/documents.js';
 import { realSource } from '../helpers.js';
+import { recoveryScenarios } from './recovery-scenarios.js';
 
 const url = process.env['BANUCHAT_TEST_DATABASE_URL'];
 if (!url) throw new Error('test:db requiere BANUCHAT_TEST_DATABASE_URL apuntando a una base vacía banuchat_rag_test.');
@@ -237,4 +238,5 @@ test('PostgreSQL disposable staging integration', async t => {
     assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.ingestion_runs')).rows[0].n, 1);
     assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.dataset_releases')).rows[0].n, 1);
   });
+  await recoveryScenarios(t, pool, input, testConfig);
 });

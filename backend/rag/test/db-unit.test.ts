@@ -54,7 +54,7 @@ test('DB SQL text never interpolates data into identifiers', async () => {
         assert.ok(sql && (ts.isStringLiteralLike(sql)
           || (file === 'writer-lock.ts' && ts.isIdentifier(sql) && sql.text === 'sql')
           || (file === 'structured.ts' && ts.isElementAccessExpression(sql)
-            && sql.expression.getText(source) === 'STRUCTURED_SQL')), `Nonliteral SQL in ${file}`);
+            && ['STRUCTURED_SQL', 'STRUCTURED_MATCH_SQL'].includes(sql.expression.getText(source)))), `Nonliteral SQL in ${file}`);
       }
       ts.forEachChild(node, visit);
     };

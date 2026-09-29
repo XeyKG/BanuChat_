@@ -17,8 +17,8 @@ por el equipo con formato realista para simular el contexto institucional. El m�
 descrito como "RPA de scraping" pasa a ser orquestación de ingesta asíncrona de releases
 sintéticas completas sobre `/data/synthetic`, fuente de verdad versionada. PostgreSQL conserva su representación
 procesada. El contenido funcional es creado/revisado por el equipo y versionado antes
-de la ingesta. N8N valida, procesa e ingiere automáticamente revisiones aprobadas de
-`/data/synthetic` y genera derivados técnicos cuando corresponda. No inventa ni publica
+de la ingesta. La arquitectura prevé que N8N orqueste la ingesta de revisiones aprobadas de
+`/data/synthetic`, delegando la validación, el procesamiento y los derivados técnicos en `backend/rag`. No inventa ni publica
 automáticamente hechos funcionales como fuente de verdad ni modifica silenciosamente sus archivos.
 El anteproyecto justifica el despliegue on-premise en UNAB como parte de su
 viabilidad (sección 3.5) — ese punto quedó desactualizado por esta decisión y debe explicarse

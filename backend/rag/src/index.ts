@@ -27,3 +27,8 @@ export { resolveEmbeddingConfig } from './db/embedding-config.js';
 export { generateEmbeddings } from './db/embeddings.js';
 export { finalizeAndPublish } from './db/finalize.js';
 export { ingestApprovedCandidate } from './ingest.js';
+export type { IngestInput } from './ingest.js';
+export { failAttempt, recoverOrphanedAttempt, failureCode, FAILURE_CODES } from './db/failure.js';
+export type { FailureCode } from './db/failure.js';
+export { prepareRetry } from './db/retry.js';
+export { retryFailedCandidate } from './retry.js';

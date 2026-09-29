@@ -18,7 +18,7 @@ export async function resolveDocument(lease: WriterLease, document: Readonly<Doc
   return inserted.rows[0].id;
 }
 export async function stageDocuments(lease: WriterLease, release: string, run: string,
-  documents: readonly DocumentRecord[], derivatives: readonly DocumentDerivatives[], items: readonly ManifestItem[]): Promise<void> {
+  documents: readonly DocumentRecord[], derivatives: readonly DocumentDerivatives[], items: readonly ManifestItem[], retry = false): Promise<void> {
   for (const document of documents) {
     const derived = derivatives.find(value => value.document_key === document.document_key);
     invariant(derived);
@@ -26,14 +26,36 @@ export async function stageDocuments(lease: WriterLease, release: string, run: s
     await lease.transaction(async () => {
       const id = await resolveDocument(lease, document);
       const full = document.retrieval_mode === 'full_document';
-      const version = await lease.query<{ id: string }>(`INSERT INTO banuchat.document_versions
+      invariant(full ? derived.chunks.length === 0 : derived.chunks.length === 6);
+      let versionId: string;
+      const previous = retry ? (await lease.query<{ id: string; exact: boolean }>(`SELECT id,
+        ROW(version_label,title,source_path,source_locator,source_sha256,content_sha256,mime_type)
+          IS NOT DISTINCT FROM ROW($3::text,$4::text,$5::text,$6::text,$7::text,$8::text,$9::text) AS exact
+        FROM banuchat.document_versions WHERE dataset_release_id=$1 AND document_id=$2 FOR UPDATE`,
+      [release, id, document.version_label, document.title, ...provenance(item), derived.content_sha256, document.mime_type])).rows[0] : undefined;
+      if (previous) {
+        invariant(previous.exact === true);
+        versionId = previous.id;
+        if (full) {
+          invariant((await lease.query('SELECT id FROM banuchat.document_chunks WHERE dataset_release_id=$1 AND document_version_id=$2',
+            [release, versionId])).rowCount === 0);
+        } else {
+          // Candidate derivatives are replaceable in staging; historical items keep this version's ID.
+          await lease.query('DELETE FROM banuchat.document_chunks WHERE dataset_release_id=$1 AND document_version_id=$2', [release, versionId]);
+        }
+        invariant((await lease.query(`UPDATE banuchat.document_versions
+          SET ingestion_run_id=$3,ingested_at=clock_timestamp(),processing_status=$4
+          WHERE dataset_release_id=$1 AND id=$2`, [release, versionId, run, full ? 'ready' : 'pending'])).rowCount === 1);
+      } else {
+        const version = await lease.query<{ id: string }>(`INSERT INTO banuchat.document_versions
         (dataset_id,dataset_release_id,document_id,version_label,title,source_path,source_locator,source_sha256,
          content_sha256,mime_type,processing_status,ingestion_run_id)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id`,
       [1, release, id, document.version_label, document.title, ...provenance(item),
         derived.content_sha256, document.mime_type, full ? 'ready' : 'pending', run]);
-      invariant(version.rows[0]);
-      const versionId = version.rows[0].id;
+        invariant(version.rows[0]);
+        versionId = version.rows[0].id;
+      }
       const linked = await lease.query(`UPDATE banuchat.ingestion_items SET document_version_id=$1
         WHERE ingestion_run_id=$2 AND source_kind='document' AND record_key=$3 AND status='pending'`,
       [versionId, run, document.document_key]);
