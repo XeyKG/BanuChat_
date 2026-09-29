@@ -48,3 +48,7 @@ export { loadApprovalRegistry,
 export { prepareApprovedSource } from './approval/source.js';
 export type { ApprovedSourceSnapshot,
   PrepareApprovedSourceOptions } from './approval/source.js';
+export { RuntimeProvenanceError } from './runtime/errors.js';
+export type { RuntimeProvenanceReason } from './runtime/errors.js';
+export { prepareRuntimeContext } from './runtime/provenance.js';
+export type { RuntimeContext, PrepareRuntimeContextOptions } from './runtime/provenance.js';
