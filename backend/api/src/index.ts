@@ -56,3 +56,12 @@ export type {
   IntentRoutingInput,
   IntentRoutingParameters,
 } from "./routing/intent-router-types.js";
+export { dispatchChatQuery } from "./chat/chat-dispatcher.js";
+export type {
+  AgentFallback,
+  ChatDispatchDependencies,
+  ChatDispatchInput,
+  ChatDispatchResult,
+  FastPathAnswer,
+  PresentationCitation,
+} from "./chat/chat-types.js";

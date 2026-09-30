@@ -203,15 +203,15 @@ El detalle estructurado completo de cada mismatch está en \`checkpoint-2026-10-
 
 \`cases.json\` forma parte del diseño del router y no es un dataset externo independiente. Esta evaluación tampoco mide desempeño sobre usuarios reales.
 
-## Comando utilizado
+## Ejecución
 
-\`\`\`powershell
-Set-Location backend/api
-npm run build
-Set-Location ../..
-node eval/intent-routing/run-evaluation.mjs
-\`\`\`
+La evaluación requiere compilar previamente \`backend/api\` y después ejecutar:
+
+\`node eval/intent-routing/run-evaluation.mjs\`
+
+En esta ejecución, \`npm\` no estaba disponible en \`PATH\`; \`backend/api\` se compiló con el compilador TypeScript local equivalente y el runner se ejecutó inmediatamente después con Node.js.
 `;
+
 }
 
 async function main() {
