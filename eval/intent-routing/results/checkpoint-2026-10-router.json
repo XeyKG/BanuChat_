@@ -1,0 +1,67 @@
+{
+  "evaluation_type": "intent_router_design_case_conformance",
+  "router_revision": "d7527947236674489c9a8308ee0c509932129431",
+  "catalog_version": "1.0.0-draft",
+  "inputs": {
+    "cases_sha256": "109a83cfc31d197840abce8f86ac9773600adb691829e6fd2a64ba2cbef7eb72",
+    "catalog_sha256": "4ab86c511316b7f292747a890d71366c69c352116b7a174a508787b3a81835f4"
+  },
+  "metrics": {
+    "total_cases": 129,
+    "route_correct": 129,
+    "route_accuracy": 1,
+    "exact_correct": 129,
+    "exact_case_accuracy": 1,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 0,
+    "wrong_nonfallback_route": 0
+  },
+  "by_expected_route": {
+    "profile_progress": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "course_catalog": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "calendar_events": {
+      "total": 15,
+      "route_correct": 15,
+      "exact_correct": 15
+    },
+    "announcements": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "document_lookup": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "capabilities_help": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "basic_social": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "known_out_of_scope": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "agent_fallback": {
+      "total": 37,
+      "route_correct": 37,
+      "exact_correct": 37
+    }
+  },
+  "mismatches": []
+}
