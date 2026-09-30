@@ -44,3 +44,15 @@ export {
   type AnnouncementsErrorReason,
 } from "./application/announcements-errors.js";
 export type { SqlQueryClient } from "./data/sql-client.js";
+export {
+  createIntentRouter,
+  loadDefaultIntentRouter,
+} from "./routing/intent-router.js";
+export type {
+  IntentResponseVariant,
+  IntentRoute,
+  IntentRouter,
+  IntentRoutingDecision,
+  IntentRoutingInput,
+  IntentRoutingParameters,
+} from "./routing/intent-router-types.js";
