@@ -2,8 +2,9 @@
 
 ## Alcance vigente
 
-BanuChat es un prototipo académico en Fase 1 — Análisis y Diseño. Todo dato funcional
-(documentos, cursos, calendarios, convocatorias y perfiles) será sintético y tendrá
+BanuChat es un proyecto académico cuyo MVP está en implementación incremental. Todo
+dato funcional (documentos, cursos, calendarios, convocatorias y perfiles) es
+sintético y tiene
 su fuente de verdad versionada en `/data/synthetic`. PostgreSQL conserva una
 representación procesada y reconstruible desde esos archivos.
 
@@ -74,8 +75,10 @@ flowchart LR
     ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
 ```
 
-El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) define esta frontera aceptada para implementación, todavía sin implementarla.
-N8N orquesta triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
+El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) define esta frontera. El core
+TypeScript y el transporte HTTP interno ya están implementados; su composición/startup
+operacional y el workflow N8N todavía no. En la arquitectura objetivo, N8N orquesta
+triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
 hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
 de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,
 nunca paths enviados por HTTP. El operador prepara la fuente en un worktree o checkout
@@ -92,7 +95,9 @@ alterar ni volver a aprobar el contenido. No se exige un checkout en dos revisio
 El calendario se carga como parte de una release completa desde `/data/synthetic/calendars`;
 no sincronización independiente, Google Sheets ni fuente institucional. Full_document
 produce versiones sin chunks/embeddings y conserva el artefacto exacto para REST.
-Chunked v1 propone secciones H2, sin overlap: 60 chunks estimados, todavía no generados.
+Chunked v1 usa secciones H2, sin overlap: la receta produce 60 chunks, validados en
+PostgreSQL; la E2E real de Implementación 3 generó sus 60 embeddings. Estos conteos
+no acreditan calidad RAG.
 
 Se conservan 76 items por intento exitoso, incluidos skipped verificados. Solo
 publish_release promueve atómicamente; un fallo mantiene current. Ready actual es
@@ -110,7 +115,7 @@ flowchart TB
         B -->|"Fast path"| S["Servicios compartidos previstos"]
         C --> S
         S --> P[("Única instancia PostgreSQL + pgvector")]
-        N["N8N asíncrono"] -->|"HTTP privado previsto"| I["Componente de ingesta backend/rag"]
+        N["N8N asíncrono pendiente de integración"] -->|"HTTP privado implementado; startup pendiente"| I["Componente de ingesta backend/rag"]
         I -->|"Publicación completa"| P
         I -->|"Embeddings"| O["Ollama local previsto"]
         D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
@@ -124,8 +129,11 @@ y la migración fue ejecutada en PostgreSQL local desechable. Compose por sí so
 aplica automáticamente esa migración; disponer de la imagen no significa que toda
 base nueva esté migrada. No hay servicios backend o mobile en el Compose actual.
 
-Las credenciales se suministrarán localmente mediante variables; los puertos publicados
-se restringen a `127.0.0.1`. No existe despliegue institucional.
+El HTTP interno implementa `Authorization: Bearer <service-token>` con token fuera
+de Git, mínimo 32 caracteres, sin whitespace ni logging, y comparación SHA-256 con
+`timingSafeEqual`. Falta conectar esta configuración al startup/N8N operacional y
+decidir la topología/bind Docker-host final. No es autenticación de usuarios. No
+existe despliegue institucional.
 
 ## Perfiles, usabilidad y funcionalidades pendientes
 
@@ -156,9 +164,17 @@ su cumplimiento experimental.
 ## Estado validado y trabajo pendiente
 
 La migración inicial `infra/db/001_initial_schema.sql` ya fue ejecutada sobre PostgreSQL
-local desechable y la suite A–K fue ejecutada. Véanse
+local desechable y la suite A–K fue ejecutada. El core de ingesta implementa preflight,
+carga de 64 registros estructurados sintéticos, documentos/chunking, embeddings,
+publicación atómica y recovery/retry. También están implementados Approval Registry,
+vínculos approval↔source, procedencia del runtime checkout, operaciones internas
+`execute`/`retry`/`recover`/`status`, observación del WriterLease, transporte HTTP,
+Bearer service token y parser de configuración operacional. Véanse
 [documentación física](../infra/db/README.md) y [evidencia/límites](../infra/db/tests/README.md).
-Esto no acredita ingesta funcional, permisos runtime ni concurrencia avanzada.
+La E2E real de Implementación 3 acreditó 76 items procesados, 12 versiones ready,
+60 chunks, 60 embeddings reales y `already_current`, pero usó una
+`implementation_revision` TEST/sintética. Recovery/retry fue validado después con
+PostgreSQL real y embeddings TEST_ONLY; son ejecuciones separadas.
 
 Los contratos `backend/mcp-server/tools-contract.md` y
 `backend/mcp-server/tools.contract.json`, versión `2.0.0-draft`, están congelados para
@@ -168,7 +184,10 @@ se conserva hasta disponer de implementación validada.
 
 - SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y
   reintentos avanzados descritos en su documentación; no repetir como pendiente A–K.
-- MCP: implementación y pruebas de integración de los contratos congelados.
-- Modelo generador, transporte MCP y autenticación local: pendientes de diseño.
+- Operación de ingesta: startup/composición HTTP, topología/bind e integración N8N.
+- Consulta: Application Services, Intent Router, REST, retrieval, Agent/MCP y modelo
+  generador productivos.
+- Producto/evaluación: app móvil, autenticación de usuario final, RAGAS/MRR y pruebas
+  con usuarios.
 
 Las decisiones confirmadas en `AGENTS.md` prevalecen sobre referencias históricas.

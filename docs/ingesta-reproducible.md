@@ -1,9 +1,29 @@
 # Ingesta reproducible del dataset sintético
 
-Estado: diseño aceptado para implementación del MVP; implementación todavía pendiente.
-Fecha del diseño: 2026-09-26; no ingesta, chunks, vectores ni workflows ejecutados.
+Estado: diseño vigente; core de ingesta y transporte HTTP interno implementados y
+validados por etapas. La composición/startup operacional y el workflow N8N siguen
+pendientes. Fecha del diseño original: 2026-09-26.
 Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
 [contrato físico](../infra/db/README.md) y [plan de pruebas](../eval/ingestion/plan.md).
+
+### Estado de implementación
+
+Están implementados preflight, carga de 64 registros estructurados del dataset v1
+(12 cursos, 8 anuncios, 4 perfiles sintéticos, 22 eventos y 18 asociaciones),
+documentos/chunking, embeddings, publicación atómica, recovery/retry, Approval
+Registry y loader local seguro, verificaciones approval↔source y procedencia del
+runtime checkout, servicio `execute`/`retry`/`recover`/`status`, observación del
+WriterLease, transporte HTTP interno, Bearer service token y parser de configuración
+operacional. No están implementados el startup integrado del servicio ni su consumo
+por N8N.
+
+Las evidencias no se deben mezclar como una sola ejecución: la E2E real de
+Implementación 3 usó PostgreSQL 16.15, pgvector 0.8.6, Ollama 0.34.4 y
+`qwen3-embedding:0.6b`; procesó 76 items y publicó 12 versiones ready, 60 chunks y
+60 embeddings reales, seguida de `already_current`. Su `implementation_revision`
+era TEST/sintética y no acreditó procedencia operacional automática. Recovery/retry
+se validó después con PostgreSQL real y embeddings TEST_ONLY. Además existen pruebas
+unitarias y pruebas PostgreSQL con fixtures; cada resultado conserva su alcance.
 
 ## 1. Base inspeccionada y alcance
 
@@ -80,12 +100,18 @@ no inicia ni implica retry.
 
 Es una operación de solo lectura para reconciliar el estado, especialmente después
 de una respuesta HTTP perdida. Admite únicamente IDs o selectores cerrados: un
-`run_id`, un `release_id` o la identidad exacta formada por `approval_ref`,
-`source_git_revision` y `pipeline_version`; `workflow_ref` puede acompañar la
+`run_id`, un `release_id` o el **selector de identidad de control** formado por
+`approval_ref`, `source_git_revision` y `pipeline_version`; `workflow_ref` puede acompañar la
 consulta como correlación cuando corresponda. No activa ingesta, recovery ni retry,
 y no necesita Ollama para leer estado ya guardado. `not_started` solo es válido
 después de resolver la identidad reproducible; no puede inferirse únicamente de
 `approval_ref`.
+
+El selector de identidad de control puede resolver cero releases (`not_started`),
+una release (se informa su estado) o más de una (`ambiguous_identity`). Nunca se
+elige una release arbitrariamente. `recovery_required` solo se informa para un run
+`running` cuando se observa la ausencia de su WriterLease en la base actual; no usa
+edad ni timeout y no ejecuta recovery automáticamente.
 
 El servidor resuelve desde configuración controlada las raíces separadas del
 runtime/código y del checkout fuente, `implementation_revision`, PostgreSQL,
@@ -127,9 +153,12 @@ curso. Ante una respuesta perdida, el consumidor consulta `/status` antes de
 considerar `/retry`; nunca hace retry ciego.
 
 Despliegue futuro: listener solo en red local privada entre N8N y componente, sin
-puerto público ni proxy hacia mobile. Los cuatro endpoints requieren una credencial
-de servicio, cuyo mecanismo concreto todavía no se diseña; el secreto permanece
-fuera de Git y de payloads/logs, y la credencial N8N se protege. Solo el componente
+puerto público ni proxy hacia mobile. Los cuatro endpoints requieren
+`Authorization: Bearer <service-token>`. El token se configura fuera de Git, exige
+al menos 32 caracteres y ningún whitespace, no se loguea y se compara mediante
+SHA-256 + `timingSafeEqual`. Falta conectar esta configuración al startup y a N8N
+operacionales. Esta credencial entre servicios no autentica usuarios de la app.
+Solo el componente
 posee credencial de ingesta y acceso
 Ollama. Sin privilegios DDL/TRUNCATE/superusuario ni acceso a historial conversacional.
 El runtime ejecuta su propio código/build identificado; lee un source checkout
@@ -343,7 +372,8 @@ Algoritmo aceptado para implementación, sin ejecutarlo como pipeline:
    El ordinal evita colisiones por títulos repetidos; no es ancla URL ni pointer JSON.
    Páginas null para Markdown. SQL calcula el hash de cada `content`.
 
-Resultado estimado exacto para v1: **60 chunks y 60 embeddings**, no 76 embeddings.
+La receta del dataset v1 produce **60 chunks**; se validaron 60 en PostgreSQL y la
+E2E real de Implementación 3 generó **60 embeddings**, no 76 embeddings.
 Los 64 items estructurados no se vectorizan. Los 12 documentales son items de ingesta,
 no uno por chunk. doc-011/doc-012 `full_document`: cero chunks y cero embeddings,
 versión documental ready con procedencia; `content_sha256=source_sha256` por no extraer.
@@ -511,10 +541,11 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
 
 ## 11. Riesgos y verificaciones pendientes
 
-- Falta implementar y probar interfaz, credenciales mínimas, montajes read-only,
-  exclusión/reconciliación y errores de transporte. Compose todavía no los contiene.
-- Digest/runtime/opciones efectivos de Ollama, compatibilidad de límites y calidad
-  de la receta sin prefijo se verificarán al implementar; no se ejecutó Ollama aquí.
+- Falta componer y levantar operacionalmente el listener, configurar su token y
+  topología/bind Docker-host, conectarlo a N8N y definir permisos/montajes finales.
+  Compose todavía no contiene esa integración.
+- La E2E real verificó digest/runtime/opciones efectivos de Ollama y 60 embeddings;
+  todavía falta evaluar calidad de retrieval/RAG y no se acreditan RAGAS/MRR.
 - Auditar roles no propietarios, concurrencia y procedencia en retries con el plan;
   las pruebas SQL existentes no acreditan esos escenarios avanzados.
 - Conservar checkout/artefactos fuente históricos, código/build y receta del runtime
@@ -523,8 +554,9 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
 - Modelo lógico conserva `item_key` e indicaciones antiguas; ADR 0003 dice DEFAULT/CHECK
   del nombre, pero SQL solo fija dimensión/cosine y defaults de proveedor/modelo.
   Prevalece SQL. No se corrigen esos documentos fuera del alcance autorizado.
-- La arquitectura refleja SQL y suite A–K ya ejecutados, y MCP congelado para
-  implementación; esas evidencias no acreditan todavía la ingesta aquí diseñada.
+- La arquitectura refleja SQL y suite A–K, además del core de ingesta validado por
+  etapas; esas evidencias no acreditan N8N operacional ni el sistema conversacional.
 
-Esta entrega valida diseño/trazabilidad, no métricas OE1/OE2/OE4, rendimiento,
-publicación real ni capacidad del hardware. No contiene resultados PASS de ingesta.
+Estas evidencias validan diseño, trazabilidad y publicación dentro de sus alcances
+separados; no acreditan métricas OE1/OE2/OE4, calidad RAG, rendimiento del sistema,
+N8N operacional ni capacidad general del hardware.

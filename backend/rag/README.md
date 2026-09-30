@@ -1,10 +1,24 @@
-# RAG — implementaciones 1–4 (E2E real de 3; recovery/retry de 4 validados)
+# RAG e ingesta — estado implementado
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
 SHA-256 físico, identidades/relaciones, verificador Git local separado y extracción/
 chunking determinista en memoria. Usa `node:test`, sin frameworks ni servicios.
 Fuente de verdad: `/data/synthetic`, solo lectura. Contratos congelados sin cambios.
+
+El core de ingesta está implementado: preflight, persistencia estructurada y
+documental, chunking/embeddings, publicación atómica y recovery/retry. También están
+implementados Approval Registry y loader seguro, vínculo approval↔source, procedencia
+del runtime checkout, servicio `execute`/`retry`/`recover`/`status`, observación real
+del WriterLease, transporte HTTP interno, Bearer service token y parser de
+configuración operacional. Faltan la composición/startup que levante todo como un
+servicio integrado y el consumo operacional desde N8N.
+
+La suite unitaria actual registra **176 PASS / 0 FAIL / 0 SKIP**. La última
+validación PostgreSQL de 5I, separada, registró **38 PASS / 0 FAIL / 0 SKIP** sobre
+PostgreSQL 16.15 y pgvector 0.8.6. La E2E real histórica de Implementación 3 fue otra
+ejecución: **5 E2E PASS** y 60 embeddings reales con
+`qwen3-embedding:0.6b`. No se suman estas corridas en un total único.
 
 ## Ejecutar
 
@@ -78,7 +92,8 @@ conteos. El dialecto/shape local sigue siendo el contrato v1, no un migrador de 
 Los errores tipados distinguen `SOURCE_REJECTED`, `VALIDATION_FAILED` e
 `INTERNAL_ERROR`, con categoría y archivo lógico permitido. `toJSON()`/`safeError`
 no serializan stack, stderr, paths arbitrarios, contenido fuente ni secretos.
-No hay envelope HTTP ni logger productivo.
+El preflight conserva errores tipados y saneados. El transporte HTTP interno añade
+su envelope técnico allowlisted; no existe logger productivo general del sistema.
 
 ## Verificación Git separada
 
@@ -94,7 +109,9 @@ Git se invoca con argumentos separados, sin shell, locks opcionales ni variables
 `GIT_*` heredadas que redirijan repositorio/índice. No checkout/pull/fetch/branch/red.
 Las pruebas crean commits exclusivamente en repositorios temporales aislados,
 que se eliminan al finalizar; no crean un worktree persistente del proyecto.
-No se implementan approval registry ni verificación de `implementation_revision`.
+La verificación Git de fuente se complementa actualmente con Approval Registry,
+vínculo approval↔source y verificación de procedencia del runtime checkout para
+`implementation_revision`.
 
 ## Receta Markdown v1
 
@@ -155,8 +172,9 @@ Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se com
 el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
 y métrica cosine. PostgreSQL calcula los hashes JSONB de manifest/pipeline;
 el código no los sustituye por SHA de JSON.stringify. El caller entrega una receta
-JSON canónica v1 sin secretos; esta capa no implementa approval registry ni acredita
-que implementation_revision corresponda al runtime ejecutado.
+JSON canónica v1 sin secretos. La composición actual usa los controles implementados
+de aprobación y procedencia para acreditar que `implementation_revision` corresponda
+al runtime checkout ejecutado.
 
 Estado esperado de v1 después de staging:
 
@@ -295,7 +313,7 @@ unitarias PASS y 37 de integración PASS (incluido el test contenedor), total
 la E2E real acreditada de Implementación 3. Véase la
 [evidencia de recovery/retry](../../eval/ingestion/results/implementation-4-recovery-retry-2026-09-29.md).
 
-API interna, sin HTTP ni N8N:
+Core interno (la fase 4 todavía se validó sin HTTP ni N8N):
 
 | Operación | Responsabilidad |
 | --- | --- |
@@ -342,9 +360,18 @@ parcial histórico. La limpieza de chunks no borra document_versions ni items.
 
 ## Límites y siguiente implementación
 
-Todavía NO implementado: approval registry operativo, verificación automática de
-`implementation_revision`, HTTP interno, N8N, retrieval productivo, Intent Router
-ni Agent/RAG. RAGAS/MRR no implementados ni validados.
+El Approval Registry, la verificación approval↔source, la procedencia del runtime,
+el servicio interno y su transporte HTTP autenticado ya están implementados. La
+operación `status` es read-only: su selector de identidad de control puede resolver
+0 releases (`not_started`), una release (su estado) o más de una
+(`ambiguous_identity`), sin selección arbitraria. `recovery_required` significa run
+`running` y ausencia observable del WriterLease en la base actual; no depende de
+edad/timeout ni ejecuta recovery.
+
+Todavía no están implementados la composición/startup operacional del HTTP, la
+decisión final de topología/bind Docker-host, el workflow N8N funcional, retrieval
+productivo, Intent Router, Application Services, REST, Agent/MCP, generador LLM ni
+app móvil. RAGAS/MRR y evaluación con usuarios no están implementados ni validados.
 Embeddings implementados y validados en E2E real: Ollama local,
 `qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
 búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
@@ -359,7 +386,7 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
-Antes de la siguiente fase quedan registro de aprobación, procedencia runtime,
-montajes read-only y permisos mínimos pendientes. Recovery requiere decisión explícita;
+Antes de la siguiente fase quedan composición/startup, integración N8N, topología,
+montajes read-only y permisos mínimos operacionales pendientes. Recovery requiere decisión explícita;
 no hay scheduler, cola, timeout automático ni reconciliación automática de COMMIT incierto.
 N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.
