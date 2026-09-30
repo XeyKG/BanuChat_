@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import { InternalRuntimeConfigError,
   type InternalRuntimeConfigReason } from './runtime-config-errors.js';
+import { isValidInternalServiceToken } from './service-token.js';
 
 export interface InternalIngestionRuntimeConfig {
   approvalRegistryPath: string;
@@ -82,7 +83,7 @@ export function parseInternalIngestionEnvironment(
     reject('invalid_ollama_url');
   }
 
-  if (serviceToken.length < 32) {
+  if (!isValidInternalServiceToken(serviceToken)) {
     reject('invalid_value');
   }
 

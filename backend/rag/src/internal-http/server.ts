@@ -5,6 +5,7 @@ import type { InternalIngestionService } from './service.js';
 import { InternalHttpTransportError, mapInternalHttpError } from './http-errors.js';
 import { parseExecuteRequest, parseRecoverRequest,
   parseRetryRequest, parseStatusRequest } from './protocol.js';
+import { isValidInternalServiceToken } from './service-token.js';
 
 export const INTERNAL_HTTP_BODY_LIMIT = 64 * 1024;
 
@@ -121,7 +122,7 @@ async function dispatch(
 export function createInternalIngestionHttpServer(
   options: InternalIngestionHttpServerOptions,
 ): Server {
-  if (typeof options.serviceToken !== 'string' || options.serviceToken.length < 32) {
+  if (!isValidInternalServiceToken(options.serviceToken)) {
     throw new Error('Invalid internal HTTP configuration');
   }
   const expectedDigest = digest(options.serviceToken);
@@ -157,4 +158,3 @@ export function createInternalIngestionHttpServer(
     });
   });
 }
-

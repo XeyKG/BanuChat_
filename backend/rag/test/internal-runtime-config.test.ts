@@ -101,6 +101,22 @@ test('accepts exactly 32 token characters and rejects a shorter token', () => {
   expectReason(short, 'invalid_value');
 });
 
+test('rejects service tokens containing whitespace without normalizing them', () => {
+  const invalidTokens = [
+    ` ${'a'.repeat(32)}`,
+    `${'a'.repeat(32)} `,
+    `${'a'.repeat(16)} ${'a'.repeat(16)}`,
+    `${'a'.repeat(16)}\t${'a'.repeat(15)}`,
+    `${'a'.repeat(16)}\n${'a'.repeat(15)}`,
+  ];
+
+  for (const serviceToken of invalidTokens) {
+    const env = validEnvironment();
+    env.BANUCHAT_INGESTION_SERVICE_TOKEN = serviceToken;
+    expectReason(env, 'invalid_value');
+  }
+});
+
 test('accepts postgresql and postgres database URL protocols', () => {
   for (const databaseUrl of ['postgresql://db.example/banuchat', 'postgres://localhost']) {
     const env = validEnvironment();
@@ -131,9 +147,9 @@ test('accepts an HTTP Ollama URL and rejects malformed or HTTPS URLs', () => {
 });
 
 test('serializes errors without configuration values or native details', () => {
-  const secret = 'super-secret-token-value-that-must-not-leak';
+  const secret = `super-secret-token-value ${'x'.repeat(32)}`;
   const env = validEnvironment();
-  env.BANUCHAT_INGESTION_SERVICE_TOKEN = secret.slice(0, 8);
+  env.BANUCHAT_INGESTION_SERVICE_TOKEN = secret;
 
   let caught: unknown;
   try {

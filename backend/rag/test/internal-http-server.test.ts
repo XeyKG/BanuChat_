@@ -106,6 +106,24 @@ async function post(port: number, path: string, body: string | Buffer, options: 
   });
 }
 
+test('direct server construction rejects configured service tokens containing whitespace', () => {
+  const { service } = fakeService();
+  for (const serviceToken of [
+    ` ${'a'.repeat(32)}`,
+    `${'a'.repeat(32)} `,
+    `${'a'.repeat(16)} ${'a'.repeat(16)}`,
+    `${'a'.repeat(16)}\t${'a'.repeat(15)}`,
+    `${'a'.repeat(16)}\n${'a'.repeat(15)}`,
+  ]) {
+    assert.throws(
+      () => createInternalIngestionHttpServer({ service, serviceToken }),
+      (error: unknown) => error instanceof Error
+        && error.message === 'Invalid internal HTTP configuration'
+        && !error.message.includes(serviceToken),
+    );
+  }
+});
+
 test('authenticated execute, retry, recover and status return safe 200 responses', async () => {
   const fixture = fakeService();
   await withServer(fixture.service, async (port) => {
