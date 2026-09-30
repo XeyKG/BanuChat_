@@ -64,3 +64,10 @@ export { isDatasetWriterLeaseHeld, getIngestionStatusByRun,
   notStartedStatus } from './internal-http/status.js';
 export type { IngestionStatusOutcome, IngestionItemCounts,
   IngestionStatus } from './internal-http/status.js';
+export { InternalHttpTransportError,
+  mapInternalHttpError } from './internal-http/http-errors.js';
+export type { InternalHttpErrorBody,
+  InternalHttpErrorResponse } from './internal-http/http-errors.js';
+export { createInternalIngestionHttpServer,
+  INTERNAL_HTTP_BODY_LIMIT } from './internal-http/server.js';
+export type { InternalIngestionHttpServerOptions } from './internal-http/server.js';
