@@ -71,3 +71,7 @@ export type { InternalHttpErrorBody,
 export { createInternalIngestionHttpServer,
   INTERNAL_HTTP_BODY_LIMIT } from './internal-http/server.js';
 export type { InternalIngestionHttpServerOptions } from './internal-http/server.js';
+export { InternalRuntimeConfigError } from './internal-http/runtime-config-errors.js';
+export type { InternalRuntimeConfigReason } from './internal-http/runtime-config-errors.js';
+export { parseInternalIngestionEnvironment } from './internal-http/runtime-config.js';
+export type { InternalIngestionRuntimeConfig } from './internal-http/runtime-config.js';
