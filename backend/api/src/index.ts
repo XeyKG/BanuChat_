@@ -30,4 +30,17 @@ export {
   CalendarEventsError,
   type CalendarEventsErrorReason,
 } from "./application/calendar-events-errors.js";
+export {
+  getAnnouncements,
+  type AnnouncementResult,
+  type AnnouncementSource,
+  type AnnouncementsInput,
+  type AnnouncementsResult,
+  type AnnouncementTemporalStatus,
+  type DerivedAnnouncementStatus,
+} from "./application/announcements.js";
+export {
+  AnnouncementsError,
+  type AnnouncementsErrorReason,
+} from "./application/announcements-errors.js";
 export type { SqlQueryClient } from "./data/sql-client.js";
