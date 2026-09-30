@@ -165,8 +165,7 @@ El runtime ejecuta su propio código/build identificado; lee un source checkout
 separado, preparado por el operador como worktree Git o checkout equivalente y
 montado/configurado read-only. Ambas raíces son configuración controlada del servidor,
 no parámetros HTTP. `/data/synthetic` se resuelve dentro de la raíz fuente, nunca
-por defecto dentro del checkout del backend. No se implementan listener, credenciales,
-roles, dependencias, worktrees ni montajes en esta tarea.
+por defecto dentro del checkout del backend. El listener HTTP y la credencial Bearer ya están implementados como componentes. Siguen pendientes la composición/startup operacional, los roles y permisos mínimos, la preparación de worktrees o montajes read-only y la conexión efectiva con N8N.
 
 ## 3. Aprobación y revisiones Git independientes
 

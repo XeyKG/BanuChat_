@@ -172,9 +172,7 @@ Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se com
 el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
 y métrica cosine. PostgreSQL calcula los hashes JSONB de manifest/pipeline;
 el código no los sustituye por SHA de JSON.stringify. El caller entrega una receta
-JSON canónica v1 sin secretos. La composición actual usa los controles implementados
-de aprobación y procedencia para acreditar que `implementation_revision` corresponda
-al runtime checkout ejecutado.
+JSON canónica v1 sin secretos. El core ya dispone de controles implementados de aprobación y procedencia; la composición/startup operacional que los integra con las dependencias de ejecución continúa pendiente.
 
 Estado esperado de v1 después de staging:
 
