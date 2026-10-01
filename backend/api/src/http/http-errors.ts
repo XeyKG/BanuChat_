@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { CreateConversationError } from "../application/conversations-errors.js";
+import { ConversationDetailError } from "../application/conversation-detail-errors.js";
 import { ConversationHistoryError } from "../application/conversation-history-errors.js";
 import { CurrentReleaseError } from "../application/current-release-errors.js";
 import { SendMessageError } from "../application/messages-errors.js";
@@ -91,6 +92,17 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
     return error.reason === "invalid_argument"
       ? INVALID_ARGUMENT
       : INTERNAL_ERROR;
+  }
+
+  if (error instanceof ConversationDetailError) {
+    switch (error.reason) {
+      case "invalid_argument":
+        return INVALID_ARGUMENT;
+      case "conversation_not_found":
+        return NOT_FOUND;
+      case "invalid_database_result":
+        return INTERNAL_ERROR;
+    }
   }
 
   if (error instanceof SendMessageError) {

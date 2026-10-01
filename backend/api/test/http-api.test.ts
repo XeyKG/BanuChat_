@@ -903,3 +903,174 @@ test("GET /conversations maps invalid database rows to a safe 500", async () => 
     },
   );
 });
+
+const conversationDetailRow = {
+  conversation_id: CONVERSATION_ID,
+  dataset_release_id: OTHER_RELEASE_ID,
+  profile_key: "student_001",
+  started_at: CREATED_AT,
+  profile_alias: "Alias histórico",
+};
+
+const detailUserRow = {
+  message_id: USER_MESSAGE_ID,
+  ordinal: 0,
+  role: "user",
+  content: "Pregunta sintética",
+  created_at: "2026-10-01T14:00:01.000Z",
+  answer_dataset_release_id: null,
+  insufficient_evidence: false,
+};
+
+const detailAssistantRow = {
+  message_id: ASSISTANT_MESSAGE_ID,
+  ordinal: 1,
+  role: "assistant",
+  content: "Respuesta histórica",
+  created_at: "2026-10-01T14:00:02.000Z",
+  answer_dataset_release_id: RELEASE_ID,
+  insufficient_evidence: false,
+};
+
+const detailDocumentCitationRow = {
+  message_id: ASSISTANT_MESSAGE_ID,
+  message_ordinal: 1,
+  citation_index: 0,
+  dataset_release_id: RELEASE_ID,
+  source_kind: "document",
+  source_locator: "document:guide#section",
+  document_version_id: DOCUMENT_VERSION_ID,
+  metadata_label: "Guía histórica",
+};
+
+test("GET /conversations/{id} returns an empty historical conversation", async () => {
+  await withServer(
+    sql([conversationDetailRow], [], []),
+    async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      );
+      assert.equal(response.status, 200);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+      assert.equal(
+        response.headers.get("content-type"),
+        "application/json; charset=utf-8",
+      );
+      assert.deepEqual(await response.json(), {
+        conversation_id: CONVERSATION_ID,
+        started_at: CREATED_AT,
+        profile: {
+          profile_key: "student_001",
+          alias: "Alias histórico",
+        },
+        messages: [],
+      });
+    },
+  );
+});
+
+test("GET /conversations/{id} round-trips messages and a document citation", async () => {
+  await withServer(
+    sql(
+      [conversationDetailRow],
+      [detailUserRow, detailAssistantRow],
+      [detailDocumentCitationRow],
+    ),
+    async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      );
+      assert.equal(response.status, 200);
+      const body = await response.json();
+      assert.deepEqual(body, {
+        conversation_id: CONVERSATION_ID,
+        started_at: CREATED_AT,
+        profile: {
+          profile_key: "student_001",
+          alias: "Alias histórico",
+        },
+        messages: [
+          {
+            message_id: USER_MESSAGE_ID,
+            role: "user",
+            content: "Pregunta sintética",
+            created_at: "2026-10-01T14:00:01.000Z",
+          },
+          {
+            message_id: ASSISTANT_MESSAGE_ID,
+            role: "assistant",
+            content: "Respuesta histórica",
+            created_at: "2026-10-01T14:00:02.000Z",
+            insufficient_evidence: false,
+            citations: [
+              {
+                index: 0,
+                source_kind: "document",
+                label: "Documento: Guía histórica",
+                locator: "document:guide#section",
+                release_id: RELEASE_ID,
+                document_version_id: DOCUMENT_VERSION_ID,
+                artifact_url: null,
+              },
+            ],
+          },
+        ],
+      });
+      const serialized = JSON.stringify(body);
+      assert.doesNotMatch(
+        serialized,
+        /ordinal|answer_dataset_release_id|source_path|source_sha256|chunk_id/u,
+      );
+    },
+  );
+});
+
+test("GET /conversations/{id} rejects an invalid UUID", async () => {
+  await withServer(sql(), async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/v1/conversations/not-a-uuid`);
+    await assertErrorResponse(response, 400, "INVALID_ARGUMENT");
+  });
+});
+
+test("GET /conversations/{id} rejects query parameters", async () => {
+  await withServer(sql(), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}?x=1`,
+    );
+    await assertErrorResponse(response, 400, "INVALID_ARGUMENT");
+  });
+});
+
+test("GET /conversations/{id} maps a missing conversation to 404", async () => {
+  await withServer(sql([]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+    );
+    await assertErrorResponse(response, 404, "NOT_FOUND");
+  });
+});
+
+test("GET /conversations/{id} maps database unavailability to 503", async () => {
+  await withServer(sql(new DatabaseDependencyError()), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+    );
+    await assertErrorResponse(response, 503, "DEPENDENCY_UNAVAILABLE");
+  });
+});
+
+test("GET /conversations/{id} maps malformed rows to a safe 500", async () => {
+  await withServer(
+    sql([{ ...conversationDetailRow, profile_alias: null }]),
+    async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      );
+      const rawBody = await response.text();
+      assert.equal(response.status, 500);
+      assert.doesNotMatch(rawBody, /SELECT|banuchat|profile_alias/u);
+      const body = JSON.parse(rawBody) as ErrorBody;
+      assert.equal(body.error.code, "INTERNAL_ERROR");
+    },
+  );
+});

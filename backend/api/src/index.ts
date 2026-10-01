@@ -73,6 +73,20 @@ export {
   type ConversationHistoryErrorReason,
 } from "./application/conversation-history-errors.js";
 export {
+  getConversationDetail,
+  type ConversationDetailAssistantMessage,
+  type ConversationDetailCitation,
+  type ConversationDetailMessage,
+  type ConversationDetailResult,
+  type ConversationDetailSourceKind,
+  type ConversationDetailUserMessage,
+  type GetConversationDetailInput,
+} from "./application/conversation-detail.js";
+export {
+  ConversationDetailError,
+  type ConversationDetailErrorReason,
+} from "./application/conversation-detail-errors.js";
+export {
   sendMessage,
   type DocumentRagResponder,
   type SendMessageDependencies,

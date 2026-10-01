@@ -6,6 +6,7 @@ import {
 } from "node:http";
 
 import { createConversation } from "../application/conversations.js";
+import { getConversationDetail } from "../application/conversation-detail.js";
 import {
   listConversations,
   type ListConversationsInput,
@@ -33,6 +34,8 @@ const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MESSAGES_PATH_PATTERN =
   /^\/api\/v1\/conversations\/([^/]+)\/messages$/u;
+const CONVERSATION_DETAIL_PATH_PATTERN =
+  /^\/api\/v1\/conversations\/([^/]+)$/u;
 
 export interface ApiServerDependencies {
   sql: SqlQueryClient;
@@ -188,9 +191,13 @@ async function handleRequest(
   const isConversationsPath = url.pathname === "/api/v1/conversations";
   const messagesMatch = MESSAGES_PATH_PATTERN.exec(url.pathname);
   const isMessagesPath = messagesMatch !== null;
+  const conversationDetailMatch = CONVERSATION_DETAIL_PATH_PATTERN.exec(
+    url.pathname,
+  );
+  const isConversationDetailPath = conversationDetailMatch !== null;
 
   if (
-    (isProfilesPath || isMessagesPath ||
+    (isProfilesPath || isMessagesPath || isConversationDetailPath ||
       (isConversationsPath && request.method !== "GET")) &&
     url.search !== ""
   ) {
@@ -231,6 +238,26 @@ async function handleRequest(
       sendError(response, describeHttpError(error));
     }
     return;
+  }
+
+  if (isConversationDetailPath) {
+    const conversationId = conversationDetailMatch[1];
+    if (conversationId === undefined || !UUID_PATTERN.test(conversationId)) {
+      sendError(response, describeHttpError(new InvalidHttpRequestError()));
+      return;
+    }
+
+    if (request.method === "GET") {
+      try {
+        const result = await getConversationDetail(dependencies.sql, {
+          conversation_id: conversationId,
+        });
+        sendJson(response, 200, result);
+      } catch (error) {
+        sendError(response, describeHttpError(error));
+      }
+      return;
+    }
   }
 
   if (isMessagesPath) {
