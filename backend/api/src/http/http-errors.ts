@@ -4,9 +4,11 @@ import { CreateConversationError } from "../application/conversations-errors.js"
 import { ConversationDetailError } from "../application/conversation-detail-errors.js";
 import { ConversationHistoryError } from "../application/conversation-history-errors.js";
 import { CurrentReleaseError } from "../application/current-release-errors.js";
+import { DeleteConversationError } from "../application/delete-conversation-errors.js";
 import { SendMessageError } from "../application/messages-errors.js";
 import { ProfilesError } from "../application/profiles-errors.js";
 import { DatabaseDependencyError } from "../data/database-errors.js";
+import { ConversationActivityConflictError } from "./conversation-activity.js";
 
 export type HttpErrorCode =
   | "INVALID_ARGUMENT"
@@ -63,6 +65,10 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
     return INVALID_ARGUMENT;
   }
 
+  if (error instanceof ConversationActivityConflictError) {
+    return CONFLICT;
+  }
+
   if (error instanceof DatabaseDependencyError) {
     return DEPENDENCY_UNAVAILABLE;
   }
@@ -103,6 +109,12 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
       case "invalid_database_result":
         return INTERNAL_ERROR;
     }
+  }
+
+  if (error instanceof DeleteConversationError) {
+    return error.reason === "invalid_argument"
+      ? INVALID_ARGUMENT
+      : INTERNAL_ERROR;
   }
 
   if (error instanceof SendMessageError) {

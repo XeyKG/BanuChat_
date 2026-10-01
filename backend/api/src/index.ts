@@ -87,6 +87,14 @@ export {
   type ConversationDetailErrorReason,
 } from "./application/conversation-detail-errors.js";
 export {
+  deleteConversation,
+  type DeleteConversationInput,
+} from "./application/delete-conversation.js";
+export {
+  DeleteConversationError,
+  type DeleteConversationErrorReason,
+} from "./application/delete-conversation-errors.js";
+export {
   sendMessage,
   type DocumentRagResponder,
   type SendMessageDependencies,

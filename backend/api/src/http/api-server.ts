@@ -7,6 +7,7 @@ import {
 
 import { createConversation } from "../application/conversations.js";
 import { getConversationDetail } from "../application/conversation-detail.js";
+import { deleteConversation } from "../application/delete-conversation.js";
 import {
   listConversations,
   type ListConversationsInput,
@@ -18,6 +19,10 @@ import {
 import { listProfiles } from "../application/profiles.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
+import {
+  ConversationActivityConflictError,
+  ConversationActivityCoordinator,
+} from "./conversation-activity.js";
 import {
   createErrorBody,
   describeHttpError,
@@ -65,6 +70,11 @@ function sendError(
   sendJson(response, description.status, createErrorBody(description));
 }
 
+function sendNoContent(response: ServerResponse): void {
+  response.writeHead(204, { "Cache-Control": "no-store" });
+  response.end();
+}
+
 function requireJsonContentType(request: IncomingMessage): void {
   const contentType = request.headers["content-type"];
   if (
@@ -89,6 +99,17 @@ async function readRequestBody(request: IncomingMessage): Promise<string> {
   }
 
   return Buffer.concat(chunks, byteLength).toString("utf8");
+}
+
+async function requireEmptyRequestBody(request: IncomingMessage): Promise<void> {
+  let hasBody = false;
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    if (buffer.byteLength > 0) {
+      hasBody = true;
+    }
+  }
+  if (hasBody) throw new InvalidHttpRequestError();
 }
 
 function parseCreateConversationBody(body: string): { profile_key: string } {
@@ -178,6 +199,7 @@ async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
   dependencies: ApiServerDependencies,
+  activity: ConversationActivityCoordinator,
 ): Promise<void> {
   let url: URL;
   try {
@@ -258,6 +280,26 @@ async function handleRequest(
       }
       return;
     }
+
+    if (request.method === "DELETE") {
+      try {
+        await requireEmptyRequestBody(request);
+        if (!activity.tryBeginDelete(conversationId)) {
+          throw new ConversationActivityConflictError();
+        }
+        try {
+          await deleteConversation(dependencies.sql, {
+            conversation_id: conversationId,
+          });
+        } finally {
+          activity.endDelete(conversationId);
+        }
+        sendNoContent(response);
+      } catch (error) {
+        sendError(response, describeHttpError(error));
+      }
+      return;
+    }
   }
 
   if (isMessagesPath) {
@@ -275,18 +317,26 @@ async function handleRequest(
         requireJsonContentType(request);
         const input = parseSendMessageBody(await readRequestBody(request));
         const now = (dependencies.now ?? (() => new Date().toISOString()))();
-        const result = await sendMessage(
-          {
-            sql: dependencies.sql,
-            router: dependencies.router,
-            document_rag: dependencies.document_rag,
-          },
-          {
-            conversation_id: conversationId,
-            content: input.content,
-            now,
-          },
-        );
+        if (!activity.tryBeginMessage(conversationId)) {
+          throw new ConversationActivityConflictError();
+        }
+        let result;
+        try {
+          result = await sendMessage(
+            {
+              sql: dependencies.sql,
+              router: dependencies.router,
+              document_rag: dependencies.document_rag,
+            },
+            {
+              conversation_id: conversationId,
+              content: input.content,
+              now,
+            },
+          );
+        } finally {
+          activity.endMessage(conversationId);
+        }
         sendJson(response, 201, result);
       } catch (error) {
         sendError(response, describeHttpError(error));
@@ -301,7 +351,8 @@ async function handleRequest(
 export function createApiServer(
   dependencies: ApiServerDependencies,
 ): Server {
+  const activity = new ConversationActivityCoordinator();
   return createServer((request, response) => {
-    void handleRequest(request, response, dependencies);
+    void handleRequest(request, response, dependencies, activity);
   });
 }

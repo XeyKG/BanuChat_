@@ -31,9 +31,12 @@ const UUID_PATTERN =
 type QueryOutcome = readonly unknown[] | Error;
 
 class ScriptedSqlClient implements SqlQueryClient {
+  readonly queryTexts: string[] = [];
+
   constructor(private readonly outcomes: QueryOutcome[]) {}
 
-  async query<T>(): Promise<{ rows: T[] }> {
+  async query<T>(text = ""): Promise<{ rows: T[] }> {
+    this.queryTexts.push(text);
     const outcome = this.outcomes.shift();
     if (outcome === undefined) {
       throw new Error("unexpected query");
@@ -1072,5 +1075,359 @@ test("GET /conversations/{id} maps malformed rows to a safe 500", async () => {
       const body = JSON.parse(rawBody) as ErrorBody;
       assert.equal(body.error.code, "INTERNAL_ERROR");
     },
+  );
+});
+
+const CONVERSATION_B_ID = "99999999-9999-4999-8999-999999999999";
+
+interface Deferred<T> {
+  promise: Promise<T>;
+  resolve: (value: T | PromiseLike<T>) => void;
+  reject: (reason?: unknown) => void;
+}
+
+function deferred<T>(): Deferred<T> {
+  let resolve!: Deferred<T>["resolve"];
+  let reject!: Deferred<T>["reject"];
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve, reject };
+}
+
+class BlockingDeleteSqlClient implements SqlQueryClient {
+  readonly started = deferred<void>();
+  readonly release = deferred<void>();
+  readonly queryTexts: string[] = [];
+
+  constructor(private readonly expectedStarts: number) {}
+
+  async query<T>(text: string): Promise<{ rows: T[] }> {
+    this.queryTexts.push(text);
+    const call = this.queryTexts.length;
+    if (call === this.expectedStarts) this.started.resolve();
+    await this.release.promise;
+    const rows = call === 1 ? [{ id: CONVERSATION_ID }] : [];
+    return { rows: rows as T[] };
+  }
+}
+
+test("DELETE /conversations/{id} returns an exact empty 204", async () => {
+  await withServer(sql([{ id: CONVERSATION_ID }]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(response.headers.get("content-type"), null);
+    assert.equal(await response.text(), "");
+  });
+});
+
+test("DELETE /conversations/{id} is idempotent for missing and repeated deletes", async () => {
+  await withServer(
+    sql([{ id: CONVERSATION_ID }], []),
+    async (baseUrl) => {
+      const url = `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`;
+      const first = await fetch(url, { method: "DELETE" });
+      const second = await fetch(url, { method: "DELETE" });
+      assert.equal(first.status, 204);
+      assert.equal(second.status, 204);
+    },
+  );
+
+  await withServer(sql([]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    assert.equal(response.status, 204);
+  });
+});
+
+test("DELETE /conversations/{id} rejects invalid UUID, query and any body bytes", async () => {
+  await withServer(sql(), async (baseUrl) => {
+    const invalidUuid = await fetch(`${baseUrl}/api/v1/conversations/bad`, {
+      method: "DELETE",
+    });
+    await assertErrorResponse(invalidUuid, 400, "INVALID_ARGUMENT");
+
+    const query = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}?x=1`,
+      { method: "DELETE" },
+    );
+    await assertErrorResponse(query, 400, "INVALID_ARGUMENT");
+
+    for (const body of ["{}", " "]) {
+      const withBody = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+        { method: "DELETE", body },
+      );
+      await assertErrorResponse(withBody, 400, "INVALID_ARGUMENT");
+    }
+  });
+});
+
+test("DELETE /conversations/{id} maps dependency and internal errors safely", async () => {
+  await withServer(sql(new DatabaseDependencyError()), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    await assertErrorResponse(response, 503, "DEPENDENCY_UNAVAILABLE");
+  });
+
+  await withServer(sql([{ id: "wrong-id" }]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    const rawBody = await response.text();
+    assert.equal(response.status, 500);
+    assert.doesNotMatch(rawBody, /wrong-id|DELETE|banuchat/u);
+    const body = JSON.parse(rawBody) as ErrorBody;
+    assert.equal(body.error.code, "INTERNAL_ERROR");
+  });
+});
+
+test("an active POST blocks DELETE without executing DELETE SQL, then releases", async () => {
+  const ragStarted = deferred<void>();
+  const finishRag = deferred<DocumentRagAnswer>();
+  const client = new ScriptedSqlClient([
+    [conversationContextRow],
+    [
+      persistedTurnRow("consulta A", {
+        assistant_content: "Respuesta documental sintética.",
+      }),
+    ],
+    [{ id: CONVERSATION_ID }],
+  ]);
+
+  await withServer(
+    client,
+    async (baseUrl) => {
+      const message = fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: "consulta A" }),
+        },
+      );
+      await ragStarted.promise;
+
+      const blockedDelete = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+        { method: "DELETE" },
+      );
+      await assertErrorResponse(blockedDelete, 409, "CONFLICT");
+      assert.equal(client.queryTexts.length, 1);
+      assert.doesNotMatch(client.queryTexts.join("\n"), /DELETE FROM/u);
+
+      finishRag.resolve(documentAnswer());
+      assert.equal((await message).status, 201);
+      const allowedDelete = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+        { method: "DELETE" },
+      );
+      assert.equal(allowedDelete.status, 204);
+      assert.match(client.queryTexts.at(-1) ?? "", /DELETE FROM/u);
+    },
+    {
+      document_rag: async () => {
+        ragStarted.resolve();
+        return finishRag.promise;
+      },
+    },
+  );
+});
+
+test("an active DELETE blocks POST for the same conversation", async () => {
+  const client = new BlockingDeleteSqlClient(1);
+  await withServer(client, async (baseUrl) => {
+    const deletion = fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    await client.started.promise;
+
+    const blockedMessage = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "consulta bloqueada" }),
+      },
+    );
+    await assertErrorResponse(blockedMessage, 409, "CONFLICT");
+    assert.equal(client.queryTexts.length, 1);
+
+    client.release.resolve();
+    assert.equal((await deletion).status, 204);
+  });
+});
+
+test("activity on conversation A does not block conversation B", async () => {
+  const aStarted = deferred<void>();
+  const finishA = deferred<DocumentRagAnswer>();
+  const client = new ScriptedSqlClient([
+    [conversationContextRow],
+    [conversationContextRow],
+    [
+      persistedTurnRow("consulta B", {
+        assistant_content: "Respuesta documental sintética.",
+      }),
+    ],
+    [
+      persistedTurnRow("consulta A", {
+        assistant_content: "Respuesta documental sintética.",
+      }),
+    ],
+  ]);
+
+  await withServer(
+    client,
+    async (baseUrl) => {
+      const messageA = fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: "consulta A" }),
+        },
+      );
+      await aStarted.promise;
+
+      const messageB = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_B_ID}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: "consulta B" }),
+        },
+      );
+      assert.equal(messageB.status, 201);
+      finishA.resolve(documentAnswer());
+      assert.equal((await messageA).status, 201);
+    },
+    {
+      document_rag: async ({ query }) => {
+        if (query === "consulta A") {
+          aStarted.resolve();
+          return finishA.promise;
+        }
+        return documentAnswer();
+      },
+    },
+  );
+});
+
+test("a second concurrent POST for the same conversation returns 409", async () => {
+  const ragStarted = deferred<void>();
+  const finishRag = deferred<DocumentRagAnswer>();
+  const client = new ScriptedSqlClient([
+    [conversationContextRow],
+    [
+      persistedTurnRow("primera", {
+        assistant_content: "Respuesta documental sintética.",
+      }),
+    ],
+  ]);
+
+  await withServer(
+    client,
+    async (baseUrl) => {
+      const url = `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`;
+      const first = fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "primera" }),
+      });
+      await ragStarted.promise;
+      const second = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "segunda" }),
+      });
+      await assertErrorResponse(second, 409, "CONFLICT");
+      assert.equal(client.queryTexts.length, 1);
+      finishRag.resolve(documentAnswer());
+      assert.equal((await first).status, 201);
+    },
+    {
+      document_rag: async () => {
+        ragStarted.resolve();
+        return finishRag.promise;
+      },
+    },
+  );
+});
+
+test("concurrent DELETE requests remain idempotent without artificial conflict", async () => {
+  const client = new BlockingDeleteSqlClient(2);
+  await withServer(client, async (baseUrl) => {
+    const url = `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`;
+    const first = fetch(url, { method: "DELETE" });
+    const second = fetch(url, { method: "DELETE" });
+    await client.started.promise;
+    assert.equal(client.queryTexts.length, 2);
+    client.release.resolve();
+    assert.equal((await first).status, 204);
+    assert.equal((await second).status, 204);
+  });
+});
+
+test("message and delete activity are released after errors", async () => {
+  const postFailureClient = new ScriptedSqlClient([
+    [conversationContextRow],
+    [],
+  ]);
+  await withServer(postFailureClient, async (baseUrl) => {
+    const message = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: "fallará" }),
+      },
+    );
+    await assertErrorResponse(message, 503, "DEPENDENCY_UNAVAILABLE");
+    const deletion = await fetch(
+      `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+      { method: "DELETE" },
+    );
+    assert.equal(deletion.status, 204);
+  });
+
+  const deleteFailureClient = new ScriptedSqlClient([
+    new DatabaseDependencyError(),
+    [conversationContextRow],
+    [
+      persistedTurnRow("después", {
+        assistant_content: "Respuesta documental sintética.",
+      }),
+    ],
+  ]);
+  await withServer(
+    deleteFailureClient,
+    async (baseUrl) => {
+      const deletion = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`,
+        { method: "DELETE" },
+      );
+      await assertErrorResponse(deletion, 503, "DEPENDENCY_UNAVAILABLE");
+      const message = await fetch(
+        `${baseUrl}/api/v1/conversations/${CONVERSATION_ID}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: "después" }),
+        },
+      );
+      assert.equal(message.status, 201);
+    },
+    { document_rag: async () => documentAnswer() },
   );
 });
