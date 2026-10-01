@@ -12,6 +12,23 @@ export {
   type DocumentRetrievalErrorReason,
 } from "./application/document-retrieval-errors.js";
 export {
+  retrieveDocumentChunksForQuery,
+  type DocumentQueryRetrievalDependencies,
+  type DocumentQueryRetrievalInput,
+} from "./application/document-query-retrieval.js";
+export {
+  DocumentQueryRetrievalError,
+  type DocumentQueryRetrievalErrorReason,
+} from "./application/document-query-retrieval-errors.js";
+export {
+  QueryEmbeddingClientError,
+  type QueryEmbeddingClient,
+  type QueryEmbeddingClientErrorReason,
+  type QueryEmbeddingConfig,
+  type QueryEmbeddingRecipe,
+} from "./retrieval/query-embedding-client.js";
+export { OllamaQueryEmbeddingClient } from "./retrieval/ollama-query-embedding-client.js";
+export {
   CurrentReleaseError,
   type CurrentReleaseErrorReason,
 } from "./application/current-release-errors.js";
