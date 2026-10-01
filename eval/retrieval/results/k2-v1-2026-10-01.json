@@ -1,0 +1,1432 @@
+{
+  "evaluation_type": "retrieval_quantitative_k2_at_5",
+  "benchmark_id": "banuchat-retrieval-k2-v1",
+  "benchmark_frozen_commit": "7a38967739b59d382b0c270c2aeaeceb89c8f81b",
+  "implementation_revision": "e97ef326a1062a66c43ab1474fe286dc017420b4",
+  "generated_at": "2026-10-01T06:53:28.244Z",
+  "inputs": {
+    "gold_sha256": "668185628099aedd1892bda366457a04c8a1e9955558076c3aaaeb355f96c0fc",
+    "release_id": "5b307391-f475-4120-b8de-30df8f9a7d63",
+    "corpus_chunk_count": 60,
+    "top_k": 5
+  },
+  "embedding_runtime": {
+    "embedding_config_id": "ea0d5b91-310c-4efe-8fae-e61a44c66b91",
+    "provider": "ollama",
+    "model": "qwen3-embedding:0.6b",
+    "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "dimension": 1024,
+    "distance_metric": "cosine",
+    "stored_runtime_version": "0.35.0"
+  },
+  "metrics": {
+    "cases_evaluated": 18,
+    "mrr_at_5": 0.8518518518518519,
+    "mean_precision_at_5": 0.22222222222222232,
+    "mean_recall_at_5": 1,
+    "hit_rate_at_5": 1,
+    "cases_with_hit": 18,
+    "cases_without_hit": 0,
+    "theoretical_max_mean_precision_at_5": 0.2222222222222222
+  },
+  "latency_observation": {
+    "label": "retrieval evaluation observational latency",
+    "total_duration_ms": 33935.7992
+  },
+  "cases": [
+    {
+      "id": "K2-01",
+      "query": "Si quiero consultar el avance de un perfil, ¿qué debo verificar primero para no mezclar resultados entre perfiles?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-001",
+          "ordinal": 2,
+          "chunk_id": "932903f0-32b2-444f-95bd-0690dbce5c89",
+          "locator": "section:2:3. Perfiles y contexto de consulta"
+        }
+      ],
+      "latency_ms": 30355.4048,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "932903f0-32b2-444f-95bd-0690dbce5c89",
+          "document_key": "doc-001",
+          "document_version_id": "12cdbab4-67f8-43a8-af19-484b48ea7381",
+          "ordinal": 2,
+          "title": "Orientación general del programa demo",
+          "locator": "section:2:3. Perfiles y contexto de consulta",
+          "cosine_distance": 0.2513727835578963,
+          "cosine_similarity": 0.7486272164421037
+        },
+        {
+          "rank": 2,
+          "chunk_id": "cb51f662-831f-4f84-8235-88fdee6fb3b3",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 2,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.4108068665956359,
+          "cosine_similarity": 0.5891931334043641
+        },
+        {
+          "rank": 3,
+          "chunk_id": "4e12d050-20d3-49c7-b8cb-d51ec03a8acb",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 0,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:0:1. Qué representa el avance",
+          "cosine_distance": 0.4205590865330119,
+          "cosine_similarity": 0.5794409134669881
+        },
+        {
+          "rank": 4,
+          "chunk_id": "e1c03617-520d-48cc-8858-3d28d7013938",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 5,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.43310154187326466,
+          "cosine_similarity": 0.5668984581267353
+        },
+        {
+          "rank": 5,
+          "chunk_id": "d3192f93-c56e-4b98-b3e4-5c175629b3dd",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 2,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:2:3. Preparación de una propuesta",
+          "cosine_distance": 0.4784643986586061,
+          "cosine_similarity": 0.5215356013413939
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-02",
+      "query": "Si una consulta no devuelve información, ¿eso significa que existe una prohibición universal?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-001",
+          "ordinal": 4,
+          "chunk_id": "32a56420-c8c5-4ba5-b631-b03d783272f8",
+          "locator": "section:4:5. Lectura de respuestas y evidencia"
+        }
+      ],
+      "latency_ms": 198.84079999999813,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "461ddb9b-4105-4786-8fb6-c014c738e198",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 5,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:5:6. Comunicaciones incompletas y revisión",
+          "cosine_distance": 0.45630836486814863,
+          "cosine_similarity": 0.5436916351318514
+        },
+        {
+          "rank": 2,
+          "chunk_id": "32a56420-c8c5-4ba5-b631-b03d783272f8",
+          "document_key": "doc-001",
+          "document_version_id": "12cdbab4-67f8-43a8-af19-484b48ea7381",
+          "ordinal": 4,
+          "title": "Orientación general del programa demo",
+          "locator": "section:4:5. Lectura de respuestas y evidencia",
+          "cosine_distance": 0.4623178884603766,
+          "cosine_similarity": 0.5376821115396234
+        },
+        {
+          "rank": 3,
+          "chunk_id": "cb51f662-831f-4f84-8235-88fdee6fb3b3",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 2,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.5323863664133952,
+          "cosine_similarity": 0.4676136335866048
+        },
+        {
+          "rank": 4,
+          "chunk_id": "1c87ed19-1909-4d88-86dd-4bdab680c4ea",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 2,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:2:3. Consulta y búsqueda",
+          "cosine_distance": 0.5375600591516674,
+          "cosine_similarity": 0.4624399408483326
+        },
+        {
+          "rank": 5,
+          "chunk_id": "e1c03617-520d-48cc-8858-3d28d7013938",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 5,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.5408314378308394,
+          "cosine_similarity": 0.4591685621691606
+        }
+      ],
+      "first_relevant_rank": 2,
+      "reciprocal_rank_at_5": 0.5,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-03",
+      "query": "Si cambio de actividad, ¿puedo trasladar automáticamente el porcentaje de progreso del curso anterior al nuevo?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-002",
+          "ordinal": 3,
+          "chunk_id": "93562326-e897-4825-a930-6aacfcace175",
+          "locator": "section:3:4. Cambios de actividad"
+        }
+      ],
+      "latency_ms": 226.492000000002,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "93562326-e897-4825-a930-6aacfcace175",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 3,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:3:4. Cambios de actividad",
+          "cosine_distance": 0.33535071189983534,
+          "cosine_similarity": 0.6646492881001647
+        },
+        {
+          "rank": 2,
+          "chunk_id": "4e12d050-20d3-49c7-b8cb-d51ec03a8acb",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 0,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:0:1. Qué representa el avance",
+          "cosine_distance": 0.4471640509278474,
+          "cosine_similarity": 0.5528359490721526
+        },
+        {
+          "rank": 3,
+          "chunk_id": "36579a27-a086-4cae-90e8-3eb3db541269",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 2,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:2:3. Interpretación de porcentajes",
+          "cosine_distance": 0.4552672289708576,
+          "cosine_similarity": 0.5447327710291424
+        },
+        {
+          "rank": 4,
+          "chunk_id": "94850fe2-932f-4210-aab5-51496d7d26cc",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 1,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.47460733528848265,
+          "cosine_similarity": 0.5253926647115174
+        },
+        {
+          "rank": 5,
+          "chunk_id": "73478ebf-2650-402e-ab53-b48f602b1b85",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 1,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:1:2. Disponibilidad y selección",
+          "cosine_distance": 0.49191452586897433,
+          "cosine_similarity": 0.5080854741310257
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-04",
+      "query": "Si un curso no aparece al aplicar un filtro, ¿eso demuestra que el perfil se retiró de la actividad?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-002",
+          "ordinal": 4,
+          "chunk_id": "87336078-d313-4614-a57f-f1fbd134eedb",
+          "locator": "section:4:5. Retiro y cancelación de participación"
+        },
+        {
+          "document_key": "doc-002",
+          "ordinal": 5,
+          "chunk_id": "dde7d5ab-4cbc-4399-9093-b278a70f6aa7",
+          "locator": "section:5:6. Confirmación y casos incompletos"
+        }
+      ],
+      "latency_ms": 229.16530000000057,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "87336078-d313-4614-a57f-f1fbd134eedb",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 4,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:4:5. Retiro y cancelación de participación",
+          "cosine_distance": 0.3295057619206999,
+          "cosine_similarity": 0.6704942380793001
+        },
+        {
+          "rank": 2,
+          "chunk_id": "e1c03617-520d-48cc-8858-3d28d7013938",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 5,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.3553785701434523,
+          "cosine_similarity": 0.6446214298565477
+        },
+        {
+          "rank": 3,
+          "chunk_id": "73478ebf-2650-402e-ab53-b48f602b1b85",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 1,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:1:2. Disponibilidad y selección",
+          "cosine_distance": 0.35790362766204586,
+          "cosine_similarity": 0.6420963723379541
+        },
+        {
+          "rank": 4,
+          "chunk_id": "94850fe2-932f-4210-aab5-51496d7d26cc",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 1,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.39432102611029063,
+          "cosine_similarity": 0.6056789738897094
+        },
+        {
+          "rank": 5,
+          "chunk_id": "dde7d5ab-4cbc-4399-9093-b278a70f6aa7",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 5,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:5:6. Confirmación y casos incompletos",
+          "cosine_distance": 0.3974250799595733,
+          "cosine_similarity": 0.6025749200404267
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 2,
+      "precision_at_5": 0.4,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-05",
+      "query": "¿Encontrar una sesión en el calendario demuestra que un perfil asistió a ella?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-003",
+          "ordinal": 0,
+          "chunk_id": "24899744-fed7-4293-9e5b-8c2a815131f2",
+          "locator": "section:0:1. Participar en una sesión"
+        }
+      ],
+      "latency_ms": 189.17599999999948,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "aab7f926-2c53-4104-8d3d-ec0bbb36fe0b",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 2,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:2:3. Participación y avance",
+          "cosine_distance": 0.3191812469527132,
+          "cosine_similarity": 0.6808187530472868
+        },
+        {
+          "rank": 2,
+          "chunk_id": "24899744-fed7-4293-9e5b-8c2a815131f2",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 0,
+          "title": "Participación y asistencia",
+          "locator": "section:0:1. Participar en una sesión",
+          "cosine_distance": 0.38614169854818203,
+          "cosine_similarity": 0.613858301451818
+        },
+        {
+          "rank": 3,
+          "chunk_id": "8a450243-a6ec-42c5-994c-21b24dd276c0",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 5,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:5:6. Uso combinado con comunicaciones",
+          "cosine_distance": 0.4187053732733542,
+          "cosine_similarity": 0.5812946267266458
+        },
+        {
+          "rank": 4,
+          "chunk_id": "bc1ae359-4d53-4c51-8c2d-cca80b0467f7",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 4,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:4:5. Finales ausentes y cambios",
+          "cosine_distance": 0.43266796263070806,
+          "cosine_similarity": 0.5673320373692919
+        },
+        {
+          "rank": 5,
+          "chunk_id": "13e5c557-8475-4c16-b3d2-4f1f681e51bd",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 3,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:3:4. Fechas y anuncios",
+          "cosine_distance": 0.43717227150658855,
+          "cosine_similarity": 0.5628277284934114
+        }
+      ],
+      "first_relevant_rank": 2,
+      "reciprocal_rank_at_5": 0.5,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-06",
+      "query": "Si una práctica se interrumpe, ¿qué conviene conservar para retomarla sin inventar un historial?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-003",
+          "ordinal": 3,
+          "chunk_id": "1f5fbe58-d270-4aa9-baff-83ef70901e49",
+          "locator": "section:3:4. Ausencias e interrupciones"
+        },
+        {
+          "document_key": "doc-003",
+          "ordinal": 4,
+          "chunk_id": "0628515e-90c3-4da9-9ab5-ff4280f13305",
+          "locator": "section:4:5. Retomar y revisar"
+        }
+      ],
+      "latency_ms": 234.45760000000155,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "c82b0ef8-b1d1-403d-b247-05c0f6f4b3ee",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 5,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.3756534643276358,
+          "cosine_similarity": 0.6243465356723642
+        },
+        {
+          "rank": 2,
+          "chunk_id": "1f5fbe58-d270-4aa9-baff-83ef70901e49",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 3,
+          "title": "Participación y asistencia",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.3767379708070032,
+          "cosine_similarity": 0.6232620291929968
+        },
+        {
+          "rank": 3,
+          "chunk_id": "0628515e-90c3-4da9-9ab5-ff4280f13305",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 4,
+          "title": "Participación y asistencia",
+          "locator": "section:4:5. Retomar y revisar",
+          "cosine_distance": 0.38605345709565375,
+          "cosine_similarity": 0.6139465429043462
+        },
+        {
+          "rank": 4,
+          "chunk_id": "bc1ae359-4d53-4c51-8c2d-cca80b0467f7",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 4,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:4:5. Finales ausentes y cambios",
+          "cosine_distance": 0.4938404092861507,
+          "cosine_similarity": 0.5061595907138493
+        },
+        {
+          "rank": 5,
+          "chunk_id": "4a17f7aa-8e9e-4c38-afb0-5d9fa6bada5a",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 1,
+          "title": "Participación y asistencia",
+          "locator": "section:1:2. Preparación de la actividad",
+          "cosine_distance": 0.5245007476659187,
+          "cosine_similarity": 0.4754992523340813
+        }
+      ],
+      "first_relevant_rank": 2,
+      "reciprocal_rank_at_5": 0.5,
+      "relevant_retrieved_count": 2,
+      "precision_at_5": 0.4,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-07",
+      "query": "¿Qué significa el estado `in_progress` y qué rango de porcentaje representa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-004",
+          "ordinal": 1,
+          "chunk_id": "39f8fe5a-4d11-4f95-84dd-6d4e32f3cb91",
+          "locator": "section:1:2. Estados de la relación"
+        }
+      ],
+      "latency_ms": 181.20930000000226,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "39f8fe5a-4d11-4f95-84dd-6d4e32f3cb91",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 1,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:1:2. Estados de la relación",
+          "cosine_distance": 0.242501652537349,
+          "cosine_similarity": 0.757498347462651
+        },
+        {
+          "rank": 2,
+          "chunk_id": "e460e92e-8861-4e1c-9881-25fb59137aae",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 4,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:4:5. Comprobar la lectura del progreso",
+          "cosine_distance": 0.3723349209818563,
+          "cosine_similarity": 0.6276650790181437
+        },
+        {
+          "rank": 3,
+          "chunk_id": "4e12d050-20d3-49c7-b8cb-d51ec03a8acb",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 0,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:0:1. Qué representa el avance",
+          "cosine_distance": 0.3917570501242653,
+          "cosine_similarity": 0.6082429498757347
+        },
+        {
+          "rank": 4,
+          "chunk_id": "36579a27-a086-4cae-90e8-3eb3db541269",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 2,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:2:3. Interpretación de porcentajes",
+          "cosine_distance": 0.422070621087843,
+          "cosine_similarity": 0.577929378912157
+        },
+        {
+          "rank": 5,
+          "chunk_id": "e1c03617-520d-48cc-8858-3d28d7013938",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 5,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.448847528042395,
+          "cosine_similarity": 0.551152471957605
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-08",
+      "query": "¿Puedo calcular el porcentaje de avance dividiendo las sesiones asistidas entre las sesiones programadas?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-004",
+          "ordinal": 2,
+          "chunk_id": "36579a27-a086-4cae-90e8-3eb3db541269",
+          "locator": "section:2:3. Interpretación de porcentajes"
+        }
+      ],
+      "latency_ms": 199.554500000002,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "36579a27-a086-4cae-90e8-3eb3db541269",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 2,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:2:3. Interpretación de porcentajes",
+          "cosine_distance": 0.23226862300323625,
+          "cosine_similarity": 0.7677313769967637
+        },
+        {
+          "rank": 2,
+          "chunk_id": "aab7f926-2c53-4104-8d3d-ec0bbb36fe0b",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 2,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:2:3. Participación y avance",
+          "cosine_distance": 0.307718458081614,
+          "cosine_similarity": 0.692281541918386
+        },
+        {
+          "rank": 3,
+          "chunk_id": "4e12d050-20d3-49c7-b8cb-d51ec03a8acb",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 0,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:0:1. Qué representa el avance",
+          "cosine_distance": 0.3529089075706314,
+          "cosine_similarity": 0.6470910924293686
+        },
+        {
+          "rank": 4,
+          "chunk_id": "e460e92e-8861-4e1c-9881-25fb59137aae",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 4,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:4:5. Comprobar la lectura del progreso",
+          "cosine_distance": 0.4284069197763498,
+          "cosine_similarity": 0.5715930802236502
+        },
+        {
+          "rank": 5,
+          "chunk_id": "24899744-fed7-4293-9e5b-8c2a815131f2",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 0,
+          "title": "Participación y asistencia",
+          "locator": "section:0:1. Participar en una sesión",
+          "cosine_distance": 0.4456582033750983,
+          "cosine_similarity": 0.5543417966249017
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-09",
+      "query": "¿Qué debe contener una evidencia para que sea legible y qué se hace si está incompleta?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-005",
+          "ordinal": 1,
+          "chunk_id": "c9861059-f493-4039-81f2-befaa2ce0054",
+          "locator": "section:1:2. Preparar una evidencia legible"
+        }
+      ],
+      "latency_ms": 200.2046999999984,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "c9861059-f493-4039-81f2-befaa2ce0054",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 1,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.3064660612621932,
+          "cosine_similarity": 0.6935339387378068
+        },
+        {
+          "rank": 2,
+          "chunk_id": "051c80b0-859b-44a2-8f82-914120d9d167",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 0,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.46409582235704017,
+          "cosine_similarity": 0.5359041776429598
+        },
+        {
+          "rank": 3,
+          "chunk_id": "461ddb9b-4105-4786-8fb6-c014c738e198",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 5,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:5:6. Comunicaciones incompletas y revisión",
+          "cosine_distance": 0.4693595560313585,
+          "cosine_similarity": 0.5306404439686415
+        },
+        {
+          "rank": 4,
+          "chunk_id": "e460e92e-8861-4e1c-9881-25fb59137aae",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 4,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:4:5. Comprobar la lectura del progreso",
+          "cosine_distance": 0.4852562599457765,
+          "cosine_similarity": 0.5147437400542235
+        },
+        {
+          "rank": 5,
+          "chunk_id": "e0e6edde-f387-4c43-af3c-d732f893eeb4",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 2,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:2:3. Presentación para revisión",
+          "cosine_distance": 0.48560297489162974,
+          "cosine_similarity": 0.5143970251083703
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-10",
+      "query": "¿Qué criterios se usan para revisar cualitativamente una evidencia y por qué no equivalen a una nota numérica?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-005",
+          "ordinal": 3,
+          "chunk_id": "c5c87ae7-fcac-431f-9bc1-285855746767",
+          "locator": "section:3:4. Criterios de lectura cualitativa"
+        }
+      ],
+      "latency_ms": 204.08179999999993,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "c5c87ae7-fcac-431f-9bc1-285855746767",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 3,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:3:4. Criterios de lectura cualitativa",
+          "cosine_distance": 0.3274628915626431,
+          "cosine_similarity": 0.6725371084373569
+        },
+        {
+          "rank": 2,
+          "chunk_id": "051c80b0-859b-44a2-8f82-914120d9d167",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 0,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.4091665176052548,
+          "cosine_similarity": 0.5908334823947452
+        },
+        {
+          "rank": 3,
+          "chunk_id": "c9861059-f493-4039-81f2-befaa2ce0054",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 1,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.4517058672553984,
+          "cosine_similarity": 0.5482941327446016
+        },
+        {
+          "rank": 4,
+          "chunk_id": "4d22b5f0-5355-420a-8b58-bdfc60d16fb1",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 5,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:5:6. Relación con progreso y límites",
+          "cosine_distance": 0.4556085301612218,
+          "cosine_similarity": 0.5443914698387782
+        },
+        {
+          "rank": 5,
+          "chunk_id": "5106378b-94e8-4bfc-baf2-67cb45ea3232",
+          "document_key": "doc-005",
+          "document_version_id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90",
+          "ordinal": 4,
+          "title": "Evaluación formativa y entrega de evidencias",
+          "locator": "section:4:5. Ajustes y nueva revisión",
+          "cosine_distance": 0.4749525815304979,
+          "cosine_similarity": 0.5250474184695021
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-11",
+      "query": "Si un evento comienza antes del rango consultado y termina dentro de él, ¿debe aparecer en los resultados?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-006",
+          "ordinal": 3,
+          "chunk_id": "e5ebbca9-4ca0-49d5-bf6b-62f4ea8237a3",
+          "locator": "section:3:4. Selección por inicio"
+        }
+      ],
+      "latency_ms": 199.32990000000063,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "e5ebbca9-4ca0-49d5-bf6b-62f4ea8237a3",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 3,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:3:4. Selección por inicio",
+          "cosine_distance": 0.2706975446190748,
+          "cosine_similarity": 0.7293024553809252
+        },
+        {
+          "rank": 2,
+          "chunk_id": "ca2db3c1-8c17-4eb8-bfef-ef9d1689dd12",
+          "document_key": "doc-004",
+          "document_version_id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b",
+          "ordinal": 3,
+          "title": "Progreso y finalización de actividades",
+          "locator": "section:3:4. Inicio y finalización",
+          "cosine_distance": 0.4280062401313214,
+          "cosine_similarity": 0.5719937598686786
+        },
+        {
+          "rank": 3,
+          "chunk_id": "648fb251-a375-4ac2-865e-841e13ef3870",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 1,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:1:2. Lectura de la ventana temporal",
+          "cosine_distance": 0.45174595909456694,
+          "cosine_similarity": 0.5482540409054331
+        },
+        {
+          "rank": 4,
+          "chunk_id": "598a4976-90bb-48a0-ac38-e7ccb9b81214",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 2,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:2:3. Días civiles y zona canónica",
+          "cosine_distance": 0.4717966970730806,
+          "cosine_similarity": 0.5282033029269194
+        },
+        {
+          "rank": 5,
+          "chunk_id": "8a450243-a6ec-42c5-994c-21b24dd276c0",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 5,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:5:6. Uso combinado con comunicaciones",
+          "cosine_distance": 0.48370775871731875,
+          "cosine_similarity": 0.5162922412826813
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-12",
+      "query": "¿Cómo se interpretan los rangos de días civiles del calendario en la zona `America/Bogota`?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-006",
+          "ordinal": 2,
+          "chunk_id": "598a4976-90bb-48a0-ac38-e7ccb9b81214",
+          "locator": "section:2:3. Días civiles y zona canónica"
+        }
+      ],
+      "latency_ms": 258.3522000000012,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "598a4976-90bb-48a0-ac38-e7ccb9b81214",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 2,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:2:3. Días civiles y zona canónica",
+          "cosine_distance": 0.2463091525256672,
+          "cosine_similarity": 0.7536908474743328
+        },
+        {
+          "rank": 2,
+          "chunk_id": "e5ebbca9-4ca0-49d5-bf6b-62f4ea8237a3",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 3,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:3:4. Selección por inicio",
+          "cosine_distance": 0.48118571656729503,
+          "cosine_similarity": 0.518814283432705
+        },
+        {
+          "rank": 3,
+          "chunk_id": "13e5c557-8475-4c16-b3d2-4f1f681e51bd",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 3,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:3:4. Fechas y anuncios",
+          "cosine_distance": 0.5179736241211574,
+          "cosine_similarity": 0.48202637587884256
+        },
+        {
+          "rank": 4,
+          "chunk_id": "a11427ed-1953-4427-9efa-744b1d8406be",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 0,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:0:1. El calendario como fuente de fechas",
+          "cosine_distance": 0.5736080960268849,
+          "cosine_similarity": 0.4263919039731151
+        },
+        {
+          "rank": 5,
+          "chunk_id": "c2a044f9-5677-4cc7-bae9-e62c610bec73",
+          "document_key": "doc-001",
+          "document_version_id": "12cdbab4-67f8-43a8-af19-484b48ea7381",
+          "ordinal": 1,
+          "title": "Orientación general del programa demo",
+          "locator": "section:1:2. Recorrido inicial",
+          "cosine_distance": 0.5872557901282502,
+          "cosine_similarity": 0.41274420987174976
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-13",
+      "query": "¿Cuándo se considera que un anuncio está futuro, vigente o expirado?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-007",
+          "ordinal": 1,
+          "chunk_id": "648fb251-a375-4ac2-865e-841e13ef3870",
+          "locator": "section:1:2. Lectura de la ventana temporal"
+        }
+      ],
+      "latency_ms": 194.76120000000083,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "648fb251-a375-4ac2-865e-841e13ef3870",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 1,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:1:2. Lectura de la ventana temporal",
+          "cosine_distance": 0.2880776484081644,
+          "cosine_similarity": 0.7119223515918356
+        },
+        {
+          "rank": 2,
+          "chunk_id": "13e5c557-8475-4c16-b3d2-4f1f681e51bd",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 3,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:3:4. Fechas y anuncios",
+          "cosine_distance": 0.4754038599706195,
+          "cosine_similarity": 0.5245961400293805
+        },
+        {
+          "rank": 3,
+          "chunk_id": "1c87ed19-1909-4d88-86dd-4bdab680c4ea",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 2,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:2:3. Consulta y búsqueda",
+          "cosine_distance": 0.49918138971103676,
+          "cosine_similarity": 0.5008186102889632
+        },
+        {
+          "rank": 4,
+          "chunk_id": "33db5c60-2ac3-41d6-a486-bec98c12a43f",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 3,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:3:4. Relación con calendario y actividades",
+          "cosine_distance": 0.499279618434997,
+          "cosine_similarity": 0.500720381565003
+        },
+        {
+          "rank": 5,
+          "chunk_id": "8a450243-a6ec-42c5-994c-21b24dd276c0",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 5,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:5:6. Uso combinado con comunicaciones",
+          "cosine_distance": 0.5206839368281556,
+          "cosine_similarity": 0.4793160631718444
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-14",
+      "query": "Si una convocatoria ya expiró, ¿puedo asumir una prórroga o usar la fecha del siguiente evento?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-007",
+          "ordinal": 4,
+          "chunk_id": "ecfb0141-d6bb-4c14-9a05-b023ef5fc85f",
+          "locator": "section:4:5. Respuesta a una invitación"
+        }
+      ],
+      "latency_ms": 230.5034999999989,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "ecfb0141-d6bb-4c14-9a05-b023ef5fc85f",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 4,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:4:5. Respuesta a una invitación",
+          "cosine_distance": 0.398056882677707,
+          "cosine_similarity": 0.601943117322293
+        },
+        {
+          "rank": 2,
+          "chunk_id": "33db5c60-2ac3-41d6-a486-bec98c12a43f",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 3,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:3:4. Relación con calendario y actividades",
+          "cosine_distance": 0.44634599503985006,
+          "cosine_similarity": 0.5536540049601499
+        },
+        {
+          "rank": 3,
+          "chunk_id": "bc1ae359-4d53-4c51-8c2d-cca80b0467f7",
+          "document_key": "doc-006",
+          "document_version_id": "c01ba724-ad02-4a67-92cb-288461ac5fd5",
+          "ordinal": 4,
+          "title": "Uso del calendario y tipos de eventos",
+          "locator": "section:4:5. Finales ausentes y cambios",
+          "cosine_distance": 0.459735152006962,
+          "cosine_similarity": 0.540264847993038
+        },
+        {
+          "rank": 4,
+          "chunk_id": "648fb251-a375-4ac2-865e-841e13ef3870",
+          "document_key": "doc-007",
+          "document_version_id": "671d967b-133d-4f1c-8a20-cc8b5bdcd158",
+          "ordinal": 1,
+          "title": "Convocatorias y comunicaciones",
+          "locator": "section:1:2. Lectura de la ventana temporal",
+          "cosine_distance": 0.4599297177498355,
+          "cosine_similarity": 0.5400702822501645
+        },
+        {
+          "rank": 5,
+          "chunk_id": "13e5c557-8475-4c16-b3d2-4f1f681e51bd",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 3,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:3:4. Fechas y anuncios",
+          "cosine_distance": 0.49364568463518754,
+          "cosine_similarity": 0.5063543153648125
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-15",
+      "query": "Si una acción quedó en un estado incierto, ¿qué debo hacer antes de repetirla?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-008",
+          "ordinal": 2,
+          "chunk_id": "cb51f662-831f-4f84-8235-88fdee6fb3b3",
+          "locator": "section:2:3. Comprobaciones iniciales"
+        }
+      ],
+      "latency_ms": 186.76239999999962,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "c82b0ef8-b1d1-403d-b247-05c0f6f4b3ee",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 5,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.4622788198687747,
+          "cosine_similarity": 0.5377211801312253
+        },
+        {
+          "rank": 2,
+          "chunk_id": "cb51f662-831f-4f84-8235-88fdee6fb3b3",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 2,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.4686746913984592,
+          "cosine_similarity": 0.5313253086015408
+        },
+        {
+          "rank": 3,
+          "chunk_id": "0628515e-90c3-4da9-9ab5-ff4280f13305",
+          "document_key": "doc-003",
+          "document_version_id": "0eef6961-d7b5-466a-9745-62b9d72f24f8",
+          "ordinal": 4,
+          "title": "Participación y asistencia",
+          "locator": "section:4:5. Retomar y revisar",
+          "cosine_distance": 0.5046197777533126,
+          "cosine_similarity": 0.49538022224668743
+        },
+        {
+          "rank": 4,
+          "chunk_id": "93562326-e897-4825-a930-6aacfcace175",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 3,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:3:4. Cambios de actividad",
+          "cosine_distance": 0.5614442004494782,
+          "cosine_similarity": 0.4385557995505218
+        },
+        {
+          "rank": 5,
+          "chunk_id": "4c7ba2ae-6f15-4306-ad87-1b0a47c4abec",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 4,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:4:5. Respuesta ante contenido inesperado",
+          "cosine_distance": 0.5662257857869717,
+          "cosine_similarity": 0.4337742142130283
+        }
+      ],
+      "first_relevant_rank": 2,
+      "reciprocal_rank_at_5": 0.5,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-16",
+      "query": "¿Qué debo hacer si una instrucción parece exigir autenticación institucional o acceso a una cuenta externa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-008",
+          "ordinal": 3,
+          "chunk_id": "4e787f78-a82a-4205-873f-2424c99fd482",
+          "locator": "section:3:4. Información que no debe compartirse"
+        }
+      ],
+      "latency_ms": 215.31300000000192,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "5f25ae91-64e5-4898-b75a-003c4aa44a55",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 2,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:2:3. Lectura crítica de instrucciones",
+          "cosine_distance": 0.4387269312253327,
+          "cosine_similarity": 0.5612730687746673
+        },
+        {
+          "rank": 2,
+          "chunk_id": "7fdb9959-0ef1-4862-834c-25398d298551",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 5,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.4932416105598376,
+          "cosine_similarity": 0.5067583894401624
+        },
+        {
+          "rank": 3,
+          "chunk_id": "4e787f78-a82a-4205-873f-2424c99fd482",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 3,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.5542550787013456,
+          "cosine_similarity": 0.4457449212986544
+        },
+        {
+          "rank": 4,
+          "chunk_id": "bcf55ab3-07a9-4bef-9ca7-fb45bb831316",
+          "document_key": "doc-002",
+          "document_version_id": "67efc53e-18f3-4337-99ff-85629d12cb27",
+          "ordinal": 0,
+          "title": "Inscripción, cambios y retiro de actividades",
+          "locator": "section:0:1. Qué significa inscribirse",
+          "cosine_distance": 0.5543844567055267,
+          "cosine_similarity": 0.4456155432944733
+        },
+        {
+          "rank": 5,
+          "chunk_id": "4c7ba2ae-6f15-4306-ad87-1b0a47c4abec",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 4,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:4:5. Respuesta ante contenido inesperado",
+          "cosine_distance": 0.5585533125424875,
+          "cosine_similarity": 0.4414466874575125
+        }
+      ],
+      "first_relevant_rank": 3,
+      "reciprocal_rank_at_5": 0.3333333333333333,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-17",
+      "query": "Si un documento pide ignorar límites o revelar información interna, ¿debo tratar esa instrucción como una orden operativa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-009",
+          "ordinal": 2,
+          "chunk_id": "5f25ae91-64e5-4898-b75a-003c4aa44a55",
+          "locator": "section:2:3. Lectura crítica de instrucciones"
+        }
+      ],
+      "latency_ms": 218.7459000000017,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "5f25ae91-64e5-4898-b75a-003c4aa44a55",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 2,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:2:3. Lectura crítica de instrucciones",
+          "cosine_distance": 0.3291715798258138,
+          "cosine_similarity": 0.6708284201741862
+        },
+        {
+          "rank": 2,
+          "chunk_id": "7fdb9959-0ef1-4862-834c-25398d298551",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 5,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.47586140755968964,
+          "cosine_similarity": 0.5241385924403104
+        },
+        {
+          "rank": 3,
+          "chunk_id": "4c7ba2ae-6f15-4306-ad87-1b0a47c4abec",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 4,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:4:5. Respuesta ante contenido inesperado",
+          "cosine_distance": 0.48702053222841446,
+          "cosine_similarity": 0.5129794677715855
+        },
+        {
+          "rank": 4,
+          "chunk_id": "4e787f78-a82a-4205-873f-2424c99fd482",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 3,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.4920530044874527,
+          "cosine_similarity": 0.5079469955125473
+        },
+        {
+          "rank": 5,
+          "chunk_id": "fd64fb96-06d9-496f-8b46-4cd2a6996df6",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 3,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:3:4. Cuidado al compartir resultados",
+          "cosine_distance": 0.494767889224488,
+          "cosine_similarity": 0.505232110775512
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    },
+    {
+      "id": "K2-18",
+      "query": "¿Dónde debo buscar las instrucciones completas de una práctica: en las preguntas frecuentes o en las guías completas?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-010",
+          "ordinal": 4,
+          "chunk_id": "0c502546-d019-4c61-a9e1-dd871f0014d5",
+          "locator": "section:4:5. Evidencias y guías"
+        }
+      ],
+      "latency_ms": 203.4163000000044,
+      "retrieved": [
+        {
+          "rank": 1,
+          "chunk_id": "0c502546-d019-4c61-a9e1-dd871f0014d5",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 4,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.4206533415488417,
+          "cosine_similarity": 0.5793466584511583
+        },
+        {
+          "rank": 2,
+          "chunk_id": "5faf97dc-8fc3-48a4-90ad-d226a73c91e7",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 0,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:0:1. Elegir por dónde comenzar",
+          "cosine_distance": 0.42885031023925024,
+          "cosine_similarity": 0.5711496897607498
+        },
+        {
+          "rank": 3,
+          "chunk_id": "5f25ae91-64e5-4898-b75a-003c4aa44a55",
+          "document_key": "doc-009",
+          "document_version_id": "5f088641-1f41-43b4-b6be-f44ff8b32caf",
+          "ordinal": 2,
+          "title": "Uso responsable y seguridad digital",
+          "locator": "section:2:3. Lectura crítica de instrucciones",
+          "cosine_distance": 0.5109259473173369,
+          "cosine_similarity": 0.48907405268266313
+        },
+        {
+          "rank": 4,
+          "chunk_id": "7fdb9959-0ef1-4862-834c-25398d298551",
+          "document_key": "doc-010",
+          "document_version_id": "84d674f0-2ecc-475d-916d-c45668035cac",
+          "ordinal": 5,
+          "title": "Preguntas frecuentes del programa demo",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.5343150794505941,
+          "cosine_similarity": 0.4656849205494059
+        },
+        {
+          "rank": 5,
+          "chunk_id": "edd61de5-66c3-43fe-8932-5632043f1743",
+          "document_key": "doc-008",
+          "document_version_id": "0f6386bc-0464-4d20-b131-2cc23ce00692",
+          "ordinal": 0,
+          "title": "Soporte y reporte de incidencias",
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.5508427200691857,
+          "cosine_similarity": 0.44915727993081433
+        }
+      ],
+      "first_relevant_rank": 1,
+      "reciprocal_rank_at_5": 1,
+      "relevant_retrieved_count": 1,
+      "precision_at_5": 0.2,
+      "recall_at_5": 1,
+      "hit_at_5": 1
+    }
+  ],
+  "full_document_cases": [
+    {
+      "id": "K2-19",
+      "query": "En la actividad integradora, ¿qué seis fichas imaginarias deben prepararse?",
+      "relevant_document": "doc-011",
+      "status": "not_evaluated_by_vector_retrieval"
+    },
+    {
+      "id": "K2-20",
+      "query": "En una sesión práctica, ¿qué tarjetas de acciones deben crearse en la copia de trabajo?",
+      "relevant_document": "doc-012",
+      "status": "not_evaluated_by_vector_retrieval"
+    }
+  ]
+}
