@@ -3,6 +3,15 @@ export {
   type CurrentReleaseContext,
 } from "./application/current-release.js";
 export {
+  retrieveDocumentChunks,
+  type DocumentRetrievalInput,
+  type RetrievedDocumentChunk,
+} from "./application/document-retrieval.js";
+export {
+  DocumentRetrievalError,
+  type DocumentRetrievalErrorReason,
+} from "./application/document-retrieval-errors.js";
+export {
   CurrentReleaseError,
   type CurrentReleaseErrorReason,
 } from "./application/current-release-errors.js";
