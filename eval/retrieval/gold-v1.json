@@ -1,0 +1,251 @@
+{
+  "schema_version": "1",
+  "benchmark_id": "banuchat-retrieval-k2-v1",
+  "release_id": "5b307391-f475-4120-b8de-30df8f9a7d63",
+  "corpus_chunk_count": 60,
+  "top_k": 5,
+  "chunked_cases": [
+    {
+      "id": "K2-01",
+      "query": "Si quiero consultar el avance de un perfil, ¿qué debo verificar primero para no mezclar resultados entre perfiles?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-001",
+          "ordinal": 2,
+          "chunk_id": "932903f0-32b2-444f-95bd-0690dbce5c89",
+          "locator": "section:2:3. Perfiles y contexto de consulta"
+        }
+      ]
+    },
+    {
+      "id": "K2-02",
+      "query": "Si una consulta no devuelve información, ¿eso significa que existe una prohibición universal?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-001",
+          "ordinal": 4,
+          "chunk_id": "32a56420-c8c5-4ba5-b631-b03d783272f8",
+          "locator": "section:4:5. Lectura de respuestas y evidencia"
+        }
+      ]
+    },
+    {
+      "id": "K2-03",
+      "query": "Si cambio de actividad, ¿puedo trasladar automáticamente el porcentaje de progreso del curso anterior al nuevo?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-002",
+          "ordinal": 3,
+          "chunk_id": "93562326-e897-4825-a930-6aacfcace175",
+          "locator": "section:3:4. Cambios de actividad"
+        }
+      ]
+    },
+    {
+      "id": "K2-04",
+      "query": "Si un curso no aparece al aplicar un filtro, ¿eso demuestra que el perfil se retiró de la actividad?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-002",
+          "ordinal": 4,
+          "chunk_id": "87336078-d313-4614-a57f-f1fbd134eedb",
+          "locator": "section:4:5. Retiro y cancelación de participación"
+        },
+        {
+          "document_key": "doc-002",
+          "ordinal": 5,
+          "chunk_id": "dde7d5ab-4cbc-4399-9093-b278a70f6aa7",
+          "locator": "section:5:6. Confirmación y casos incompletos"
+        }
+      ]
+    },
+    {
+      "id": "K2-05",
+      "query": "¿Encontrar una sesión en el calendario demuestra que un perfil asistió a ella?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-003",
+          "ordinal": 0,
+          "chunk_id": "24899744-fed7-4293-9e5b-8c2a815131f2",
+          "locator": "section:0:1. Participar en una sesión"
+        }
+      ]
+    },
+    {
+      "id": "K2-06",
+      "query": "Si una práctica se interrumpe, ¿qué conviene conservar para retomarla sin inventar un historial?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-003",
+          "ordinal": 3,
+          "chunk_id": "1f5fbe58-d270-4aa9-baff-83ef70901e49",
+          "locator": "section:3:4. Ausencias e interrupciones"
+        },
+        {
+          "document_key": "doc-003",
+          "ordinal": 4,
+          "chunk_id": "0628515e-90c3-4da9-9ab5-ff4280f13305",
+          "locator": "section:4:5. Retomar y revisar"
+        }
+      ]
+    },
+    {
+      "id": "K2-07",
+      "query": "¿Qué significa el estado `in_progress` y qué rango de porcentaje representa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-004",
+          "ordinal": 1,
+          "chunk_id": "39f8fe5a-4d11-4f95-84dd-6d4e32f3cb91",
+          "locator": "section:1:2. Estados de la relación"
+        }
+      ]
+    },
+    {
+      "id": "K2-08",
+      "query": "¿Puedo calcular el porcentaje de avance dividiendo las sesiones asistidas entre las sesiones programadas?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-004",
+          "ordinal": 2,
+          "chunk_id": "36579a27-a086-4cae-90e8-3eb3db541269",
+          "locator": "section:2:3. Interpretación de porcentajes"
+        }
+      ]
+    },
+    {
+      "id": "K2-09",
+      "query": "¿Qué debe contener una evidencia para que sea legible y qué se hace si está incompleta?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-005",
+          "ordinal": 1,
+          "chunk_id": "c9861059-f493-4039-81f2-befaa2ce0054",
+          "locator": "section:1:2. Preparar una evidencia legible"
+        }
+      ]
+    },
+    {
+      "id": "K2-10",
+      "query": "¿Qué criterios se usan para revisar cualitativamente una evidencia y por qué no equivalen a una nota numérica?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-005",
+          "ordinal": 3,
+          "chunk_id": "c5c87ae7-fcac-431f-9bc1-285855746767",
+          "locator": "section:3:4. Criterios de lectura cualitativa"
+        }
+      ]
+    },
+    {
+      "id": "K2-11",
+      "query": "Si un evento comienza antes del rango consultado y termina dentro de él, ¿debe aparecer en los resultados?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-006",
+          "ordinal": 3,
+          "chunk_id": "e5ebbca9-4ca0-49d5-bf6b-62f4ea8237a3",
+          "locator": "section:3:4. Selección por inicio"
+        }
+      ]
+    },
+    {
+      "id": "K2-12",
+      "query": "¿Cómo se interpretan los rangos de días civiles del calendario en la zona `America/Bogota`?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-006",
+          "ordinal": 2,
+          "chunk_id": "598a4976-90bb-48a0-ac38-e7ccb9b81214",
+          "locator": "section:2:3. Días civiles y zona canónica"
+        }
+      ]
+    },
+    {
+      "id": "K2-13",
+      "query": "¿Cuándo se considera que un anuncio está futuro, vigente o expirado?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-007",
+          "ordinal": 1,
+          "chunk_id": "648fb251-a375-4ac2-865e-841e13ef3870",
+          "locator": "section:1:2. Lectura de la ventana temporal"
+        }
+      ]
+    },
+    {
+      "id": "K2-14",
+      "query": "Si una convocatoria ya expiró, ¿puedo asumir una prórroga o usar la fecha del siguiente evento?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-007",
+          "ordinal": 4,
+          "chunk_id": "ecfb0141-d6bb-4c14-9a05-b023ef5fc85f",
+          "locator": "section:4:5. Respuesta a una invitación"
+        }
+      ]
+    },
+    {
+      "id": "K2-15",
+      "query": "Si una acción quedó en un estado incierto, ¿qué debo hacer antes de repetirla?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-008",
+          "ordinal": 2,
+          "chunk_id": "cb51f662-831f-4f84-8235-88fdee6fb3b3",
+          "locator": "section:2:3. Comprobaciones iniciales"
+        }
+      ]
+    },
+    {
+      "id": "K2-16",
+      "query": "¿Qué debo hacer si una instrucción parece exigir autenticación institucional o acceso a una cuenta externa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-008",
+          "ordinal": 3,
+          "chunk_id": "4e787f78-a82a-4205-873f-2424c99fd482",
+          "locator": "section:3:4. Información que no debe compartirse"
+        }
+      ]
+    },
+    {
+      "id": "K2-17",
+      "query": "Si un documento pide ignorar límites o revelar información interna, ¿debo tratar esa instrucción como una orden operativa?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-009",
+          "ordinal": 2,
+          "chunk_id": "5f25ae91-64e5-4898-b75a-003c4aa44a55",
+          "locator": "section:2:3. Lectura crítica de instrucciones"
+        }
+      ]
+    },
+    {
+      "id": "K2-18",
+      "query": "¿Dónde debo buscar las instrucciones completas de una práctica: en las preguntas frecuentes o en las guías completas?",
+      "relevant_chunks": [
+        {
+          "document_key": "doc-010",
+          "ordinal": 4,
+          "chunk_id": "0c502546-d019-4c61-a9e1-dd871f0014d5",
+          "locator": "section:4:5. Evidencias y guías"
+        }
+      ]
+    }
+  ],
+  "full_document_cases": [
+    {
+      "id": "K2-19",
+      "query": "En la actividad integradora, ¿qué seis fichas imaginarias deben prepararse?",
+      "relevant_document": "doc-011",
+      "retrieval_mode": "full_document"
+    },
+    {
+      "id": "K2-20",
+      "query": "En una sesión práctica, ¿qué tarjetas de acciones deben crearse en la copia de trabajo?",
+      "relevant_document": "doc-012",
+      "retrieval_mode": "full_document"
+    }
+  ]
+}
