@@ -2,22 +2,28 @@ import { pathToFileURL } from "node:url";
 
 import { Pool } from "pg";
 
+import type { DocumentRagResponder } from "./application/messages.js";
+import { generateDocumentRagAnswer } from "./chat/document-rag.js";
 import { PgSqlClient } from "./data/pg-client.js";
 import type { SqlQueryClient } from "./data/sql-client.js";
+import { loadGeneratorRuntimeConfig } from "./generation/generator-client.js";
+import { OllamaGeneratorClient } from "./generation/ollama-generator-client.js";
 import { createApiServer } from "./http/api-server.js";
+import { OllamaQueryEmbeddingClient } from "./retrieval/ollama-query-embedding-client.js";
 import { loadDefaultIntentRouter } from "./routing/intent-router.js";
 import type { IntentRouter } from "./routing/intent-router-types.js";
 import { loadRuntimeConfig } from "./runtime-config.js";
 
 export async function createRuntimeApiServer(
   sql: SqlQueryClient,
+  documentRag: DocumentRagResponder,
   loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
 ): Promise<ReturnType<typeof createApiServer>> {
   const router = await loadRouter();
   if (router.catalog_valid !== true) {
     throw new Error("intent_router_catalog_invalid");
   }
-  return createApiServer({ sql, router });
+  return createApiServer({ sql, router, document_rag: documentRag });
 }
 
 async function closeHttpServer(
@@ -43,6 +49,7 @@ export async function startApi(): Promise<void> {
 
   try {
     const config = loadRuntimeConfig();
+    const generatorRuntime = loadGeneratorRuntimeConfig();
     pool = new Pool({
       host: config.postgres.host,
       port: config.postgres.port,
@@ -54,7 +61,22 @@ export async function startApi(): Promise<void> {
     const sql = new PgSqlClient(pool);
     await sql.query<{ ok: number }>("SELECT 1 AS ok");
 
-    server = await createRuntimeApiServer(sql);
+    const queryEmbeddingClient = new OllamaQueryEmbeddingClient(
+      generatorRuntime.base_url,
+    );
+    const generatorClient = new OllamaGeneratorClient(generatorRuntime.base_url);
+    const documentRag: DocumentRagResponder = (input) =>
+      generateDocumentRagAnswer(
+        {
+          sql,
+          query_embedding_client: queryEmbeddingClient,
+          generator_client: generatorClient,
+          generator_config: generatorRuntime.generator,
+        },
+        input,
+      );
+
+    server = await createRuntimeApiServer(sql, documentRag);
     await new Promise<void>((resolve, reject) => {
       const handleError = (error: Error): void => reject(error);
       server?.once("error", handleError);

@@ -4,6 +4,11 @@ import test from "node:test";
 import {
   sendMessage,
   SendMessageError,
+  DocumentQueryRetrievalError,
+  DocumentRagInvariantError,
+  GeneratorClientError,
+  type DocumentRagAnswer,
+  type DocumentRagResponder,
   type IntentRouter,
   type IntentRoutingDecision,
   type SqlQueryClient,
@@ -15,6 +20,8 @@ const EMBEDDING_ID = "33333333-3333-4333-8333-333333333333";
 const CONVERSATION_ID = "44444444-4444-4444-8444-444444444444";
 const USER_MESSAGE_ID = "55555555-5555-4555-8555-555555555555";
 const ASSISTANT_MESSAGE_ID = "66666666-6666-4666-8666-666666666666";
+const DOCUMENT_VERSION_ID = "77777777-7777-4777-8777-777777777777";
+const CHUNK_ID = "88888888-8888-4888-8888-888888888888";
 const HASH = "a".repeat(64);
 const NOW = "2026-10-01T09:00:00-05:00";
 
@@ -50,6 +57,64 @@ function router(decision: IntentRoutingDecision): IntentRouter {
     route() {
       return decision;
     },
+  };
+}
+
+function fallbackRouter(): IntentRouter {
+  return router({
+    route: "agent_fallback",
+    parameters: {},
+    response_variant: null,
+  });
+}
+
+const unexpectedDocumentRag: DocumentRagResponder = async () => {
+  throw new Error("unexpected document RAG call");
+};
+
+function dependencies(
+  sql: SqlQueryClient,
+  intentRouter: IntentRouter,
+  documentRag: DocumentRagResponder = unexpectedDocumentRag,
+) {
+  return { sql, router: intentRouter, document_rag: documentRag };
+}
+
+function documentAnswer(
+  overrides: Partial<DocumentRagAnswer> = {},
+): DocumentRagAnswer {
+  return {
+    release_id: RELEASE_ID,
+    content: "Respuesta documental sintética.",
+    insufficient_evidence: false,
+    citations: [
+      {
+        index: 0,
+        label: "Guía sintética",
+        locator: "document:guia#chunk-1",
+        release_id: RELEASE_ID,
+        artifact_url: null,
+        source_kind: "document",
+        document_version_id: DOCUMENT_VERSION_ID,
+      },
+    ],
+    citation_records: [
+      {
+        citation_index: 0,
+        dataset_release_id: RELEASE_ID,
+        source_path: "documents/guia.md",
+        source_locator: "document:guia#chunk-1",
+        source_sha256: HASH,
+        source_kind: "document",
+        document_version_id: DOCUMENT_VERSION_ID,
+        chunk_id: CHUNK_ID,
+        profile_key: null,
+        course_key: null,
+        event_key: null,
+        announcement_key: null,
+      },
+    ],
+    ...overrides,
   };
 }
 
@@ -108,7 +173,17 @@ test("rechaza UUID y contenido inválidos antes de consultar SQL", async () => {
   ]) {
     const sql = new FakeSqlClient([]);
     await assert.rejects(
-      sendMessage({ sql, router: router({ route: "agent_fallback", parameters: {}, response_variant: null }) }, input),
+      sendMessage(
+        dependencies(
+          sql,
+          router({
+            route: "agent_fallback",
+            parameters: {},
+            response_variant: null,
+          }),
+        ),
+        input,
+      ),
       expectReason("invalid_argument"),
     );
     assert.equal(sql.calls.length, 0);
@@ -119,7 +194,14 @@ test("reporta conversación ausente", async () => {
   const sql = new FakeSqlClient([[]]);
   await assert.rejects(
     sendMessage(
-      { sql, router: router({ route: "agent_fallback", parameters: {}, response_variant: null }) },
+      dependencies(
+        sql,
+        router({
+          route: "agent_fallback",
+          parameters: {},
+          response_variant: null,
+        }),
+      ),
       { conversation_id: CONVERSATION_ID, content: "hola", now: NOW },
     ),
     expectReason("conversation_not_found"),
@@ -132,7 +214,14 @@ test("rechaza una conversación cuya release ya no es la vigente ready", async (
   ]);
   await assert.rejects(
     sendMessage(
-      { sql, router: router({ route: "agent_fallback", parameters: {}, response_variant: null }) },
+      dependencies(
+        sql,
+        router({
+          route: "agent_fallback",
+          parameters: {},
+          response_variant: null,
+        }),
+      ),
       { conversation_id: CONVERSATION_ID, content: "hola", now: NOW },
     ),
     expectReason("current_release_changed"),
@@ -173,14 +262,14 @@ test("profile_progress persiste procedencia exacta y solo expone citas públicas
   ]);
 
   const result = await sendMessage(
-    {
+    dependencies(
       sql,
-      router: router({
+      router({
         route: "profile_progress",
         parameters: {},
         response_variant: null,
       }),
-    },
+    ),
     { conversation_id: CONVERSATION_ID, content, now: NOW },
   );
 
@@ -263,9 +352,9 @@ test("calendar_events persiste event_key", async () => {
   ]);
 
   await sendMessage(
-    {
+    dependencies(
       sql,
-      router: router({
+      router({
         route: "calendar_events",
         parameters: {
           date_from: "2026-10-01",
@@ -273,7 +362,7 @@ test("calendar_events persiste event_key", async () => {
         },
         response_variant: null,
       }),
-    },
+    ),
     { conversation_id: CONVERSATION_ID, content: "eventos de hoy", now: NOW },
   );
 
@@ -305,14 +394,14 @@ test("announcements persiste announcement_key", async () => {
   ]);
 
   await sendMessage(
-    {
+    dependencies(
       sql,
-      router: router({
+      router({
         route: "announcements",
         parameters: { reference_time: NOW },
         response_variant: null,
       }),
-    },
+    ),
     { conversation_id: CONVERSATION_ID, content: "anuncios", now: NOW },
   );
 
@@ -323,16 +412,180 @@ test("announcements persiste announcement_key", async () => {
   assert.equal(records[0]?.source_sha256, HASH);
 });
 
-test("agent_fallback no persiste mensajes", async () => {
+test("fast path no llama document_rag", async () => {
+  let ragCalls = 0;
+  const sql = new FakeSqlClient([
+    contextRows(),
+    releaseRows(),
+    [],
+    persistedRows(
+      "eventos",
+      "No encontré eventos que comiencen dentro del rango consultado.",
+    ),
+  ]);
+
+  await sendMessage(
+    dependencies(
+      sql,
+      router({
+        route: "calendar_events",
+        parameters: { date_from: "2026-10-01", date_to: "2026-10-01" },
+        response_variant: null,
+      }),
+      async () => {
+        ragCalls += 1;
+        return documentAnswer();
+      },
+    ),
+    { conversation_id: CONVERSATION_ID, content: "eventos", now: NOW },
+  );
+
+  assert.equal(ragCalls, 0);
+});
+
+test("agent_fallback usa la release y query exactas y persiste citas documentales", async () => {
+  const content = "  consulta documental exacta  ";
+  const answer = documentAnswer();
+  const calls: unknown[] = [];
+  const sql = new FakeSqlClient([
+    contextRows(),
+    persistedRows(content, answer.content),
+  ]);
+
+  const result = await sendMessage(
+    dependencies(sql, fallbackRouter(), async (input) => {
+      calls.push(input);
+      return answer;
+    }),
+    { conversation_id: CONVERSATION_ID, content, now: NOW },
+  );
+
+  assert.deepEqual(calls, [{ release_id: RELEASE_ID, query: content }]);
+  assert.deepEqual(
+    JSON.parse(String(sql.calls[1]?.values?.[6])),
+    answer.citation_records,
+  );
+  assert.equal("citation_records" in result.assistant_message, false);
+  assert.deepEqual(result.assistant_message.citations, answer.citations);
+  assert.deepEqual(result.assistant_message.citations[0], {
+    index: 0,
+    label: "Guía sintética",
+    locator: "document:guia#chunk-1",
+    release_id: RELEASE_ID,
+    artifact_url: null,
+    source_kind: "document",
+    document_version_id: DOCUMENT_VERSION_ID,
+  });
+});
+
+test("insufficient evidence se persiste como respuesta válida sin citas", async () => {
+  const answer = documentAnswer({
+    content: "No encontré evidencia suficiente.",
+    insufficient_evidence: true,
+    citations: [],
+    citation_records: [],
+  });
+  const sql = new FakeSqlClient([
+    contextRows(),
+    persistedRows("consulta", answer.content, {
+      assistant_insufficient_evidence: true,
+    }),
+  ]);
+
+  const result = await sendMessage(
+    dependencies(sql, fallbackRouter(), async () => answer),
+    { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+  );
+
+  assert.equal(sql.calls[1]?.values?.[5], true);
+  assert.equal(sql.calls[1]?.values?.[6], "[]");
+  assert.equal(result.assistant_message.insufficient_evidence, true);
+  assert.deepEqual(result.assistant_message.citations, []);
+});
+
+test("agent_fallback rechaza otra release sin persistir", async () => {
   const sql = new FakeSqlClient([contextRows()]);
   await assert.rejects(
     sendMessage(
-      { sql, router: router({ route: "agent_fallback", parameters: {}, response_variant: null }) },
-      { conversation_id: CONVERSATION_ID, content: "consulta abierta", now: NOW },
+      dependencies(sql, fallbackRouter(), async () =>
+        documentAnswer({ release_id: OTHER_RELEASE_ID }),
+      ),
+      { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
     ),
-    expectReason("agent_fallback_unavailable"),
+    expectReason("current_release_changed"),
   );
   assert.equal(sql.calls.length, 1);
+});
+
+test("errores de generación se convierten en rag_dependency_unavailable", async () => {
+  for (const reason of [
+    "generator_runtime_mismatch",
+    "generator_unavailable",
+    "invalid_generator_response",
+    "generator_response_incomplete",
+  ] as const) {
+    const sql = new FakeSqlClient([contextRows()]);
+    await assert.rejects(
+      sendMessage(
+        dependencies(sql, fallbackRouter(), async () => {
+          throw new GeneratorClientError(reason);
+        }),
+        { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+      ),
+      expectReason("rag_dependency_unavailable"),
+    );
+  }
+});
+
+test("errores de embedding se convierten en rag_dependency_unavailable", async () => {
+  for (const reason of [
+    "embedding_runtime_mismatch",
+    "embedding_unavailable",
+    "invalid_embedding_response",
+  ] as const) {
+    const sql = new FakeSqlClient([contextRows()]);
+    await assert.rejects(
+      sendMessage(
+        dependencies(sql, fallbackRouter(), async () => {
+          throw new DocumentQueryRetrievalError(reason);
+        }),
+        { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+      ),
+      expectReason("rag_dependency_unavailable"),
+    );
+  }
+});
+
+test("release_not_available se convierte en current_release_changed", async () => {
+  const sql = new FakeSqlClient([contextRows()]);
+  await assert.rejects(
+    sendMessage(
+      dependencies(sql, fallbackRouter(), async () => {
+        throw new DocumentQueryRetrievalError("release_not_available");
+      }),
+      { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+    ),
+    expectReason("current_release_changed"),
+  );
+});
+
+test("errores RAG internos se convierten en invalid_database_result", async () => {
+  for (const error of [
+    new DocumentQueryRetrievalError("invalid_argument"),
+    new DocumentQueryRetrievalError("invalid_database_result"),
+    new DocumentRagInvariantError(),
+  ]) {
+    const sql = new FakeSqlClient([contextRows()]);
+    await assert.rejects(
+      sendMessage(
+        dependencies(sql, fallbackRouter(), async () => {
+          throw error;
+        }),
+        { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+      ),
+      expectReason("invalid_database_result"),
+    );
+  }
 });
 
 test("rechaza una respuesta generada con otra release sin persistir", async () => {
@@ -343,9 +596,9 @@ test("rechaza una respuesta generada con otra release sin persistir", async () =
   ]);
   await assert.rejects(
     sendMessage(
-      {
+      dependencies(
         sql,
-        router: router({
+        router({
           route: "calendar_events",
           parameters: {
             date_from: "2026-10-01",
@@ -353,7 +606,7 @@ test("rechaza una respuesta generada con otra release sin persistir", async () =
           },
           response_variant: null,
         }),
-      },
+      ),
       { conversation_id: CONVERSATION_ID, content: "eventos", now: NOW },
     ),
     expectReason("current_release_changed"),
@@ -383,9 +636,9 @@ test("un cambio de ordinal en la sentencia final produce conversation_conflict",
   ]);
   await assert.rejects(
     sendMessage(
-      {
+      dependencies(
         sql,
-        router: router({
+        router({
           route: "calendar_events",
           parameters: {
             date_from: "2026-10-01",
@@ -393,7 +646,7 @@ test("un cambio de ordinal en la sentencia final produce conversation_conflict",
           },
           response_variant: null,
         }),
-      },
+      ),
       { conversation_id: CONVERSATION_ID, content: "eventos", now: NOW },
     ),
     expectReason("conversation_conflict"),
@@ -411,9 +664,9 @@ test("una respuesta válida sin elementos permite cero citas", async () => {
   ]);
 
   const result = await sendMessage(
-    {
+    dependencies(
       sql,
-      router: router({
+      router({
         route: "calendar_events",
         parameters: {
           date_from: "2026-10-01",
@@ -421,7 +674,7 @@ test("una respuesta válida sin elementos permite cero citas", async () => {
         },
         response_variant: null,
       }),
-    },
+    ),
     { conversation_id: CONVERSATION_ID, content: "eventos", now: NOW },
   );
 
@@ -439,9 +692,9 @@ test("una violación UNIQUE residual se tipa como conversation_conflict", async 
   ]);
   await assert.rejects(
     sendMessage(
-      {
+      dependencies(
         sql,
-        router: router({
+        router({
           route: "calendar_events",
           parameters: {
             date_from: "2026-10-01",
@@ -449,7 +702,7 @@ test("una violación UNIQUE residual se tipa como conversation_conflict", async 
           },
           response_variant: null,
         }),
-      },
+      ),
       { conversation_id: CONVERSATION_ID, content: "eventos", now: NOW },
     ),
     expectReason("conversation_conflict"),

@@ -95,7 +95,7 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
       case "current_release_changed":
       case "conversation_conflict":
         return CONFLICT;
-      case "agent_fallback_unavailable":
+      case "rag_dependency_unavailable":
         return DEPENDENCY_UNAVAILABLE;
       case "invalid_database_result":
         return INTERNAL_ERROR;

@@ -64,6 +64,7 @@ export {
 } from "./application/conversations-errors.js";
 export {
   sendMessage,
+  type DocumentRagResponder,
   type SendMessageDependencies,
   type SendMessageInput,
   type SendMessageResult,

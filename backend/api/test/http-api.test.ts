@@ -5,6 +5,10 @@ import test from "node:test";
 import {
   createApiServer,
   DatabaseDependencyError,
+  DocumentRagInvariantError,
+  GeneratorClientError,
+  type DocumentRagAnswer,
+  type DocumentRagResponder,
   type IntentRouter,
   type IntentRoutingDecision,
   type SqlQueryClient,
@@ -18,6 +22,9 @@ const CREATED_AT = "2026-09-30T15:00:00.000Z";
 const NOW = "2026-10-01T14:00:00.000Z";
 const USER_MESSAGE_ID = "55555555-5555-4555-8555-555555555555";
 const ASSISTANT_MESSAGE_ID = "66666666-6666-4666-8666-666666666666";
+const DOCUMENT_VERSION_ID = "77777777-7777-4777-8777-777777777777";
+const CHUNK_ID = "88888888-8888-4888-8888-888888888888";
+const HASH = "a".repeat(64);
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -111,14 +118,61 @@ const calendarRouter = router({
   response_variant: null,
 });
 
+const unavailableDocumentRag: DocumentRagResponder = async () => {
+  throw new GeneratorClientError("generator_unavailable");
+};
+
+function documentAnswer(
+  overrides: Partial<DocumentRagAnswer> = {},
+): DocumentRagAnswer {
+  return {
+    release_id: RELEASE_ID,
+    content: "Respuesta documental sintética.",
+    insufficient_evidence: false,
+    citations: [
+      {
+        index: 0,
+        label: "Guía sintética",
+        locator: "document:guia#chunk-1",
+        release_id: RELEASE_ID,
+        artifact_url: null,
+        source_kind: "document",
+        document_version_id: DOCUMENT_VERSION_ID,
+      },
+    ],
+    citation_records: [
+      {
+        citation_index: 0,
+        dataset_release_id: RELEASE_ID,
+        source_path: "documents/guia.md",
+        source_locator: "document:guia#chunk-1",
+        source_sha256: HASH,
+        source_kind: "document",
+        document_version_id: DOCUMENT_VERSION_ID,
+        chunk_id: CHUNK_ID,
+        profile_key: null,
+        course_key: null,
+        event_key: null,
+        announcement_key: null,
+      },
+    ],
+    ...overrides,
+  };
+}
+
 async function withServer<T>(
   client: SqlQueryClient,
   action: (baseUrl: string) => Promise<T>,
-  options: { router?: IntentRouter; now?: () => string } = {},
+  options: {
+    router?: IntentRouter;
+    now?: () => string;
+    document_rag?: DocumentRagResponder;
+  } = {},
 ): Promise<T> {
   const server = createApiServer({
     sql: client,
     router: options.router ?? fallbackRouter,
+    document_rag: options.document_rag ?? unavailableDocumentRag,
     ...(options.now === undefined ? {} : { now: options.now }),
   });
   await new Promise<void>((resolve, reject) => {
@@ -332,6 +386,79 @@ test("POST /conversations/{id}/messages returns the exact public fast-path resul
   );
 });
 
+test("POST messages returns a document RAG answer compatible with OpenAPI", async () => {
+  const content = "consulta documental";
+  const answer = documentAnswer();
+  await withServer(
+    sql(
+      [conversationContextRow],
+      [
+        persistedTurnRow(content, {
+          assistant_content: answer.content,
+        }),
+      ],
+    ),
+    async (baseUrl) => {
+      const response = await postMessage(
+        baseUrl,
+        JSON.stringify({ content }),
+      );
+      assert.equal(response.status, 201);
+      const body = (await response.json()) as Record<string, unknown>;
+      const assistant = body.assistant_message as Record<string, unknown>;
+      assert.equal("citation_records" in assistant, false);
+      assert.deepEqual(assistant.citations, answer.citations);
+      assert.deepEqual((assistant.citations as unknown[])[0], {
+        index: 0,
+        label: "Guía sintética",
+        locator: "document:guia#chunk-1",
+        release_id: RELEASE_ID,
+        artifact_url: null,
+        source_kind: "document",
+        document_version_id: DOCUMENT_VERSION_ID,
+      });
+    },
+    { document_rag: async () => answer, now: () => NOW },
+  );
+});
+
+test("POST messages returns 201 for insufficient document evidence", async () => {
+  const content = "consulta sin evidencia";
+  const answer = documentAnswer({
+    content: "No encontré evidencia suficiente.",
+    insufficient_evidence: true,
+    citations: [],
+    citation_records: [],
+  });
+  await withServer(
+    sql(
+      [conversationContextRow],
+      [
+        persistedTurnRow(content, {
+          assistant_content: answer.content,
+          assistant_insufficient_evidence: true,
+        }),
+      ],
+    ),
+    async (baseUrl) => {
+      const response = await postMessage(
+        baseUrl,
+        JSON.stringify({ content }),
+      );
+      assert.equal(response.status, 201);
+      const body = (await response.json()) as {
+        assistant_message: {
+          insufficient_evidence: boolean;
+          citations: unknown[];
+        };
+      };
+      assert.equal(body.assistant_message.insufficient_evidence, true);
+      assert.deepEqual(body.assistant_message.citations, []);
+    },
+    { document_rag: async () => answer, now: () => NOW },
+  );
+});
+
 async function postMessage(
   baseUrl: string,
   body: string,
@@ -474,14 +601,43 @@ test("POST messages maps conversation conflicts to 409", async () => {
   );
 });
 
-test("POST messages maps agent fallback unavailability to 503", async () => {
+test("POST messages maps RAG dependency unavailability to 503 without details", async () => {
   await withServer(sql([conversationContextRow]), async (baseUrl) => {
-    await assertErrorResponse(
-      await postMessage(baseUrl, JSON.stringify({ content: "consulta abierta" })),
+    const response = await postMessage(
+      baseUrl,
+      JSON.stringify({ content: "consulta abierta" }),
+    );
+    const body = await assertErrorResponse(
+      response,
       503,
       "DEPENDENCY_UNAVAILABLE",
     );
+    assert.equal(
+      body.error.message,
+      "Una dependencia temporalmente no está disponible.",
+    );
+    assert.doesNotMatch(JSON.stringify(body), /generator|ollama|embedding/iu);
   });
+});
+
+test("POST messages maps an internal RAG invariant to 500 without details", async () => {
+  await withServer(
+    sql([conversationContextRow]),
+    async (baseUrl) => {
+      const response = await postMessage(
+        baseUrl,
+        JSON.stringify({ content: "consulta abierta" }),
+      );
+      const body = await assertErrorResponse(response, 500, "INTERNAL_ERROR");
+      assert.equal(body.error.message, "Ocurrió un error interno.");
+      assert.doesNotMatch(JSON.stringify(body), /invariant|release/iu);
+    },
+    {
+      document_rag: async () => {
+        throw new DocumentRagInvariantError();
+      },
+    },
+  );
 });
 
 test("POST messages maps database unavailability to 503", async () => {

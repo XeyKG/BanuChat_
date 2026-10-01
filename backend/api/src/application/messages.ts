@@ -1,10 +1,16 @@
 import { dispatchChatQuery } from "../chat/chat-dispatcher.js";
+import {
+  DocumentRagInvariantError,
+  type DocumentRagAnswer,
+  type DocumentRagInput,
+} from "../chat/document-rag.js";
 import type {
-  FastPathAnswer,
   PersistenceCitation,
   PresentationCitation,
 } from "../chat/chat-types.js";
+import { DocumentQueryRetrievalError } from "./document-query-retrieval-errors.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
+import { GeneratorClientError } from "../generation/generator-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
 import { AnnouncementsError } from "./announcements-errors.js";
 import { CalendarEventsError } from "./calendar-events-errors.js";
@@ -179,7 +185,12 @@ SELECT
 export interface SendMessageDependencies {
   sql: SqlQueryClient;
   router: IntentRouter;
+  document_rag: DocumentRagResponder;
 }
+
+export type DocumentRagResponder = (
+  input: DocumentRagInput,
+) => Promise<DocumentRagAnswer>;
 
 export interface SendMessageInput {
   conversation_id: string;
@@ -351,7 +362,15 @@ function validateCitationPair(
   );
 }
 
-function validateAnswer(answer: FastPathAnswer): void {
+interface PersistableAnswer {
+  release_id: string;
+  content: string;
+  insufficient_evidence: boolean;
+  citations: PresentationCitation[];
+  citation_records: PersistenceCitation[];
+}
+
+function validateAnswer(answer: PersistableAnswer): void {
   if (
     !isUuid(answer.release_id) ||
     !isNonblank(answer.content) ||
@@ -456,13 +475,42 @@ export async function sendMessage(
     throw error;
   }
 
-  if (dispatched.kind === "agent_fallback") {
-    reject("agent_fallback_unavailable");
+  let answer: PersistableAnswer;
+  if (dispatched.kind === "answered") {
+    answer = dispatched;
+  } else {
+    try {
+      answer = await dependencies.document_rag({
+        release_id: context.dataset_release_id,
+        query: input.content,
+      });
+    } catch (error) {
+      if (error instanceof GeneratorClientError) {
+        reject("rag_dependency_unavailable");
+      }
+      if (error instanceof DocumentQueryRetrievalError) {
+        if (error.reason === "release_not_available") {
+          reject("current_release_changed");
+        }
+        if (
+          error.reason === "embedding_runtime_mismatch" ||
+          error.reason === "embedding_unavailable" ||
+          error.reason === "invalid_embedding_response"
+        ) {
+          reject("rag_dependency_unavailable");
+        }
+        reject("invalid_database_result");
+      }
+      if (error instanceof DocumentRagInvariantError) {
+        reject("invalid_database_result");
+      }
+      throw error;
+    }
   }
-  validateAnswer(dispatched);
-  if (dispatched.release_id !== context.dataset_release_id) {
+  if (answer.release_id !== context.dataset_release_id) {
     reject("current_release_changed");
   }
+  validateAnswer(answer);
 
   const expectedOrdinal = context.expected_next_ordinal as number;
   let persistenceResult;
@@ -474,9 +522,9 @@ export async function sendMessage(
         context.dataset_release_id,
         expectedOrdinal,
         input.content,
-        dispatched.content,
-        dispatched.insufficient_evidence,
-        JSON.stringify(dispatched.citation_records),
+        answer.content,
+        answer.insufficient_evidence,
+        JSON.stringify(answer.citation_records),
       ],
     );
   } catch (error) {
@@ -513,9 +561,9 @@ export async function sendMessage(
     userCreatedAt === undefined ||
     !isUuid(row.assistant_message_id) ||
     row.assistant_ordinal !== expectedOrdinal + 1 ||
-    row.assistant_content !== dispatched.content ||
+    row.assistant_content !== answer.content ||
     assistantCreatedAt === undefined ||
-    row.assistant_insufficient_evidence !== dispatched.insufficient_evidence
+    row.assistant_insufficient_evidence !== answer.insufficient_evidence
   ) {
     reject("invalid_database_result");
   }
@@ -534,7 +582,7 @@ export async function sendMessage(
       content: row.assistant_content,
       created_at: assistantCreatedAt,
       insufficient_evidence: row.assistant_insufficient_evidence,
-      citations: dispatched.citations,
+      citations: answer.citations,
     },
   };
 }

@@ -6,7 +6,10 @@ import {
 } from "node:http";
 
 import { createConversation } from "../application/conversations.js";
-import { sendMessage } from "../application/messages.js";
+import {
+  sendMessage,
+  type DocumentRagResponder,
+} from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
@@ -30,6 +33,7 @@ const MESSAGES_PATH_PATTERN =
 export interface ApiServerDependencies {
   sql: SqlQueryClient;
   router: IntentRouter;
+  document_rag: DocumentRagResponder;
   now?: () => string;
 }
 
@@ -201,7 +205,11 @@ async function handleRequest(
         const input = parseSendMessageBody(await readRequestBody(request));
         const now = (dependencies.now ?? (() => new Date().toISOString()))();
         const result = await sendMessage(
-          { sql: dependencies.sql, router: dependencies.router },
+          {
+            sql: dependencies.sql,
+            router: dependencies.router,
+            document_rag: dependencies.document_rag,
+          },
           {
             conversation_id: conversationId,
             content: input.content,

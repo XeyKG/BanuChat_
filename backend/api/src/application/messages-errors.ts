@@ -3,7 +3,7 @@ export type SendMessageErrorReason =
   | "conversation_not_found"
   | "current_release_changed"
   | "conversation_conflict"
-  | "agent_fallback_unavailable"
+  | "rag_dependency_unavailable"
   | "invalid_database_result";
 
 export class SendMessageError extends Error {
