@@ -103,7 +103,7 @@ Un UUID inválido produce 400; una conversación ocupada puede producir 409.
 La cascada es exclusivamente conversations → messages → message_citations.
 No borra perfiles, corpus, releases, documentos, chunks, cursos, eventos o anuncios.
 
-### Enviar mensaje y consistencia futura
+### Enviar mensaje y consistencia
 
 POST messages acepta únicamente `content`: string de 1–4000 caracteres Unicode,
 no compuesto solo por espacios. No se recorta ni transforma silenciosamente.
@@ -111,35 +111,49 @@ Este límite controla el tamaño del turno sin depender del límite de la consul
 interna de retrieval. El cliente no elige perfil, release, tool, modelo, prompt
 ni embedding. La conversación determina la clave de perfil del contexto.
 
-El futuro backend deberá:
+Implementado actualmente:
 
-1. Validar request y conversación, impedir turnos/borrados concurrentes para la
-   misma conversación, fijar la release vigente publicada y resolver allí el
-   perfil de la conversación. Si esa clave ya no existe, devolver 409 sin insertar.
-2. Persistir el mensaje user con su siguiente ordinal en una transacción corta.
-3. Evaluar el Intent Router sobre una copia normalizada del mensaje, sin modificar
-   el original persistido; usar contexto controlado y un instante de referencia
-   capturado una sola vez. La clasificación no usa LLM, embeddings ni N8N.
-4. Si hay una intención segura, ejecutar el servicio compartido y renderer
-   determinista; ayuda/social/límites conocidos pueden usar un renderer estático.
+1. Validar el request y la conversación, fijar la release vigente publicada,
+   resolver allí el perfil de la conversación y obtener el ordinal esperado. Si el
+   contexto ya no es válido, devolver el error correspondiente sin insertar.
+2. Evaluar el Intent Router sobre el mensaje con contexto controlado y un instante
+   de referencia capturado para el turno. La clasificación no usa LLM, embeddings
+   ni N8N.
+3. Si hay una intención segura, ejecutar el fast path y su renderer determinista.
    El fast path no llama al servidor MCP ni al generador.
-5. De lo contrario ejecutar Agent/RAG con contexto de perfil controlado y obtener
-   evidencia estructurada de MCP/servicios. Ambigüedad y consultas compuestas
-   siempre hacen fallback, no una clasificación forzada.
-6. Verificar procedencia e IDs en ambas rutas; toda evidencia debe pertenecer a
-   la release fijada. Si un servicio o refresco interno MCP cambia la release del
-   turno, falla con 409, sin alterar MCP ni publicar respuesta mezclada.
-   Insuficiencia de evidencia se declara explícitamente; encontrar un resultado
-   no prueba suficiencia. Renderers vacíos/estáticos no fabrican citas.
-7. Persistir assistant y todas sus citas verificadas atómicamente, con
-   `answer_release_id` de ese turno, y después responder 201 con
-   `conversation_id`, `user_message` y `assistant_message`.
-8. Liberar la exclusión de conversación incluso si falla la ejecución.
+4. De lo contrario ejecutar Document RAG directo sobre la release fijada, sin un
+   ciclo Agent/ReAct ni llamadas MCP.
+5. Validar la respuesta, sus citas y sus registros de persistencia; toda evidencia
+   debe pertenecer a la release fijada. La insuficiencia de evidencia se declara
+   explícitamente y no fabrica citas.
+6. Ejecutar una única sentencia atómica que bloquea la fila de conversación durante
+   la persistencia, vuelve a verificar la existencia de la conversación, la release
+   vigente y el ordinal esperado, y aplica además las restricciones `UNIQUE`
+   residuales.
+7. En esa misma sentencia insertar el mensaje user, el mensaje assistant y todas
+   las citas verificadas, con `answer_release_id` de ese turno.
+8. Responder 201 con `conversation_id`, `user_message` y `assistant_message` solo
+   después de confirmar la persistencia completa.
+
+Si algo falla antes de esa sentencia de persistencia, no queda insertado el mensaje
+user de ese turno. Si la persistencia falla, la sentencia completa no debe dejar un
+turno parcial. Si el servidor confirma correctamente el commit pero la respuesta
+HTTP no llega al cliente, el turno completo puede existir aunque el cliente no haya
+visto 201.
+
+El backend no mantiene una transacción, mutex ni advisory lock durante la ejecución
+del router, fast path o Document RAG. La protección implementada actúa al persistir
+mediante el bloqueo de la conversación, el gate de release, el ordinal esperado y
+las restricciones `UNIQUE` residuales. Por tanto, no se afirma que DELETE pueda
+detectar actualmente una generación en curso.
+
+Arquitectura objetivo pendiente: incorporar Agent/ReAct y el MCP interno al fallback.
+Una posible exclusión explícita durante el procesamiento requiere una decisión e
+implementación posteriores; este contrato no presupone su mecanismo.
 
 Este cambio es interno: véanse [ADR 0004](../../docs/adr/0004-enrutamiento-determinista-intenciones.md)
 y la [especificación del router](../../docs/enrutamiento-intenciones.md). No modifica
-OpenAPI, rutas, payloads, códigos HTTP ni idempotencia. Los servicios compartidos
-son diseño, no implementación. `answer_release_id` designa conceptualmente la
+rutas, payloads, códigos HTTP ni idempotencia. `answer_release_id` designa conceptualmente la
 release de respuesta; la columna SQL vigente es `messages.answer_dataset_release_id`.
 
 La release de respuesta puede diferir de la de apertura. Las citas históricas
@@ -148,17 +162,10 @@ La release efectiva se conserva en `messages.answer_release_id` incluso cuando
 no haya citas; no se añade un campo REST nuevo al assistant por ese motivo.
 Ninguna nueva consulta admite seleccionar una release histórica. `reference_time`
 solo clasifica anuncios de la release vigente, no selecciona una versión del corpus.
-La exclusión deberá funcionar entre procesos, no solo mediante un mutex en memoria;
-una opción acotada para implementación posterior es un advisory lock PostgreSQL
-por conversación en una conexión dedicada, con adquisición no bloqueante (409),
-liberación garantizada y sin mantener una transacción abierta durante generación.
-Esta opción no añade tablas ni constituye implementación o cambio del DDL.
-
-Si falla el agente, servicio o renderer después del commit del user, ese mensaje puede quedar sin
-assistant. No se crean respuestas ficticias, estados pendientes ni tablas nuevas.
-GET puede mostrar ese estado incluso mientras un turno sigue ejecutándose.
-Un fallo al persistir citas revierte también assistant. Tras un timeout puede
-existir un commit aunque el cliente no haya recibido 201.
+POST messages no es idempotente y no admite `Idempotency-Key`. Después de un timeout
+o resultado de red incierto se debe consultar el historial antes de decidir si se
+reenvía; no corresponde hacer retry ciego. Una lectura sin el turno todavía no
+demuestra que el procesamiento anterior haya terminado.
 
 ### Consultas directas
 

@@ -228,7 +228,7 @@
       "post": {
         "operationId": "send_message",
         "summary": "Enviar mensaje y recibir respuesta del agente",
-        "description": "Solo content, de 1 a 4000 caracteres Unicode y no solo espacios. Contexto de perfil derivado de la conversación. Fija release vigente; todas las evidencias del turno deben coincidir. 201 únicamente tras confirmar user, assistant y citas. Puede quedar user sin assistant ante un fallo posterior al primer commit; consultar historial, nunca reenviar ciegamente. Un turno concurrente o cambio incompatible de release/perfil produce 409. No admite Idempotency-Key en v1.",
+        "description": "Solo content, de 1 a 4000 caracteres Unicode y no solo espacios. Contexto de perfil derivado de la conversación. Fija la release vigente, ejecuta el Intent Router y el fast path o Document RAG, y valida la respuesta y su procedencia antes de persistir. Una única sentencia atómica vuelve a verificar conversación, release y ordinal esperado, e inserta user, assistant y todas las citas; un fallo previo no deja el user de ese turno y un fallo de persistencia no debe dejar un turno parcial. 201 únicamente después de confirmar la persistencia completa. Si el commit se completa pero la respuesta HTTP no llega, el turno puede existir aunque el cliente no haya visto 201; consultar historial y nunca reenviar ciegamente tras un resultado de red incierto. Un turno concurrente o cambio incompatible de release/perfil produce 409. No admite Idempotency-Key en v1.",
         "requestBody": {
           "required": true,
           "content": {
