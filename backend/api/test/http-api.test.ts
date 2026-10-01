@@ -811,3 +811,95 @@ test("an unexpected conversations query parameter returns 400", async () => {
     await assertErrorResponse(response, 400, "INVALID_ARGUMENT");
   });
 });
+
+const conversationHistoryRow = {
+  conversation_id: CONVERSATION_ID,
+  profile_key: "student_001",
+  started_at: CREATED_AT,
+  last_message_at: "2026-10-01T14:05:00.000Z",
+  message_count: 2,
+};
+
+test("GET /conversations returns the exact history response", async () => {
+  await withServer(sql([conversationHistoryRow]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations?profile_key=student_001`,
+    );
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "no-store");
+    assert.equal(
+      response.headers.get("content-type"),
+      "application/json; charset=utf-8",
+    );
+    assert.deepEqual(await response.json(), {
+      conversations: [conversationHistoryRow],
+    });
+  });
+});
+
+test("GET /conversations accepts a valid limit", async () => {
+  await withServer(sql([conversationHistoryRow]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations?profile_key=student_001&limit=1`,
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), {
+      conversations: [conversationHistoryRow],
+    });
+  });
+});
+
+test("GET /conversations returns an empty history with 200", async () => {
+  await withServer(sql([]), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations?profile_key=student_001`,
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { conversations: [] });
+  });
+});
+
+test("GET /conversations rejects invalid query parameters", async () => {
+  const invalidQueries = [
+    "",
+    "?profile_key=INVALID",
+    "?profile_key=student_001&profile_key=student_002",
+    "?profile_key=student_001&limit=0",
+    "?profile_key=student_001&limit=51",
+    "?profile_key=student_001&limit=20.0",
+    "?profile_key=student_001&limit=1&limit=2",
+    "?profile_key=student_001&unknown=1",
+  ];
+
+  for (const query of invalidQueries) {
+    await withServer(sql(), async (baseUrl) => {
+      const response = await fetch(`${baseUrl}/api/v1/conversations${query}`);
+      await assertErrorResponse(response, 400, "INVALID_ARGUMENT");
+    });
+  }
+});
+
+test("GET /conversations maps database unavailability to 503", async () => {
+  await withServer(sql(new DatabaseDependencyError()), async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations?profile_key=student_001`,
+    );
+    await assertErrorResponse(response, 503, "DEPENDENCY_UNAVAILABLE");
+  });
+});
+
+test("GET /conversations maps invalid database rows to a safe 500", async () => {
+  await withServer(
+    sql([{ ...conversationHistoryRow, conversation_id: "not-a-uuid" }]),
+    async (baseUrl) => {
+      const response = await fetch(
+        `${baseUrl}/api/v1/conversations?profile_key=student_001`,
+      );
+      const rawBody = await response.text();
+      assert.equal(response.status, 500);
+      assert.doesNotMatch(rawBody, /not-a-uuid|SELECT|banuchat/u);
+      const body = JSON.parse(rawBody) as ErrorBody;
+      assert.equal(body.error.code, "INTERNAL_ERROR");
+    },
+  );
+});

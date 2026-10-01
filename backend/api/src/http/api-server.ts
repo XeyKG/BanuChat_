@@ -7,6 +7,10 @@ import {
 
 import { createConversation } from "../application/conversations.js";
 import {
+  listConversations,
+  type ListConversationsInput,
+} from "../application/conversation-history.js";
+import {
   sendMessage,
   type DocumentRagResponder,
 } from "../application/messages.js";
@@ -139,6 +143,34 @@ function parseSendMessageBody(body: string): { content: string } {
   return { content: value.content };
 }
 
+function parseListConversationsQuery(url: URL): ListConversationsInput {
+  const allowedParameters = new Set(["profile_key", "limit"]);
+  if ([...url.searchParams.keys()].some((key) => !allowedParameters.has(key))) {
+    throw new InvalidHttpRequestError();
+  }
+
+  const profileKeys = url.searchParams.getAll("profile_key");
+  const limits = url.searchParams.getAll("limit");
+  if (profileKeys.length !== 1 || limits.length > 1) {
+    throw new InvalidHttpRequestError();
+  }
+
+  const profileKey = profileKeys[0];
+  if (profileKey === undefined) {
+    throw new InvalidHttpRequestError();
+  }
+
+  if (limits.length === 0) {
+    return { profile_key: profileKey };
+  }
+
+  const rawLimit = limits[0];
+  if (rawLimit === undefined || !/^(?:[1-9]|[1-4][0-9]|50)$/u.test(rawLimit)) {
+    throw new InvalidHttpRequestError();
+  }
+  return { profile_key: profileKey, limit: Number(rawLimit) };
+}
+
 async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
@@ -158,7 +190,8 @@ async function handleRequest(
   const isMessagesPath = messagesMatch !== null;
 
   if (
-    (isProfilesPath || isConversationsPath || isMessagesPath) &&
+    (isProfilesPath || isMessagesPath ||
+      (isConversationsPath && request.method !== "GET")) &&
     url.search !== ""
   ) {
     sendError(response, describeHttpError(new InvalidHttpRequestError()));
@@ -183,6 +216,17 @@ async function handleRequest(
       sendJson(response, 201, result, {
         Location: `/api/v1/conversations/${result.conversation_id}`,
       });
+    } catch (error) {
+      sendError(response, describeHttpError(error));
+    }
+    return;
+  }
+
+  if (request.method === "GET" && isConversationsPath) {
+    try {
+      const input = parseListConversationsQuery(url);
+      const result = await listConversations(dependencies.sql, input);
+      sendJson(response, 200, result);
     } catch (error) {
       sendError(response, describeHttpError(error));
     }

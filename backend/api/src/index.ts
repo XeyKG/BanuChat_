@@ -63,6 +63,16 @@ export {
   type CreateConversationErrorReason,
 } from "./application/conversations-errors.js";
 export {
+  listConversations,
+  type ConversationHistoryItem,
+  type ConversationHistoryResult,
+  type ListConversationsInput,
+} from "./application/conversation-history.js";
+export {
+  ConversationHistoryError,
+  type ConversationHistoryErrorReason,
+} from "./application/conversation-history-errors.js";
+export {
   sendMessage,
   type DocumentRagResponder,
   type SendMessageDependencies,
