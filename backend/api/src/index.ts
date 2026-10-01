@@ -29,6 +29,18 @@ export {
 } from "./retrieval/query-embedding-client.js";
 export { OllamaQueryEmbeddingClient } from "./retrieval/ollama-query-embedding-client.js";
 export {
+  GeneratorClientError,
+  loadGeneratorRuntimeConfig,
+  type GeneratorClient,
+  type GeneratorClientErrorReason,
+  type GeneratorConfig,
+  type GeneratorInput,
+  type GeneratorRecipe,
+  type GeneratorResult,
+  type GeneratorRuntimeConfig,
+} from "./generation/generator-client.js";
+export { OllamaGeneratorClient } from "./generation/ollama-generator-client.js";
+export {
   CurrentReleaseError,
   type CurrentReleaseErrorReason,
 } from "./application/current-release-errors.js";
