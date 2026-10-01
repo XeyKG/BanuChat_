@@ -31,15 +31,20 @@ export async function deleteConversation(
     throw new DeleteConversationError("invalid_argument");
   }
 
+  const canonicalConversationId = input.conversation_id.toLowerCase();
+
   const result = await client.query<DeletedConversationRow>(
     DELETE_CONVERSATION_QUERY,
-    [input.conversation_id],
+    [canonicalConversationId],
   );
   if (result.rows.length === 0) return;
 
+  const returnedId = result.rows[0]?.id;
   if (
     result.rows.length !== 1 ||
-    result.rows[0]?.id !== input.conversation_id
+    typeof returnedId !== "string" ||
+    !UUID_PATTERN.test(returnedId) ||
+    returnedId.toLowerCase() !== canonicalConversationId
   ) {
     throw new DeleteConversationError("invalid_database_result");
   }

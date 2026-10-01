@@ -1126,6 +1126,20 @@ test("DELETE /conversations/{id} returns an exact empty 204", async () => {
   });
 });
 
+test("DELETE accepts uppercase UUID when SQL returns canonical lowercase UUID", async () => {
+  const canonicalId = "abcdefab-cdef-4abc-8def-abcdefabcdef";
+  const client = sql([{ id: canonicalId }]) as ScriptedSqlClient;
+  await withServer(client, async (baseUrl) => {
+    const response = await fetch(
+      `${baseUrl}/api/v1/conversations/${canonicalId.toUpperCase()}`,
+      { method: "DELETE" },
+    );
+    assert.equal(response.status, 204);
+    assert.equal(client.queryTexts.length, 1);
+    assert.match(client.queryTexts[0] ?? "", /DELETE FROM banuchat\.conversations/u);
+  });
+});
+
 test("DELETE /conversations/{id} is idempotent for missing and repeated deletes", async () => {
   await withServer(
     sql([{ id: CONVERSATION_ID }], []),

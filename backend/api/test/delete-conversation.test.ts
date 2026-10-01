@@ -8,7 +8,7 @@ import {
   type SqlQueryClient,
 } from "../src/index.js";
 
-const CONVERSATION_ID = "11111111-1111-4111-8111-111111111111";
+const CONVERSATION_ID = "abcdefab-cdef-4abc-8def-abcdefabcdef";
 
 class DeleteSqlClient implements SqlQueryClient {
   readonly calls: { text: string; parameters: readonly unknown[] }[] = [];
@@ -46,6 +46,14 @@ test("deletes an existing conversation with one parameterized query", async () =
     /DELETE FROM banuchat\.conversations\s+WHERE id = \$1\s+RETURNING id/u,
   );
   assert.doesNotMatch(sql.calls[0]?.text ?? "", /messages|message_citations/u);
+});
+
+test("accepts uppercase UUID input when PostgreSQL returns its canonical lowercase UUID", async () => {
+  const sql = new DeleteSqlClient([{ id: CONVERSATION_ID }]);
+  await deleteConversation(sql, {
+    conversation_id: CONVERSATION_ID.toUpperCase(),
+  });
+  assert.deepEqual(sql.calls[0]?.parameters, [CONVERSATION_ID]);
 });
 
 test("treats an absent valid conversation as success", async () => {
