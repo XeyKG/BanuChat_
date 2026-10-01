@@ -7,6 +7,24 @@ export {
   type CurrentReleaseErrorReason,
 } from "./application/current-release-errors.js";
 export {
+  listProfiles,
+  type ProfileSummary,
+  type ProfilesResult,
+} from "./application/profiles.js";
+export {
+  ProfilesError,
+  type ProfilesErrorReason,
+} from "./application/profiles-errors.js";
+export {
+  createConversation,
+  type CreatedConversation,
+  type CreateConversationInput,
+} from "./application/conversations.js";
+export {
+  CreateConversationError,
+  type CreateConversationErrorReason,
+} from "./application/conversations-errors.js";
+export {
   getProfileProgress,
   type ProfileProgressCourse,
   type ProfileProgressInput,
