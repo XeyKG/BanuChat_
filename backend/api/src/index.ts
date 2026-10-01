@@ -63,6 +63,11 @@ export {
 } from "./application/announcements-errors.js";
 export type { SqlQueryClient } from "./data/sql-client.js";
 export { DatabaseDependencyError } from "./data/database-errors.js";
+export { PgSqlClient } from "./data/pg-client.js";
+export {
+  loadRuntimeConfig,
+  type RuntimeConfig,
+} from "./runtime-config.js";
 export {
   createApiServer,
   type ApiServerDependencies,

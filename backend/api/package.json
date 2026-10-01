@@ -7,10 +7,16 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "start": "node dist/main.js",
+    "start:local": "node --env-file=../../.env dist/main.js"
+  },
+  "dependencies": {
+    "pg": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
     "tsx": "^4.20.0",
     "typescript": "~5.9.3"
   }
