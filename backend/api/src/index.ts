@@ -136,6 +136,13 @@ export type {
   IntentRoutingParameters,
 } from "./routing/intent-router-types.js";
 export { dispatchChatQuery } from "./chat/chat-dispatcher.js";
+export {
+  DocumentRagInvariantError,
+  generateDocumentRagAnswer,
+  type DocumentRagAnswer,
+  type DocumentRagDependencies,
+  type DocumentRagInput,
+} from "./chat/document-rag.js";
 export type {
   AgentFallback,
   ChatDispatchDependencies,
