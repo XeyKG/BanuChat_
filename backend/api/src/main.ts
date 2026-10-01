@@ -3,8 +3,22 @@ import { pathToFileURL } from "node:url";
 import { Pool } from "pg";
 
 import { PgSqlClient } from "./data/pg-client.js";
+import type { SqlQueryClient } from "./data/sql-client.js";
 import { createApiServer } from "./http/api-server.js";
+import { loadDefaultIntentRouter } from "./routing/intent-router.js";
+import type { IntentRouter } from "./routing/intent-router-types.js";
 import { loadRuntimeConfig } from "./runtime-config.js";
+
+export async function createRuntimeApiServer(
+  sql: SqlQueryClient,
+  loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
+): Promise<ReturnType<typeof createApiServer>> {
+  const router = await loadRouter();
+  if (router.catalog_valid !== true) {
+    throw new Error("intent_router_catalog_invalid");
+  }
+  return createApiServer({ sql, router });
+}
 
 async function closeHttpServer(
   server: ReturnType<typeof createApiServer>,
@@ -40,7 +54,7 @@ export async function startApi(): Promise<void> {
     const sql = new PgSqlClient(pool);
     await sql.query<{ ok: number }>("SELECT 1 AS ok");
 
-    server = createApiServer({ sql });
+    server = await createRuntimeApiServer(sql);
     await new Promise<void>((resolve, reject) => {
       const handleError = (error: Error): void => reject(error);
       server?.once("error", handleError);

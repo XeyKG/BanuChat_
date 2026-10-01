@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { CreateConversationError } from "../application/conversations-errors.js";
 import { CurrentReleaseError } from "../application/current-release-errors.js";
+import { SendMessageError } from "../application/messages-errors.js";
 import { ProfilesError } from "../application/profiles-errors.js";
 import { DatabaseDependencyError } from "../data/database-errors.js";
 
@@ -80,6 +81,22 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
         return NOT_FOUND;
       case "current_release_changed":
         return CONFLICT;
+      case "invalid_database_result":
+        return INTERNAL_ERROR;
+    }
+  }
+
+  if (error instanceof SendMessageError) {
+    switch (error.reason) {
+      case "invalid_argument":
+        return INVALID_ARGUMENT;
+      case "conversation_not_found":
+        return NOT_FOUND;
+      case "current_release_changed":
+      case "conversation_conflict":
+        return CONFLICT;
+      case "agent_fallback_unavailable":
+        return DEPENDENCY_UNAVAILABLE;
       case "invalid_database_result":
         return INTERNAL_ERROR;
     }

@@ -6,8 +6,10 @@ import {
 } from "node:http";
 
 import { createConversation } from "../application/conversations.js";
+import { sendMessage } from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
+import type { IntentRouter } from "../routing/intent-router-types.js";
 import {
   createErrorBody,
   describeHttpError,
@@ -20,9 +22,15 @@ const MAX_REQUEST_BODY_BYTES = 16 * 1024;
 const JSON_CONTENT_TYPE = "application/json; charset=utf-8";
 const JSON_MEDIA_TYPE_PATTERN =
   /^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8"))?\s*$/i;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MESSAGES_PATH_PATTERN =
+  /^\/api\/v1\/conversations\/([^/]+)\/messages$/u;
 
 export interface ApiServerDependencies {
   sql: SqlQueryClient;
+  router: IntentRouter;
+  now?: () => string;
 }
 
 function sendJson(
@@ -97,6 +105,36 @@ function parseCreateConversationBody(body: string): { profile_key: string } {
   return { profile_key: value.profile_key };
 }
 
+function parseSendMessageBody(body: string): { content: string } {
+  let value: unknown;
+  try {
+    value = JSON.parse(body) as unknown;
+  } catch {
+    throw new InvalidHttpRequestError();
+  }
+
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new InvalidHttpRequestError();
+  }
+
+  const keys = Object.keys(value);
+  if (
+    keys.length !== 1 ||
+    keys[0] !== "content" ||
+    !("content" in value) ||
+    typeof value.content !== "string"
+  ) {
+    throw new InvalidHttpRequestError();
+  }
+
+  const length = Array.from(value.content).length;
+  if (length < 1 || length > 4000 || !/\S/u.test(value.content)) {
+    throw new InvalidHttpRequestError();
+  }
+
+  return { content: value.content };
+}
+
 async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
@@ -112,8 +150,13 @@ async function handleRequest(
 
   const isProfilesPath = url.pathname === "/api/v1/profiles";
   const isConversationsPath = url.pathname === "/api/v1/conversations";
+  const messagesMatch = MESSAGES_PATH_PATTERN.exec(url.pathname);
+  const isMessagesPath = messagesMatch !== null;
 
-  if ((isProfilesPath || isConversationsPath) && url.search !== "") {
+  if (
+    (isProfilesPath || isConversationsPath || isMessagesPath) &&
+    url.search !== ""
+  ) {
     sendError(response, describeHttpError(new InvalidHttpRequestError()));
     return;
   }
@@ -140,6 +183,37 @@ async function handleRequest(
       sendError(response, describeHttpError(error));
     }
     return;
+  }
+
+  if (isMessagesPath) {
+    const conversationId = messagesMatch[1];
+    if (conversationId === undefined || !UUID_PATTERN.test(conversationId)) {
+      sendError(response, describeHttpError(new InvalidHttpRequestError()));
+      return;
+    }
+
+    if (request.method === "POST") {
+      try {
+        if (request.headers["idempotency-key"] !== undefined) {
+          throw new InvalidHttpRequestError();
+        }
+        requireJsonContentType(request);
+        const input = parseSendMessageBody(await readRequestBody(request));
+        const now = (dependencies.now ?? (() => new Date().toISOString()))();
+        const result = await sendMessage(
+          { sql: dependencies.sql, router: dependencies.router },
+          {
+            conversation_id: conversationId,
+            content: input.content,
+            now,
+          },
+        );
+        sendJson(response, 201, result);
+      } catch (error) {
+        sendError(response, describeHttpError(error));
+      }
+      return;
+    }
   }
 
   sendError(response, notFoundDescription());

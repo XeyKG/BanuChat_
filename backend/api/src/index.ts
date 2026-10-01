@@ -84,6 +84,7 @@ export {
   createApiServer,
   type ApiServerDependencies,
 } from "./http/api-server.js";
+export { createRuntimeApiServer } from "./main.js";
 export {
   createIntentRouter,
   loadDefaultIntentRouter,
