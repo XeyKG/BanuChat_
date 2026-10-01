@@ -30,7 +30,7 @@ const GENERATOR_CONFIG: GeneratorConfig = {
   recipe: {
     think: false,
     stream: false,
-    options: { temperature: 0, num_predict: 128 },
+    options: { temperature: 0, num_predict: 256 },
     keep_alive: "5m",
   },
 };

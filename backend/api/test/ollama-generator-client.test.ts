@@ -19,7 +19,7 @@ const expected: GeneratorConfig = {
   recipe: {
     think: false,
     stream: false,
-    options: { temperature: 0, num_predict: 128 },
+    options: { temperature: 0, num_predict: 256 },
     keep_alive: "5m",
   },
 };
@@ -183,7 +183,7 @@ test("verifies runtime twice and sends the exact chat payload without trimming",
     stream: false,
     think: false,
     keep_alive: "5m",
-    options: { temperature: 0, num_predict: 128 },
+    options: { temperature: 0, num_predict: 256 },
     messages: [
       { role: "system", content: "  sistema  " },
       { role: "user", content: "  usuario  " },
@@ -240,6 +240,26 @@ test("rejects runtime, model, digest and completion capability mismatches", asyn
       );
     });
   }
+});
+
+test("rejects a generator config whose num_predict is not 256", async () => {
+  const client = new OllamaGeneratorClient(
+    "http://localhost:11434",
+    5_000,
+    fakeFetch(),
+  );
+  const invalid = {
+    ...expected,
+    recipe: {
+      ...expected.recipe,
+      options: { ...expected.recipe.options, num_predict: 128 },
+    },
+  } as unknown as GeneratorConfig;
+
+  await assertReason(
+    () => client.generate({ system_prompt: "s", user_prompt: "u" }, invalid),
+    "generator_runtime_mismatch",
+  );
 });
 
 test("rejects visible thinking, blank content and invalid metrics", async (t) => {

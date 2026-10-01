@@ -8,7 +8,7 @@ export interface GeneratorRecipe {
   stream: false;
   options: {
     temperature: 0;
-    num_predict: 128;
+    num_predict: 256;
   };
   keep_alive: "5m";
 }
@@ -136,7 +136,7 @@ export function loadGeneratorRuntimeConfig(
       recipe: {
         think: false,
         stream: false,
-        options: { temperature: 0, num_predict: 128 },
+        options: { temperature: 0, num_predict: 256 },
         keep_alive: "5m",
       },
     },

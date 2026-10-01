@@ -53,7 +53,7 @@ function validateExpectedConfig(expected: GeneratorConfig): void {
     expected.recipe.stream !== false ||
     expected.recipe.keep_alive !== "5m" ||
     expected.recipe.options.temperature !== 0 ||
-    expected.recipe.options.num_predict !== 128
+    expected.recipe.options.num_predict !== 256
   ) {
     return reject("generator_runtime_mismatch");
   }
@@ -189,7 +189,7 @@ export class OllamaGeneratorClient implements GeneratorClient {
         keep_alive: "5m",
         options: {
           temperature: 0,
-          num_predict: 128,
+          num_predict: 256,
         },
         messages: [
           { role: "system", content: input.system_prompt },
