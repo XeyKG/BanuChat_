@@ -1,5 +1,6 @@
 import {
   GeneratorClientError,
+  normalizeSha256Digest,
   type GeneratorClient,
   type GeneratorClientErrorReason,
   type GeneratorConfig,
@@ -9,7 +10,6 @@ import {
 
 const MAX_TIMEOUT_MS = 300_000;
 const MODEL = "qwen3:4b-instruct";
-const DIGEST_PATTERN = /^sha256:[0-9a-f]{64}$/;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
 
 type Fetch = typeof fetch;
@@ -47,7 +47,7 @@ function validateExpectedConfig(expected: GeneratorConfig): void {
   if (
     expected.provider !== "ollama" ||
     expected.model !== MODEL ||
-    !DIGEST_PATTERN.test(expected.model_revision) ||
+    normalizeSha256Digest(expected.model_revision) === undefined ||
     !SEMVER_PATTERN.test(expected.runtime_version) ||
     expected.recipe.think !== false ||
     expected.recipe.stream !== false ||
@@ -144,7 +144,15 @@ export class OllamaGeneratorClient implements GeneratorClient {
         isRecord(candidate) &&
         (candidate.name === expected.model || candidate.model === expected.model),
     );
-    if (!isRecord(model) || model.digest !== expected.model_revision) {
+    const observedDigest = isRecord(model)
+      ? normalizeSha256Digest(model.digest)
+      : undefined;
+    const expectedDigest = normalizeSha256Digest(expected.model_revision);
+    if (
+      observedDigest === undefined ||
+      expectedDigest === undefined ||
+      observedDigest !== expectedDigest
+    ) {
       return reject("generator_runtime_mismatch");
     }
 

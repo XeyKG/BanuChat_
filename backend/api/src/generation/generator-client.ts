@@ -50,8 +50,15 @@ export class GeneratorClientError extends Error {
 }
 
 const GENERATOR_MODEL = "qwen3:4b-instruct" as const;
-const DIGEST_PATTERN = /^(?:sha256:)?([0-9a-fA-F]{64})$/;
+const DIGEST_PATTERN = /^(?:sha256:)?([0-9a-f]{64})$/i;
 const SEMVER_PATTERN = /^\d+\.\d+\.\d+$/;
+
+export function normalizeSha256Digest(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  return DIGEST_PATTERN.exec(value)?.[1]?.toLowerCase();
+}
 
 function validateBaseUrl(value: string): void {
   let parsed: URL;
@@ -106,13 +113,13 @@ export function loadGeneratorRuntimeConfig(
     environment,
     "BANUCHAT_GENERATOR_RUNTIME_VERSION",
   );
-  const digestMatch = DIGEST_PATTERN.exec(revision);
+  const normalizedRevision = normalizeSha256Digest(revision);
 
   validateBaseUrl(baseUrl);
   if (model !== GENERATOR_MODEL) {
     throw new Error("BANUCHAT_GENERATOR_MODEL");
   }
-  if (digestMatch === null) {
+  if (normalizedRevision === undefined) {
     throw new Error("BANUCHAT_GENERATOR_MODEL_REVISION");
   }
   if (!SEMVER_PATTERN.test(runtimeVersion)) {
@@ -124,7 +131,7 @@ export function loadGeneratorRuntimeConfig(
     generator: {
       provider: "ollama",
       model: GENERATOR_MODEL,
-      model_revision: `sha256:${digestMatch[1]?.toLowerCase()}`,
+      model_revision: normalizedRevision,
       runtime_version: runtimeVersion,
       recipe: {
         think: false,

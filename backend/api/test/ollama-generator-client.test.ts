@@ -10,11 +10,11 @@ import {
 
 const MODEL = "qwen3:4b-instruct";
 const DIGEST_HEX = "a".repeat(64);
-const DIGEST = `sha256:${DIGEST_HEX}`;
+const PREFIXED_DIGEST = `sha256:${DIGEST_HEX}`;
 const expected: GeneratorConfig = {
   provider: "ollama",
   model: MODEL,
-  model_revision: DIGEST,
+  model_revision: DIGEST_HEX,
   runtime_version: "0.35.0",
   recipe: {
     think: false,
@@ -57,7 +57,7 @@ function fakeFetch(
       return json(overrides.version ?? { version: "0.35.0" });
     }
     if (url.pathname === "/api/tags") {
-      return json(overrides.tags ?? { models: [{ name: MODEL, digest: DIGEST }] });
+      return json(overrides.tags ?? { models: [{ name: MODEL, digest: DIGEST_HEX }] });
     }
     if (url.pathname === "/api/show") {
       return json(overrides.show ?? { capabilities: ["completion", "thinking"] });
@@ -120,10 +120,10 @@ test("loads and validates explicit generator runtime configuration", () => {
   const prefixed = loadGeneratorRuntimeConfig({
     BANUCHAT_OLLAMA_BASE_URL: "http://[::1]:11434",
     BANUCHAT_GENERATOR_MODEL: MODEL,
-    BANUCHAT_GENERATOR_MODEL_REVISION: DIGEST,
+    BANUCHAT_GENERATOR_MODEL_REVISION: PREFIXED_DIGEST,
     BANUCHAT_GENERATOR_RUNTIME_VERSION: "0.35.0",
   });
-  assert.equal(prefixed.generator.model_revision, DIGEST);
+  assert.equal(prefixed.generator.model_revision, DIGEST_HEX);
 
   for (const [name, value] of [
     ["BANUCHAT_OLLAMA_BASE_URL", "https://localhost:11434"],
@@ -136,7 +136,7 @@ test("loads and validates explicit generator runtime configuration", () => {
         loadGeneratorRuntimeConfig({
           BANUCHAT_OLLAMA_BASE_URL: "http://localhost:11434",
           BANUCHAT_GENERATOR_MODEL: MODEL,
-          BANUCHAT_GENERATOR_MODEL_REVISION: DIGEST,
+          BANUCHAT_GENERATOR_MODEL_REVISION: DIGEST_HEX,
           BANUCHAT_GENERATOR_RUNTIME_VERSION: "0.35.0",
           [name]: value,
         }),
@@ -191,11 +191,40 @@ test("verifies runtime twice and sends the exact chat payload without trimming",
   });
 });
 
+test("accepts equivalent bare, prefixed and case-varied SHA-256 digests", async (t) => {
+  const cases: Array<[string, string]> = [
+    [DIGEST_HEX, DIGEST_HEX],
+    [PREFIXED_DIGEST, DIGEST_HEX],
+    [DIGEST_HEX, PREFIXED_DIGEST],
+    [DIGEST_HEX.toUpperCase(), PREFIXED_DIGEST.toUpperCase()],
+  ];
+  for (const [configuredDigest, observedDigest] of cases) {
+    await t.test(`${configuredDigest.slice(0, 8)} / ${observedDigest.slice(0, 8)}`, async () => {
+      const config = loadGeneratorRuntimeConfig({
+        BANUCHAT_GENERATOR_MODEL: MODEL,
+        BANUCHAT_GENERATOR_MODEL_REVISION: configuredDigest,
+        BANUCHAT_GENERATOR_RUNTIME_VERSION: "0.35.0",
+      });
+      const client = new OllamaGeneratorClient(
+        "http://localhost:11434",
+        5_000,
+        fakeFetch({ tags: { models: [{ name: MODEL, digest: observedDigest }] } }),
+      );
+      const result = await client.generate(
+        { system_prompt: "s", user_prompt: "u" },
+        config.generator,
+      );
+      assert.equal(result.content, " respuesta ");
+    });
+  }
+});
+
 test("rejects runtime, model, digest and completion capability mismatches", async (t) => {
   const cases: Array<Partial<Record<Endpoint, unknown>>> = [
     { version: { version: "0.35.1" } },
-    { tags: { models: [{ name: "another-model", digest: DIGEST }] } },
+    { tags: { models: [{ name: "another-model", digest: DIGEST_HEX }] } },
     { tags: { models: [{ name: MODEL, digest: `sha256:${"b".repeat(64)}` }] } },
+    { tags: { models: [{ name: MODEL, digest: "malformed" }] } },
     { show: { capabilities: ["thinking"] } },
   ];
   for (const [index, overrides] of cases.entries()) {
