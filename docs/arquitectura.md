@@ -21,7 +21,7 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 | Mobile App | React Native + TypeScript; consume únicamente la API REST pública. | `mobile/` |
 | REST Backend API | Entrada síncrona; fija contexto, evalúa Intent Router y persiste respuesta/citas de la misma release. | `backend/api/` |
 | Intent Router | Catálogo determinista: fast path seguro o fallback Agent/RAG; sin LLM, embeddings ni N8N para clasificar. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
-| Application Services | Lógica compartida por fast path y tools MCP, con acceso consistente a PostgreSQL; sin implementación todavía. | Capa lógica interna prevista del backend |
+| Application Services | Lógica compartida con acceso consistente a PostgreSQL; implementada para los fast paths actuales y pendiente de reutilización por tools MCP. | `backend/api/` |
 | Agent/RAG | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; el agente es cliente MCP. | `backend/`, `backend/rag/` |
 | MCP Server interno | Expone herramientas controladas mediante los mismos servicios de aplicación que usa el fast path. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
@@ -30,6 +30,8 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 | Docker Compose local | Entorno de desarrollo y demostraciones iniciales. | `infra/docker-compose.yml` |
 
 ## Consulta síncrona
+
+### Arquitectura objetivo
 
 ```mermaid
 flowchart LR
@@ -50,8 +52,10 @@ flowchart LR
 ```
 
 N8N queda fuera del camino síncrono. La app no consume MCP, N8N ni PostgreSQL
-directamente. El generador sigue abierto; embeddings usa Ollama local con
-`qwen3-embedding:0.6b`, 1024 dimensiones y coseno ([ADR 0003](adr/0003-embedding-local-qwen3.md)).
+directamente. Agent/ReAct y MCP continúan siendo parte de esta arquitectura objetivo;
+no están integrados en el fallback implementado actualmente. Embeddings usa Ollama
+local con `qwen3-embedding:0.6b`, 1024 dimensiones y coseno
+([ADR 0003](adr/0003-embedding-local-qwen3.md)).
 
 El [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md) introduce el router.
 El fast path no llama a MCP ni al LLM generador; usa servicios compartidos y renderers.
@@ -64,6 +68,34 @@ y declaran evidencia insuficiente cuando corresponda. Mantienen una release por 
 No presentan la simulación como información institucional vigente. Los documentos con
 `retrieval_mode=full_document` no se fragmentan ni vectorizan; se resuelven como
 artefactos completos verificados por la ruta REST interna aprobada, no URLs externas.
+
+### Estado de implementación actual
+
+El vertical slice conversacional validado al commit
+`f47ec9e29b8c161a2c88a4eadf641dab2359a964` ejecuta este recorrido:
+
+```mermaid
+flowchart LR
+    client["Mobile / futuro cliente"] -->|"REST"| api["Backend API"]
+    api --> router["Intent Router determinista"]
+    router -->|"Fast path"| fast["Progreso, calendario o anuncios"]
+    router -->|"Fallback documental"| rag["Document RAG directo"]
+    fast --> db[("PostgreSQL + pgvector")]
+    rag --> db
+    rag --> ollama["Ollama local"]
+    fast --> reply["Persistencia y respuesta REST"]
+    rag --> reply
+```
+
+La API expone actualmente `GET /api/v1/profiles`,
+`POST /api/v1/conversations` y
+`POST /api/v1/conversations/{id}/messages`. El fallback hace retrieval documental
+exacto con `qwen3-embedding:0.6b`, genera con `qwen3:4b-instruct`, construye citas y
+persiste mensajes y citas. El recorrido RAG E2E real obtuvo HTTP 201.
+
+Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback. Ambos
+siguen pendientes en la arquitectura objetivo, pero no son necesarios para demostrar
+el vertical slice implementado actual.
 
 ## Ingesta asíncrona de releases sintéticas completas
 
@@ -161,6 +193,13 @@ pendiente de diseño explícito y no se incorpora un proveedor en esta iteració
 Estos son criterios para evaluaciones futuras; este cambio documental no acredita
 su cumplimiento experimental.
 
+Como estado técnico, una muestra warm exploratoria de cinco solicitudes HTTP
+exitosas registró media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms
+y máximo de 13511.09 ms; 0/5 estuvieron por debajo de 5000 ms. La referencia
+histórica de OE6 no se cumplió en esa muestra. No es un benchmark exhaustivo y no se
+modifica ni se acredita OE6. Véase
+[la evidencia versionada](../eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
+
 ## Estado validado y trabajo pendiente
 
 La migración inicial `infra/db/001_initial_schema.sql` ya fue ejecutada sobre PostgreSQL
@@ -185,9 +224,15 @@ se conserva hasta disponer de implementación validada.
 - SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y
   reintentos avanzados descritos en su documentación; no repetir como pendiente A–K.
 - Operación de ingesta: startup/composición HTTP, topología/bind e integración N8N.
-- Consulta: Application Services, Intent Router, REST, retrieval, Agent/MCP y modelo
-  generador productivos.
+- Consulta implementada: Intent Router determinista, fast paths de progreso,
+  calendario y anuncios, los tres endpoints REST descritos arriba, retrieval exacto,
+  Document RAG directo con generación Ollama, citas y persistencia; vertical slice
+  RAG E2E real con HTTP 201.
+- Consulta pendiente: Agent/ReAct real, integración productiva del MCP interno al
+  fallback, `GET /conversations`, `GET /conversations/{id}` y
+  `DELETE /conversations/{id}`, endpoint de artefactos documentales, y exposición
+  HTTP directa de calendario, progreso y anuncios.
 - Producto/evaluación: app móvil, autenticación de usuario final, RAGAS/MRR y pruebas
-  con usuarios.
+  con usuarios, y notificaciones push reales.
 
 Las decisiones confirmadas en `AGENTS.md` prevalecen sobre referencias históricas.
