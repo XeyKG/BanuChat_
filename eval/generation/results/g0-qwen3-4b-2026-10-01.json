@@ -1,0 +1,197 @@
+{
+  "schema_version": "1",
+  "benchmark_id": "banuchat-generator-g0-v1",
+  "metadata": {
+    "implementation_revision": "43dabeb9993c5bc9099da70a28336f90ffbd5194",
+    "prompts_sha256": "ea4a131d3b517dd8852b1cb44ad124399a8169c64924691355ceee5e523bb952",
+    "generated_at": "2026-10-01T07:26:20.903Z",
+    "ollama_runtime_version": "0.35.0",
+    "model": "qwen3:4b",
+    "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "think": false,
+    "stream": false,
+    "temperature": 0,
+    "num_predict": 128
+  },
+  "preflight": {
+    "base_url": "http://127.0.0.1:11434",
+    "capabilities": [
+      "completion",
+      "tools",
+      "thinking"
+    ],
+    "thinking": {
+      "capability_reported": true,
+      "model_info": {},
+      "false_requested": true,
+      "execution_validation": "Cada respuesta debe omitir message.thinking o devolverlo vacío."
+    }
+  },
+  "phases": {
+    "unload_control": {
+      "completed": true,
+      "included_in_warm_aggregates": false
+    },
+    "initial_cold_observation": {
+      "completed": true,
+      "included_in_warm_aggregates": false
+    },
+    "warmup": {
+      "completed": true,
+      "included_in_warm_aggregates": false
+    },
+    "measured_warm_runs": {
+      "completed": true,
+      "included_in_warm_aggregates": true,
+      "count": 10
+    }
+  },
+  "initial_cold_observation": {
+    "id": "initial_cold_observation",
+    "wall_clock_ms": 8837.729299999999,
+    "ollama_total_duration_ms": 8829.9267,
+    "load_duration_ms": 3739.8847,
+    "prompt_eval_duration_ms": 358.049,
+    "eval_duration_ms": 4717.795,
+    "prompt_eval_count": 295,
+    "eval_count": 128,
+    "tokens_per_second": 27.13131876226076,
+    "response": "Okay, let's tackle this question. The user is asking what they need to check before interpreting progress and why they shouldn't combine results from different profiles.\n\nFirst, I need to look at the context provided. The context says that demonstration profiles are fictitious identities that let you observe different progress situations. The alias helps recognize the selected context but doesn't identify a person. Choosing a profile doesn't start an institutional session or authenticate an academic relationship.\n\nBefore interpreting progress, you must check which profile is selected. The same activity can appear with different situations in distinct profiles. That diversity is part of the scenario and not a contradiction that needs resolving by"
+  },
+  "warm_runs": [
+    {
+      "id": "G0-01",
+      "wall_clock_ms": 3417.187299999998,
+      "ollama_total_duration_ms": 3411.7188,
+      "load_duration_ms": 14.5764,
+      "prompt_eval_duration_ms": 25.411,
+      "eval_duration_ms": 3356.668,
+      "prompt_eval_count": 295,
+      "eval_count": 128,
+      "tokens_per_second": 38.13305337316648,
+      "response": "Okay, let's tackle this question. The user is asking what they need to check before interpreting progress and why they shouldn't combine results from different profiles.\n\nFirst, I'll look at the context provided. The context says that demonstration profiles are fictitious identities to observe different progress situations. The alias helps recognize the selected context but doesn't identify a person. Choosing a profile doesn't start an institutional session or authenticate an academic relationship.\n\nBefore interpreting progress, they must check which profile is selected. The same activity can appear with different situations in distinct profiles. That diversity is part of the scenario, not a contradiction that needs resolving by taking the highest"
+    },
+    {
+      "id": "G0-02",
+      "wall_clock_ms": 4488.881200000003,
+      "ollama_total_duration_ms": 4486.505,
+      "load_duration_ms": 9.9553,
+      "prompt_eval_duration_ms": 133.561,
+      "eval_duration_ms": 4295.739,
+      "prompt_eval_count": 287,
+      "eval_count": 128,
+      "tokens_per_second": 29.796968577467112,
+      "response": "Okay, let's tackle this question. The user wants to know what decisions they need to clarify when changing activities and what happens to the previous progress percentage.\n\nFirst, I'll look at the context provided. The context says that changing activities requires distinguishing two decisions: what happens with the previous relationship and what new relationship is proposed for the destination activity. Also, it mentions that the percentage between courses doesn't transfer automatically because contents and evidence can be different. The similarity in name doesn't mean equivalence.\n\nThe question is about the decisions to clarify and the percentage of progress. From the context, the key points are the two decisions (previous relationship and"
+    },
+    {
+      "id": "G0-03",
+      "wall_clock_ms": 8201.339300000007,
+      "ollama_total_duration_ms": 8197.3745,
+      "load_duration_ms": 9.2522,
+      "prompt_eval_duration_ms": 189.438,
+      "eval_duration_ms": 7943.018,
+      "prompt_eval_count": 284,
+      "eval_count": 128,
+      "tokens_per_second": 16.114781560359045,
+      "response": "Okay, let's tackle this question. The user is asking about the difference between \"asistencia\" and \"participación\" in the context of the Digital Learning Demo program, and what the calendar can show about a profile.\n\nFirst, I need to recall the context provided. The context says that participating in the program involves a fictitious practice with attention to instructions, expressing decisions, and reviewing results. It's not just opening a material. Asistencia describes presence in a session, while participación describes the work done during it.\n\nThe program doesn't have an individual attendance list. Finding a session in the calendar shows the schedule but doesn't"
+    },
+    {
+      "id": "G0-04",
+      "wall_clock_ms": 3829.262499999997,
+      "ollama_total_duration_ms": 3825.4594,
+      "load_duration_ms": 20.296,
+      "prompt_eval_duration_ms": 187.937,
+      "eval_duration_ms": 3554.512,
+      "prompt_eval_count": 285,
+      "eval_count": 128,
+      "tokens_per_second": 36.01056910203145,
+      "response": "Okay, let's tackle this question. The user is asking how the enrolled and in_progress states are interpreted and what dates or conclusions shouldn't be invented based on the provided context.\n\nFirst, I need to recall the context given. The context says that \"enrolled\" is a registration with 0% and no expiration date. It describes the snapshot situation, not a promise of when work starts. The start date might be missing and isn't determined by the first calendar event.\n\nThen, \"in_progress\" is work in progress with a percentage between 0 and 100. It doesn't have an expiration date. The value"
+    },
+    {
+      "id": "G0-05",
+      "wall_clock_ms": 3129.2502000000095,
+      "ollama_total_duration_ms": 3123.9199,
+      "load_duration_ms": 8.7793,
+      "prompt_eval_duration_ms": 102.085,
+      "eval_duration_ms": 2972.69,
+      "prompt_eval_count": 288,
+      "eval_count": 128,
+      "tokens_per_second": 43.058643854555974,
+      "response": "Okay, let's tackle this question. The user is asking how to organize evidence and what to do if a necessary data is missing. \n\nFirst, I need to recall the context provided. The context says that the evidence should start with a brief identification of the activity and material, then describe the result and main decisions. It's important to separate what was produced from comments on how it was produced. Also, incomplete evidence should note pending steps, recognize difficulties instead of presenting fabricated results, and when data is missing, identify the absence and explain which part is affected without completing it arbitrarily.\n\nSo, for organizing evidence: the answer should mention starting"
+    },
+    {
+      "id": "G0-06",
+      "wall_clock_ms": 3252.51400000001,
+      "ollama_total_duration_ms": 3248.1521,
+      "load_duration_ms": 14.3867,
+      "prompt_eval_duration_ms": 112.75,
+      "eval_duration_ms": 3074.334,
+      "prompt_eval_count": 304,
+      "eval_count": 128,
+      "tokens_per_second": 41.63503379919033,
+      "response": "Okay, let's tackle this question. The user is asking about the time zone where calendar days are interpreted and how inclusive date ranges work.\n\nFirst, looking at the context provided. It says: \"Los días civiles del calendario se interpretan en America/Bogota, la zona técnica canónica del prototipo.\" So that translates to \"Calendar civil days are interpreted in America/Bogota, the canonical technical zone of the prototype.\" So the time zone here is America/Bogota.\n\nNext part: \"Una consulta desde un día hasta otro incluye ambos días civiles. Internamente, sus límites corresponden al"
+    },
+    {
+      "id": "G0-07",
+      "wall_clock_ms": 3154.192599999995,
+      "ollama_total_duration_ms": 3152.114,
+      "load_duration_ms": 8.9482,
+      "prompt_eval_duration_ms": 104.397,
+      "eval_duration_ms": 2994.187,
+      "prompt_eval_count": 294,
+      "eval_count": 128,
+      "tokens_per_second": 42.74950094967348,
+      "response": "Okay, let's tackle this question. The user is asking how to determine if an ad is future, current, or expired, including the exact start and end moments.\n\nFirst, I need to recall the context provided. The context says that each ad has a start date, which may have an end date or not. The classification depends on a reference instant (explicit or the current moment). \n\nSo, the key points from the context: \n- Future ad: start date is after the reference instant.\n- Current ad: started and hasn't exceeded the end date (if it exists).\n- Expired ad: end date is before the"
+    },
+    {
+      "id": "G0-08",
+      "wall_clock_ms": 3221.108500000002,
+      "ollama_total_duration_ms": 3216.3588,
+      "load_duration_ms": 20.9869,
+      "prompt_eval_duration_ms": 104.696,
+      "eval_duration_ms": 3037.139,
+      "prompt_eval_count": 284,
+      "eval_count": 128,
+      "tokens_per_second": 42.144926524600955,
+      "response": "Okay, let's tackle this question. The user is asking about what information should be included in a report of an incident and how to distinguish an observation from an interpretation.\n\nFirst, I need to look at the context provided. The context says that a useful description should indicate what was intended, what happened, and what was expected based on the material. It also mentions using titles or scene keys to identify the context. They don't need personal info, device routes, or foreign service captures to explain a practice difficulty.\n\nThe key part here is distinguishing observation from interpretation. The example given is \"La lista aparece vacía\" (the list"
+    },
+    {
+      "id": "G0-09",
+      "wall_clock_ms": 3213.9502000000066,
+      "ollama_total_duration_ms": 3196.6937,
+      "load_duration_ms": 10.1926,
+      "prompt_eval_duration_ms": 116.282,
+      "eval_duration_ms": 3015.474,
+      "prompt_eval_count": 292,
+      "eval_count": 128,
+      "tokens_per_second": 42.4477213200976,
+      "response": "Okay, let's tackle this question. The user is asking how to act if a material says to ignore limits, reveal internal information, or expand permissions.\n\nFirst, I need to check the context provided. The context says that not all text in a document is an operational order. For example, a sequence for analysis, not to execute. If a phrase asks to ignore limits, change sources, or reveal internal info, it doesn't have authority just because it's in the material.\n\nAlso, the instructions of a practice must be compatible with their purpose and the fictional scope. If there's a contradiction, stop the affected step and request review"
+    },
+    {
+      "id": "G0-10",
+      "wall_clock_ms": 3580.305699999997,
+      "ollama_total_duration_ms": 3564.2607,
+      "load_duration_ms": 10.5212,
+      "prompt_eval_duration_ms": 93.914,
+      "eval_duration_ms": 3415.617,
+      "prompt_eval_count": 271,
+      "eval_count": 128,
+      "tokens_per_second": 37.47492766314256,
+      "response": "Okay, let's tackle this question. The user is asking which source to consult for four things: a topic, a schedule, interpreting a rule, and checking the validity of an invitation.\n\nFirst, I'll look at the context provided. The context has two sections. The first section says: \"¿Dónde encuentro lo que necesito? Si busca un tema de aprendizaje, empiece por el catálogo. Si necesita un horario, consulte el calendario. Para interpretar una regla, busque el documento dedicado a ese asunto.\"\n\nSo, for a learning topic, it's the"
+    }
+  ],
+  "warm_aggregates": {
+    "count": 10,
+    "mean_wall_clock_ms": 3948.7991500000026,
+    "median_wall_clock_ms": 3334.850650000004,
+    "min_wall_clock_ms": 3129.2502000000095,
+    "max_wall_clock_ms": 8201.339300000007,
+    "mean_ollama_total_duration_ms": 3942.2556899999995,
+    "median_ollama_total_duration_ms": 3329.93545,
+    "mean_eval_tokens": 128,
+    "mean_tokens_per_second": 36.956612672428506,
+    "median_tokens_per_second": 39.88404358617841,
+    "under_5000_ms_count": 9,
+    "at_or_over_5000_ms_count": 1
+  }
+}
