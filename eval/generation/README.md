@@ -67,3 +67,37 @@ La fecha del nombre se calcula en `America/Bogota`. Los archivos se crean sin so
 El reporte usa 5000 ms como referencia porque el proyecto conserva un objetivo histórico de respuesta promedio menor a 5 s. Si la media warm de generación ya supera esa referencia, el reporte puede indicar que el modelo resulta poco prometedor en el hardware probado.
 
 Este benchmark mide únicamente generación aislada en Ollama. No demuestra cumplimiento ni incumplimiento definitivo de OE6 end-to-end y no mide retrieval, Agent/ReAct, MCP, persistencia, REST ni mobile. Usa corpus/contexto sintético, una muestra pequeña de diez prompts, una observación cold separada y un warmup excluido.
+
+## G0 v2: comparación controlada de qwen3:4b-instruct
+
+G0 v2 conserva exactamente, en el mismo orden, los diez IDs, contextos y preguntas de G0 v1. La variable experimental principal es el modelo: v1 usa `qwen3:4b` y v2 usa `qwen3:4b-instruct`. Se mantienen sin cambios el system prompt, la construcción del user prompt, `think=false`, `stream=false`, `temperature=0`, `num_predict=128` y `keep_alive="5m"`.
+
+Los archivos de v2 son:
+
+```text
+eval/generation/prompts-v2.json
+eval/generation/run-benchmark-v2.mjs
+```
+
+El runner carga también `prompts-v1.json` y, antes del preflight de Ollama, exige igualdad exacta de `id`, `context` y `question` en las diez posiciones. Además conserva las mismas fases secuenciales: unload/control, observación cold inicial, warmup y las diez ejecuciones warm; las tres primeras no forman parte de los agregados warm.
+
+Para cada ejecución medida, v2 registra `done`, `done_reason`, `thinking_present` y `starts_with_known_reasoning_preamble`, además de las métricas de v1. Exige `done=true`. Si el runtime proporciona `done_reason`, debe ser un string no vacío. Solo clasifica `stop` como terminación natural y `length` como límite de longitud; cualquier otro valor se reporta por separado, sin inferir su significado. `eval_count == 128` no se usa como prueba de truncamiento.
+
+`message.thinking` nunca se almacena: únicamente se registra el booleano `thinking_present`, y cualquier string no vacío aborta el benchmark. El diagnóstico de prefacio inspecciona, sin modificar ni rechazar la respuesta, el comienzo de sus primeros 200 caracteres para las frases documentadas en el runner. No usa un clasificador LLM ni altera las métricas de latencia.
+
+La ejecución futura es:
+
+```powershell
+node eval/generation/run-benchmark-v2.mjs
+```
+
+Una ejecución completa creará, sin sobrescribir archivos existentes:
+
+```text
+eval/generation/results/g0-v2-qwen3-4b-instruct-AAAA-MM-DD.json
+eval/generation/results/g0-v2-qwen3-4b-instruct-AAAA-MM-DD.md
+```
+
+El digest completo se obtiene de `GET /api/tags`; no se valida contra un digest o prefijo hardcodeado. El reporte Markdown añade `done_reason`, el diagnóstico de prefacio y los conteos de terminación natural, límite de longitud y prefacio conocido. Estas señales son diagnósticas y no afirman automáticamente la calidad académica de las respuestas.
+
+G0 v2 aún no tiene resultados ejecutados en este cambio, por lo que no corresponde comparar resultados con v1.

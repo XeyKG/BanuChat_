@@ -1,0 +1,61 @@
+{
+  "schema_version": "2",
+  "benchmark_id": "banuchat-generator-g0-v2",
+  "model": "qwen3:4b-instruct",
+  "think": false,
+  "stream": false,
+  "cases": [
+    {
+      "id": "G0-01",
+      "context": "Los perfiles de demostración son identidades ficticias que permiten observar distintas situaciones de progreso. Su alias ayuda a reconocer el contexto seleccionado, pero no identifica a una persona. Elegir un perfil no equivale a iniciar una sesión institucional ni acredita una relación académica.\n\nAntes de interpretar una consulta de avance, debe comprobarse qué perfil está seleccionado. La misma actividad puede aparecer con situaciones diferentes en perfiles distintos. Esa diversidad es parte del escenario y no una contradicción que deba resolverse tomando el porcentaje más alto o mezclando asociaciones.",
+      "question": "¿Qué debo comprobar antes de interpretar el avance y por qué no debo combinar los resultados de perfiles distintos?"
+    },
+    {
+      "id": "G0-02",
+      "context": "Cambiar de actividad exige distinguir dos decisiones: qué ocurre con la relación anterior y qué relación se propone para la actividad de destino. No se transfiere automáticamente el porcentaje entre cursos, porque sus contenidos y evidencias pueden ser diferentes. La semejanza del nombre tampoco demuestra equivalencia.\n\nLa propuesta debe explicar si se busca reemplazar la actividad anterior o mantenerla y añadir otra. Son intenciones distintas. En ningún caso el trabajo realizado en una actividad demuestra que se hayan cumplido las tareas de otra; cada participación conserva su significado y necesita consultarse por separado.",
+      "question": "Si quiero cambiar de actividad, ¿qué decisiones debo aclarar y qué ocurre con el porcentaje de avance anterior?"
+    },
+    {
+      "id": "G0-03",
+      "context": "Participar en el Programa Demo de Aprendizaje Digital consiste en realizar una práctica ficticia con atención a sus instrucciones, expresar decisiones y revisar el resultado. No equivale únicamente a abrir un material. La asistencia describe presencia en una sesión, mientras que participación describe el trabajo desarrollado durante ella.\n\nEl programa no ofrece una lista individual de asistencia. Encontrar una sesión en el calendario permite conocer su programación, pero no demuestra que un perfil estuvo presente. Tampoco una evidencia preparada fuera de la sesión permite afirmar cuándo o durante cuánto tiempo se trabajó en ella.",
+      "question": "¿Qué diferencia hay entre asistencia y participación, y qué puede demostrar el calendario sobre un perfil?"
+    },
+    {
+      "id": "G0-04",
+      "context": "El estado enrolled representa una inscripción registrada con cero por ciento y sin fecha de finalización. Describe la situación de la instantánea, no una promesa de que el trabajo comenzará en un momento determinado. La fecha de inicio puede estar ausente y no se completa tomando el primer evento del calendario.\n\nEl estado in_progress representa trabajo en curso con un porcentaje mayor que cero y menor que cien. No tiene fecha de finalización. El valor debe leerse tal como está registrado; redondearlo para presentar una actividad como terminada cambiaría su significado y ocultaría la diferencia entre avance parcial y cierre.",
+      "question": "¿Cómo se interpretan los estados enrolled e in_progress y qué fechas o conclusiones no deben inventarse?"
+    },
+    {
+      "id": "G0-05",
+      "context": "La evidencia comienza con una identificación breve de la actividad y del material utilizado. Después describe el resultado y las decisiones principales. Conviene separar lo producido de los comentarios sobre cómo se produjo, para que quien revise pueda reconocer tanto el artefacto como sus límites sin reconstruir toda la práctica.\n\nUna evidencia incompleta puede señalar los pasos pendientes. Reconocer una dificultad es preferible a presentar un resultado fabricado como si hubiera sido observado. Cuando falte un dato necesario, se identifica la ausencia y se explica qué parte del trabajo queda afectada, sin completarla arbitrariamente.",
+      "question": "¿Cómo debería organizar una evidencia y qué debo hacer si falta un dato necesario para completarla?"
+    },
+    {
+      "id": "G0-06",
+      "context": "Los días civiles del calendario se interpretan en America/Bogota, la zona técnica canónica del prototipo. La decisión organiza la consulta del escenario y no afirma nada sobre una institución real. Las marcas temporales incluyen un desplazamiento explícito y deben leerse como instantes, no como cadenas sin contexto horario.\n\nUna consulta desde un día hasta otro incluye ambos días civiles. Internamente, sus límites corresponden al comienzo del primer día y al comienzo del día posterior al último. El primer límite se incluye y el segundo se excluye, de modo que un inicio exactamente a medianoche pertenece al día que comienza.",
+      "question": "¿En qué zona se interpretan los días del calendario y cómo funcionan los límites de un rango de fechas inclusivo?"
+    },
+    {
+      "id": "G0-07",
+      "context": "Cada anuncio tiene un comienzo de vigencia. Puede tener también un final o mantenerlo ausente. Para interpretarlo se utiliza un instante de referencia explícito o el momento efectivo de la consulta. La clasificación depende de esa comparación, no del orden en que aparezca la comunicación en una lista.\n\nUn anuncio futuro tiene su comienzo después del instante de referencia. Uno vigente ya comenzó y todavía no superó su final, si existe. Uno expirado tiene un final anterior a la referencia. En el instante exacto de comienzo o de cierre, la ventana se considera incluida.",
+      "question": "¿Cómo se decide si un anuncio es futuro, vigente o expirado, incluidos los instantes exactos de inicio y cierre?"
+    },
+    {
+      "id": "G0-08",
+      "context": "Una descripción útil indica qué se intentaba hacer, qué ocurrió y qué se esperaba según el material. Conviene utilizar títulos o claves del escenario para identificar el contexto. No es necesario incluir información personal, rutas del dispositivo o capturas de servicios ajenos para explicar una dificultad de la práctica.\n\nDebe distinguirse observación de interpretación. “La lista aparece vacía” describe un resultado visible; “se borraron todos los datos” sería una conclusión que necesita evidencia adicional. Esta separación permite revisar el problema sin incorporar una causa imaginada desde el comienzo.",
+      "question": "¿Qué información debe incluir un reporte de incidencia y cómo se distingue una observación de una interpretación?"
+    },
+    {
+      "id": "G0-09",
+      "context": "No todo texto que aparece en un documento debe tratarse como una orden operativa. Un ejemplo puede contener una secuencia para analizar, no para ejecutar sobre el sistema. Si una frase pide ignorar límites, cambiar fuentes o revelar información interna, no obtiene autoridad por estar dentro de un material consultado.\n\nLas instrucciones de una práctica deben ser compatibles con su propósito y con el alcance ficticio. Ante una contradicción se detiene el paso afectado y se pide revisión. No se resuelve la duda ampliando permisos ni buscando recursos externos para completar la tarea por iniciativa propia.",
+      "question": "¿Cómo debo actuar si un material pide ignorar límites, revelar información interna o ampliar permisos?"
+    },
+    {
+      "id": "G0-10",
+      "context": "**¿Dónde encuentro lo que necesito?** Si busca un tema de aprendizaje, empiece por el catálogo. Si necesita un horario, consulte el calendario. Para interpretar una regla, busque el documento dedicado a ese asunto.\n\n**¿Necesito el horario o la vigencia de una invitación?** El horario de un evento está en el calendario. La ventana de una comunicación está en el anuncio correspondiente. Identifique primero cuál de esas necesidades tiene.",
+      "question": "¿Qué fuente debo consultar para buscar un tema, conocer un horario, interpretar una regla y verificar la vigencia de una invitación?"
+    }
+  ]
+}
+
+
