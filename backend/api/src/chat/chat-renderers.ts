@@ -24,7 +24,7 @@ const ANNOUNCEMENT_STATUS_LABELS = {
 
 function citation(
   index: number,
-  sourceKind: PresentationCitation["source_kind"],
+  sourceKind: Exclude<PresentationCitation["source_kind"], "document">,
   label: string,
   locator: string,
   releaseId: string,

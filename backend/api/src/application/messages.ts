@@ -288,11 +288,30 @@ function validateCitationPair(
     !isNonblank(citation.label) ||
     !isNonblank(citation.locator) ||
     citation.locator !== record.source_locator ||
-    citation.document_version_id !== null ||
     citation.artifact_url !== null ||
     !isNonblank(record.source_path) ||
     !isNonblank(record.source_locator) ||
-    !isSha256(record.source_sha256) ||
+    !isSha256(record.source_sha256)
+  ) {
+    return false;
+  }
+
+  if (citation.source_kind === "document") {
+    return (
+      record.source_kind === "document" &&
+      isUuid(citation.document_version_id) &&
+      record.document_version_id === citation.document_version_id &&
+      isUuid(record.chunk_id) &&
+      record.profile_key === null &&
+      record.course_key === null &&
+      record.event_key === null &&
+      record.announcement_key === null
+    );
+  }
+
+  if (
+    record.source_kind === "document" ||
+    citation.document_version_id !== null ||
     record.document_version_id !== null ||
     record.chunk_id !== null
   ) {

@@ -12,58 +12,79 @@ export interface ChatDispatchDependencies {
   router: IntentRouter;
 }
 
-export interface PresentationCitation {
+interface PresentationCitationBase {
   index: number;
-  source_kind:
-    | "profile"
-    | "profile_course"
-    | "calendar_event"
-    | "announcement";
   label: string;
   locator: string;
   release_id: string;
-  document_version_id: null;
   artifact_url: null;
 }
 
-interface PersistenceCitationBase {
+export type PresentationCitation =
+  | (PresentationCitationBase & {
+      source_kind:
+        | "profile"
+        | "profile_course"
+        | "calendar_event"
+        | "announcement";
+      document_version_id: null;
+    })
+  | (PresentationCitationBase & {
+      source_kind: "document";
+      document_version_id: string;
+    });
+
+interface PersistenceCitationSource {
   citation_index: number;
   dataset_release_id: string;
   source_path: string;
   source_locator: string;
   source_sha256: string;
+}
+
+interface StructuredPersistenceCitationBase
+  extends PersistenceCitationSource {
   document_version_id: null;
   chunk_id: null;
 }
 
 export type PersistenceCitation =
-  | (PersistenceCitationBase & {
+  | (StructuredPersistenceCitationBase & {
       source_kind: "profile";
       profile_key: string;
       course_key: null;
       event_key: null;
       announcement_key: null;
     })
-  | (PersistenceCitationBase & {
+  | (StructuredPersistenceCitationBase & {
       source_kind: "profile_course";
       profile_key: string;
       course_key: string;
       event_key: null;
       announcement_key: null;
     })
-  | (PersistenceCitationBase & {
+  | (StructuredPersistenceCitationBase & {
       source_kind: "calendar_event";
       profile_key: null;
       course_key: null;
       event_key: string;
       announcement_key: null;
     })
-  | (PersistenceCitationBase & {
+  | (StructuredPersistenceCitationBase & {
       source_kind: "announcement";
       profile_key: null;
       course_key: null;
       event_key: null;
       announcement_key: string;
+    })
+  | (PersistenceCitationSource & {
+      source_kind: "document";
+      document_version_id: string;
+      chunk_id: string;
+      profile_key: null;
+      course_key: null;
+      event_key: null;
+      announcement_key: null;
     });
 
 export interface FastPathAnswer {
