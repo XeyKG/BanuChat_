@@ -62,6 +62,11 @@ export {
   type AnnouncementsErrorReason,
 } from "./application/announcements-errors.js";
 export type { SqlQueryClient } from "./data/sql-client.js";
+export { DatabaseDependencyError } from "./data/database-errors.js";
+export {
+  createApiServer,
+  type ApiServerDependencies,
+} from "./http/api-server.js";
 export {
   createIntentRouter,
   loadDefaultIntentRouter,
