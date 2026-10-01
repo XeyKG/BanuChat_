@@ -25,6 +25,18 @@ export {
   type CreateConversationErrorReason,
 } from "./application/conversations-errors.js";
 export {
+  sendMessage,
+  type SendMessageDependencies,
+  type SendMessageInput,
+  type SendMessageResult,
+  type SentAssistantMessage,
+  type SentUserMessage,
+} from "./application/messages.js";
+export {
+  SendMessageError,
+  type SendMessageErrorReason,
+} from "./application/messages-errors.js";
+export {
   getProfileProgress,
   type ProfileProgressCourse,
   type ProfileProgressInput,
@@ -91,5 +103,6 @@ export type {
   ChatDispatchInput,
   ChatDispatchResult,
   FastPathAnswer,
+  PersistenceCitation,
   PresentationCitation,
 } from "./chat/chat-types.js";

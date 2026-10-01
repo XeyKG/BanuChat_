@@ -158,6 +158,38 @@ test("profile_progress usa el perfil confiable, ejecuta C3 y renderiza citas con
     "profile_course",
     "profile_course",
   ]);
+  assert.deepEqual(
+    result.citation_records.map(
+      ({ citation_index, source_kind, source_path, source_sha256 }) => ({
+        citation_index,
+        source_kind,
+        source_path,
+        source_sha256,
+      }),
+    ),
+    [
+      {
+        citation_index: 0,
+        source_kind: "profile",
+        source_path: "internal/profile.json",
+        source_sha256: HASH,
+      },
+      {
+        citation_index: 1,
+        source_kind: "profile_course",
+        source_path: "internal/progress-a.json",
+        source_sha256: HASH,
+      },
+      {
+        citation_index: 2,
+        source_kind: "profile_course",
+        source_path: "internal/progress-b.json",
+        source_sha256: HASH,
+      },
+    ],
+  );
+  assert.equal(result.citation_records[0]?.profile_key, "perfil_demo");
+  assert.equal(result.citation_records[1]?.course_key, "curso_a");
   assert.equal(result.insufficient_evidence, false);
   assert.deepEqual(inputs, [
     {
@@ -211,6 +243,7 @@ test("progreso vacío es respuesta determinista sin citas", async () => {
       "No encontré cursos que coincidan con ese filtro para el perfil seleccionado.",
     insufficient_evidence: false,
     citations: [],
+    citation_records: [],
   });
 });
 
@@ -245,6 +278,8 @@ test("calendar_events ejecuta C4 con los parámetros del router", async () => {
   assert.deepEqual(result.citations.map(({ source_kind }) => source_kind), [
     "calendar_event",
   ]);
+  assert.equal(result.citation_records[0]?.event_key, "evento_a");
+  assert.equal(result.citation_records[0]?.source_path, "internal/event.json");
 });
 
 test("calendar_events sin rango deriva a fallback sin consultar SQL", async () => {
@@ -282,6 +317,7 @@ test("calendario vacío responde sin citas", async () => {
     "No encontré eventos que comiencen dentro del rango consultado.",
   );
   assert.deepEqual(result.citations, []);
+  assert.deepEqual(result.citation_records, []);
 });
 
 test("announcements ejecuta C5 con reference_time y query del router", async () => {
@@ -307,6 +343,11 @@ test("announcements ejecuta C5 con reference_time y query del router", async () 
   assert.deepEqual(result.citations.map(({ source_kind }) => source_kind), [
     "announcement",
   ]);
+  assert.equal(result.citation_records[0]?.announcement_key, "anuncio_a");
+  assert.equal(
+    result.citation_records[0]?.source_path,
+    "internal/announcement.json",
+  );
 });
 
 test("announcements sin reference_time deriva a fallback sin consultar SQL", async () => {
@@ -337,6 +378,7 @@ test("anuncios vacíos responden sin citas", async () => {
   if (result.kind !== "answered") return;
   assert.equal(result.content, "No encontré anuncios que coincidan con la consulta.");
   assert.deepEqual(result.citations, []);
+  assert.deepEqual(result.citation_records, []);
 });
 
 test("las rutas fuera de los tres fast paths derivan a fallback sin SQL", async () => {

@@ -4,7 +4,11 @@ import type {
   ProfileProgressResult,
   ProfileProgressStatus,
 } from "../application/profile-progress.js";
-import type { FastPathAnswer, PresentationCitation } from "./chat-types.js";
+import type {
+  FastPathAnswer,
+  PersistenceCitation,
+  PresentationCitation,
+} from "./chat-types.js";
 
 const PROFILE_STATUS_LABELS: Record<ProfileProgressStatus, string> = {
   enrolled: "inscrito",
@@ -36,6 +40,69 @@ function citation(
   };
 }
 
+function persistenceCitation(
+  index: number,
+  releaseId: string,
+  source: {
+    source_path: string;
+    source_locator: string;
+    source_sha256: string;
+  },
+  identity:
+    | { source_kind: "profile"; profile_key: string }
+    | {
+        source_kind: "profile_course";
+        profile_key: string;
+        course_key: string;
+      }
+    | { source_kind: "calendar_event"; event_key: string }
+    | { source_kind: "announcement"; announcement_key: string },
+): PersistenceCitation {
+  const base = {
+    citation_index: index,
+    dataset_release_id: releaseId,
+    source_path: source.source_path,
+    source_locator: source.source_locator,
+    source_sha256: source.source_sha256,
+    document_version_id: null,
+    chunk_id: null,
+  } as const;
+
+  if (identity.source_kind === "profile") {
+    return {
+      ...base,
+      ...identity,
+      course_key: null,
+      event_key: null,
+      announcement_key: null,
+    };
+  }
+  if (identity.source_kind === "profile_course") {
+    return {
+      ...base,
+      ...identity,
+      event_key: null,
+      announcement_key: null,
+    };
+  }
+  if (identity.source_kind === "calendar_event") {
+    return {
+      ...base,
+      ...identity,
+      profile_key: null,
+      course_key: null,
+      announcement_key: null,
+    };
+  }
+  return {
+    ...base,
+    ...identity,
+    profile_key: null,
+    course_key: null,
+    event_key: null,
+  };
+}
+
 export function renderProfileProgress(
   result: ProfileProgressResult,
 ): FastPathAnswer {
@@ -48,6 +115,7 @@ export function renderProfileProgress(
         "No encontré cursos que coincidan con ese filtro para el perfil seleccionado.",
       insufficient_evidence: false,
       citations: [],
+      citation_records: [],
     };
   }
 
@@ -73,6 +141,19 @@ export function renderProfileProgress(
       ),
     ),
   ];
+  const citationRecords: PersistenceCitation[] = [
+    persistenceCitation(0, result.release_id, result.profile.source, {
+      source_kind: "profile",
+      profile_key: result.profile.profile_key,
+    }),
+    ...result.courses.map((course, index) =>
+      persistenceCitation(index + 1, result.release_id, course.source, {
+        source_kind: "profile_course",
+        profile_key: result.profile.profile_key,
+        course_key: course.course_key,
+      }),
+    ),
+  ];
 
   return {
     kind: "answered",
@@ -81,6 +162,7 @@ export function renderProfileProgress(
     content: `Progreso registrado para ${result.profile.alias}:\n${lines.join("\n")}`,
     insufficient_evidence: false,
     citations,
+    citation_records: citationRecords,
   };
 }
 
@@ -95,8 +177,25 @@ export function renderCalendarEvents(
       content: "No encontré eventos que comiencen dentro del rango consultado.",
       insufficient_evidence: false,
       citations: [],
+      citation_records: [],
     };
   }
+
+  const citations = result.events.map((event, index) =>
+    citation(
+      index,
+      "calendar_event",
+      `Evento: ${event.title}`,
+      event.source.source_locator,
+      result.release_id,
+    ),
+  );
+  const citationRecords = result.events.map((event, index) =>
+    persistenceCitation(index, result.release_id, event.source, {
+      source_kind: "calendar_event",
+      event_key: event.event_key,
+    }),
+  );
 
   return {
     kind: "answered",
@@ -106,15 +205,8 @@ export function renderCalendarEvents(
       .map((event) => `- ${event.starts_at} — ${event.title}`)
       .join("\n")}`,
     insufficient_evidence: false,
-    citations: result.events.map((event, index) =>
-      citation(
-        index,
-        "calendar_event",
-        `Evento: ${event.title}`,
-        event.source.source_locator,
-        result.release_id,
-      ),
-    ),
+    citations,
+    citation_records: citationRecords,
   };
 }
 
@@ -129,8 +221,25 @@ export function renderAnnouncements(
       content: "No encontré anuncios que coincidan con la consulta.",
       insufficient_evidence: false,
       citations: [],
+      citation_records: [],
     };
   }
+
+  const citations = result.announcements.map((announcement, index) =>
+    citation(
+      index,
+      "announcement",
+      `Anuncio: ${announcement.title}`,
+      announcement.source.source_locator,
+      result.release_id,
+    ),
+  );
+  const citationRecords = result.announcements.map((announcement, index) =>
+    persistenceCitation(index, result.release_id, announcement.source, {
+      source_kind: "announcement",
+      announcement_key: announcement.announcement_key,
+    }),
+  );
 
   return {
     kind: "answered",
@@ -143,14 +252,7 @@ export function renderAnnouncements(
       )
       .join("\n")}`,
     insufficient_evidence: false,
-    citations: result.announcements.map((announcement, index) =>
-      citation(
-        index,
-        "announcement",
-        `Anuncio: ${announcement.title}`,
-        announcement.source.source_locator,
-        result.release_id,
-      ),
-    ),
+    citations,
+    citation_records: citationRecords,
   };
 }
