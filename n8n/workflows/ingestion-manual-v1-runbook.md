@@ -28,12 +28,13 @@ decisión portable ni topología aprobada para Linux o despliegues futuros.
 
 ## Credencial
 
-Los tres nodos HTTP declaran una referencia de credencial N8N `BanuChat Ingestion
-Service` de tipo HTTP Header Auth. En la instancia validada, ese ID no corresponde a
-una credencial existente; después de importar, el operador debe seleccionar/revincular
-la credencial correcta en **Check Ingestion Status**, **Execute Ingestion** y
-**Reconcile Status**. No incluir el token en workflow, parámetros, body, README o
-logs. La referencia local de credencial del export no es portable.
+Los tres nodos HTTP del JSON versionado declaran una credencial de tipo HTTP Header
+Auth con el nombre `BanuChat Ingestion Service` y el ID placeholder
+`__RELINK_AFTER_IMPORT__`. Ese ID es intencionalmente no portable; después de importar,
+el operador debe seleccionar/revincular la credencial local correcta en
+**Check Ingestion Status**, **Execute Ingestion** y **Reconcile Status**. No incluir
+el token, el ID interno real de la credencial ni el header Authorization en workflow,
+parámetros, documentación o logs.
 
 N3 mostró que ver un nombre de credencial en la UI no basta: el workflow importado
 puede conservar el ID placeholder `__RELINK_AFTER_IMPORT__`. Verificar/revincular la

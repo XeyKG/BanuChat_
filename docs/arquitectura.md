@@ -164,7 +164,7 @@ flowchart TB
         S --> P[("Única instancia PostgreSQL + pgvector")]
         N["N8N 2.40.5; manual v1 validado E2E localmente"] -->|"HTTP privado; status/execute"| I["Componente de ingesta backend/rag"]
         I -->|"Publicación completa"| P
-        I -->|"Embeddings"| O["Ollama local previsto"]
+        I -->|"Embeddings"| O["Ollama local"]
         D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
     end
 ```
