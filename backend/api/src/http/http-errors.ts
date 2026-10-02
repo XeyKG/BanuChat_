@@ -7,6 +7,9 @@ import { CurrentReleaseError } from "../application/current-release-errors.js";
 import { DeleteConversationError } from "../application/delete-conversation-errors.js";
 import { SendMessageError } from "../application/messages-errors.js";
 import { ProfilesError } from "../application/profiles-errors.js";
+import { CalendarEventsError } from "../application/calendar-events-errors.js";
+import { ProfileProgressError } from "../application/profile-progress-errors.js";
+import { AnnouncementsError } from "../application/announcements-errors.js";
 import { DatabaseDependencyError } from "../data/database-errors.js";
 import { ConversationActivityConflictError } from "./conversation-activity.js";
 
@@ -79,6 +82,18 @@ export function describeHttpError(error: unknown): HttpErrorDescription {
 
   if (error instanceof ProfilesError) {
     return INTERNAL_ERROR;
+  }
+
+  if (error instanceof CalendarEventsError || error instanceof AnnouncementsError) {
+    return error.reason === "invalid_argument" ? INVALID_ARGUMENT : INTERNAL_ERROR;
+  }
+
+  if (error instanceof ProfileProgressError) {
+    switch (error.reason) {
+      case "invalid_argument": return INVALID_ARGUMENT;
+      case "profile_not_found": return NOT_FOUND;
+      case "invalid_database_result": return INTERNAL_ERROR;
+    }
   }
 
   if (error instanceof CreateConversationError) {

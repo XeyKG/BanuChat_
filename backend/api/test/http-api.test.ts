@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { request as httpRequest } from "node:http";
 import type { AddressInfo } from "node:net";
 import test from "node:test";
 
@@ -244,6 +245,62 @@ test("GET /profiles returns profiles over real HTTP", async () => {
       });
     },
   );
+});
+
+test("structured REST GET routes return service results without internal sources", async () => {
+  const profile = { profile_key: "student_001", alias: "Estudiante Uno", source_path: "profiles/p.json", source_locator: "$.profiles[0]", source_sha256: HASH };
+  await withServer(new ScriptedSqlClient([
+    [currentReleaseRow], [],
+    [currentReleaseRow], [profile], [],
+    [currentReleaseRow], [],
+  ]), async (baseUrl) => {
+    const calendar = await fetch(`${baseUrl}/api/v1/calendar/events?date_from=2026-10-01&date_to=2026-10-01`);
+    assert.equal(calendar.status, 200);
+    assert.deepEqual(await calendar.json(), { release_id: RELEASE_ID, events: [] });
+
+    const progress = await fetch(`${baseUrl}/api/v1/profiles/student_001/progress?statuses=completed&limit=2`);
+    assert.equal(progress.status, 200);
+    assert.deepEqual(await progress.json(), { release_id: RELEASE_ID, profile: { profile_key: "student_001", alias: "Estudiante Uno" }, courses: [] });
+
+    const announcements = await fetch(`${baseUrl}/api/v1/announcements?temporal_status=all`);
+    assert.equal(announcements.status, 200);
+    assert.deepEqual(await announcements.json(), { release_id: RELEASE_ID, reference_time: NOW, announcements: [] });
+  }, { now: () => NOW });
+});
+
+test("structured REST GET routes reject malformed and unknown query parameters", async () => {
+  await withServer(new ScriptedSqlClient([]), async (baseUrl) => {
+    for (const path of [
+      "/api/v1/calendar/events?date_from=2026-10-01&date_to=2026-10-01&event_types=general,general",
+      "/api/v1/calendar/events?date_from=2026-10-01&date_to=2026-10-01&extra=x",
+      "/api/v1/profiles/student_001/progress?statuses=completed&statuses=completed",
+      "/api/v1/profiles/student_001/progress?limit=01",
+      "/api/v1/announcements?temporal_status=active&temporal_status=all",
+      "/api/v1/announcements?query=x",
+    ]) {
+      await assertErrorResponse(await fetch(`${baseUrl}${path}`), 400, "INVALID_ARGUMENT");
+    }
+  });
+});
+
+test("GET requests with a body are rejected, including on existing GET routes", async () => {
+  await withServer(new ScriptedSqlClient([]), async (baseUrl) => {
+    for (const path of ["/api/v1/calendar/events", "/api/v1/profiles"]) {
+      const response = await new Promise<{ statusCode: number | undefined; body: string }>((resolve, reject) => {
+        const target = new URL(path, baseUrl);
+        const req = httpRequest(target, { method: "GET", headers: { "Content-Length": "2" } }, (res) => {
+          let body = "";
+          res.setEncoding("utf8");
+          res.on("data", (chunk: string) => { body += chunk; });
+          res.on("end", () => resolve({ statusCode: res.statusCode, body }));
+        });
+        req.on("error", reject);
+        req.end("{}");
+      });
+      assert.equal(response.statusCode, 400);
+      assert.equal(JSON.parse(response.body).error.code, "INVALID_ARGUMENT");
+    }
+  });
 });
 
 test("GET /profiles returns an empty list", async () => {

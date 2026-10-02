@@ -17,6 +17,9 @@ import {
   type DocumentRagResponder,
 } from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
+import { getCalendarEvents, type CalendarEventType } from "../application/calendar-events.js";
+import { getProfileProgress, type ProfileProgressStatus } from "../application/profile-progress.js";
+import { getAnnouncements, type AnnouncementTemporalStatus } from "../application/announcements.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
 import {
@@ -41,6 +44,10 @@ const MESSAGES_PATH_PATTERN =
   /^\/api\/v1\/conversations\/([^/]+)\/messages$/u;
 const CONVERSATION_DETAIL_PATH_PATTERN =
   /^\/api\/v1\/conversations\/([^/]+)$/u;
+const PROFILE_PROGRESS_PATH_PATTERN = /^\/api\/v1\/profiles\/([^/]+)\/progress$/u;
+const CALENDAR_EVENT_TYPES = new Set<CalendarEventType>(["course_session", "announcement_deadline", "general"]);
+const PROFILE_PROGRESS_STATUSES = new Set<ProfileProgressStatus>(["enrolled", "in_progress", "completed"]);
+const ANNOUNCEMENT_STATUSES = new Set<AnnouncementTemporalStatus>(["active", "upcoming", "expired", "all"]);
 
 export interface ApiServerDependencies {
   sql: SqlQueryClient;
@@ -195,6 +202,35 @@ function parseListConversationsQuery(url: URL): ListConversationsInput {
   return { profile_key: profileKey, limit: Number(rawLimit) };
 }
 
+function readLimit(url: URL): number | undefined {
+  const values = url.searchParams.getAll("limit");
+  if (values.length === 0) return undefined;
+  if (values.length !== 1 || !/^(?:[1-9]|[1-4][0-9]|50)$/u.test(values[0] ?? "")) {
+    throw new InvalidHttpRequestError();
+  }
+  return Number(values[0]);
+}
+
+function rejectUnknownParameters(url: URL, allowed: readonly string[]): void {
+  const set = new Set(allowed);
+  if ([...url.searchParams.keys()].some((key) => !set.has(key))) throw new InvalidHttpRequestError();
+}
+
+function readSingle(url: URL, name: string, required = false): string | undefined {
+  const values = url.searchParams.getAll(name);
+  if (values.length > 1 || (required && values.length !== 1)) throw new InvalidHttpRequestError();
+  return values[0];
+}
+
+function readRepeated<T extends string>(url: URL, name: string, allowed: ReadonlySet<T>): T[] | undefined {
+  const values = url.searchParams.getAll(name);
+  if (values.length === 0) return undefined;
+  if (values.some((value) => value.length === 0 || value.includes(",") || !allowed.has(value as T)) || new Set(values).size !== values.length) {
+    throw new InvalidHttpRequestError();
+  }
+  return values as T[];
+}
+
 async function handleRequest(
   request: IncomingMessage,
   response: ServerResponse,
@@ -209,6 +245,15 @@ async function handleRequest(
     return;
   }
 
+  if (request.method === "GET") {
+    try {
+      await requireEmptyRequestBody(request);
+    } catch (error) {
+      sendError(response, describeHttpError(error));
+      return;
+    }
+  }
+
   const isProfilesPath = url.pathname === "/api/v1/profiles";
   const isConversationsPath = url.pathname === "/api/v1/conversations";
   const messagesMatch = MESSAGES_PATH_PATTERN.exec(url.pathname);
@@ -217,6 +262,48 @@ async function handleRequest(
     url.pathname,
   );
   const isConversationDetailPath = conversationDetailMatch !== null;
+  const progressMatch = PROFILE_PROGRESS_PATH_PATTERN.exec(url.pathname);
+
+  if (request.method === "GET" && url.pathname === "/api/v1/calendar/events") {
+    try {
+      rejectUnknownParameters(url, ["date_from", "date_to", "event_types", "limit"]);
+      const dateFrom = readSingle(url, "date_from", true)!;
+      const dateTo = readSingle(url, "date_to", true)!;
+      const eventTypes = readRepeated(url, "event_types", CALENDAR_EVENT_TYPES);
+      const limit = readLimit(url);
+      const result = await getCalendarEvents(dependencies.sql, { date_from: dateFrom, date_to: dateTo, ...(eventTypes ? { event_types: eventTypes } : {}), ...(limit ? { limit } : {}) });
+      sendJson(response, 200, { release_id: result.release_id, events: result.events.map(({ event_key, title, description, event_type, starts_at, ends_at, course_key, announcement_key }) => ({ event_key, title, description, event_type, starts_at, ends_at, course_key, announcement_key })) });
+    } catch (error) { sendError(response, describeHttpError(error)); }
+    return;
+  }
+
+  if (request.method === "GET" && progressMatch !== null) {
+    try {
+      rejectUnknownParameters(url, ["statuses", "limit"]);
+      const profileKey = progressMatch[1];
+      if (profileKey === undefined) throw new InvalidHttpRequestError();
+      const statuses = readRepeated(url, "statuses", PROFILE_PROGRESS_STATUSES);
+      const limit = readLimit(url);
+      const result = await getProfileProgress(dependencies.sql, { profile_key: profileKey, ...(statuses ? { statuses } : {}), ...(limit ? { limit } : {}) });
+      sendJson(response, 200, { release_id: result.release_id, profile: { profile_key: result.profile.profile_key, alias: result.profile.alias }, courses: result.courses.map(({ course_key, course_name, status, progress_percent, started_at, completed_at }) => ({ course_key, course_name, status, progress_percent, started_at, completed_at })) });
+    } catch (error) { sendError(response, describeHttpError(error)); }
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/v1/announcements") {
+    try {
+      rejectUnknownParameters(url, ["query", "temporal_status", "reference_time", "limit"]);
+      const query = readSingle(url, "query");
+      const temporalStatus = readSingle(url, "temporal_status");
+      const suppliedReferenceTime = readSingle(url, "reference_time");
+      const referenceTime = suppliedReferenceTime ?? (dependencies.now ?? (() => new Date().toISOString()))();
+      const limit = readLimit(url);
+      if (temporalStatus !== undefined && !ANNOUNCEMENT_STATUSES.has(temporalStatus as AnnouncementTemporalStatus)) throw new InvalidHttpRequestError();
+      const result = await getAnnouncements(dependencies.sql, { ...(query !== undefined ? { query } : {}), ...(temporalStatus !== undefined ? { temporal_status: temporalStatus as AnnouncementTemporalStatus } : {}), reference_time: referenceTime, ...(limit ? { limit } : {}) });
+      sendJson(response, 200, { release_id: result.release_id, reference_time: result.reference_time, announcements: result.announcements.map(({ announcement_key, title, description, valid_from, valid_until, temporal_status: status }) => ({ announcement_key, title, description, valid_from, valid_until, temporal_status: status })) });
+    } catch (error) { sendError(response, describeHttpError(error)); }
+    return;
+  }
 
   if (
     (isProfilesPath || isMessagesPath || isConversationDetailPath ||
