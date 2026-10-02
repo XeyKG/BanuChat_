@@ -88,14 +88,22 @@ flowchart LR
 ```
 
 La API expone actualmente `GET /api/v1/profiles`,
-`POST /api/v1/conversations` y
-`POST /api/v1/conversations/{id}/messages`. El fallback hace retrieval documental
-exacto con `qwen3-embedding:0.6b`, genera con `qwen3:4b-instruct`, construye citas y
-persiste mensajes y citas. El recorrido RAG E2E real obtuvo HTTP 201.
+`POST /api/v1/conversations`,
+`GET /api/v1/conversations`,
+`GET /api/v1/conversations/{conversation_id}`,
+`DELETE /api/v1/conversations/{conversation_id}`,
+`POST /api/v1/conversations/{conversation_id}/messages`,
+`GET /api/v1/documents/{document_version_id}/artifact`,
+`GET /api/v1/calendar/events`,
+`GET /api/v1/profiles/{profile_key}/progress` y
+`GET /api/v1/announcements`.
 
-Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback. Ambos
-siguen pendientes en la arquitectura objetivo, pero no son necesarios para demostrar
-el vertical slice implementado actual.
+El fallback conversacional implementado hace retrieval documental exacto con
+`qwen3-embedding:0.6b`, genera con `qwen3:4b-instruct`, construye citas y persiste
+mensajes y citas. El recorrido RAG E2E real obtuvo HTTP 201.
+
+Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback.
+Ambos siguen pendientes en la arquitectura objetivo.
 
 ## Ingesta asíncrona de releases sintéticas completas
 

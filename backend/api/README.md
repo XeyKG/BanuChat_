@@ -10,11 +10,13 @@ El fallback conversacional actual es Document RAG directo.
   reintentos y trazabilidad con PostgreSQL y MCP 2.0.
 
 Los mensajes pasan por Intent Router: servicio compartido + renderer determinista
-si hay una intención segura, o Agent/RAG como fallback. La clasificación no usa LLM,
-embeddings ni N8N; el fast path no llama a MCP. Las consultas directas podrán usar
-los mismos servicios compartidos con MCP sin pasar por el agente. La app consume únicamente REST,
-nunca MCP ni N8N. El servidor implementa además historial, artefactos documentales y
-lecturas HTTP directas de calendario, progreso y anuncios; revisar `src/http/api-server.ts`.
+si hay una intención segura, o Document RAG directo como fallback actual.
+Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
+La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
+Las consultas REST directas usan los mismos servicios de aplicación y su futura
+reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
+N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP
+directas de calendario, progreso y anuncios; revisar `src/http/api-server.ts`.
 Solo se emplean perfiles y datos sintéticos de demostración.
 No se incluye autenticación institucional ni catálogo REST de cursos en v1.
 
