@@ -1,6 +1,12 @@
 # Workflow lógico de ingesta
 
 Estado: especificación; este README ya existía y se amplía. No hay JSON ejecutable.
+N8N 2.40.5 se levantó localmente con el Compose vigente y se verificó desde su
+contenedor conectividad autenticada a `POST /internal/ingestion/status` con resultado
+`not_started`.
+Todavía no existe workflow ejecutable/versionado ni se ha ejecutado ingesta orquestada
+por N8N. La evidencia aplica solo a Windows + Docker Desktop + Compose actual; no
+acredita `/execute`, E2E, Linux ni despliegue institucional.
 Referencias: [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [especificación autoritativa](../../docs/ingesta-reproducible.md).
 

@@ -1,6 +1,8 @@
 # N8N
 
-Estado: diseño de orquestación asíncrona, sin workflows funcionales ni ejecución.
+Estado: N8N 2.40.5 fue levantado localmente mediante el Compose vigente y desde su
+contenedor se verificó conectividad autenticada a `POST /internal/ingestion/status`.
+El resultado fue `not_started`; no hay workflows funcionales ni ejecución de ingesta.
 La fuente de verdad es `/data/synthetic`, creada/revisada por el equipo y versionada
 antes de ingesta. El calendario se ingiere dentro de una **release completa**;
 no existe sincronización de calendario independiente ni fuente institucional externa.
@@ -32,4 +34,7 @@ Los logs solo contienen correlación, estados, tiempos y códigos técnicos segu
 N8N queda fuera del camino Mobile → REST → Intent Router → fast path / Agent-RAG.
 OE2 mantiene sus objetivos no medidos; OE4 verifica orquestación E2E y publicación
 atómica, no una latencia de calendario de 30 minutos. Véase el
-[plan de pruebas](../eval/ingestion/plan.md). No se ha configurado N8N ni cambiado Compose.
+[plan de pruebas](../eval/ingestion/plan.md). La evidencia local se registra en
+[N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md).
+La conectividad observada acredita solo Windows local + Docker Desktop + Compose
+actual; no acredita workflow, `/execute`, E2E, Linux ni despliegue institucional.

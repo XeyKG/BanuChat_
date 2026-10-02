@@ -1,8 +1,9 @@
 # Ingesta reproducible del dataset sintético
 
-Estado: diseño vigente; core de ingesta y transporte HTTP interno implementados y
-validados por etapas. La composición/startup operacional y el workflow N8N siguen
-pendientes. Fecha del diseño original: 2026-09-26.
+Estado: diseño vigente; core de ingesta, transporte HTTP interno y
+composición/startup operacional implementados. El startup y `/status` se validaron
+localmente; no se ejecutó ingesta. Workflow N8N, `/execute` desde N8N y E2E orquestada
+siguen pendientes. Fecha del diseño original: 2026-09-26.
 Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
 [contrato físico](../infra/db/README.md) y [plan de pruebas](../eval/ingestion/plan.md).
 
@@ -14,8 +15,9 @@ documentos/chunking, embeddings, publicación atómica, recovery/retry, Approval
 Registry y loader local seguro, verificaciones approval↔source y procedencia del
 runtime checkout, servicio `execute`/`retry`/`recover`/`status`, observación del
 WriterLease, transporte HTTP interno, Bearer service token y parser de configuración
-operacional. No están implementados el startup integrado del servicio ni su consumo
-por N8N.
+operacional. `backend/rag/src/main.ts` compone estos elementos y el servicio se validó
+localmente mediante build/start y consultas `/status`; véase el [registro N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md).
+No existe todavía workflow N8N ejecutable/versionado ni consumo de `/execute` por N8N.
 
 Las evidencias no se deben mezclar como una sola ejecución: la E2E real de
 Implementación 3 usó PostgreSQL 16.15, pgvector 0.8.6, Ollama 0.34.4 y
@@ -156,8 +158,9 @@ Despliegue futuro: listener solo en red local privada entre N8N y componente, si
 puerto público ni proxy hacia mobile. Los cuatro endpoints requieren
 `Authorization: Bearer <service-token>`. El token se configura fuera de Git, exige
 al menos 32 caracteres y ningún whitespace, no se loguea y se compara mediante
-SHA-256 + `timingSafeEqual`. Falta conectar esta configuración al startup y a N8N
-operacionales. Esta credencial entre servicios no autentica usuarios de la app.
+SHA-256 + `timingSafeEqual`. La configuración está conectada al startup. Se validó
+`/status` autenticado desde Windows y desde el contenedor N8N local; esto no valida
+un workflow ni `/execute`. Esta credencial entre servicios no autentica usuarios de la app.
 Solo el componente
 posee credencial de ingesta y acceso
 Ollama. Sin privilegios DDL/TRUNCATE/superusuario ni acceso a historial conversacional.
@@ -165,7 +168,11 @@ El runtime ejecuta su propio código/build identificado; lee un source checkout
 separado, preparado por el operador como worktree Git o checkout equivalente y
 montado/configurado read-only. Ambas raíces son configuración controlada del servidor,
 no parámetros HTTP. `/data/synthetic` se resuelve dentro de la raíz fuente, nunca
-por defecto dentro del checkout del backend. El listener HTTP y la credencial Bearer ya están implementados como componentes. Siguen pendientes la composición/startup operacional, los roles y permisos mínimos, la preparación de worktrees o montajes read-only y la conexión efectiva con N8N.
+por defecto dentro del checkout del backend. El listener HTTP, la credencial Bearer y la composición/startup están implementados.
+La preparación de source checkout separado y Approval Registry local también se
+validaron operacionalmente (registro N0). Siguen pendientes los roles y permisos
+mínimos, la solución de montaje read-only para despliegues futuros y la integración
+funcional con N8N.
 
 ## 3. Aprobación y revisiones Git independientes
 
@@ -540,9 +547,11 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
 
 ## 11. Riesgos y verificaciones pendientes
 
-- Falta componer y levantar operacionalmente el listener, configurar su token y
-  topología/bind Docker-host, conectarlo a N8N y definir permisos/montajes finales.
-  Compose todavía no contiene esa integración.
+- El listener, la configuración local y el startup fueron validados operacionalmente
+  en Windows + Docker Desktop. Sigue pendiente decidir topología/bind para despliegues
+  futuros, implementar/versionar el workflow, llamar `/execute` desde N8N y definir
+  permisos/montajes finales. `host.docker.internal` solo fue observado en Docker
+  Desktop; no define una topología Linux. Compose no implementa el workflow.
 - La E2E real verificó digest/runtime/opciones efectivos de Ollama y 60 embeddings;
   todavía falta evaluar calidad de retrieval/RAG y no se acreditan RAGAS/MRR.
 - Auditar roles no propietarios, concurrencia y procedencia en retries con el plan;

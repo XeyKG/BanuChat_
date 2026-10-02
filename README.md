@@ -36,16 +36,20 @@ media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms y máximo d
 muestra acotada, no un benchmark exhaustivo ni evidencia de cumplimiento de OE6.
 Véase [la evidencia warm](eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
 
-Todavía faltan la composición/startup operacional del HTTP interno de ingesta, la
-decisión final de topología/bind Docker-host y la integración funcional de N8N. En
+La composición/startup operacional del HTTP interno de ingesta está implementada y
+fue validada localmente: el servicio inició en `127.0.0.1:3010` y `/status` autenticado
+respondió desde Windows y desde el contenedor N8N local con `not_started`. Esta
+validación no ejecutó ingesta ni workflow. Siguen pendientes la decisión de topología
+para futuros despliegues y la integración funcional de N8N. En
 consulta siguen pendientes el Agent/ReAct real y la integración productiva del MCP
 interno al fallback: forman parte de la arquitectura objetivo, pero el vertical
 slice actual no los ejecuta ni los necesita para demostrar su recorrido directo.
-También faltan los endpoints REST de historial `GET /conversations`,
-`GET /conversations/{id}` y `DELETE /conversations/{id}`, el endpoint de artefactos
-documentales, la exposición HTTP directa de calendario/progreso/anuncios, la app
-móvil terminada, autenticación de usuario final, notificaciones push reales y las
-evaluaciones RAGAS completas y con usuarios. El MVP completo no está terminado.
+También están implementados en el servidor REST los endpoints de historial
+`GET /conversations`, `GET /conversations/{id}` y `DELETE /conversations/{id}`, el
+endpoint de artefactos documentales y la exposición HTTP directa de
+calendario/progreso/anuncios. La app móvil terminada, autenticación de usuario final,
+notificaciones push reales y evaluaciones RAGAS completas y con usuarios siguen
+pendientes. El MVP completo no está terminado.
 
 ## Arquitectura vigente
 

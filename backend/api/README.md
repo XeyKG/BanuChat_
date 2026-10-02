@@ -1,18 +1,21 @@
 # API REST — especificación
 
-Contrato REST v1 propuesto para la futura app React Native, con base `/api/v1`.
-Este directorio no implementa servidor, handlers ni agente.
+Contrato REST v1 documentado para la app React Native, con base `/api/v1`.
+Este directorio implementa servidor y handlers REST; Agent/ReAct no está implementado.
+El fallback conversacional actual es Document RAG directo.
 
 - [OpenAPI 3.1.0](openapi.yaml): contrato `1.0.0-draft`, serializado en JSON
   (subconjunto de YAML 1.2) para facilitar validación local sin dependencias.
 - [Contrato humano](api-contract.md): endpoints, citas, consistencia, errores,
   reintentos y trazabilidad con PostgreSQL y MCP 2.0.
 
-Los mensajes pasarán por Intent Router: servicio compartido + renderer determinista
+Los mensajes pasan por Intent Router: servicio compartido + renderer determinista
 si hay una intención segura, o Agent/RAG como fallback. La clasificación no usa LLM,
 embeddings ni N8N; el fast path no llama a MCP. Las consultas directas podrán usar
 los mismos servicios compartidos con MCP sin pasar por el agente. La app consume únicamente REST,
-nunca MCP ni N8N. Solo se emplean perfiles y datos sintéticos de demostración.
+nunca MCP ni N8N. El servidor implementa además historial, artefactos documentales y
+lecturas HTTP directas de calendario, progreso y anuncios; revisar `src/http/api-server.ts`.
+Solo se emplean perfiles y datos sintéticos de demostración.
 No se incluye autenticación institucional ni catálogo REST de cursos en v1.
 
 - [Especificación del router](../../docs/enrutamiento-intenciones.md) y

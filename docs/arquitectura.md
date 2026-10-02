@@ -108,8 +108,10 @@ flowchart LR
 ```
 
 El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) define esta frontera. El core
-TypeScript y el transporte HTTP interno ya están implementados; su composición/startup
-operacional y el workflow N8N todavía no. En la arquitectura objetivo, N8N orquesta
+TypeScript, transporte HTTP interno y su composición/startup operacional ya están
+implementados. El servicio se levantó localmente en `127.0.0.1:3010`; `/status`
+autenticado respondió desde Windows y desde el contenedor N8N local. El workflow N8N
+sigue pendiente. En la arquitectura objetivo, N8N orquesta
 triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
 hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
 de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,
@@ -147,7 +149,7 @@ flowchart TB
         B -->|"Fast path"| S["Servicios compartidos previstos"]
         C --> S
         S --> P[("Única instancia PostgreSQL + pgvector")]
-        N["N8N asíncrono pendiente de integración"] -->|"HTTP privado implementado; startup pendiente"| I["Componente de ingesta backend/rag"]
+        N["N8N levantado localmente; workflow pendiente"] -->|"Conectividad /status validada localmente"| I["Componente de ingesta backend/rag"]
         I -->|"Publicación completa"| P
         I -->|"Embeddings"| O["Ollama local previsto"]
         D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
@@ -163,9 +165,12 @@ base nueva esté migrada. No hay servicios backend o mobile en el Compose actual
 
 El HTTP interno implementa `Authorization: Bearer <service-token>` con token fuera
 de Git, mínimo 32 caracteres, sin whitespace ni logging, y comparación SHA-256 con
-`timingSafeEqual`. Falta conectar esta configuración al startup/N8N operacional y
-decidir la topología/bind Docker-host final. No es autenticación de usuarios. No
-existe despliegue institucional.
+`timingSafeEqual`. La configuración está conectada al startup; su `/status` autenticado
+se validó en Windows local y desde N8N dentro de Docker Desktop. `host.docker.internal`
+fue observado en ese entorno, no es una decisión portable. Siguen pendientes el
+workflow ejecutable/versionado, `/execute` desde N8N, la topología/bind para futuros
+despliegues y permisos/roles mínimos. No es autenticación de usuarios ni existe
+despliegue institucional.
 
 ## Perfiles, usabilidad y funcionalidades pendientes
 
@@ -223,15 +228,15 @@ se conserva hasta disponer de implementación validada.
 
 - SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y
   reintentos avanzados descritos en su documentación; no repetir como pendiente A–K.
-- Operación de ingesta: startup/composición HTTP, topología/bind e integración N8N.
+- Operación de ingesta: startup/composición HTTP y `/status` validados localmente;
+  siguen pendientes workflow N8N versionado, `/execute` y E2E orquestada, topología
+  para despliegue futuro y permisos/roles mínimos.
 - Consulta implementada: Intent Router determinista, fast paths de progreso,
   calendario y anuncios, los tres endpoints REST descritos arriba, retrieval exacto,
   Document RAG directo con generación Ollama, citas y persistencia; vertical slice
   RAG E2E real con HTTP 201.
 - Consulta pendiente: Agent/ReAct real, integración productiva del MCP interno al
-  fallback, `GET /conversations`, `GET /conversations/{id}` y
-  `DELETE /conversations/{id}`, endpoint de artefactos documentales, y exposición
-  HTTP directa de calendario, progreso y anuncios.
+  fallback y validación E2E de endpoints REST implementados.
 - Producto/evaluación: app móvil, autenticación de usuario final, RAGAS/MRR y pruebas
   con usuarios, y notificaciones push reales.
 
