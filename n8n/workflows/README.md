@@ -1,18 +1,19 @@
 # Workflow lógico de ingesta
 
-Estado: especificación; este README ya existía y se amplía. No hay JSON ejecutable.
+Estado: existe `ingestion-manual-v1.json`, workflow manual implementado e importado
+en N8N 2.40.5 (inactivo). No existe evidencia de `/execute` real ni ingesta N8N E2E.
 N8N 2.40.5 se levantó localmente con el Compose vigente y se verificó desde su
 contenedor conectividad autenticada a `POST /internal/ingestion/status` con resultado
 `not_started`.
-Todavía no existe workflow ejecutable/versionado ni se ha ejecutado ingesta orquestada
-por N8N. La evidencia aplica solo a Windows + Docker Desktop + Compose actual; no
+La importación quedó verificada; no se ha ejecutado ingesta orquestada por N8N. La
+evidencia operacional aplica solo a Windows + Docker Desktop + Compose actual; no
 acredita `/execute`, E2E, Linux ni despliegue institucional.
 Referencias: [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [especificación autoritativa](../../docs/ingesta-reproducible.md).
 
 ## Secuencia prevista
 
-1. N8N: trigger manual/retry; validar campos de control y correlacionar ejecución.
+1. N2: Manual Trigger prepara configuración; retry no está incluido en este workflow.
 2. N8N: invocar `POST /internal/ingestion/execute` privado, no `/api/v1` ni MCP.
 3. Componente TypeScript: resolver aprobación y revisión Git; preflight completo.
 4. Componente: resolver configuración Ollama efectiva y candidata por identidad.
@@ -34,8 +35,18 @@ no autoriza retry. Un run activo no se abandona por timeout del cliente.
 
 ## Entradas, salidas y límites
 
-Entrada cerrada: approval_ref, git_revision completo, pipeline_version,
-trigger_type, workflow_ref; retry_run_id solo y obligatorio para retry.
+Contrato HTTP implementado (verificado contra `backend/rag/src/internal-http/protocol.ts`):
+
+- Execute: `approval_ref`, `source_git_revision` completo, `pipeline_version`,
+  `workflow_ref`.
+- Retry futuro: `approval_ref`, `release_id`, `source_git_revision` completo,
+  `pipeline_version`, `workflow_ref`.
+- Recover futuro: `release_id`, `run_id`, `workflow_ref`.
+- Status por identidad: `approval_ref`, `source_git_revision` completo,
+  `pipeline_version`, y `workflow_ref` como correlación.
+
+Este workflow N2 implementa solo status y execute manual. Retry y recover futuros
+no forman parte de este flujo.
 Selectores autorizados por configuración del componente, nunca rutas/SQL/modelos libres.
 Salida: outcome, release_id, run_id/attempt_no si existen, revisión/hashes/configuración
 y contadores derivados. Fallos llevan error_code y retryable; no stacks o credenciales.

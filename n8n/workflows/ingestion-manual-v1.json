@@ -1,0 +1,297 @@
+{
+  "name": "BanuChat - Manual ingestion v1",
+  "id": "BanuChatN2Manual1",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "42a943b6-0d9e-42f6-a1cb-0398c795cb0f",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "9c9de893-e400-4afd-bce2-a43a9ac99bd1", "name": "ingestion_base_url", "value": "__BANUCHAT_INGESTION_BASE_URL__", "type": "string" },
+            { "id": "627ca699-a068-4c93-b906-ac970cd526a5", "name": "workflow_ref", "value": "__BANUCHAT_WORKFLOW_REF__", "type": "string" },
+            { "id": "6d2def27-5a39-4f1f-8fb8-87cb089750fb", "name": "approval_ref", "value": "banuchat-synthetic-v1-approved", "type": "string" },
+            { "id": "304950da-225a-42e5-8b98-c68a829d8f13", "name": "source_git_revision", "value": "af7ac711e1da3426e1f5fbe8b2892cec1344ce8b", "type": "string" },
+            { "id": "c1a20dd3-2bce-429f-bd73-fb030cbf0be8", "name": "pipeline_version", "value": "synthetic-v1-section-v1", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dc72fca1-18cc-4696-9e7e-0f2f9d8bace5",
+      "name": "Prepare Control Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.ingestion_base_url + '/internal/ingestion/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ approval_ref: $json.approval_ref, source_git_revision: $json.source_git_revision, pipeline_version: $json.pipeline_version, workflow_ref: $json.workflow_ref }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "a84e9ffc-07f0-47a0-a606-ef671f7aefde",
+      "name": "Check Ingestion Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat Ingestion Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "not_started", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "not_started" }},
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "running", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "running" }},
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "failed", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "failed" }},
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "succeeded", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "succeeded" }},
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "already_current", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "already_current" }},
+            { "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 }, "conditions": [{ "leftValue": "={{ $json.outcome }}", "rightValue": "already_ready_not_current", "operator": { "type": "string", "operation": "equals" } }], "combinator": "and", "renameOutput": true, "outputKey": "already_ready_not_current" }}
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      },
+      "id": "d065b4ae-aa82-4fbe-a332-a5e2069d7362",
+      "name": "Route Status Outcome",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Prepare Control Configuration').first().json.ingestion_base_url + '/internal/ingestion/execute' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ approval_ref: $('Prepare Control Configuration').first().json.approval_ref, source_git_revision: $('Prepare Control Configuration').first().json.source_git_revision, pipeline_version: $('Prepare Control Configuration').first().json.pipeline_version, workflow_ref: $('Prepare Control Configuration').first().json.workflow_ref }) }}",
+        "options": { "timeout": 900000 }
+      },
+      "id": "b4953e6e-248a-495b-9d38-16d50e296185",
+      "name": "Execute Ingestion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1190, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat Ingestion Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Prepare Control Configuration').first().json.ingestion_base_url + '/internal/ingestion/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ approval_ref: $('Prepare Control Configuration').first().json.approval_ref, source_git_revision: $('Prepare Control Configuration').first().json.source_git_revision, pipeline_version: $('Prepare Control Configuration').first().json.pipeline_version, workflow_ref: $('Prepare Control Configuration').first().json.workflow_ref }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "4310dc2d-24ed-4ce2-aa80-b6bf9666434e",
+      "name": "Reconcile Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1430, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat Ingestion Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "09864f84-9e1e-4710-b2db-c338d0a4c846", "name": "workflow_result", "value": "execute_response_received", "type": "string" },
+        { "id": "5cdde6b4-0c2c-49c2-b7b0-3a81a3a1b915", "name": "action_taken", "value": "execute_once", "type": "string" },
+        { "id": "6f3b8c67-8e97-4712-84f4-5c9a2df6fc98", "name": "outcome", "value": "={{ $json.outcome ?? null }}", "type": "string" },
+        { "id": "c0220d0e-0fa9-4b65-9f57-17b64457c22c", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "8b9048a3-17a4-43ca-b460-d7dfe0ecbd08", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "e092bd7d-fbf3-441e-81ed-8b80a457761e", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "620ce143-f603-4fc0-9e95-700409d43c54", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "e5d7afae-0270-43c5-a5a4-0487c52dd7e4", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "d648035d-e4dd-4f86-a99b-268c9b432ac8",
+      "name": "Execution Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1430, 40]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "c930bedc-cba2-4641-9f2f-a6f802bb0cae", "name": "workflow_result", "value": "status_reconciled", "type": "string" },
+        { "id": "234525f2-8ed9-4f2d-b62f-5a653cd3c266", "name": "action_taken", "value": "status_only_after_execute_transport_error", "type": "string" },
+        { "id": "cd41fb2b-aad9-4d0c-a554-9bf2c2843030", "name": "outcome", "value": "={{ $json.outcome ?? 'status_unavailable' }}", "type": "string" },
+        { "id": "d753201f-c919-48e0-a4e2-02fea9308951", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "e6edb9b3-8077-4cd0-aad8-8e43b7b0a63a", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "6c897c6d-0276-4f04-87ee-ff06e836a4bf", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "d4956ea2-cea3-4210-8c68-cba6f506bbf0", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "a04d6c46-f1d3-4193-9ce4-44643426907f", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "f7fdccf4-0eed-43cb-82e9-a2218042601f",
+      "name": "Reconciliation Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1670, 240]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "f5ac17d2-c42e-4cc2-a9e3-09fe81576c08", "name": "workflow_result", "value": "already_running", "type": "string" },
+        { "id": "d31b6fd5-fb30-4dfb-b4c7-70bac8d566e6", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "9ac4aa55-f7cf-4357-bc26-4b4ed0824025", "name": "outcome", "value": "={{ $json.outcome }}", "type": "string" },
+        { "id": "8083c96a-ad5e-4d37-a62d-ed8e47c3b77b", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "53f8d253-2184-4694-8f09-5f183e025122", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "3c637c01-755d-459b-b114-064d8d161064", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "9d7351d1-d9d4-49c2-b44c-f225aa12ada8", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "da5fa451-7e21-427d-9350-cc08fd77bd8a", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "e1dd44fe-71d1-47e1-a9cc-c7e9f160fc23",
+      "name": "Running Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 300]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "2fef8882-e0e6-457a-82f2-9cff1ca0fb92", "name": "workflow_result", "value": "prior_run_failed", "type": "string" },
+        { "id": "6380fc2a-3b9c-4cf1-8df7-68dbeea48a78", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "29130e1e-d312-44d0-8cb5-5ca323af0d20", "name": "outcome", "value": "={{ $json.outcome }}", "type": "string" },
+        { "id": "52454532-0f89-46d8-9138-8b7815d7dd41", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "0839844f-7d8c-4d27-ae90-b205ec61f0b3", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "0688d2ec-e451-40b8-a39d-e2ebff76e211", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "5c1b8016-d3f3-44f3-97cf-1fdfbb949516", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "b1f98007-ded0-4ec6-87bb-9b0e76fc487a", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "a8418712-bd5f-4c30-a8e7-3854f0935dcf",
+      "name": "Failed Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 500]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "5dc44c3f-92ab-45fb-9f37-c8da0b3e4412", "name": "workflow_result", "value": "already_succeeded", "type": "string" },
+        { "id": "89969ea8-a427-417f-96a2-3c5759a8d79e", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "686420a8-05f0-4132-8c23-c748307a2a06", "name": "outcome", "value": "={{ $json.outcome }}", "type": "string" },
+        { "id": "57699e36-66d7-4f54-937f-888450255cde", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "597815a6-2a2f-4a27-ae9d-c24d63c2b981", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "46a7883a-8d40-4713-88c9-55d153a99c25", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "dfb90b61-09a6-4021-82f7-f10447260810", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "4f3ad341-3dc0-48f4-aee2-ed30a08170b8", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "e22a8283-3e83-4118-ad44-317434b20db1",
+      "name": "Succeeded Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 700]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "08690df4-401b-40b2-93a5-b7c2d76cb56f", "name": "workflow_result", "value": "already_current", "type": "string" },
+        { "id": "cead55c7-4d3e-457a-acb0-0401588bb7ea", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "77a8eb23-ceda-4af1-a41e-c91b760af149", "name": "outcome", "value": "={{ $json.outcome }}", "type": "string" },
+        { "id": "98742c30-bfa0-44c7-93ec-171670f05c2a", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "38d97724-af3c-436a-a033-e77e01db77c0", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "80e6c798-c221-4ee8-8910-e1cd87b12f84", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "d4c50ec0-5a4b-4029-ae30-ab98c4d1a49d", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "43dc96bb-0e32-472c-8065-eae714e90bde", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "8729f288-1ad7-4866-bcf5-4cc62b2ffec7",
+      "name": "Already Current Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 900]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "feffaddf-8171-4e7a-9c92-614be92bdb32", "name": "workflow_result", "value": "ready_not_current", "type": "string" },
+        { "id": "015c0023-6689-4cbf-b61f-20a32854532d", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "770435d3-a42e-411c-aeca-85943b4bc000", "name": "outcome", "value": "={{ $json.outcome }}", "type": "string" },
+        { "id": "ec75b4fd-5f1d-44d6-adbd-cebe6304d8f7", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "6cc265f0-bcf6-4847-ab20-3b005c818156", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "687f3907-9bf4-4823-81e5-b1bca687c07c", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "f04a6f37-b780-4d72-9dc6-308e4e454b25", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "49c23ac0-79d5-4eec-b95c-dd3e4c59b1c6", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "e080fb97-aa3b-4a2d-b465-806371d05efb",
+      "name": "Already Ready Not Current Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 1100]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "bd70273d-8bab-4955-9826-af14ad9d9716", "name": "workflow_result", "value": "unknown_result", "type": "string" },
+        { "id": "11035744-5717-4e90-9981-a74e6a3667f5", "name": "action_taken", "value": "none", "type": "string" },
+        { "id": "38acfd94-a130-46b8-a28f-79a239cb80b7", "name": "outcome", "value": "={{ $json.outcome ?? null }}", "type": "string" },
+        { "id": "8ff456e3-b1ec-4603-8e71-d4e44be59583", "name": "release_id", "value": "={{ $json.release_id ?? null }}", "type": "string" },
+        { "id": "91cc9b36-498f-497d-b259-1b190bbaea2a", "name": "run_id", "value": "={{ $json.run_id ?? null }}", "type": "string" },
+        { "id": "3164d5fa-5b95-4211-8e5d-0a4bfa0afd52", "name": "attempt_no", "value": "={{ $json.attempt_no ?? null }}", "type": "number" },
+        { "id": "6e7f76c9-80d6-40de-8c2a-61a63e44fc7b", "name": "recovery_required", "value": "={{ $json.recovery_required ?? null }}", "type": "boolean" },
+        { "id": "2295b3af-1f7a-40dc-a51e-fe4592ea2548", "name": "item_counts", "value": "={{ $json.item_counts ?? null }}", "type": "object" }
+      ] }, "options": {} },
+      "id": "649d003f-43c4-4e55-8ad1-92baa2099b50",
+      "name": "Unknown Outcome Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1190, 1300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": { "main": [[{ "node": "Prepare Control Configuration", "type": "main", "index": 0 }]] },
+    "Prepare Control Configuration": { "main": [[{ "node": "Check Ingestion Status", "type": "main", "index": 0 }]] },
+    "Check Ingestion Status": { "main": [
+      [{ "node": "Route Status Outcome", "type": "main", "index": 0 }],
+      [{ "node": "Unknown Outcome Summary", "type": "main", "index": 0 }]
+    ] },
+    "Route Status Outcome": { "main": [
+      [{ "node": "Execute Ingestion", "type": "main", "index": 0 }],
+      [{ "node": "Running Summary", "type": "main", "index": 0 }],
+      [{ "node": "Failed Summary", "type": "main", "index": 0 }],
+      [{ "node": "Succeeded Summary", "type": "main", "index": 0 }],
+      [{ "node": "Already Current Summary", "type": "main", "index": 0 }],
+      [{ "node": "Already Ready Not Current Summary", "type": "main", "index": 0 }],
+      [{ "node": "Unknown Outcome Summary", "type": "main", "index": 0 }]
+    ] },
+    "Execute Ingestion": { "main": [
+      [{ "node": "Execution Summary", "type": "main", "index": 0 }],
+      [{ "node": "Reconcile Status", "type": "main", "index": 0 }]
+    ] },
+    "Reconcile Status": { "main": [
+      [{ "node": "Reconciliation Summary", "type": "main", "index": 0 }],
+      [{ "node": "Reconciliation Summary", "type": "main", "index": 0 }]
+    ] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "6e6d8594-71bf-4d83-a376-c50c683da295",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}

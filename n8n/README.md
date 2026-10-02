@@ -1,8 +1,9 @@
 # N8N
 
-Estado: N8N 2.40.5 fue levantado localmente mediante el Compose vigente y desde su
-contenedor se verificó conectividad autenticada a `POST /internal/ingestion/status`.
-El resultado fue `not_started`; no hay workflows funcionales ni ejecución de ingesta.
+Estado: N8N 2.40.5 fue levantado localmente mediante el Compose vigente; desde su
+contenedor se verificó conectividad autenticada a `POST /internal/ingestion/status`
+con resultado `not_started`. El workflow manual v1 está implementado e importado,
+pero permanece inactivo; no se ha probado `/execute` ni ejecutado ingesta N8N E2E.
 La fuente de verdad es `/data/synthetic`, creada/revisada por el equipo y versionada
 antes de ingesta. El calendario se ingiere dentro de una **release completa**;
 no existe sincronización de calendario independiente ni fuente institucional externa.
@@ -14,9 +15,9 @@ PostgreSQL. N8N controla triggers, llamada, condiciones sencillas y resumen; Typ
 posee preflight, relaciones, parser, chunking, embeddings, DML, retry y publicación.
 No SQL manual ni reglas complejas en nodos Code. No Execute Command ni webhook público.
 
-Primera implementación: triggers `manual` y `retry`; `scheduled` está soportado por
-el contrato físico, pero su activación queda para después. Entrada: referencia de
-aprobación, SHA Git completo, receta, referencia de workflow y run previo en retry.
+El primer workflow implementado usa solo trigger manual. Retry y scheduled quedan
+fuera de N2. Execute recibe referencia de aprobación, `source_git_revision` completo,
+`pipeline_version` y `workflow_ref`.
 Salida: resultado, identidad de release, run/attempt y contadores por estado; errores
 saneados. Nunca paths libres, credenciales, SQL o corpus completo en los payloads.
 
@@ -26,9 +27,11 @@ reemplaza current; solo publish_release promueve. Ready actual es no-op; ready h
 se reporta sin reactivación. Procedencia desde runs fallidos requiere el tratamiento
 documental/vectorial específico de la [especificación](../docs/ingesta-reproducible.md).
 
-El workflow lógico y la política de exportación/versionado están en
-[workflows/README.md](workflows/README.md). Se exportará JSON sin secretos cuando se
-implemente, y workflow_ref fijará ruta y revisión de esa definición, no execution ID.
+El workflow manual versionado y el runbook están en
+[workflows/README.md](workflows/README.md) y
+[ingestion-manual-v1-runbook.md](workflows/ingestion-manual-v1-runbook.md). Fue
+importado en N8N 2.40.5 y permanece inactivo. No se ha probado `/execute` ni ejecutado
+ingesta N8N E2E. `workflow_ref` fijará ruta y revisión de la definición, no execution ID.
 Los logs solo contienen correlación, estados, tiempos y códigos técnicos seguros.
 
 N8N queda fuera del camino Mobile → REST → Intent Router → fast path / Agent-RAG.
