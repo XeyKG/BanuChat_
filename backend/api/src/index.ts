@@ -91,6 +91,18 @@ export {
   type DeleteConversationInput,
 } from "./application/delete-conversation.js";
 export {
+  getDocumentArtifact,
+  isPathInside,
+  type DocumentArtifactInput,
+  type DocumentArtifactResult,
+  type DocumentArtifactStorage,
+  type DocumentArtifactFileSystem,
+} from "./application/document-artifact.js";
+export {
+  DocumentArtifactError,
+  type DocumentArtifactErrorReason,
+} from "./application/document-artifact-errors.js";
+export {
   DeleteConversationError,
   type DeleteConversationErrorReason,
 } from "./application/delete-conversation-errors.js";

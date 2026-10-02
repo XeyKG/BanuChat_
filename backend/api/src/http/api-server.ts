@@ -17,6 +17,11 @@ import {
   type DocumentRagResponder,
 } from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
+import {
+  getDocumentArtifact,
+  type DocumentArtifactResult,
+  type DocumentArtifactStorage,
+} from "../application/document-artifact.js";
 import { getCalendarEvents, type CalendarEventType } from "../application/calendar-events.js";
 import { getProfileProgress, type ProfileProgressStatus } from "../application/profile-progress.js";
 import { getAnnouncements, type AnnouncementTemporalStatus } from "../application/announcements.js";
@@ -45,6 +50,7 @@ const MESSAGES_PATH_PATTERN =
 const CONVERSATION_DETAIL_PATH_PATTERN =
   /^\/api\/v1\/conversations\/([^/]+)$/u;
 const PROFILE_PROGRESS_PATH_PATTERN = /^\/api\/v1\/profiles\/([^/]+)\/progress$/u;
+const DOCUMENT_ARTIFACT_PATH_PATTERN = /^\/api\/v1\/documents\/([^/]+)\/artifact$/u;
 const CALENDAR_EVENT_TYPES = new Set<CalendarEventType>(["course_session", "announcement_deadline", "general"]);
 const PROFILE_PROGRESS_STATUSES = new Set<ProfileProgressStatus>(["enrolled", "in_progress", "completed"]);
 const ANNOUNCEMENT_STATUSES = new Set<AnnouncementTemporalStatus>(["active", "upcoming", "expired", "all"]);
@@ -54,6 +60,7 @@ export interface ApiServerDependencies {
   router: IntentRouter;
   document_rag: DocumentRagResponder;
   now?: () => string;
+  document_artifact?: DocumentArtifactStorage;
 }
 
 function sendJson(
@@ -80,6 +87,17 @@ function sendError(
 function sendNoContent(response: ServerResponse): void {
   response.writeHead(204, { "Cache-Control": "no-store" });
   response.end();
+}
+
+function sendArtifact(response: ServerResponse, artifact: DocumentArtifactResult): void {
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Content-Type": "application/octet-stream",
+    "Content-Disposition": `attachment; filename="${artifact.document_version_id}.bin"`,
+    "X-Content-Type-Options": "nosniff",
+    "Content-Length": artifact.bytes.byteLength,
+  });
+  response.end(artifact.bytes);
 }
 
 function requireJsonContentType(request: IncomingMessage): void {
@@ -263,6 +281,27 @@ async function handleRequest(
   );
   const isConversationDetailPath = conversationDetailMatch !== null;
   const progressMatch = PROFILE_PROGRESS_PATH_PATTERN.exec(url.pathname);
+
+  const artifactMatch = DOCUMENT_ARTIFACT_PATH_PATTERN.exec(url.pathname);
+  if (request.method === "GET" && artifactMatch !== null) {
+    try {
+      const documentVersionId = artifactMatch[1];
+      if (url.search !== "" || documentVersionId === undefined ||
+        !UUID_PATTERN.test(documentVersionId)) {
+        throw new InvalidHttpRequestError();
+      }
+      const artifact = await getDocumentArtifact(
+        dependencies.sql,
+        { document_version_id: documentVersionId },
+        dependencies.document_artifact,
+      );
+      // Range is deliberately ignored: v1 always sends the complete verified bytes.
+      sendArtifact(response, artifact);
+    } catch (error) {
+      sendError(response, describeHttpError(error));
+    }
+    return;
+  }
 
   if (request.method === "GET" && url.pathname === "/api/v1/calendar/events") {
     try {

@@ -5,6 +5,7 @@ import { ConversationDetailError } from "../application/conversation-detail-erro
 import { ConversationHistoryError } from "../application/conversation-history-errors.js";
 import { CurrentReleaseError } from "../application/current-release-errors.js";
 import { DeleteConversationError } from "../application/delete-conversation-errors.js";
+import { DocumentArtifactError } from "../application/document-artifact-errors.js";
 import { SendMessageError } from "../application/messages-errors.js";
 import { ProfilesError } from "../application/profiles-errors.js";
 import { CalendarEventsError } from "../application/calendar-events-errors.js";
@@ -64,6 +65,14 @@ const INTERNAL_ERROR: HttpErrorDescription = {
 };
 
 export function describeHttpError(error: unknown): HttpErrorDescription {
+  if (error instanceof DocumentArtifactError) {
+    switch (error.reason) {
+      case "invalid_argument": return INVALID_ARGUMENT;
+      case "not_found": return NOT_FOUND;
+      case "invalid_database_result":
+      case "filesystem_error": return INTERNAL_ERROR;
+    }
+  }
   if (error instanceof InvalidHttpRequestError) {
     return INVALID_ARGUMENT;
   }
