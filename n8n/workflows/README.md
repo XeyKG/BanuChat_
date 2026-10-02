@@ -27,12 +27,15 @@ Referencias: [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 6. Componente TypeScript: durante `/execute`, resolver aprobación y revisión Git;
    realizar preflight completo, procesar la release y gobernar su publicación.
 
-Los pasos 3–8 son internos de una llamada al componente, **no nodos con SQL/Code
-duplicando el pipeline**. Failure: el componente revierte transacción abierta,
-cierra pending y run failed, conserva current y puede marcar candidata failed.
-N8N recibe estado/código. Si no hay respuesta, consulta
-`POST /internal/ingestion/status` antes de cualquier reenvío; estado desconocido
-no autoriza retry. Un run activo no se abandona por timeout del cliente.
+El paso 6 resume el trabajo interno realizado por el componente TypeScript durante
+`/execute`; ese procesamiento no se descompone en nodos N8N con SQL/Code que
+dupliquen el pipeline. Ante un fallo interno, el componente revierte la transacción
+abierta, cierra los items `pending` y el run como `failed`, conserva `current` y
+puede marcar la candidata como `failed`.
+
+Si N8N pierde la respuesta de `/execute`, consulta
+`POST /internal/ingestion/status` antes de cualquier decisión posterior. Un estado
+desconocido no autoriza retry y un run activo no se abandona por timeout del cliente.
 
 ## Entradas, salidas y límites
 
