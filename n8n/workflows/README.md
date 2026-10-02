@@ -1,17 +1,14 @@
 # Workflow lógico de ingesta
 
-Estado: existe `ingestion-manual-v1.json`, workflow manual implementado e importado
-en N8N 2.40.5 (inactivo). No existe evidencia de `/execute` real ni ingesta N8N E2E.
-N8N 2.40.5 se levantó localmente con el Compose vigente y se verificó desde su
-contenedor conectividad autenticada a `POST /internal/ingestion/status` con resultado
-`not_started`.
-La importación quedó verificada; no se ha ejecutado ingesta orquestada por N8N. La
-evidencia operacional aplica solo a Windows + Docker Desktop + Compose actual; no
-acredita `/execute`, E2E, Linux ni despliegue institucional.
+Estado: existe `ingestion-manual-v1.json`, importado en N8N 2.40.5 e inactivo como
+automatización. Su ejecución manual N3 validó `/execute` y el camino E2E local con
+publicación `ready/current`, seguida de `already_current`. Véase [evidencia N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
+La evidencia aplica solo a Windows + Docker Desktop + Compose actual; no acredita
+Linux ni despliegue institucional.
 Referencias: [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [especificación autoritativa](../../docs/ingesta-reproducible.md).
 
-## Secuencia implementada en N2
+## Secuencia del workflow manual v1
 
 1. N8N: `Manual Trigger` inicia el flujo y `Prepare Control Configuration`
    aporta los valores de control no secretos.
@@ -49,7 +46,7 @@ Contrato HTTP implementado (verificado contra `backend/rag/src/internal-http/pro
 - Status por identidad: `approval_ref`, `source_git_revision` completo,
   `pipeline_version`, y `workflow_ref` como correlación.
 
-Este workflow N2 implementa solo status y execute manual. Retry y recover futuros
+Este workflow manual implementa solo status y execute. Retry y recover futuros
 no forman parte de este flujo.
 Selectores autorizados por configuración del componente, nunca rutas/SQL/modelos libres.
 Salida: outcome, release_id, run_id/attempt_no si existen, revisión/hashes/configuración
@@ -68,13 +65,17 @@ Ready histórica requiere acción administrativa aparte para rollback, no este w
 ## Versionado y evidencia
 
 La definición ejecutable se versiona en `ingestion-manual-v1.json`; los cambios
-funcionales no deben quedar únicamente en la UI de N8N. La exportación versionada
-no contiene secretos, URLs operacionales definitivas ni datos de ejecuciones.
-`workflow_ref` deberá fijar la ruta de esa exportación y el SHA completo de su
-revisión desplegada; la exportación no se autoincluye su propio SHA.
+funcionales no deben quedar únicamente en la UI de N8N. El `workflow_ref` usado en
+N3 fue
+`n8n/workflows/ingestion-manual-v1.json@4fb7bd410cccf646d4454183550ec9f4aeb78f5a`.
+El JSON base conserva placeholders para URL, `workflow_ref` e ID portable de
+credencial; la instancia recibió overrides locales. Por ello no se afirma que el
+objeto almacenado en N8N sea byte-for-byte idéntico al JSON versionado. Esta
+limitación de procedencia queda pendiente para despliegues futuros. La evidencia de
+ejecución está en [N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
 
 Capturar instantes reales de disponibilidad aprobada, trigger y publicación/fallo,
 duraciones y resultados por intento. No incluir estos valores variables en receta.
-OE4 exige todos los escenarios críticos del [plan](../../eval/ingestion/plan.md)
-con resultado esperado; hoy ninguno se presenta como ejecutado. Duración observada
-sin umbral nuevo, y actualización académica de OE4 pendiente.
+N3 cubrió el camino manual exitoso asociado a I01 y el no-op I02, no todos los
+escenarios del [plan](../../eval/ingestion/plan.md). Duración observada sin umbral
+nuevo; retry/recover/scheduled y actualización académica de OE4 siguen pendientes.

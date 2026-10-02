@@ -22,13 +22,15 @@ fallback implementado es Document RAG directo sobre PostgreSQL + pgvector y Olla
 con retrieval exacto, generación mediante `qwen3:4b-instruct`, citas documentales y
 persistencia de mensajes y citas. Su E2E real obtuvo HTTP 201.
 
-La evidencia E2E real de ingesta registró 76 items procesados, 12 versiones
-documentales ready, 60 chunks y 60 embeddings con Ollama y
-`qwen3-embedding:0.6b`; una segunda ejecución devolvió `already_current`. Esta
-evidencia no evalúa calidad RAG ni acredita procedencia operacional automática del
-runtime, porque utilizó una `implementation_revision` sintética de prueba. Véanse
-[la evidencia E2E](eval/ingestion/results/implementation-3-e2e-2026-09-29.md) y
-[la validación separada de recovery/retry](eval/ingestion/results/implementation-4-recovery-retry-2026-09-29.md).
+La E2E de ingesta de Implementación 3 registró 76 items, 12 versiones documentales,
+60 chunks y 60 embeddings, pero usó una `implementation_revision` sintética de prueba.
+Después, N0 validó localmente startup y `/status`; N2 versionó e importó el workflow
+manual; N3 ejecutó ese workflow E2E local: `not_started` llevó a `/execute`, publicó
+una release `ready/current` con 76 items, 12 `document_versions` y 60 embeddings.
+La segunda ejecución devolvió `already_current` sin crear otra release ni run. Véase
+[la evidencia N3](eval/ingestion/results/n3-n8n-e2e-2026-10-02.md), además de [la
+E2E de Implementación 3](eval/ingestion/results/implementation-3-e2e-2026-09-29.md) y
+[recovery/retry](eval/ingestion/results/implementation-4-recovery-retry-2026-09-29.md).
 
 Una muestra warm exploratoria versionada de cinco solicitudes HTTP exitosas observó
 media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms y máximo de
@@ -36,11 +38,12 @@ media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms y máximo d
 muestra acotada, no un benchmark exhaustivo ni evidencia de cumplimiento de OE6.
 Véase [la evidencia warm](eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
 
-La composición/startup operacional del HTTP interno de ingesta está implementada y
-fue validada localmente: el servicio inició en `127.0.0.1:3010` y `/status` autenticado
-respondió desde Windows y desde el contenedor N8N local con `not_started`. Esta
-validación no ejecutó ingesta ni workflow. Siguen pendientes la decisión de topología
-para futuros despliegues y la integración funcional de N8N. En
+N0 validó startup y `/status`; N2 agregó e importó el workflow manual; N3 lo ejecutó
+E2E localmente. La consulta `not_started` llevó a `/execute` y publicó una release
+`ready/current`; la segunda ejecución devolvió `already_current` sin crear otra
+release o run. Sigue pendiente una topología portable para futuros despliegues y
+siguen fuera de alcance los flujos N8N de retry/recover/scheduled. Véase [evidencia
+N3](eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). En
 consulta siguen pendientes el Agent/ReAct real y la integración productiva del MCP
 interno al fallback: forman parte de la arquitectura objetivo, pero el vertical
 slice actual no los ejecuta ni los necesita para demostrar su recorrido directo.
@@ -60,7 +63,8 @@ pendientes. El MVP completo no está terminado.
   directo; Agent/ReAct y MCP siguen pendientes como arquitectura objetivo.
 - Una sola instancia PostgreSQL con pgvector almacena representaciones procesadas.
 - `data/synthetic/` es la fuente de verdad versionada de todos los datos funcionales.
-- N8N orquestará de forma asíncrona la ingesta; su workflow operacional sigue pendiente.
+- N8N orquesta de forma asíncrona la ingesta; el workflow manual v1 fue validado E2E
+  localmente. Retry/recover/scheduled permanecen pendientes.
 - Desarrollo y demostraciones iniciales mediante Docker Compose local.
 
 Google Sheets queda fuera del MVP. El generador implementado usa Ollama local con

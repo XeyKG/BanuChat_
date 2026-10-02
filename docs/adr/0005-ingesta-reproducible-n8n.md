@@ -1,9 +1,11 @@
 # ADR 0005 — Ingesta reproducible y orquestación N8N
 
-Fecha: 2026-09-26. Estado: aceptado para implementación del MVP; todavía sin implementación ejecutada.
+Fecha: 2026-09-26. Estado: aceptado e implementado para el recorrido manual del MVP;
+retry/recover/scheduled N8N permanecen fuera de la validación N3.
 
-El diseño está aprobado; la implementación todavía no existe. No se han ejecutado
-pruebas E2E de ingesta ni demostrado métricas de ingesta, recuperación o rendimiento.
+La opción 3 fue implementada y validada localmente para el recorrido manual N8N E2E;
+véase [evidencia N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Esta
+validación no demuestra métricas generales de ingesta, recuperación o rendimiento.
 
 ## Contexto y autoridad
 
@@ -12,7 +14,9 @@ ingesta asíncrona de revisiones sintéticas aprobadas y completas. Prevalece el
 [SQL vigente](../../infra/db/001_initial_schema.sql), ya validado según su README,
 sobre referencias históricas del modelo lógico. Se mantienen los
 [ADR 0002](0002-publicaciones-sinteticas-inmutables.md) y
-[0003](0003-embedding-local-qwen3.md). No hay ingesta ejecutada del dataset v1.
+[0003](0003-embedding-local-qwen3.md). Al aceptar originalmente este ADR todavía no
+había una ingesta operacional N8N ejecutada del dataset v1; esa situación cambió con
+N3, cuyo recorrido manual local se registra en [su evidencia](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
 
 El alcance de aproximadamente 16 semanas favorece un único componente pequeño,
 testeable y sin motor de tareas, broker ni base adicional. N8N no puede convertirse
@@ -40,9 +44,9 @@ simples, correlación y resumen. TypeScript bajo `backend/rag` posee preflight,
 relaciones, extracción, chunking, embeddings, DML parametrizado, reintentos y
 publicación. PostgreSQL conserva sus constraints, triggers y funciones actuales.
 
-La invocación prevista es HTTP JSON privado: una operación de ejecución y otra
-de consulta de estado por identidad aprobada, descritas en la
-[especificación](../ingesta-reproducible.md). No pertenecen a `/api/v1`, MCP ni mobile;
+La invocación manual validada usa HTTP JSON privado: `/status` por identidad aprobada
+y una llamada `/execute`, descritas en la [especificación](../ingesta-reproducible.md)
+y la [evidencia N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). No pertenecen a `/api/v1`, MCP ni mobile;
 no hay webhook público, Execute Command, shell ni acceso SQL directo desde N8N.
 La ejecución HTTP espera el resultado, pero el trabajo sigue siendo asíncrono
 respecto a las consultas móviles. Un timeout no equivale a fallo confirmado.
@@ -72,16 +76,18 @@ por separado verifica código/build y receta efectivos del runtime.
 evidencia humana, no automáticamente implementation_revision. La autorización de
 receta/runtime se controla aparte: cambiar solo implementación/pipeline puede
 crear otra release por pipeline_sha256 sin otra aprobación de contenido. Cambiar
-la fuente requiere nueva aprobación. No se crea un worktree ni se implementa este
-despliegue; N8N no ejecuta checkout, pull, fetch ni comandos de red Git.
+la fuente requiere nueva aprobación. N0 preparó y validó localmente el source
+worktree; N3 validó el recorrido manual. N8N no ejecuta checkout, pull, fetch ni
+comandos de red Git.
 
 ## Consecuencias y límites
 
 - El equipo prepara localmente una revisión aprobada; ni Git pull ni credenciales
   GitHub en N8N. El componente verifica Git y bytes, nunca modifica la fuente.
-- El futuro despliegue deberá conectar N8N con el adaptador privado, montar el
-  checkout fuente separado de solo lectura y aprovisionar permisos mínimos. El Compose actual no
-  implementa esas conexiones; no se cambia aquí ni se fija un framework HTTP.
+- N3 validó N8N local → adaptador HTTP privado en el entorno Windows + Docker Desktop.
+  Para futuros despliegues quedan por decidir topología/bind, montaje del checkout
+  fuente de solo lectura y permisos mínimos. El Compose actual no fija topología
+  portable ni Linux.
 - Se conserva la distinción entre fuente aprobada y release SQL publicada.
   `ready` histórica no se reactiva desde una ingesta normal aunque SQL permita
   su activación administrativa mediante `publish_release`.
@@ -93,5 +99,6 @@ despliegue; N8N no ejecuta checkout, pull, fetch ni comandos de red Git.
 - La duración, calidad de recuperación y capacidad del hardware siguen sin medir.
   Las pruebas propuestas están en [el plan](../../eval/ingestion/plan.md).
 
-No se implementa ninguna alternativa ni se aprueba implícitamente infraestructura
-externa. El diseño aprobado queda listo para una tarea posterior de implementación.
+La opción 3 queda implementada y validada para el recorrido manual local observado.
+Esta actualización no aprueba infraestructura externa; retry/recover/scheduled y
+despliegues futuros permanecen fuera de N3.

@@ -1,8 +1,9 @@
 # Plan de pruebas de ingesta reproducible
 
 Estado: plan general con ejecución parcial documentada. Las filas I01–I24 son
-expectativas, no resultados PASS/FAIL por sí solas. Los escenarios de recovery/retry
-R1–R6 de Implementación 4 sí fueron ejecutados; véase su evidencia separada abajo.
+expectativas, no resultados PASS/FAIL por sí solas. N3 aporta evidencia operacional
+del camino manual local además de R1–R6 de recovery/retry de Implementación 4; véanse
+las evidencias separadas abajo. No convierte I01–I24 completos en PASS.
 Especificación: [ingesta reproducible](../../docs/ingesta-reproducible.md).
 Este plan no modifica ni reemplaza la suite SQL A–K existente.
 
@@ -67,6 +68,15 @@ y cobertura de 76 items por intento, con denominadores explícitos y no-op separ
 Objetivos heredados >90% y <24h todavía sin medición; publicación exige 100% de unidades.
 Las métricas RAG/RAGAS/usabilidad no se derivan de estas pruebas. La actualización
 académica de OE4 queda pendiente; los resultados ejecutados se registran por separado.
+
+## Orquestación N8N manual — N3
+
+N3 ejercitó el camino exitoso manual relacionado con I01: base aislada vacía,
+publicación `ready/current`, 76 items procesados, 12 versiones y 60 embeddings.
+También ejercitó el comportamiento no-op relacionado con I02: la misma identidad
+ready/current devolvió `already_current` sin nueva release, run ni chunks. Esta
+evidencia no recaptura por sí sola toda la evidencia exhaustiva exigida por I01 y no
+marca I03–I24 como ejecutados. Véase [N3 — E2E N8N manual](results/n3-n8n-e2e-2026-10-02.md).
 
 ## Recovery/retry ejecutable — Implementación 4
 

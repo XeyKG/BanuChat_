@@ -1,9 +1,9 @@
 # N8N
 
-Estado: N8N 2.40.5 fue levantado localmente mediante el Compose vigente; desde su
-contenedor se verificó conectividad autenticada a `POST /internal/ingestion/status`
-con resultado `not_started`. El workflow manual v1 está implementado e importado,
-pero permanece inactivo; no se ha probado `/execute` ni ejecutado ingesta N8N E2E.
+Estado: N8N 2.40.5 se levantó localmente mediante el Compose vigente. El workflow
+manual v1 está implementado e importado y permanece `active=false`; N3 lo ejecutó
+manualmente, `/execute` publicó una release y la segunda ejecución devolvió
+`already_current`. Véase [evidencia N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
 La fuente de verdad es `/data/synthetic`, creada/revisada por el equipo y versionada
 antes de ingesta. El calendario se ingiere dentro de una **release completa**;
 no existe sincronización de calendario independiente ni fuente institucional externa.
@@ -30,14 +30,15 @@ documental/vectorial específico de la [especificación](../docs/ingesta-reprodu
 El workflow manual versionado y el runbook están en
 [workflows/README.md](workflows/README.md) y
 [ingestion-manual-v1-runbook.md](workflows/ingestion-manual-v1-runbook.md). Fue
-importado en N8N 2.40.5 y permanece inactivo. No se ha probado `/execute` ni ejecutado
-ingesta N8N E2E. `workflow_ref` fijará ruta y revisión de la definición, no execution ID.
+importado en N8N 2.40.5 y permanece inactivo como automatización. N3 acredita el
+camino manual local con `/execute`; `workflow_ref` referencia la definición base, no
+un execution ID ni un objeto N8N garantizado idéntico byte por byte.
 Los logs solo contienen correlación, estados, tiempos y códigos técnicos seguros.
 
 N8N queda fuera del camino Mobile → REST → Intent Router → fast path / Agent-RAG.
 OE2 mantiene sus objetivos no medidos; OE4 verifica orquestación E2E y publicación
 atómica, no una latencia de calendario de 30 minutos. Véase el
-[plan de pruebas](../eval/ingestion/plan.md). La evidencia local se registra en
-[N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md).
-La conectividad observada acredita solo Windows local + Docker Desktop + Compose
-actual; no acredita workflow, `/execute`, E2E, Linux ni despliegue institucional.
+[plan de pruebas](../eval/ingestion/plan.md). Véanse [N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md)
+y [N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). N3 acredita workflow
+manual, `/execute` y E2E local; no acredita Linux, despliegue institucional,
+producción ni retry/recover/scheduled.

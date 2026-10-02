@@ -9,10 +9,11 @@ a llamar `/execute` automáticamente.
 
 ## Importación y estado
 
-Importar `ingestion-manual-v1.json` desde la interfaz de N8N o con el CLI nativo. El
-workflow debe permanecer **inactivo**. N2 valida importación; no autoriza pulsar
-Manual Run. La primera ejecución real corresponde a N3, con autorización y preparación
-operacional de esa tarea.
+Importar `ingestion-manual-v1.json` desde la interfaz de N8N o con el CLI nativo. N3
+ya validó una ejecución manual real; el workflow permanece `active=false` como
+automatización. Toda futura ejecución manual requiere su propio preflight operacional.
+Antes de ejecutarla, verificar la base URL, `workflow_ref`, `approval_ref`,
+`source_git_revision`, `pipeline_version` y que la credencial correcta esté vinculada.
 
 ## Configuración tras importar
 
@@ -34,6 +35,11 @@ la credencial correcta en **Check Ingestion Status**, **Execute Ingestion** y
 **Reconcile Status**. No incluir el token en workflow, parámetros, body, README o
 logs. La referencia local de credencial del export no es portable.
 
+N3 mostró que ver un nombre de credencial en la UI no basta: el workflow importado
+puede conservar el ID placeholder `__RELINK_AFTER_IMPORT__`. Verificar/revincular la
+credencial y probar primero **Check Ingestion Status** (`/status`) antes de cualquier
+ejecución completa. No registrar el ID interno ni el token.
+
 ## Parámetros y comportamiento
 
 - `/status` inicial: timeout explícito 30000 ms.
@@ -49,4 +55,5 @@ no es métrica académica. N0 observó una única consulta `/status` de 10538 ms
 timeout artificial de 5 s insuficiente; 10538 ms no es latencia de N8N.
 
 Los resúmenes contienen estado y campos técnicos saneados, sin autorización, token,
-URLs de base de datos, paths personales, corpus, vectores o stack traces.
+URLs de base de datos, paths personales, corpus, vectores o stack traces. N3 acredita
+solo el camino manual local observado; no habilita producción ni otros entornos.

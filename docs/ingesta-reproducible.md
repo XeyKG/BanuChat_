@@ -1,9 +1,11 @@
 # Ingesta reproducible del dataset sintético
 
-Estado: diseño vigente; core de ingesta, transporte HTTP interno y
-composición/startup operacional implementados. El startup y `/status` se validaron
-localmente; no se ejecutó ingesta. Workflow N8N, `/execute` desde N8N y E2E orquestada
-siguen pendientes. Fecha del diseño original: 2026-09-26.
+Estado: core de ingesta, transporte HTTP y startup implementados. N0 validó startup y
+`/status`; N2 versionó/importó el workflow manual; N3 validó la ejecución manual E2E
+con `/execute`, publicación `ready/current` y una segunda ejecución `already_current`.
+Véase [evidencia N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Retry,
+recover, scheduled y topología portable siguen pendientes. Diseño original:
+2026-09-26.
 Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
 [contrato físico](../infra/db/README.md) y [plan de pruebas](../eval/ingestion/plan.md).
 
@@ -15,9 +17,11 @@ documentos/chunking, embeddings, publicación atómica, recovery/retry, Approval
 Registry y loader local seguro, verificaciones approval↔source y procedencia del
 runtime checkout, servicio `execute`/`retry`/`recover`/`status`, observación del
 WriterLease, transporte HTTP interno, Bearer service token y parser de configuración
-operacional. `backend/rag/src/main.ts` compone estos elementos y el servicio se validó
-localmente mediante build/start y consultas `/status`; véase el [registro N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md).
-No existe todavía workflow N8N ejecutable/versionado ni consumo de `/execute` por N8N.
+operacional. `backend/rag/src/main.ts` compone estos elementos. N0 validó build/start
+y `/status`; N2 versionó/importó y N3 ejecutó manualmente el workflow desde N8N hasta
+`/execute` y la publicación. Véanse [N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md)
+y [N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Retry/recover/scheduled
+no forman parte de ese workflow.
 
 Las evidencias no se deben mezclar como una sola ejecución: la E2E real de
 Implementación 3 usó PostgreSQL 16.15, pgvector 0.8.6, Ollama 0.34.4 y
@@ -158,9 +162,10 @@ Despliegue futuro: listener solo en red local privada entre N8N y componente, si
 puerto público ni proxy hacia mobile. Los cuatro endpoints requieren
 `Authorization: Bearer <service-token>`. El token se configura fuera de Git, exige
 al menos 32 caracteres y ningún whitespace, no se loguea y se compara mediante
-SHA-256 + `timingSafeEqual`. La configuración está conectada al startup. Se validó
-`/status` autenticado desde Windows y desde el contenedor N8N local; esto no valida
-un workflow ni `/execute`. Esta credencial entre servicios no autentica usuarios de la app.
+SHA-256 + `timingSafeEqual`. La configuración está conectada al startup. N0 validó
+`/status` autenticado y N3 validó el workflow manual autenticado hasta `/execute` en
+el entorno local observado. Esta credencial entre servicios no autentica usuarios
+de la app. Los límites están en [N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
 Solo el componente
 posee credencial de ingesta y acceso
 Ollama. Sin privilegios DDL/TRUNCATE/superusuario ni acceso a historial conversacional.
@@ -187,14 +192,16 @@ igualdad entre las dos identidades ni que un working tree esté en ambas revisio
 La revisión concreta de v1 no es un default universal para futuros datasets.
 
 La aprobación humana de v1 ya existe; no se vuelve a inferir ni a inventar una firma.
-Antes de la primera ejecución, el operador deberá vincularla a un SHA completo
-en un registro operativo local de aprobaciones, de solo lectura para el componente,
-fuera de `/data/synthetic`. `approval_ref` identifica esa entrada, no una ruta.
+N0 preparó y verificó el registro operativo local, de solo lectura para el componente
+y fuera de `/data/synthetic`; N3 lo usó durante la ejecución manual ([N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md),
+[N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)). `approval_ref` identifica
+esa entrada, no una ruta.
 Contendrá source_git_revision, dataset_key, SHA-256 de bytes de manifest aprobado,
 referencia a la evidencia humana e instante real de disponibilidad.
 No vincula automáticamente implementation_revision ni aprueba código o receta.
 La autorización de runtime/pipeline y configuración efectiva se mantiene por separado.
-No se crea ese registro ahora. Evita incluir en el propio commit su SHA autorreferente.
+El registro operacional no se versiona con secretos ni se incluye en el commit del
+workflow.
 Los valores se suministran por el operador; N8N no puede escribir la aprobación.
 Para otro contenido se exige nueva aprobación. Un SHA distinto no hereda aprobación
 solo porque un README conserve la palabra «approved».
@@ -517,7 +524,7 @@ no repetir generación o publicación ciegamente.
 
 | Paso | Dueño |
 | --- | --- |
-| Trigger manual/retry y validación de entrada de control | N8N |
+| Trigger manual validado; retry futuro y validación de entrada de control | N8N |
 | Resolver revisión aprobada y preflight completo | TypeScript |
 | Resolver configuración efectiva; resolver/crear staging | TypeScript + validación PostgreSQL |
 | Abrir ingestion_run y 76 pending | TypeScript + PostgreSQL |
@@ -547,11 +554,12 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
 
 ## 11. Riesgos y verificaciones pendientes
 
-- El listener, la configuración local y el startup fueron validados operacionalmente
-  en Windows + Docker Desktop. Sigue pendiente decidir topología/bind para despliegues
-  futuros, implementar/versionar el workflow, llamar `/execute` desde N8N y definir
-  permisos/montajes finales. `host.docker.internal` solo fue observado en Docker
-  Desktop; no define una topología Linux. Compose no implementa el workflow.
+- El camino manual N8N con `/execute` publicó una release local y una segunda llamada
+  fue `already_current` ([N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)).
+  Siguen pendientes topología/bind y permisos/montajes para futuros despliegues,
+  retry/recover/scheduled N8N y escenarios avanzados. `host.docker.internal` solo
+  se observó en Windows + Docker Desktop; no define topología Linux. No hay evidencia
+  Linux ni institucional.
 - La E2E real verificó digest/runtime/opciones efectivos de Ollama y 60 embeddings;
   todavía falta evaluar calidad de retrieval/RAG y no se acreditan RAGAS/MRR.
 - Auditar roles no propietarios, concurrencia y procedencia en retries con el plan;
@@ -563,8 +571,9 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
   del nombre, pero SQL solo fija dimensión/cosine y defaults de proveedor/modelo.
   Prevalece SQL. No se corrigen esos documentos fuera del alcance autorizado.
 - La arquitectura refleja SQL y suite A–K, además del core de ingesta validado por
-  etapas; esas evidencias no acreditan N8N operacional ni el sistema conversacional.
+  etapas y el camino manual N8N local de N3; ninguna de esas evidencias acredita el
+  sistema conversacional completo.
 
 Estas evidencias validan diseño, trazabilidad y publicación dentro de sus alcances
 separados; no acreditan métricas OE1/OE2/OE4, calidad RAG, rendimiento del sistema,
-N8N operacional ni capacidad general del hardware.
+todos los escenarios I01–I24 ni capacidad general del hardware.
