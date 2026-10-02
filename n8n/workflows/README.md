@@ -11,20 +11,21 @@ acredita `/execute`, E2E, Linux ni despliegue institucional.
 Referencias: [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [especificación autoritativa](../../docs/ingesta-reproducible.md).
 
-## Secuencia prevista
+## Secuencia implementada en N2
 
-1. N2: Manual Trigger prepara configuración; retry no está incluido en este workflow.
-2. N8N: invocar `POST /internal/ingestion/execute` privado, no `/api/v1` ni MCP.
-3. Componente TypeScript: resolver aprobación y revisión Git; preflight completo.
-4. Componente: resolver configuración Ollama efectiva y candidata por identidad.
-   Ready/current devuelve no-op; ready histórica devuelve already_ready_not_current.
-5. Componente/PostgreSQL: abrir run y 76 items pending, con exclusión de escritor.
-6. Componente: procesar cursos, anuncios, perfiles, eventos, progreso y documentos.
-   Full_document → versión; chunked → secciones → Ollama → chunks con embeddings.
-7. Componente/PostgreSQL: cerrar 76 items, incluidos skipped verificados en retry.
-8. Componente/PostgreSQL: en una transacción final, cerrar run succeeded,
-   assert_release_complete y publish_release; commit y resumen.
-9. N8N: evaluar outcome y guardar resumen saneado, no corpus/vectores ni secretos.
+1. N8N: `Manual Trigger` inicia el flujo y `Prepare Control Configuration`
+   aporta los valores de control no secretos.
+2. N8N: invocar `POST /internal/ingestion/status` con selector de identidad.
+3. N8N: evaluar `outcome`. Solo `not_started` continúa hacia ejecución; los demás
+   estados conocidos terminan en un resumen y cualquier valor no reconocido usa la
+   salida fallback sin ejecutar acciones.
+4. N8N: únicamente para `not_started`, invocar
+   `POST /internal/ingestion/execute`.
+5. N8N: si `/execute` responde, terminar con `Execution Summary`. Si hay error de
+   transporte o timeout, consultar `POST /internal/ingestion/status` y terminar con
+   `Reconciliation Summary`; nunca repetir `/execute` automáticamente.
+6. Componente TypeScript: durante `/execute`, resolver aprobación y revisión Git;
+   realizar preflight completo, procesar la release y gobernar su publicación.
 
 Los pasos 3–8 son internos de una llamada al componente, **no nodos con SQL/Code
 duplicando el pipeline**. Failure: el componente revierte transacción abierta,
@@ -52,7 +53,8 @@ Salida: outcome, release_id, run_id/attempt_no si existen, revisión/hashes/conf
 y contadores derivados. Fallos llevan error_code y retryable; no stacks o credenciales.
 Detalles y códigos HTTP privados en la especificación, sin alterar REST público.
 
-Manual/retry son obligatorios; scheduled diferido. Un único escritor del dataset;
+El workflow N2 implementa únicamente ejecución manual. Retry/recover permanecen
+previstos para una iteración posterior y `scheduled` continúa diferido. Un único escritor del dataset;
 no calendario independiente, webhook público, Git pull, fuentes remotas ni nuevas tablas
 de jobs. N8N no repara fuentes, valida schemas complejos, genera embeddings ni publica.
 
@@ -60,13 +62,13 @@ Retry explícito solo tras reconciliar resultado y restaurar dependencias, conse
 fuente/receta/configuración. No retry automático ilimitado ni ciego por nodo.
 Ready histórica requiere acción administrativa aparte para rollback, no este workflow.
 
-## Versionado y evidencia futura
+## Versionado y evidencia
 
-Al implementar, exportar la definición JSON revisada aquí; no dejar cambios importantes
-solo en la UI. Limpiar secretos, URLs privadas y datos de ejecuciones de la exportación.
-Fijar workflow_ref a ruta de exportación y SHA completo del commit que la contiene;
-validar que coincida con lo desplegado. La exportación no se autoincluye su propio SHA.
-N8N execution ID solo correlaciona logs con run_id; no sustituye versión de workflow.
+La definición ejecutable se versiona en `ingestion-manual-v1.json`; los cambios
+funcionales no deben quedar únicamente en la UI de N8N. La exportación versionada
+no contiene secretos, URLs operacionales definitivas ni datos de ejecuciones.
+`workflow_ref` deberá fijar la ruta de esa exportación y el SHA completo de su
+revisión desplegada; la exportación no se autoincluye su propio SHA.
 
 Capturar instantes reales de disponibilidad aprobada, trigger y publicación/fallo,
 duraciones y resultados por intento. No incluir estos valores variables en receta.
