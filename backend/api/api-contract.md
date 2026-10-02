@@ -141,15 +141,24 @@ turno parcial. Si el servidor confirma correctamente el commit pero la respuesta
 HTTP no llega al cliente, el turno completo puede existir aunque el cliente no haya
 visto 201.
 
-El backend no mantiene una transacción, mutex ni advisory lock durante la ejecución
-del router, fast path o Document RAG. La protección implementada actúa al persistir
-mediante el bloqueo de la conversación, el gate de release, el ordinal esperado y
-las restricciones `UNIQUE` residuales. Por tanto, no se afirma que DELETE pueda
-detectar actualmente una generación en curso.
+Durante la ejecución del router, fast path o Document RAG, el backend no mantiene
+una transacción ni un advisory lock de base de datos. El servidor HTTP implementa
+un coordinador de actividad en memoria, por proceso y por `conversation_id`, para
+evitar operaciones incompatibles sobre una misma conversación. Un
+`POST /conversations/{conversation_id}/messages` activo hace que un `DELETE` sobre
+esa conversación responda 409 sin borrar; un `DELETE` activo impide iniciar un nuevo
+POST sobre la misma conversación, y dos POST concurrentes sobre la misma conversación
+también se rechazan con 409. Los DELETE concurrentes permanecen permitidos e
+idempotentes.
+
+Esta exclusión es local al proceso Node que atiende las solicitudes: no es durable,
+se pierde al reiniciar el proceso y no coordina múltiples instancias o réplicas.
+Independientemente de esa protección HTTP, la persistencia atómica mantiene sus
+comprobaciones de conversación, release y ordinal, junto con las restricciones
+`UNIQUE` residuales.
 
 Arquitectura objetivo pendiente: incorporar Agent/ReAct y el MCP interno al fallback.
-Una posible exclusión explícita durante el procesamiento requiere una decisión e
-implementación posteriores; este contrato no presupone su mecanismo.
+La exclusión actualmente implementada no depende de esos componentes.
 
 Este cambio es interno: véanse [ADR 0004](../../docs/adr/0004-enrutamiento-determinista-intenciones.md)
 y la [especificación del router](../../docs/enrutamiento-intenciones.md). No modifica

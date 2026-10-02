@@ -4,12 +4,12 @@
   "info": {
     "title": "BanuChat REST API",
     "version": "1.0.0-draft",
-    "description": "Especificación REST v1 para demostración sintética local. No implementada. Mobile consume solo REST; MCP es una frontera interna distinta. Objetos JSON snake_case cerrados. No hay autenticación real. Consultar api-contract.md para concurrencia, reintentos, pertenencia de release y resolución de artefactos. Se rechazan query parameters desconocidos y cuerpos en GET/DELETE. No se implementa catálogo de cursos."
+    "description": "Especificación REST v1 para demostración sintética local. Implementación parcial del contrato disponible en el backend local. Mobile consume solo REST; MCP es una frontera interna distinta. Objetos JSON snake_case cerrados. No hay autenticación real. Consultar api-contract.md para concurrencia, reintentos, pertenencia de release y resolución de artefactos. Se rechazan query parameters desconocidos y cuerpos en GET/DELETE. No se implementa catálogo de cursos."
   },
   "servers": [
     {
       "url": "/api/v1",
-      "description": "Base relativa del futuro backend local; host/puerto no fijados por este contrato."
+      "description": "Base relativa del backend local; host/puerto no fijados por este contrato."
     }
   ],
   "security": [],
