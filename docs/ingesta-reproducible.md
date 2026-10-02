@@ -175,9 +175,10 @@ montado/configurado read-only. Ambas raíces son configuración controlada del s
 no parámetros HTTP. `/data/synthetic` se resuelve dentro de la raíz fuente, nunca
 por defecto dentro del checkout del backend. El listener HTTP, la credencial Bearer y la composición/startup están implementados.
 La preparación de source checkout separado y Approval Registry local también se
-validaron operacionalmente (registro N0). Siguen pendientes los roles y permisos
-mínimos, la solución de montaje read-only para despliegues futuros y la integración
-funcional con N8N.
+validaron operacionalmente (registro N0). N3 validó la integración funcional manual
+con N8N en el entorno local observado. Siguen pendientes los roles y permisos mínimos,
+la solución de montaje read-only y la topología portable para despliegues futuros,
+además de los flujos N8N de retry/recover/scheduled.
 
 ## 3. Aprobación y revisiones Git independientes
 

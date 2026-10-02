@@ -53,7 +53,7 @@ Salida: outcome, release_id, run_id/attempt_no si existen, revisión/hashes/conf
 y contadores derivados. Fallos llevan error_code y retryable; no stacks o credenciales.
 Detalles y códigos HTTP privados en la especificación, sin alterar REST público.
 
-El workflow N2 implementa únicamente ejecución manual. Retry/recover permanecen
+El workflow manual v1 implementa únicamente ejecución manual. Retry/recover permanecen
 previstos para una iteración posterior y `scheduled` continúa diferido. Un único escritor del dataset;
 no calendario independiente, webhook público, Git pull, fuentes remotas ni nuevas tablas
 de jobs. N8N no repara fuentes, valida schemas complejos, genera embeddings ni publica.
