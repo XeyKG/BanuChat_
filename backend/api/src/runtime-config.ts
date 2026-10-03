@@ -1,4 +1,7 @@
 const LOOPBACK_HOST = "127.0.0.1" as const;
+const LAN_BIND_HOST = "0.0.0.0" as const;
+
+type ApiHost = typeof LOOPBACK_HOST | typeof LAN_BIND_HOST;
 
 export interface RuntimeConfig {
   postgres: {
@@ -9,9 +12,20 @@ export interface RuntimeConfig {
     password: string;
   };
   api: {
-    host: typeof LOOPBACK_HOST;
+    host: ApiHost;
     port: number;
   };
+}
+
+function readApiHost(environment: NodeJS.ProcessEnv): ApiHost {
+  const value = environment.BANUCHAT_API_HOST;
+  if (value === undefined) {
+    return LOOPBACK_HOST;
+  }
+  if (value === LOOPBACK_HOST || value === LAN_BIND_HOST) {
+    return value;
+  }
+  throw new Error("BANUCHAT_API_HOST");
 }
 
 function requireValue(
@@ -57,7 +71,7 @@ export function loadRuntimeConfig(
       password: requireValue(environment, "POSTGRES_PASSWORD"),
     },
     api: {
-      host: LOOPBACK_HOST,
+      host: readApiHost(environment),
       port: readPort(environment, "BANUCHAT_API_PORT", 3000),
     },
   };

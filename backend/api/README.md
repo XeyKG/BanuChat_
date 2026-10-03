@@ -20,6 +20,19 @@ directas de calendario, progreso y anuncios; revisar `src/http/api-server.ts`.
 Solo se emplean perfiles y datos sintéticos de demostración.
 No se incluye autenticación institucional ni catálogo REST de cursos en v1.
 
+### Configuración del listener
+
+Por defecto, el API escucha solo en loopback con `BANUCHAT_API_HOST=127.0.0.1`.
+Para una prueba temporal desde un celular real en la misma red LAN privada/de
+confianza, configura `BANUCHAT_API_HOST=0.0.0.0` y conecta el celular a la IPv4
+privada del PC, por ejemplo `http://<IP-LAN-DEL-PC>:3000/api/v1`. El celular no
+debe consumir `0.0.0.0` directamente. La API todavía no implementa autenticación
+de usuario final, por lo que este bind LAN es solo para desarrollo/demostración;
+en Windows, limita cualquier regla o permiso del firewall a la red privada.
+No expongas el API a Internet, no configures port forwarding ni uses una red
+pública. `BANUCHAT_API_HOST` solo controla el listener HTTP REST; PostgreSQL
+mantiene su host fijo en `127.0.0.1`.
+
 - [Especificación del router](../../docs/enrutamiento-intenciones.md) y
   [ADR 0004](../../docs/adr/0004-enrutamiento-determinista-intenciones.md).
 - [Catálogo declarativo](intent-routing.catalog.json) y
