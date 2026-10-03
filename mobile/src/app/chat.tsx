@@ -24,7 +24,7 @@ type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
 
 const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PROFILE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 
 function singleParam(value: string | string[] | undefined): string | null {
