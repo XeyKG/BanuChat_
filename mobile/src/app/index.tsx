@@ -152,6 +152,14 @@ export default function HomeScreen() {
             )}
           </View>
         )}
+
+        <Pressable
+          accessibilityRole="button"
+          disabled={isStartingChat}
+          onPress={() => router.push('/calendar')}
+          style={[styles.secondaryButton, isStartingChat && styles.buttonDisabled]}>
+          <Text style={styles.secondaryButtonText}>Calendario</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -236,6 +244,23 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryButton: {
+    minHeight: 52,
+    minWidth: 180,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#1d4ed8',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+  },
+  secondaryButtonText: {
+    color: '#1d4ed8',
     fontSize: 16,
     fontWeight: '700',
   },
