@@ -226,3 +226,52 @@ poblacional robusta. L1 compara descriptivamente con la referencia histórica de
 Los resultados futuros tendrán fecha `America/Bogota` y quedarán en
 `results/l1-rag-latency-AAAA-MM-DD.json` y `.md`. Los intentos L1 abortados
 durante la preparación no produjeron resultados oficiales.
+
+## OPT-1C: contexto de query y estabilidad del retrieval
+
+`compare-query-context-retrieval.mjs` investiga el thrashing de GPU observado
+cuando el embedding con `num_ctx=32768` y el generador compiten por residencia.
+Compara únicamente el contexto de los embeddings de consulta: `32768` frente a
+`4096`. La receta documental permanece en `32768` y ambos vectores se buscan
+contra los mismos embeddings documentales de la release actual. No regenera
+documentos, no escribe PostgreSQL, no llama al generador y no modifica la
+configuración productiva. Esta exploración no mide latencia ni es L1-B.
+
+Desde la raíz, la revisión local es:
+
+```powershell
+node --check eval/generation/compare-query-context-retrieval.mjs
+node eval/generation/compare-query-context-retrieval.mjs --dry-run
+```
+
+El dry-run valida el workload L1 congelado, su SHA-256 frente al baseline L1,
+los cambios Git permitidos y la URL loopback de Ollama. No abre PostgreSQL ni
+Ollama. Para la ejecución real posterior, compilar `backend/api` con
+`npm run build` y usar PostgreSQL/pgvector, Ollama y las variables `POSTGRES_*`
+de `backend/api`; `BANUCHAT_OLLAMA_BASE_URL` solo acepta loopback:
+
+```powershell
+node --env-file=.env eval/generation/compare-query-context-retrieval.mjs
+```
+
+El preflight exige que la release actual esté lista y sea la registrada en L1,
+con modelo, digest, runtime, dimensión 1024, coseno y recetas query/document
+iguales a las del baseline. Confirma el modelo y digest con `/api/tags`, la
+capability de embedding y contexto nativo de al menos 32768 con `/api/show`.
+Después obtiene un vector y hace retrieval `top_k=5` por pregunta, primero
+para los diez casos con `32768` y luego para los diez con `4096`; el orden no
+aporta conclusiones de rendimiento. Cada petición `/api/embed` usa
+`truncate=false`, `dimensions=1024` y texto sin prefijo (`input_prefix=null`).
+La búsqueda reutiliza `retrieveDocumentChunks` y su SQL productivo: filtra la
+misma release, versiones `ready`, documentos `chunked` y embeddings presentes;
+ordena por distancia coseno, `document_version_id` y `ordinal`.
+
+La identidad estable comparada es `document_version_id:ordinal`. El JSON
+registra por caso similitud coseno entre vectores, diferencia absoluta máxima,
+top-1, conjunto y orden del top-5, intersección, Jaccard, ranks, IDs, locators
+y distancias. El Markdown resume qué casos conservan el top-5, cambian su
+orden o incorporan/sacan chunks. Un coseno alto entre vectores no basta para
+declarar equivalencia. Los resultados exploratorios se crean con `wx`, sin
+sobrescribir, en `results/opt1c-query-context-retrieval-AAAA-MM-DD.json` y
+`.md` (fecha `America/Bogota`). Esta primera entrega no ejecuta la comparación
+real ni cambia producción.
