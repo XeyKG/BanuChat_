@@ -76,6 +76,8 @@ export default function HomeScreen() {
     }
   }
 
+  const isProgressDisabled = selectedProfile === null || isStartingChat || loadState !== 'success';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -159,6 +161,27 @@ export default function HomeScreen() {
           onPress={() => router.push('/calendar')}
           style={[styles.secondaryButton, isStartingChat && styles.buttonDisabled]}>
           <Text style={styles.secondaryButtonText}>Calendario</Text>
+        </Pressable>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isProgressDisabled }}
+          disabled={isProgressDisabled}
+          onPress={() => {
+            if (selectedProfile === null) return;
+            router.push({
+              pathname: '/progress',
+              params: {
+                profile_key: selectedProfile.profile_key,
+                profile_alias: selectedProfile.alias,
+              },
+            });
+          }}
+          style={[
+            styles.secondaryButton,
+            isProgressDisabled && styles.buttonDisabled,
+          ]}>
+          <Text style={styles.secondaryButtonText}>Progreso</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
