@@ -11,7 +11,8 @@ import { fileURLToPath } from "node:url";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "../..");
 const API_DIR = join(ROOT, "backend", "api");
-const PROMPTS = join(HERE, "prompts-v2.json");
+const L1_CASES_PATH = join(HERE, "l1-rag-latency-cases.json");
+const G0_PROMPTS_PATH = join(HERE, "prompts-v2.json");
 const RESULTS = join(HERE, "results");
 const PROFILE_KEY = "profile-001";
 const REQUEST_TIMEOUT_MS = 180_000;
@@ -38,6 +39,7 @@ const HTTP_ERROR_CODES = new Set([
 ]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const ALLOWED_CHANGES = new Set([
+  "eval/generation/l1-rag-latency-cases.json",
   "eval/generation/run-rag-latency-profile.mjs",
   "eval/generation/README.md",
 ]);
@@ -85,7 +87,7 @@ function bogotaDate(date) {
   return `${p.year}-${p.month}-${p.day}`;
 }
 
-function validateCases(data) {
+function validateG0Cases(data) {
   assert(data?.schema_version === "2" && data?.benchmark_id === "banuchat-generator-g0-v2" &&
     Array.isArray(data.cases) && data.cases.length === 10,
   "prompts-v2.json no contiene los diez casos G0 v2 esperados.");
@@ -94,6 +96,21 @@ function validateCases(data) {
     assert(item?.id === id && nonempty(item.question) && [...item.question].length <= 4000,
       `Caso inválido: ${id}`);
     return { id, question: item.question };
+  });
+}
+
+function validateL1Cases(data) {
+  assert(data?.schema_version === "1" &&
+    data?.workload_id === "banuchat-rag-latency-l1" &&
+    Array.isArray(data.cases) && data.cases.length === 10,
+  "l1-rag-latency-cases.json debe contener exactamente diez casos L1.");
+  return data.cases.map((item, index) => {
+    const id = `L1-${String(index + 1).padStart(2, "0")}`;
+    assert(item?.id === id && nonempty(item.question) &&
+      [...item.question].length <= 4000 && nonempty(item.rationale) &&
+      Object.keys(item).sort().join(",") === "id,question,rationale",
+    `Caso L1 inválido: ${id}`);
+    return { id, question: item.question, rationale: item.rationale };
   });
 }
 
@@ -137,7 +154,7 @@ function safeDependencyError(error, backend) {
   return "unknown";
 }
 
-function recorder(backend, retainLast = false) {
+function recorder(backend, retainLast = false, recordTimings = true) {
   let active = null;
   let last = null;
   return {
@@ -160,12 +177,14 @@ function recorder(backend, retainLast = false) {
         measurement.last_stage_started = name;
         measurement.counts[name] = (measurement.counts[name] ?? 0) + 1;
       }
-      const start = performance.now();
+      const start = recordTimings ? performance.now() : null;
       try {
         const result = await operation();
         if (measurement) {
-          measurement.timings[name] = (measurement.timings[name] ?? 0) +
-            finiteMs(performance.now() - start, name);
+          if (recordTimings) {
+            measurement.timings[name] = (measurement.timings[name] ?? 0) +
+              finiteMs(performance.now() - start, name);
+          }
           measurement.last_stage_completed = name;
         }
         return result;
@@ -407,7 +426,7 @@ async function cleanup(base, id) {
   assert(after.status === 404, `Limpieza no confirmada: GET HTTP ${after.status}.`);
 }
 
-async function runCase(base, item, instrumentation) {
+async function runCase(base, item, instrumentation, { functionalOnly = false } = {}) {
   const conversationId = await createConversation(base);
   let failure;
   let run;
@@ -417,7 +436,7 @@ async function runCase(base, item, instrumentation) {
   let httpError;
   try {
     current = instrumentation.begin();
-    const start = performance.now();
+    const start = functionalOnly ? null : performance.now();
     let data;
     try {
       response = await request(base,
@@ -429,21 +448,24 @@ async function runCase(base, item, instrumentation) {
       }
       data = await expectedJson(response, 201, "POST /messages");
     } finally { instrumentation.end(); }
-    const wall = finiteMs(performance.now() - start, "wall_ms");
+    const wall = functionalOnly ? null : finiteMs(performance.now() - start, "wall_ms");
     assert(current.routes.length === 1 && current.routes[0] === "agent_fallback" &&
       current.rag_calls === 1 && current.embedding_calls === 1 &&
       current.generation_calls === 1,
     "La ruta no ejecutó exactamente una vez Document RAG, embedding y generación.");
-    for (const stage of STAGES) {
-      assert(current.counts[stage] === 1 && current.timings[stage] !== undefined,
-        `Etapa ausente o repetida: ${stage}`);
-      finiteMs(current.timings[stage], stage);
+    let other;
+    if (!functionalOnly) {
+      for (const stage of STAGES) {
+        assert(current.counts[stage] === 1 && current.timings[stage] !== undefined,
+          `Etapa ausente o repetida: ${stage}`);
+        finiteMs(current.timings[stage], stage);
+      }
+      assert(Object.keys(current.counts).every((stage) => STAGES.includes(stage)),
+        "Etapa de medición inesperada.");
+      const observed = STAGES.reduce((sum, stage) => sum + current.timings[stage], 0);
+      other = wall - observed;
+      assert(other >= 0, "Las etapas exceden el wall clock; revisar solapamiento.");
     }
-    assert(Object.keys(current.counts).every((stage) => STAGES.includes(stage)),
-      "Etapa de medición inesperada.");
-    const observed = STAGES.reduce((sum, stage) => sum + current.timings[stage], 0);
-    const other = wall - observed;
-    assert(other >= 0, "Las etapas exceden el wall clock; revisar solapamiento.");
     assert(data?.conversation_id === conversationId &&
       data?.user_message?.content === item.question &&
       nonempty(data?.assistant_message?.content) &&
@@ -453,13 +475,16 @@ async function runCase(base, item, instrumentation) {
     const citations = data.assistant_message.citations;
     assert(citations.every((citation) => citation?.source_kind === "document"),
       "La respuesta contiene citas no documentales.");
-    run = { id: item.id, question: item.question, http_status: response.status,
-      wall_ms: wall, insufficient_evidence: data.assistant_message.insufficient_evidence,
-      citation_count: citations.length, all_document: citations.length > 0,
-      ...current.timings,
-      generator_ollama_total_duration_ms: finiteMs(
-        current.generator_ollama_total_duration_ms, "generator_ollama_total_duration_ms"),
-      other_orchestration_ms: other, cleanup_success: false };
+    run = functionalOnly
+      ? { id: item.id, http_status: response.status, route: current.routes[0],
+        rag_calls: current.rag_calls, cleanup_success: false }
+      : { id: item.id, question: item.question, http_status: response.status,
+        wall_ms: wall, insufficient_evidence: data.assistant_message.insufficient_evidence,
+        citation_count: citations.length, all_document: citations.length > 0,
+        ...current.timings,
+        generator_ollama_total_duration_ms: finiteMs(
+          current.generator_ollama_total_duration_ms, "generator_ollama_total_duration_ms"),
+        other_orchestration_ms: other, cleanup_success: false };
   } catch (error) { failure = error; }
   try { await cleanup(base, conversationId); cleaned = true; }
   catch { cleaned = false; }
@@ -515,7 +540,7 @@ function markdown(report) {
 - Commit: \`${report.metadata.implementation_revision}\`.
 - Archivos L1 sin commit al ejecutar: \`${report.metadata.implementation_changed_paths.join(", ") || "ninguno"}\`.
 - SHA-256 del runner: \`${report.metadata.runner_sha256}\`.
-- SHA-256 de prompts G0 v2: \`${report.metadata.prompts_sha256}\`.
+- SHA-256 del workload L1: \`${report.metadata.l1_cases_sha256}\`.
 - Release: \`${report.metadata.release_id}\`.
 - PostgreSQL: \`${report.metadata.postgres_server_version}\`; pgvector: \`${report.metadata.pgvector_version}\`.
 - Ollama: \`${report.metadata.ollama_runtime_version}\`.
@@ -559,13 +584,16 @@ ${wall.mean >= 5000 ? "En el entorno local observado, la muestra L1 no alcanzó 
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.length === 1 && args[0] === "--dry-run";
+  const functionalValidation = args.length === 1 && args[0] === "--validate-l1-cases";
   const diagnosticId = args.length === 2 && args[0] === "--diagnose-case" &&
     /^G0-(?:0[1-9]|10)$/u.test(args[1]) ? args[1] : null;
-  assert(args.length === 0 || dryRun || diagnosticId !== null,
-  "Uso: node eval/generation/run-rag-latency-profile.mjs [--dry-run | --diagnose-case G0-01..G0-10]");
+  assert(args.length === 0 || dryRun || functionalValidation || diagnosticId !== null,
+  "Uso: node eval/generation/run-rag-latency-profile.mjs [--dry-run | --validate-l1-cases | --diagnose-case G0-01..G0-10]");
   const state = gitState();
-  const promptBytes = await readFile(PROMPTS);
-  const cases = validateCases(JSON.parse(promptBytes.toString("utf8")));
+  const caseBytes = await readFile(diagnosticId === null ? L1_CASES_PATH : G0_PROMPTS_PATH);
+  const cases = diagnosticId === null
+    ? validateL1Cases(JSON.parse(caseBytes.toString("utf8")))
+    : validateG0Cases(JSON.parse(caseBytes.toString("utf8")));
   const backend = await import(new URL("../../backend/api/dist/index.js", import.meta.url));
   const router = await backend.loadDefaultIntentRouter();
   verifyRoutes(router, cases);
@@ -578,7 +606,7 @@ async function main() {
   const basename = `l1-rag-latency-${runDate}`;
   const jsonPath = join(RESULTS, `${basename}.json`);
   const mdPath = join(RESULTS, `${basename}.md`);
-  if (diagnosticId === null) {
+  if (diagnosticId === null && !functionalValidation) {
     await assertAbsent(jsonPath);
     await assertAbsent(mdPath);
   }
@@ -591,7 +619,7 @@ async function main() {
   try {
     const realSql = new backend.PgSqlClient(pool);
     const environment = await preflight(realSql, generatorRuntime);
-    const instrument = recorder(backend, diagnosticId !== null);
+    const instrument = recorder(backend, diagnosticId !== null, !functionalValidation);
     const sql = { query: (text, values) => {
       if (!instrument.active) return realSql.query(text, values);
       return instrument.time(classifySql(text), () => realSql.query(text, values));
@@ -610,7 +638,9 @@ async function main() {
       instrument.active.generation_calls += 1;
       return instrument.time("generation_ms", async () => {
         const result = await generator.generate(input, config);
-        instrument.active.generator_ollama_total_duration_ms = result.total_duration_ms;
+        if (!functionalValidation) {
+          instrument.active.generator_ollama_total_duration_ms = result.total_duration_ms;
+        }
         return result;
       });
     } };
@@ -647,6 +677,15 @@ async function main() {
       }
       return;
     }
+    if (functionalValidation) {
+      for (const item of cases) {
+        const run = await runCase(base, item, instrument, { functionalOnly: true });
+        console.log(`${item.id}: PASS route=${run.route} rag_calls=${run.rag_calls} ` +
+          `http_status=${run.http_status} cleanup_success=${run.cleanup_success}`);
+      }
+      console.log("Validación funcional L1 completa; no se generaron resultados oficiales.");
+      return;
+    }
     const warmup = await runCase(base, { id: "warmup", question: cases[0].question },
       instrument);
     const warmRuns = [];
@@ -658,7 +697,7 @@ async function main() {
     const report = { schema_version: "1", benchmark_id: "banuchat-rag-latency-l1",
       metadata: { ...state, ...environment, generated_at: generatedAt.toISOString(),
         runner_sha256: sha256(await readFile(fileURLToPath(import.meta.url))),
-        prompts_sha256: sha256(promptBytes), measured_run_count: 10,
+        l1_cases_sha256: sha256(caseBytes), measured_run_count: 10,
         warmup_excluded: true, profile_key: PROFILE_KEY },
       warmup, warm_runs: warmRuns, warm_aggregates: aggregate(warmRuns),
       timing_method: { p95: "nearest_rank_ceil_0.95_n", other_orchestration:

@@ -104,14 +104,25 @@ G0 v2 aún no tiene resultados ejecutados en este cambio, por lo que no correspo
 
 ## L1: perfil reproducible de latencia Document RAG
 
-`run-rag-latency-profile.mjs` es un instrumento nuevo para diez solicitudes warm
-secuenciales de `POST /api/v1/conversations/{id}/messages`. Usa solamente el campo
-`question` de G0-01 a G0-10 en `prompts-v2.json`: el contexto llega del retrieval
-real del corpus sintético. No reemplaza G0 ni G2, y no mezcla sus resultados con
-J1. El runner verifica antes de medir que las diez preguntas caigan en
+`run-rag-latency-profile.mjs` es un instrumento para diez solicitudes warm
+secuenciales de `POST /api/v1/conversations/{id}/messages`. El workload formal
+congelado está en `l1-rag-latency-cases.json` (`L1-01` a `L1-10`): el runner envía
+solamente cada `question` y el contexto llega del retrieval real del corpus
+sintético. G0 sigue siendo el benchmark de generación; L1 no reemplaza G0 ni
+G2, y no mezcla sus resultados con J1. El runner verifica antes de medir que
+las diez preguntas L1 caigan en
 `agent_fallback` con el catálogo real `1.1.0-draft`. Durante cada solicitud
 comprueba además una decisión de fallback y exactamente una invocación de
 Document RAG, embedding y generación.
+
+Durante la preparación, el caso histórico G0-04 terminó en Ollama con
+`done=true`, `done_reason=length` y `eval_count=256`, bajo el límite productivo
+`num_predict=256`; por ello no produjo HTTP 201. Se separó un workload L1
+específico por esa incompatibilidad funcional, sin modificar modelo, parámetros
+ni producción. Las preguntas L1 se eligieron por su pertinencia documental y
+posibilidad de respuesta breve y natural, no por tiempos observados. Las
+ejecuciones L1 abortadas con preguntas G0 no forman parte de ningún agregado
+formal L1.
 
 ### Preparación y revisión sin consultas costosas
 
@@ -125,11 +136,23 @@ node eval/generation/run-rag-latency-profile.mjs --dry-run
 ```
 
 El build local actualiza `backend/api/dist`, que el runner importa mediante una
-ruta relativa al repositorio. `--dry-run` valida Git, prompts y decisiones del
+ruta relativa al repositorio. `--dry-run` valida Git, casos L1 y decisiones del
 router; no abre PostgreSQL, Ollama ni el servidor HTTP y no crea resultados. Se
 rechazan cambios Git ajenos a los archivos L1 autorizados. El informe final
 registra el commit y los archivos L1 aún sin commit, además del SHA-256 del runner
-y de los prompts.
+y del workload L1.
+
+La validación funcional, que se ejecutará después de revisar este cambio, usa
+las dependencias reales y recorre los diez casos L1 secuencialmente:
+
+```powershell
+node --env-file=.env eval/generation/run-rag-latency-profile.mjs --validate-l1-cases
+```
+
+Cada caso crea y limpia su propia conversación. Se exige fallback, una llamada
+Document RAG, HTTP 201 y respuesta válida. No registra ni imprime tiempos, no
+reintenta solicitudes y no crea resultados L1. Si falla un caso, informa su ID
+y aborta; cualquier sustitución requiere revisión del conjunto congelado.
 
 Para la ejecución real posterior se necesitan PostgreSQL/pgvector y Ollama locales,
 la release sintética lista y las mismas variables de entorno que usa
@@ -156,8 +179,8 @@ la ruta, conteos y etapas observadas, y un identificador seguro del error captur
 por los wrappers de evaluación. Ese diagnóstico ayuda a ubicar la etapa o
 dependencia observada; el body HTTP por sí solo no acredita la causa interna.
 
-Para investigar un caso aislado sin producir evidencia L1 oficial, el modo
-`--diagnose-case` acepta únicamente `G0-01` a `G0-10`:
+Para investigar históricamente un caso G0 aislado sin producir evidencia L1
+oficial, el modo `--diagnose-case` acepta únicamente `G0-01` a `G0-10`:
 
 ```powershell
 node --env-file=.env eval/generation/run-rag-latency-profile.mjs --diagnose-case G0-04
@@ -198,5 +221,5 @@ poblacional robusta. L1 compara descriptivamente con la referencia histórica de
 5000 ms, sin decidir el cumplimiento de OE6 ni cambiar su formulación.
 
 Los resultados futuros tendrán fecha `America/Bogota` y quedarán en
-`results/l1-rag-latency-AAAA-MM-DD.json` y `.md`. No existen resultados L1
-acreditados por esta primera fase.
+`results/l1-rag-latency-AAAA-MM-DD.json` y `.md`. Los intentos L1 abortados
+durante la preparación no produjeron resultados oficiales.

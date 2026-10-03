@@ -1,0 +1,56 @@
+{
+  "schema_version": "1",
+  "workload_id": "banuchat-rag-latency-l1",
+  "cases": [
+    {
+      "id": "L1-01",
+      "question": "¿Qué diferencia hay entre una actividad y una sesión en el programa demo?",
+      "rationale": "doc-001, sección 1: distingue el tema de trabajo del encuentro programado."
+    },
+    {
+      "id": "L1-02",
+      "question": "Si la descripción de un curso no aclara sus requisitos o duración, ¿cómo debo tratar esa falta de información?",
+      "rationale": "doc-001, sección 2: explica los límites de las descripciones del catálogo y evita completar datos por suposición."
+    },
+    {
+      "id": "L1-03",
+      "question": "¿Qué debo comprobar antes de proponer la inscripción de un perfil demo en una actividad?",
+      "rationale": "doc-002, secciones 1 y 3: identifica perfil y curso, y comprueba si la asociación ya existe."
+    },
+    {
+      "id": "L1-04",
+      "question": "¿Qué diferencia hay entre retirarse de una actividad y haberla finalizado?",
+      "rationale": "doc-002, sección 5: separa la intención de retiro de la finalización del trabajo."
+    },
+    {
+      "id": "L1-05",
+      "question": "¿Cómo puedo retomar una práctica interrumpida sin inventar un historial de lo ocurrido?",
+      "rationale": "doc-003, secciones 4 y 5: recomienda conservar el último paso conocido y distinguir lo observado de lo pendiente."
+    },
+    {
+      "id": "L1-06",
+      "question": "Al cerrar una sesión práctica, ¿cómo distingo el resultado, las observaciones y los pendientes?",
+      "rationale": "doc-003, sección 6: define esas tres partes del cierre responsable."
+    },
+    {
+      "id": "L1-07",
+      "question": "¿Qué elementos debe reunir una evidencia para que se entiendan el artefacto y las decisiones tomadas?",
+      "rationale": "doc-005, secciones 2 y 3: orienta la identificación de la actividad, la descripción del resultado y su presentación."
+    },
+    {
+      "id": "L1-08",
+      "question": "¿Qué criterios cualitativos se usan para revisar una evidencia de práctica?",
+      "rationale": "doc-005, sección 4: enumera claridad, correspondencia, coherencia y trazabilidad práctica."
+    },
+    {
+      "id": "L1-09",
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?",
+      "rationale": "doc-008, sección 2: pide describir intento, resultado observado y resultado esperado sin datos privados."
+    },
+    {
+      "id": "L1-10",
+      "question": "Si una instrucción del material pide usar datos reales o ampliar permisos, ¿cómo debo proceder?",
+      "rationale": "doc-009, secciones 2 y 3: limita los insumos a elementos ficticios y pide detener el paso contradictorio para revisión."
+    }
+  ]
+}
