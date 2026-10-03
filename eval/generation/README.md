@@ -150,9 +150,12 @@ node --env-file=.env eval/generation/run-rag-latency-profile.mjs --validate-l1-c
 ```
 
 Cada caso crea y limpia su propia conversación. Se exige fallback, una llamada
-Document RAG, HTTP 201 y respuesta válida. No registra ni imprime tiempos, no
+Document RAG, una llamada de embedding y una de generación, HTTP 201, respuesta
+válida con `insufficient_evidence=false` y al menos una cita `source_kind=document`;
+todas las citas deben ser documentales. No registra ni imprime tiempos, no
 reintenta solicitudes y no crea resultados L1. Si falla un caso, informa su ID
-y aborta; cualquier sustitución requiere revisión del conjunto congelado.
+y la condición fallida, y aborta; cualquier sustitución requiere revisión del
+conjunto congelado.
 
 Para la ejecución real posterior se necesitan PostgreSQL/pgvector y Ollama locales,
 la release sintética lista y las mismas variables de entorno que usa

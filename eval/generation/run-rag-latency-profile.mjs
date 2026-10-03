@@ -316,6 +316,7 @@ function abortDiagnostic(item, current, httpError, httpStatus, cleanupSuccess) {
     `active_or_last_stage=${current?.active_stage ?? current?.last_stage_started ??
       current?.last_stage_completed ?? "unknown"}`,
     `dependency_error=${current?.dependency_error ?? "unknown"}`,
+    ...(current?.validation_failure ? [`validation_failure=${current.validation_failure}`] : []),
     `cleanup_success=${cleanupSuccess}`,
   ].join("\n"));
 }
@@ -473,11 +474,23 @@ async function runCase(base, item, instrumentation, { functionalOnly = false } =
       Array.isArray(data?.assistant_message?.citations),
     "Respuesta de Document RAG inválida.");
     const citations = data.assistant_message.citations;
+    if (functionalOnly) {
+      current.validation_failure = data.assistant_message.insufficient_evidence
+        ? "insufficient_evidence"
+        : citations.length === 0 ? "zero_citations"
+        : citations.some((citation) => citation?.source_kind !== "document")
+          ? "non_document_citation" : null;
+      assert(current.validation_failure === null,
+        "El caso L1 no obtuvo evidencia suficiente y citas documentales.");
+    }
     assert(citations.every((citation) => citation?.source_kind === "document"),
       "La respuesta contiene citas no documentales.");
     run = functionalOnly
       ? { id: item.id, http_status: response.status, route: current.routes[0],
-        rag_calls: current.rag_calls, cleanup_success: false }
+        rag_calls: current.rag_calls, embedding_calls: current.embedding_calls,
+        generation_calls: current.generation_calls,
+        insufficient_evidence: false, citation_count: citations.length,
+        cleanup_success: false }
       : { id: item.id, question: item.question, http_status: response.status,
         wall_ms: wall, insufficient_evidence: data.assistant_message.insufficient_evidence,
         citation_count: citations.length, all_document: citations.length > 0,
@@ -681,7 +694,9 @@ async function main() {
       for (const item of cases) {
         const run = await runCase(base, item, instrument, { functionalOnly: true });
         console.log(`${item.id}: PASS route=${run.route} rag_calls=${run.rag_calls} ` +
-          `http_status=${run.http_status} cleanup_success=${run.cleanup_success}`);
+          `embedding_calls=${run.embedding_calls} generation_calls=${run.generation_calls} ` +
+          `http_status=${run.http_status} insufficient_evidence=${run.insufficient_evidence} ` +
+          `citation_count=${run.citation_count} cleanup_success=${run.cleanup_success}`);
       }
       console.log("Validación funcional L1 completa; no se generaron resultados oficiales.");
       return;
