@@ -32,13 +32,20 @@ const REQUIRED_SQL = [
   "vector_retrieval_db_ms",
   "persistence_db_ms",
 ];
+const HTTP_ERROR_CODES = new Set([
+  "INVALID_ARGUMENT", "NOT_FOUND", "CONFLICT",
+  "DEPENDENCY_UNAVAILABLE", "INTERNAL_ERROR",
+]);
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const ALLOWED_CHANGES = new Set([
   "eval/generation/run-rag-latency-profile.mjs",
   "eval/generation/README.md",
 ]);
 
+class SafeRunnerError extends Error {}
+
 function assert(condition, message) {
-  if (!condition) throw new Error(message);
+  if (!condition) throw new SafeRunnerError(message);
 }
 
 function nonempty(value) {
@@ -116,26 +123,55 @@ function classifySql(text) {
   throw new Error("Consulta SQL inesperada durante POST /messages; perfil abortado.");
 }
 
-function recorder() {
+function safeDependencyError(error, backend) {
+  if (error instanceof backend.QueryEmbeddingClientError) {
+    return ["embedding_runtime_mismatch", "embedding_unavailable",
+      "invalid_embedding_response"].includes(error.reason) ? error.reason : "unknown";
+  }
+  if (error instanceof backend.GeneratorClientError) {
+    return ["generator_runtime_mismatch", "generator_unavailable",
+      "invalid_generator_response", "generator_response_incomplete"]
+      .includes(error.reason) ? error.reason : "unknown";
+  }
+  if (error instanceof backend.DatabaseDependencyError) return "DatabaseDependencyError";
+  return "unknown";
+}
+
+function recorder(backend) {
   let active = null;
   return {
     get active() { return active; },
     begin() {
       assert(active === null, "Mediciones solapadas.");
       active = { timings: {}, counts: {}, routes: [], rag_calls: 0,
-        embedding_calls: 0, generation_calls: 0, generator_ollama_total_duration_ms: null };
+        embedding_calls: 0, generation_calls: 0, generator_ollama_total_duration_ms: null,
+        active_stage: null, last_stage_started: null, last_stage_completed: null,
+        dependency_error: null };
       return active;
     },
     end() { active = null; },
     async time(name, operation) {
+      const measurement = active;
+      if (measurement) {
+        measurement.active_stage = name;
+        measurement.last_stage_started = name;
+        measurement.counts[name] = (measurement.counts[name] ?? 0) + 1;
+      }
       const start = performance.now();
-      try { return await operation(); }
-      finally {
-        if (active) {
-          active.timings[name] = (active.timings[name] ?? 0) +
+      try {
+        const result = await operation();
+        if (measurement) {
+          measurement.timings[name] = (measurement.timings[name] ?? 0) +
             finiteMs(performance.now() - start, name);
-          active.counts[name] = (active.counts[name] ?? 0) + 1;
+          measurement.last_stage_completed = name;
         }
+        return result;
+      } catch (error) {
+        if (measurement) measurement.dependency_error = safeDependencyError(error, backend);
+        throw error;
+      }
+      finally {
+        if (measurement?.active_stage === name) measurement.active_stage = null;
       }
     },
   };
@@ -160,6 +196,42 @@ async function expectedJson(response, status, label) {
   assert(response.status === status, `${label}: HTTP ${response.status}, esperado ${status}.`);
   try { return await response.json(); }
   catch { throw new Error(`${label}: respuesta JSON inválida.`); }
+}
+
+async function unexpectedHttpError(response) {
+  let body;
+  try { body = await response.json(); }
+  catch { body = null; }
+  const error = body?.error;
+  return {
+    http_status: response.status,
+    error_code: HTTP_ERROR_CODES.has(error?.code) ? error.code : null,
+    request_id: typeof error?.request_id === "string" &&
+      UUID_PATTERN.test(error.request_id) ? error.request_id : null,
+  };
+}
+
+function abortDiagnostic(item, current, httpError, httpStatus, cleanupSuccess) {
+  const timings = Object.fromEntries(STAGES.filter((stage) =>
+    current?.timings[stage] !== undefined).map((stage) => [stage, current.timings[stage]]));
+  const counts = Object.fromEntries(STAGES.filter((stage) =>
+    current?.counts[stage] !== undefined).map((stage) => [stage, current.counts[stage]]));
+  return new SafeRunnerError([
+    `L1 case ${item.id} aborted:`,
+    `http_status=${httpError?.http_status ?? httpStatus ?? "unknown"}`,
+    `error_code=${httpError?.error_code ?? "unknown"}`,
+    `request_id=${httpError?.request_id ?? "unknown"}`,
+    `route=${current?.routes.join(",") || "unknown"}`,
+    `rag_calls=${current?.rag_calls ?? 0}`,
+    `embedding_calls=${current?.embedding_calls ?? 0}`,
+    `generation_calls=${current?.generation_calls ?? 0}`,
+    `timings_completed=${JSON.stringify(timings)}`,
+    `counts=${JSON.stringify(counts)}`,
+    `active_or_last_stage=${current?.active_stage ?? current?.last_stage_started ??
+      current?.last_stage_completed ?? "unknown"}`,
+    `dependency_error=${current?.dependency_error ?? "unknown"}`,
+    `cleanup_success=${cleanupSuccess}`,
+  ].join("\n"));
 }
 
 async function ollamaJson(base, path, body) {
@@ -273,15 +345,21 @@ async function runCase(base, item, instrumentation) {
   let failure;
   let run;
   let cleaned = false;
+  let current;
+  let response;
+  let httpError;
   try {
-    const current = instrumentation.begin();
+    current = instrumentation.begin();
     const start = performance.now();
-    let response;
     let data;
     try {
       response = await request(base,
         `/conversations/${encodeURIComponent(conversationId)}/messages`,
         { method: "POST", body: { content: item.question } });
+      if (response.status !== 201) {
+        httpError = await unexpectedHttpError(response);
+        throw new Error("POST /messages devolvió un status inesperado.");
+      }
       data = await expectedJson(response, 201, "POST /messages");
     } finally { instrumentation.end(); }
     const wall = finiteMs(performance.now() - start, "wall_ms");
@@ -317,8 +395,10 @@ async function runCase(base, item, instrumentation) {
       other_orchestration_ms: other, cleanup_success: false };
   } catch (error) { failure = error; }
   try { await cleanup(base, conversationId); cleaned = true; }
-  catch (error) { throw new Error(`Limpieza imposible de confirmar para ${item.id}: ${error.message}`); }
-  if (failure) throw failure;
+  catch { cleaned = false; }
+  if (failure || !cleaned) {
+    throw abortDiagnostic(item, current, httpError, response?.status, cleaned);
+  }
   run.cleanup_success = cleaned;
   return run;
 }
@@ -350,7 +430,7 @@ async function assertAbsent(path) {
     if (error?.code === "ENOENT") return;
     throw error;
   }
-  throw new Error("Ya existe un resultado L1 para esta fecha.");
+  throw new SafeRunnerError("Ya existe un resultado L1 para esta fecha.");
 }
 
 function markdown(report) {
@@ -440,7 +520,7 @@ async function main() {
   try {
     const realSql = new backend.PgSqlClient(pool);
     const environment = await preflight(realSql, generatorRuntime);
-    const instrument = recorder();
+    const instrument = recorder(backend);
     const sql = { query: (text, values) => {
       if (!instrument.active) return realSql.query(text, values);
       return instrument.time(classifySql(text), () => realSql.query(text, values));
@@ -504,6 +584,7 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`L1 abortado: ${error instanceof Error ? error.message : "error desconocido"}`);
+  console.error(`L1 abortado: ${error instanceof SafeRunnerError
+    ? error.message : "error no clasificado de preflight o dependencia"}`);
   process.exitCode = 1;
 });

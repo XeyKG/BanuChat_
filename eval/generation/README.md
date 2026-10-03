@@ -149,6 +149,12 @@ medidos secuencialmente. Cada caso crea su conversación fuera del cronómetro,
 mide el POST completo incluyendo lectura del JSON y confirma limpieza con
 `DELETE 204` seguido de `GET 404`. Cualquier error aborta; no hay reintento del
 POST. Los dos archivos de resultados se crean con `wx`, sin sobrescribir otros.
+Una corrida abortada no crea resultados L1 oficiales, aunque casos anteriores
+del mismo intento hayan respondido. Tras intentar la limpieza, el runner informa
+solo el status HTTP, `error.code` y `request_id` públicos cuando estén disponibles,
+la ruta, conteos y etapas observadas, y un identificador seguro del error capturado
+por los wrappers de evaluación. Ese diagnóstico ayuda a ubicar la etapa o
+dependencia observada; el body HTTP por sí solo no acredita la causa interna.
 
 ### Etapas y lectura de resultados
 
