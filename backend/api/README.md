@@ -14,6 +14,12 @@ Los mensajes pasan por Intent Router: las rutas `profile_progress`,
 determinista; las demás decisiones van a Document RAG directo como fallback actual.
 Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
+El catálogo del router es `1.1.0-draft`. M3.1 añadió `lexical_patterns` de score 90:
+cada regla exige todos sus grupos de señales delimitadas y consume el mensaje
+completo con hasta cinco tokens residuales de su propia lista `allowed_fillers`.
+Un residual desconocido deja la decisión en fallback; no hay stemming ni fuzzy
+matching. Los fast paths productivos siguen siendo solo progreso, calendario y
+anuncios. La regresión ejecuta los casos históricos y M3.1 de `cases.json`.
 Las consultas REST directas usan los mismos servicios de aplicación y su futura
 reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
 N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP

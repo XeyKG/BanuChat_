@@ -4,8 +4,8 @@ Estado: decisión arquitectónica aceptada por autorización explícita del proy
 Catálogo y reglas iniciales: `1.0.0-draft`. Este ADR conserva la decisión
 arquitectónica original. Estado actual: router determinista implementado y
 productivo; fast paths despachados para progreso, calendario y anuncios; fallback
-Document RAG directo. Agent/ReAct y MCP interno siguen pendientes de integración,
-al igual que el refinamiento M3.1.
+Document RAG directo. Agent/ReAct y MCP interno siguen pendientes de integración.
+El refinamiento M3.1 está implementado en el catálogo `1.1.0-draft`.
 
 ## Contexto y motivación
 
@@ -68,6 +68,17 @@ El fallback Agent/RAG permanece como objetivo, no como paso obligatorio actual;
 el runtime vigente usa Document RAG directo.
 
 ## Consecuencias y evaluación pendiente
+
+M3.1 añadió `lexical_patterns` como evidencia declarativa de 90 puntos entre las
+expresiones exactas (100) y las combinaciones cerradas (80). Cada regla exige al
+menos dos grupos de señales delimitadas, admite solo sus propios tokens de relleno
+(máximo cinco residuales) y consume el mensaje completo. Una señal ausente, un
+residual desconocido, dos familias elegibles o parámetros incompatibles mantienen
+el fallback. El catálogo se valida de forma estricta antes de arrancar el runtime.
+No se añadió stemming, fuzzy matching, LLM, embeddings ni dependencia NLP. Las
+tres familias con fast path productivo siguen siendo progreso, calendario y anuncios.
+Los 129 casos anteriores y los nuevos casos M3.1 son regresión funcional; no son
+una medición de clasificación sobre una población real.
 
 Se mantiene un catálogo versionado y se comprueban exclusiones, parámetros y
 procedencia. Los renderers de progreso, calendario y anuncios ya están

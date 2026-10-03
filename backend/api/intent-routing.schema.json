@@ -253,6 +253,13 @@
             "$ref": "#/$defs/combination"
           },
           "minItems": 1
+        },
+        "lexical_patterns": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/lexical_pattern"
+          }
         }
       },
       "required": [
@@ -264,7 +271,8 @@
         "default_parameters",
         "exclusions",
         "strong_expressions",
-        "token_combinations"
+        "token_combinations",
+        "lexical_patterns"
       ],
       "allOf": [
         {
@@ -314,6 +322,21 @@
                     },
                     "parameters": {
                       "$ref": "#/$defs/profile_progress_parameters"
+                    }
+                  }
+                }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/profile_progress_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
                     }
                   }
                 }
@@ -368,6 +391,21 @@
                     },
                     "parameters": {
                       "$ref": "#/$defs/course_catalog_parameters"
+                    }
+                  }
+                }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/course_catalog_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
                     }
                   }
                 }
@@ -441,6 +479,26 @@
                     }
                   }
                 }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/calendar_events_parameters"
+                    },
+                    "temporal_rule": {
+                      "enum": [
+                        "today",
+                        "tomorrow",
+                        "this_week",
+                        "next_week"
+                      ]
+                    }
+                  }
+                }
               }
             }
           }
@@ -492,6 +550,21 @@
                     },
                     "parameters": {
                       "$ref": "#/$defs/announcements_parameters"
+                    }
+                  }
+                }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/announcements_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
                     }
                   }
                 }
@@ -555,6 +628,24 @@
                     }
                   }
                 }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "response_variant": {
+                      "const": null
+                    },
+                    "parameters": {
+                      "$ref": "#/$defs/document_lookup_parameters",
+                      "required": [
+                        "query"
+                      ]
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    }
+                  }
+                }
               }
             }
           }
@@ -602,6 +693,23 @@
                 }
               },
               "token_combinations": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/capabilities_help_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "capabilities"
+                      ]
+                    }
+                  }
+                }
+              },
+              "lexical_patterns": {
                 "items": {
                   "properties": {
                     "parameters": {
@@ -683,6 +791,25 @@
                     }
                   }
                 }
+              },
+              "lexical_patterns": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/basic_social_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "greeting",
+                        "thanks",
+                        "farewell"
+                      ]
+                    }
+                  }
+                }
               }
             }
           }
@@ -730,6 +857,23 @@
                 }
               },
               "token_combinations": {
+                "items": {
+                  "properties": {
+                    "parameters": {
+                      "$ref": "#/$defs/known_out_of_scope_parameters"
+                    },
+                    "temporal_rule": {
+                      "const": null
+                    },
+                    "response_variant": {
+                      "enum": [
+                        "not_available"
+                      ]
+                    }
+                  }
+                }
+              },
+              "lexical_patterns": {
                 "items": {
                   "properties": {
                     "parameters": {
@@ -830,7 +974,9 @@
               "whitespace",
               "temporal",
               "context",
-              "safety"
+              "safety",
+              "lexical",
+              "m3_1"
             ]
           }
         }
@@ -1082,7 +1228,7 @@
           "const": "intent_routing_catalog"
         },
         "catalog_version": {
-          "const": "1.0.0-draft"
+          "const": "1.1.0-draft"
         },
         "language": {
           "const": "es"
@@ -1115,6 +1261,9 @@
           "const": {
             "version": "1",
             "exact_score": 100,
+            "lexical_score": 90,
+            "lexical_match_mode": "required_groups_plus_allowlisted_fillers",
+            "lexical_max_filler_tokens": 5,
             "combination_score": 80,
             "generic_token_score": 0,
             "threshold": 80,
@@ -1232,7 +1381,7 @@
           "const": "intent_routing_cases"
         },
         "catalog_version": {
-          "const": "1.0.0-draft"
+          "const": "1.1.0-draft"
         },
         "language": {
           "const": "es"
@@ -1417,6 +1566,72 @@
       "additionalProperties": false,
       "properties": {},
       "required": []
+    },
+    "lexical_pattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]+$"
+        },
+        "required_groups": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80,
+              "pattern": "^[a-z0-9ñ]+(?: [a-z0-9ñ]+){0,3}$"
+            }
+          }
+        },
+        "allowed_fillers": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9ñ]+$"
+          }
+        },
+        "parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "temporal_rule": {
+          "enum": [
+            null,
+            "today",
+            "tomorrow",
+            "this_week",
+            "next_week"
+          ]
+        },
+        "response_variant": {
+          "enum": [
+            null,
+            "greeting",
+            "thanks",
+            "farewell",
+            "capabilities",
+            "not_available"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "required_groups",
+        "allowed_fillers",
+        "parameters",
+        "temporal_rule",
+        "response_variant"
+      ]
     }
   }
 }

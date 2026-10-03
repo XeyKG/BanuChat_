@@ -1,10 +1,10 @@
-# Intent Router determinista — diseño v1
+# Intent Router determinista — diseño v1.1
 
-Estado: especificación y catálogo `1.0.0-draft`. El Intent Router determinista está
+Estado: especificación y catálogo `1.1.0-draft`. El Intent Router determinista está
 implementado. El dispatcher ejecuta fast paths para `profile_progress`,
 `calendar_events` y `announcements`, con sus servicios de aplicación y renderers.
 El fallback implementado es Document RAG directo; Agent/ReAct y MCP interno siguen
-pendientes como arquitectura objetivo. El refinamiento M3.1 también está pendiente.
+pendientes como arquitectura objetivo. El refinamiento léxico M3.1 está implementado.
 Aplica [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md). Las reglas y
 valores versionados residen en el [catálogo](../backend/api/intent-routing.catalog.json);
 su [schema](../backend/api/intent-routing.schema.json) es Draft 2020-12.
@@ -69,6 +69,7 @@ Evaluar todas las familias, sin cortocircuito por prioridad:
 | --- | ---: | --- |
 | Expresión fuerte | 100 | Igualdad de toda la copia normalizada |
 | Patrón absoluto de fecha | 100 | Gramática completa, fechas reales y rango válido |
+| `lexical_patterns` | 90 | Todos los grupos requeridos y únicamente relleno permitido; consumir todo el mensaje |
 | Combinación de términos | 80 | Elegir una alternativa de cada segmento, en orden, separadas por espacios; consumir todo el mensaje |
 | Token genérico / frase parcial | 0 | Solo indicio de conflicto, jamás habilita una ruta |
 
@@ -77,9 +78,17 @@ puede contener varios tokens; no admite inserciones, permutaciones ni capturas l
 No se ejecuta código ni regex proporcionado por el catálogo. Los dos patrones de
 fechas son producción declarativa finita, no lenguaje de plantillas ejecutables.
 `full_utterance_required` permanece activo: la coincidencia debe consumir el
-mensaje normalizado completo. M3.1 está previsto para ampliar de forma
-determinista la tolerancia a paráfrasis y lenguaje de relleno sin convertir el
-router en un clasificador LLM; su diseño final no se define aquí.
+mensaje normalizado completo. En M3.1, cada `lexical_pattern` declara entre dos
+y cuatro `required_groups`; cada grupo ofrece alternativas de frases completas,
+de una o varias palabras. Se busca una alternativa por grupo en límites de token,
+sin solapar los tokens usados como señales. Todos los tokens restantes deben estar
+en `allowed_fillers` de esa regla y no pueden superar cinco. Una señal incompleta,
+un token residual desconocido o un sexto token de relleno hacen que esa regla no
+coincida. Los rellenos por sí solos nunca activan una ruta. El catálogo exige el
+array `lexical_patterns` en cada familia, vacío cuando no se usa; valida IDs únicos
+globales, normalización, tamaños, parámetros, reglas temporales y variantes. El
+runtime rechaza un catálogo inválido al iniciar. No hay stemming, fuzzy matching,
+autocorrección, LLM, embeddings ni regex declaradas por el catálogo.
 
 El score de una familia es el máximo, no la suma. Exigir score >=80 y margen >=20
 frente a otro candidato; además, **dos familias con score >=80 siempre hacen fallback**,
@@ -87,10 +96,10 @@ incluso si hay margen o distinta prioridad. Esta regla más estricta domina al m
 Si dos reglas de una misma familia proponen parámetros distintos, hacer fallback.
 Reglas solapadas con parámetros y variante idénticos se deduplican, sin sumar puntos.
 
-Las exclusiones por familia invalidan sus coincidencias. Para detectar conflictos se
-conservan también señales fuertes interiores de dos familias, aunque una exclusión
-las invalide: no se elimina una cláusula para rescatar la otra. No se enruta un
-substring reconocido dejando texto sin consumir. Una fecha ilegible, filtro extra,
+Las exclusiones por familia invalidan sus coincidencias. Una consulta compuesta
+detectada por los marcadores globales se envía completa al fallback; no se elimina
+una cláusula para rescatar otra. No se enruta un substring reconocido dejando
+texto sin consumir. Una fecha ilegible, filtro extra,
 negación o petición de escritura no se corrige mediante adivinación.
 
 «curso», «fecha», «calendario», «notas» y «mis cursos» no activan fast path.
@@ -290,11 +299,11 @@ Todos los objetos de datos se cierran. Políticas/valores están fijados para es
 versión mediante const; cambiarlos requiere editar schema, catálogo y expectativas
 coordinadamente, no código ejecutable en el catálogo. Las referencias son locales.
 
-Validación cruzada adicional: ocho IDs únicos y enlaces a servicios correctos;
-IDs de reglas únicos; expresiones no duplicadas tras normalizar; ausencia de
-triggers genéricos aislados; reglas temporales solo en calendario; parámetros por
-familia compatibles con límites/enums MCP; static renderers sin parámetros de
-servicio; casos referencian IDs existentes y al menos diez positivos por familia.
+El compilador valida ocho IDs únicos y enlaces a servicios correctos, IDs de reglas
+únicos, forma normalizada de las reglas léxicas, reglas temporales solo en calendario,
+parámetros por familia y variantes de respuesta admitidas. Un catálogo inválido
+impide iniciar el runtime. La regresión data-driven verifica las decisiones de los
+129 casos históricos y 25 casos M3.1; no cambia sus expectativas para aprobarlas.
 JSON Schema por sí solo no demuestra que un renderer cite bien ni que el algoritmo
 funcione correctamente. Los formatos requieren validación explícita de fechas reales.
 

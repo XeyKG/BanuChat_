@@ -20,6 +20,7 @@ const CHUNK_ID = "88888888-8888-4888-8888-888888888888";
 const SHA256 = "a".repeat(64);
 const PROFILE_KEY = "perfil_demo";
 const FAST_PATH_PROMPT = "mi progreso";
+const LEXICAL_FAST_PATH_PROMPT = "¿Cuál es mi progreso?";
 const RAG_PROMPT = "¿Qué información debo incluir al reportar una incidencia?";
 const RAG_CONTENT = "Respuesta documental sintética de integración.";
 
@@ -136,7 +137,7 @@ async function postMessage(baseUrl: string, content: string): Promise<SendMessag
   return JSON.parse(body) as SendMessageResult;
 }
 
-test("J2.1 real catalog routes HTTP progress to fast path and persists provenance", async () => {
+async function assertProgressFastPath(prompt: string): Promise<void> {
   const sql = new ScriptedSqlClient([
     conversationStep(),
     {
@@ -176,10 +177,10 @@ test("J2.1 real catalog routes HTTP progress to fast path and persists provenanc
   };
 
   await withRuntimeServer(sql, documentRag, async (baseUrl) => {
-    const result = await postMessage(baseUrl, FAST_PATH_PROMPT);
+    const result = await postMessage(baseUrl, prompt);
     assert.equal(result.conversation_id, CONVERSATION_ID);
     assert.equal(result.user_message.role, "user");
-    assert.equal(result.user_message.content, FAST_PATH_PROMPT);
+    assert.equal(result.user_message.content, prompt);
     assert.equal(result.assistant_message.role, "assistant");
     assert.ok(result.assistant_message.content.length > 0);
     assert.equal(result.assistant_message.insufficient_evidence, false);
@@ -190,7 +191,7 @@ test("J2.1 real catalog routes HTTP progress to fast path and persists provenanc
 
     const call = persistenceCall(sql);
     assert.equal(call.values?.[0], CONVERSATION_ID);
-    assert.equal(call.values?.[3], FAST_PATH_PROMPT);
+    assert.equal(call.values?.[3], prompt);
     assert.equal(call.values?.[4], result.assistant_message.content);
     assert.equal(call.values?.[5], false);
     const records = citationRecords(call);
@@ -202,6 +203,14 @@ test("J2.1 real catalog routes HTTP progress to fast path and persists provenanc
     }
     sql.assertComplete();
   });
+}
+
+test("J2.1 real catalog routes HTTP progress to fast path and persists provenance", async () => {
+  await assertProgressFastPath(FAST_PATH_PROMPT);
+});
+
+test("M3.1 lexical progress uses the real HTTP fast path and preserves the original text", async () => {
+  await assertProgressFastPath(LEXICAL_FAST_PATH_PROMPT);
 });
 
 test("J2.2 real catalog routes HTTP fallback to deterministic Document RAG", async () => {

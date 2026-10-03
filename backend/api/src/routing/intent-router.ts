@@ -9,7 +9,7 @@ import type {
   IntentRoutingParameters,
 } from "./intent-router-types.js";
 
-const CATALOG_VERSION = "1.0.0-draft";
+const CATALOG_VERSION = "1.1.0-draft";
 const SUPPORTED_INTENTS = [
   "profile_progress",
   "course_catalog",
@@ -47,6 +47,9 @@ const EXPECTED_NORMALIZATION = {
 const EXPECTED_DECISION_POLICY = {
   version: "1",
   exact_score: 100,
+  lexical_score: 90,
+  lexical_match_mode: "required_groups_plus_allowlisted_fillers",
+  lexical_max_filler_tokens: 5,
   combination_score: 80,
   generic_token_score: 0,
   threshold: 80,
@@ -185,12 +188,21 @@ const INTENT_CONFIGURATION: Record<
   },
 };
 
-interface CompiledRule {
-  readonly text: string;
+interface CompiledEvidence {
   readonly score: number;
   readonly parameters: IntentRoutingParameters;
   readonly temporalRule: TemporalRule | null;
   readonly responseVariant: IntentResponseVariant;
+}
+
+interface CompiledRule extends CompiledEvidence {
+  readonly text: string;
+}
+
+interface CompiledLexicalPattern extends CompiledEvidence {
+  readonly requiredGroups: readonly (readonly (readonly string[])[])[];
+  readonly allowedFillers: ReadonlySet<string>;
+  readonly maximumTokens: number;
 }
 
 interface CompiledIntent {
@@ -200,6 +212,7 @@ interface CompiledIntent {
   readonly defaultParameters: IntentRoutingParameters;
   readonly exclusions: readonly string[];
   readonly rules: readonly CompiledRule[];
+  readonly lexicalPatterns: readonly CompiledLexicalPattern[];
 }
 
 interface CompiledCatalog {
@@ -292,6 +305,59 @@ function containsDelimitedPhrase(content: string, phrase: string): boolean {
   const middle = content.includes(` ${phrase} `);
   const end = content.endsWith(` ${phrase}`);
   return start || middle || end;
+}
+
+function tokenizeNormalized(phrase: string): string[] {
+  return phrase.split(" ");
+}
+
+function isNormalizedLexicalPhrase(phrase: string): boolean {
+  return (
+    phrase.length > 0 &&
+    phrase === normalizeCatalogPhrase(phrase) &&
+    /^[a-z0-9ñ]+(?: [a-z0-9ñ]+)*$/u.test(phrase)
+  );
+}
+
+function matchesLexicalPattern(
+  tokens: readonly string[],
+  pattern: CompiledLexicalPattern,
+): boolean {
+  if (tokens.length > pattern.maximumTokens) return false;
+  const consumed = new Array<boolean>(tokens.length).fill(false);
+
+  function assignGroup(groupIndex: number): boolean {
+    if (groupIndex === pattern.requiredGroups.length) {
+      const residual = tokens.filter((_, index) => !consumed[index]);
+      return (
+        residual.length <= EXPECTED_DECISION_POLICY.lexical_max_filler_tokens &&
+        residual.every((token) => pattern.allowedFillers.has(token))
+      );
+    }
+    const group = pattern.requiredGroups[groupIndex];
+    if (group === undefined) return false;
+    for (const alternative of group) {
+      for (let start = 0; start + alternative.length <= tokens.length; start++) {
+        if (
+          alternative.every(
+            (token, offset) =>
+              !consumed[start + offset] && tokens[start + offset] === token,
+          )
+        ) {
+          for (let offset = 0; offset < alternative.length; offset++) {
+            consumed[start + offset] = true;
+          }
+          if (assignGroup(groupIndex + 1)) return true;
+          for (let offset = 0; offset < alternative.length; offset++) {
+            consumed[start + offset] = false;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  return assignGroup(0);
 }
 
 function stringArray(value: unknown): string[] | null {
@@ -454,6 +520,73 @@ function readRuleShape(
   };
 }
 
+function compileLexicalPattern(
+  value: unknown,
+  intentId: SupportedIntent,
+  seenRuleIds: Set<string>,
+): CompiledLexicalPattern | null {
+  if (
+    !isRecord(value) ||
+    !hasExactKeys(value, [
+      "id",
+      "required_groups",
+      "allowed_fillers",
+      "parameters",
+      "temporal_rule",
+      "response_variant",
+    ]) ||
+    !Array.isArray(value.required_groups) ||
+    value.required_groups.length < 2 ||
+    value.required_groups.length > 4 ||
+    !Array.isArray(value.allowed_fillers) ||
+    value.allowed_fillers.length > 8
+  ) {
+    return null;
+  }
+  const shape = readRuleShape(value, intentId, seenRuleIds);
+  if (shape === null) return null;
+  if (intentId === "calendar_events" && shape.temporalRule === null) return null;
+
+  const requiredGroups: string[][][] = [];
+  for (const rawGroup of value.required_groups) {
+    const group = stringArray(rawGroup);
+    if (group === null || group.length < 1 || group.length > 4 || !uniqueStrings(group)) {
+      return null;
+    }
+    const alternatives: string[][] = [];
+    for (const phrase of group) {
+      if (!isNormalizedLexicalPhrase(phrase) || phrase.length > 80) return null;
+      const tokens = tokenizeNormalized(phrase);
+      if (tokens.length > 4) return null;
+      alternatives.push(tokens);
+    }
+    requiredGroups.push(alternatives);
+  }
+
+  const fillers = stringArray(value.allowed_fillers);
+  if (
+    fillers === null ||
+    !uniqueStrings(fillers) ||
+    fillers.some((filler) =>
+      !isNormalizedLexicalPhrase(filler) || tokenizeNormalized(filler).length !== 1,
+    )
+  ) {
+    return null;
+  }
+  return {
+    requiredGroups,
+    allowedFillers: new Set(fillers),
+    maximumTokens: requiredGroups.reduce(
+      (total, group) => Math.max(...group.map((phrase) => phrase.length)) + total,
+      EXPECTED_DECISION_POLICY.lexical_max_filler_tokens,
+    ),
+    score: EXPECTED_DECISION_POLICY.lexical_score,
+    parameters: shape.parameters,
+    temporalRule: shape.temporalRule,
+    responseVariant: shape.responseVariant,
+  };
+}
+
 function compileIntent(
   value: unknown,
   seenRuleIds: Set<string>,
@@ -470,6 +603,7 @@ function compileIntent(
       "exclusions",
       "strong_expressions",
       "token_combinations",
+      "lexical_patterns",
     ]) ||
     !isSupportedIntent(value.id) ||
     !Number.isInteger(value.priority) ||
@@ -497,7 +631,9 @@ function compileIntent(
     !Array.isArray(value.strong_expressions) ||
     value.strong_expressions.length < 1 ||
     !Array.isArray(value.token_combinations) ||
-    value.token_combinations.length < 1
+    value.token_combinations.length < 1 ||
+    !Array.isArray(value.lexical_patterns) ||
+    value.lexical_patterns.length > 8
   ) {
     return null;
   }
@@ -586,6 +722,13 @@ function compileIntent(
     }
   }
 
+  const lexicalPatterns: CompiledLexicalPattern[] = [];
+  for (const rawPattern of value.lexical_patterns) {
+    const pattern = compileLexicalPattern(rawPattern, id, seenRuleIds);
+    if (pattern === null) return null;
+    lexicalPatterns.push(pattern);
+  }
+
   return {
     id,
     priority: value.priority as number,
@@ -593,6 +736,7 @@ function compileIntent(
     defaultParameters,
     exclusions: exclusions.map(normalizeCatalogPhrase),
     rules,
+    lexicalPatterns,
   };
 }
 
@@ -788,7 +932,7 @@ function absoluteDateParameters(content: string): IntentRoutingParameters | null
 
 function effectiveParameters(
   intent: CompiledIntent,
-  rule: CompiledRule,
+  rule: CompiledEvidence,
   input: IntentRoutingInput,
 ): IntentRoutingParameters | null {
   const parameters: IntentRoutingParameters = {
@@ -841,6 +985,7 @@ function routeWithCatalog(
     return fallbackDecision();
   }
 
+  const tokens = tokenizeNormalized(content);
   const candidates: Array<IntentRoutingDecision & { score: number }> = [];
   for (const intent of catalog.intents) {
     if (
@@ -851,12 +996,16 @@ function routeWithCatalog(
     ) {
       continue;
     }
-    const matches = intent.rules.filter((rule) => rule.text === content);
+    const matches: CompiledEvidence[] = [
+      ...intent.rules.filter((rule) => rule.text === content),
+      ...intent.lexicalPatterns.filter((pattern) =>
+        matchesLexicalPattern(tokens, pattern),
+      ),
+    ];
     if (intent.id === "calendar_events") {
       const absolute = absoluteDateParameters(content);
       if (absolute !== null) {
         matches.push({
-          text: content,
           score: 100,
           parameters: absolute,
           temporalRule: null,

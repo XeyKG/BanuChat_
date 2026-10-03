@@ -1,6 +1,6 @@
 {
   "artifact_type": "intent_routing_cases",
-  "catalog_version": "1.0.0-draft",
+  "catalog_version": "1.1.0-draft",
   "language": "es",
   "purpose": "design_expectations_not_execution_results",
   "cases": [
@@ -2213,6 +2213,452 @@
       "tags": [
         "positive",
         "temporal"
+      ]
+    },
+    {
+      "id": "m3_1_profile_progress_question",
+      "input": "¿Cuál es mi progreso?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "reason": "Las señales mi y progreso consumen el mensaje con relleno permitido.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_profile_advance_question",
+      "input": "¿Cómo va mi avance?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "reason": "Las señales mi y avance consumen el mensaje con relleno permitido.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_profile_show_how",
+      "input": "Muéstrame cómo voy",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "reason": "Las señales muestrame y voy requieren ambas presencias; como es relleno permitido.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_profile_completed",
+      "input": "¿Qué cursos he terminado?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20,
+        "statuses": [
+          "completed"
+        ]
+      },
+      "expected_response_variant": null,
+      "reason": "Cursos y he terminado identifican explícitamente el estado completed.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_calendar_today",
+      "input": "¿Qué tengo hoy en el calendario?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "calendar_events",
+      "expected_parameters": {
+        "limit": 20,
+        "date_from": "2026-09-26",
+        "date_to": "2026-09-26"
+      },
+      "expected_response_variant": null,
+      "reason": "Calendario y hoy activan la fecha civil local; el resto es relleno permitido.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive",
+        "temporal"
+      ]
+    },
+    {
+      "id": "m3_1_calendar_tomorrow",
+      "input": "Muéstrame mis eventos de mañana",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "calendar_events",
+      "expected_parameters": {
+        "limit": 20,
+        "date_from": "2026-09-27",
+        "date_to": "2026-09-27"
+      },
+      "expected_response_variant": null,
+      "reason": "Eventos y mañana activan la regla temporal tomorrow.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive",
+        "temporal"
+      ]
+    },
+    {
+      "id": "m3_1_announcements_active",
+      "input": "¿Hay anuncios vigentes?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "announcements",
+      "expected_parameters": {
+        "limit": 20,
+        "temporal_status": "active",
+        "reference_time": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_response_variant": null,
+      "reason": "Anuncios y vigentes activan el estado active con el reloj confiable.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_notices_active",
+      "input": "¿Qué avisos están activos?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "announcements",
+      "expected_parameters": {
+        "limit": 20,
+        "temporal_status": "active",
+        "reference_time": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_response_variant": null,
+      "reason": "Avisos y activos consumen el mensaje con relleno permitido.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m3_1_profile_missing",
+      "input": "¿Cuál es mi progreso?",
+      "context": {
+        "profile_selected": false,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "La ruta de progreso exige un perfil seleccionado.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "context",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_compare_domains",
+      "input": "Compara mi progreso con anuncios",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "El marcador compuesto compara impide elegir una familia.",
+      "tags": [
+        "m3_1",
+        "compound",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_progress_and_announcements",
+      "input": "Mi progreso y anuncios vigentes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "El marcador y bloquea una solicitud multidominio.",
+      "tags": [
+        "m3_1",
+        "compound",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_show_progress_and_announcements",
+      "input": "Muéstrame mi progreso y los anuncios vigentes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "El marcador y bloquea una solicitud multidominio.",
+      "tags": [
+        "m3_1",
+        "compound",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_events_and_announcements",
+      "input": "¿Qué eventos tengo hoy y cuáles anuncios están activos?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "El marcador y bloquea una solicitud multidominio.",
+      "tags": [
+        "m3_1",
+        "compound",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_campus",
+      "input": "¿Cómo voy al campus?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Faltan señales completas de progreso y quedan tokens desconocidos.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_today_without_domain",
+      "input": "¿Qué tengo hoy?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Hoy sin calendario o eventos no aporta señales suficientes.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_progress_alone",
+      "input": "progreso",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Una señal aislada no satisface dos grupos requeridos.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_calendar_alone",
+      "input": "calendario",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Una señal aislada no satisface dos grupos requeridos.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_announcements_alone",
+      "input": "anuncios",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Una señal aislada no satisface dos grupos requeridos.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_upcoming_sessions",
+      "input": "próximas sesiones",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "No hay periodo explícito ni regla léxica para una ventana indeterminada.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_which_courses",
+      "input": "¿Qué cursos tengo?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Cursos sin señal de estado completed no completa la regla léxica.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_specific_course",
+      "input": "Muéstrame mi avance del curso X",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Los tokens del curso X no están autorizados como relleno.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_document_incident",
+      "input": "¿Qué información debo incluir al reportar una incidencia?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "No contiene grupos completos de ninguna regla de fast path.",
+      "tags": [
+        "m3_1",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_negative_progress",
+      "input": "No quiero ver mi progreso",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "La exclusión global impide elegir el fast path.",
+      "tags": [
+        "m3_1",
+        "safety",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_unknown_residual",
+      "input": "¿Cuál es mi progreso exacto?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Exacto es un token residual no incluido en la regla.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m3_1_substring",
+      "input": "¿Cuál es mi progresograma?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Progresograma no equivale al token progreso.",
+      "tags": [
+        "m3_1",
+        "lexical",
+        "near_negative"
       ]
     }
   ]

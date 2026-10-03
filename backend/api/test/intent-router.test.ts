@@ -11,6 +11,7 @@ import {
 const NOW = "2026-09-26T15:00:00-05:00";
 const CATALOG_PATH = new URL("../intent-routing.catalog.json", import.meta.url);
 const CATALOG = JSON.parse(readFileSync(CATALOG_PATH, "utf8")) as unknown;
+const CASES_PATH = new URL("../../../eval/intent-routing/cases.json", import.meta.url);
 
 function route(
   content: string,
@@ -54,10 +55,110 @@ function intentOf(
   return intent;
 }
 
+function lexicalPatternsOf(
+  catalog: Record<string, unknown>,
+  id: string,
+): Record<string, unknown>[] {
+  return intentOf(catalog, id).lexical_patterns as Record<string, unknown>[];
+}
+
 test("loads and compiles the repository catalog", async () => {
   const router = await loadDefaultIntentRouter();
   assert.equal(router.catalog_valid, true);
-  assert.equal(router.catalog_version, "1.0.0-draft");
+  assert.equal(router.catalog_version, "1.1.0-draft");
+});
+
+test("all historical and M3.1 design cases execute as routing regression", () => {
+  const dataset = JSON.parse(readFileSync(CASES_PATH, "utf8")) as {
+    catalog_version: string;
+    cases: Array<{
+      id: string;
+      input: string;
+      context: { profile_selected: boolean; now: string };
+      expected_route: IntentRoutingDecision["route"];
+      expected_parameters: IntentRoutingDecision["parameters"];
+      expected_response_variant: IntentRoutingDecision["response_variant"];
+    }>;
+  };
+  const router = createIntentRouter(CATALOG);
+  assert.equal(router.catalog_valid, true);
+  assert.equal(dataset.catalog_version, router.catalog_version);
+  assert.equal(dataset.cases.length, 154);
+  assert.equal(new Set(dataset.cases.map((item) => item.id)).size, dataset.cases.length);
+  for (const item of dataset.cases) {
+    assert.deepEqual(
+      router.route({ content: item.input, context: item.context }),
+      expected(item.expected_route, item.expected_parameters, item.expected_response_variant),
+      item.id,
+    );
+  }
+});
+
+test("lexical rules require every signal and only allowlisted residual tokens", () => {
+  assert.deepEqual(route("¿Cuál es mi progreso?"), expected("profile_progress", { limit: 20 }));
+  assert.deepEqual(route("¿Cómo va mi avance?"), expected("profile_progress", { limit: 20 }));
+  assert.deepEqual(route("¿Cuál es mi progreso exacto?"), expected("agent_fallback", {}));
+  assert.deepEqual(route("¿Cuál es mi progresograma?"), expected("agent_fallback", {}));
+  assert.deepEqual(route("¿Qué tengo hoy?"), expected("agent_fallback", {}));
+  assert.deepEqual(route("mi progreso"), expected("profile_progress", { limit: 20 }));
+});
+
+test("lexical fillers are limited to five residual tokens", () => {
+  assert.deepEqual(
+    route("cual cual cual cual cual mi progreso"),
+    expected("profile_progress", { limit: 20 }),
+  );
+  assert.deepEqual(
+    route("cual cual cual cual cual cual mi progreso"),
+    expected("agent_fallback", {}),
+  );
+});
+
+test("multiword lexical signals require separate token spans", () => {
+  const catalog = cloneCatalog();
+  const pattern = lexicalPatternsOf(catalog, "profile_progress")[0];
+  assert.ok(pattern);
+  pattern.required_groups = [["mira progreso"], ["progreso"]];
+  pattern.allowed_fillers = [];
+  const router = createIntentRouter(catalog);
+  assert.equal(router.catalog_valid, true);
+  const context = { profile_selected: true, now: NOW };
+  assert.deepEqual(
+    router.route({ content: "mira progreso", context }),
+    expected("agent_fallback", {}),
+  );
+  assert.deepEqual(
+    router.route({ content: "mira progreso progreso", context }),
+    expected("profile_progress", { limit: 20 }),
+  );
+});
+
+test("lexical evidence from two families falls back regardless of score", () => {
+  const catalog = cloneCatalog();
+  lexicalPatternsOf(catalog, "course_catalog").push({
+    ...structuredClone(lexicalPatternsOf(catalog, "profile_progress")[0]),
+    id: "course_catalog_l_test",
+  });
+  const router = createIntentRouter(catalog);
+  assert.equal(router.catalog_valid, true);
+  assert.deepEqual(
+    router.route({ content: "¿Cuál es mi progreso?", context: { profile_selected: true, now: NOW } }),
+    expected("agent_fallback", {}),
+  );
+});
+
+test("conflicting lexical parameters in one family fall back", () => {
+  const catalog = cloneCatalog();
+  const conflicting = lexicalPatternsOf(catalog, "profile_progress")[2];
+  assert.ok(conflicting);
+  conflicting.required_groups = [["mi"], ["progreso"]];
+  conflicting.allowed_fillers = [];
+  const router = createIntentRouter(catalog);
+  assert.equal(router.catalog_valid, true);
+  assert.deepEqual(
+    router.route({ content: "mi progreso", context: { profile_selected: true, now: NOW } }),
+    expected("agent_fallback", {}),
+  );
 });
 
 test("normalizes case, acute accents, punctuation, whitespace, and one courtesy suffix", () => {
@@ -360,6 +461,30 @@ test("an invalid catalog disables every fast path without partial execution", ()
     (catalog) => {
       const policy = catalog.decision_policy as Record<string, unknown>;
       policy.score_aggregation = "sum";
+    },
+    (catalog) => {
+      delete intentOf(catalog, "profile_progress").lexical_patterns;
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.required_groups = [["mi"]];
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.required_groups = [["mi", "mi"], ["progreso"]];
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.allowed_fillers = ["cual", "cual"];
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.allowed_fillers = ["por favor"];
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.extra = true;
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.temporal_rule = "today";
+    },
+    (catalog) => {
+      lexicalPatternsOf(catalog, "profile_progress")[0]!.id = "profile_progress_e01";
     },
   ];
 

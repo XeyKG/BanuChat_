@@ -1,6 +1,6 @@
 {
   "artifact_type": "intent_routing_catalog",
-  "catalog_version": "1.0.0-draft",
+  "catalog_version": "1.1.0-draft",
   "language": "es",
   "normalization": {
     "unicode": "NFC",
@@ -27,6 +27,9 @@
   "decision_policy": {
     "version": "1",
     "exact_score": 100,
+    "lexical_score": 90,
+    "lexical_match_mode": "required_groups_plus_allowlisted_fillers",
+    "lexical_max_filler_tokens": 5,
     "combination_score": 80,
     "generic_token_score": 0,
     "threshold": 80,
@@ -381,6 +384,67 @@
           "temporal_rule": null,
           "response_variant": null
         }
+      ],
+      "lexical_patterns": [
+        {
+          "id": "profile_progress_l01",
+          "required_groups": [
+            [
+              "mi"
+            ],
+            [
+              "progreso",
+              "avance"
+            ]
+          ],
+          "allowed_fillers": [
+            "cual",
+            "es",
+            "como",
+            "va"
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_l02",
+          "required_groups": [
+            [
+              "muestrame"
+            ],
+            [
+              "voy"
+            ]
+          ],
+          "allowed_fillers": [
+            "como"
+          ],
+          "parameters": {},
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "profile_progress_l03",
+          "required_groups": [
+            [
+              "cursos"
+            ],
+            [
+              "he terminado"
+            ]
+          ],
+          "allowed_fillers": [
+            "que"
+          ],
+          "parameters": {
+            "statuses": [
+              "completed"
+            ]
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
       ]
     },
     {
@@ -645,7 +709,8 @@
           "temporal_rule": null,
           "response_variant": null
         }
-      ]
+      ],
+      "lexical_patterns": []
     },
     {
       "id": "calendar_events",
@@ -865,6 +930,47 @@
               "course_session"
             ]
           },
+          "temporal_rule": "tomorrow",
+          "response_variant": null
+        }
+      ],
+      "lexical_patterns": [
+        {
+          "id": "calendar_events_l01",
+          "required_groups": [
+            [
+              "calendario"
+            ],
+            [
+              "hoy"
+            ]
+          ],
+          "allowed_fillers": [
+            "que",
+            "tengo",
+            "en",
+            "el"
+          ],
+          "parameters": {},
+          "temporal_rule": "today",
+          "response_variant": null
+        },
+        {
+          "id": "calendar_events_l02",
+          "required_groups": [
+            [
+              "eventos"
+            ],
+            [
+              "mañana"
+            ]
+          ],
+          "allowed_fillers": [
+            "muestrame",
+            "mis",
+            "de"
+          ],
+          "parameters": {},
           "temporal_rule": "tomorrow",
           "response_variant": null
         }
@@ -1103,6 +1209,47 @@
           ],
           "parameters": {
             "temporal_status": "expired"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        }
+      ],
+      "lexical_patterns": [
+        {
+          "id": "announcements_l01",
+          "required_groups": [
+            [
+              "anuncios"
+            ],
+            [
+              "vigentes"
+            ]
+          ],
+          "allowed_fillers": [
+            "hay"
+          ],
+          "parameters": {
+            "temporal_status": "active"
+          },
+          "temporal_rule": null,
+          "response_variant": null
+        },
+        {
+          "id": "announcements_l02",
+          "required_groups": [
+            [
+              "avisos"
+            ],
+            [
+              "activos"
+            ]
+          ],
+          "allowed_fillers": [
+            "que",
+            "estan"
+          ],
+          "parameters": {
+            "temporal_status": "active"
           },
           "temporal_rule": null,
           "response_variant": null
@@ -1358,7 +1505,8 @@
           "temporal_rule": null,
           "response_variant": null
         }
-      ]
+      ],
+      "lexical_patterns": []
     },
     {
       "id": "capabilities_help",
@@ -1548,7 +1696,8 @@
           "temporal_rule": null,
           "response_variant": "capabilities"
         }
-      ]
+      ],
+      "lexical_patterns": []
     },
     {
       "id": "basic_social",
@@ -1734,7 +1883,8 @@
           "temporal_rule": null,
           "response_variant": "farewell"
         }
-      ]
+      ],
+      "lexical_patterns": []
     },
     {
       "id": "known_out_of_scope",
@@ -1927,7 +2077,8 @@
           "temporal_rule": null,
           "response_variant": "not_available"
         }
-      ]
+      ],
+      "lexical_patterns": []
     }
   ]
 }
