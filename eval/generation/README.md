@@ -101,3 +101,79 @@ eval/generation/results/g0-v2-qwen3-4b-instruct-AAAA-MM-DD.md
 El digest completo se obtiene de `GET /api/tags`; no se valida contra un digest o prefijo hardcodeado. El reporte Markdown añade `done_reason`, el diagnóstico de prefacio y los conteos de terminación natural, límite de longitud y prefacio conocido. Estas señales son diagnósticas y no afirman automáticamente la calidad académica de las respuestas.
 
 G0 v2 aún no tiene resultados ejecutados en este cambio, por lo que no corresponde comparar resultados con v1.
+
+## L1: perfil reproducible de latencia Document RAG
+
+`run-rag-latency-profile.mjs` es un instrumento nuevo para diez solicitudes warm
+secuenciales de `POST /api/v1/conversations/{id}/messages`. Usa solamente el campo
+`question` de G0-01 a G0-10 en `prompts-v2.json`: el contexto llega del retrieval
+real del corpus sintético. No reemplaza G0 ni G2, y no mezcla sus resultados con
+J1. El runner verifica antes de medir que las diez preguntas caigan en
+`agent_fallback` con el catálogo real `1.1.0-draft`. Durante cada solicitud
+comprueba además una decisión de fallback y exactamente una invocación de
+Document RAG, embedding y generación.
+
+### Preparación y revisión sin consultas costosas
+
+Desde la raíz del repositorio:
+
+```powershell
+cd backend/api
+npm run build
+cd ../..
+node eval/generation/run-rag-latency-profile.mjs --dry-run
+```
+
+El build local actualiza `backend/api/dist`, que el runner importa mediante una
+ruta relativa al repositorio. `--dry-run` valida Git, prompts y decisiones del
+router; no abre PostgreSQL, Ollama ni el servidor HTTP y no crea resultados. Se
+rechazan cambios Git ajenos a los archivos L1 autorizados. El informe final
+registra el commit y los archivos L1 aún sin commit, además del SHA-256 del runner
+y de los prompts.
+
+Para la ejecución real posterior se necesitan PostgreSQL/pgvector y Ollama locales,
+la release sintética lista y las mismas variables de entorno que usa
+`backend/api` (`POSTGRES_*`, `BANUCHAT_GENERATOR_*` y opcionalmente
+`BANUCHAT_OLLAMA_BASE_URL`). Con `.env` local, el comando será:
+
+```powershell
+node --env-file=.env eval/generation/run-rag-latency-profile.mjs
+```
+
+No ejecutar la medición hasta revisar el instrumento. El runner hace preflight de
+release, versiones de PostgreSQL/pgvector y Ollama, modelos, digests y recetas.
+Luego levanta la API real en proceso en `127.0.0.1` con puerto efímero usando
+`createRuntimeApiServer`, `PgSqlClient`, Intent Router, clientes Ollama y
+`generateDocumentRagAnswer` reales. Ejecuta un warmup excluido y diez casos
+medidos secuencialmente. Cada caso crea su conversación fuera del cronómetro,
+mide el POST completo incluyendo lectura del JSON y confirma limpieza con
+`DELETE 204` seguido de `GET 404`. Cualquier error aborta; no hay reintento del
+POST. Los dos archivos de resultados se crean con `wx`, sin sobrescribir otros.
+
+### Etapas y lectura de resultados
+
+Los wrappers temporales de evaluación miden, en el mismo recorrido HTTP:
+
+- `conversation_context_db_ms`: consulta de contexto/ordinal.
+- `rag_embedding_config_db_ms`: configuración de embedding de la release.
+- `query_embedding_ms`: llamada completa al cliente, con sus verificaciones de runtime.
+- `rag_release_availability_db_ms`: comprobación de release lista anterior al vector.
+- `vector_retrieval_db_ms`: consulta pgvector de chunks.
+- `generation_ms`: llamada completa al cliente, con sus verificaciones de runtime.
+- `persistence_db_ms`: sentencia atómica de mensajes y citas.
+
+`generator_ollama_total_duration_ms` procede del resultado del generador y está
+incluido dentro de `generation_ms`; no se suma otra vez. Como las siete etapas
+observadas son secuenciales, `other_orchestration_ms` resta su suma del wall
+clock. Ese residual incluye trabajo de router, validaciones, serialización y
+transporte HTTP local; no separa ni atribuye esos componentes. Los agregados usan
+solo las diez corridas warm: media, mediana, mínimo, máximo y p95 por etapa, y
+conteos por debajo o en/por encima de 5000 ms para wall clock. p95 usa
+**nearest rank**: el elemento ordenado en posición `ceil(0.95 × n)`; con diez
+observaciones es el máximo y es una descripción inestable, no una estimación
+poblacional robusta. L1 compara descriptivamente con la referencia histórica de
+5000 ms, sin decidir el cumplimiento de OE6 ni cambiar su formulación.
+
+Los resultados futuros tendrán fecha `America/Bogota` y quedarán en
+`results/l1-rag-latency-AAAA-MM-DD.json` y `.md`. No existen resultados L1
+acreditados por esta primera fase.
