@@ -25,16 +25,28 @@ No hacer scraping ni consumir sitios/APIs reales de UNAB o CCD.
 
 No modificar el dataset v1 congelado salvo autorización explícita.
 
-## Arquitectura vigente
+## Implementación actual
 
-Flujo conversacional:
+Flujo conversacional implementado:
 
-`Mobile → REST Backend API → Intent Router → fast path o Agent/RAG → MCP interno`
+`Mobile (Expo + React Native + TypeScript) → REST Backend API → Intent Router determinista → fast path estructurado o Document RAG directo`
 
-N8N NO participa en el camino síncrono de consultas.
+Los fast paths usan servicios de aplicación y PostgreSQL. Document RAG usa
+PostgreSQL + pgvector y Ollama. Agent/ReAct y el MCP interno no están integrados
+al fallback actual. N8N NO participa en el camino síncrono de consultas.
 
-La arquitectura prevé que N8N orqueste de forma asíncrona la ingesta, delegando
-validación, procesamiento, embeddings, recovery y retry en `backend/rag`.
+Los perfiles son sintéticos; seleccionar un perfil no equivale a autenticarse.
+
+## Arquitectura objetivo
+
+`Mobile → REST Backend API → Intent Router → fast path o Agent/RAG → MCP interno cuando corresponda`
+
+Agent/ReAct y MCP interno siguen pendientes de implementación e integración en
+el fallback. No están descartados.
+
+N8N ya orquesta manualmente la ingesta asíncrona local. Delega validación,
+procesamiento y embeddings en `backend/rag`; sus flujos de retry/recover/scheduled
+siguen pendientes.
 
 Persistencia:
 
@@ -61,8 +73,10 @@ Leer SOLO cuando la tarea lo requiera:
 - PostgreSQL → `infra/db/001_initial_schema.sql` y `infra/db/README.md`
 - RAG/ingesta implementada → `backend/rag/README.md`
 - MCP → `backend/mcp-server/tools-contract.md`
-- REST → contratos de `backend/api`
-- Intent Router → ADR/especificación correspondiente
+- Mobile → `mobile/README.md`
+- REST → `backend/api/README.md`, `backend/api/api-contract.md` y `backend/api/openapi.yaml`
+- Intent Router → ADR y especificación correspondientes, `backend/api/intent-routing.catalog.json`, `backend/api/intent-routing.schema.json` y `eval/intent-routing/`
+- integración → `eval/integration/README.md` y `eval/integration/results/`
 - evaluación de ingesta → `eval/ingestion/plan.md`
 
 No leer todos estos documentos por defecto.
@@ -83,6 +97,8 @@ explícita de la tarea.
 - Si código y contrato vigente son incompatibles, detenerse y reportarlo.
 - No hacer retry/recovery automático si la tarea no lo autoriza.
 - No inventar métricas, resultados de pruebas ni procedencia runtime.
+- El sprint móvil actual usa Expo SDK 57. No migrar Expo/React Native ni generar
+  proyectos nativos `android/` o `ios/` salvo tarea explícitamente autorizada.
 
 ## Seguridad
 

@@ -4,7 +4,7 @@ Aplicación móvil en Expo + React Native + TypeScript, inicializada con Expo SD
 57 y Expo Router. El dispositivo principal para desarrollo es un teléfono Android
 real con Expo Go.
 
-La app consumirá exclusivamente la API REST de BanuChat; no accede directamente a
+La app consume exclusivamente la API REST de BanuChat; no accede directamente a
 MCP, N8N ni PostgreSQL. Para configurar la URL de API local, copia `.env.example`
 a `.env.local` y define `EXPO_PUBLIC_API_BASE_URL`. Por ejemplo:
 
@@ -27,10 +27,14 @@ npx expo start
 
 Abre el proyecto con Expo Go en el teléfono Android.
 
-## Alcance móvil
+## Estado del MVP móvil de demostración
 
-Obligatorio: Expo con TypeScript, configuración de API, perfil sintético, chat
-con citas, estados de carga y error, y prueba en dispositivo real. Opcionales, en
-orden: calendario; progreso e historial de cursos. Solo si sobra tiempo: listado,
-apertura y eliminación de historial de conversaciones. M1.1 inicializa el
-proyecto y su pantalla de inicio; todavía no implementa funcionalidades de negocio.
+Implementado: Expo SDK 57, React Native + TypeScript, Expo Router, URL base de API
+configurable, selección de perfil sintético, creación de conversación, chat con
+citas, estados de carga y error, calendario y progreso de cursos. M1–M5 fueron
+validados manualmente con Expo Go en un dispositivo Android físico. Véase el
+[checkpoint de evidencia](../eval/integration/results/j3-checkpoint-2026-10-03.md).
+
+La selección de perfil sintético no es un inicio de sesión. Siguen pendientes la
+autenticación y autorización de usuario final, el historial conversacional visible
+en la UI, las notificaciones push y la distribución/operación en producción.

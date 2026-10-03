@@ -1,4 +1,14 @@
-# J1: smoke vertical del backend actual
+# Integración y checkpoint técnico
+
+- [J1: smoke vertical operacional](run-j1-smoke.mjs) sobre servicios locales
+  reales; sus instrucciones están a continuación.
+- [J2: integración HTTP con router real](../../backend/api/test/intent-http-integration.test.ts),
+  SQL controlado y Document RAG determinista; se ejecuta con `npm test` en
+  `backend/api/`.
+- [J3: checkpoint documental](results/j3-checkpoint-2026-10-03.md) de M1–M5,
+  J1 y J2, con alcances y pendientes.
+
+## J1: smoke vertical del backend actual
 
 Este smoke operacional consulta la API REST local de BanuChat sobre una release
 **100 % sintética** ya publicada. Comprueba perfiles, calendario y progreso;

@@ -18,12 +18,12 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 
 | Componente | Responsabilidad | Ubicación |
 | --- | --- | --- |
-| Mobile App | React Native + TypeScript; consume únicamente la API REST pública. | `mobile/` |
+| Mobile App | Expo SDK 57, React Native + TypeScript; consume únicamente la API REST pública. MVP de demostración M1–M5 validado manualmente en Android físico. | `mobile/` |
 | REST Backend API | Entrada síncrona; fija contexto, evalúa Intent Router y persiste respuesta/citas de la misma release. | `backend/api/` |
-| Intent Router | Catálogo determinista: fast path seguro o fallback Agent/RAG; sin LLM, embeddings ni N8N para clasificar. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
+| Intent Router | Catálogo determinista: fast path seguro o fallback Document RAG directo actual; Agent/RAG permanece como objetivo. Clasifica sin LLM, embeddings ni N8N. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
 | Application Services | Lógica compartida con acceso consistente a PostgreSQL; implementada para los fast paths actuales y pendiente de reutilización por tools MCP. | `backend/api/` |
-| Agent/RAG | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; el agente es cliente MCP. | `backend/`, `backend/rag/` |
-| MCP Server interno | Expone herramientas controladas mediante los mismos servicios de aplicación que usa el fast path. | `backend/mcp-server/` |
+| Agent/RAG objetivo | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; pendiente de integración en el fallback. | `backend/`, `backend/rag/` |
+| MCP Server interno objetivo | Herramientas controladas para el agente; pendiente de integración productiva con el fallback. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
 | N8N | Orquesta ingesta asíncrona de releases sintéticas completas y aprobadas. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
@@ -71,12 +71,13 @@ artefactos completos verificados por la ruta REST interna aprobada, no URLs exte
 
 ### Estado de implementación actual
 
-El vertical slice conversacional validado al commit
-`f47ec9e29b8c161a2c88a4eadf641dab2359a964` ejecuta este recorrido:
+El vertical slice conversacional, validado inicialmente al commit
+`f47ec9e29b8c161a2c88a4eadf641dab2359a964` y comprobado después por J1 y J2,
+ejecuta este recorrido:
 
 ```mermaid
 flowchart LR
-    client["Mobile / futuro cliente"] -->|"REST"| api["Backend API"]
+    mobile["Mobile App Expo / React Native"] -->|"REST"| api["Backend API"]
     api --> router["Intent Router determinista"]
     router -->|"Fast path"| fast["Progreso, calendario o anuncios"]
     router -->|"Fallback documental"| rag["Document RAG directo"]
@@ -104,6 +105,11 @@ mensajes y citas. El recorrido RAG E2E real obtuvo HTTP 201.
 
 Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback.
 Ambos siguen pendientes en la arquitectura objetivo.
+El cliente móvil M1–M5 está implementado y fue validado manualmente en Android
+físico. J1 comprobó operacionalmente la ruta REST con PostgreSQL/pgvector y Ollama
+reales; J2 comprobó mediante HTTP en proceso el router real con SQL controlado y
+Document RAG simulado. Sus límites constan en el
+[checkpoint J3](../eval/integration/results/j3-checkpoint-2026-10-03.md).
 
 ## Ingesta asíncrona de releases sintéticas completas
 
@@ -248,9 +254,11 @@ se conserva hasta disponer de implementación validada.
   calendario y anuncios, los tres endpoints REST descritos arriba, retrieval exacto,
   Document RAG directo con generación Ollama, citas y persistencia; vertical slice
   RAG E2E real con HTTP 201.
-- Consulta pendiente: Agent/ReAct real, integración productiva del MCP interno al
-  fallback y validación E2E de endpoints REST implementados.
-- Producto/evaluación: app móvil, autenticación de usuario final, RAGAS/MRR y pruebas
-  con usuarios, y notificaciones push reales.
+- Consulta pendiente: refinamiento M3.1 del Intent Router, Agent/ReAct real e
+  integración productiva del MCP interno al fallback. J1 cubre una ruta operacional
+  concreta, no todas las variantes o condiciones de concurrencia REST.
+- Producto/evaluación: autenticación de usuario final, RAGAS/MRR completas,
+  pruebas formales con usuarios y notificaciones push reales. El MVP móvil de
+  demostración M1–M5 ya existe; no hay despliegue institucional acreditado.
 
 Las decisiones confirmadas en `AGENTS.md` prevalecen sobre referencias históricas.

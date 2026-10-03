@@ -50,17 +50,20 @@ slice actual no los ejecuta ni los necesita para demostrar su recorrido directo.
 También están implementados en el servidor REST los endpoints de historial
 `GET /conversations`, `GET /conversations/{id}` y `DELETE /conversations/{id}`, el
 endpoint de artefactos documentales y la exposición HTTP directa de
-calendario/progreso/anuncios. La app móvil terminada, autenticación de usuario final,
-notificaciones push reales y evaluaciones RAGAS completas y con usuarios siguen
-pendientes. El MVP completo no está terminado.
+calendario/progreso/anuncios. El MVP móvil de demostración con selección de perfiles
+sintéticos, chat, citas, calendario y progreso está implementado y fue validado
+manualmente en Android físico. Siguen pendientes la autenticación de usuario final,
+las notificaciones push reales, las evaluaciones RAGAS completas y las pruebas
+formales con usuarios. El MVP académico completo no está terminado. Véase el
+[checkpoint M1–M5, J1 y J2](eval/integration/results/j3-checkpoint-2026-10-03.md).
 
-## Arquitectura vigente
+## Arquitectura actual y objetivo
 
-- Mobile (React Native + TypeScript) → REST Backend API → Intent Router → fast path / Agent-RAG.
-- Fast path usa servicios compartidos; el fallback usa Agent/RAG + MCP interno.
-  La app nunca consume MCP ni N8N directamente.
-- El vertical slice implementado actualmente se detiene en fast path o Document RAG
-  directo; Agent/ReAct y MCP siguen pendientes como arquitectura objetivo.
+- Mobile (Expo + React Native + TypeScript) → REST Backend API → Intent Router
+  determinista → fast path estructurado o Document RAG directo.
+- El fast path usa servicios de aplicación y PostgreSQL; Document RAG usa
+  PostgreSQL + pgvector y Ollama. La app consume solo REST.
+- Agent/ReAct y MCP interno siguen pendientes dentro de la arquitectura objetivo.
 - Una sola instancia PostgreSQL con pgvector almacena representaciones procesadas.
 - `data/synthetic/` es la fuente de verdad versionada de todos los datos funcionales.
 - N8N orquesta de forma asíncrona la ingesta; el workflow manual v1 fue validado E2E
