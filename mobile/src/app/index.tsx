@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,16 +10,19 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { createConversation } from '@/api/conversations';
 import { getProfiles, type ProfileSummary } from '@/api/profiles';
 
 type LoadState = 'loading' | 'error' | 'success';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [profiles, setProfiles] = useState<ProfileSummary[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<ProfileSummary | null>(null);
-  const [confirmedAlias, setConfirmedAlias] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [isStartingChat, setIsStartingChat] = useState(false);
+  const [startChatError, setStartChatError] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -29,14 +33,14 @@ export default function HomeScreen() {
         if (!isMounted) return;
         setProfiles(result.profiles);
         setSelectedProfile(null);
-        setConfirmedAlias(null);
+        setStartChatError(false);
         setLoadState('success');
       })
       .catch(() => {
         if (!isMounted) return;
         setProfiles([]);
         setSelectedProfile(null);
-        setConfirmedAlias(null);
+        setStartChatError(false);
         setLoadState('error');
       });
 
@@ -50,9 +54,26 @@ export default function HomeScreen() {
     setRetryCount((count) => count + 1);
   }
 
-  function continueWithSelectedProfile() {
-    if (selectedProfile === null) return;
-    setConfirmedAlias(selectedProfile.alias);
+  async function continueWithSelectedProfile() {
+    if (selectedProfile === null || isStartingChat) return;
+
+    setIsStartingChat(true);
+    setStartChatError(false);
+    try {
+      const conversation = await createConversation(selectedProfile.profile_key);
+      router.push({
+        pathname: '/chat',
+        params: {
+          conversation_id: conversation.conversation_id,
+          profile_key: conversation.profile_key,
+          profile_alias: conversation.profile_alias,
+        },
+      });
+    } catch {
+      setStartChatError(true);
+    } finally {
+      setIsStartingChat(false);
+    }
   }
 
   return (
@@ -91,9 +112,10 @@ export default function HomeScreen() {
                       key={profile.profile_key}
                       accessibilityRole="radio"
                       accessibilityState={{ checked: isSelected }}
+                      disabled={isStartingChat}
                       onPress={() => {
                         setSelectedProfile(profile);
-                        setConfirmedAlias(null);
+                        setStartChatError(false);
                       }}
                       style={[styles.profileOption, isSelected && styles.profileOptionSelected]}>
                       <Text style={styles.profileAlias}>{profile.alias}</Text>
@@ -106,16 +128,26 @@ export default function HomeScreen() {
 
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ disabled: selectedProfile === null }}
-              disabled={selectedProfile === null}
-              onPress={continueWithSelectedProfile}
-              style={[styles.primaryButton, selectedProfile === null && styles.buttonDisabled]}>
-              <Text style={styles.primaryButtonText}>Continuar</Text>
+              accessibilityState={{ disabled: selectedProfile === null || isStartingChat }}
+              disabled={selectedProfile === null || isStartingChat}
+              onPress={() => void continueWithSelectedProfile()}
+              style={[
+                styles.primaryButton,
+                (selectedProfile === null || isStartingChat) && styles.buttonDisabled,
+              ]}>
+              {isStartingChat ? (
+                <View style={styles.buttonProgress}>
+                  <ActivityIndicator color="#fff" />
+                  <Text style={styles.primaryButtonText}>Iniciando chat...</Text>
+                </View>
+              ) : (
+                <Text style={styles.primaryButtonText}>Continuar</Text>
+              )}
             </Pressable>
 
-            {confirmedAlias !== null && (
-              <Text accessibilityLiveRegion="polite" style={styles.confirmation}>
-                Perfil seleccionado: {confirmedAlias}
+            {startChatError && (
+              <Text accessibilityLiveRegion="polite" style={styles.errorText}>
+                No fue posible iniciar el chat.
               </Text>
             )}
           </View>
@@ -207,8 +239,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  confirmation: {
-    color: '#166534',
+  buttonProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  errorText: {
+    color: '#b91c1c',
     fontSize: 15,
     textAlign: 'center',
   },
