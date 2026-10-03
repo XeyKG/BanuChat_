@@ -156,6 +156,23 @@ la ruta, conteos y etapas observadas, y un identificador seguro del error captur
 por los wrappers de evaluación. Ese diagnóstico ayuda a ubicar la etapa o
 dependencia observada; el body HTTP por sí solo no acredita la causa interna.
 
+Para investigar un caso aislado sin producir evidencia L1 oficial, el modo
+`--diagnose-case` acepta únicamente `G0-01` a `G0-10`:
+
+```powershell
+node --env-file=.env eval/generation/run-rag-latency-profile.mjs --diagnose-case G0-04
+```
+
+Ejecuta solo el caso elegido con dependencias reales, conversación nueva y
+limpieza confirmada; no hace warmup, retries ni escribe archivos de resultados.
+Solo en este modo, una copia de la respuesta de Ollama `/api/chat` permite
+mostrar status, señales de terminación, conteos y duraciones numéricas, y la
+presencia/longitud del contenido y presencia de thinking. No registra los textos
+de `message.content` o `message.thinking`, prompts ni chunks. Clonar y analizar
+esa respuesta puede añadir tiempo, por lo que esta instrumentación no se usa en
+las diez corridas formales. Si se observa `done_reason=length`, describe esa
+respuesta concreta y no decide por sí solo una optimización.
+
 ### Etapas y lectura de resultados
 
 Los wrappers temporales de evaluación miden, en el mismo recorrido HTTP:

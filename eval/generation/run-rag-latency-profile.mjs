@@ -137,19 +137,22 @@ function safeDependencyError(error, backend) {
   return "unknown";
 }
 
-function recorder(backend) {
+function recorder(backend, retainLast = false) {
   let active = null;
+  let last = null;
   return {
     get active() { return active; },
+    get last() { return last; },
     begin() {
       assert(active === null, "Mediciones solapadas.");
+      if (retainLast) last = null;
       active = { timings: {}, counts: {}, routes: [], rag_calls: 0,
         embedding_calls: 0, generation_calls: 0, generator_ollama_total_duration_ms: null,
         active_stage: null, last_stage_started: null, last_stage_completed: null,
         dependency_error: null };
       return active;
     },
-    end() { active = null; },
+    end() { if (retainLast) last = active; active = null; },
     async time(name, operation) {
       const measurement = active;
       if (measurement) {
@@ -175,6 +178,70 @@ function recorder(backend) {
       }
     },
   };
+}
+
+function diagnosticNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function diagnosticOllamaResponse(response, body) {
+  const message = body?.message;
+  const content = typeof message?.content === "string" ? message.content : null;
+  const thinking = message?.thinking;
+  return {
+    ollama_http_status: response.status,
+    ollama_done: typeof body?.done === "boolean" ? body.done : null,
+    ollama_done_reason: typeof body?.done_reason === "string" &&
+      /^[a-z_]{1,32}$/u.test(body.done_reason) ? body.done_reason : null,
+    ollama_prompt_eval_count: diagnosticNumber(body?.prompt_eval_count),
+    ollama_eval_count: diagnosticNumber(body?.eval_count),
+    ollama_total_duration_ns: diagnosticNumber(body?.total_duration),
+    ollama_load_duration_ns: diagnosticNumber(body?.load_duration),
+    ollama_prompt_eval_duration_ns: diagnosticNumber(body?.prompt_eval_duration),
+    ollama_eval_duration_ns: diagnosticNumber(body?.eval_duration),
+    ollama_content_present: message && typeof message === "object"
+      ? content !== null : null,
+    ollama_content_length_chars: content === null ? null : [...content].length,
+    ollama_thinking_present: message && typeof message === "object"
+      ? (typeof thinking === "string" ? thinking.length > 0
+        : thinking === undefined ? false : null) : null,
+  };
+}
+
+function diagnosticGeneratorFetch(observation) {
+  return async (input, init) => {
+    const response = await fetch(input, init);
+    if (init?.method === "POST" && new URL(input).pathname === "/api/chat") {
+      let body = null;
+      try { body = await response.clone().json(); }
+      catch { /* El status sigue disponible aunque el JSON no lo esté. */ }
+      observation.raw_chat = diagnosticOllamaResponse(response, body);
+    }
+    return response;
+  };
+}
+
+function diagnosticOutput(item, measurement, observation, result) {
+  const generatorResult = measurement?.generation_calls
+    ? measurement.dependency_error ?? "success" : "not_called";
+  const details = observation.raw_chat ?? diagnosticOllamaResponse(
+    { status: null }, null);
+  return [
+    `L1 DIAGNOSTIC ${item.id}`,
+    `route=${measurement?.routes.join(",") || "unknown"}`,
+    `rag_calls=${measurement?.rag_calls ?? 0}`,
+    `embedding_calls=${measurement?.embedding_calls ?? 0}`,
+    `generation_calls=${measurement?.generation_calls ?? 0}`,
+    `active_or_last_stage=${measurement?.active_stage ??
+      measurement?.last_stage_started ?? measurement?.last_stage_completed ?? "unknown"}`,
+    `generator_client_result=${generatorResult}`,
+    ...Object.entries(details).map(([key, value]) => `${key}=${value ?? "unknown"}`),
+    ...(details.ollama_done_reason === "length"
+      ? ["Interpretación: done_reason=length describe solo esta respuesta de Ollama; no implica una decisión de optimización."]
+      : []),
+    `official_l1_result=false`,
+    `case_outcome=${result}`,
+  ].join("\n");
 }
 
 async function request(base, path, { method = "GET", body, timeout = REQUEST_TIMEOUT_MS } = {}) {
@@ -490,10 +557,12 @@ ${wall.mean >= 5000 ? "En el entorno local observado, la muestra L1 no alcanzó 
 }
 
 async function main() {
-  assert(process.argv.length === 2 ||
-    (process.argv.length === 3 && process.argv[2] === "--dry-run"),
-  "Uso: node eval/generation/run-rag-latency-profile.mjs [--dry-run]");
-  const dryRun = process.argv[2] === "--dry-run";
+  const args = process.argv.slice(2);
+  const dryRun = args.length === 1 && args[0] === "--dry-run";
+  const diagnosticId = args.length === 2 && args[0] === "--diagnose-case" &&
+    /^G0-(?:0[1-9]|10)$/u.test(args[1]) ? args[1] : null;
+  assert(args.length === 0 || dryRun || diagnosticId !== null,
+  "Uso: node eval/generation/run-rag-latency-profile.mjs [--dry-run | --diagnose-case G0-01..G0-10]");
   const state = gitState();
   const promptBytes = await readFile(PROMPTS);
   const cases = validateCases(JSON.parse(promptBytes.toString("utf8")));
@@ -509,8 +578,10 @@ async function main() {
   const basename = `l1-rag-latency-${runDate}`;
   const jsonPath = join(RESULTS, `${basename}.json`);
   const mdPath = join(RESULTS, `${basename}.md`);
-  await assertAbsent(jsonPath);
-  await assertAbsent(mdPath);
+  if (diagnosticId === null) {
+    await assertAbsent(jsonPath);
+    await assertAbsent(mdPath);
+  }
 
   const runtimeConfig = backend.loadRuntimeConfig();
   const generatorRuntime = backend.loadGeneratorRuntimeConfig();
@@ -520,13 +591,17 @@ async function main() {
   try {
     const realSql = new backend.PgSqlClient(pool);
     const environment = await preflight(realSql, generatorRuntime);
-    const instrument = recorder(backend);
+    const instrument = recorder(backend, diagnosticId !== null);
     const sql = { query: (text, values) => {
       if (!instrument.active) return realSql.query(text, values);
       return instrument.time(classifySql(text), () => realSql.query(text, values));
     } };
     const embedding = new backend.OllamaQueryEmbeddingClient(generatorRuntime.base_url);
-    const generator = new backend.OllamaGeneratorClient(generatorRuntime.base_url);
+    const diagnosticObservation = diagnosticId === null ? null : { raw_chat: null };
+    const generator = diagnosticObservation === null
+      ? new backend.OllamaGeneratorClient(generatorRuntime.base_url)
+      : new backend.OllamaGeneratorClient(generatorRuntime.base_url, undefined,
+        diagnosticGeneratorFetch(diagnosticObservation));
     const measuredEmbedding = { embedQuery: (text, config) => {
       instrument.active.embedding_calls += 1;
       return instrument.time("query_embedding_ms", () => embedding.embedQuery(text, config));
@@ -557,6 +632,21 @@ async function main() {
     server = await backend.createRuntimeApiServer(sql, documentRag,
       async () => measuredRouter);
     const base = await listen(server);
+    if (diagnosticId !== null) {
+      const item = cases.find((entry) => entry.id === diagnosticId);
+      assert(item !== undefined, "ID diagnóstico inválido.");
+      try {
+        const run = await runCase(base, item, instrument);
+        console.log(diagnosticOutput(item, instrument.last, diagnosticObservation, "completed"));
+        console.log(`http_status=${run.http_status}\ncleanup_success=${run.cleanup_success}`);
+      } catch (error) {
+        if (!(error instanceof SafeRunnerError)) throw error;
+        console.error(diagnosticOutput(item, instrument.last, diagnosticObservation, "aborted"));
+        console.error(error.message);
+        process.exitCode = 1;
+      }
+      return;
+    }
     const warmup = await runCase(base, { id: "warmup", question: cases[0].question },
       instrument);
     const warmRuns = [];
