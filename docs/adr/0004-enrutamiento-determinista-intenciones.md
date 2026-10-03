@@ -1,7 +1,11 @@
 # ADR 0004 — Enrutamiento determinista de intenciones
 
 Estado: decisión arquitectónica aceptada por autorización explícita del proyecto.
-Catálogo y reglas iniciales: `1.0.0-draft`, diseño sin implementación.
+Catálogo y reglas iniciales: `1.0.0-draft`. Este ADR conserva la decisión
+arquitectónica original. Estado actual: router determinista implementado y
+productivo; fast paths despachados para progreso, calendario y anuncios; fallback
+Document RAG directo. Agent/ReAct y MCP interno siguen pendientes de integración,
+al igual que el refinamiento M3.1.
 
 ## Contexto y motivación
 
@@ -35,12 +39,14 @@ Una palabra genérica aislada no es suficiente. Las fórmulas sociales completas
 
 No se cambia REST público ni se añade `/courses`; course_catalog es una ruta interna
 de chat, no un endpoint nuevo. MCP 2.0, sus seis tools y sus schemas permanecen intactos.
-El router no sustituye RAG, MCP o Agent/RAG. Los servicios compartidos son una frontera
-lógica de diseño, no nuevos contenedores ni módulos productivos creados ahora.
+El router no sustituye RAG, MCP o Agent/RAG de la arquitectura objetivo. Los
+servicios compartidos se implementaron como lógica de aplicación; esta decisión
+no prescribe nuevos contenedores.
 
 Ambas rutas fijan la misma release vigente del turno y el perfil controlado antes de
 procesar contenido. Conservan el mensaje original, verifican evidencia y persisten
-assistant + citas atómicamente. La ruta rápida no habilita selección histórica,
+el turno completo (`user`, `assistant` y citas) atómicamente en la implementación
+actual. La ruta rápida no habilita selección histórica,
 cambio de perfil por texto ni procedencia inventada. Un fallo operacional no se
 disfraza de lista vacía ni se resuelve llamando al generador sin evidencia.
 
@@ -58,14 +64,17 @@ hacen fallback. El detalle normativo está en la especificación y el catálogo.
 Se descartan clasificación por una palabra, clasificación mediante IA y una cadena
 de reglas que intente resolver peticiones compuestas. También se descarta duplicar
 consultas dentro de MCP y del fast path: ambos adaptan los mismos servicios.
-Usar siempre Agent/RAG sigue disponible como fallback, no como paso obligatorio.
+El fallback Agent/RAG permanece como objetivo, no como paso obligatorio actual;
+el runtime vigente usa Document RAG directo.
 
 ## Consecuencias y evaluación pendiente
 
-Se necesita mantener un catálogo versionado, comprobar exclusiones, producir
-renderers seguros y validar parámetros/procedencia. La cobertura inicial es
-deliberadamente limitada: una paráfrasis no reconocida puede ir al agente aunque
-una persona identifique su intención. Es preferible ese costo a un falso positivo.
+Se mantiene un catálogo versionado y se comprueban exclusiones, parámetros y
+procedencia. Los renderers de progreso, calendario y anuncios ya están
+implementados. La cobertura inicial es
+deliberadamente limitada: una paráfrasis no reconocida va al fallback documental
+actual aunque una persona identifique su intención; en el diseño objetivo iría al
+agente. Es preferible ese costo a un falso positivo.
 
 Medir después fast_path_hit_rate, agent_fallback_rate, clasificación correcta,
 falsos positivos, latencias de ambas rutas y turnos que invocan al generador.

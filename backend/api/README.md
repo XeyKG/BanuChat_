@@ -9,8 +9,9 @@ El fallback conversacional actual es Document RAG directo.
 - [Contrato humano](api-contract.md): endpoints, citas, consistencia, errores,
   reintentos y trazabilidad con PostgreSQL y MCP 2.0.
 
-Los mensajes pasan por Intent Router: servicio compartido + renderer determinista
-si hay una intención segura, o Document RAG directo como fallback actual.
+Los mensajes pasan por Intent Router: las rutas `profile_progress`,
+`calendar_events` y `announcements` ejecutan servicio compartido y renderer
+determinista; las demás decisiones van a Document RAG directo como fallback actual.
 Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
 Las consultas REST directas usan los mismos servicios de aplicación y su futura
@@ -38,4 +39,6 @@ mantiene su host fijo en `127.0.0.1`.
 - [Catálogo declarativo](intent-routing.catalog.json) y
   [JSON Schema Draft 2020-12](intent-routing.schema.json), que valida catálogo y casos.
 - [Casos de diseño](../../eval/intent-routing/cases.json): expectativas de clasificación,
-  no resultados ejecutados ni preguntas RAGAS. No se implementa código productivo.
+  no resultados ejecutados ni preguntas RAGAS. El router sí está implementado
+  productivamente; [intent-router.test.ts](test/intent-router.test.ts) lo prueba
+  directamente y [J2](test/intent-http-integration.test.ts) lo prueba por HTTP.

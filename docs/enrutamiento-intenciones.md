@@ -1,6 +1,10 @@
 # Intent Router determinista — diseño v1
 
-Estado: especificación `1.0.0-draft`, sin router, servicios ni renderers implementados.
+Estado: especificación y catálogo `1.0.0-draft`. El Intent Router determinista está
+implementado. El dispatcher ejecuta fast paths para `profile_progress`,
+`calendar_events` y `announcements`, con sus servicios de aplicación y renderers.
+El fallback implementado es Document RAG directo; Agent/ReAct y MCP interno siguen
+pendientes como arquitectura objetivo. El refinamiento M3.1 también está pendiente.
 Aplica [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md). Las reglas y
 valores versionados residen en el [catálogo](../backend/api/intent-routing.catalog.json);
 su [schema](../backend/api/intent-routing.schema.json) es Draft 2020-12.
@@ -13,7 +17,8 @@ conversación validada, perfil seleccionado por el backend, release vigente fija
 `turn_now` capturado una sola vez por el backend y versión del catálogo.
 El usuario no suministra profile_key, release_id, reloj, tool o modelo al router.
 Una mención de otro perfil no cambia contexto. No se usa historial para completar
-«esas», «lo anterior» o una fecha implícita: tales mensajes van al agente.
+«esas», «lo anterior» o una fecha implícita: tales mensajes van al fallback
+Document RAG actual; Agent/ReAct sigue siendo el objetivo.
 
 Salida conceptual interna: ruta (un id del catálogo o agent_fallback), parámetros
 validados, variante de renderer cuando sea estático y motivo de decisión. No se
@@ -22,8 +27,9 @@ versión, ids de reglas, scores y motivo; no registrar texto sensible por defect
 
 No hay probabilidades ni confianza producida por IA. `priority` solo ordena la
 evaluación y el diagnóstico de forma reproducible; no elige ganador ante conflicto.
-Un catálogo inválido debe deshabilitar el fast path y dejar disponible Agent/RAG,
-con diagnóstico interno, no cargar reglas parcialmente.
+Un catálogo inválido deshabilita el fast path; no se cargan reglas parcialmente.
+La decisión interna de fallback se llama `agent_fallback`, pero hoy conduce a
+Document RAG directo, no a Agent/ReAct ni a MCP.
 
 ## 2. Normalización y conservación del original
 
@@ -70,6 +76,10 @@ Las combinaciones son secuencias cerradas, no bolsas de palabras. Cada alternati
 puede contener varios tokens; no admite inserciones, permutaciones ni capturas libres.
 No se ejecuta código ni regex proporcionado por el catálogo. Los dos patrones de
 fechas son producción declarativa finita, no lenguaje de plantillas ejecutables.
+`full_utterance_required` permanece activo: la coincidencia debe consumir el
+mensaje normalizado completo. M3.1 está previsto para ampliar de forma
+determinista la tolerancia a paráfrasis y lenguaje de relleno sin convertir el
+router en un clasificador LLM; su diseño final no se define aquí.
 
 El score de una familia es el máximo, no la suma. Exigir score >=80 y margen >=20
 frente a otro candidato; además, **dos familias con score >=80 siempre hacen fallback**,
@@ -89,6 +99,13 @@ no son tokens genéricos de dominio. «hola, cursos disponibles» no es saludo a
 No se busca maximizar cobertura usando reglas compuestas progresivamente más complejas.
 
 ## 4. Familias y parámetros
+
+La tabla enumera familias y servicios lógicos del catálogo. En el flujo productivo
+de `POST /messages`, el dispatcher solo ejecuta como fast path
+`profile_progress`, `calendar_events` y `announcements`. Decisiones de
+`course_catalog`, `document_lookup`, `capabilities_help`, `basic_social` y
+`known_out_of_scope` llegan al fallback Document RAG directo; su presencia en el
+catálogo no equivale a un servicio o renderer productivo para esas rutas.
 
 | Intención | Servicio lógico / renderer | Extracción acotada |
 | --- | --- | --- |
@@ -116,7 +133,7 @@ sin inventar un perfil ni pedir al generador que lo seleccione.
 
 La localización busca los títulos declarados, no IDs fijos ni respuestas sobre sus
 contenidos. Esos títulos son selectores, no garantía de existencia en una release.
-«Dame una guía» sin selector y «explícame/resume la guía» van al agente. No se abre
+«Dame una guía» sin selector y «explícame/resume la guía» van al fallback. No se abre
 ni vectoriza full_document para producir un resumen por el fast path.
 
 Fuera de alcance reconoce únicamente solicitudes inequívocas sobre categorías ya
@@ -160,42 +177,47 @@ No admite reference_time libre del usuario en esta gramática inicial.
 
 ## 6. Servicios compartidos y release coherente
 
-Intent Router y MCP son adaptadores del mismo código de aplicación futuro. El
-fast path no llama al servidor MCP, ni emula tools/call, ni duplica consultas/reglas.
-Cada servicio estructurado usa internamente el contexto de turno con release esperada,
-validación de parámetros, reglas de orden/límite y procedencia equivalentes a su tool.
-Los endpoints REST directos podrán reutilizar esa lógica sin pasar por router/agente.
-No se crea ahora esa capa ni se decide su empaquetado, transporte o contenedores.
+Los fast paths implementados llaman directamente a servicios de aplicación
+compartidos. No llaman al servidor MCP ni emulan `tools/call`. Las consultas REST
+directas ya reutilizan esos servicios sin pasar por router o agente. La
+reutilización productiva de la misma lógica por MCP sigue pendiente; esta
+especificación no decide su empaquetado, transporte o contenedores.
 
-Flujo de POST messages:
+Flujo implementado de `POST /messages`:
 
-1. Recibir y validar el mensaje; aplicar exclusión de conversación según REST.
-2. Fijar release vigente publicada y resolver allí el perfil de la conversación;
-   capturar turn_now. Sin contexto válido, aplicar errores REST antes de insertar.
-3. Persistir user original en transacción corta, sin normalización destructiva.
-4. Normalizar copia, evaluar catálogo completo y detectar exclusiones/conflictos.
-5. Si una familia es segura, invocar servicio + renderer o renderer estático.
-6. Si no, pasar el texto original a Agent/RAG, que usa MCP y servicios compartidos.
-7. Validar toda procedencia y su pertenencia a la release fijada.
-8. Persistir assistant y citas atómicamente, con la release efectiva del turno;
-   responder el mismo 201 REST y liberar la exclusión incluso ante error.
+1. REST valida la solicitud y el identificador de conversación; coordina la
+   exclusión de operaciones concurrentes sobre esa conversación.
+2. El backend captura `turn_now` una vez y obtiene el contexto de conversación:
+   perfil confiable, release vigente `ready` y ordinal siguiente esperado. Un
+   contexto inválido se rechaza antes de insertar mensajes.
+3. El Intent Router evalúa una copia normalizada del texto original y decide la
+   ruta. El dispatcher ejecuta uno de los tres fast paths implementados o deriva
+   al fallback Document RAG directo con el texto original.
+4. Se obtiene o renderiza la respuesta y se validan release, citas y procedencia.
+5. Una única sentencia SQL persiste atómicamente el mensaje `user` original, el
+   mensaje `assistant` y sus citas, con la release esperada y control de ordinal.
+6. En caso de éxito, REST responde HTTP 201. La exclusión de la conversación se
+   libera también si ocurre un error.
+
+Si la generación o el fallback falla antes de la sentencia de persistencia, no se
+puede afirmar que el mensaje `user` haya quedado guardado.
 
 `answer_release_id` es el nombre conceptual usado por el contrato humano;
 su columna SQL vigente es `messages.answer_dataset_release_id`. No se renombra SQL.
 Incluso los renderers sin citas conservan esa release, como exige el modelo actual.
 
-Los servicios no aceptan elección histórica desde usuario o catálogo. Resuelven
-vigente + filas en un snapshot coherente y comprueban la release esperada del turno.
-Si la release devuelta difiere, no mezclan datos: el coordinador aplica el 409 ya
-documentado, no cambia silenciosamente la release del mensaje. En fallback se
-conservan los reintentos internos MCP existentes; su resultado final debe coincidir
-con el turno. No se añaden argumentos a tools MCP para cambiar ese contrato.
+Los servicios no aceptan elección histórica desde usuario o catálogo. Consultan
+la release vigente y comprueban la release esperada del turno.
+Si la release devuelta difiere, no mezclan datos: se aplica el error de conflicto
+documentado, sin cambiar silenciosamente la release del mensaje. El fallback actual
+no ejecuta tools MCP ni sus reintentos; la integración MCP permanece pendiente.
 
 Una respuesta vacía mantiene release_id. El fast path no llama al generador para
 «rellenarla». Un fallo de dependencia, validación de evidencia o renderer utiliza
-los errores REST existentes; no es un fallo de matching. El user puede quedar sin
-assistant igual que en fallback. Se conserva la política sin Idempotency-Key y la
-consulta de historial antes de reenviar; no se añade estado ni tabla de reintentos.
+los errores REST existentes; no es un fallo de matching. Antes de persistir, un
+fallo no guarda un mensaje `user` aislado. Se conserva la política sin
+Idempotency-Key y la consulta de historial antes de reenviar; no se añade estado
+ni tabla de reintentos.
 
 ## 7. Renderers, citas y listas vacías
 
@@ -206,9 +228,10 @@ Ejemplo no factual: «Se muestran {n} actividades completadas: {nombres}» con
 `n = filas recibidas`, no «tienes exactamente n» si existe limitación de resultados.
 No incluyen títulos/resultados del dataset como respuestas hardcodeadas.
 
-Textos estáticos propuestos para las variantes (su uso empieza con la futura
-implementación, no afirma que hoy exista un servidor): greeting → «Hola. ¿Qué
-necesitas consultar?»; thanks → «Con gusto.»; farewell → «Hasta luego.».
+Los renderers de progreso, calendario y anuncios ya están implementados. Los
+textos estáticos siguientes son propuestas del catálogo; el dispatcher actual no
+los ejecuta como fast path: greeting → «Hola. ¿Qué necesitas consultar?»;
+thanks → «Con gusto.»; farewell → «Hasta luego.».
 capabilities → «Puedes consultar el catálogo, calendario, anuncios y progreso del
 perfil de demostración, localizar documentos y preguntar sobre los materiales
 sintéticos disponibles. No realizo inscripciones ni trámites reales.».
@@ -221,7 +244,7 @@ source_sha256 y release_id, junto con claves reales de entidad; los documentos
 incluyen document_version_id y los fragmentos, cuando proceda, chunk_id.
 No se fabrican citas para una lista vacía, una ausencia o un texto estático.
 
-| Renderer | Evidencia para afirmaciones | Caso vacío / insuficiente |
+| Renderer / expectativa del catálogo | Evidencia para afirmaciones | Caso vacío / insuficiente |
 | --- | --- | --- |
 | Progreso | profile, profile_course; nombres del curso requieren además procedencia course en la misma release | Sin asociaciones coincidentes: explicitarlo, no asignar cero a cursos inexistentes |
 | Catálogo | course por fila | Informar que no se encontraron cursos con esos filtros |
@@ -232,15 +255,20 @@ No se fabrican citas para una lista vacía, una ausencia o un texto estático.
 | Fuera de alcance | Ninguna: límite del prototipo, no afirmación sobre el mundo | citations=[], insufficient_evidence=true |
 
 Para resultados estructurados no vacíos y suficientes: insufficient_evidence=false.
-Para listas vacías de los cinco servicios: true y explicación acotada de que no hay
-evidencia coincidente, no una afirmación universal de inexistencia. Se pueden conservar
-citas de perfil si realmente se presenta su alias, pero no inventar una cita que
+Para las listas vacías de los tres servicios despachados actualmente se usa la
+respuesta implementada de cada renderer. Las demás filas de la tabla conservan
+expectativas de diseño; no acreditan que exista su fast path. La expectativa
+original para listas vacías de los cinco servicios era explicitar que no hay
+evidencia coincidente, no una afirmación universal de inexistencia. Se pueden
+conservar citas de perfil si realmente se presenta su alias, pero no inventar una cita que
 «demuestre» la ausencia de filas. Todos los enums/campos REST permanecen iguales.
 
-ProfileProgressService puede enriquecer su resultado interno con procedencia course
-del mismo snapshot para sustentar nombres; el adaptador MCP proyecta exactamente su
-output congelado, sin propiedades extra. No se dispara una segunda intención para
-ese join necesario. Una comparación o recomendación entre dominios sí requiere agente.
+Como propuesta de diseño pendiente, ProfileProgressService podría enriquecer su
+resultado interno con procedencia `course` del mismo snapshot para sustentar nombres;
+un futuro adaptador MCP proyectaría exactamente su output congelado, sin propiedades
+extra. No se dispararía una segunda intención para ese join. Una comparación o
+recomendación entre dominios va al fallback actual; razonamiento mediante Agent/ReAct
+sigue pendiente.
 
 Las citas públicas siguen el objeto REST: index, source_kind, label, locator,
 release_id, document_version_id y artifact_url. source_path/source_locator internos
@@ -252,7 +280,8 @@ Para documentos disponibles, artifact_url solo puede ser la ruta interna
 `/api/v1/documents/{document_version_id}/artifact`, con el UUID verificado exacto;
 si no está disponible, null. La descarga histórica conserva la versión precisa o
 devuelve 404; no reemplaza bytes por los actuales. Full_document no se fragmenta.
-Una petición que exige interpretar el documento, en vez de localizarlo, va al agente.
+Una petición que exige interpretar el documento, en vez de localizarlo, va al
+fallback Document RAG actual.
 
 ## 8. Catálogo y casos: validación estática
 
@@ -266,14 +295,17 @@ IDs de reglas únicos; expresiones no duplicadas tras normalizar; ausencia de
 triggers genéricos aislados; reglas temporales solo en calendario; parámetros por
 familia compatibles con límites/enums MCP; static renderers sin parámetros de
 servicio; casos referencian IDs existentes y al menos diez positivos por familia.
-JSON Schema no demuestra que un renderer futuro cite bien ni que el algoritmo se
-implemente correctamente. Los formatos requieren validación explícita de fechas reales.
+JSON Schema por sí solo no demuestra que un renderer cite bien ni que el algoritmo
+funcione correctamente. Los formatos requieren validación explícita de fechas reales.
 
 [cases.json](../eval/intent-routing/cases.json) tiene expectativas de clasificación,
 parámetros, contexto controlado, variante estática y razón técnica. No contiene
 respuestas gold, preguntas RAGAS ni resultados ejecutados. Su reloj fijo no cambia
-el dataset. Los casos de perfil ausente prueban el router aislado, no autorizan
-procesar una conversación REST inválida. No se ejecuta un IntentRouter aquí.
+el dataset. Los casos de perfil ausente se refieren al router aislado, no autorizan
+procesar una conversación REST inválida. `cases.json` por sí solo no ejecuta el
+router ni constituye un resultado experimental. `backend/api/test/intent-router.test.ts`
+sí ejecuta el router real y J2 lo ejercita por HTTP en
+`backend/api/test/intent-http-integration.test.ts`.
 
 ## 9. Métricas futuras y límites de esta entrega
 
@@ -290,7 +322,8 @@ procesar una conversación REST inválida. No se ejecuta un IntentRouter aquí.
 - Número/proporción de turnos que realmente invocan LLM generador, contado por
   invocación efectiva, no inferido automáticamente de la decisión de fallback.
 
-No hay mínimo arbitrario de ahorro ni resultados de accuracy. No se llama a Ollama,
-no se ejecutan queries ni se cambia la semántica de los objetivos OE1–OE6. El router
-solo evita generación donde un renderer seguro basta; no sustituye evaluación de
+No hay mínimo arbitrario de ahorro ni resultados de accuracy en este documento.
+Esta actualización documental no llama a Ollama, no ejecuta consultas ni cambia la
+semántica de los objetivos OE1–OE6. El router solo evita generación donde un renderer
+seguro basta; no sustituye evaluación de
 RAG, selección de tools, calidad de evidencia o usabilidad.
