@@ -5,49 +5,44 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
 import { useSession } from '@/session/session-context';
-import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
+import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
+import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, SparkGlyph } from '@/ui/icons';
+import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
-interface DashboardActionProps {
+interface QuickActionProps {
   title: string;
   description: string;
+  tint: string;
+  tintSoft: string;
+  icon: 'calendar' | 'chart' | 'clock';
   onPress: () => void;
   disabled: boolean;
-  primary?: boolean;
-  loading?: boolean;
+  delay: number;
 }
 
-function DashboardAction({
-  title,
-  description,
-  onPress,
-  disabled,
-  primary = false,
-  loading = false,
-}: DashboardActionProps) {
+function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabled, delay }: QuickActionProps) {
   return (
-    <Pressable
-      accessibilityLabel={`${title}. ${description}`}
-      accessibilityRole="button"
-      accessibilityState={{ busy: loading, disabled }}
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.actionCard,
-        primary && styles.primaryActionCard,
-        disabled && styles.disabled,
-        pressed && !disabled && styles.pressed,
-      ]}>
-      <View style={styles.actionHeading}>
-        <Text style={[styles.actionTitle, primary && styles.primaryActionText]}>{title}</Text>
-        {loading && <ActivityIndicator color={colors.surface} size="small" />}
-      </View>
-      <Text style={[styles.actionDescription, primary && styles.primaryActionDescription]}>
-        {loading ? 'Creando una conversación segura...' : description}
-      </Text>
-      <Text aria-hidden style={[styles.actionHint, primary && styles.primaryActionText]}>
-        Abrir
-      </Text>
-    </Pressable>
+    <FadeIn delay={delay}>
+      <PressableScale
+        accessibilityLabel={`${title}. ${description}`}
+        accessibilityRole="button"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}>
+        <View style={[styles.quickCard, disabled && styles.disabled]}>
+          <View style={[styles.quickIconWrap, { backgroundColor: tintSoft }]}>
+            {icon === 'calendar' && <CalendarGlyph color={tint} size={22} />}
+            {icon === 'chart' && <ChartGlyph color={tint} size={22} />}
+            {icon === 'clock' && <ClockGlyph color={tint} size={22} />}
+          </View>
+          <View style={styles.quickCopy}>
+            <Text style={styles.quickTitle}>{title}</Text>
+            <Text style={styles.quickDescription}>{description}</Text>
+          </View>
+          <ChevronGlyph color={colors.muted} size={16} />
+        </View>
+      </PressableScale>
+    </FadeIn>
   );
 }
 
@@ -59,7 +54,7 @@ export default function HomeScreen() {
   const [startChatError, setStartChatError] = useState(false);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/');
+    if (activeProfile === null) router.replace('/profiles');
   }, [activeProfile, router]);
 
   useEffect(() => {
@@ -93,71 +88,124 @@ export default function HomeScreen() {
   function endSession() {
     if (isStartingChat) return;
     clearSession();
-    router.replace('/');
+    router.replace('/profiles');
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
-          <View style={styles.heading}>
-            <Text style={styles.brand}>BanuChat</Text>
-            <Text style={styles.greeting}>Hola, {activeProfile.alias}</Text>
-            <Text style={styles.demoLabel}>Perfil de demostración</Text>
-          </View>
-
-          <View style={styles.actions}>
-            <DashboardAction
-              title="Chat"
-              description="Consulta progreso, eventos, anuncios y material disponible."
-              disabled={isStartingChat}
-              loading={isStartingChat}
-              onPress={() => void startChat()}
-              primary
-            />
-
-            {startChatError && (
-              <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
-                <Text style={styles.errorTitle}>No fue posible iniciar el chat</Text>
-                <Text style={styles.errorText}>Puedes volver a intentarlo desde esta pantalla.</Text>
+          <FadeIn>
+            <View style={styles.topBar}>
+              <View style={styles.brandRow}>
+                <BrandMark size={36} />
+                <Text style={styles.brandName}>BanuChat</Text>
               </View>
-            )}
-
-            <DashboardAction
-              title="Calendario"
-              description="Revisa las actividades de los próximos 30 días."
-              disabled={isStartingChat}
-              onPress={() => router.push('/calendar')}
-            />
-            <DashboardAction
-              title="Progreso"
-              description="Consulta el avance registrado para este perfil."
-              disabled={isStartingChat}
-              onPress={() => router.push('/progress')}
-            />
-          </View>
-
-          <View style={styles.sessionSection}>
-            <Text style={styles.sessionTitle}>Sesión de demostración</Text>
-            <View style={styles.sessionActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ disabled: isStartingChat }}
-                disabled={isStartingChat}
-                onPress={endSession}
-                style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
-                <Text style={styles.changeProfileLabel}>Cambiar perfil</Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ disabled: isStartingChat }}
-                disabled={isStartingChat}
-                onPress={endSession}
-                style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
-                <Text style={styles.closeSessionLabel}>Cerrar sesión demo</Text>
-              </Pressable>
+              <MonogramAvatar alias={activeProfile.alias} size={40} />
             </View>
+          </FadeIn>
+
+          <FadeIn delay={80}>
+            <View style={styles.greetingBlock}>
+              <Text style={styles.greeting}>Hola, {activeProfile.alias}</Text>
+              <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
+            </View>
+          </FadeIn>
+
+          <FadeIn delay={160}>
+            <PressableScale
+              accessibilityLabel="Abrir chat con Banu"
+              accessibilityRole="button"
+              accessibilityState={{ busy: isStartingChat, disabled: isStartingChat }}
+              disabled={isStartingChat}
+              onPress={() => void startChat()}
+              scaleTo={0.98}>
+              <View style={styles.heroCard}>
+                <View aria-hidden style={styles.heroGlowOne} />
+                <View aria-hidden style={styles.heroGlowTwo} />
+                <View style={styles.heroIconWrap}>
+                  <SparkGlyph color={colors.white} size={26} />
+                </View>
+                <Text style={styles.heroTitle}>Pregúntale a Banu</Text>
+                <Text style={styles.heroBody}>
+                  {isStartingChat
+                    ? 'Creando una conversación segura...'
+                    : 'Progreso, eventos, anuncios y material del programa, con citas verificables.'}
+                </Text>
+                <View style={styles.heroCtaRow}>
+                  {isStartingChat && <ActivityIndicator color={colors.white} size="small" />}
+                  <Text style={styles.heroCta}>{isStartingChat ? 'Abriendo...' : 'Iniciar conversación'}</Text>
+                </View>
+              </View>
+            </PressableScale>
+          </FadeIn>
+
+          {startChatError && (
+            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+              <Text style={styles.errorTitle}>No fue posible iniciar el chat</Text>
+              <Text style={styles.errorText}>Puedes volver a intentarlo desde esta pantalla.</Text>
+            </View>
+          )}
+
+          <View style={styles.quickSection}>
+            <FadeIn delay={230}>
+              <Text style={styles.sectionLabel}>Accesos directos</Text>
+            </FadeIn>
+            <QuickAction
+              title="Calendario"
+              description="Actividades de los próximos 30 días."
+              tint={colors.violet}
+              tintSoft={colors.violetSoft}
+              icon="calendar"
+              onPress={() => router.push('/calendar')}
+              disabled={isStartingChat}
+              delay={280}
+            />
+            <QuickAction
+              title="Progreso"
+              description="Avance registrado para este perfil."
+              tint={colors.success}
+              tintSoft={colors.successSoft}
+              icon="chart"
+              onPress={() => router.push('/progress')}
+              disabled={isStartingChat}
+              delay={340}
+            />
+            <QuickAction
+              title="Historial"
+              description="Tus conversaciones anteriores."
+              tint={colors.accent}
+              tintSoft={colors.accentSoft}
+              icon="clock"
+              onPress={() => router.push('/history')}
+              disabled={isStartingChat}
+              delay={400}
+            />
           </View>
+
+          <FadeIn delay={460}>
+            <View style={styles.sessionSection}>
+              <Text style={styles.sessionTitle}>Sesión de demostración</Text>
+              <View style={styles.sessionActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isStartingChat }}
+                  disabled={isStartingChat}
+                  onPress={endSession}
+                  style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
+                  <Text style={styles.changeProfileLabel}>Cambiar perfil</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isStartingChat }}
+                  disabled={isStartingChat}
+                  onPress={endSession}
+                  style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
+                  <Text style={styles.closeSessionLabel}>Cerrar sesión demo</Text>
+                </Pressable>
+              </View>
+            </View>
+          </FadeIn>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -166,40 +214,94 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.xl },
+  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
   content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
-  heading: { gap: spacing.xs },
-  brand: { color: colors.primary, fontSize: typography.small, fontWeight: '800', letterSpacing: 0.8 },
-  greeting: { color: colors.brand, fontSize: typography.title, lineHeight: 37, fontWeight: '800' },
-  demoLabel: { color: colors.muted, fontSize: typography.small, lineHeight: 20 },
-  actions: { gap: spacing.sm },
-  actionCard: {
-    minHeight: 132,
-    justifyContent: 'space-between',
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
+  greetingBlock: { gap: spacing.xxs },
+  greeting: { color: colors.ink, fontSize: typography.title, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
+  greetingSub: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 24 },
+  heroCard: {
+    overflow: 'hidden',
     gap: spacing.sm,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
+    padding: spacing.xl,
+    borderRadius: radii.xl,
+    backgroundColor: colors.accent,
+    ...shadows.card,
   },
-  primaryActionCard: { borderColor: colors.primary, backgroundColor: colors.primary },
-  actionHeading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  actionTitle: { color: colors.brand, fontSize: 19, lineHeight: 25, fontWeight: '800' },
-  actionDescription: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21 },
-  actionHint: { color: colors.primary, fontSize: typography.small, fontWeight: '700' },
-  primaryActionText: { color: colors.surface },
-  primaryActionDescription: { color: '#DBEAFE' },
+  heroGlowOne: {
+    position: 'absolute',
+    top: -60,
+    right: -40,
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+  },
+  heroGlowTwo: {
+    position: 'absolute',
+    bottom: -70,
+    left: -30,
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: 'rgba(20,26,60,0.22)',
+  },
+  heroIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 17,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    marginBottom: spacing.xs,
+  },
+  heroTitle: { color: colors.white, fontSize: 24, lineHeight: 30, fontWeight: '800', letterSpacing: -0.4 },
+  heroBody: { color: 'rgba(255,255,255,0.85)', fontSize: typography.small, lineHeight: 21 },
+  heroCtaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
+  heroCta: { color: colors.white, fontSize: typography.body, fontWeight: '800' },
   errorBanner: {
     gap: spacing.xxs,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#F3C2BE',
     borderRadius: radii.md,
     backgroundColor: colors.errorSoft,
   },
   errorTitle: { color: colors.error, fontSize: typography.small, fontWeight: '700' },
   errorText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
+  quickSection: { gap: spacing.sm },
+  sectionLabel: {
+    color: colors.muted,
+    fontSize: typography.caption,
+    fontWeight: '800',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
+  },
+  quickCard: {
+    minHeight: 84,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
+    ...shadows.soft,
+  },
+  quickIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickCopy: { flex: 1, gap: 2 },
+  quickTitle: { color: colors.ink, fontSize: typography.body, fontWeight: '800', letterSpacing: -0.2 },
+  quickDescription: { color: colors.textSecondary, fontSize: 13, lineHeight: 18 },
   sessionSection: {
     gap: spacing.xs,
     paddingTop: spacing.md,
@@ -209,7 +311,7 @@ const styles = StyleSheet.create({
   sessionTitle: { color: colors.muted, fontSize: typography.caption, fontWeight: '700', textTransform: 'uppercase' },
   sessionActions: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   textButton: { minHeight: layout.minTouchTarget, justifyContent: 'center', paddingHorizontal: spacing.sm },
-  changeProfileLabel: { color: colors.primary, fontSize: typography.small, fontWeight: '700' },
+  changeProfileLabel: { color: colors.accent, fontSize: typography.small, fontWeight: '700' },
   closeSessionLabel: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
   disabled: { opacity: 0.5 },
   pressed: { opacity: 0.68 },
