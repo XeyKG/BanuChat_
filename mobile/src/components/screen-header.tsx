@@ -20,7 +20,6 @@ export function ScreenHeader({
   return (
     <View style={styles.header}>
       <View style={styles.heading}>
-        <Text style={styles.brand}>BanuChat</Text>
         <Text style={styles.title}>{title}</Text>
         {subtitle !== undefined && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
@@ -50,37 +49,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.md,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.background,
   },
-  heading: { flex: 1 },
-  brand: {
-    color: colors.primary,
-    fontSize: typography.caption,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
+  heading: { flex: 1, gap: 2 },
   title: {
-    color: colors.brand,
+    color: colors.ink,
     fontSize: typography.heading,
     fontWeight: '800',
+    letterSpacing: -0.4,
     lineHeight: 28,
   },
   subtitle: {
     color: colors.textSecondary,
     fontSize: typography.small,
     lineHeight: 20,
-    marginTop: spacing.xxs,
   },
   action: {
-    minHeight: layout.minTouchTarget,
+    minHeight: 38,
     justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
   },
-  actionText: { color: colors.primary, fontSize: typography.small, fontWeight: '700' },
+  actionText: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
   actionDisabled: { opacity: 0.5 },
-  actionPressed: { opacity: 0.65 },
+  actionPressed: { opacity: 0.7 },
 });
