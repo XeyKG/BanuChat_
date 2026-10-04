@@ -8,10 +8,9 @@ import { loadDefaultIntentRouter } from "../../backend/api/dist/index.js";
 
 const EXPECTED_ARTIFACT_TYPE = "intent_routing_cases";
 const EXPECTED_CATALOG_VERSION = "1.1.0-draft";
-const EXPECTED_TOTAL_CASES = 154;
-const EXPECTED_HISTORICAL_CASES = 129;
-const EXPECTED_M3_1_CASES = 25;
-const ROUTER_REVISION = "7cfcc698c9c2b41dfbd1f33ec2f81c29e8e829ba";
+const EXPECTED_TOTAL_CASES = 158;
+const EXPECTED_THROUGH_K1_1_CASES = 154;
+const EXPECTED_POST_K1_1_CASES = 4;
 const execFileAsync = promisify(execFile);
 const EXPECTED_ROUTES = [
   "profile_progress",
@@ -41,8 +40,8 @@ const catalogUrl = new URL(
   repositoryRoot,
 );
 const resultsDirectory = new URL("results/", evaluationDirectory);
-const jsonResultUrl = new URL("k1-1-router-2026-10-03.json", resultsDirectory);
-const markdownResultUrl = new URL("k1-1-router-2026-10-03.md", resultsDirectory);
+const jsonResultUrl = new URL("k1-2-router-2026-10-04.json", resultsDirectory);
+const markdownResultUrl = new URL("k1-2-router-2026-10-04.md", resultsDirectory);
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -143,22 +142,38 @@ function validateCases(document) {
         errors.push(`${prefix}.tags debe ser un array de strings`);
       }
     });
-    const m3_1Count = document.cases.filter(
+    const postK1_1Count = document.cases.filter(
       (testCase) =>
         isRecord(testCase) &&
         Array.isArray(testCase.tags) &&
-        testCase.tags.includes("m3_1"),
+        testCase.tags.includes("m6_1_2"),
     ).length;
-    const historicalCount = document.cases.length - m3_1Count;
-    if (m3_1Count !== EXPECTED_M3_1_CASES) {
+    const throughK1_1Count = document.cases.length - postK1_1Count;
+    if (postK1_1Count !== EXPECTED_POST_K1_1_CASES) {
       errors.push(
-        `debe haber exactamente ${EXPECTED_M3_1_CASES} casos con tag m3_1; se encontraron ${m3_1Count}`,
+        `debe haber exactamente ${EXPECTED_POST_K1_1_CASES} casos con tag m6_1_2; se encontraron ${postK1_1Count}`,
       );
     }
-    if (historicalCount !== EXPECTED_HISTORICAL_CASES) {
+    if (throughK1_1Count !== EXPECTED_THROUGH_K1_1_CASES) {
       errors.push(
-        `debe haber exactamente ${EXPECTED_HISTORICAL_CASES} casos sin tag m3_1; se encontraron ${historicalCount}`,
+        `debe haber exactamente ${EXPECTED_THROUGH_K1_1_CASES} casos hasta K1.1; se encontraron ${throughK1_1Count}`,
       );
+    }
+    if (
+      document.cases.slice(0, EXPECTED_THROUGH_K1_1_CASES).some(
+        (testCase) =>
+          isRecord(testCase) &&
+          Array.isArray(testCase.tags) &&
+          testCase.tags.includes("m6_1_2"),
+      ) ||
+      document.cases.slice(EXPECTED_THROUGH_K1_1_CASES).some(
+        (testCase) =>
+          !isRecord(testCase) ||
+          !Array.isArray(testCase.tags) ||
+          !testCase.tags.includes("m6_1_2"),
+      )
+    ) {
+      errors.push("los casos m6_1_2 deben estar después de los 154 casos evaluados por K1.1");
     }
   }
   if (errors.length > 0) {
@@ -241,7 +256,7 @@ async function writeEvidenceExclusively(jsonContent, markdownContent) {
     if (jsonHandle !== undefined) await unlink(jsonResultUrl).catch(() => {});
     if (markdownHandle !== undefined) await unlink(markdownResultUrl).catch(() => {});
     if (error !== null && typeof error === "object" && error.code === "EEXIST") {
-      throw new Error("La evidencia K1.1 ya existe; se abortó sin sobrescribirla.");
+      throw new Error("La evidencia K1.2 ya existe; se abortó sin sobrescribirla.");
     }
     throw error;
   }
@@ -263,30 +278,29 @@ function markdownFor(result) {
     return `| ${route} | ${row.total} | ${row.route_correct} | ${row.exact_correct} |`;
   });
   const provenanceRows = [
-    ["historical_retained", result.by_provenance.historical_retained],
-    ["m3_1_incremental", result.by_provenance.m3_1_incremental],
+    ["through_k1_1", result.by_provenance.through_k1_1],
+    ["post_k1_1", result.by_provenance.post_k1_1],
     ["combined", result.by_provenance.combined],
   ].map(
     ([name, row]) =>
       `| ${name} | ${row.total_cases} | ${row.route_correct} | ${row.exact_correct} | ${row.unexpected_fast_path} | ${row.unexpected_fallback} | ${row.wrong_nonfallback_route} |`,
   );
 
-  return `# K1.1 — Reevaluación reproducible del Intent Router post-M3.1
+  return `# K1.2 — Reevaluación reproducible del Intent Router post-M6.1.2
 
 ## Propósito
 
-Evaluar la conformidad del router determinista productivo post-M3.1 con los casos de diseño versionados en \`eval/intent-routing/cases.json\`, preservando la evidencia histórica K1.
+Evaluar la conformidad del router determinista productivo post-M6.1.2 con los casos de diseño versionados en \`eval/intent-routing/cases.json\`, preservando las evidencias históricas K1 y K1.1.
 
 ## Identificación e integridad
 
-- Revisión del repositorio al ejecutar: \`${result.repository_revision}\`
-- Última revisión funcional declarada del router/catálogo/casos: \`${result.router_revision}\`
+- Commit base del working tree al ejecutar: \`${result.repository_revision}\`
 - Versión del catálogo: \`${result.catalog_version}\`
 - SHA-256 de cases.json: \`${result.inputs.cases_sha256}\`
 - SHA-256 de intent-routing.catalog.json: \`${result.inputs.catalog_sha256}\`
 - Casos ejecutados: ${metric.total_cases}
-- Casos históricos retenidos: ${result.inputs.historical_retained_cases}
-- Casos incrementales M3.1: ${result.inputs.m3_1_incremental_cases}
+- Casos históricos hasta K1.1: ${result.inputs.through_k1_1_cases}
+- Casos nuevos post-K1.1: ${result.inputs.post_k1_1_cases}
 
 ## Métricas combinadas observadas
 
@@ -312,15 +326,15 @@ ${routeRows.join("\n")}
 
 ${mismatchLines.join("\n")}
 
-El detalle estructurado completo de cada mismatch está en \`k1-1-router-2026-10-03.json\`. No se atribuyen causas automáticamente; solo se indican los campos diferentes.
+El detalle estructurado completo de cada mismatch está en \`k1-2-router-2026-10-04.json\`. No se atribuyen causas automáticamente; solo se indican los campos diferentes.
 
 ## Limitaciones de interpretación
 
 > **Advertencia:** Estos resultados miden conformidad contra casos de diseño versionados del Intent Router. No representan accuracy de un modelo de IA, generalización sobre consultas reales ni evaluación de calidad RAG.
 
-\`cases.json\` es un artefacto de diseño, no un dataset externo independiente. Los 25 casos M3.1 se desarrollaron dentro del mismo proceso de modificación del router y, por ello, no constituyen validación independiente.
+\`cases.json\` es un artefacto de diseño, no un dataset externo independiente. Los ${result.inputs.post_k1_1_cases} casos post-K1.1 se desarrollaron durante esta corrección como regresión y conformidad; por ello, no constituyen validación externa independiente.
 
-Un resultado de 154/154, si ocurre, demuestra conformidad y ausencia de regresión sobre estos casos versionados; no demuestra desempeño poblacional ni comportamiento sobre consultas reales.
+Un resultado de ${metric.total_cases}/${metric.total_cases}, si ocurre, demuestra conformidad y ausencia de regresión sobre estos casos versionados; no demuestra desempeño poblacional ni comportamiento sobre consultas reales.
 
 ## Ejecución
 
@@ -357,8 +371,8 @@ async function main() {
   );
   const mismatches = [];
   const combinedAccumulator = newMetricAccumulator();
-  const historicalAccumulator = newMetricAccumulator();
-  const m3_1Accumulator = newMetricAccumulator();
+  const throughK1_1Accumulator = newMetricAccumulator();
+  const postK1_1Accumulator = newMetricAccumulator();
 
   for (const testCase of cases) {
     const actual = router.route({
@@ -373,12 +387,12 @@ async function main() {
     const routeCorrect = actual.route === expected.route;
     const exactCorrect = routeCorrect && deepEqual(actual.parameters, expected.parameters) &&
       actual.response_variant === expected.response_variant;
-    const provenance = testCase.tags.includes("m3_1")
-      ? "m3_1_incremental"
-      : "historical_retained";
-    const provenanceAccumulator = provenance === "m3_1_incremental"
-      ? m3_1Accumulator
-      : historicalAccumulator;
+    const provenance = testCase.tags.includes("m6_1_2")
+      ? "post_k1_1"
+      : "through_k1_1";
+    const provenanceAccumulator = provenance === "post_k1_1"
+      ? postK1_1Accumulator
+      : throughK1_1Accumulator;
     recordMetrics(
       combinedAccumulator,
       expected.route,
@@ -423,24 +437,23 @@ async function main() {
 
   const repositoryRevision = await readRepositoryRevision();
   const combinedMetrics = finalizedMetrics(combinedAccumulator);
-  const historicalMetrics = finalizedMetrics(historicalAccumulator);
-  const m3_1Metrics = finalizedMetrics(m3_1Accumulator);
+  const throughK1_1Metrics = finalizedMetrics(throughK1_1Accumulator);
+  const postK1_1Metrics = finalizedMetrics(postK1_1Accumulator);
   const result = {
     evaluation_type: "intent_router_design_case_conformance",
     repository_revision: repositoryRevision,
-    router_revision: ROUTER_REVISION,
     catalog_version: EXPECTED_CATALOG_VERSION,
     inputs: {
       cases_sha256: sha256(casesBytes),
       catalog_sha256: sha256(catalogBytes),
       total_cases: cases.length,
-      historical_retained_cases: historicalMetrics.total_cases,
-      m3_1_incremental_cases: m3_1Metrics.total_cases,
+      through_k1_1_cases: throughK1_1Metrics.total_cases,
+      post_k1_1_cases: postK1_1Metrics.total_cases,
     },
     metrics: combinedMetrics,
     by_provenance: {
-      historical_retained: historicalMetrics,
-      m3_1_incremental: m3_1Metrics,
+      through_k1_1: throughK1_1Metrics,
+      post_k1_1: postK1_1Metrics,
       combined: combinedMetrics,
     },
     by_expected_route: byExpectedRoute,

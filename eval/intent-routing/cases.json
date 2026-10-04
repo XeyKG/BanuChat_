@@ -2660,6 +2660,76 @@
         "lexical",
         "near_negative"
       ]
+    },
+    {
+      "id": "m6_1_2_consult_progress",
+      "input": "Quiero consultar mi progreso",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "reason": "Quiero y consultar son rellenos controlados; mi y progreso conservan las señales fuertes de la intención.",
+      "tags": [
+        "m6_1_2",
+        "lexical",
+        "positive"
+      ]
+    },
+    {
+      "id": "m6_1_2_consult_progress_negated",
+      "input": "No quiero consultar mi progreso",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "La exclusión global de negación conserva el fallback aunque los demás tokens coincidan.",
+      "tags": [
+        "m6_1_2",
+        "safety",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m6_1_2_consult_progress_compound",
+      "input": "Quiero consultar mi progreso y anuncios vigentes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "El marcador y bloquea la solicitud que combina progreso y anuncios.",
+      "tags": [
+        "m6_1_2",
+        "compound",
+        "near_negative"
+      ]
+    },
+    {
+      "id": "m6_1_2_consult_progress_unknown_residual",
+      "input": "Quiero consultar mi progreso detallado",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "reason": "Detallado permanece como token residual desconocido y fuerza el fallback.",
+      "tags": [
+        "m6_1_2",
+        "lexical",
+        "near_negative"
+      ]
     }
   ]
 }

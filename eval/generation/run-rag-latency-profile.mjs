@@ -82,13 +82,15 @@ function git(...args) {
     stdio: ["ignore", "pipe", "ignore"] }).trim();
 }
 
-function gitState() {
+function gitState(enforceAllowedChanges = true) {
   const changed = git("diff", "--name-only", "HEAD").split(/\r?\n/u).filter(Boolean);
   const untracked = git("ls-files", "--others", "--exclude-standard")
     .split(/\r?\n/u).filter(Boolean);
   const paths = [...new Set([...changed, ...untracked])];
-  assert(paths.every((path) => ALLOWED_CHANGES.has(path)),
-    "Hay cambios Git fuera de los archivos L1 autorizados.");
+  if (enforceAllowedChanges) {
+    assert(paths.every((path) => ALLOWED_CHANGES.has(path)),
+      "Hay cambios Git fuera de los archivos L1 autorizados.");
+  }
   return { implementation_revision: git("rev-parse", "HEAD"),
     implementation_changed_paths: paths };
 }
@@ -645,7 +647,7 @@ async function main() {
   "Uso: node eval/generation/run-rag-latency-profile.mjs [--l1-b | --dry-run | --validate-l1-cases | --diagnose-case G0-01..G0-10]");
   const formalRun = l1B ? FORMAL_RUNS.l1_b : FORMAL_RUNS.l1;
   validateFormalRunConfiguration(bogotaDate(new Date()));
-  const state = gitState();
+  const state = gitState(!functionalValidation);
   const caseBytes = await readFile(diagnosticId === null ? L1_CASES_PATH : G0_PROMPTS_PATH);
   const cases = diagnosticId === null
     ? validateL1Cases(JSON.parse(caseBytes.toString("utf8")))

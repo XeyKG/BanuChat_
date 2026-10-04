@@ -257,13 +257,17 @@ test("returns insufficient evidence without calling the generator when retrieval
   });
 });
 
-test("recognizes only the exact insufficient-evidence marker, allowing surrounding whitespace", async (t) => {
-  for (const marker of [
+test("treats an exact or mixed insufficient-evidence marker token conservatively", async (t) => {
+  for (const generatedContent of [
     "EVIDENCIA_INSUFICIENTE",
     " \n\tEVIDENCIA_INSUFICIENTE\r\n ",
+    "Respuesta sustantiva.\n\nEVIDENCIA_INSUFICIENTE",
+    "EVIDENCIA_INSUFICIENTE\n\nRespuesta sustantiva.",
+    "Respuesta sustantiva. EVIDENCIA_INSUFICIENTE",
+    "EVIDENCIA_INSUFICIENTE Respuesta sustantiva.",
   ]) {
-    await t.test(JSON.stringify(marker), async () => {
-      const fake = fakeDependencies([chunk()], marker);
+    await t.test(JSON.stringify(generatedContent), async () => {
+      const fake = fakeDependencies([chunk()], generatedContent);
       const answer = await generateDocumentRagAnswer(fake.dependencies, {
         release_id: RELEASE_ID,
         query: "Pregunta sintética",
@@ -273,21 +277,27 @@ test("recognizes only the exact insufficient-evidence marker, allowing surroundi
         answer.content,
         "No encontré evidencia suficiente en los documentos disponibles para responder esa consulta.",
       );
+      assert.doesNotMatch(answer.content, /EVIDENCIA_INSUFICIENTE/u);
       assert.deepEqual(answer.citations, []);
       assert.deepEqual(answer.citation_records, []);
     });
   }
+});
 
-  const normal = fakeDependencies(
+test("does not treat a longer token containing the marker text as control output", async () => {
+  const fake = fakeDependencies(
     [chunk()],
-    "La evidencia es insuficiente para otro detalle.",
+    "El texto EVIDENCIA_INSUFICIENTE_EXTRA no es el marcador exacto.",
   );
-  const answer = await generateDocumentRagAnswer(normal.dependencies, {
+  const answer = await generateDocumentRagAnswer(fake.dependencies, {
     release_id: RELEASE_ID,
     query: "Pregunta sintética",
   });
   assert.equal(answer.insufficient_evidence, false);
-  assert.equal(answer.content, "La evidencia es insuficiente para otro detalle.");
+  assert.equal(
+    answer.content,
+    "El texto EVIDENCIA_INSUFICIENTE_EXTRA no es el marcador exacto.",
+  );
   assert.equal(answer.citations.length, 1);
 });
 

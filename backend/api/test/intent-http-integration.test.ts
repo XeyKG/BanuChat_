@@ -21,6 +21,7 @@ const SHA256 = "a".repeat(64);
 const PROFILE_KEY = "perfil_demo";
 const FAST_PATH_PROMPT = "mi progreso";
 const LEXICAL_FAST_PATH_PROMPT = "¿Cuál es mi progreso?";
+const M6_1_2_FAST_PATH_PROMPT = "Quiero consultar mi progreso";
 const GREETING_PROMPT = "hola";
 const GREETING_CONTENT =
   "Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?";
@@ -214,6 +215,10 @@ test("J2.1 real catalog routes HTTP progress to fast path and persists provenanc
 
 test("M3.1 lexical progress uses the real HTTP fast path and preserves the original text", async () => {
   await assertProgressFastPath(LEXICAL_FAST_PATH_PROMPT);
+});
+
+test("M6.1.2 spontaneous progress phrasing uses the real HTTP fast path", async () => {
+  await assertProgressFastPath(M6_1_2_FAST_PATH_PROMPT);
 });
 
 test("M6.1.1 real catalog renders HTTP greeting without Document RAG", async () => {

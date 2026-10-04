@@ -68,7 +68,7 @@ test("loads and compiles the repository catalog", async () => {
   assert.equal(router.catalog_version, "1.1.0-draft");
 });
 
-test("all historical and M3.1 design cases execute as routing regression", () => {
+test("all design cases through M6.1.2 execute as routing regression", () => {
   const dataset = JSON.parse(readFileSync(CASES_PATH, "utf8")) as {
     catalog_version: string;
     cases: Array<{
@@ -83,7 +83,7 @@ test("all historical and M3.1 design cases execute as routing regression", () =>
   const router = createIntentRouter(CATALOG);
   assert.equal(router.catalog_valid, true);
   assert.equal(dataset.catalog_version, router.catalog_version);
-  assert.equal(dataset.cases.length, 154);
+  assert.equal(dataset.cases.length, 158);
   assert.equal(new Set(dataset.cases.map((item) => item.id)).size, dataset.cases.length);
   for (const item of dataset.cases) {
     assert.deepEqual(
@@ -97,10 +97,24 @@ test("all historical and M3.1 design cases execute as routing regression", () =>
 test("lexical rules require every signal and only allowlisted residual tokens", () => {
   assert.deepEqual(route("¿Cuál es mi progreso?"), expected("profile_progress", { limit: 20 }));
   assert.deepEqual(route("¿Cómo va mi avance?"), expected("profile_progress", { limit: 20 }));
+  assert.deepEqual(
+    route("Quiero consultar mi progreso"),
+    expected("profile_progress", { limit: 20 }),
+  );
   assert.deepEqual(route("¿Cuál es mi progreso exacto?"), expected("agent_fallback", {}));
   assert.deepEqual(route("¿Cuál es mi progresograma?"), expected("agent_fallback", {}));
   assert.deepEqual(route("¿Qué tengo hoy?"), expected("agent_fallback", {}));
   assert.deepEqual(route("mi progreso"), expected("profile_progress", { limit: 20 }));
+});
+
+test("M6.1.2 progress phrasing preserves conservative guards", () => {
+  for (const content of [
+    "No quiero consultar mi progreso",
+    "Quiero consultar mi progreso y anuncios vigentes",
+    "Quiero consultar mi progreso detallado",
+  ]) {
+    assert.deepEqual(route(content), expected("agent_fallback", {}));
+  }
 });
 
 test("lexical fillers are limited to five residual tokens", () => {

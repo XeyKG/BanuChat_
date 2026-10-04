@@ -7,10 +7,10 @@ El fallback conversacional actual es Document RAG directo.
 El cliente Ollama de query usa `options.num_ctx` de la receta de la release
 consultada. Comprueba que el contexto nativo anunciado por `/api/show` sea al
 menos el solicitado y mantiene la dimensión exacta; ambos valores pueden ser
-distintos. Por ello admite la release histórica L1 con query 32768 y una futura
-release con query 4096. La receta candidata OPT-1D1 se describe en
-[backend/rag](../rag/README.md); todavía requiere una nueva configuración/release
-y no tiene medición de latencia L1-B.
+distintos. La release actual `6a770ce7-13b7-4b0b-95ae-0c193fa0d655` usa
+`document.options.num_ctx=32768` y `query.options.num_ctx=4096`. Su medición
+formal L1-B ya fue ejecutada y está versionada en
+[`eval/generation/results`](../../eval/generation/results/).
 
 - [OpenAPI 3.1.0](openapi.yaml): contrato `1.0.0-draft`, serializado en JSON
   (subconjunto de YAML 1.2) para facilitar validación local sin dependencias.

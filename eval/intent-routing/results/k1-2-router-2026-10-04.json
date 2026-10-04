@@ -1,0 +1,102 @@
+{
+  "evaluation_type": "intent_router_design_case_conformance",
+  "repository_revision": "6c3b1678664598ff9883accab3673a21ab42fa6a",
+  "catalog_version": "1.1.0-draft",
+  "inputs": {
+    "cases_sha256": "ed01899284d43aacf136a0ce969b99ff2f3456017c5ab2bcc3e650eea1a4cefc",
+    "catalog_sha256": "6673973f8c2e25b70025d854ce458ebcc48f4342eccf40753355ccced2a0749f",
+    "total_cases": 158,
+    "through_k1_1_cases": 154,
+    "post_k1_1_cases": 4
+  },
+  "metrics": {
+    "total_cases": 158,
+    "route_correct": 158,
+    "exact_correct": 158,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 0,
+    "wrong_nonfallback_route": 0,
+    "route_accuracy": 1,
+    "exact_case_accuracy": 1
+  },
+  "by_provenance": {
+    "through_k1_1": {
+      "total_cases": 154,
+      "route_correct": 154,
+      "exact_correct": 154,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "post_k1_1": {
+      "total_cases": 4,
+      "route_correct": 4,
+      "exact_correct": 4,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "combined": {
+      "total_cases": 158,
+      "route_correct": 158,
+      "exact_correct": 158,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_expected_route": {
+    "profile_progress": {
+      "total": 16,
+      "route_correct": 16,
+      "exact_correct": 16
+    },
+    "course_catalog": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "calendar_events": {
+      "total": 17,
+      "route_correct": 17,
+      "exact_correct": 17
+    },
+    "announcements": {
+      "total": 13,
+      "route_correct": 13,
+      "exact_correct": 13
+    },
+    "document_lookup": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "capabilities_help": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "basic_social": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "known_out_of_scope": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "agent_fallback": {
+      "total": 57,
+      "route_correct": 57,
+      "exact_correct": 57
+    }
+  },
+  "mismatches": []
+}
