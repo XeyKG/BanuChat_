@@ -24,6 +24,8 @@ import { useSession } from '@/session/session-context';
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
 
+const CHAT_INTRODUCTION =
+  'Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?';
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -131,7 +133,10 @@ export default function ChatScreen() {
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
           {messages.length === 0 && (
-            <Text style={styles.emptyText}>Escribe un mensaje para comenzar.</Text>
+            <View style={[styles.messageCard, styles.assistantCard, styles.introductionCard]}>
+              <Text style={styles.messageRole}>BanuChat</Text>
+              <Text style={styles.messageContent}>{CHAT_INTRODUCTION}</Text>
+            </View>
           )}
 
           {messages.map((message) => (
@@ -254,10 +259,10 @@ const styles = StyleSheet.create({
   backButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 },
   backButtonText: { color: '#1d4ed8', fontSize: 14, fontWeight: '600' },
   messageList: { flexGrow: 1, gap: 12, padding: 16 },
-  emptyText: { color: '#64748b', textAlign: 'center', marginTop: 32 },
   messageCard: { maxWidth: '88%', padding: 14, borderRadius: 14 },
   userCard: { alignSelf: 'flex-end', backgroundColor: '#dbeafe' },
   assistantCard: { alignSelf: 'flex-start', backgroundColor: '#fff' },
+  introductionCard: { marginTop: 16 },
   messageRole: { color: '#475569', fontSize: 12, fontWeight: '700', marginBottom: 5 },
   messageContent: { color: '#0f172a', fontSize: 16, lineHeight: 23 },
   evidenceWarning: { color: '#92400e', fontWeight: '700', marginTop: 12 },

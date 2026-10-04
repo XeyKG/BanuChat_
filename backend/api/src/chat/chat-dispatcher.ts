@@ -12,7 +12,10 @@ import {
 } from "../application/profile-progress.js";
 import {
   renderAnnouncements,
+  renderBasicSocial,
   renderCalendarEvents,
+  renderCapabilitiesHelp,
+  renderKnownOutOfScope,
   renderProfileProgress,
 } from "./chat-renderers.js";
 import type {
@@ -89,6 +92,32 @@ export async function dispatchChatQuery(
         : { query: decision.parameters.query }),
     } satisfies AnnouncementsInput);
     return renderAnnouncements(result);
+  }
+
+  if (decision.route === "basic_social") {
+    const { response_variant } = decision;
+    if (
+      response_variant !== "greeting" &&
+      response_variant !== "thanks" &&
+      response_variant !== "farewell"
+    ) {
+      return AGENT_FALLBACK;
+    }
+    return renderBasicSocial(input.release_id, response_variant);
+  }
+
+  if (
+    decision.route === "capabilities_help" &&
+    decision.response_variant === "capabilities"
+  ) {
+    return renderCapabilitiesHelp(input.release_id);
+  }
+
+  if (
+    decision.route === "known_out_of_scope" &&
+    decision.response_variant === "not_available"
+  ) {
+    return renderKnownOutOfScope(input.release_id);
   }
 
   return AGENT_FALLBACK;

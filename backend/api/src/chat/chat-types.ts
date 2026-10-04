@@ -4,6 +4,7 @@ import type { IntentRouter } from "../routing/intent-router-types.js";
 export interface ChatDispatchInput {
   content: string;
   profile_key: string | null;
+  release_id: string;
   now: string;
 }
 
@@ -89,7 +90,13 @@ export type PersistenceCitation =
 
 export interface FastPathAnswer {
   kind: "answered";
-  route: "profile_progress" | "calendar_events" | "announcements";
+  route:
+    | "profile_progress"
+    | "calendar_events"
+    | "announcements"
+    | "basic_social"
+    | "capabilities_help"
+    | "known_out_of_scope";
   release_id: string;
   content: string;
   insufficient_evidence: boolean;

@@ -22,6 +22,53 @@ const ANNOUNCEMENT_STATUS_LABELS = {
   expired: "vencido",
 } as const;
 
+const SOCIAL_RESPONSES = {
+  greeting:
+    "Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?",
+  thanks: "Con gusto. Si necesitas otra consulta, aquí estoy.",
+  farewell:
+    "Hasta luego. Puedes volver cuando quieras para consultar la información disponible.",
+} as const;
+
+function staticAnswer(
+  route: "basic_social" | "capabilities_help" | "known_out_of_scope",
+  releaseId: string,
+  content: string,
+): FastPathAnswer {
+  return {
+    kind: "answered",
+    route,
+    release_id: releaseId,
+    content,
+    insufficient_evidence: false,
+    citations: [],
+    citation_records: [],
+  };
+}
+
+export function renderBasicSocial(
+  releaseId: string,
+  variant: keyof typeof SOCIAL_RESPONSES,
+): FastPathAnswer {
+  return staticAnswer("basic_social", releaseId, SOCIAL_RESPONSES[variant]);
+}
+
+export function renderCapabilitiesHelp(releaseId: string): FastPathAnswer {
+  return staticAnswer(
+    "capabilities_help",
+    releaseId,
+    "Puedo ayudarte a consultar el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
+  );
+}
+
+export function renderKnownOutOfScope(releaseId: string): FastPathAnswer {
+  return staticAnswer(
+    "known_out_of_scope",
+    releaseId,
+    "Esa información o función no está disponible en este prototipo de demostración.",
+  );
+}
+
 function citation(
   index: number,
   sourceKind: Exclude<PresentationCitation["source_kind"], "document">,

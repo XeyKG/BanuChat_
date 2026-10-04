@@ -32,8 +32,8 @@ Abre el proyecto con Expo Go en el teléfono Android.
 Implementado: Expo SDK 57, React Native + TypeScript, Expo Router, URL base de API
 configurable, sesión local para perfiles sintéticos, Home, navegación protegida,
 creación de conversación al abrir Chat, chat con citas, estados de carga y error,
-calendario y progreso de cursos. M1–M5 fueron
-validados manualmente con Expo Go en un dispositivo Android físico. Véase el
+presentación local de Banu al iniciar el chat, calendario y progreso de cursos.
+M1–M5 fueron validados manualmente con Expo Go en un dispositivo Android físico. Véase el
 [checkpoint de evidencia](../eval/integration/results/j3-checkpoint-2026-10-03.md).
 
 La aplicación implementa un flujo local de sesión para perfiles sintéticos de

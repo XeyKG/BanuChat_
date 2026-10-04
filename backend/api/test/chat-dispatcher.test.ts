@@ -16,6 +16,7 @@ const HASH = "a".repeat(64);
 const DEFAULT_INPUT: ChatDispatchInput = {
   content: "consulta",
   profile_key: "perfil_demo",
+  release_id: RELEASE_ID,
   now: "2026-10-01T09:00:00-05:00",
 };
 
@@ -381,14 +382,129 @@ test("anuncios vacíos responden sin citas", async () => {
   assert.deepEqual(result.citation_records, []);
 });
 
-test("las rutas fuera de los tres fast paths derivan a fallback sin SQL", async () => {
+test("basic_social greeting responde de forma determinista sin SQL", async () => {
+  const { router } = fakeRouter({
+    route: "basic_social",
+    parameters: {},
+    response_variant: "greeting",
+  });
+  const { sql, calls } = fakeSql([]);
+
+  assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+    kind: "answered",
+    route: "basic_social",
+    release_id: RELEASE_ID,
+    content:
+      "Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?",
+    insufficient_evidence: false,
+    citations: [],
+    citation_records: [],
+  });
+  assert.equal(calls.length, 0);
+});
+
+test("basic_social responde thanks y farewell sin SQL", async () => {
+  const cases = [
+    ["thanks", "Con gusto. Si necesitas otra consulta, aquí estoy."],
+    [
+      "farewell",
+      "Hasta luego. Puedes volver cuando quieras para consultar la información disponible.",
+    ],
+  ] as const;
+
+  for (const [responseVariant, content] of cases) {
+    const { router } = fakeRouter({
+      route: "basic_social",
+      parameters: {},
+      response_variant: responseVariant,
+    });
+    const { sql, calls } = fakeSql([]);
+
+    assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+      kind: "answered",
+      route: "basic_social",
+      release_id: RELEASE_ID,
+      content,
+      insufficient_evidence: false,
+      citations: [],
+      citation_records: [],
+    });
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("capabilities_help describe solo capacidades disponibles sin SQL", async () => {
+  const { router } = fakeRouter({
+    route: "capabilities_help",
+    parameters: {},
+    response_variant: "capabilities",
+  });
+  const { sql, calls } = fakeSql([]);
+
+  assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+    kind: "answered",
+    route: "capabilities_help",
+    release_id: RELEASE_ID,
+    content:
+      "Puedo ayudarte a consultar el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
+    insufficient_evidence: false,
+    citations: [],
+    citation_records: [],
+  });
+  assert.equal(calls.length, 0);
+});
+
+test("known_out_of_scope informa el límite del prototipo sin SQL", async () => {
+  const { router } = fakeRouter({
+    route: "known_out_of_scope",
+    parameters: {},
+    response_variant: "not_available",
+  });
+  const { sql, calls } = fakeSql([]);
+
+  assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+    kind: "answered",
+    route: "known_out_of_scope",
+    release_id: RELEASE_ID,
+    content:
+      "Esa información o función no está disponible en este prototipo de demostración.",
+    insufficient_evidence: false,
+    citations: [],
+    citation_records: [],
+  });
+  assert.equal(calls.length, 0);
+});
+
+test("variantes estáticas incompatibles derivan a fallback sin SQL", async () => {
+  const decisions: IntentRoutingDecision[] = [
+    { route: "basic_social", parameters: {}, response_variant: null },
+    {
+      route: "capabilities_help",
+      parameters: {},
+      response_variant: "greeting",
+    },
+    {
+      route: "known_out_of_scope",
+      parameters: {},
+      response_variant: "capabilities",
+    },
+  ];
+
+  for (const decision of decisions) {
+    const { router } = fakeRouter(decision);
+    const { sql, calls } = fakeSql([]);
+    assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+      kind: "agent_fallback",
+    });
+    assert.equal(calls.length, 0);
+  }
+});
+
+test("las rutas todavía no implementadas derivan a fallback sin SQL", async () => {
   const routes = [
     "agent_fallback",
     "course_catalog",
     "document_lookup",
-    "basic_social",
-    "capabilities_help",
-    "known_out_of_scope",
   ] as const;
 
   for (const route of routes) {

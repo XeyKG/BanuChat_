@@ -21,6 +21,9 @@ const SHA256 = "a".repeat(64);
 const PROFILE_KEY = "perfil_demo";
 const FAST_PATH_PROMPT = "mi progreso";
 const LEXICAL_FAST_PATH_PROMPT = "¿Cuál es mi progreso?";
+const GREETING_PROMPT = "hola";
+const GREETING_CONTENT =
+  "Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?";
 const RAG_PROMPT = "¿Qué información debo incluir al reportar una incidencia?";
 const RAG_CONTENT = "Respuesta documental sintética de integración.";
 
@@ -211,6 +214,34 @@ test("J2.1 real catalog routes HTTP progress to fast path and persists provenanc
 
 test("M3.1 lexical progress uses the real HTTP fast path and preserves the original text", async () => {
   await assertProgressFastPath(LEXICAL_FAST_PATH_PROMPT);
+});
+
+test("M6.1.1 real catalog renders HTTP greeting without Document RAG", async () => {
+  const sql = new ScriptedSqlClient([conversationStep(), persistenceStep()]);
+  let documentRagCalls = 0;
+  const documentRag: DocumentRagResponder = async () => {
+    documentRagCalls++;
+    throw new Error("Document RAG must not run for a static greeting");
+  };
+
+  await withRuntimeServer(sql, documentRag, async (baseUrl) => {
+    const result = await postMessage(baseUrl, GREETING_PROMPT);
+    assert.equal(result.conversation_id, CONVERSATION_ID);
+    assert.equal(result.user_message.content, GREETING_PROMPT);
+    assert.equal(result.assistant_message.content, GREETING_CONTENT);
+    assert.equal(result.assistant_message.insufficient_evidence, false);
+    assert.deepEqual(result.assistant_message.citations, []);
+    assert.equal(documentRagCalls, 0);
+
+    const call = persistenceCall(sql);
+    assert.equal(call.values?.[0], CONVERSATION_ID);
+    assert.equal(call.values?.[1], RELEASE_ID);
+    assert.equal(call.values?.[3], GREETING_PROMPT);
+    assert.equal(call.values?.[4], GREETING_CONTENT);
+    assert.equal(call.values?.[5], false);
+    assert.deepEqual(citationRecords(call), []);
+    sql.assertComplete();
+  });
 });
 
 test("J2.2 real catalog routes HTTP fallback to deterministic Document RAG", async () => {

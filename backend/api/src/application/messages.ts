@@ -448,6 +448,7 @@ export async function sendMessage(
       {
         content: input.content,
         profile_key: context.profile_key,
+        release_id: context.dataset_release_id,
         now: input.now,
       },
     );
