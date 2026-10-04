@@ -8,7 +8,10 @@ import {
   type CourseProgress,
   type ProgressStatus,
 } from '@/api/progress';
+import { AppButton } from '@/components/app-button';
+import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
+import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 type ProgressFilter = 'all' | ProgressStatus;
@@ -91,146 +94,180 @@ export default function ProgressScreen() {
 
   if (activeProfile === null || profileAlias === null) return null;
 
+  const visibleAlias = authoritativeAlias ?? profileAlias;
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      <ScreenHeader
+        onAction={() => router.replace('/home')}
+        subtitle={`Perfil activo: ${visibleAlias}`}
+        title="Progreso"
+      />
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
+        <View style={styles.content}>
           <View>
-            <Text style={styles.brand}>BanuChat</Text>
-            <Text style={styles.title}>Progreso</Text>
+            <Text style={styles.sectionLabel}>Filtrar por estado</Text>
+            <View accessibilityRole="radiogroup" style={styles.filters}>
+              {FILTERS.map((option) => {
+                const isSelected = filter === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    accessibilityLabel={`Mostrar cursos ${option.label.toLowerCase()}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: isSelected }}
+                    onPress={() => selectFilter(option.value)}
+                    style={({ pressed }) => [
+                      styles.filterButton,
+                      isSelected && styles.filterButtonSelected,
+                      pressed && styles.pressed,
+                    ]}>
+                    <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
+                      {isSelected ? `✓ ${option.label}` : option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace('/home')}
-            style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver</Text>
-          </Pressable>
-        </View>
 
-        <Text style={styles.profileLabel}>Perfil: {authoritativeAlias ?? profileAlias}</Text>
+          {loadState === 'loading' && (
+            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
+              <ActivityIndicator
+                accessibilityLabel="Cargando progreso"
+                size="large"
+                color={colors.primary}
+              />
+              <Text style={styles.stateText}>Cargando progreso...</Text>
+            </View>
+          )}
 
-        <View accessibilityRole="radiogroup" style={styles.filters}>
-          {FILTERS.map((option) => {
-            const isSelected = filter === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: isSelected }}
-                onPress={() => selectFilter(option.value)}
-                style={[styles.filterButton, isSelected && styles.filterButtonSelected]}>
-                <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
-                  {option.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+          {loadState === 'error' && (
+            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
+              <Text style={styles.stateTitle}>No fue posible cargar el progreso</Text>
+              <Text style={styles.stateText}>Comprueba la conexión e intenta nuevamente.</Text>
+              <AppButton label="Reintentar" onPress={retry} style={styles.retryButton} />
+            </View>
+          )}
 
-        {loadState === 'loading' && (
-          <View style={styles.stateContainer}>
-            <ActivityIndicator size="large" color="#1d4ed8" />
-            <Text style={styles.stateText}>Cargando progreso...</Text>
-          </View>
-        )}
+          {loadState === 'success' && courses.length === 0 && (
+            <View style={styles.stateCard}>
+              <Text style={styles.stateTitle}>Sin cursos</Text>
+              <Text style={styles.stateText}>No hay cursos con el estado seleccionado.</Text>
+            </View>
+          )}
 
-        {loadState === 'error' && (
-          <View style={styles.stateContainer}>
-            <Text style={styles.stateText}>No fue posible cargar el progreso.</Text>
-            <Pressable accessibilityRole="button" onPress={retry} style={styles.retryButton}>
-              <Text style={styles.retryButtonText}>Reintentar</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {loadState === 'success' && courses.length === 0 && (
-          <Text style={styles.stateText}>No hay cursos con este estado.</Text>
-        )}
-
-        {loadState === 'success' && courses.length > 0 && (
-          <View style={styles.courseList}>
-            {courses.map((course) => (
-              <View key={course.course_key} style={styles.courseCard}>
-                <Text style={styles.courseName}>{course.course_name}</Text>
-                <Text style={styles.status}>{STATUS_LABELS[course.status]}</Text>
-                <View style={styles.progressRow}>
-                  <View style={styles.progressTrack}>
-                    <View
-                      style={[
-                        styles.progressFill,
-                        { width: `${course.progress_percent}%` as `${number}%` },
-                      ]}
-                    />
+          {loadState === 'success' && courses.length > 0 && (
+            <View style={styles.courseList}>
+              {courses.map((course) => (
+                <View key={course.course_key} style={styles.courseCard}>
+                  <View style={styles.courseHeading}>
+                    <Text style={styles.courseName}>{course.course_name}</Text>
+                    <View style={styles.statusBadge}>
+                      <Text style={styles.status}>{STATUS_LABELS[course.status]}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.percent}>{course.progress_percent} %</Text>
+                  <View
+                    accessibilityLabel={`${course.progress_percent} por ciento completado`}
+                    accessibilityRole="progressbar"
+                    accessibilityValue={{ min: 0, max: 100, now: course.progress_percent }}
+                    style={styles.progressBlock}>
+                    <View style={styles.progressRow}>
+                      <Text style={styles.progressLabel}>Avance</Text>
+                      <Text style={styles.percent}>{course.progress_percent}%</Text>
+                    </View>
+                    <View style={styles.progressTrack}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          { width: `${course.progress_percent}%` as `${number}%` },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                  {(course.started_at !== null || course.completed_at !== null) && (
+                    <View style={styles.dateBlock}>
+                      {course.started_at !== null && (
+                        <Text style={styles.dateText}>
+                          <Text style={styles.dateLabel}>Inicio: </Text>
+                          {formatBogotaDateTime(course.started_at)}
+                        </Text>
+                      )}
+                      {course.completed_at !== null && (
+                        <Text style={styles.dateText}>
+                          <Text style={styles.dateLabel}>Finalización: </Text>
+                          {formatBogotaDateTime(course.completed_at)}
+                        </Text>
+                      )}
+                    </View>
+                  )}
                 </View>
-                {course.started_at !== null && (
-                  <Text style={styles.dateText}>
-                    Inicio: {formatBogotaDateTime(course.started_at)}
-                  </Text>
-                )}
-                {course.completed_at !== null && (
-                  <Text style={styles.dateText}>
-                    Finalización: {formatBogotaDateTime(course.completed_at)}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f8fafc' },
-  container: { flexGrow: 1, padding: 20, gap: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  brand: { color: '#172554', fontSize: 24, fontWeight: '700' },
-  title: { color: '#334155', fontSize: 20, fontWeight: '600', marginTop: 4 },
-  backButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 },
-  backButtonText: { color: '#1d4ed8', fontSize: 16, fontWeight: '600' },
-  profileLabel: { color: '#334155', fontSize: 16, fontWeight: '600', marginTop: 8 },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
+  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
+  sectionLabel: { color: colors.textSecondary, fontSize: typography.caption, fontWeight: '800', textTransform: 'uppercase', marginBottom: spacing.xs },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   filterButton: {
-    minHeight: 44,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
-    paddingHorizontal: 14,
-    borderRadius: 12,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    backgroundColor: '#fff',
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
   },
-  filterButtonSelected: { borderColor: '#1d4ed8', backgroundColor: '#dbeafe' },
-  filterText: { color: '#334155', fontSize: 14, fontWeight: '600' },
-  filterTextSelected: { color: '#1e40af' },
-  stateContainer: { alignItems: 'center', gap: 16, marginTop: 36 },
-  stateText: { color: '#475569', fontSize: 16, textAlign: 'center', marginTop: 24 },
-  retryButton: {
-    minHeight: 48,
-    minWidth: 140,
+  filterButtonSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
+  filterTextSelected: { color: colors.primaryStrong },
+  stateCard: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: '#1d4ed8',
-  },
-  retryButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  courseList: { gap: 12 },
-  courseCard: {
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
+    gap: spacing.sm,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#fff',
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
   },
-  courseName: { color: '#0f172a', fontSize: 17, fontWeight: '700' },
-  status: { color: '#1d4ed8', fontSize: 14, fontWeight: '600' },
-  progressRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  progressTrack: { flex: 1, height: 12, overflow: 'hidden', borderRadius: 6, backgroundColor: '#e2e8f0' },
-  progressFill: { height: '100%', backgroundColor: '#1d4ed8' },
-  percent: { color: '#0f172a', fontSize: 14, fontWeight: '700' },
-  dateText: { color: '#475569', fontSize: 14 },
+  errorCard: { borderColor: '#FECACA', backgroundColor: colors.errorSoft },
+  stateTitle: { color: colors.text, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
+  stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
+  retryButton: { minWidth: 144 },
+  courseList: { gap: spacing.sm },
+  courseCard: {
+    gap: spacing.md,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  courseHeading: { gap: spacing.xs, alignItems: 'flex-start' },
+  courseName: { color: colors.text, fontSize: 18, lineHeight: 24, fontWeight: '800' },
+  statusBadge: {
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xxs,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primarySoft,
+  },
+  status: { color: colors.primaryStrong, fontSize: typography.caption, fontWeight: '800' },
+  progressBlock: { gap: spacing.xs },
+  progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  progressLabel: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
+  percent: { color: colors.text, fontSize: typography.small, fontWeight: '800' },
+  progressTrack: { height: 10, overflow: 'hidden', borderRadius: radii.pill, backgroundColor: colors.border },
+  progressFill: { height: '100%', borderRadius: radii.pill, backgroundColor: colors.primary },
+  dateBlock: { gap: spacing.xs, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
+  dateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
+  dateLabel: { color: colors.text, fontWeight: '700' },
+  pressed: { opacity: 0.68 },
 });

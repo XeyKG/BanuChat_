@@ -8,7 +8,10 @@ import {
   type CalendarEvent,
   type CalendarEventType,
 } from '@/api/calendar';
+import { AppButton } from '@/components/app-button';
+import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
+import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
 
 type LoadState = 'loading' | 'error' | 'success';
@@ -96,129 +99,159 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <ScreenHeader
+        onAction={() => router.replace('/home')}
+        subtitle="Próximos 30 días"
+        title="Calendario"
+      />
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.header}>
+        <View style={styles.content}>
+          <View style={styles.contextCard}>
+            <Text style={styles.contextTitle}>Agenda del periodo</Text>
+            <Text style={styles.contextText}>Las fechas y horas se muestran en hora de Bogotá.</Text>
+          </View>
+
           <View>
-            <Text style={styles.brand}>BanuChat</Text>
-            <Text style={styles.title}>Calendario</Text>
+            <Text style={styles.sectionLabel}>Filtrar por tipo</Text>
+            <View accessibilityRole="radiogroup" style={styles.filters}>
+              {FILTERS.map((option) => {
+                const isSelected = filter === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: isSelected }}
+                    onPress={() => selectFilter(option.value)}
+                    style={({ pressed }) => [
+                      styles.filterButton,
+                      isSelected && styles.filterButtonSelected,
+                      pressed && styles.pressed,
+                    ]}>
+                    <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
+                      {isSelected ? `✓ ${option.label}` : option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace('/home')}
-            style={styles.backButton}>
-            <Text style={styles.backButtonText}>Volver</Text>
-          </Pressable>
+
+          {loadState === 'loading' && (
+            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
+              <ActivityIndicator
+                accessibilityLabel="Cargando calendario"
+                size="large"
+                color={colors.primary}
+              />
+              <Text style={styles.stateText}>Cargando calendario...</Text>
+            </View>
+          )}
+
+          {loadState === 'error' && (
+            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
+              <Text style={styles.stateTitle}>No fue posible cargar el calendario</Text>
+              <Text style={styles.stateText}>Comprueba la conexión e intenta nuevamente.</Text>
+              <AppButton label="Reintentar" onPress={retry} style={styles.retryButton} />
+            </View>
+          )}
+
+          {loadState === 'success' && events.length === 0 && (
+            <View style={styles.stateCard}>
+              <Text style={styles.stateTitle}>Sin eventos</Text>
+              <Text style={styles.stateText}>No hay eventos en este periodo para el filtro seleccionado.</Text>
+            </View>
+          )}
+
+          {loadState === 'success' && events.length > 0 && (
+            <View style={styles.eventList}>
+              {events.map((event) => (
+                <View key={event.event_key} style={styles.eventCard}>
+                  <View style={styles.eventTypeBadge}>
+                    <Text style={styles.eventType}>{EVENT_LABELS[event.event_type]}</Text>
+                  </View>
+                  <Text style={styles.eventTitle}>{event.title}</Text>
+                  <View style={styles.timeBlock}>
+                    <Text style={styles.timeLabel}>Inicio</Text>
+                    <Text style={styles.eventTime}>{formatBogotaDateTime(event.starts_at)}</Text>
+                    {event.ends_at !== null && (
+                      <>
+                        <Text style={styles.timeLabel}>Fin</Text>
+                        <Text style={styles.eventTime}>{formatBogotaDateTime(event.ends_at)}</Text>
+                      </>
+                    )}
+                  </View>
+                  <Text style={styles.eventDescription}>{event.description}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
-
-        <Text style={styles.period}>Próximos 30 días</Text>
-        <Text style={styles.timeZone}>Horario: America/Bogota</Text>
-
-        <View accessibilityRole="radiogroup" style={styles.filters}>
-          {FILTERS.map((option) => {
-            const isSelected = filter === option.value;
-            return (
-              <Pressable
-                key={option.value}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: isSelected }}
-                onPress={() => selectFilter(option.value)}
-                style={[styles.filterButton, isSelected && styles.filterButtonSelected]}>
-                <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
-                  {option.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {loadState === 'loading' && (
-          <View style={styles.stateContainer}>
-            <ActivityIndicator size="large" color="#1d4ed8" />
-            <Text style={styles.stateText}>Cargando calendario...</Text>
-          </View>
-        )}
-
-        {loadState === 'error' && (
-          <View style={styles.stateContainer}>
-            <Text style={styles.stateText}>No fue posible cargar el calendario.</Text>
-            <Pressable accessibilityRole="button" onPress={retry} style={styles.retryButton}>
-              <Text style={styles.retryButtonText}>Reintentar</Text>
-            </Pressable>
-          </View>
-        )}
-
-        {loadState === 'success' && events.length === 0 && (
-          <Text style={styles.stateText}>No hay eventos en este periodo.</Text>
-        )}
-
-        {loadState === 'success' && events.length > 0 && (
-          <View style={styles.eventList}>
-            {events.map((event) => (
-              <View key={event.event_key} style={styles.eventCard}>
-                <Text style={styles.eventType}>{EVENT_LABELS[event.event_type]}</Text>
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <Text style={styles.eventTime}>
-                  Inicio: {formatBogotaDateTime(event.starts_at)}
-                </Text>
-                {event.ends_at !== null && (
-                  <Text style={styles.eventTime}>Fin: {formatBogotaDateTime(event.ends_at)}</Text>
-                )}
-                <Text style={styles.eventDescription}>{event.description}</Text>
-              </View>
-            ))}
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f8fafc' },
-  container: { flexGrow: 1, padding: 20, gap: 16 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  brand: { color: '#172554', fontSize: 24, fontWeight: '700' },
-  title: { color: '#334155', fontSize: 20, fontWeight: '600', marginTop: 4 },
-  backButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 },
-  backButtonText: { color: '#1d4ed8', fontSize: 16, fontWeight: '600' },
-  period: { color: '#0f172a', fontSize: 18, fontWeight: '600', marginTop: 8 },
-  timeZone: { color: '#64748b', fontSize: 14 },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
+  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
+  contextCard: {
+    gap: spacing.xxs,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    backgroundColor: colors.primarySoft,
+  },
+  contextTitle: { color: colors.brand, fontSize: typography.body, fontWeight: '700' },
+  contextText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
+  sectionLabel: { color: colors.textSecondary, fontSize: typography.caption, fontWeight: '800', textTransform: 'uppercase', marginBottom: spacing.xs },
+  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   filterButton: {
-    minHeight: 44,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
-    paddingHorizontal: 14,
-    borderRadius: 12,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    backgroundColor: '#fff',
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
   },
-  filterButtonSelected: { borderColor: '#1d4ed8', backgroundColor: '#dbeafe' },
-  filterText: { color: '#334155', fontSize: 14, fontWeight: '600' },
-  filterTextSelected: { color: '#1e40af' },
-  stateContainer: { alignItems: 'center', gap: 16, marginTop: 36 },
-  stateText: { color: '#475569', fontSize: 16, textAlign: 'center', marginTop: 24 },
-  retryButton: {
-    minHeight: 48,
-    minWidth: 140,
+  filterButtonSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
+  filterTextSelected: { color: colors.primaryStrong },
+  stateCard: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: '#1d4ed8',
-  },
-  retryButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  eventList: { gap: 12 },
-  eventCard: {
-    gap: 8,
-    padding: 16,
-    borderRadius: 12,
+    gap: spacing.sm,
+    padding: spacing.xl,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#fff',
+    borderColor: colors.border,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
   },
-  eventType: { color: '#1d4ed8', fontSize: 13, fontWeight: '700' },
-  eventTitle: { color: '#0f172a', fontSize: 17, fontWeight: '700' },
-  eventTime: { color: '#334155', fontSize: 14 },
-  eventDescription: { color: '#475569', fontSize: 15, lineHeight: 22 },
+  errorCard: { borderColor: '#FECACA', backgroundColor: colors.errorSoft },
+  stateTitle: { color: colors.text, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
+  stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
+  retryButton: { minWidth: 144 },
+  eventList: { gap: spacing.sm },
+  eventCard: {
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  eventTypeBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xxs,
+    borderRadius: radii.pill,
+    backgroundColor: colors.primarySoft,
+  },
+  eventType: { color: colors.primaryStrong, fontSize: typography.caption, fontWeight: '800' },
+  eventTitle: { color: colors.text, fontSize: 18, lineHeight: 24, fontWeight: '800' },
+  timeBlock: { gap: 2, paddingVertical: spacing.xxs },
+  timeLabel: { color: colors.muted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  eventTime: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20, marginBottom: spacing.xxs },
+  eventDescription: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 23 },
+  pressed: { opacity: 0.68 },
 });

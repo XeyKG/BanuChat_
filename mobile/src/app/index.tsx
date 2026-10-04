@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getProfiles, type ProfileSummary } from '@/api/profiles';
+import { AppButton } from '@/components/app-button';
 import { useSession } from '@/session/session-context';
+import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 
@@ -62,156 +57,177 @@ export default function ProfileSelectorScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>BanuChat</Text>
-
-        {loadState === 'loading' && (
-          <View style={styles.stateContainer}>
-            <ActivityIndicator size="large" color="#1d4ed8" />
-            <Text style={styles.message}>Cargando perfiles...</Text>
+        <View style={styles.content}>
+          <View style={styles.heading}>
+            <Text style={styles.eyebrow}>Demo académica</Text>
+            <Text style={styles.title}>BanuChat</Text>
+            <Text style={styles.subtitle}>Selecciona un perfil de demostración</Text>
+            <Text style={styles.helperText}>
+              Los perfiles y la información de esta aplicación son completamente sintéticos.
+            </Text>
           </View>
-        )}
 
-        {loadState === 'error' && (
-          <View style={styles.stateContainer}>
-            <Text style={styles.message}>No fue posible cargar los perfiles.</Text>
-            <Pressable accessibilityRole="button" onPress={retry} style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Reintentar</Text>
-            </Pressable>
-          </View>
-        )}
+          {loadState === 'loading' && (
+            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
+              <ActivityIndicator
+                accessibilityLabel="Cargando perfiles"
+                size="large"
+                color={colors.primary}
+              />
+              <Text style={styles.stateText}>Cargando perfiles...</Text>
+            </View>
+          )}
 
-        {loadState === 'success' && (
-          <View style={styles.content}>
-            <Text style={styles.message}>Selecciona un perfil de demostración</Text>
+          {loadState === 'error' && (
+            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
+              <Text style={styles.stateTitle}>No fue posible cargar los perfiles</Text>
+              <Text style={styles.stateText}>Comprueba la conexión con el API local.</Text>
+              <AppButton label="Reintentar" onPress={retry} style={styles.stateButton} />
+            </View>
+          )}
 
-            {profiles.length === 0 ? (
-              <Text style={styles.secondaryText}>No hay perfiles disponibles.</Text>
-            ) : (
-              <View style={styles.profileList}>
-                {profiles.map((profile) => {
-                  const isSelected = selectedProfile?.profile_key === profile.profile_key;
-                  return (
-                    <Pressable
-                      key={profile.profile_key}
-                      accessibilityRole="radio"
-                      accessibilityState={{ checked: isSelected }}
-                      disabled={isContinuing}
-                      onPress={() => {
-                        setSelectedProfile(profile);
-                      }}
-                      style={[styles.profileOption, isSelected && styles.profileOptionSelected]}>
-                      <Text style={styles.profileAlias}>{profile.alias}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ disabled: selectedProfile === null || isContinuing }}
-              disabled={selectedProfile === null || isContinuing}
-              onPress={continueWithSelectedProfile}
-              style={[
-                styles.primaryButton,
-                (selectedProfile === null || isContinuing) && styles.buttonDisabled,
-              ]}>
-              {isContinuing ? (
-                <View style={styles.buttonProgress}>
-                  <ActivityIndicator color="#fff" />
-                  <Text style={styles.primaryButtonText}>Continuando...</Text>
+          {loadState === 'success' && (
+            <View style={styles.selectorCard}>
+              {profiles.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Text style={styles.stateTitle}>No hay perfiles disponibles</Text>
+                  <Text style={styles.stateText}>Intenta nuevamente cuando el API tenga datos.</Text>
                 </View>
               ) : (
-                <Text style={styles.primaryButtonText}>Continuar</Text>
+                <View accessibilityRole="radiogroup" style={styles.profileList}>
+                  {profiles.map((profile) => {
+                    const isSelected = selectedProfile?.profile_key === profile.profile_key;
+                    return (
+                      <Pressable
+                        key={profile.profile_key}
+                        accessibilityLabel={`Seleccionar perfil ${profile.alias}`}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: isSelected, disabled: isContinuing }}
+                        disabled={isContinuing}
+                        onPress={() => setSelectedProfile(profile)}
+                        style={({ pressed }) => [
+                          styles.profileOption,
+                          isSelected && styles.profileOptionSelected,
+                          pressed && !isContinuing && styles.pressed,
+                        ]}>
+                        <View style={styles.profileCopy}>
+                          <Text style={styles.profileLabel}>Perfil de demostración</Text>
+                          <Text style={styles.profileAlias}>{profile.alias}</Text>
+                        </View>
+                        <View
+                          aria-hidden
+                          style={[styles.selectionMark, isSelected && styles.selectionMarkSelected]}>
+                          {isSelected && <Text style={styles.selectionMarkText}>✓</Text>}
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </View>
               )}
-            </Pressable>
-          </View>
-        )}
+
+              <AppButton
+                disabled={selectedProfile === null}
+                label="Continuar"
+                loading={isContinuing}
+                loadingLabel="Continuando..."
+                onPress={continueWithSelectedProfile}
+                style={styles.continueButton}
+              />
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   container: {
     flexGrow: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xxl,
   },
-  title: {
-    color: '#172554',
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 24,
+  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
+  heading: { gap: spacing.xs },
+  eyebrow: {
+    color: colors.primary,
+    fontSize: typography.caption,
+    fontWeight: '800',
+    letterSpacing: 0.9,
+    textTransform: 'uppercase',
   },
-  content: {
-    width: '100%',
-    maxWidth: 480,
-    alignItems: 'stretch',
-    gap: 16,
+  title: { color: colors.brand, fontSize: 36, lineHeight: 42, fontWeight: '800' },
+  subtitle: { color: colors.text, fontSize: 20, lineHeight: 27, fontWeight: '700' },
+  helperText: { color: colors.muted, fontSize: typography.small, lineHeight: 20 },
+  selectorCard: {
+    gap: spacing.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.xl,
+    backgroundColor: colors.surface,
   },
-  stateContainer: {
-    alignItems: 'center',
-    gap: 20,
-  },
-  message: {
-    color: '#334155',
-    fontSize: 18,
-    lineHeight: 26,
-    textAlign: 'center',
-  },
-  secondaryText: {
-    color: '#64748b',
-    fontSize: 15,
-    textAlign: 'center',
-  },
-  profileList: {
-    gap: 12,
-  },
+  profileList: { gap: spacing.sm },
   profileOption: {
     minHeight: 72,
-    justifyContent: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 12,
-    backgroundColor: '#fff',
-  },
-  profileOptionSelected: {
-    borderColor: '#1d4ed8',
-    borderWidth: 2,
-    backgroundColor: '#eff6ff',
-  },
-  profileAlias: {
-    color: '#0f172a',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  primaryButton: {
-    minHeight: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: '#1d4ed8',
-  },
-  buttonDisabled: {
-    backgroundColor: '#94a3b8',
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  buttonProgress: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
   },
+  profileOptionSelected: {
+    borderWidth: 2,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
+  },
+  profileCopy: { flex: 1, gap: spacing.xxs },
+  profileLabel: { color: colors.muted, fontSize: typography.caption, fontWeight: '600' },
+  profileAlias: { color: colors.text, fontSize: 18, lineHeight: 24, fontWeight: '700' },
+  selectionMark: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surface,
+  },
+  selectionMarkSelected: { borderColor: colors.primary, backgroundColor: colors.primary },
+  selectionMarkText: { color: colors.surface, fontSize: 14, fontWeight: '800' },
+  continueButton: { width: '100%' },
+  stateCard: {
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.xl,
+    backgroundColor: colors.surface,
+  },
+  errorCard: { borderColor: '#FECACA', backgroundColor: colors.errorSoft },
+  stateTitle: {
+    color: colors.text,
+    fontSize: typography.body,
+    lineHeight: 23,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  stateText: {
+    color: colors.textSecondary,
+    fontSize: typography.small,
+    lineHeight: 21,
+    textAlign: 'center',
+  },
+  stateButton: { minWidth: 144 },
+  emptyState: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.md },
+  pressed: { opacity: 0.72 },
 });

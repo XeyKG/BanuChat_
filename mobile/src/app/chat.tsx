@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,7 +18,11 @@ import {
   type SentAssistantMessage,
   type SentUserMessage,
 } from '@/api/messages';
+import { AppButton } from '@/components/app-button';
+import { ChatSources } from '@/components/chat-sources';
+import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
+import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
@@ -65,11 +68,10 @@ export default function ChatScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.invalidContainer}>
-          <Text style={styles.title}>BanuChat</Text>
-          <Text style={styles.errorText}>No fue posible abrir esta conversación.</Text>
-          <Pressable accessibilityRole="button" onPress={returnHome} style={styles.button}>
-            <Text style={styles.buttonText}>Volver al inicio</Text>
-          </Pressable>
+          <Text style={styles.invalidEyebrow}>BanuChat</Text>
+          <Text style={styles.invalidTitle}>No fue posible abrir esta conversación</Text>
+          <Text style={styles.invalidText}>Vuelve al inicio para crear una conversación válida.</Text>
+          <AppButton label="Volver al inicio" onPress={returnHome} style={styles.invalidButton} />
         </View>
       </SafeAreaView>
     );
@@ -113,120 +115,120 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.title}>BanuChat</Text>
-            <Text style={styles.profileLabel}>Perfil: {activeProfile.alias}</Text>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            disabled={isSending}
-            onPress={returnHome}
-            style={[styles.backButton, isSending && styles.disabled]}>
-            <Text style={styles.backButtonText}>Inicio</Text>
-          </Pressable>
-        </View>
+        <ScreenHeader
+          actionDisabled={isSending}
+          onAction={returnHome}
+          subtitle={`Perfil: ${activeProfile.alias}`}
+          title="Chat"
+        />
 
         <ScrollView
           ref={scrollViewRef}
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
-          {messages.length === 0 && (
-            <View style={[styles.messageCard, styles.assistantCard, styles.introductionCard]}>
-              <Text style={styles.messageRole}>BanuChat</Text>
-              <Text style={styles.messageContent}>{CHAT_INTRODUCTION}</Text>
-            </View>
-          )}
-
-          {messages.map((message) => (
-            <View
-              key={message.message_id}
-              style={[
-                styles.messageCard,
-                message.role === 'user' ? styles.userCard : styles.assistantCard,
-              ]}>
-              <Text style={styles.messageRole}>
-                {message.role === 'user' ? 'Tú' : 'BanuChat'}
-              </Text>
-              <Text style={styles.messageContent}>{message.content}</Text>
-
-              {message.role === 'assistant' && message.insufficient_evidence && (
-                <Text style={styles.evidenceWarning}>Evidencia insuficiente</Text>
-              )}
-
-              {message.role === 'assistant' && message.citations.length > 0 && (
-                <View style={styles.sources}>
-                  <Text style={styles.sourcesTitle}>Fuentes</Text>
-                  {message.citations.map((citation) => (
-                    <View key={`${message.message_id}-${citation.index}`} style={styles.source}>
-                      <Text style={styles.sourceLabel}>
-                        [{citation.index + 1}] {citation.label}
-                      </Text>
-                      <Text style={styles.sourceLocator}>{citation.locator}</Text>
-                      <Text style={styles.sourceKind}>{citation.source_kind}</Text>
-                    </View>
-                  ))}
+          <View style={styles.messageColumn}>
+            {messages.length === 0 && (
+              <View style={[styles.messageCard, styles.assistantCard, styles.introductionCard]}>
+                <View style={styles.introductionLabel}>
+                  <Text style={styles.introductionLabelText}>Bienvenida</Text>
                 </View>
-              )}
-            </View>
-          ))}
+                <Text style={styles.messageRole}>BanuChat</Text>
+                <Text style={styles.messageContent}>{CHAT_INTRODUCTION}</Text>
+              </View>
+            )}
+
+            {messages.map((message) => (
+              <View
+                key={message.message_id}
+                style={[
+                  styles.messageCard,
+                  message.role === 'user' ? styles.userCard : styles.assistantCard,
+                ]}>
+                <Text style={styles.messageRole}>
+                  {message.role === 'user' ? 'Tú' : 'BanuChat'}
+                </Text>
+                <Text style={styles.messageContent}>{message.content}</Text>
+
+                {message.role === 'assistant' && message.insufficient_evidence && (
+                  <View accessibilityRole="alert" style={styles.evidenceWarning}>
+                    <Text style={styles.evidenceWarningTitle}>Evidencia insuficiente</Text>
+                    <Text style={styles.evidenceWarningText}>
+                      La respuesta no cuenta con respaldo documental suficiente.
+                    </Text>
+                  </View>
+                )}
+
+                {message.role === 'assistant' && message.citations.length > 0 && (
+                  <ChatSources citations={message.citations} />
+                )}
+              </View>
+            ))}
+          </View>
         </ScrollView>
 
         <View style={styles.composer}>
           {isSending && (
-            <View style={styles.progress}>
-              <ActivityIndicator color="#1d4ed8" />
-              <Text style={styles.progressText}>BanuChat está respondiendo...</Text>
+            <View accessibilityLiveRegion="polite" style={styles.sendingStatus}>
+              <ActivityIndicator color={colors.primary} size="small" />
+              <Text style={styles.sendingText}>BanuChat está respondiendo...</Text>
             </View>
           )}
 
           {sendError === 'http' && (
-            <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              No fue posible obtener una respuesta.
-            </Text>
+            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+              <Text style={styles.errorText}>No fue posible obtener una respuesta.</Text>
+            </View>
           )}
 
           {sendError === 'uncertain' && (
-            <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              No se pudo confirmar si el mensaje fue procesado.{`\n`}No se reenviará
-              automáticamente para evitar duplicados.
-            </Text>
+            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+              <Text style={styles.errorText}>
+                No se pudo confirmar si el mensaje fue procesado.{`\n`}No se reenviará
+                automáticamente para evitar duplicados.
+              </Text>
+            </View>
           )}
 
           {sendError === 'invalid_response' && (
-            <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              No fue posible interpretar la respuesta confirmada. Vuelve al inicio para
-              continuar de forma segura.
-            </Text>
+            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+              <Text style={styles.errorText}>
+                No fue posible interpretar la respuesta confirmada. Vuelve al inicio para
+                continuar de forma segura.
+              </Text>
+            </View>
           )}
 
-          <TextInput
-            accessibilityLabel="Mensaje"
-            editable={!isSending && !isConversationLocked}
-            multiline
-            onChangeText={(value) => {
-              setContent(value);
-              if (sendError === 'http') setSendError(null);
-            }}
-            placeholder="Escribe tu mensaje"
-            style={styles.input}
-            value={content}
-          />
-          <Text style={[styles.characterCount, characterCount > 4000 && styles.limitExceeded]}>
-            {characterCount}/4000
-          </Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !isContentValid || isSending || isConversationLocked }}
-            disabled={!isContentValid || isSending || isConversationLocked}
-            onPress={() => void submitMessage()}
-            style={[
-              styles.button,
-              (!isContentValid || isSending || isConversationLocked) && styles.disabled,
-            ]}>
-            <Text style={styles.buttonText}>Enviar</Text>
-          </Pressable>
+          <View style={styles.composerRow}>
+            <View style={styles.inputColumn}>
+              <TextInput
+                accessibilityLabel="Mensaje"
+                editable={!isSending && !isConversationLocked}
+                multiline
+                onChangeText={(value) => {
+                  setContent(value);
+                  if (sendError === 'http') setSendError(null);
+                }}
+                placeholder="Escribe tu mensaje"
+                placeholderTextColor={colors.muted}
+                style={[styles.input, isConversationLocked && styles.inputLocked]}
+                value={content}
+              />
+              <Text
+                accessibilityLabel={`${characterCount} de 4000 caracteres`}
+                style={[styles.characterCount, characterCount > 4000 && styles.limitExceeded]}>
+                {characterCount}/4000
+              </Text>
+            </View>
+            <AppButton
+              disabled={!isContentValid || isConversationLocked}
+              label="Enviar"
+              loading={isSending}
+              loadingLabel="Enviando"
+              onPress={() => void submitMessage()}
+              style={styles.sendButton}
+            />
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -234,71 +236,113 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#f8fafc' },
+  safeArea: { flex: 1, backgroundColor: colors.background },
   keyboardView: { flex: 1 },
   invalidContainer: {
     flex: 1,
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 20,
-    padding: 24,
+    gap: spacing.sm,
+    padding: spacing.xl,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
-    backgroundColor: '#fff',
+  invalidEyebrow: { color: colors.primary, fontSize: typography.small, fontWeight: '800' },
+  invalidTitle: { color: colors.brand, fontSize: typography.heading, lineHeight: 29, fontWeight: '800', textAlign: 'center' },
+  invalidText: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 23, textAlign: 'center' },
+  invalidButton: { minWidth: 180, marginTop: spacing.sm },
+  messageList: { flexGrow: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.lg },
+  messageColumn: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', gap: spacing.md },
+  messageCard: { maxWidth: '88%', padding: spacing.md, borderRadius: radii.lg },
+  userCard: {
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: radii.sm,
+    backgroundColor: '#DBEAFE',
   },
-  title: { color: '#172554', fontSize: 26, fontWeight: '700' },
-  profileLabel: { color: '#475569', fontSize: 14, marginTop: 4 },
-  backButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 },
-  backButtonText: { color: '#1d4ed8', fontSize: 14, fontWeight: '600' },
-  messageList: { flexGrow: 1, gap: 12, padding: 16 },
-  messageCard: { maxWidth: '88%', padding: 14, borderRadius: 14 },
-  userCard: { alignSelf: 'flex-end', backgroundColor: '#dbeafe' },
-  assistantCard: { alignSelf: 'flex-start', backgroundColor: '#fff' },
-  introductionCard: { marginTop: 16 },
-  messageRole: { color: '#475569', fontSize: 12, fontWeight: '700', marginBottom: 5 },
-  messageContent: { color: '#0f172a', fontSize: 16, lineHeight: 23 },
-  evidenceWarning: { color: '#92400e', fontWeight: '700', marginTop: 12 },
-  sources: { gap: 10, marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#e2e8f0' },
-  sourcesTitle: { color: '#0f172a', fontSize: 14, fontWeight: '700' },
-  source: { gap: 2 },
-  sourceLabel: { color: '#1e293b', fontSize: 14, fontWeight: '600' },
-  sourceLocator: { color: '#475569', fontSize: 13 },
-  sourceKind: { color: '#64748b', fontSize: 12 },
-  composer: { gap: 9, padding: 16, borderTopWidth: 1, borderTopColor: '#e2e8f0', backgroundColor: '#fff' },
-  progress: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10 },
-  progressText: { color: '#334155', fontSize: 14 },
-  input: {
-    minHeight: 52,
-    maxHeight: 140,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  assistantCard: {
+    alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: '#94a3b8',
-    borderRadius: 12,
-    color: '#0f172a',
-    backgroundColor: '#fff',
-    fontSize: 16,
+    borderColor: colors.border,
+    borderBottomLeftRadius: radii.sm,
+    backgroundColor: colors.surface,
+  },
+  introductionCard: { marginTop: spacing.xs, backgroundColor: colors.primarySoft },
+  introductionLabel: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xxs,
+    borderRadius: radii.pill,
+    backgroundColor: colors.surface,
+  },
+  introductionLabelText: { color: colors.primary, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  messageRole: { color: colors.textSecondary, fontSize: typography.caption, fontWeight: '800', marginBottom: spacing.xs },
+  messageContent: { color: colors.text, fontSize: typography.body, lineHeight: 24 },
+  evidenceWarning: {
+    gap: spacing.xxs,
+    marginTop: spacing.sm,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: radii.md,
+    backgroundColor: colors.warningSoft,
+  },
+  evidenceWarningTitle: { color: colors.warning, fontSize: typography.small, fontWeight: '800' },
+  evidenceWarningText: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  composer: {
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  composerRow: {
+    width: '100%',
+    maxWidth: layout.maxReadingWidth,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+  },
+  inputColumn: { flex: 1, gap: spacing.xxs },
+  input: {
+    minHeight: 48,
+    maxHeight: 112,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderRadius: radii.md,
+    color: colors.text,
+    backgroundColor: colors.surface,
+    fontSize: typography.body,
+    lineHeight: 22,
     textAlignVertical: 'top',
   },
-  characterCount: { color: '#64748b', fontSize: 12, textAlign: 'right' },
-  limitExceeded: { color: '#b91c1c', fontWeight: '700' },
-  button: {
-    minHeight: 50,
+  inputLocked: { backgroundColor: colors.background, color: colors.muted },
+  characterCount: { color: colors.muted, fontSize: typography.caption, textAlign: 'right' },
+  limitExceeded: { color: colors.error, fontWeight: '800' },
+  sendButton: { minWidth: 100 },
+  sendingStatus: {
+    width: '100%',
+    maxWidth: layout.maxReadingWidth,
+    alignSelf: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    backgroundColor: '#1d4ed8',
+    gap: spacing.xs,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  disabled: { opacity: 0.5 },
-  errorText: { color: '#b91c1c', fontSize: 14, lineHeight: 20, textAlign: 'center' },
+  sendingText: { color: colors.textSecondary, fontSize: typography.small },
+  errorBanner: {
+    width: '100%',
+    maxWidth: layout.maxReadingWidth,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.sm,
+    backgroundColor: colors.errorSoft,
+  },
+  errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20, textAlign: 'center' },
 });
