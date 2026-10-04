@@ -10,37 +10,34 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { createConversation } from '@/api/conversations';
 import { getProfiles, type ProfileSummary } from '@/api/profiles';
+import { useSession } from '@/session/session-context';
 
 type LoadState = 'loading' | 'error' | 'success';
 
-export default function HomeScreen() {
+export default function ProfileSelectorScreen() {
   const router = useRouter();
+  const { selectProfile } = useSession();
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [profiles, setProfiles] = useState<ProfileSummary[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<ProfileSummary | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const [isStartingChat, setIsStartingChat] = useState(false);
-  const [startChatError, setStartChatError] = useState(false);
+  const [isContinuing, setIsContinuing] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
-    setLoadState('loading');
 
     void getProfiles()
       .then((result) => {
         if (!isMounted) return;
         setProfiles(result.profiles);
         setSelectedProfile(null);
-        setStartChatError(false);
         setLoadState('success');
       })
       .catch(() => {
         if (!isMounted) return;
         setProfiles([]);
         setSelectedProfile(null);
-        setStartChatError(false);
         setLoadState('error');
       });
 
@@ -54,29 +51,13 @@ export default function HomeScreen() {
     setRetryCount((count) => count + 1);
   }
 
-  async function continueWithSelectedProfile() {
-    if (selectedProfile === null || isStartingChat) return;
+  function continueWithSelectedProfile() {
+    if (selectedProfile === null || isContinuing) return;
 
-    setIsStartingChat(true);
-    setStartChatError(false);
-    try {
-      const conversation = await createConversation(selectedProfile.profile_key);
-      router.push({
-        pathname: '/chat',
-        params: {
-          conversation_id: conversation.conversation_id,
-          profile_key: conversation.profile_key,
-          profile_alias: conversation.profile_alias,
-        },
-      });
-    } catch {
-      setStartChatError(true);
-    } finally {
-      setIsStartingChat(false);
-    }
+    setIsContinuing(true);
+    selectProfile(selectedProfile);
+    router.replace('/home');
   }
-
-  const isProgressDisabled = selectedProfile === null || isStartingChat || loadState !== 'success';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -114,14 +95,12 @@ export default function HomeScreen() {
                       key={profile.profile_key}
                       accessibilityRole="radio"
                       accessibilityState={{ checked: isSelected }}
-                      disabled={isStartingChat}
+                      disabled={isContinuing}
                       onPress={() => {
                         setSelectedProfile(profile);
-                        setStartChatError(false);
                       }}
                       style={[styles.profileOption, isSelected && styles.profileOptionSelected]}>
                       <Text style={styles.profileAlias}>{profile.alias}</Text>
-                      <Text style={styles.profileKey}>{profile.profile_key}</Text>
                     </Pressable>
                   );
                 })}
@@ -130,59 +109,24 @@ export default function HomeScreen() {
 
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ disabled: selectedProfile === null || isStartingChat }}
-              disabled={selectedProfile === null || isStartingChat}
-              onPress={() => void continueWithSelectedProfile()}
+              accessibilityState={{ disabled: selectedProfile === null || isContinuing }}
+              disabled={selectedProfile === null || isContinuing}
+              onPress={continueWithSelectedProfile}
               style={[
                 styles.primaryButton,
-                (selectedProfile === null || isStartingChat) && styles.buttonDisabled,
+                (selectedProfile === null || isContinuing) && styles.buttonDisabled,
               ]}>
-              {isStartingChat ? (
+              {isContinuing ? (
                 <View style={styles.buttonProgress}>
                   <ActivityIndicator color="#fff" />
-                  <Text style={styles.primaryButtonText}>Iniciando chat...</Text>
+                  <Text style={styles.primaryButtonText}>Continuando...</Text>
                 </View>
               ) : (
                 <Text style={styles.primaryButtonText}>Continuar</Text>
               )}
             </Pressable>
-
-            {startChatError && (
-              <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-                No fue posible iniciar el chat.
-              </Text>
-            )}
           </View>
         )}
-
-        <Pressable
-          accessibilityRole="button"
-          disabled={isStartingChat}
-          onPress={() => router.push('/calendar')}
-          style={[styles.secondaryButton, isStartingChat && styles.buttonDisabled]}>
-          <Text style={styles.secondaryButtonText}>Calendario</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ disabled: isProgressDisabled }}
-          disabled={isProgressDisabled}
-          onPress={() => {
-            if (selectedProfile === null) return;
-            router.push({
-              pathname: '/progress',
-              params: {
-                profile_key: selectedProfile.profile_key,
-                profile_alias: selectedProfile.alias,
-              },
-            });
-          }}
-          style={[
-            styles.secondaryButton,
-            isProgressDisabled && styles.buttonDisabled,
-          ]}>
-          <Text style={styles.secondaryButtonText}>Progreso</Text>
-        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -249,11 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
   },
-  profileKey: {
-    color: '#64748b',
-    fontSize: 13,
-    marginTop: 4,
-  },
   primaryButton: {
     minHeight: 52,
     alignItems: 'center',
@@ -270,31 +209,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  secondaryButton: {
-    minHeight: 52,
-    minWidth: 180,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: '#1d4ed8',
-    borderRadius: 12,
-    backgroundColor: '#fff',
-  },
-  secondaryButtonText: {
-    color: '#1d4ed8',
-    fontSize: 16,
-    fontWeight: '700',
-  },
   buttonProgress: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-  },
-  errorText: {
-    color: '#b91c1c',
-    fontSize: 15,
-    textAlign: 'center',
   },
 });

@@ -8,6 +8,7 @@ import {
   type CalendarEvent,
   type CalendarEventType,
 } from '@/api/calendar';
+import { useSession } from '@/session/session-context';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
 
 type LoadState = 'loading' | 'error' | 'success';
@@ -41,6 +42,7 @@ function formatBogotaDateTime(timestamp: string): string {
 
 export default function CalendarScreen() {
   const router = useRouter();
+  const { activeProfile } = useSession();
   const [range] = useState(() => {
     const dateFrom = getBogotaCivilToday();
     return { dateFrom, dateTo: addCivilDays(dateFrom, 29) };
@@ -51,8 +53,13 @@ export default function CalendarScreen() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
+    if (activeProfile === null) router.replace('/');
+  }, [activeProfile, router]);
+
+  useEffect(() => {
+    if (activeProfile === null) return;
+
     let isMounted = true;
-    setLoadState('loading');
 
     void getCalendarEvents({
       ...range,
@@ -72,7 +79,7 @@ export default function CalendarScreen() {
     return () => {
       isMounted = false;
     };
-  }, [filter, range, retryCount]);
+  }, [activeProfile, filter, range, retryCount]);
 
   function selectFilter(value: EventFilter) {
     if (value === filter) return;
@@ -85,6 +92,8 @@ export default function CalendarScreen() {
     setRetryCount((count) => count + 1);
   }
 
+  if (activeProfile === null) return null;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -95,7 +104,7 @@ export default function CalendarScreen() {
           </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.replace('/')}
+            onPress={() => router.replace('/home')}
             style={styles.backButton}>
             <Text style={styles.backButtonText}>Volver</Text>
           </Pressable>

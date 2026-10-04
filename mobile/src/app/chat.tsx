@@ -19,13 +19,13 @@ import {
   type SentAssistantMessage,
   type SentUserMessage,
 } from '@/api/messages';
+import { useSession } from '@/session/session-context';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const PROFILE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 
 function singleParam(value: string | string[] | undefined): string | null {
   return typeof value === 'string' ? value : null;
@@ -33,11 +33,8 @@ function singleParam(value: string | string[] | undefined): string | null {
 
 export default function ChatScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    conversation_id?: string | string[];
-    profile_key?: string | string[];
-    profile_alias?: string | string[];
-  }>();
+  const { activeProfile } = useSession();
+  const params = useLocalSearchParams<{ conversation_id?: string | string[] }>();
   const scrollViewRef = useRef<ScrollView>(null);
   const isMountedRef = useRef(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -51,28 +48,25 @@ export default function ChatScreen() {
     };
   }, []);
 
+  useEffect(() => {
+    if (activeProfile === null) router.replace('/');
+  }, [activeProfile, router]);
+
   const conversationId = singleParam(params.conversation_id);
-  const profileKey = singleParam(params.profile_key);
-  const profileAlias = singleParam(params.profile_alias);
-  function returnToProfiles() {
-    router.replace('/');
+  function returnHome() {
+    router.replace('/home');
   }
 
-  if (
-    conversationId === null ||
-    !UUID_PATTERN.test(conversationId) ||
-    profileKey === null ||
-    !PROFILE_KEY_PATTERN.test(profileKey) ||
-    profileAlias === null ||
-    profileAlias.trim().length === 0
-  ) {
+  if (activeProfile === null) return null;
+
+  if (conversationId === null || !UUID_PATTERN.test(conversationId)) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.invalidContainer}>
           <Text style={styles.title}>BanuChat</Text>
           <Text style={styles.errorText}>No fue posible abrir esta conversación.</Text>
-          <Pressable accessibilityRole="button" onPress={returnToProfiles} style={styles.button}>
-            <Text style={styles.buttonText}>Volver a perfiles</Text>
+          <Pressable accessibilityRole="button" onPress={returnHome} style={styles.button}>
+            <Text style={styles.buttonText}>Volver al inicio</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -120,14 +114,14 @@ export default function ChatScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.title}>BanuChat</Text>
-            <Text style={styles.profileLabel}>Perfil: {profileAlias}</Text>
+            <Text style={styles.profileLabel}>Perfil: {activeProfile.alias}</Text>
           </View>
           <Pressable
             accessibilityRole="button"
             disabled={isSending}
-            onPress={returnToProfiles}
+            onPress={returnHome}
             style={[styles.backButton, isSending && styles.disabled]}>
-            <Text style={styles.backButtonText}>Volver a perfiles</Text>
+            <Text style={styles.backButtonText}>Inicio</Text>
           </Pressable>
         </View>
 
@@ -197,7 +191,7 @@ export default function ChatScreen() {
 
           {sendError === 'invalid_response' && (
             <Text accessibilityLiveRegion="polite" style={styles.errorText}>
-              No fue posible interpretar la respuesta confirmada. Vuelve a perfiles para
+              No fue posible interpretar la respuesta confirmada. Vuelve al inicio para
               continuar de forma segura.
             </Text>
           )}

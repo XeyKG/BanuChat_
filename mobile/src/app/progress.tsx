@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,11 +8,11 @@ import {
   type CourseProgress,
   type ProgressStatus,
 } from '@/api/progress';
+import { useSession } from '@/session/session-context';
 
 type LoadState = 'loading' | 'error' | 'success';
 type ProgressFilter = 'all' | ProgressStatus;
 
-const PROFILE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 const FILTERS: { value: ProgressFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'enrolled', label: 'Inscritos' },
@@ -33,27 +33,15 @@ const bogotaDateTimeFormatter = new Intl.DateTimeFormat('es-CO', {
   minute: '2-digit',
 });
 
-function singleParam(value: string | string[] | undefined): string | null {
-  return typeof value === 'string' ? value : null;
-}
-
 function formatBogotaDateTime(timestamp: string): string {
   return bogotaDateTimeFormatter.format(new Date(timestamp));
 }
 
 export default function ProgressScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    profile_key?: string | string[];
-    profile_alias?: string | string[];
-  }>();
-  const profileKey = singleParam(params.profile_key);
-  const profileAlias = singleParam(params.profile_alias);
-  const hasValidParams =
-    profileKey !== null &&
-    PROFILE_KEY_PATTERN.test(profileKey) &&
-    profileAlias !== null &&
-    profileAlias.trim().length > 0;
+  const { activeProfile } = useSession();
+  const profileKey = activeProfile?.profile_key ?? null;
+  const profileAlias = activeProfile?.alias ?? null;
 
   const [filter, setFilter] = useState<ProgressFilter>('all');
   const [retryCount, setRetryCount] = useState(0);
@@ -62,10 +50,13 @@ export default function ProgressScreen() {
   const [authoritativeAlias, setAuthoritativeAlias] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!hasValidParams || profileKey === null) return;
+    if (activeProfile === null) router.replace('/');
+  }, [activeProfile, router]);
+
+  useEffect(() => {
+    if (profileKey === null) return;
 
     let isMounted = true;
-    setLoadState('loading');
     void getProfileProgress({
       profileKey,
       statuses: filter === 'all' ? undefined : [filter],
@@ -85,7 +76,7 @@ export default function ProgressScreen() {
     return () => {
       isMounted = false;
     };
-  }, [filter, hasValidParams, profileKey, retryCount]);
+  }, [filter, profileKey, retryCount]);
 
   function selectFilter(value: ProgressFilter) {
     if (value === filter) return;
@@ -98,22 +89,7 @@ export default function ProgressScreen() {
     setRetryCount((count) => count + 1);
   }
 
-  if (!hasValidParams) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.invalidContainer}>
-          <Text style={styles.brand}>BanuChat</Text>
-          <Text style={styles.stateText}>No fue posible abrir el progreso de este perfil.</Text>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.replace('/')}
-            style={styles.retryButton}>
-            <Text style={styles.retryButtonText}>Volver a perfiles</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  if (activeProfile === null || profileAlias === null) return null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -125,7 +101,7 @@ export default function ProgressScreen() {
           </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.replace('/')}
+            onPress={() => router.replace('/home')}
             style={styles.backButton}>
             <Text style={styles.backButtonText}>Volver</Text>
           </Pressable>
@@ -210,7 +186,6 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f8fafc' },
   container: { flexGrow: 1, padding: 20, gap: 16 },
-  invalidContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 24 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   brand: { color: '#172554', fontSize: 24, fontWeight: '700' },
   title: { color: '#334155', fontSize: 20, fontWeight: '600', marginTop: 4 },
