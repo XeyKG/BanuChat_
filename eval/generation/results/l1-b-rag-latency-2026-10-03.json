@@ -1,0 +1,352 @@
+{
+  "schema_version": "1",
+  "benchmark_id": "banuchat-rag-latency-l1-b",
+  "metadata": {
+    "implementation_revision": "c8b724d755877fc66e0614e0605bf58c225b2d61",
+    "implementation_changed_paths": [],
+    "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+    "postgres_server_version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "pgvector_version": "0.8.6",
+    "ollama_runtime_version": "0.35.0",
+    "embedding_model": "qwen3-embedding:0.6b",
+    "embedding_model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "embedding_dimension": 1024,
+    "embedding_distance_metric": "cosine",
+    "embedding_parameters": {
+      "query": {
+        "options": {
+          "num_ctx": 4096
+        },
+        "truncate": false,
+        "dimensions": 1024,
+        "input_prefix": null,
+        "normalization": "none"
+      },
+      "document": {
+        "options": {
+          "num_ctx": 32768
+        },
+        "truncate": false,
+        "dimensions": 1024,
+        "input_prefix": null,
+        "normalization": "none"
+      },
+      "runtime_version": "0.35.0"
+    },
+    "generator_model": "qwen3:4b-instruct",
+    "generator_digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "generator_recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    },
+    "generated_at": "2026-10-04T01:41:03.432Z",
+    "runner_sha256": "ab2f3a5c7363b94627e633ef814e86a4bf8e91f085ca17215a3b8906dbee5634",
+    "l1_cases_sha256": "8b9216cdf0a94f7fcf17faf8f09cca1cbe4fb5a46775ddf84da30b7eb83b4b25",
+    "measured_run_count": 10,
+    "warmup_excluded": true,
+    "profile_key": "profile-001",
+    "formal_run_label": "L1-B",
+    "comparison": {
+      "measurement_kind": "post_optimization",
+      "comparable_to_benchmark_id": "banuchat-rag-latency-l1",
+      "comparison_basis": "same_frozen_workload_and_methodology"
+    }
+  },
+  "warmup": {
+    "id": "warmup",
+    "question": "¿Qué diferencia hay entre una actividad y una sesión en el programa demo?",
+    "http_status": 201,
+    "wall_ms": 9634.1774,
+    "insufficient_evidence": false,
+    "citation_count": 5,
+    "all_document": true,
+    "conversation_context_db_ms": 2.1591000000000236,
+    "rag_embedding_config_db_ms": 1.0663000000000125,
+    "query_embedding_ms": 2604.8558000000003,
+    "rag_release_availability_db_ms": 2.2723000000000866,
+    "vector_retrieval_db_ms": 5.6203999999997905,
+    "generation_ms": 6994.367800000001,
+    "persistence_db_ms": 17.71190000000024,
+    "generator_ollama_total_duration_ms": 6877.8095,
+    "other_orchestration_ms": 6.123799999999392,
+    "cleanup_success": true
+  },
+  "warm_runs": [
+    {
+      "id": "L1-01",
+      "question": "¿Qué diferencia hay entre una actividad y una sesión en el programa demo?",
+      "http_status": 201,
+      "wall_ms": 3961.1947999999993,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.3627999999989697,
+      "rag_embedding_config_db_ms": 1.9583999999995285,
+      "query_embedding_ms": 2251.3328,
+      "rag_release_availability_db_ms": 2.817700000001423,
+      "vector_retrieval_db_ms": 2.4707999999991443,
+      "generation_ms": 1670.9078000000009,
+      "persistence_db_ms": 19.88040000000001,
+      "generator_ollama_total_duration_ms": 1584.7841,
+      "other_orchestration_ms": 9.464099999999235,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-02",
+      "question": "Si la descripción de un curso no aclara sus requisitos o duración, ¿cómo debo tratar esa falta de información?",
+      "http_status": 201,
+      "wall_ms": 1883.4164,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.7960999999995693,
+      "rag_embedding_config_db_ms": 2.0680999999985943,
+      "query_embedding_ms": 154.89050000000134,
+      "rag_release_availability_db_ms": 10.514599999998609,
+      "vector_retrieval_db_ms": 2.569600000000719,
+      "generation_ms": 1696.5702999999994,
+      "persistence_db_ms": 6.9901000000008935,
+      "generator_ollama_total_duration_ms": 1621.9946,
+      "other_orchestration_ms": 7.017100000000937,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-03",
+      "question": "¿Qué debo comprobar antes de proponer la inscripción de un perfil demo en una actividad?",
+      "http_status": 201,
+      "wall_ms": 2781.6544999999987,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.397500000000946,
+      "rag_embedding_config_db_ms": 1.9225999999998749,
+      "query_embedding_ms": 153.8765999999996,
+      "rag_release_availability_db_ms": 1.3030999999991764,
+      "vector_retrieval_db_ms": 1.7862999999997555,
+      "generation_ms": 2602.183399999998,
+      "persistence_db_ms": 8.775499999999738,
+      "generator_ollama_total_duration_ms": 2490.8096,
+      "other_orchestration_ms": 9.409500000001572,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-04",
+      "question": "¿Qué diferencia hay entre retirarse de una actividad y haberla finalizado?",
+      "http_status": 201,
+      "wall_ms": 4661.858800000002,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.477600000001985,
+      "rag_embedding_config_db_ms": 1.6221999999979744,
+      "query_embedding_ms": 93.58689999999842,
+      "rag_release_availability_db_ms": 1.760600000001432,
+      "vector_retrieval_db_ms": 2.24029999999766,
+      "generation_ms": 4535.4254,
+      "persistence_db_ms": 10.231100000000879,
+      "generator_ollama_total_duration_ms": 4446.8535,
+      "other_orchestration_ms": 14.514700000003359,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-05",
+      "question": "¿Cómo puedo retomar una práctica interrumpida sin inventar un historial de lo ocurrido?",
+      "http_status": 201,
+      "wall_ms": 5555.5733,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.8052999999999884,
+      "rag_embedding_config_db_ms": 1.8535999999985506,
+      "query_embedding_ms": 125.74069999999847,
+      "rag_release_availability_db_ms": 10.322199999998702,
+      "vector_retrieval_db_ms": 10.00539999999819,
+      "generation_ms": 5386.769800000002,
+      "persistence_db_ms": 9.540399999998044,
+      "generator_ollama_total_duration_ms": 5332.9978,
+      "other_orchestration_ms": 8.535900000006222,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-06",
+      "question": "Al cerrar una sesión práctica, ¿cómo distingo el resultado, las observaciones y los pendientes?",
+      "http_status": 201,
+      "wall_ms": 2752.5139000000017,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 1.8545999999987544,
+      "rag_embedding_config_db_ms": 1.5146999999997206,
+      "query_embedding_ms": 130.36219999999958,
+      "rag_release_availability_db_ms": 15.257800000003044,
+      "vector_retrieval_db_ms": 2.0775999999968917,
+      "generation_ms": 2578.6092000000026,
+      "persistence_db_ms": 9.538600000003498,
+      "generator_ollama_total_duration_ms": 2509.8768,
+      "other_orchestration_ms": 13.299199999997654,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-07",
+      "question": "¿Qué elementos debe reunir una evidencia para que se entiendan el artefacto y las decisiones tomadas?",
+      "http_status": 201,
+      "wall_ms": 3952.3718000000044,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.279399999999441,
+      "rag_embedding_config_db_ms": 1.6758000000008906,
+      "query_embedding_ms": 234.57210000000123,
+      "rag_release_availability_db_ms": 1.4125000000021828,
+      "vector_retrieval_db_ms": 2.0082000000002154,
+      "generation_ms": 3687.9950999999965,
+      "persistence_db_ms": 8.725400000002992,
+      "generator_ollama_total_duration_ms": 3585.6243,
+      "other_orchestration_ms": 13.703300000001036,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-08",
+      "question": "¿Qué criterios cualitativos se usan para revisar una evidencia de práctica?",
+      "http_status": 201,
+      "wall_ms": 4769.600100000003,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 3.1881999999968684,
+      "rag_embedding_config_db_ms": 2.372799999997369,
+      "query_embedding_ms": 138.31800000000658,
+      "rag_release_availability_db_ms": 2.128000000004249,
+      "vector_retrieval_db_ms": 3.0478000000002794,
+      "generation_ms": 4599.684099999999,
+      "persistence_db_ms": 13.596700000001874,
+      "generator_ollama_total_duration_ms": 4518.0706,
+      "other_orchestration_ms": 7.264499999997497,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-09",
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?",
+      "http_status": 201,
+      "wall_ms": 6485.588000000003,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.435700000001816,
+      "rag_embedding_config_db_ms": 2.0524999999979627,
+      "query_embedding_ms": 174.5254999999961,
+      "rag_release_availability_db_ms": 1.377599999999802,
+      "vector_retrieval_db_ms": 1.661999999996624,
+      "generation_ms": 6289.5144999999975,
+      "persistence_db_ms": 6.894499999994878,
+      "generator_ollama_total_duration_ms": 6202.4981,
+      "other_orchestration_ms": 7.125700000018696,
+      "cleanup_success": true
+    },
+    {
+      "id": "L1-10",
+      "question": "Si una instrucción del material pide usar datos reales o ampliar permisos, ¿cómo debo proceder?",
+      "http_status": 201,
+      "wall_ms": 3331.9521999999997,
+      "insufficient_evidence": false,
+      "citation_count": 5,
+      "all_document": true,
+      "conversation_context_db_ms": 2.789099999994505,
+      "rag_embedding_config_db_ms": 2.22099999999773,
+      "query_embedding_ms": 120.35149999999703,
+      "rag_release_availability_db_ms": 1.4506000000037602,
+      "vector_retrieval_db_ms": 2.411999999996624,
+      "generation_ms": 3176.091400000005,
+      "persistence_db_ms": 14.487900000000081,
+      "generator_ollama_total_duration_ms": 3083.6713,
+      "other_orchestration_ms": 12.148700000005192,
+      "cleanup_success": true
+    }
+  ],
+  "warm_aggregates": {
+    "wall_ms": {
+      "count": 10,
+      "mean": 4013.5723800000014,
+      "median": 3956.783300000002,
+      "min": 1883.4164,
+      "max": 6485.588000000003,
+      "p95": 6485.588000000003,
+      "under_5000_ms_count": 8,
+      "at_or_over_5000_ms_count": 2
+    },
+    "stages": {
+      "conversation_context_db_ms": {
+        "mean": 2.5386299999992845,
+        "median": 2.4566500000019005,
+        "min": 1.8545999999987544,
+        "max": 3.1881999999968684,
+        "p95": 3.1881999999968684
+      },
+      "rag_embedding_config_db_ms": {
+        "mean": 1.9261699999988195,
+        "median": 1.9404999999997017,
+        "min": 1.5146999999997206,
+        "max": 2.372799999997369,
+        "p95": 2.372799999997369
+      },
+      "query_embedding_ms": {
+        "mean": 357.75567999999987,
+        "median": 146.0973000000031,
+        "min": 93.58689999999842,
+        "max": 2251.3328,
+        "p95": 2251.3328
+      },
+      "rag_release_availability_db_ms": {
+        "mean": 4.834470000001238,
+        "median": 1.9443000000028405,
+        "min": 1.3030999999991764,
+        "max": 15.257800000003044,
+        "p95": 15.257800000003044
+      },
+      "vector_retrieval_db_ms": {
+        "mean": 3.0279999999986105,
+        "median": 2.326149999997142,
+        "min": 1.661999999996624,
+        "max": 10.00539999999819,
+        "p95": 10.00539999999819
+      },
+      "generation_ms": {
+        "mean": 3622.3751,
+        "median": 3432.0432500000006,
+        "min": 1670.9078000000009,
+        "max": 6289.5144999999975,
+        "p95": 6289.5144999999975
+      },
+      "persistence_db_ms": {
+        "mean": 10.866060000000289,
+        "median": 9.539500000000771,
+        "min": 6.894499999994878,
+        "max": 19.88040000000001,
+        "p95": 19.88040000000001
+      },
+      "generator_ollama_total_duration_ms": {
+        "mean": 3537.7180700000004,
+        "median": 3334.6477999999997,
+        "min": 1584.7841,
+        "max": 6202.4981,
+        "p95": 6202.4981
+      },
+      "other_orchestration_ms": {
+        "mean": 10.24827000000314,
+        "median": 9.436800000000403,
+        "min": 7.017100000000937,
+        "max": 14.514700000003359,
+        "p95": 14.514700000003359
+      }
+    }
+  },
+  "timing_method": {
+    "p95": "nearest_rank_ceil_0.95_n",
+    "other_orchestration": "wall_ms minus the seven sequential measured stages; Ollama total is nested in generation"
+  }
+}
