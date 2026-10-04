@@ -261,11 +261,21 @@ Véase el [registro de evidencia E2E](../../eval/ingestion/results/implementatio
   Exige modelo exacto, digest completo y capacidad embedding; cambios de runtime/
   digest/receta interrumpen la operación. No lee .env ni acepta configuración de chat.
 - `/api/embed` recibe explícitamente modelo, input, dimensions=1024, truncate=false
-  y options.num_ctx obtenido del contexto informado por `/api/show`. No añade
-  prefijos ni normaliza texto. Esa opción efectiva queda en document/query junto
-  con runtime_version; su compatibilidad se validó en la E2E real del 2026-09-29.
+  y `options.num_ctx` de la receta documental. No añade prefijos ni normaliza
+  texto. La E2E real del 2026-09-29 validó la receta histórica, con contexto
+  nativo 32768 para documento y query.
   Referencia: [API embed](https://docs.ollama.com/api/embed) y
   [API tags](https://docs.ollama.com/api/tags).
+
+La receta efectiva candidata OPT-1D1 conserva `document.options.num_ctx` igual
+al contexto nativo de `/api/show` (32768 en el modelo actual) y fija
+`query.options.num_ctx=4096` en código. Rechaza un contexto nativo menor a 4096.
+La capacidad nativa del modelo es un límite, no el contexto que debe solicitar
+cada query. La decisión usa [OPT-1C](../../eval/generation/results/opt1c-query-context-retrieval-2026-10-03.md):
+top-1 y conjunto top-5 iguales en 10/10 casos; L1-10 cambió solo el orden de
+tres resultados. La release histórica L1 conserva su receta original. Activar
+la nueva receta requiere registrar una nueva `embedding_config` y publicar una
+nueva release; este cambio no lo hace y no acredita aún latencia L1-B.
 - `resolveEmbeddingConfig` reutiliza igualdad de campos/JSONB; inserta sin hash JS,
   relee tras conflicto UNIQUE concurrente y nunca actualiza configuración inmutable.
 - `generateEmbeddings` limita el batch interno a 1–10 (default 10), por documento.

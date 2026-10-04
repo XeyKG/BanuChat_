@@ -5,11 +5,11 @@ import type { TestContext } from 'node:test';
 import { OllamaClient, OllamaError, validateVectors, validateEmbedResponse, vectorLiteral,
   buildPipelineConfigV1, validatePipelineConfigV1, DatabaseError } from '../src/index.js';
 import { EMBEDDING_MODEL } from '../src/ollama/types.js';
-import { effectiveConfig } from '../src/ollama/config.js';
+import { effectiveConfig, validateEffectiveConfig, assertSameRuntime } from '../src/ollama/config.js';
 
 // Synthetic vectors are confined to unit HTTP fixtures; never persisted to PostgreSQL.
 const vector = (first = 1): number[] => [first, ...Array<number>(1023).fill(0)];
-async function fixture(t: TestContext, options: { missing?: boolean; badDigest?: boolean; embedFailure?: boolean; invalidJson?: boolean } = {}) {
+async function fixture(t: TestContext, options: { missing?: boolean; badDigest?: boolean; embedFailure?: boolean; invalidJson?: boolean; contextLength?: number } = {}) {
   const requests: Record<string, unknown>[] = [];
   let digest = 'a'.repeat(64);
   const server = createServer(async (req, res) => {
@@ -17,7 +17,7 @@ async function fixture(t: TestContext, options: { missing?: boolean; badDigest?:
     if (req.url === '/api/version') result = { version: '0.0.0-fixture' };
     else if (req.url === '/api/tags') result = { models: options.missing ? [] : [{ name: EMBEDDING_MODEL, digest: options.badDigest ? 'abc' : digest }] };
     else if (req.url === '/api/show') result = { capabilities: ['embedding'], model_info: {
-      'general.architecture': 'qwen3', 'qwen3.context_length': 2048, 'qwen3.embedding_length': 1024 } };
+      'general.architecture': 'qwen3', 'qwen3.context_length': options.contextLength ?? 32768, 'qwen3.embedding_length': 1024 } };
     else if (req.url === '/api/embed') {
       const chunks: Buffer[] = [];
       for await (const chunk of req) chunks.push(Buffer.from(chunk as Uint8Array));
@@ -80,10 +80,32 @@ test('HTTP fixture verifies batch order, exact text, dimensions and truncate:fal
   const { client, requests } = await fixture(t);
   const config = await client.inspect();
   assert.equal(config.model_revision, 'a'.repeat(64));
+  assert.equal(config.parameters.document.options.num_ctx, 32768);
+  assert.equal(config.parameters.query.options.num_ctx, 4096);
+  validateEffectiveConfig(config);
   const inputs = ['Primer  texto\n', 'Segundo e\u0301'];
   assert.deepEqual(await client.embed(inputs, config), [vector(1), vector(2)]);
-  assert.deepEqual(requests, [{ model: EMBEDDING_MODEL, input: inputs, dimensions: 1024, truncate: false, options: { num_ctx: 2048 } }]);
+  assert.deepEqual(requests, [{ model: EMBEDDING_MODEL, input: inputs, dimensions: 1024, truncate: false, options: { num_ctx: 32768 } }]);
   assert.equal(client.embedRequestCount, 1);
+});
+test('effective config keeps document context native and rejects inconsistent recipes', () => {
+  const config = effectiveConfig('0.0.0-fixture', 'a'.repeat(64), 32768);
+  assert.deepEqual(config.parameters.document.options, { num_ctx: 32768 });
+  assert.deepEqual(config.parameters.query.options, { num_ctx: 4096 });
+  const changedQuery = structuredClone(config);
+  changedQuery.parameters.query.options.num_ctx = 32768;
+  assert.throws(() => validateEffectiveConfig(changedQuery), OllamaError);
+  assert.throws(() => assertSameRuntime(config, changedQuery), error =>
+    error instanceof OllamaError && error.reason === 'runtime_changed');
+  const changedDocument = structuredClone(config);
+  changedDocument.parameters.document.options.num_ctx = 2048;
+  assert.throws(() => validateEffectiveConfig(changedDocument), OllamaError);
+});
+test('native context below query recipe is rejected before embedding', async t => {
+  const { client, requests } = await fixture(t, { contextLength: 4095 });
+  await assert.rejects(client.inspect(), OllamaError);
+  assert.equal(requests.length, 0);
+  assert.throws(() => effectiveConfig('0.0.0-fixture', 'a'.repeat(64), 4095), OllamaError);
 });
 test('HTTP fixture missing model blocks before any embed call', async t => {
   const { client } = await fixture(t, { missing: true });

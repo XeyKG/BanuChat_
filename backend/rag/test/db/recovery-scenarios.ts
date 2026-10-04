@@ -59,8 +59,8 @@ export async function recoveryScenarios(t: TestContext, pool: Pool, base: StageI
     await assert.rejects(retryFailedCandidate(pool, good, release, { ...input, sourceGitRevision: 'e'.repeat(40) }), code('DATABASE_INVARIANT'));
     const altered = structuredClone(input.validated); altered.manifest.timezone = 'TEST_ONLY_DIFFERENT';
     await assert.rejects(retryFailedCandidate(pool, good, release, { ...input, validated: altered }), code('DATABASE_INVARIANT'));
-    for (const different of [effectiveConfig('0.0.0-TEST-ONLY', 'f'.repeat(64), 2048),
-      effectiveConfig('0.0.1-TEST-ONLY', config.model_revision, 2048), effectiveConfig(config.parameters.runtime_version, config.model_revision, 4096)]) {
+    for (const different of [effectiveConfig('0.0.0-TEST-ONLY', 'f'.repeat(64), 32768),
+      effectiveConfig('0.0.1-TEST-ONLY', config.model_revision, 32768), effectiveConfig(config.parameters.runtime_version, config.model_revision, 65536)]) {
       await assert.rejects(retryFailedCandidate(pool, { ...good, inspect: async () => different }, release, input), code('DATABASE_INVARIANT'));
     }
     assert.equal((await pool.query('SELECT count(*)::integer AS n FROM banuchat.ingestion_runs WHERE dataset_release_id=$1', [release])).rows[0].n, 1);

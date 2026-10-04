@@ -4,6 +4,14 @@ Contrato REST v1 documentado para la app React Native, con base `/api/v1`.
 Este directorio implementa servidor y handlers REST; Agent/ReAct no está implementado.
 El fallback conversacional actual es Document RAG directo.
 
+El cliente Ollama de query usa `options.num_ctx` de la receta de la release
+consultada. Comprueba que el contexto nativo anunciado por `/api/show` sea al
+menos el solicitado y mantiene la dimensión exacta; ambos valores pueden ser
+distintos. Por ello admite la release histórica L1 con query 32768 y una futura
+release con query 4096. La receta candidata OPT-1D1 se describe en
+[backend/rag](../rag/README.md); todavía requiere una nueva configuración/release
+y no tiene medición de latencia L1-B.
+
 - [OpenAPI 3.1.0](openapi.yaml): contrato `1.0.0-draft`, serializado en JSON
   (subconjunto de YAML 1.2) para facilitar validación local sin dependencias.
 - [Contrato humano](api-contract.md): endpoints, citas, consistencia, errores,

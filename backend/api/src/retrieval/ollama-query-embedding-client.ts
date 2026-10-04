@@ -164,10 +164,11 @@ export class OllamaQueryEmbeddingClient implements QueryEmbeddingClient {
     if (typeof architecture !== "string" || architecture.length === 0) {
       return reject("embedding_runtime_mismatch");
     }
+    const nativeContextLength = modelInfo[`${architecture}.context_length`];
     if (
       modelInfo[`${architecture}.embedding_length`] !== expected.dimension ||
-      modelInfo[`${architecture}.context_length`] !==
-        expected.query.options.num_ctx
+      !Number.isSafeInteger(nativeContextLength) ||
+      (nativeContextLength as number) < expected.query.options.num_ctx
     ) {
       return reject("embedding_runtime_mismatch");
     }

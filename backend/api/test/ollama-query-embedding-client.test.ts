@@ -46,7 +46,7 @@ function fakeFetch(
       model_info: {
         "general.architecture": "qwen3",
         "qwen3.embedding_length": 1024,
-        "qwen3.context_length": 4096,
+        "qwen3.context_length": 32768,
       },
     });
     return json(overrides.embed ?? {
@@ -102,6 +102,27 @@ test("verifies runtime and sends the stored query recipe without trimming", asyn
     truncate: false,
     options: { num_ctx: 4096 },
   });
+});
+
+test("accepts historical query context 32768 against native 32768", async () => {
+  const historical = { ...expected, query: { ...expected.query,
+    options: { num_ctx: 32768 } } };
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  await new OllamaQueryEmbeddingClient("http://localhost:11434", 5000,
+    fakeFetch({}, calls)).embedQuery("query", historical);
+  assert.deepEqual(JSON.parse(String(calls[3]?.init?.body)).options,
+    { num_ctx: 32768 });
+});
+
+test("rejects requested context above native context", async () => {
+  const larger = { ...expected, query: { ...expected.query,
+    options: { num_ctx: 8192 } } };
+  const show = { capabilities: ["embedding"], model_info: {
+    "general.architecture": "qwen3", "qwen3.embedding_length": 1024,
+    "qwen3.context_length": 4096 } };
+  await assertReason(() => new OllamaQueryEmbeddingClient("http://localhost:11434",
+    5000, fakeFetch({ show })).embedQuery("query", larger),
+  "embedding_runtime_mismatch");
 });
 
 test("rejects digest, runtime, capability and model dimension mismatches", async (t) => {

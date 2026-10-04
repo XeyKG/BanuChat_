@@ -44,7 +44,7 @@ test('PostgreSQL disposable staging integration', async t => {
   });
 
   // Fixtures only. Neither revision is a real runtime digest nor an operational approval.
-  const testConfig = effectiveConfig('0.0.0-TEST-ONLY', 'a'.repeat(64), 2048);
+  const testConfig = effectiveConfig('0.0.0-TEST-ONLY', 'a'.repeat(64), 32768);
   const config = await pool.query<{ id: string; config_sha256: string }>(`INSERT INTO banuchat.embedding_configs
     (provider,model,model_revision,dimension,distance_metric,parameters)
     VALUES ($1,$2,$3,1024,'cosine',$4::jsonb) RETURNING id,config_sha256`,
@@ -90,10 +90,10 @@ test('PostgreSQL disposable staging integration', async t => {
   try {
     await t.test('embedding config resolver uses SQL hash, reuses equal values, never updates', async () => {
       // Only this disposable test DB. Synthetic digest, not an inspected/approved model.
-      const fixture = effectiveConfig('0.0.0-fixture', 'a'.repeat(64), 2048);
+      const fixture = effectiveConfig('0.0.0-fixture', 'a'.repeat(64), 32768);
       const first = await resolveEmbeddingConfig(lease, fixture);
       assert.equal(await resolveEmbeddingConfig(lease, fixture), first);
-      const other = await resolveEmbeddingConfig(lease, effectiveConfig('0.0.0-fixture', 'c'.repeat(64), 2048));
+      const other = await resolveEmbeddingConfig(lease, effectiveConfig('0.0.0-fixture', 'c'.repeat(64), 32768));
       assert.notEqual(other, first);
       const row = (await pool.query('SELECT model_revision,config_sha256 FROM banuchat.embedding_configs WHERE id=$1', [first])).rows[0];
       assert.equal(row.model_revision, 'a'.repeat(64)); assert.match(row.config_sha256, /^[0-9a-f]{64}$/);
