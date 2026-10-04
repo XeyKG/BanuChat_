@@ -1,0 +1,1205 @@
+{
+  "schema_version": "1",
+  "evaluation_id": "banuchat-opt1c-query-context-retrieval",
+  "metadata": {
+    "implementation_revision": "3ebe94c7e8aab8553cbf910c8c597ea046afafee",
+    "implementation_changed_paths": [],
+    "release_id": "5b307391-f475-4120-b8de-30df8f9a7d63",
+    "model": "qwen3-embedding:0.6b",
+    "model_digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "runtime_version": "0.35.0",
+    "native_context_length": 32768,
+    "generated_at": "2026-10-04T00:06:13.250Z",
+    "runner_sha256": "43a61c8208fcfa1d003a3a0fc23f0c06f2ad7210c925fe794ecf72efe204a3c3",
+    "l1_cases_sha256": "8b9216cdf0a94f7fcf17faf8f09cca1cbe4fb5a46775ddf84da30b7eb83b4b25",
+    "query_contexts": [
+      32768,
+      4096
+    ],
+    "top_k": 5,
+    "document_embeddings_regenerated": false,
+    "same_document_release_for_both_contexts": true,
+    "execution_order": "all_32768_then_all_4096"
+  },
+  "summary": {
+    "cosine_similarity": {
+      "min": 0.9994328670215906,
+      "mean": 0.9996494275203924,
+      "median": 0.9996661887112255
+    },
+    "max_abs_difference": 0.0073805494,
+    "top1_same_count": 10,
+    "top5_same_set_count": 10,
+    "top5_same_order_count": 9,
+    "top5_intersection_count": {
+      "mean": 5,
+      "min": 5
+    },
+    "top5_jaccard": {
+      "mean": 1,
+      "min": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "L1-01",
+      "cosine_similarity": 0.9996357720235595,
+      "max_abs_difference": 0.005464010000000005,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:0",
+          "document_key": "doc-001",
+          "locator": "section:0:1. Alcance del programa demo",
+          "cosine_distance": 0.29014809668943686,
+          "cosine_similarity": 0.7098519033105631
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:0",
+          "document_key": "doc-003",
+          "locator": "section:0:1. Participar en una sesión",
+          "cosine_distance": 0.32630852900090734,
+          "cosine_similarity": 0.6736914709990927
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "document_key": "doc-002",
+          "locator": "section:0:1. Qué significa inscribirse",
+          "cosine_distance": 0.36518050663791635,
+          "cosine_similarity": 0.6348194933620837
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.36966037100657023,
+          "cosine_similarity": 0.6303396289934298
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:2",
+          "document_key": "doc-010",
+          "locator": "section:2:3. Participación y avance",
+          "cosine_distance": 0.37203421426020544,
+          "cosine_similarity": 0.6279657857397946
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:0",
+          "document_key": "doc-001",
+          "locator": "section:0:1. Alcance del programa demo",
+          "cosine_distance": 0.2920838805411936,
+          "cosine_similarity": 0.7079161194588064
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:0",
+          "document_key": "doc-003",
+          "locator": "section:0:1. Participar en una sesión",
+          "cosine_distance": 0.32820097681861826,
+          "cosine_similarity": 0.6717990231813817
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "document_key": "doc-002",
+          "locator": "section:0:1. Qué significa inscribirse",
+          "cosine_distance": 0.36520345158699385,
+          "cosine_similarity": 0.6347965484130061
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.36799948477752564,
+          "cosine_similarity": 0.6320005152224744
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:2",
+          "document_key": "doc-010",
+          "locator": "section:2:3. Participación y avance",
+          "cosine_distance": 0.37278707704581215,
+          "cosine_similarity": 0.6272129229541878
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:0",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:0",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:2",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-02",
+      "cosine_similarity": 0.999706717752956,
+      "max_abs_difference": 0.0057216175,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:1",
+          "document_key": "doc-001",
+          "locator": "section:1:2. Recorrido inicial",
+          "cosine_distance": 0.45113156119614284,
+          "cosine_similarity": 0.5488684388038572
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "document_key": "doc-008",
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.47878209388785176,
+          "cosine_similarity": 0.5212179061121482
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:5",
+          "document_key": "doc-004",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.4894554754604822,
+          "cosine_similarity": 0.5105445245395178
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "document_key": "doc-010",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.4939422313009282,
+          "cosine_similarity": 0.5060577686990718
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "document_key": "doc-003",
+          "locator": "section:1:2. Preparación de la actividad",
+          "cosine_distance": 0.5040934391188802,
+          "cosine_similarity": 0.49590656088111984
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:1",
+          "document_key": "doc-001",
+          "locator": "section:1:2. Recorrido inicial",
+          "cosine_distance": 0.45233802923514044,
+          "cosine_similarity": 0.5476619707648596
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "document_key": "doc-008",
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.4796314132981856,
+          "cosine_similarity": 0.5203685867018144
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:5",
+          "document_key": "doc-004",
+          "locator": "section:5:6. Consultas incompletas y cierre",
+          "cosine_distance": 0.48986747679724507,
+          "cosine_similarity": 0.5101325232027549
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "document_key": "doc-010",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.4947078077407836,
+          "cosine_similarity": 0.5052921922592164
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "document_key": "doc-003",
+          "locator": "section:1:2. Preparación de la actividad",
+          "cosine_distance": 0.5057245657301273,
+          "cosine_similarity": 0.49427543426987275
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:1",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:5",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-03",
+      "cosine_similarity": 0.9996521763127812,
+      "max_abs_difference": 0.003294735,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:2",
+          "document_key": "doc-002",
+          "locator": "section:2:3. Preparación de una propuesta",
+          "cosine_distance": 0.3073618871301643,
+          "cosine_similarity": 0.6926381128698357
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "document_key": "doc-002",
+          "locator": "section:0:1. Qué significa inscribirse",
+          "cosine_distance": 0.3586657406886292,
+          "cosine_similarity": 0.6413342593113708
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:2",
+          "document_key": "doc-001",
+          "locator": "section:2:3. Perfiles y contexto de consulta",
+          "cosine_distance": 0.42543544293701496,
+          "cosine_similarity": 0.574564557062985
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.43505223657613445,
+          "cosine_similarity": 0.5649477634238655
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "document_key": "doc-003",
+          "locator": "section:1:2. Preparación de la actividad",
+          "cosine_distance": 0.4665051500483133,
+          "cosine_similarity": 0.5334948499516867
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:2",
+          "document_key": "doc-002",
+          "locator": "section:2:3. Preparación de una propuesta",
+          "cosine_distance": 0.3104930479215955,
+          "cosine_similarity": 0.6895069520784045
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "document_key": "doc-002",
+          "locator": "section:0:1. Qué significa inscribirse",
+          "cosine_distance": 0.3606558515400259,
+          "cosine_similarity": 0.6393441484599741
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:2",
+          "document_key": "doc-001",
+          "locator": "section:2:3. Perfiles y contexto de consulta",
+          "cosine_distance": 0.4280940465702737,
+          "cosine_similarity": 0.5719059534297263
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.43722262243411913,
+          "cosine_similarity": 0.5627773775658809
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "document_key": "doc-003",
+          "locator": "section:1:2. Preparación de la actividad",
+          "cosine_distance": 0.4681076369413859,
+          "cosine_similarity": 0.5318923630586141
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:2",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:0",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:2",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:1",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-04",
+      "cosine_similarity": 0.9997072554978026,
+      "max_abs_difference": 0.003381556000000001,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:4",
+          "document_key": "doc-002",
+          "locator": "section:4:5. Retiro y cancelación de participación",
+          "cosine_distance": 0.31107336282725695,
+          "cosine_similarity": 0.688926637172743
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:3",
+          "document_key": "doc-002",
+          "locator": "section:3:4. Cambios de actividad",
+          "cosine_distance": 0.39569415892153703,
+          "cosine_similarity": 0.604305841078463
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.4151788803614347,
+          "cosine_similarity": 0.5848211196385653
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:3",
+          "document_key": "doc-004",
+          "locator": "section:3:4. Inicio y finalización",
+          "cosine_distance": 0.4377461114062525,
+          "cosine_similarity": 0.5622538885937475
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.4674157182821823,
+          "cosine_similarity": 0.5325842817178177
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:4",
+          "document_key": "doc-002",
+          "locator": "section:4:5. Retiro y cancelación de participación",
+          "cosine_distance": 0.310610082563732,
+          "cosine_similarity": 0.689389917436268
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:3",
+          "document_key": "doc-002",
+          "locator": "section:3:4. Cambios de actividad",
+          "cosine_distance": 0.3969971774218517,
+          "cosine_similarity": 0.6030028225781483
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "document_key": "doc-010",
+          "locator": "section:1:2. Inscripción y cambios",
+          "cosine_distance": 0.4157084628541481,
+          "cosine_similarity": 0.5842915371458519
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:3",
+          "document_key": "doc-004",
+          "locator": "section:3:4. Inicio y finalización",
+          "cosine_distance": 0.43817489602262905,
+          "cosine_similarity": 0.561825103977371
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.46868742258848606,
+          "cosine_similarity": 0.5313125774115139
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:4",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "67efc53e-18f3-4337-99ff-85629d12cb27:3",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:1",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "3115f93f-02a6-44a0-8e80-83b35e7cf66b:3",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-05",
+      "cosine_similarity": 0.9996483091425806,
+      "max_abs_difference": 0.00333493369,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "document_key": "doc-008",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.38086487003270597,
+          "cosine_similarity": 0.619135129967294
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:4",
+          "document_key": "doc-003",
+          "locator": "section:4:5. Retomar y revisar",
+          "cosine_distance": 0.3891658815245861,
+          "cosine_similarity": 0.6108341184754139
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.40785806902758326,
+          "cosine_similarity": 0.5921419309724167
+        },
+        {
+          "id": "c01ba724-ad02-4a67-92cb-288461ac5fd5:4",
+          "document_key": "doc-006",
+          "locator": "section:4:5. Finales ausentes y cambios",
+          "cosine_distance": 0.5182231621208957,
+          "cosine_similarity": 0.4817768378791043
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "document_key": "doc-008",
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.5329951823966214,
+          "cosine_similarity": 0.46700481760337864
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "document_key": "doc-008",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.37945929888132424,
+          "cosine_similarity": 0.6205407011186758
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:4",
+          "document_key": "doc-003",
+          "locator": "section:4:5. Retomar y revisar",
+          "cosine_distance": 0.3889170620243654,
+          "cosine_similarity": 0.6110829379756346
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.4092325920323878,
+          "cosine_similarity": 0.5907674079676122
+        },
+        {
+          "id": "c01ba724-ad02-4a67-92cb-288461ac5fd5:4",
+          "document_key": "doc-006",
+          "locator": "section:4:5. Finales ausentes y cambios",
+          "cosine_distance": 0.5195536373715435,
+          "cosine_similarity": 0.4804463626284565
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "document_key": "doc-008",
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.534336751878872,
+          "cosine_similarity": 0.465663248121128
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:4",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "c01ba724-ad02-4a67-92cb-288461ac5fd5:4",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-06",
+      "cosine_similarity": 0.9997576271975501,
+      "max_abs_difference": 0.002793711000000001,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:5",
+          "document_key": "doc-003",
+          "locator": "section:5:6. Cierre responsable",
+          "cosine_distance": 0.24098507683846448,
+          "cosine_similarity": 0.7590149231615355
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.4145266282496659,
+          "cosine_similarity": 0.5854733717503341
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:5",
+          "document_key": "doc-005",
+          "locator": "section:5:6. Relación con progreso y límites",
+          "cosine_distance": 0.4439780380712286,
+          "cosine_similarity": 0.5560219619287714
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:3",
+          "document_key": "doc-009",
+          "locator": "section:3:4. Cuidado al compartir resultados",
+          "cosine_distance": 0.45470582904182155,
+          "cosine_similarity": 0.5452941709581784
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.4595687937222128,
+          "cosine_similarity": 0.5404312062777872
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:5",
+          "document_key": "doc-003",
+          "locator": "section:5:6. Cierre responsable",
+          "cosine_distance": 0.24015726325073095,
+          "cosine_similarity": 0.759842736749269
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.41578898602417613,
+          "cosine_similarity": 0.5842110139758239
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:5",
+          "document_key": "doc-005",
+          "locator": "section:5:6. Relación con progreso y límites",
+          "cosine_distance": 0.4453530902756475,
+          "cosine_similarity": 0.5546469097243525
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:3",
+          "document_key": "doc-009",
+          "locator": "section:3:4. Cuidado al compartir resultados",
+          "cosine_distance": 0.455563149517218,
+          "cosine_similarity": 0.544436850482782
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "document_key": "doc-003",
+          "locator": "section:3:4. Ausencias e interrupciones",
+          "cosine_distance": 0.45947052980873015,
+          "cosine_similarity": 0.5405294701912698
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:5",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:5",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:3",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:3",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-07",
+      "cosine_similarity": 0.9995710489081203,
+      "max_abs_difference": 0.0073805494,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "document_key": "doc-005",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.4054663439272638,
+          "cosine_similarity": 0.5945336560727362
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "document_key": "doc-005",
+          "locator": "section:2:3. Presentación para revisión",
+          "cosine_distance": 0.5008257331924826,
+          "cosine_similarity": 0.4991742668075174
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:2",
+          "document_key": "doc-003",
+          "locator": "section:2:3. Acuerdos durante el trabajo",
+          "cosine_distance": 0.50205284430486,
+          "cosine_similarity": 0.49794715569514003
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.5081074105725248,
+          "cosine_similarity": 0.49189258942747516
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "document_key": "doc-005",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.5102922375577553,
+          "cosine_similarity": 0.4897077624422447
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "document_key": "doc-005",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.4062149962295514,
+          "cosine_similarity": 0.5937850037704486
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "document_key": "doc-005",
+          "locator": "section:2:3. Presentación para revisión",
+          "cosine_distance": 0.5012471530206296,
+          "cosine_similarity": 0.4987528469793704
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:2",
+          "document_key": "doc-003",
+          "locator": "section:2:3. Acuerdos durante el trabajo",
+          "cosine_distance": 0.5023464121165975,
+          "cosine_similarity": 0.4976535878834025
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.5071662081181183,
+          "cosine_similarity": 0.4928337918818817
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "document_key": "doc-005",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.5095356304080734,
+          "cosine_similarity": 0.49046436959192663
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0eef6961-d7b5-466a-9745-62b9d72f24f8:2",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-08",
+      "cosine_similarity": 0.9994328670215906,
+      "max_abs_difference": 0.006555550000000007,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:3",
+          "document_key": "doc-005",
+          "locator": "section:3:4. Criterios de lectura cualitativa",
+          "cosine_distance": 0.34597810410931096,
+          "cosine_similarity": 0.654021895890689
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "document_key": "doc-005",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.41449171442860633,
+          "cosine_similarity": 0.5855082855713937
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.41559423487083347,
+          "cosine_similarity": 0.5844057651291665
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "document_key": "doc-005",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.45606291343843475,
+          "cosine_similarity": 0.5439370865615653
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "document_key": "doc-005",
+          "locator": "section:2:3. Presentación para revisión",
+          "cosine_distance": 0.46470621771680976,
+          "cosine_similarity": 0.5352937822831902
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:3",
+          "document_key": "doc-005",
+          "locator": "section:3:4. Criterios de lectura cualitativa",
+          "cosine_distance": 0.3421881018673367,
+          "cosine_similarity": 0.6578118981326633
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "document_key": "doc-005",
+          "locator": "section:0:1. Propósito formativo",
+          "cosine_distance": 0.40964128238735353,
+          "cosine_similarity": 0.5903587176126465
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "document_key": "doc-010",
+          "locator": "section:4:5. Evidencias y guías",
+          "cosine_distance": 0.411374719645786,
+          "cosine_similarity": 0.588625280354214
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "document_key": "doc-005",
+          "locator": "section:1:2. Preparar una evidencia legible",
+          "cosine_distance": 0.4509543928367983,
+          "cosine_similarity": 0.5490456071632017
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "document_key": "doc-005",
+          "locator": "section:2:3. Presentación para revisión",
+          "cosine_distance": 0.4605809952213714,
+          "cosine_similarity": 0.5394190047786286
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:3",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:0",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:4",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:1",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "8b638d6d-7858-419b-a6c9-0d5d2d634f90:2",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-09",
+      "cosine_similarity": 0.999702300237314,
+      "max_abs_difference": 0.003306215999999999,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": true,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:3",
+          "document_key": "doc-008",
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.29337146041729034,
+          "cosine_similarity": 0.7066285395827097
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "document_key": "doc-008",
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.3618761414657683,
+          "cosine_similarity": 0.6381238585342317
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:4",
+          "document_key": "doc-008",
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.4225275516507999,
+          "cosine_similarity": 0.5774724483492001
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "document_key": "doc-008",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.4510440194966445,
+          "cosine_similarity": 0.5489559805033555
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "document_key": "doc-008",
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.46932142369875174,
+          "cosine_similarity": 0.5306785763012483
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:3",
+          "document_key": "doc-008",
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.2926906696188796,
+          "cosine_similarity": 0.7073093303811204
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "document_key": "doc-008",
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.3619206649973341,
+          "cosine_similarity": 0.6380793350026659
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:4",
+          "document_key": "doc-008",
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.4226469784448509,
+          "cosine_similarity": 0.5773530215551491
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "document_key": "doc-008",
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.4511046351318766,
+          "cosine_similarity": 0.5488953648681234
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "document_key": "doc-008",
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.46892112863994595,
+          "cosine_similarity": 0.531078871360054
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:3",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:1",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:4",
+          "rank_32768": 3,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:5",
+          "rank_32768": 4,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "0f6386bc-0464-4d20-b131-2cc23ce00692:0",
+          "rank_32768": 5,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 0
+        }
+      ]
+    },
+    {
+      "id": "L1-10",
+      "cosine_similarity": 0.9996802011096697,
+      "max_abs_difference": 0.0036187801000000003,
+      "top1_same": true,
+      "top5_same_set": true,
+      "top5_same_order": false,
+      "top5_intersection_count": 5,
+      "top5_jaccard": 1,
+      "top5_32768": [
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "document_key": "doc-010",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.3981161360463772,
+          "cosine_similarity": 0.6018838639536228
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:2",
+          "document_key": "doc-009",
+          "locator": "section:2:3. Lectura crítica de instrucciones",
+          "cosine_distance": 0.4049272877237917,
+          "cosine_similarity": 0.5950727122762083
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:5",
+          "document_key": "doc-001",
+          "locator": "section:5:6. Límites y continuidad",
+          "cosine_distance": 0.45280721502344656,
+          "cosine_similarity": 0.5471927849765534
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:4",
+          "document_key": "doc-009",
+          "locator": "section:4:5. Respuesta ante contenido inesperado",
+          "cosine_distance": 0.4542962853443616,
+          "cosine_similarity": 0.5457037146556384
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:0",
+          "document_key": "doc-009",
+          "locator": "section:0:1. Uso acotado del escenario",
+          "cosine_distance": 0.4546575708789239,
+          "cosine_similarity": 0.5453424291210761
+        }
+      ],
+      "top5_4096": [
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "document_key": "doc-010",
+          "locator": "section:5:6. Dificultades y límites",
+          "cosine_distance": 0.4015009159442444,
+          "cosine_similarity": 0.5984990840557556
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:2",
+          "document_key": "doc-009",
+          "locator": "section:2:3. Lectura crítica de instrucciones",
+          "cosine_distance": 0.40489076142751623,
+          "cosine_similarity": 0.5951092385724838
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:4",
+          "document_key": "doc-009",
+          "locator": "section:4:5. Respuesta ante contenido inesperado",
+          "cosine_distance": 0.45412623868533064,
+          "cosine_similarity": 0.5458737613146694
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:0",
+          "document_key": "doc-009",
+          "locator": "section:0:1. Uso acotado del escenario",
+          "cosine_distance": 0.45428975607604494,
+          "cosine_similarity": 0.5457102439239551
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:5",
+          "document_key": "doc-001",
+          "locator": "section:5:6. Límites y continuidad",
+          "cosine_distance": 0.4549652066847084,
+          "cosine_similarity": 0.5450347933152916
+        }
+      ],
+      "rank_changes": [
+        {
+          "id": "84d674f0-2ecc-475d-916d-c45668035cac:5",
+          "rank_32768": 1,
+          "rank_4096": 1,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:2",
+          "rank_32768": 2,
+          "rank_4096": 2,
+          "delta_4096_minus_32768": 0
+        },
+        {
+          "id": "12cdbab4-67f8-43a8-af19-484b48ea7381:5",
+          "rank_32768": 3,
+          "rank_4096": 5,
+          "delta_4096_minus_32768": 2
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:4",
+          "rank_32768": 4,
+          "rank_4096": 3,
+          "delta_4096_minus_32768": -1
+        },
+        {
+          "id": "5f088641-1f41-43b4-b6be-f44ff8b32caf:0",
+          "rank_32768": 5,
+          "rank_4096": 4,
+          "delta_4096_minus_32768": -1
+        }
+      ]
+    }
+  ]
+}
