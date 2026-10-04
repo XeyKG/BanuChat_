@@ -1,0 +1,103 @@
+{
+  "evaluation_type": "intent_router_design_case_conformance",
+  "repository_revision": "d11bbcd88e8da11e5437ccbe40c4007e27dfa6ba",
+  "router_revision": "7cfcc698c9c2b41dfbd1f33ec2f81c29e8e829ba",
+  "catalog_version": "1.1.0-draft",
+  "inputs": {
+    "cases_sha256": "c065690890f3c4fb2a75a312fa21597d0d9432eaa09343c5a2ad3fc91051c18c",
+    "catalog_sha256": "65758242969e8fde17c0e7b0e78cda09cae345accbf7f60dd290da2b1edb0c48",
+    "total_cases": 154,
+    "historical_retained_cases": 129,
+    "m3_1_incremental_cases": 25
+  },
+  "metrics": {
+    "total_cases": 154,
+    "route_correct": 154,
+    "exact_correct": 154,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 0,
+    "wrong_nonfallback_route": 0,
+    "route_accuracy": 1,
+    "exact_case_accuracy": 1
+  },
+  "by_provenance": {
+    "historical_retained": {
+      "total_cases": 129,
+      "route_correct": 129,
+      "exact_correct": 129,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "m3_1_incremental": {
+      "total_cases": 25,
+      "route_correct": 25,
+      "exact_correct": 25,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "combined": {
+      "total_cases": 154,
+      "route_correct": 154,
+      "exact_correct": 154,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_expected_route": {
+    "profile_progress": {
+      "total": 15,
+      "route_correct": 15,
+      "exact_correct": 15
+    },
+    "course_catalog": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "calendar_events": {
+      "total": 17,
+      "route_correct": 17,
+      "exact_correct": 17
+    },
+    "announcements": {
+      "total": 13,
+      "route_correct": 13,
+      "exact_correct": 13
+    },
+    "document_lookup": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "capabilities_help": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "basic_social": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "known_out_of_scope": {
+      "total": 11,
+      "route_correct": 11,
+      "exact_correct": 11
+    },
+    "agent_fallback": {
+      "total": 54,
+      "route_correct": 54,
+      "exact_correct": 54
+    }
+  },
+  "mismatches": []
+}

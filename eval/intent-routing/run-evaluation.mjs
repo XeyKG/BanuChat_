@@ -1,13 +1,18 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { mkdir, open, readFile, unlink } from "node:fs/promises";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 
 import { loadDefaultIntentRouter } from "../../backend/api/dist/index.js";
 
 const EXPECTED_ARTIFACT_TYPE = "intent_routing_cases";
-const EXPECTED_CATALOG_VERSION = "1.0.0-draft";
-const EXPECTED_TOTAL_CASES = 129;
-const ROUTER_REVISION = "d7527947236674489c9a8308ee0c509932129431";
+const EXPECTED_CATALOG_VERSION = "1.1.0-draft";
+const EXPECTED_TOTAL_CASES = 154;
+const EXPECTED_HISTORICAL_CASES = 129;
+const EXPECTED_M3_1_CASES = 25;
+const ROUTER_REVISION = "7cfcc698c9c2b41dfbd1f33ec2f81c29e8e829ba";
+const execFileAsync = promisify(execFile);
 const EXPECTED_ROUTES = [
   "profile_progress",
   "course_catalog",
@@ -36,8 +41,8 @@ const catalogUrl = new URL(
   repositoryRoot,
 );
 const resultsDirectory = new URL("results/", evaluationDirectory);
-const jsonResultUrl = new URL("checkpoint-2026-10-router.json", resultsDirectory);
-const markdownResultUrl = new URL("checkpoint-2026-10-router.md", resultsDirectory);
+const jsonResultUrl = new URL("k1-1-router-2026-10-03.json", resultsDirectory);
+const markdownResultUrl = new URL("k1-1-router-2026-10-03.md", resultsDirectory);
 
 function isRecord(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -131,7 +136,30 @@ function validateCases(document) {
       if (!VALID_RESPONSE_VARIANTS.has(testCase.expected_response_variant)) {
         errors.push(`${prefix}.expected_response_variant no es válido`);
       }
+      if (
+        !Array.isArray(testCase.tags) ||
+        testCase.tags.some((tag) => typeof tag !== "string")
+      ) {
+        errors.push(`${prefix}.tags debe ser un array de strings`);
+      }
     });
+    const m3_1Count = document.cases.filter(
+      (testCase) =>
+        isRecord(testCase) &&
+        Array.isArray(testCase.tags) &&
+        testCase.tags.includes("m3_1"),
+    ).length;
+    const historicalCount = document.cases.length - m3_1Count;
+    if (m3_1Count !== EXPECTED_M3_1_CASES) {
+      errors.push(
+        `debe haber exactamente ${EXPECTED_M3_1_CASES} casos con tag m3_1; se encontraron ${m3_1Count}`,
+      );
+    }
+    if (historicalCount !== EXPECTED_HISTORICAL_CASES) {
+      errors.push(
+        `debe haber exactamente ${EXPECTED_HISTORICAL_CASES} casos sin tag m3_1; se encontraron ${historicalCount}`,
+      );
+    }
   }
   if (errors.length > 0) {
     throw new Error(`cases.json inválido:\n- ${errors.join("\n- ")}`);
@@ -149,6 +177,78 @@ function percentage(value) {
   return `${(value * 100).toFixed(2)} %`;
 }
 
+function newMetricAccumulator() {
+  return {
+    total_cases: 0,
+    route_correct: 0,
+    exact_correct: 0,
+    unexpected_fast_path: 0,
+    unexpected_fallback: 0,
+    wrong_nonfallback_route: 0,
+  };
+}
+
+function recordMetrics(accumulator, expectedRoute, actualRoute, routeCorrect, exactCorrect) {
+  accumulator.total_cases += 1;
+  if (routeCorrect) accumulator.route_correct += 1;
+  if (exactCorrect) accumulator.exact_correct += 1;
+  if (expectedRoute === "agent_fallback" && actualRoute !== "agent_fallback") {
+    accumulator.unexpected_fast_path += 1;
+  }
+  if (expectedRoute !== "agent_fallback" && actualRoute === "agent_fallback") {
+    accumulator.unexpected_fallback += 1;
+  }
+  if (
+    expectedRoute !== "agent_fallback" &&
+    actualRoute !== "agent_fallback" &&
+    actualRoute !== expectedRoute
+  ) {
+    accumulator.wrong_nonfallback_route += 1;
+  }
+}
+
+function finalizedMetrics(accumulator) {
+  return {
+    ...accumulator,
+    route_accuracy: accumulator.route_correct / accumulator.total_cases,
+    exact_case_accuracy: accumulator.exact_correct / accumulator.total_cases,
+  };
+}
+
+async function readRepositoryRevision() {
+  const { stdout } = await execFileAsync("git", ["rev-parse", "HEAD"], {
+    cwd: fileURLToPath(repositoryRoot),
+    windowsHide: true,
+  });
+  const revision = stdout.trim();
+  if (!/^[0-9a-f]{40}$/u.test(revision)) {
+    throw new Error("No fue posible obtener una revisión Git válida para la evidencia.");
+  }
+  return revision;
+}
+
+async function writeEvidenceExclusively(jsonContent, markdownContent) {
+  let jsonHandle;
+  let markdownHandle;
+  try {
+    jsonHandle = await open(jsonResultUrl, "wx");
+    markdownHandle = await open(markdownResultUrl, "wx");
+    await jsonHandle.writeFile(jsonContent, "utf8");
+    await markdownHandle.writeFile(markdownContent, "utf8");
+  } catch (error) {
+    await jsonHandle?.close().catch(() => {});
+    await markdownHandle?.close().catch(() => {});
+    if (jsonHandle !== undefined) await unlink(jsonResultUrl).catch(() => {});
+    if (markdownHandle !== undefined) await unlink(markdownResultUrl).catch(() => {});
+    if (error !== null && typeof error === "object" && error.code === "EEXIST") {
+      throw new Error("La evidencia K1.1 ya existe; se abortó sin sobrescribirla.");
+    }
+    throw error;
+  }
+  await jsonHandle.close();
+  await markdownHandle.close();
+}
+
 function markdownFor(result) {
   const metric = result.metrics;
   const mismatchLines =
@@ -162,28 +262,45 @@ function markdownFor(result) {
     const row = result.by_expected_route[route];
     return `| ${route} | ${row.total} | ${row.route_correct} | ${row.exact_correct} |`;
   });
+  const provenanceRows = [
+    ["historical_retained", result.by_provenance.historical_retained],
+    ["m3_1_incremental", result.by_provenance.m3_1_incremental],
+    ["combined", result.by_provenance.combined],
+  ].map(
+    ([name, row]) =>
+      `| ${name} | ${row.total_cases} | ${row.route_correct} | ${row.exact_correct} | ${row.unexpected_fast_path} | ${row.unexpected_fallback} | ${row.wrong_nonfallback_route} |`,
+  );
 
-  return `# Evaluación reproducible del Intent Router — Checkpoint 2026-10
+  return `# K1.1 — Reevaluación reproducible del Intent Router post-M3.1
 
 ## Propósito
 
-Evaluar la conformidad del router determinista productivo con los casos de diseño congelados en \`eval/intent-routing/cases.json\`.
+Evaluar la conformidad del router determinista productivo post-M3.1 con los casos de diseño versionados en \`eval/intent-routing/cases.json\`, preservando la evidencia histórica K1.
 
 ## Identificación e integridad
 
-- Revisión del router: \`${result.router_revision}\`
+- Revisión del repositorio al ejecutar: \`${result.repository_revision}\`
+- Última revisión funcional declarada del router/catálogo/casos: \`${result.router_revision}\`
 - Versión del catálogo: \`${result.catalog_version}\`
 - SHA-256 de cases.json: \`${result.inputs.cases_sha256}\`
 - SHA-256 de intent-routing.catalog.json: \`${result.inputs.catalog_sha256}\`
 - Casos ejecutados: ${metric.total_cases}
+- Casos históricos retenidos: ${result.inputs.historical_retained_cases}
+- Casos incrementales M3.1: ${result.inputs.m3_1_incremental_cases}
 
-## Métricas observadas
+## Métricas combinadas observadas
 
 - Route accuracy: ${metric.route_correct}/${metric.total_cases} (${percentage(metric.route_accuracy)})
 - Exact case accuracy: ${metric.exact_correct}/${metric.total_cases} (${percentage(metric.exact_case_accuracy)})
 - Unexpected fast path: ${metric.unexpected_fast_path}
 - Unexpected fallback: ${metric.unexpected_fallback}
 - Wrong non-fallback route: ${metric.wrong_nonfallback_route}
+
+## Breakdown por procedencia
+
+| Procedencia | Total | Route correct | Exact correct | Unexpected fast path | Unexpected fallback | Wrong non-fallback route |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+${provenanceRows.join("\n")}
 
 ## Breakdown por ruta esperada
 
@@ -195,23 +312,22 @@ ${routeRows.join("\n")}
 
 ${mismatchLines.join("\n")}
 
-El detalle estructurado completo de cada mismatch está en \`checkpoint-2026-10-router.json\`. No se atribuyen causas automáticamente; solo se indican los campos diferentes.
+El detalle estructurado completo de cada mismatch está en \`k1-1-router-2026-10-03.json\`. No se atribuyen causas automáticamente; solo se indican los campos diferentes.
 
 ## Limitaciones de interpretación
 
-> **Advertencia:** Estos resultados miden conformidad contra casos de diseño congelados del Intent Router. No representan accuracy de un modelo de IA, generalización sobre consultas reales ni evaluación de calidad RAG.
+> **Advertencia:** Estos resultados miden conformidad contra casos de diseño versionados del Intent Router. No representan accuracy de un modelo de IA, generalización sobre consultas reales ni evaluación de calidad RAG.
 
-\`cases.json\` forma parte del diseño del router y no es un dataset externo independiente. Esta evaluación tampoco mide desempeño sobre usuarios reales.
+\`cases.json\` es un artefacto de diseño, no un dataset externo independiente. Los 25 casos M3.1 se desarrollaron dentro del mismo proceso de modificación del router y, por ello, no constituyen validación independiente.
+
+Un resultado de 154/154, si ocurre, demuestra conformidad y ausencia de regresión sobre estos casos versionados; no demuestra desempeño poblacional ni comportamiento sobre consultas reales.
 
 ## Ejecución
 
-La evaluación requiere compilar previamente \`backend/api\` y después ejecutar:
+La evaluación requiere compilar y validar previamente \`backend/api\`, y después ejecutar una vez:
 
 \`node eval/intent-routing/run-evaluation.mjs\`
-
-En esta ejecución, \`npm\` no estaba disponible en \`PATH\`; \`backend/api\` se compiló con el compilador TypeScript local equivalente y el runner se ejecutó inmediatamente después con Node.js.
 `;
-
 }
 
 async function main() {
@@ -240,11 +356,9 @@ async function main() {
     ]),
   );
   const mismatches = [];
-  let routeCorrectCount = 0;
-  let exactCorrectCount = 0;
-  let unexpectedFastPath = 0;
-  let unexpectedFallback = 0;
-  let wrongNonfallbackRoute = 0;
+  const combinedAccumulator = newMetricAccumulator();
+  const historicalAccumulator = newMetricAccumulator();
+  const m3_1Accumulator = newMetricAccumulator();
 
   for (const testCase of cases) {
     const actual = router.route({
@@ -259,17 +373,35 @@ async function main() {
     const routeCorrect = actual.route === expected.route;
     const exactCorrect = routeCorrect && deepEqual(actual.parameters, expected.parameters) &&
       actual.response_variant === expected.response_variant;
+    const provenance = testCase.tags.includes("m3_1")
+      ? "m3_1_incremental"
+      : "historical_retained";
+    const provenanceAccumulator = provenance === "m3_1_incremental"
+      ? m3_1Accumulator
+      : historicalAccumulator;
+    recordMetrics(
+      combinedAccumulator,
+      expected.route,
+      actual.route,
+      routeCorrect,
+      exactCorrect,
+    );
+    recordMetrics(
+      provenanceAccumulator,
+      expected.route,
+      actual.route,
+      routeCorrect,
+      exactCorrect,
+    );
     const routeBreakdown = byExpectedRoute[expected.route];
     if (routeBreakdown === undefined) {
       throw new Error(`Ruta esperada no soportada en ${testCase.id}: ${expected.route}`);
     }
     routeBreakdown.total += 1;
     if (routeCorrect) {
-      routeCorrectCount += 1;
       routeBreakdown.route_correct += 1;
     }
     if (exactCorrect) {
-      exactCorrectCount += 1;
       routeBreakdown.exact_correct += 1;
     } else {
       mismatches.push({
@@ -283,52 +415,48 @@ async function main() {
           response_variant: actual.response_variant,
         },
         route_correct: routeCorrect,
+        provenance,
         differing_fields: differingFields(expected, actual),
       });
     }
-    if (expected.route === "agent_fallback" && actual.route !== "agent_fallback") {
-      unexpectedFastPath += 1;
-    }
-    if (expected.route !== "agent_fallback" && actual.route === "agent_fallback") {
-      unexpectedFallback += 1;
-    }
-    if (
-      expected.route !== "agent_fallback" &&
-      actual.route !== "agent_fallback" &&
-      actual.route !== expected.route
-    ) {
-      wrongNonfallbackRoute += 1;
-    }
   }
 
+  const repositoryRevision = await readRepositoryRevision();
+  const combinedMetrics = finalizedMetrics(combinedAccumulator);
+  const historicalMetrics = finalizedMetrics(historicalAccumulator);
+  const m3_1Metrics = finalizedMetrics(m3_1Accumulator);
   const result = {
     evaluation_type: "intent_router_design_case_conformance",
+    repository_revision: repositoryRevision,
     router_revision: ROUTER_REVISION,
     catalog_version: EXPECTED_CATALOG_VERSION,
     inputs: {
       cases_sha256: sha256(casesBytes),
       catalog_sha256: sha256(catalogBytes),
-    },
-    metrics: {
       total_cases: cases.length,
-      route_correct: routeCorrectCount,
-      route_accuracy: routeCorrectCount / cases.length,
-      exact_correct: exactCorrectCount,
-      exact_case_accuracy: exactCorrectCount / cases.length,
-      unexpected_fast_path: unexpectedFastPath,
-      unexpected_fallback: unexpectedFallback,
-      wrong_nonfallback_route: wrongNonfallbackRoute,
+      historical_retained_cases: historicalMetrics.total_cases,
+      m3_1_incremental_cases: m3_1Metrics.total_cases,
+    },
+    metrics: combinedMetrics,
+    by_provenance: {
+      historical_retained: historicalMetrics,
+      m3_1_incremental: m3_1Metrics,
+      combined: combinedMetrics,
     },
     by_expected_route: byExpectedRoute,
     mismatches,
   };
 
   await mkdir(resultsDirectory, { recursive: true });
-  await Promise.all([
-    writeFile(jsonResultUrl, `${JSON.stringify(result, null, 2)}\n`, "utf8"),
-    writeFile(markdownResultUrl, markdownFor(result), "utf8"),
-  ]);
-  console.log(JSON.stringify(result.metrics, null, 2));
+  await writeEvidenceExclusively(
+    `${JSON.stringify(result, null, 2)}\n`,
+    markdownFor(result),
+  );
+  console.log(JSON.stringify({
+    repository_revision: repositoryRevision,
+    metrics: result.metrics,
+    by_provenance: result.by_provenance,
+  }, null, 2));
   if (mismatches.length > 0) {
     console.log(`Mismatches: ${mismatches.map(({ id }) => id).join(", ")}`);
   }
