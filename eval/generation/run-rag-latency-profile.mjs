@@ -39,10 +39,27 @@ const HTTP_ERROR_CODES = new Set([
 ]);
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const ALLOWED_CHANGES = new Set([
-  "eval/generation/l1-rag-latency-cases.json",
   "eval/generation/run-rag-latency-profile.mjs",
   "eval/generation/README.md",
 ]);
+const FORMAL_RUNS = Object.freeze({
+  l1: Object.freeze({
+    label: "L1",
+    benchmark_id: "banuchat-rag-latency-l1",
+    result_prefix: "l1-rag-latency",
+    comparison: null,
+  }),
+  l1_b: Object.freeze({
+    label: "L1-B",
+    benchmark_id: "banuchat-rag-latency-l1-b",
+    result_prefix: "l1-b-rag-latency",
+    comparison: Object.freeze({
+      measurement_kind: "post_optimization",
+      comparable_to_benchmark_id: "banuchat-rag-latency-l1",
+      comparison_basis: "same_frozen_workload_and_methodology",
+    }),
+  }),
+});
 
 class SafeRunnerError extends Error {}
 
@@ -85,6 +102,26 @@ function bogotaDate(date) {
     year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
   const p = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
   return `${p.year}-${p.month}-${p.day}`;
+}
+
+function validateFormalRunConfiguration(date) {
+  const baseline = `${FORMAL_RUNS.l1.result_prefix}-${date}`;
+  const l1b = `${FORMAL_RUNS.l1_b.result_prefix}-${date}`;
+  assert(FORMAL_RUNS.l1.benchmark_id === "banuchat-rag-latency-l1" &&
+    FORMAL_RUNS.l1_b.benchmark_id === "banuchat-rag-latency-l1-b" &&
+    baseline === `l1-rag-latency-${date}` &&
+    l1b === `l1-b-rag-latency-${date}` &&
+    baseline !== l1b,
+  "La configuración de resultados formales L1/L1-B no es segura.");
+}
+
+function formalResultPaths(formalRun, date) {
+  validateFormalRunConfiguration(date);
+  const basename = `${formalRun.result_prefix}-${date}`;
+  return {
+    jsonPath: join(RESULTS, `${basename}.json`),
+    mdPath: join(RESULTS, `${basename}.md`),
+  };
 }
 
 function validateG0Cases(data) {
@@ -529,13 +566,13 @@ function aggregate(runs) {
     at_or_over_5000_ms_count: wall.filter((ms) => ms >= 5000).length }, stages };
 }
 
-async function assertAbsent(path) {
+async function assertAbsent(path, label) {
   try { await access(path); }
   catch (error) {
     if (error?.code === "ENOENT") return;
     throw error;
   }
-  throw new SafeRunnerError("Ya existe un resultado L1 para esta fecha.");
+  throw new SafeRunnerError(`Ya existe un resultado ${label} para esta fecha.`);
 }
 
 function markdown(report) {
@@ -545,7 +582,10 @@ function markdown(report) {
   const stageRows = Object.entries(report.warm_aggregates.stages).map(([name, s]) =>
     `| ${name} | ${f(s.mean)} | ${f(s.median)} | ${f(s.min)} | ${f(s.max)} | ${f(s.p95)} |`).join("\n");
   const wall = report.warm_aggregates.wall_ms;
-  return `# L1 — Perfil de latencia RAG end-to-end de BanuChat
+  const label = report.metadata.formal_run_label ?? "L1";
+  const comparison = report.metadata.comparison === undefined ? "" :
+    `- Tipo de medición: post-optimización, comparable descriptivamente con \`${report.metadata.comparison.comparable_to_benchmark_id}\` por usar el mismo workload congelado y la misma metodología.\n`;
+  return `# ${label} — Perfil de latencia RAG end-to-end de BanuChat
 
 ## Entorno y método
 
@@ -562,7 +602,7 @@ function markdown(report) {
 - Receta generador: \`${JSON.stringify(report.metadata.generator_recipe)}\`.
 - Receta embedding de release: \`${JSON.stringify(report.metadata.embedding_parameters)}\`.
 - Diez POST /messages secuenciales con conversación nueva, retrieval y modelos reales. El warmup se excluyó de los agregados.
-
+${comparison}
 ## Warmup excluido
 
 HTTP ${report.warmup.http_status}; wall ${f(report.warmup.wall_ms)} ms; limpieza confirmada: ${report.warmup.cleanup_success}.
@@ -590,18 +630,21 @@ El p95 usa nearest rank: ordenar las diez observaciones y tomar la posición \`c
 
 ## Interpretación
 
-${wall.mean >= 5000 ? "En el entorno local observado, la muestra L1 no alcanzó la referencia histórica de 5000 ms para las solicitudes RAG medidas." : "La media observada de la muestra L1 quedó por debajo de la referencia histórica de 5000 ms para estas solicitudes RAG."} L1 no decide el cumplimiento de OE6. G0, G2 y J1 son antecedentes separados y no se combinaron estadísticamente con L1.
+${wall.mean >= 5000 ? `En el entorno local observado, la muestra ${label} no alcanzó la referencia histórica de 5000 ms para las solicitudes RAG medidas.` : `La media observada de la muestra ${label} quedó por debajo de la referencia histórica de 5000 ms para estas solicitudes RAG.`} ${label} no decide el cumplimiento de OE6. G0, G2 y J1 son antecedentes separados y no se combinaron estadísticamente con ${label}.${report.metadata.comparison === undefined ? "" : " La comparación con L1 es descriptiva y no constituye una prueba general de SLA u OE6."}
 `;
 }
 
 async function main() {
   const args = process.argv.slice(2);
+  const l1B = args.length === 1 && args[0] === "--l1-b";
   const dryRun = args.length === 1 && args[0] === "--dry-run";
   const functionalValidation = args.length === 1 && args[0] === "--validate-l1-cases";
   const diagnosticId = args.length === 2 && args[0] === "--diagnose-case" &&
     /^G0-(?:0[1-9]|10)$/u.test(args[1]) ? args[1] : null;
-  assert(args.length === 0 || dryRun || functionalValidation || diagnosticId !== null,
-  "Uso: node eval/generation/run-rag-latency-profile.mjs [--dry-run | --validate-l1-cases | --diagnose-case G0-01..G0-10]");
+  assert(args.length === 0 || l1B || dryRun || functionalValidation || diagnosticId !== null,
+  "Uso: node eval/generation/run-rag-latency-profile.mjs [--l1-b | --dry-run | --validate-l1-cases | --diagnose-case G0-01..G0-10]");
+  const formalRun = l1B ? FORMAL_RUNS.l1_b : FORMAL_RUNS.l1;
+  validateFormalRunConfiguration(bogotaDate(new Date()));
   const state = gitState();
   const caseBytes = await readFile(diagnosticId === null ? L1_CASES_PATH : G0_PROMPTS_PATH);
   const cases = diagnosticId === null
@@ -616,12 +659,10 @@ async function main() {
   }
 
   const runDate = bogotaDate(new Date());
-  const basename = `l1-rag-latency-${runDate}`;
-  const jsonPath = join(RESULTS, `${basename}.json`);
-  const mdPath = join(RESULTS, `${basename}.md`);
+  const { jsonPath, mdPath } = formalResultPaths(formalRun, runDate);
   if (diagnosticId === null && !functionalValidation) {
-    await assertAbsent(jsonPath);
-    await assertAbsent(mdPath);
+    await assertAbsent(jsonPath, formalRun.label);
+    await assertAbsent(mdPath, formalRun.label);
   }
 
   const runtimeConfig = backend.loadRuntimeConfig();
@@ -709,18 +750,22 @@ async function main() {
       console.log(`${item.id}: ${warmRuns.at(-1).wall_ms.toFixed(2)} ms`);
     }
     const generatedAt = new Date();
-    const report = { schema_version: "1", benchmark_id: "banuchat-rag-latency-l1",
+    const report = { schema_version: "1", benchmark_id: formalRun.benchmark_id,
       metadata: { ...state, ...environment, generated_at: generatedAt.toISOString(),
         runner_sha256: sha256(await readFile(fileURLToPath(import.meta.url))),
         l1_cases_sha256: sha256(caseBytes), measured_run_count: 10,
-        warmup_excluded: true, profile_key: PROFILE_KEY },
+        warmup_excluded: true, profile_key: PROFILE_KEY,
+        ...(formalRun.comparison === null ? {} : {
+          formal_run_label: formalRun.label,
+          comparison: formalRun.comparison,
+        }) },
       warmup, warm_runs: warmRuns, warm_aggregates: aggregate(warmRuns),
       timing_method: { p95: "nearest_rank_ceil_0.95_n", other_orchestration:
         "wall_ms minus the seven sequential measured stages; Ollama total is nested in generation" } };
     await mkdir(RESULTS, { recursive: true });
     await writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, { flag: "wx" });
     await writeFile(mdPath, markdown(report), { flag: "wx" });
-    console.log(`L1 completo: ${jsonPath}\nReporte: ${mdPath}`);
+    console.log(`${formalRun.label} completo: ${jsonPath}\nReporte: ${mdPath}`);
   } finally {
     await closeServer(server);
     await pool.end();

@@ -223,9 +223,39 @@ observaciones es el máximo y es una descripción inestable, no una estimación
 poblacional robusta. L1 compara descriptivamente con la referencia histórica de
 5000 ms, sin decidir el cumplimiento de OE6 ni cambiar su formulación.
 
-Los resultados futuros tendrán fecha `America/Bogota` y quedarán en
-`results/l1-rag-latency-AAAA-MM-DD.json` y `.md`. Los intentos L1 abortados
-durante la preparación no produjeron resultados oficiales.
+El baseline L1 congelado está en
+`results/l1-rag-latency-2026-10-03.json` y `.md`; no debe modificarse ni
+sobrescribirse. Los intentos L1 abortados durante la preparación no produjeron
+resultados oficiales.
+
+### L1-B: medición formal posterior a la optimización
+
+L1-B reutiliza este mismo runner, los diez casos congelados L1 en el mismo orden,
+el warmup excluido, las diez corridas secuenciales, la instrumentación por etapas,
+los agregados y el p95 nearest-rank. El runner sigue obteniendo de PostgreSQL la
+release actual y su receta real de embedding durante el preflight; no exige un ID
+de release hardcodeado.
+
+Desde la raíz del repositorio, la ejecución formal posterior será:
+
+```powershell
+node --env-file=.env eval/generation/run-rag-latency-profile.mjs --l1-b
+```
+
+El modo registra `benchmark_id=banuchat-rag-latency-l1-b`, identifica en metadata
+la medición como post-optimización comparable con L1 por workload y metodología,
+y crea sin sobrescribir:
+
+```text
+eval/generation/results/l1-b-rag-latency-AAAA-MM-DD.json
+eval/generation/results/l1-b-rag-latency-AAAA-MM-DD.md
+```
+
+La configuración del CLI valida que los prefijos formales L1 y L1-B sean
+distintos. L1-B nunca apunta a `l1-rag-latency-AAAA-MM-DD.*`, por lo que no puede
+sobrescribir el baseline congelado. La comparación L1-B frente a L1 será
+descriptiva bajo el mismo workload y metodología; no constituye una prueba
+general de SLA ni acredita por sí sola OE6.
 
 ## OPT-1C: contexto de query y estabilidad del retrieval
 
