@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,8 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
-import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
+import { FadeIn } from '@/ui/animated';
+import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
 
 type LoadState = 'loading' | 'error' | 'success';
@@ -24,23 +25,49 @@ const FILTERS: { value: EventFilter; label: string }[] = [
   { value: 'general', label: 'Generales' },
 ];
 
-const EVENT_LABELS: Record<CalendarEventType, string> = {
-  course_session: 'Sesión de curso',
-  announcement_deadline: 'Cierre',
-  general: 'General',
+const EVENT_META: Record<CalendarEventType, { label: string; tint: string; soft: string }> = {
+  course_session: { label: 'Sesión de curso', tint: colors.accent, soft: colors.accentSoft },
+  announcement_deadline: { label: 'Cierre', tint: colors.amber, soft: colors.amberSoft },
+  general: { label: 'General', tint: colors.violet, soft: colors.violetSoft },
 };
 
-const bogotaDateTimeFormatter = new Intl.DateTimeFormat('es-CO', {
+const dayFormatter = new Intl.DateTimeFormat('es-CO', {
   timeZone: 'America/Bogota',
-  day: 'numeric',
+  weekday: 'long',
+});
+
+const monthFormatter = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
   month: 'short',
-  year: 'numeric',
+});
+
+const timeFormatter = new Intl.DateTimeFormat('es-CO', {
+  timeZone: 'America/Bogota',
   hour: 'numeric',
   minute: '2-digit',
 });
 
-function formatBogotaDateTime(timestamp: string): string {
-  return bogotaDateTimeFormatter.format(new Date(timestamp));
+function dayKeyOf(timestamp: string): string {
+  const date = new Date(timestamp);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === 'year')?.value ?? '';
+  const month = parts.find((part) => part.type === 'month')?.value ?? '';
+  const day = parts.find((part) => part.type === 'day')?.value ?? '';
+  return `${year}-${month}-${day}`;
+}
+
+function capitalize(text: string): string {
+  return text.length === 0 ? text : `${text[0].toUpperCase()}${text.slice(1)}`;
+}
+
+interface DayGroup {
+  dayKey: string;
+  events: CalendarEvent[];
 }
 
 export default function CalendarScreen() {
@@ -56,7 +83,7 @@ export default function CalendarScreen() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/');
+    if (activeProfile === null) router.replace('/profiles');
   }, [activeProfile, router]);
 
   useEffect(() => {
@@ -84,6 +111,23 @@ export default function CalendarScreen() {
     };
   }, [activeProfile, filter, range, retryCount]);
 
+  const dayGroups = useMemo<DayGroup[]>(() => {
+    const groups = new Map<string, CalendarEvent[]>();
+    for (const event of events) {
+      const key = dayKeyOf(event.starts_at);
+      const group = groups.get(key);
+      if (group) {
+        group.push(event);
+      } else {
+        groups.set(key, [event]);
+      }
+    }
+    return Array.from(groups.entries()).map(([dayKey, dayEvents]) => ({
+      dayKey,
+      events: dayEvents,
+    }));
+  }, [events]);
+
   function selectFilter(value: EventFilter) {
     if (value === filter) return;
     setLoadState('loading');
@@ -101,48 +145,45 @@ export default function CalendarScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle="Próximos 30 días"
+        subtitle="Próximos 30 días · hora de Bogotá"
         title="Calendario"
       />
+
+      <View style={styles.filterBar}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View accessibilityRole="radiogroup" style={styles.filters}>
+            {FILTERS.map((option) => {
+              const isSelected = filter === option.value;
+              return (
+                <Pressable
+                  key={option.value}
+                  accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: isSelected }}
+                  onPress={() => selectFilter(option.value)}
+                  style={({ pressed }) => [
+                    styles.filterButton,
+                    isSelected && styles.filterButtonSelected,
+                    pressed && styles.pressed,
+                  ]}>
+                  <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
+                    {option.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </View>
+
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
-          <View style={styles.contextCard}>
-            <Text style={styles.contextTitle}>Agenda del periodo</Text>
-            <Text style={styles.contextText}>Las fechas y horas se muestran en hora de Bogotá.</Text>
-          </View>
-
-          <View>
-            <Text style={styles.sectionLabel}>Filtrar por tipo</Text>
-            <View accessibilityRole="radiogroup" style={styles.filters}>
-              {FILTERS.map((option) => {
-                const isSelected = filter === option.value;
-                return (
-                  <Pressable
-                    key={option.value}
-                    accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`}
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: isSelected }}
-                    onPress={() => selectFilter(option.value)}
-                    style={({ pressed }) => [
-                      styles.filterButton,
-                      isSelected && styles.filterButtonSelected,
-                      pressed && styles.pressed,
-                    ]}>
-                    <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
-                      {isSelected ? `✓ ${option.label}` : option.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-          </View>
-
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator
                 accessibilityLabel="Cargando calendario"
                 size="large"
-                color={colors.primary}
+                color={colors.accent}
               />
               <Text style={styles.stateText}>Cargando calendario...</Text>
             </View>
@@ -159,33 +200,70 @@ export default function CalendarScreen() {
           {loadState === 'success' && events.length === 0 && (
             <View style={styles.stateCard}>
               <Text style={styles.stateTitle}>Sin eventos</Text>
-              <Text style={styles.stateText}>No hay eventos en este periodo para el filtro seleccionado.</Text>
+              <Text style={styles.stateText}>
+                No hay eventos en este periodo para el filtro seleccionado.
+              </Text>
             </View>
           )}
 
-          {loadState === 'success' && events.length > 0 && (
-            <View style={styles.eventList}>
-              {events.map((event) => (
-                <View key={event.event_key} style={styles.eventCard}>
-                  <View style={styles.eventTypeBadge}>
-                    <Text style={styles.eventType}>{EVENT_LABELS[event.event_type]}</Text>
+          {loadState === 'success' &&
+            dayGroups.map((group, groupIndex) => {
+              const firstEventDate = new Date(group.events[0].starts_at);
+              const dayNumber = new Intl.DateTimeFormat('es-CO', {
+                timeZone: 'America/Bogota',
+                day: 'numeric',
+              }).format(firstEventDate);
+
+              return (
+                <FadeIn key={group.dayKey} delay={Math.min(groupIndex, 5) * 70}>
+                  <View style={styles.dayGroup}>
+                    <View style={styles.dayHeader}>
+                      <View style={styles.dayBadge}>
+                        <Text style={styles.dayNumber}>{dayNumber}</Text>
+                        <Text style={styles.dayMonth}>{monthFormatter.format(firstEventDate)}</Text>
+                      </View>
+                      <View style={styles.dayHeaderCopy}>
+                        <Text style={styles.dayName}>
+                          {capitalize(dayFormatter.format(firstEventDate))}
+                        </Text>
+                        <Text style={styles.dayCount}>
+                          {group.events.length === 1
+                            ? '1 evento'
+                            : `${group.events.length} eventos`}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.eventList}>
+                      {group.events.map((event) => {
+                        const meta = EVENT_META[event.event_type];
+                        return (
+                          <View key={event.event_key} style={styles.eventCard}>
+                            <View style={[styles.eventAccent, { backgroundColor: meta.tint }]} />
+                            <View style={styles.eventBody}>
+                              <View style={styles.eventTopRow}>
+                                <View style={[styles.eventTypeBadge, { backgroundColor: meta.soft }]}>
+                                  <Text style={[styles.eventType, { color: meta.tint }]}>
+                                    {meta.label}
+                                  </Text>
+                                </View>
+                                <Text style={styles.eventTime}>
+                                  {timeFormatter.format(new Date(event.starts_at))}
+                                  {event.ends_at !== null &&
+                                    ` – ${timeFormatter.format(new Date(event.ends_at))}`}
+                                </Text>
+                              </View>
+                              <Text style={styles.eventTitle}>{event.title}</Text>
+                              <Text style={styles.eventDescription}>{event.description}</Text>
+                            </View>
+                          </View>
+                        );
+                      })}
+                    </View>
                   </View>
-                  <Text style={styles.eventTitle}>{event.title}</Text>
-                  <View style={styles.timeBlock}>
-                    <Text style={styles.timeLabel}>Inicio</Text>
-                    <Text style={styles.eventTime}>{formatBogotaDateTime(event.starts_at)}</Text>
-                    {event.ends_at !== null && (
-                      <>
-                        <Text style={styles.timeLabel}>Fin</Text>
-                        <Text style={styles.eventTime}>{formatBogotaDateTime(event.ends_at)}</Text>
-                      </>
-                    )}
-                  </View>
-                  <Text style={styles.eventDescription}>{event.description}</Text>
-                </View>
-              ))}
-            </View>
-          )}
+                </FadeIn>
+              );
+            })}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -194,30 +272,29 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
-  contextCard: {
-    gap: spacing.xxs,
-    padding: spacing.md,
-    borderRadius: radii.lg,
-    backgroundColor: colors.primarySoft,
+  filterBar: {
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  contextTitle: { color: colors.brand, fontSize: typography.body, fontWeight: '700' },
-  contextText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
-  sectionLabel: { color: colors.textSecondary, fontSize: typography.caption, fontWeight: '800', textTransform: 'uppercase', marginBottom: spacing.xs },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
+  filters: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.lg },
   filterButton: {
-    minHeight: layout.minTouchTarget,
+    minHeight: 38,
     justifyContent: 'center',
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
   },
-  filterButtonSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
+  filterButtonSelected: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accent,
+  },
   filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
-  filterTextSelected: { color: colors.primaryStrong },
+  filterTextSelected: { color: colors.white },
+  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
+  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
   stateCard: {
     alignItems: 'center',
     gap: spacing.sm,
@@ -226,32 +303,51 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
+    ...shadows.soft,
   },
-  errorCard: { borderColor: '#FECACA', backgroundColor: colors.errorSoft },
-  stateTitle: { color: colors.text, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
+  errorCard: { borderColor: '#F3C2BE', backgroundColor: colors.errorSoft },
+  stateTitle: { color: colors.ink, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
   stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
   retryButton: { minWidth: 144 },
-  eventList: { gap: spacing.sm },
-  eventCard: {
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radii.lg,
+  dayGroup: { gap: spacing.sm },
+  dayHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  dayBadge: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
+    ...shadows.soft,
+  },
+  dayNumber: { color: colors.ink, fontSize: 18, fontWeight: '800', lineHeight: 21 },
+  dayMonth: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'capitalize' },
+  dayHeaderCopy: { flex: 1, gap: 1 },
+  dayName: { color: colors.ink, fontSize: typography.body, fontWeight: '800', letterSpacing: -0.2 },
+  dayCount: { color: colors.muted, fontSize: typography.caption },
+  eventList: { gap: spacing.sm, paddingLeft: spacing.xs },
+  eventCard: {
+    flexDirection: 'row',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.lg,
     backgroundColor: colors.surface,
+    ...shadows.soft,
   },
+  eventAccent: { width: 4 },
+  eventBody: { flex: 1, gap: spacing.xs, padding: spacing.md },
+  eventTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
   eventTypeBadge: {
-    alignSelf: 'flex-start',
     paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xxs,
+    paddingVertical: 3,
     borderRadius: radii.pill,
-    backgroundColor: colors.primarySoft,
   },
-  eventType: { color: colors.primaryStrong, fontSize: typography.caption, fontWeight: '800' },
-  eventTitle: { color: colors.text, fontSize: 18, lineHeight: 24, fontWeight: '800' },
-  timeBlock: { gap: 2, paddingVertical: spacing.xxs },
-  timeLabel: { color: colors.muted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
-  eventTime: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20, marginBottom: spacing.xxs },
-  eventDescription: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 23 },
+  eventType: { fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
+  eventTime: { color: colors.muted, fontSize: typography.caption, fontWeight: '600' },
+  eventTitle: { color: colors.ink, fontSize: 17, lineHeight: 23, fontWeight: '800', letterSpacing: -0.2 },
+  eventDescription: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
   pressed: { opacity: 0.68 },
 });
