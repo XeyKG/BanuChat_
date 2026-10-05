@@ -270,10 +270,47 @@ test("all applies no temporal SQL filter and still derives each row status", asy
   const sql = client.calls[1]?.text ?? "";
   assert.doesNotMatch(sql, /valid_until IS NULL|valid_until IS NOT NULL/);
   assert.doesNotMatch(sql, /\$2::timestamptz [<>]=?/);
+  assert.match(sql, /LIMIT \$2/);
+  assert.doesNotMatch(sql, /\$3/);
+  assert.deepEqual(client.calls[1]?.values, [RELEASE_ID, 20]);
+  assert.equal(result.reference_time, REFERENCE_TIME);
   assert.deepEqual(
     result.announcements.map((announcement) => announcement.temporal_status),
     ["upcoming", "active", "expired"],
   );
+});
+
+test("temporal filters bind reference_time before limit", async () => {
+  const cases: {
+    temporalStatus: "active" | "upcoming" | "expired";
+    filterPattern: RegExp;
+  }[] = [
+    {
+      temporalStatus: "active",
+      filterPattern: /\$2::timestamptz >= a\.valid_from/,
+    },
+    {
+      temporalStatus: "upcoming",
+      filterPattern: /\$2::timestamptz < a\.valid_from/,
+    },
+    {
+      temporalStatus: "expired",
+      filterPattern: /\$2::timestamptz > a\.valid_until/,
+    },
+  ];
+
+  for (const { temporalStatus, filterPattern } of cases) {
+    const client = new FakeSqlQueryClient();
+    await getAnnouncements(client, {
+      reference_time: REFERENCE_TIME,
+      temporal_status: temporalStatus,
+      limit: 7,
+    });
+    const call = client.calls[1];
+    assert.deepEqual(call?.values, [RELEASE_ID, REFERENCE_TIME, 7]);
+    assert.match(call?.text ?? "", filterPattern);
+    assert.match(call?.text ?? "", /LIMIT \$3/);
+  }
 });
 
 test("rejects valid_until before valid_from", async () => {

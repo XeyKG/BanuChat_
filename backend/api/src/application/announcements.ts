@@ -294,25 +294,29 @@ export async function getAnnouncements(
 ): Promise<AnnouncementsResult> {
   const validated = validateInput(input);
   const release = await resolveCurrentRelease(client);
-  const values: unknown[] = [release.release_id, validated.referenceTime];
+  const values: unknown[] = [release.release_id];
   let query = ANNOUNCEMENTS_QUERY_BASE;
+
+  if (validated.temporalStatus !== "all") {
+    values.push(validated.referenceTime);
+    const referenceTimeParameter = `$${values.length}::timestamptz`;
+    if (validated.temporalStatus === "active") {
+      query +=
+        `  AND ${referenceTimeParameter} >= a.valid_from\n` +
+        `  AND (a.valid_until IS NULL OR ${referenceTimeParameter} <= a.valid_until)\n`;
+    } else if (validated.temporalStatus === "upcoming") {
+      query += `  AND ${referenceTimeParameter} < a.valid_from\n`;
+    } else {
+      query +=
+        "  AND a.valid_until IS NOT NULL\n" +
+        `  AND ${referenceTimeParameter} > a.valid_until\n`;
+    }
+  }
 
   if (validated.query !== undefined) {
     values.push(validated.query);
     const queryParameter = `$${values.length}`;
     query += `  AND (\n    strpos(lower(a.title), lower(${queryParameter})) > 0\n    OR strpos(lower(a.description), lower(${queryParameter})) > 0\n  )\n`;
-  }
-
-  if (validated.temporalStatus === "active") {
-    query +=
-      "  AND $2::timestamptz >= a.valid_from\n" +
-      "  AND (a.valid_until IS NULL OR $2::timestamptz <= a.valid_until)\n";
-  } else if (validated.temporalStatus === "upcoming") {
-    query += "  AND $2::timestamptz < a.valid_from\n";
-  } else if (validated.temporalStatus === "expired") {
-    query +=
-      "  AND a.valid_until IS NOT NULL\n" +
-      "  AND $2::timestamptz > a.valid_until\n";
   }
 
   values.push(validated.limit);
