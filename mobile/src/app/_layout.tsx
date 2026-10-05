@@ -7,7 +7,7 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />
     </SessionProvider>
   );
 }

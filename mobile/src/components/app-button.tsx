@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native';
 
-import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
+import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
 type ButtonVariant = 'primary' | 'secondary' | 'quiet';
 
@@ -27,7 +27,7 @@ export function AppButton({
 }: AppButtonProps) {
   const isDisabled = disabled || loading;
   const visibleLabel = loading ? (loadingLabel ?? label) : label;
-  const indicatorColor = variant === 'primary' ? colors.surface : colors.primary;
+  const indicatorColor = variant === 'primary' ? colors.white : colors.accent;
 
   return (
     <Pressable
@@ -39,6 +39,7 @@ export function AppButton({
       style={({ pressed }) => [
         styles.base,
         styles[variant],
+        variant === 'primary' && !isDisabled && shadows.soft,
         isDisabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
         style,
@@ -62,11 +63,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   primary: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primary,
+    borderColor: colors.accent,
+    backgroundColor: colors.accent,
   },
   secondary: {
-    borderColor: colors.primary,
+    borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
   },
   quiet: {
@@ -76,11 +77,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: typography.body,
     fontWeight: '700',
+    letterSpacing: 0.1,
     textAlign: 'center',
   },
-  primaryLabel: { color: colors.surface },
-  secondaryLabel: { color: colors.primary },
+  primaryLabel: { color: colors.white },
+  secondaryLabel: { color: colors.ink },
   quietLabel: { color: colors.textSecondary },
-  disabled: { opacity: 0.5 },
-  pressed: { opacity: 0.78 },
+  disabled: { opacity: 0.45 },
+  pressed: { opacity: 0.82, transform: [{ scale: 0.985 }] },
 });

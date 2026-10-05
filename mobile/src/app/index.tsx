@@ -1,233 +1,252 @@
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getProfiles, type ProfileSummary } from '@/api/profiles';
 import { AppButton } from '@/components/app-button';
-import { useSession } from '@/session/session-context';
-import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
+import { BrandMark, FadeIn } from '@/ui/animated';
+import { CalendarGlyph, ChartGlyph, SparkGlyph } from '@/ui/icons';
+import { colors, layout, shadows, spacing, typography } from '@/ui/tokens';
 
-type LoadState = 'loading' | 'error' | 'success';
+interface OnboardingSlide {
+  key: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  accent: string;
+  accentSoft: string;
+}
 
-export default function ProfileSelectorScreen() {
+const SLIDES: OnboardingSlide[] = [
+  {
+    key: 'assistant',
+    eyebrow: 'Asistente académico',
+    title: 'Pregunta. Banu responde con evidencia.',
+    body: 'BanuChat consulta el material disponible y muestra las fuentes asociadas cuando corresponde.',
+    accent: colors.accent,
+    accentSoft: colors.accentSoft,
+  },
+  {
+    key: 'progress',
+    eyebrow: 'Tu avance',
+    title: 'Tu progreso, siempre a la mano.',
+    body: 'Consulta el estado de tus cursos, porcentajes de avance y fechas clave sin salir de la conversación.',
+    accent: colors.success,
+    accentSoft: colors.successSoft,
+  },
+  {
+    key: 'calendar',
+    eyebrow: 'Tu agenda',
+    title: 'Eventos y cierres, sin sorpresas.',
+    body: 'Sesiones, fechas de cierre y anuncios del periodo, organizados y disponibles al instante.',
+    accent: colors.violet,
+    accentSoft: colors.violetSoft,
+  },
+];
+
+function SlideGlyph({ slide }: { slide: OnboardingSlide }) {
+  const glyphProps = { color: slide.accent, size: 44 };
+  return (
+    <View style={[styles.glyphHalo, { backgroundColor: slide.accentSoft }]}>
+      <View style={[styles.glyphHaloInner, { backgroundColor: colors.surface }, shadows.soft]}>
+        {slide.key === 'assistant' && <SparkGlyph {...glyphProps} />}
+        {slide.key === 'progress' && <ChartGlyph {...glyphProps} />}
+        {slide.key === 'calendar' && <CalendarGlyph {...glyphProps} />}
+      </View>
+    </View>
+  );
+}
+
+export default function OnboardingScreen() {
   const router = useRouter();
-  const { selectProfile } = useSession();
-  const [loadState, setLoadState] = useState<LoadState>('loading');
-  const [profiles, setProfiles] = useState<ProfileSummary[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<ProfileSummary | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
-  const [isContinuing, setIsContinuing] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
-  useEffect(() => {
-    let isMounted = true;
+  const isLastSlide = activeIndex === SLIDES.length - 1;
 
-    void getProfiles()
-      .then((result) => {
-        if (!isMounted) return;
-        setProfiles(result.profiles);
-        setSelectedProfile(null);
-        setLoadState('success');
-      })
-      .catch(() => {
-        if (!isMounted) return;
-        setProfiles([]);
-        setSelectedProfile(null);
-        setLoadState('error');
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [retryCount]);
-
-  function retry() {
-    setLoadState('loading');
-    setRetryCount((count) => count + 1);
+  function goToProfiles() {
+    router.replace('/profiles');
   }
 
-  function continueWithSelectedProfile() {
-    if (selectedProfile === null || isContinuing) return;
+  function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    if (viewportWidth <= 0) return;
+    const index = Math.round(event.nativeEvent.contentOffset.x / viewportWidth);
+    if (index !== activeIndex && index >= 0 && index < SLIDES.length) {
+      setActiveIndex(index);
+    }
+  }
 
-    setIsContinuing(true);
-    selectProfile(selectedProfile);
-    router.replace('/home');
+  function advance() {
+    if (isLastSlide) {
+      goToProfiles();
+      return;
+    }
+    const nextIndex = activeIndex + 1;
+    scrollRef.current?.scrollTo({ x: nextIndex * viewportWidth, animated: true });
+    setActiveIndex(nextIndex);
   }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.heading}>
-            <Text style={styles.eyebrow}>Demo académica</Text>
-            <Text style={styles.title}>BanuChat</Text>
-            <Text style={styles.subtitle}>Selecciona un perfil de demostración</Text>
-            <Text style={styles.helperText}>
-              Los perfiles y la información de esta aplicación son completamente sintéticos.
-            </Text>
+      <View
+        style={styles.container}
+        onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}>
+        <View style={styles.topBar}>
+          <View style={styles.brandRow}>
+            <BrandMark size={34} />
+            <Text style={styles.brandName}>BanuChat</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Omitir introducción"
+            onPress={goToProfiles}
+            style={({ pressed }) => [styles.skipButton, pressed && styles.pressed]}>
+            <Text style={styles.skipText}>Omitir</Text>
+          </Pressable>
+        </View>
+
+        {viewportWidth > 0 && (
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            pagingEnabled
+            bounces={false}
+            onMomentumScrollEnd={handleScroll}
+            scrollEventThrottle={16}
+            showsHorizontalScrollIndicator={false}
+            style={styles.pager}>
+            {SLIDES.map((slide) => (
+              <View key={slide.key} style={[styles.slide, { width: viewportWidth }]}>
+                <View style={styles.slideContent}>
+                  <FadeIn delay={80}>
+                    <SlideGlyph slide={slide} />
+                  </FadeIn>
+                  <FadeIn delay={170}>
+                    <Text style={[styles.eyebrow, { color: slide.accent }]}>{slide.eyebrow}</Text>
+                    <Text style={styles.title}>{slide.title}</Text>
+                  </FadeIn>
+                  <FadeIn delay={260}>
+                    <Text style={styles.body}>{slide.body}</Text>
+                  </FadeIn>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+
+        <View style={styles.footer}>
+          <View accessibilityLabel={`Paso ${activeIndex + 1} de ${SLIDES.length}`} style={styles.dots}>
+            {SLIDES.map((slide, index) => (
+              <View
+                key={slide.key}
+                style={[
+                  styles.dot,
+                  index === activeIndex
+                    ? [styles.dotActive, { backgroundColor: slide.accent }]
+                    : styles.dotIdle,
+                ]}
+              />
+            ))}
           </View>
 
-          {loadState === 'loading' && (
-            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
-              <ActivityIndicator
-                accessibilityLabel="Cargando perfiles"
-                size="large"
-                color={colors.primary}
-              />
-              <Text style={styles.stateText}>Cargando perfiles...</Text>
-            </View>
-          )}
-
-          {loadState === 'error' && (
-            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
-              <Text style={styles.stateTitle}>No fue posible cargar los perfiles</Text>
-              <Text style={styles.stateText}>Comprueba la conexión con el API local.</Text>
-              <AppButton label="Reintentar" onPress={retry} style={styles.stateButton} />
-            </View>
-          )}
-
-          {loadState === 'success' && (
-            <View style={styles.selectorCard}>
-              {profiles.length === 0 ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.stateTitle}>No hay perfiles disponibles</Text>
-                  <Text style={styles.stateText}>Intenta nuevamente cuando el API tenga datos.</Text>
-                </View>
-              ) : (
-                <View accessibilityRole="radiogroup" style={styles.profileList}>
-                  {profiles.map((profile) => {
-                    const isSelected = selectedProfile?.profile_key === profile.profile_key;
-                    return (
-                      <Pressable
-                        key={profile.profile_key}
-                        accessibilityLabel={`Seleccionar perfil ${profile.alias}`}
-                        accessibilityRole="radio"
-                        accessibilityState={{ checked: isSelected, disabled: isContinuing }}
-                        disabled={isContinuing}
-                        onPress={() => setSelectedProfile(profile)}
-                        style={({ pressed }) => [
-                          styles.profileOption,
-                          isSelected && styles.profileOptionSelected,
-                          pressed && !isContinuing && styles.pressed,
-                        ]}>
-                        <View style={styles.profileCopy}>
-                          <Text style={styles.profileLabel}>Perfil de demostración</Text>
-                          <Text style={styles.profileAlias}>{profile.alias}</Text>
-                        </View>
-                        <View
-                          aria-hidden
-                          style={[styles.selectionMark, isSelected && styles.selectionMarkSelected]}>
-                          {isSelected && <Text style={styles.selectionMarkText}>✓</Text>}
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
-
-              <AppButton
-                disabled={selectedProfile === null}
-                label="Continuar"
-                loading={isContinuing}
-                loadingLabel="Continuando..."
-                onPress={continueWithSelectedProfile}
-                style={styles.continueButton}
-              />
-            </View>
-          )}
+          <AppButton
+            label={isLastSlide ? 'Comenzar' : 'Continuar'}
+            onPress={advance}
+            style={styles.nextButton}
+          />
+          <Text style={styles.demoNote}>Demostración académica · datos completamente sintéticos</Text>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.xxl,
-  },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
-  heading: { gap: spacing.xs },
-  eyebrow: {
-    color: colors.primary,
-    fontSize: typography.caption,
-    fontWeight: '800',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
-  },
-  title: { color: colors.brand, fontSize: 36, lineHeight: 42, fontWeight: '800' },
-  subtitle: { color: colors.text, fontSize: 20, lineHeight: 27, fontWeight: '700' },
-  helperText: { color: colors.muted, fontSize: typography.small, lineHeight: 20 },
-  selectorCard: {
-    gap: spacing.lg,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.xl,
-    backgroundColor: colors.surface,
-  },
-  profileList: { gap: spacing.sm },
-  profileOption: {
-    minHeight: 72,
+  container: { flex: 1 },
+  topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.md,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
   },
-  profileOptionSelected: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.primarySoft,
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
+  skipButton: {
+    minHeight: 38,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: 19,
   },
-  profileCopy: { flex: 1, gap: spacing.xxs },
-  profileLabel: { color: colors.muted, fontSize: typography.caption, fontWeight: '600' },
-  profileAlias: { color: colors.text, fontSize: 18, lineHeight: 24, fontWeight: '700' },
-  selectionMark: {
-    width: 24,
-    height: 24,
+  skipText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
+  pressed: { opacity: 0.65 },
+  pager: { flexGrow: 0 },
+  slide: { paddingHorizontal: spacing.lg },
+  slideContent: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
+    gap: spacing.lg,
+    paddingTop: spacing.xxl,
+  },
+  glyphHalo: {
+    width: 148,
+    height: 148,
+    borderRadius: 74,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.borderStrong,
-    borderRadius: radii.pill,
-    backgroundColor: colors.surface,
   },
-  selectionMarkSelected: { borderColor: colors.primary, backgroundColor: colors.primary },
-  selectionMarkText: { color: colors.surface, fontSize: 14, fontWeight: '800' },
-  continueButton: { width: '100%' },
-  stateCard: {
+  glyphHaloInner: {
+    width: 96,
+    height: 96,
+    borderRadius: 30,
     alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.xl,
-    backgroundColor: colors.surface,
+    justifyContent: 'center',
   },
-  errorCard: { borderColor: '#FECACA', backgroundColor: colors.errorSoft },
-  stateTitle: {
-    color: colors.text,
-    fontSize: typography.body,
-    lineHeight: 23,
-    fontWeight: '700',
-    textAlign: 'center',
+  eyebrow: {
+    fontSize: typography.caption,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginBottom: spacing.xs,
   },
-  stateText: {
+  title: {
+    color: colors.ink,
+    fontSize: typography.display,
+    lineHeight: 40,
+    fontWeight: '800',
+    letterSpacing: -0.8,
+  },
+  body: {
     color: colors.textSecondary,
-    fontSize: typography.small,
-    lineHeight: 21,
+    fontSize: typography.body,
+    lineHeight: 25,
+    maxWidth: 460,
+  },
+  footer: {
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+    paddingTop: spacing.sm,
+  },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs },
+  dot: { height: 8, borderRadius: 4 },
+  dotIdle: { width: 8, backgroundColor: colors.borderStrong },
+  dotActive: { width: 26 },
+  nextButton: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center' },
+  demoNote: {
+    color: colors.muted,
+    fontSize: typography.caption,
     textAlign: 'center',
   },
-  stateButton: { minWidth: 144 },
-  emptyState: { alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.md },
-  pressed: { opacity: 0.72 },
 });

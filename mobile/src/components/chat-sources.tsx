@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Citation, CitationSourceKind } from '@/api/messages';
+import { DocGlyph } from '@/ui/icons';
 import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
 const LABEL_PREFIXES: Record<CitationSourceKind, RegExp> = {
@@ -11,6 +12,15 @@ const LABEL_PREFIXES: Record<CitationSourceKind, RegExp> = {
   profile_course: /^(?:Progreso|Curso):\s*/iu,
   calendar_event: /^Evento:\s*/iu,
   announcement: /^Anuncio:\s*/iu,
+};
+
+const KIND_LABELS: Record<CitationSourceKind, string> = {
+  document: 'Documento',
+  course: 'Curso',
+  profile: 'Perfil',
+  profile_course: 'Progreso',
+  calendar_event: 'Evento',
+  announcement: 'Anuncio',
 };
 
 function readableLabel(citation: Citation): string {
@@ -46,9 +56,12 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
         accessibilityState={{ expanded: isExpanded }}
         onPress={() => setIsExpanded((current) => !current)}
         style={({ pressed }) => [styles.toggle, pressed && styles.pressed]}>
-        <Text style={styles.toggleText}>
-          {isExpanded ? 'Ocultar fuentes' : 'Ver fuentes'} ({sourceCount})
-        </Text>
+        <View style={styles.toggleLeft}>
+          <DocGlyph color={colors.accent} size={15} />
+          <Text style={styles.toggleText}>
+            {sourceCount === 1 ? '1 fuente verificada' : `${sourceCount} fuentes verificadas`}
+          </Text>
+        </View>
         <Text aria-hidden style={styles.toggleSymbol}>
           {isExpanded ? '−' : '+'}
         </Text>
@@ -60,8 +73,11 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
             const detail = sourceDetail(citation);
             return (
               <View key={citation.index} style={styles.source}>
-                <Text style={styles.sourceIndex}>{citation.index + 1}</Text>
+                <View style={styles.sourceIndexBadge}>
+                  <Text style={styles.sourceIndex}>{citation.index + 1}</Text>
+                </View>
                 <View style={styles.sourceText}>
+                  <Text style={styles.sourceKind}>{KIND_LABELS[citation.source_kind]}</Text>
                   <Text style={styles.sourceLabel}>{readableLabel(citation)}</Text>
                   {detail !== null && <Text style={styles.sourceDetail}>{detail}</Text>}
                 </View>
@@ -77,36 +93,57 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
 const styles = StyleSheet.create({
   container: {
     marginTop: spacing.sm,
-    paddingTop: spacing.xs,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
   toggle: {
-    minHeight: layout.minTouchTarget,
+    minHeight: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.accentSoftStrong,
+    backgroundColor: colors.accentSoft,
+    alignSelf: 'flex-start',
+    paddingRight: spacing.md,
   },
-  toggleText: { color: colors.primary, fontSize: typography.small, fontWeight: '700' },
-  toggleSymbol: { color: colors.primary, fontSize: 20, fontWeight: '600' },
-  pressed: { opacity: 0.65 },
-  list: { gap: spacing.sm, paddingBottom: spacing.xs },
+  toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  toggleText: { color: colors.accentStrong, fontSize: 13, fontWeight: '700' },
+  toggleSymbol: { color: colors.accentStrong, fontSize: 16, fontWeight: '700', marginLeft: spacing.xs },
+  pressed: { opacity: 0.7 },
+  list: { gap: spacing.xs, marginTop: spacing.xs },
   source: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: spacing.xs,
+    gap: spacing.sm,
     padding: spacing.sm,
     borderRadius: radii.md,
-    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceSoft,
+  },
+  sourceIndexBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.accentSoft,
   },
   sourceIndex: {
-    width: 24,
-    color: colors.primary,
-    fontSize: typography.small,
+    color: colors.accentStrong,
+    fontSize: typography.caption,
     fontWeight: '800',
   },
-  sourceText: { flex: 1, gap: spacing.xxs },
-  sourceLabel: { color: colors.text, fontSize: typography.small, fontWeight: '700', lineHeight: 20 },
+  sourceText: { flex: 1, gap: 2 },
+  sourceKind: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  sourceLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700', lineHeight: 20 },
   sourceDetail: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
 });
