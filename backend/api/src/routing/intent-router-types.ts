@@ -54,9 +54,42 @@ export interface IntentRoutingDecision {
   response_variant: IntentResponseVariant;
 }
 
+export interface WeightedIntentPenalty {
+  type: "unknown_content" | "foreign_intent";
+  value: number;
+  terms?: readonly string[];
+  families?: readonly IntentRoute[];
+}
+
+export interface WeightedIntentCandidateDiagnostic {
+  candidate_intent: IntentRoute;
+  raw_score: number;
+  final_score: number;
+  matched_signal_groups: readonly string[];
+  matched_signals: readonly string[];
+  ignored_terms: readonly string[];
+  unknown_content_terms: readonly string[];
+  foreign_intent_families: readonly IntentRoute[];
+  foreign_signals: Readonly<Record<string, readonly string[]>>;
+  penalties: readonly WeightedIntentPenalty[];
+}
+
+export interface IntentRoutingDiagnostics {
+  decision: IntentRoutingDecision;
+  candidates: readonly WeightedIntentCandidateDiagnostic[];
+  winner_score: number;
+  runner_up_score: number;
+  margin: number;
+  decision_reason: string;
+}
+
 export interface IntentRouter {
   readonly catalog_valid: boolean;
   readonly catalog_version: string | null;
 
   route(input: IntentRoutingInput): IntentRoutingDecision;
+}
+
+export interface DiagnosticIntentRouter extends IntentRouter {
+  routeWithDiagnostics(input: IntentRoutingInput): IntentRoutingDiagnostics;
 }

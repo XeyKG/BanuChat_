@@ -1,6 +1,6 @@
 {
   "artifact_type": "intent_routing_catalog",
-  "catalog_version": "1.1.0-draft",
+  "catalog_version": "1.2.0-draft",
   "language": "es",
   "normalization": {
     "unicode": "NFC",
@@ -25,7 +25,7 @@
     "strip_limit": 1
   },
   "decision_policy": {
-    "version": "1",
+    "version": "2",
     "exact_score": 100,
     "lexical_score": 90,
     "lexical_match_mode": "required_groups_plus_allowlisted_fillers",
@@ -67,7 +67,75 @@
       "prompt",
       "sql"
     ],
-    "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline"
+    "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline",
+    "weighted_matcher": {
+      "calibration_note": "Pesos calibrados sobre el conjunto de desarrollo M3.2 para aceptar paráfrasis válidas conocidas manteniendo en fallback las consultas ambiguas o no soportadas del conjunto de desarrollo.",
+      "enabled_intents": [
+        "profile_progress",
+        "course_catalog",
+        "calendar_events",
+        "announcements"
+      ],
+      "aggregation": "sum_unique_signal_groups_minus_penalties",
+      "minimum_signal_groups": 2,
+      "unknown_content_penalty": 25,
+      "unknown_content_penalty_cap": 50,
+      "foreign_intent_penalty": 30,
+      "score_min": 0,
+      "score_max": 100,
+      "scaffolding_terms": [
+        "que",
+        "cual",
+        "cuales",
+        "como",
+        "quiero",
+        "quisiera",
+        "podrias",
+        "puedes",
+        "puedo",
+        "muestrame",
+        "mostrarme",
+        "dame",
+        "dime",
+        "necesito",
+        "enseñame",
+        "decirme",
+        "decir",
+        "saber",
+        "revisar",
+        "conocer",
+        "consultar",
+        "ver",
+        "hola",
+        "buenas",
+        "gracias",
+        "porfa",
+        "me",
+        "el",
+        "la",
+        "los",
+        "las",
+        "un",
+        "una",
+        "de",
+        "del",
+        "en",
+        "para",
+        "por",
+        "esta",
+        "estan",
+        "tiene",
+        "actual",
+        "actualmente",
+        "ahora",
+        "este",
+        "momento",
+        "ccd"
+      ],
+      "scaffolding_phrases": [
+        "por favor"
+      ]
+    }
   },
   "temporal_policy": {
     "timezone": "America/Bogota",
@@ -447,6 +515,173 @@
           "temporal_rule": null,
           "response_variant": null
         }
+      ],
+      "weighted_signal_groups": [
+        {
+          "id": "progress_anchor",
+          "weight": 55,
+          "signals": [
+            {
+              "form": "progreso",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "progresos",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "avance",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "avances",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "self_reference",
+          "weight": 35,
+          "signals": [
+            {
+              "form": "mi",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "mis",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "profile_object",
+          "weight": 25,
+          "signals": [
+            {
+              "form": "curso",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "cursos",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividad",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividades",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "inscripcion",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "inscripciones",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "progress_status",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "completado",
+              "parameters": {
+                "statuses": [
+                  "completed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "completada",
+              "parameters": {
+                "statuses": [
+                  "completed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "completados",
+              "parameters": {
+                "statuses": [
+                  "completed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "completadas",
+              "parameters": {
+                "statuses": [
+                  "completed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "inscrito",
+              "parameters": {
+                "statuses": [
+                  "enrolled"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "inscrita",
+              "parameters": {
+                "statuses": [
+                  "enrolled"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "inscritos",
+              "parameters": {
+                "statuses": [
+                  "enrolled"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "inscritas",
+              "parameters": {
+                "statuses": [
+                  "enrolled"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "en progreso",
+              "parameters": {
+                "statuses": [
+                  "in_progress"
+                ]
+              },
+              "temporal_rule": null
+            }
+          ]
+        }
       ]
     },
     {
@@ -712,7 +947,177 @@
           "response_variant": null
         }
       ],
-      "lexical_patterns": []
+      "lexical_patterns": [],
+      "weighted_signal_groups": [
+        {
+          "id": "course_object",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "curso",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "cursos",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividad",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividades",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "catalog_operation",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "ofrece",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "ofrecen",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "oferta",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "catalogo",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "listado",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "existe",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "existen",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "hay",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "catalog_status",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "disponible",
+              "parameters": {
+                "statuses": [
+                  "available"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "disponibles",
+              "parameters": {
+                "statuses": [
+                  "available"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "cerrado",
+              "parameters": {
+                "statuses": [
+                  "closed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "cerrada",
+              "parameters": {
+                "statuses": [
+                  "closed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "cerrados",
+              "parameters": {
+                "statuses": [
+                  "closed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "cerradas",
+              "parameters": {
+                "statuses": [
+                  "closed"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "archivado",
+              "parameters": {
+                "statuses": [
+                  "archived"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "archivada",
+              "parameters": {
+                "statuses": [
+                  "archived"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "archivados",
+              "parameters": {
+                "statuses": [
+                  "archived"
+                ]
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "archivadas",
+              "parameters": {
+                "statuses": [
+                  "archived"
+                ]
+              },
+              "temporal_rule": null
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "calendar_events",
@@ -975,6 +1380,96 @@
           "parameters": {},
           "temporal_rule": "tomorrow",
           "response_variant": null
+        }
+      ],
+      "weighted_signal_groups": [
+        {
+          "id": "calendar_object",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "evento",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "eventos",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "calendario",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividad",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "actividades",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "sesion",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "sesiones",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "calendar_date_anchor",
+          "weight": 35,
+          "signals": [
+            {
+              "form": "fecha",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "fechas",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "temporal_rule",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "hoy",
+              "parameters": {},
+              "temporal_rule": "today"
+            },
+            {
+              "form": "mañana",
+              "parameters": {},
+              "temporal_rule": "tomorrow"
+            },
+            {
+              "form": "esta semana",
+              "parameters": {},
+              "temporal_rule": "this_week"
+            },
+            {
+              "form": "proxima semana",
+              "parameters": {},
+              "temporal_rule": "next_week"
+            },
+            {
+              "form": "semana que viene",
+              "parameters": {},
+              "temporal_rule": "next_week"
+            }
+          ]
         }
       ]
     },
@@ -1255,6 +1750,228 @@
           },
           "temporal_rule": null,
           "response_variant": null
+        }
+      ],
+      "weighted_signal_groups": [
+        {
+          "id": "announcement_object",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "anuncio",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "anuncios",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "aviso",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "avisos",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "convocatoria",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "convocatorias",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "comunicacion",
+              "parameters": {},
+              "temporal_rule": null
+            },
+            {
+              "form": "comunicaciones",
+              "parameters": {},
+              "temporal_rule": null
+            }
+          ]
+        },
+        {
+          "id": "announcement_status",
+          "weight": 45,
+          "signals": [
+            {
+              "form": "vigente",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "vigentes",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "activo",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "activa",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "activos",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "activas",
+              "parameters": {
+                "temporal_status": "active"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "proximo",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "proxima",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "proximos",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "proximas",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "futuro",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "futura",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "futuros",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "futuras",
+              "parameters": {
+                "temporal_status": "upcoming"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "vencido",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "vencida",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "vencidos",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "vencidas",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "expirado",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "expirada",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "expirados",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "expiradas",
+              "parameters": {
+                "temporal_status": "expired"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "todos",
+              "parameters": {
+                "temporal_status": "all"
+              },
+              "temporal_rule": null
+            },
+            {
+              "form": "todas",
+              "parameters": {
+                "temporal_status": "all"
+              },
+              "temporal_rule": null
+            }
+          ]
         }
       ]
     },

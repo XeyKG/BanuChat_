@@ -1,15 +1,17 @@
 import { readFile } from "node:fs/promises";
 
 import type {
+  DiagnosticIntentRouter,
   IntentResponseVariant,
   IntentRoute,
-  IntentRouter,
+  IntentRoutingDiagnostics,
   IntentRoutingDecision,
   IntentRoutingInput,
   IntentRoutingParameters,
+  WeightedIntentCandidateDiagnostic,
 } from "./intent-router-types.js";
 
-const CATALOG_VERSION = "1.1.0-draft";
+const CATALOG_VERSION = "1.2.0-draft";
 const SUPPORTED_INTENTS = [
   "profile_progress",
   "course_catalog",
@@ -21,6 +23,13 @@ const SUPPORTED_INTENTS = [
   "known_out_of_scope",
 ] as const;
 type SupportedIntent = (typeof SUPPORTED_INTENTS)[number];
+const WEIGHTED_INTENTS = [
+  "profile_progress",
+  "course_catalog",
+  "calendar_events",
+  "announcements",
+] as const;
+type WeightedIntent = (typeof WEIGHTED_INTENTS)[number];
 type TemporalRule = "today" | "tomorrow" | "this_week" | "next_week";
 
 const RESPONSE_VARIANTS = [
@@ -45,7 +54,7 @@ const EXPECTED_NORMALIZATION = {
 };
 
 const EXPECTED_DECISION_POLICY = {
-  version: "1",
+  version: "2",
   exact_score: 100,
   lexical_score: 90,
   lexical_match_mode: "required_groups_plus_allowlisted_fillers",
@@ -85,6 +94,68 @@ const EXPECTED_DECISION_POLICY = {
   ],
   clause_guard:
     "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline",
+  weighted_matcher: {
+    calibration_note:
+      "Pesos calibrados sobre el conjunto de desarrollo M3.2 para aceptar paráfrasis válidas conocidas manteniendo en fallback las consultas ambiguas o no soportadas del conjunto de desarrollo.",
+    enabled_intents: [...WEIGHTED_INTENTS],
+    aggregation: "sum_unique_signal_groups_minus_penalties",
+    minimum_signal_groups: 2,
+    unknown_content_penalty: 25,
+    unknown_content_penalty_cap: 50,
+    foreign_intent_penalty: 30,
+    score_min: 0,
+    score_max: 100,
+    scaffolding_terms: [
+      "que",
+      "cual",
+      "cuales",
+      "como",
+      "quiero",
+      "quisiera",
+      "podrias",
+      "puedes",
+      "puedo",
+      "muestrame",
+      "mostrarme",
+      "dame",
+      "dime",
+      "necesito",
+      "enseñame",
+      "decirme",
+      "decir",
+      "saber",
+      "revisar",
+      "conocer",
+      "consultar",
+      "ver",
+      "hola",
+      "buenas",
+      "gracias",
+      "porfa",
+      "me",
+      "el",
+      "la",
+      "los",
+      "las",
+      "un",
+      "una",
+      "de",
+      "del",
+      "en",
+      "para",
+      "por",
+      "esta",
+      "estan",
+      "tiene",
+      "actual",
+      "actualmente",
+      "ahora",
+      "este",
+      "momento",
+      "ccd",
+    ],
+    scaffolding_phrases: ["por favor"],
+  },
 };
 
 const EXPECTED_TEMPORAL_POLICY = {
@@ -205,6 +276,19 @@ interface CompiledLexicalPattern extends CompiledEvidence {
   readonly maximumTokens: number;
 }
 
+interface CompiledWeightedSignal {
+  readonly form: string;
+  readonly tokens: readonly string[];
+  readonly parameters: IntentRoutingParameters;
+  readonly temporalRule: TemporalRule | null;
+}
+
+interface CompiledWeightedSignalGroup {
+  readonly id: string;
+  readonly weight: number;
+  readonly signals: readonly CompiledWeightedSignal[];
+}
+
 interface CompiledIntent {
   readonly id: SupportedIntent;
   readonly priority: number;
@@ -213,12 +297,15 @@ interface CompiledIntent {
   readonly exclusions: readonly string[];
   readonly rules: readonly CompiledRule[];
   readonly lexicalPatterns: readonly CompiledLexicalPattern[];
+  readonly weightedSignalGroups: readonly CompiledWeightedSignalGroup[];
 }
 
 interface CompiledCatalog {
   readonly version: string;
   readonly compoundMarkers: readonly string[];
   readonly globalExclusions: readonly string[];
+  readonly scaffoldingTerms: ReadonlySet<string>;
+  readonly scaffoldingPhrases: readonly (readonly string[])[];
   readonly intents: readonly CompiledIntent[];
 }
 
@@ -375,6 +462,10 @@ function isSupportedIntent(value: unknown): value is SupportedIntent {
     typeof value === "string" &&
     (SUPPORTED_INTENTS as readonly string[]).includes(value)
   );
+}
+
+function isWeightedIntent(value: SupportedIntent): value is WeightedIntent {
+  return (WEIGHTED_INTENTS as readonly string[]).includes(value);
 }
 
 function isResponseVariant(value: unknown): value is IntentResponseVariant {
@@ -587,24 +678,97 @@ function compileLexicalPattern(
   };
 }
 
+function compileWeightedSignalGroups(
+  value: unknown,
+  intentId: WeightedIntent,
+  seenGroupIds: Set<string>,
+): readonly CompiledWeightedSignalGroup[] | null {
+  if (!Array.isArray(value) || value.length < 2 || value.length > 8) return null;
+  const groups: CompiledWeightedSignalGroup[] = [];
+  const seenForms = new Set<string>();
+  for (const rawGroup of value) {
+    if (
+      !isRecord(rawGroup) ||
+      !hasExactKeys(rawGroup, ["id", "weight", "signals"]) ||
+      typeof rawGroup.id !== "string" ||
+      !/^[a-z][a-z0-9_]+$/u.test(rawGroup.id) ||
+      seenGroupIds.has(rawGroup.id) ||
+      !Number.isInteger(rawGroup.weight) ||
+      (rawGroup.weight as number) < 1 ||
+      (rawGroup.weight as number) > 100 ||
+      !Array.isArray(rawGroup.signals) ||
+      rawGroup.signals.length < 1 ||
+      rawGroup.signals.length > 30
+    ) {
+      return null;
+    }
+    const signals: CompiledWeightedSignal[] = [];
+    for (const rawSignal of rawGroup.signals) {
+      if (
+        !isRecord(rawSignal) ||
+        !hasExactKeys(rawSignal, ["form", "parameters", "temporal_rule"]) ||
+        typeof rawSignal.form !== "string" ||
+        !isNormalizedLexicalPhrase(rawSignal.form) ||
+        rawSignal.form.length > 80 ||
+        seenForms.has(rawSignal.form)
+      ) {
+        return null;
+      }
+      const parameters = readParameters(intentId, rawSignal.parameters);
+      const temporalRule = rawSignal.temporal_rule;
+      if (
+        parameters === null ||
+        (temporalRule !== null &&
+          temporalRule !== "today" &&
+          temporalRule !== "tomorrow" &&
+          temporalRule !== "this_week" &&
+          temporalRule !== "next_week") ||
+        (temporalRule !== null && intentId !== "calendar_events")
+      ) {
+        return null;
+      }
+      seenForms.add(rawSignal.form);
+      signals.push({
+        form: rawSignal.form,
+        tokens: tokenizeNormalized(rawSignal.form),
+        parameters,
+        temporalRule,
+      });
+    }
+    seenGroupIds.add(rawGroup.id);
+    groups.push({
+      id: rawGroup.id,
+      weight: rawGroup.weight as number,
+      signals,
+    });
+  }
+  return groups;
+}
+
 function compileIntent(
   value: unknown,
   seenRuleIds: Set<string>,
+  seenWeightedGroupIds: Set<string>,
 ): CompiledIntent | null {
+  const intentId = isRecord(value) && isSupportedIntent(value.id) ? value.id : null;
+  const expectedKeys = [
+    "id",
+    "priority",
+    "route_type",
+    "logical_service",
+    "requires_profile",
+    "default_parameters",
+    "exclusions",
+    "strong_expressions",
+    "token_combinations",
+    "lexical_patterns",
+    ...(intentId !== null && isWeightedIntent(intentId)
+      ? ["weighted_signal_groups"]
+      : []),
+  ];
   if (
     !isRecord(value) ||
-    !hasExactKeys(value, [
-      "id",
-      "priority",
-      "route_type",
-      "logical_service",
-      "requires_profile",
-      "default_parameters",
-      "exclusions",
-      "strong_expressions",
-      "token_combinations",
-      "lexical_patterns",
-    ]) ||
+    !hasExactKeys(value, expectedKeys) ||
     !isSupportedIntent(value.id) ||
     !Number.isInteger(value.priority) ||
     (value.priority as number) < 0 ||
@@ -729,6 +893,15 @@ function compileIntent(
     lexicalPatterns.push(pattern);
   }
 
+  const weightedSignalGroups = isWeightedIntent(id)
+    ? compileWeightedSignalGroups(
+        value.weighted_signal_groups,
+        id,
+        seenWeightedGroupIds,
+      )
+    : [];
+  if (weightedSignalGroups === null) return null;
+
   return {
     id,
     priority: value.priority as number,
@@ -737,6 +910,7 @@ function compileIntent(
     exclusions: exclusions.map(normalizeCatalogPhrase),
     rules,
     lexicalPatterns,
+    weightedSignalGroups,
   };
 }
 
@@ -765,9 +939,10 @@ function compileCatalog(value: unknown): CompiledCatalog | null {
   }
 
   const seenRuleIds = new Set<string>();
+  const seenWeightedGroupIds = new Set<string>();
   const intents: CompiledIntent[] = [];
   for (const rawIntent of value.intents) {
-    const intent = compileIntent(rawIntent, seenRuleIds);
+    const intent = compileIntent(rawIntent, seenRuleIds, seenWeightedGroupIds);
     if (intent === null || intents.some((entry) => entry.id === intent.id)) {
       return null;
     }
@@ -786,6 +961,13 @@ function compileCatalog(value: unknown): CompiledCatalog | null {
     version: CATALOG_VERSION,
     compoundMarkers: EXPECTED_DECISION_POLICY.compound_markers,
     globalExclusions: EXPECTED_DECISION_POLICY.global_exclusions,
+    scaffoldingTerms: new Set(
+      EXPECTED_DECISION_POLICY.weighted_matcher.scaffolding_terms,
+    ),
+    scaffoldingPhrases:
+      EXPECTED_DECISION_POLICY.weighted_matcher.scaffolding_phrases.map(
+        tokenizeNormalized,
+      ),
     intents,
   };
 }
@@ -961,38 +1143,71 @@ function sameDecision(
   );
 }
 
-function routeWithCatalog(
+interface MatchedWeightedGroup {
+  readonly group: CompiledWeightedSignalGroup;
+  readonly signals: readonly CompiledWeightedSignal[];
+  readonly tokenIndexes: readonly number[];
+}
+
+interface WeightedEvaluation {
+  readonly diagnostic: WeightedIntentCandidateDiagnostic;
+  readonly decision: IntentRoutingDecision | null;
+  readonly eligible: boolean;
+}
+
+function matchingTokenIndexes(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): number[] {
+  const indexes: number[] = [];
+  for (let start = 0; start + phrase.length <= tokens.length; start++) {
+    if (phrase.every((token, offset) => tokens[start + offset] === token)) {
+      for (let offset = 0; offset < phrase.length; offset++) {
+        indexes.push(start + offset);
+      }
+    }
+  }
+  return indexes;
+}
+
+function uniqueInOrder<T>(values: readonly T[]): T[] {
+  return [...new Set(values)];
+}
+
+function mergedWeightedEvidence(
+  intent: CompiledIntent,
+  groups: readonly MatchedWeightedGroup[],
+): { parameters: IntentRoutingParameters; temporalRule: TemporalRule | null } | null {
+  const parameters: IntentRoutingParameters = {};
+  let temporalRule: TemporalRule | null = null;
+  for (const match of groups) {
+    for (const signal of match.signals) {
+      for (const [key, value] of Object.entries(signal.parameters)) {
+        const existing = parameters[key as keyof IntentRoutingParameters];
+        if (existing !== undefined && !deepEqual(existing, value)) return null;
+        Object.assign(parameters, { [key]: structuredClone(value) });
+      }
+      if (signal.temporalRule !== null) {
+        if (temporalRule !== null && temporalRule !== signal.temporalRule) return null;
+        temporalRule = signal.temporalRule;
+      }
+    }
+  }
+  if (intent.id === "calendar_events" && temporalRule === null) return null;
+  return { parameters, temporalRule };
+}
+
+function legacyDecision(
   catalog: CompiledCatalog,
   input: IntentRoutingInput,
-): IntentRoutingDecision {
-  if (
-    typeof input?.content !== "string" ||
-    typeof input.context?.profile_selected !== "boolean" ||
-    typeof input.context?.now !== "string"
-  ) {
-    return fallbackDecision();
-  }
-  const content = normalizeInput(input.content);
-  if (content === null || content.length === 0) return fallbackDecision();
-  if (
-    catalog.globalExclusions.some((phrase) =>
-      containsDelimitedPhrase(content, phrase),
-    ) ||
-    catalog.compoundMarkers.some((phrase) =>
-      containsDelimitedPhrase(content, phrase),
-    )
-  ) {
-    return fallbackDecision();
-  }
-
-  const tokens = tokenizeNormalized(content);
+  content: string,
+  tokens: readonly string[],
+): { hasEvidence: boolean; decision: IntentRoutingDecision; reason: string } {
   const candidates: Array<IntentRoutingDecision & { score: number }> = [];
   for (const intent of catalog.intents) {
     if (
       (intent.requiresProfile && !input.context.profile_selected) ||
-      intent.exclusions.some((phrase) =>
-        containsDelimitedPhrase(content, phrase),
-      )
+      intent.exclusions.some((phrase) => containsDelimitedPhrase(content, phrase))
     ) {
       continue;
     }
@@ -1014,7 +1229,6 @@ function routeWithCatalog(
       }
     }
     if (matches.length === 0) continue;
-
     const resolved = matches.map((rule) => ({
       route: intent.id as IntentRoute,
       parameters: effectiveParameters(intent, rule, input),
@@ -1022,7 +1236,7 @@ function routeWithCatalog(
       score: rule.score,
     }));
     if (resolved.some((match) => match.parameters === null)) {
-      return fallbackDecision();
+      return { hasEvidence: true, decision: fallbackDecision(), reason: "invalid_parameters" };
     }
     const first = resolved[0];
     if (
@@ -1034,7 +1248,7 @@ function routeWithCatalog(
         ),
       )
     ) {
-      return fallbackDecision();
+      return { hasEvidence: true, decision: fallbackDecision(), reason: "conflicting_parameters" };
     }
     candidates.push({
       route: first.route,
@@ -1043,49 +1257,344 @@ function routeWithCatalog(
       score: Math.max(...resolved.map((match) => match.score)),
     });
   }
-
+  if (candidates.length === 0) {
+    return { hasEvidence: false, decision: fallbackDecision(), reason: "no_legacy_match" };
+  }
   const eligible = candidates
-    .filter((candidate) => candidate.score >= 80)
+    .filter((candidate) => candidate.score >= EXPECTED_DECISION_POLICY.threshold)
     .sort((left, right) => right.score - left.score);
-  if (eligible.length !== 1) return fallbackDecision();
+  if (eligible.length !== 1) {
+    return { hasEvidence: true, decision: fallbackDecision(), reason: "legacy_ambiguous" };
+  }
   const winner = eligible[0];
-  if (winner === undefined) return fallbackDecision();
+  if (winner === undefined) {
+    return { hasEvidence: true, decision: fallbackDecision(), reason: "legacy_below_threshold" };
+  }
   const runnerUpScore = candidates
     .filter((candidate) => candidate.route !== winner.route)
     .reduce((maximum, candidate) => Math.max(maximum, candidate.score), 0);
-  if (winner.score - runnerUpScore < 20) return fallbackDecision();
+  if (winner.score - runnerUpScore < EXPECTED_DECISION_POLICY.min_margin) {
+    return { hasEvidence: true, decision: fallbackDecision(), reason: "legacy_insufficient_margin" };
+  }
   return {
-    route: winner.route,
-    parameters: winner.parameters,
-    response_variant: winner.response_variant,
+    hasEvidence: true,
+    decision: {
+      route: winner.route,
+      parameters: winner.parameters,
+      response_variant: winner.response_variant,
+    },
+    reason: "legacy_match",
   };
 }
 
-function invalidRouter(): IntentRouter {
+function weightedDiagnostics(
+  catalog: CompiledCatalog,
+  input: IntentRoutingInput,
+  content: string,
+  tokens: readonly string[],
+): IntentRoutingDiagnostics {
+  const weightedIntents = catalog.intents.filter(
+    (intent): intent is CompiledIntent & { id: WeightedIntent } =>
+      isWeightedIntent(intent.id),
+  );
+  const matchesByIntent = new Map<WeightedIntent, MatchedWeightedGroup[]>();
+  const globallyConsumed = new Set<number>();
+  for (const intent of weightedIntents) {
+    const matchedGroups: MatchedWeightedGroup[] = [];
+    for (const group of intent.weightedSignalGroups) {
+      const signals = group.signals.filter(
+        (signal) => matchingTokenIndexes(tokens, signal.tokens).length > 0,
+      );
+      if (signals.length === 0) continue;
+      const tokenIndexes = uniqueInOrder(
+        signals.flatMap((signal) => matchingTokenIndexes(tokens, signal.tokens)),
+      );
+      tokenIndexes.forEach((index) => globallyConsumed.add(index));
+      matchedGroups.push({ group, signals, tokenIndexes });
+    }
+    matchesByIntent.set(intent.id, matchedGroups);
+  }
+
+  const ignoredTerms: string[] = [];
+  for (const phrase of catalog.scaffoldingPhrases) {
+    const indexes = matchingTokenIndexes(tokens, phrase);
+    if (indexes.length > 0) {
+      indexes.forEach((index) => globallyConsumed.add(index));
+      ignoredTerms.push(phrase.join(" "));
+    }
+  }
+  tokens.forEach((token, index) => {
+    if (!globallyConsumed.has(index) && catalog.scaffoldingTerms.has(token)) {
+      globallyConsumed.add(index);
+      ignoredTerms.push(token);
+    }
+  });
+  const unknownTerms = uniqueInOrder(
+    tokens.filter((_, index) => !globallyConsumed.has(index)),
+  );
+  const policy = EXPECTED_DECISION_POLICY.weighted_matcher;
+  const unknownPenalty = Math.min(
+    policy.unknown_content_penalty_cap,
+    unknownTerms.length * policy.unknown_content_penalty,
+  );
+
+  const evaluations: WeightedEvaluation[] = weightedIntents.map((intent) => {
+    const matchedGroups = matchesByIntent.get(intent.id) ?? [];
+    const foreignFamilies = weightedIntents.filter(
+      (other) =>
+        other.id !== intent.id &&
+        (matchesByIntent.get(other.id)?.length ?? 0) >= policy.minimum_signal_groups,
+    );
+    const rawScore = matchedGroups.reduce(
+      (total, match) => total + match.group.weight,
+      0,
+    );
+    const foreignPenalty = foreignFamilies.length > 0
+      ? policy.foreign_intent_penalty
+      : 0;
+    const finalScore = Math.max(
+      policy.score_min,
+      Math.min(policy.score_max, rawScore) - unknownPenalty - foreignPenalty,
+    );
+    const merged = mergedWeightedEvidence(intent, matchedGroups);
+    const evidence = merged === null
+      ? null
+      : effectiveParameters(
+          intent,
+          {
+            score: finalScore,
+            parameters: merged.parameters,
+            temporalRule: merged.temporalRule,
+            responseVariant: null,
+          },
+          input,
+        );
+    const blocked =
+      (intent.requiresProfile && !input.context.profile_selected) ||
+      intent.exclusions.some((phrase) => containsDelimitedPhrase(content, phrase)) ||
+      (intent.id === "course_catalog" &&
+        ignoredTerms.length === 0 &&
+        matchedGroups.some(
+          (match) =>
+            match.group.id === "course_object" &&
+            match.signals.some((signal) => signal.form === "curso"),
+        ) &&
+        matchedGroups.some((match) => match.group.id === "catalog_status") &&
+        !matchedGroups.some((match) => match.group.id === "catalog_operation"));
+    const eligible =
+      !blocked &&
+      merged !== null &&
+      evidence !== null &&
+      matchedGroups.length >= policy.minimum_signal_groups &&
+      finalScore >= EXPECTED_DECISION_POLICY.threshold;
+    const foreignSignals = Object.fromEntries(
+      foreignFamilies.map((family) => [
+        family.id,
+        uniqueInOrder(
+          (matchesByIntent.get(family.id) ?? []).flatMap((match) =>
+            match.signals.map((signal) => signal.form),
+          ),
+        ),
+      ]),
+    );
+    return {
+      eligible,
+      decision: evidence === null
+        ? null
+        : { route: intent.id, parameters: evidence, response_variant: null },
+      diagnostic: {
+        candidate_intent: intent.id,
+        raw_score: rawScore,
+        final_score: finalScore,
+        matched_signal_groups: matchedGroups.map((match) => match.group.id),
+        matched_signals: uniqueInOrder(
+          matchedGroups.flatMap((match) =>
+            match.signals.map((signal) => signal.form),
+          ),
+        ),
+        ignored_terms: uniqueInOrder(ignoredTerms),
+        unknown_content_terms: unknownTerms,
+        foreign_intent_families: foreignFamilies.map((family) => family.id),
+        foreign_signals: foreignSignals,
+        penalties: [
+          ...(unknownPenalty > 0
+            ? [{ type: "unknown_content" as const, value: unknownPenalty, terms: unknownTerms }]
+            : []),
+          ...(foreignPenalty > 0
+            ? [{
+                type: "foreign_intent" as const,
+                value: foreignPenalty,
+                families: foreignFamilies.map((family) => family.id),
+              }]
+            : []),
+        ],
+      },
+    };
+  });
+
+  const ranked = [...evaluations].sort(
+    (left, right) => right.diagnostic.final_score - left.diagnostic.final_score,
+  );
+  const winner = ranked[0];
+  const runnerUpScore = ranked[1]?.diagnostic.final_score ?? 0;
+  const winnerScore = winner?.diagnostic.final_score ?? 0;
+  const margin = winnerScore - runnerUpScore;
+  let decision = fallbackDecision();
+  let decisionReason = "below_threshold_or_minimum_signal_groups";
+  if (winner !== undefined) {
+    const winnerHasMinimumSignals =
+      winner.diagnostic.matched_signal_groups.length >=
+      policy.minimum_signal_groups;
+    if (
+      winnerHasMinimumSignals &&
+      evaluations.filter(
+        (entry) => entry.diagnostic.final_score === winnerScore,
+      ).length > 1
+    ) {
+      decisionReason = "tie";
+    } else if (
+      winnerHasMinimumSignals &&
+      margin < EXPECTED_DECISION_POLICY.min_margin
+    ) {
+      decisionReason = "insufficient_margin";
+    } else if (
+      !winnerHasMinimumSignals ||
+      winnerScore < EXPECTED_DECISION_POLICY.threshold
+    ) {
+      decisionReason = "below_threshold_or_minimum_signal_groups";
+    } else if (winner.decision === null) {
+      decisionReason = "conflicting_or_unresolvable_parameters";
+    } else if (!winner.eligible) {
+      decisionReason = "candidate_blocked_by_guard";
+    } else {
+      decision = winner.decision;
+      decisionReason = "weighted_match";
+    }
+  }
+  return {
+    decision,
+    candidates: evaluations.map((entry) => entry.diagnostic),
+    winner_score: winnerScore,
+    runner_up_score: runnerUpScore,
+    margin,
+    decision_reason: decisionReason,
+  };
+}
+
+function routeWithCatalogDiagnostics(
+  catalog: CompiledCatalog,
+  input: IntentRoutingInput,
+): IntentRoutingDiagnostics {
+  const fallback = (reason: string): IntentRoutingDiagnostics => ({
+    decision: fallbackDecision(),
+    candidates: [],
+    winner_score: 0,
+    runner_up_score: 0,
+    margin: 0,
+    decision_reason: reason,
+  });
+  if (
+    typeof input?.content !== "string" ||
+    typeof input.context?.profile_selected !== "boolean" ||
+    typeof input.context?.now !== "string"
+  ) {
+    return fallback("invalid_input");
+  }
+  const content = normalizeInput(input.content);
+  if (content === null) return fallback("clause_guard");
+  if (content.length === 0) return fallback("empty_input");
+  if (
+    catalog.globalExclusions.some((phrase) => containsDelimitedPhrase(content, phrase))
+  ) {
+    return fallback("global_exclusion");
+  }
+  if (
+    catalog.compoundMarkers.some((phrase) => containsDelimitedPhrase(content, phrase))
+  ) {
+    return fallback("compound_guard");
+  }
+  const tokens = tokenizeNormalized(content);
+  const legacy = legacyDecision(catalog, input, content, tokens);
+  if (legacy.hasEvidence) {
+    return {
+      decision: legacy.decision,
+      candidates: [],
+      winner_score: legacy.decision.route === "agent_fallback" ? 0 : 100,
+      runner_up_score: 0,
+      margin: legacy.decision.route === "agent_fallback" ? 0 : 100,
+      decision_reason: legacy.reason,
+    };
+  }
+  if (
+    tokens.length > 1 &&
+    EXPECTED_DECISION_POLICY.standalone_social_allowlist.some((term) =>
+      tokens.includes(term),
+    )
+  ) {
+    return fallback("mixed_social_request");
+  }
+  if (
+    [...new Set(tokens)].some(
+      (token) =>
+        catalog.scaffoldingTerms.has(token) &&
+        tokens.filter((entry) => entry === token).length >
+          EXPECTED_DECISION_POLICY.lexical_max_filler_tokens,
+    )
+  ) {
+    return fallback("repeated_scaffolding_limit");
+  }
+  const withoutContextModifiers = tokens
+    .filter((token) =>
+      !["actual", "actualmente", "ahora", "este", "momento"].includes(token),
+    )
+    .join(" ");
+  if (
+    withoutContextModifiers !== content &&
+    catalog.intents.some((intent) =>
+      intent.rules.some((rule) => rule.text === withoutContextModifiers),
+    )
+  ) {
+    return fallback("legacy_extension_guard");
+  }
+  return weightedDiagnostics(catalog, input, content, tokens);
+}
+
+function invalidRouter(): DiagnosticIntentRouter {
+  const diagnostics = (): IntentRoutingDiagnostics => ({
+    decision: fallbackDecision(),
+    candidates: [],
+    winner_score: 0,
+    runner_up_score: 0,
+    margin: 0,
+    decision_reason: "invalid_catalog",
+  });
   return {
     catalog_valid: false,
     catalog_version: null,
     route: fallbackDecision,
+    routeWithDiagnostics: diagnostics,
   };
 }
 
-export function createIntentRouter(catalog: unknown): IntentRouter {
+export function createIntentRouter(catalog: unknown): DiagnosticIntentRouter {
   try {
     const compiled = compileCatalog(catalog);
     if (compiled === null) return invalidRouter();
     return {
       catalog_valid: true,
       catalog_version: compiled.version,
-      route: (input) => routeWithCatalog(compiled, input),
+      route: (input) => routeWithCatalogDiagnostics(compiled, input).decision,
+      routeWithDiagnostics: (input) =>
+        routeWithCatalogDiagnostics(compiled, input),
     };
   } catch {
     return invalidRouter();
   }
 }
 
-let defaultRouterPromise: Promise<IntentRouter> | undefined;
+let defaultRouterPromise: Promise<DiagnosticIntentRouter> | undefined;
 
-export function loadDefaultIntentRouter(): Promise<IntentRouter> {
+export function loadDefaultIntentRouter(): Promise<DiagnosticIntentRouter> {
   defaultRouterPromise ??= readFile(
     new URL("../../intent-routing.catalog.json", import.meta.url),
     "utf8",

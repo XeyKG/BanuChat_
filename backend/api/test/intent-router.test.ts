@@ -62,10 +62,17 @@ function lexicalPatternsOf(
   return intentOf(catalog, id).lexical_patterns as Record<string, unknown>[];
 }
 
+function weightedGroupsOf(
+  catalog: Record<string, unknown>,
+  id: string,
+): Record<string, unknown>[] {
+  return intentOf(catalog, id).weighted_signal_groups as Record<string, unknown>[];
+}
+
 test("loads and compiles the repository catalog", async () => {
   const router = await loadDefaultIntentRouter();
   assert.equal(router.catalog_valid, true);
-  assert.equal(router.catalog_version, "1.1.0-draft");
+  assert.equal(router.catalog_version, "1.2.0-draft");
 });
 
 test("all design cases through M6.1.2 execute as routing regression", () => {
@@ -82,7 +89,8 @@ test("all design cases through M6.1.2 execute as routing regression", () => {
   };
   const router = createIntentRouter(CATALOG);
   assert.equal(router.catalog_valid, true);
-  assert.equal(dataset.catalog_version, router.catalog_version);
+  assert.equal(dataset.catalog_version, "1.1.0-draft");
+  assert.equal(router.catalog_version, "1.2.0-draft");
   assert.equal(dataset.cases.length, 158);
   assert.equal(new Set(dataset.cases.map((item) => item.id)).size, dataset.cases.length);
   for (const item of dataset.cases) {
@@ -115,6 +123,135 @@ test("M6.1.2 progress phrasing preserves conservative guards", () => {
   ]) {
     assert.deepEqual(route(content), expected("agent_fallback", {}));
   }
+});
+
+test("weighted signal morphology is explicit and fully inspectable", () => {
+  const router = createIntentRouter(CATALOG);
+  const forms: Array<[string, string, readonly string[]]> = [
+    ["profile_progress", "progress_anchor", ["progreso", "progresos", "avance", "avances"]],
+    ["profile_progress", "self_reference", ["mi", "mis"]],
+    ["profile_progress", "profile_object", ["curso", "cursos", "actividad", "actividades", "inscripcion", "inscripciones"]],
+    ["profile_progress", "progress_status", ["completado", "completada", "completados", "completadas", "inscrito", "inscrita", "inscritos", "inscritas", "en progreso"]],
+    ["course_catalog", "course_object", ["curso", "cursos", "actividad", "actividades"]],
+    ["course_catalog", "catalog_operation", ["ofrece", "ofrecen", "oferta", "catalogo", "listado", "existe", "existen", "hay"]],
+    ["course_catalog", "catalog_status", ["disponible", "disponibles", "cerrado", "cerrada", "cerrados", "cerradas", "archivado", "archivada", "archivados", "archivadas"]],
+    ["calendar_events", "calendar_object", ["evento", "eventos", "calendario", "actividad", "actividades", "sesion", "sesiones"]],
+    ["calendar_events", "calendar_date_anchor", ["fecha", "fechas"]],
+    ["calendar_events", "temporal_rule", ["hoy", "mañana", "esta semana", "proxima semana", "semana que viene"]],
+    ["announcements", "announcement_object", ["anuncio", "anuncios", "aviso", "avisos", "convocatoria", "convocatorias", "comunicacion", "comunicaciones"]],
+    ["announcements", "announcement_status", ["vigente", "vigentes", "activo", "activa", "activos", "activas", "proximo", "proxima", "proximos", "proximas", "futuro", "futura", "futuros", "futuras", "vencido", "vencida", "vencidos", "vencidas", "expirado", "expirada", "expirados", "expiradas", "todos", "todas"]],
+  ];
+  for (const [intent, group, declaredForms] of forms) {
+    for (const form of declaredForms) {
+      const diagnostics = router.routeWithDiagnostics({
+        content: form,
+        context: { profile_selected: true, now: NOW },
+      });
+      const candidate = diagnostics.candidates.find(
+        (entry) => entry.candidate_intent === intent,
+      );
+      assert.ok(candidate, `${intent}:${form}`);
+      assert.ok(candidate.matched_signal_groups.includes(group), `${intent}:${form}`);
+      assert.ok(candidate.matched_signals.includes(form), `${intent}:${form}`);
+    }
+  }
+});
+
+test("weighted matcher enforces conservative scoring and relational guards", () => {
+  const router = createIntentRouter(CATALOG);
+  for (const content of ["progreso", "calendario", "anuncios", "cursos", "mis cursos"] ) {
+    assert.deepEqual(router.route({ content, context: { profile_selected: true, now: NOW } }), expected("agent_fallback", {}), content);
+  }
+  assert.deepEqual(
+    router.route({ content: "fechas de esta semana", context: { profile_selected: true, now: NOW } }),
+    expected("calendar_events", { limit: 20, date_from: "2026-09-21", date_to: "2026-09-27" }),
+  );
+  const threshold = router.routeWithDiagnostics({
+    content: "fechas de esta semana",
+    context: { profile_selected: true, now: NOW },
+  });
+  assert.equal(threshold.winner_score, 80);
+  assert.equal(threshold.decision_reason, "weighted_match");
+
+  for (const content of ["¿Cuál es mi progreso exacto?", "Quiero consultar mi progreso detallado"]) {
+    assert.deepEqual(router.route({ content, context: { profile_selected: true, now: NOW } }), expected("agent_fallback", {}));
+  }
+  const capped = router.routeWithDiagnostics({
+    content: "mi progreso exacto detallado adicional",
+    context: { profile_selected: true, now: NOW },
+  });
+  const cappedProfile = capped.candidates.find((entry) => entry.candidate_intent === "profile_progress");
+  assert.ok(cappedProfile);
+  assert.equal(cappedProfile.penalties.find((penalty) => penalty.type === "unknown_content")?.value, 50);
+
+  const repeated = router.routeWithDiagnostics({
+    content: "progreso progresos mi",
+    context: { profile_selected: true, now: NOW },
+  });
+  const repeatedProfile = repeated.candidates.find((entry) => entry.candidate_intent === "profile_progress");
+  assert.ok(repeatedProfile);
+  assert.equal(repeatedProfile.raw_score, 90);
+
+  const oneForeignGroup = router.routeWithDiagnostics({
+    content: "mi progreso cursos",
+    context: { profile_selected: true, now: NOW },
+  });
+  const profile = oneForeignGroup.candidates.find((entry) => entry.candidate_intent === "profile_progress");
+  assert.ok(profile);
+  assert.deepEqual(profile.foreign_intent_families, []);
+
+  for (const content of [
+    "Muéstrame mis cursos en progreso con las fechas de esta semana",
+    "¿Hay anuncios vigentes sobre los cursos disponibles?",
+    "eventos esta semana anuncios vigentes",
+  ]) {
+    assert.deepEqual(router.route({ content, context: { profile_selected: true, now: NOW } }), expected("agent_fallback", {}), content);
+  }
+  const withRelation = router.routeWithDiagnostics({
+    content: "Muéstrame mis cursos en progreso con las fechas de esta semana",
+    context: { profile_selected: true, now: NOW },
+  });
+  assert.ok(withRelation.candidates.every((candidate) => candidate.unknown_content_terms.includes("con")));
+  const aboutRelation = router.routeWithDiagnostics({
+    content: "¿Hay anuncios vigentes sobre los cursos disponibles?",
+    context: { profile_selected: true, now: NOW },
+  });
+  assert.ok(aboutRelation.candidates.every((candidate) => candidate.unknown_content_terms.includes("sobre")));
+  assert.equal(aboutRelation.margin, 10);
+  assert.equal(aboutRelation.decision_reason, "insufficient_margin");
+  const courseCandidate = aboutRelation.candidates.find(
+    (candidate) => candidate.candidate_intent === "course_catalog",
+  );
+  assert.ok(courseCandidate);
+  assert.equal(
+    courseCandidate.penalties.find((penalty) => penalty.type === "foreign_intent")?.value,
+    30,
+  );
+});
+
+test("weighted matcher preserves profile, guard, parameter, and output safety", () => {
+  const router = createIntentRouter(CATALOG);
+  assert.deepEqual(router.route({ content: "mi avance", context: { profile_selected: false, now: NOW } }), expected("agent_fallback", {}));
+  for (const content of [
+    "no mi avance",
+    "mi avance y anuncios vigentes",
+    "mi avance? anuncios vigentes",
+    "cursos disponibles cerrados",
+    "avisos activos vencidos",
+    "anuncios actual",
+    "anuncios actualmente",
+    "anuncios ahora",
+  ]) {
+    assert.deepEqual(router.route({ content, context: { profile_selected: true, now: NOW } }), expected("agent_fallback", {}), content);
+  }
+  const namedCourse = router.route({
+    content: "curso seguridad digital disponible",
+    context: { profile_selected: true, now: NOW },
+  });
+  assert.deepEqual(namedCourse, expected("agent_fallback", {}));
+  assert.equal("course_name" in namedCourse.parameters, false);
+  assert.deepEqual(route("mi progreso"), expected("profile_progress", { limit: 20 }));
+  assert.deepEqual(route("eventos esta semana"), expected("calendar_events", { limit: 20, date_from: "2026-09-21", date_to: "2026-09-27" }));
 });
 
 test("lexical fillers are limited to five residual tokens", () => {
@@ -499,6 +636,42 @@ test("an invalid catalog disables every fast path without partial execution", ()
     },
     (catalog) => {
       lexicalPatternsOf(catalog, "profile_progress")[0]!.id = "profile_progress_e01";
+    },
+    (catalog) => {
+      weightedGroupsOf(catalog, "profile_progress")[0]!.weight = 0;
+    },
+    (catalog) => {
+      weightedGroupsOf(catalog, "profile_progress")[0]!.signals = [];
+    },
+    (catalog) => {
+      const groups = weightedGroupsOf(catalog, "profile_progress");
+      groups[1]!.id = groups[0]!.id;
+    },
+    (catalog) => {
+      const group = weightedGroupsOf(catalog, "profile_progress")[0]!;
+      const signals = group.signals as Record<string, unknown>[];
+      signals[1]!.form = signals[0]!.form;
+    },
+    (catalog) => {
+      intentOf(catalog, "document_lookup").weighted_signal_groups = [];
+    },
+    (catalog) => {
+      const policy = catalog.decision_policy as Record<string, unknown>;
+      const weighted = policy.weighted_matcher as Record<string, unknown>;
+      weighted.minimum_signal_groups = 0;
+    },
+    (catalog) => {
+      const policy = catalog.decision_policy as Record<string, unknown>;
+      const weighted = policy.weighted_matcher as Record<string, unknown>;
+      weighted.unknown_content_penalty = -25;
+    },
+    (catalog) => {
+      const policy = catalog.decision_policy as Record<string, unknown>;
+      const weighted = policy.weighted_matcher as Record<string, unknown>;
+      weighted.scaffolding_terms = [
+        ...weighted.scaffolding_terms as string[],
+        "con",
+      ];
     },
   ];
 

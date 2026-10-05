@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:banuchat:intent-routing:1.0.0-draft",
+  "$id": "urn:banuchat:intent-routing:1.2.0-draft",
   "title": "BanuChat: catálogo y casos de diseño del Intent Router",
   "oneOf": [
     {
@@ -259,6 +259,15 @@
           "maxItems": 8,
           "items": {
             "$ref": "#/$defs/lexical_pattern"
+          }
+        },
+        "weighted_signal_groups": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/weighted_signal_group"
           }
         }
       },
@@ -892,6 +901,33 @@
               }
             }
           }
+        },
+        {
+          "if": {
+            "properties": {
+              "id": {
+                "enum": [
+                  "profile_progress",
+                  "course_catalog",
+                  "calendar_events",
+                  "announcements"
+                ]
+              }
+            },
+            "required": [
+              "id"
+            ]
+          },
+          "then": {
+            "required": [
+              "weighted_signal_groups"
+            ]
+          },
+          "else": {
+            "properties": {
+              "weighted_signal_groups": false
+            }
+          }
         }
       ]
     },
@@ -1229,7 +1265,7 @@
           "const": "intent_routing_catalog"
         },
         "catalog_version": {
-          "const": "1.1.0-draft"
+          "const": "1.2.0-draft"
         },
         "language": {
           "const": "es"
@@ -1260,7 +1296,7 @@
         },
         "decision_policy": {
           "const": {
-            "version": "1",
+            "version": "2",
             "exact_score": 100,
             "lexical_score": 90,
             "lexical_match_mode": "required_groups_plus_allowlisted_fillers",
@@ -1302,7 +1338,75 @@
               "prompt",
               "sql"
             ],
-            "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline"
+            "clause_guard": "multiple_nonempty_segments_on_question_exclamation_semicolon_or_newline",
+            "weighted_matcher": {
+              "calibration_note": "Pesos calibrados sobre el conjunto de desarrollo M3.2 para aceptar paráfrasis válidas conocidas manteniendo en fallback las consultas ambiguas o no soportadas del conjunto de desarrollo.",
+              "enabled_intents": [
+                "profile_progress",
+                "course_catalog",
+                "calendar_events",
+                "announcements"
+              ],
+              "aggregation": "sum_unique_signal_groups_minus_penalties",
+              "minimum_signal_groups": 2,
+              "unknown_content_penalty": 25,
+              "unknown_content_penalty_cap": 50,
+              "foreign_intent_penalty": 30,
+              "score_min": 0,
+              "score_max": 100,
+              "scaffolding_terms": [
+                "que",
+                "cual",
+                "cuales",
+                "como",
+                "quiero",
+                "quisiera",
+                "podrias",
+                "puedes",
+                "puedo",
+                "muestrame",
+                "mostrarme",
+                "dame",
+                "dime",
+                "necesito",
+                "enseñame",
+                "decirme",
+                "decir",
+                "saber",
+                "revisar",
+                "conocer",
+                "consultar",
+                "ver",
+                "hola",
+                "buenas",
+                "gracias",
+                "porfa",
+                "me",
+                "el",
+                "la",
+                "los",
+                "las",
+                "un",
+                "una",
+                "de",
+                "del",
+                "en",
+                "para",
+                "por",
+                "esta",
+                "estan",
+                "tiene",
+                "actual",
+                "actualmente",
+                "ahora",
+                "este",
+                "momento",
+                "ccd"
+              ],
+              "scaffolding_phrases": [
+                "por favor"
+              ]
+            }
           }
         },
         "temporal_policy": {
@@ -1632,6 +1736,64 @@
         "parameters",
         "temporal_rule",
         "response_variant"
+      ]
+    },
+    "weighted_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "form": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-z0-9ñ]+(?: [a-z0-9ñ]+)*$"
+        },
+        "parameters": {
+          "$ref": "#/$defs/parameters"
+        },
+        "temporal_rule": {
+          "enum": [
+            null,
+            "today",
+            "tomorrow",
+            "this_week",
+            "next_week"
+          ]
+        }
+      },
+      "required": [
+        "form",
+        "parameters",
+        "temporal_rule"
+      ]
+    },
+    "weighted_signal_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]+$"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "signals": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/weighted_signal"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "weight",
+        "signals"
       ]
     }
   }
