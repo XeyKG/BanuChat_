@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -28,6 +29,19 @@ import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
 type ConversationState = 'loading' | 'ready' | 'error' | 'profile_mismatch';
+type ReconciliationState =
+  | 'awaiting_check'
+  | 'checking'
+  | 'not_visible'
+  | 'changed'
+  | 'check_failed';
+
+interface PendingUncertainSend {
+  content: string;
+  baselineMessageIds: string[];
+  baselineCount: number;
+}
+
 interface ConversationLoadResult {
   requestKey: string | null;
   state: ConversationState;
@@ -68,6 +82,10 @@ export default function ChatScreen() {
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<SendError>(null);
+  const [pendingUncertainSend, setPendingUncertainSend] =
+    useState<PendingUncertainSend | null>(null);
+  const [reconciliationState, setReconciliationState] =
+    useState<ReconciliationState | null>(null);
 
   useEffect(() => {
     return () => {
@@ -169,29 +187,119 @@ export default function ChatScreen() {
       return;
     }
 
+    const pendingSend: PendingUncertainSend = {
+      content: outgoing,
+      baselineMessageIds: messages.map((message) => message.message_id),
+      baselineCount: messages.length,
+    };
     setIsSending(true);
     setSendError(null);
+    setPendingUncertainSend(pendingSend);
+    setReconciliationState(null);
     try {
       const result = await sendMessage(activeConversationId, outgoing);
       if (!isMountedRef.current) return;
       setMessages((current) => [...current, result.user_message, result.assistant_message]);
       setContent('');
+      setPendingUncertainSend(null);
+      setReconciliationState(null);
     } catch (error) {
       if (!isMountedRef.current) return;
       if (error instanceof MessageRequestError) {
         if (error.kind === 'timeout' || error.kind === 'network') {
           setSendError('uncertain');
+          setReconciliationState('awaiting_check');
         } else if (error.kind === 'invalid_response') {
+          setPendingUncertainSend(null);
           setSendError('invalid_response');
         } else {
+          setPendingUncertainSend(null);
           setSendError('http');
         }
       } else {
+        setPendingUncertainSend(null);
         setSendError('invalid_response');
       }
     } finally {
       if (isMountedRef.current) setIsSending(false);
     }
+  }
+
+  async function checkUncertainSend() {
+    if (
+      pendingUncertainSend === null ||
+      activeProfileKey === null ||
+      reconciliationState === 'checking'
+    ) {
+      return;
+    }
+
+    setReconciliationState('checking');
+    try {
+      const detail = await getConversation(activeConversationId);
+      if (!isMountedRef.current) return;
+
+      const prefixMatches =
+        detail.messages.length >= pendingUncertainSend.baselineCount &&
+        pendingUncertainSend.baselineMessageIds.every(
+          (messageId, index) => detail.messages[index]?.message_id === messageId,
+        );
+      if (
+        detail.conversation_id !== activeConversationId ||
+        detail.profile.profile_key !== activeProfileKey ||
+        !prefixMatches
+      ) {
+        setReconciliationState('changed');
+        return;
+      }
+
+      const additionalMessages = detail.messages.slice(pendingUncertainSend.baselineCount);
+      if (additionalMessages.length === 0) {
+        setReconciliationState('not_visible');
+        return;
+      }
+
+      const [userMessage, assistantMessage] = additionalMessages;
+      if (
+        additionalMessages.length === 2 &&
+        userMessage.role === 'user' &&
+        userMessage.content === pendingUncertainSend.content &&
+        assistantMessage.role === 'assistant'
+      ) {
+        setMessages(detail.messages);
+        setPendingUncertainSend(null);
+        setReconciliationState(null);
+        setSendError(null);
+        setContent('');
+        return;
+      }
+
+      setReconciliationState('changed');
+    } catch {
+      if (isMountedRef.current) setReconciliationState('check_failed');
+    }
+  }
+
+  function continueAfterUncertainSend() {
+    if (pendingUncertainSend === null) return;
+
+    Alert.alert(
+      'Continuar con precaución',
+      'El mensaje anterior podría seguir procesándose. Si continúas y vuelves a enviarlo, podría quedar duplicado.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Continuar',
+          style: 'destructive',
+          onPress: () => {
+            setContent(pendingUncertainSend.content);
+            setPendingUncertainSend(null);
+            setReconciliationState(null);
+            setSendError(null);
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -353,11 +461,74 @@ export default function ChatScreen() {
           )}
 
           {sendError === 'uncertain' && (
-            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
-              <Text style={styles.errorText}>
-                No se pudo confirmar si el mensaje fue procesado. No se reenviará automáticamente
-                para evitar duplicados.
-              </Text>
+            <View
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+              style={[styles.errorBanner, styles.uncertainBanner]}>
+              <Text style={styles.uncertainTitle}>Resultado del envío sin confirmar</Text>
+
+              {(reconciliationState === 'awaiting_check' || reconciliationState === null) && (
+                <Text style={styles.uncertainText}>
+                  No se pudo confirmar si el mensaje fue procesado. No se reenviará automáticamente
+                  para evitar duplicados.
+                </Text>
+              )}
+
+              {reconciliationState === 'checking' && (
+                <Text style={styles.uncertainText}>Comprobando el historial de la conversación...</Text>
+              )}
+
+              {reconciliationState === 'not_visible' && (
+                <Text style={styles.uncertainText}>
+                  El turno todavía no aparece en el historial. Puede seguir procesándose.
+                </Text>
+              )}
+
+              {reconciliationState === 'check_failed' && (
+                <Text style={styles.uncertainText}>
+                  No fue posible verificar el mensaje todavía. Puedes comprobar el estado nuevamente.
+                </Text>
+              )}
+
+              {reconciliationState === 'changed' ? (
+                <>
+                  <Text style={styles.uncertainText}>
+                    La conversación cambió mientras se verificaba el mensaje. Revisa el historial antes
+                    de continuar.
+                  </Text>
+                  <View style={styles.uncertainActions}>
+                    <AppButton
+                      label="Ir al historial"
+                      onPress={() => router.replace('/history')}
+                      style={styles.uncertainAction}
+                    />
+                    <AppButton
+                      label="Ir al inicio"
+                      onPress={returnHome}
+                      style={styles.uncertainAction}
+                      variant="secondary"
+                    />
+                  </View>
+                </>
+              ) : (
+                <View style={styles.uncertainActions}>
+                  <AppButton
+                    label={reconciliationState === 'not_visible' ? 'Comprobar de nuevo' : 'Comprobar estado'}
+                    loading={reconciliationState === 'checking'}
+                    loadingLabel="Comprobando..."
+                    onPress={() => void checkUncertainSend()}
+                    style={styles.uncertainAction}
+                  />
+                  {reconciliationState === 'not_visible' && (
+                    <AppButton
+                      label="Continuar de todos modos"
+                      onPress={continueAfterUncertainSend}
+                      style={styles.uncertainAction}
+                      variant="secondary"
+                    />
+                  )}
+                </View>
+              )}
             </View>
           )}
 
@@ -659,4 +830,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.errorSoft,
   },
   errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20, textAlign: 'center' },
+  uncertainBanner: {
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderColor: colors.warning,
+    backgroundColor: colors.warningSoft,
+  },
+  uncertainTitle: {
+    color: colors.warning,
+    fontSize: typography.small,
+    lineHeight: 20,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  uncertainText: {
+    color: colors.textSecondary,
+    fontSize: typography.small,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  uncertainActions: { width: '100%', gap: spacing.xs },
+  uncertainAction: { width: '100%' },
 });

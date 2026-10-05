@@ -45,6 +45,12 @@ asociada a un perfil, pero no constituye autenticación institucional ni valida
 credenciales reales. La sesión se conserva únicamente en memoria y puede perderse
 al reiniciar completamente la aplicación.
 
+Si el envío de un mensaje termina con timeout o fallo de red, la app no repite el
+POST automáticamente. El usuario puede comprobar manualmente el historial para
+reconciliar un turno confirmado o decidir explícitamente continuar si todavía no
+aparece. Esta recuperación permanece en memoria y no ofrece idempotencia durable ni
+una garantía de procesamiento exactamente una vez.
+
 En un despliegue institucional, la selección de perfiles sintéticos deberá
 sustituirse por un mecanismo de autenticación autorizado por la institución,
 a partir del cual el backend derive la identidad y permisos del usuario.
