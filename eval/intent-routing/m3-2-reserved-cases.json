@@ -1,0 +1,364 @@
+{
+  "artifact_type": "intent_routing_m3_2_reserved_cases",
+  "schema_version": "1",
+  "evaluation_stage": "M3.2-D",
+  "catalog_version": "1.2.0-draft",
+  "language": "es",
+  "collection_date": "2026-10-04",
+  "provenance": "peer_authored",
+  "router_frozen_commit": "e55ba47299822940b36332ec6d93cbd2bb553267",
+  "expectations_frozen_before_execution": true,
+  "reserved_primary_count": 14,
+  "development_overlap_count": 5,
+  "contextual_fragment_count": 1,
+  "meta_message_count": 4,
+  "total_cases": 24,
+  "methodology_note": "The primary reserved cohort contains only negative/fallback expectations. It evaluates false fast-path safety on independent peer-authored queries and does not independently estimate positive fast-path recall or generalization.",
+  "default_context": {
+    "profile_selected": true,
+    "now": "2026-09-26T15:00:00-05:00"
+  },
+  "cases": [
+    {
+      "id": "R-01",
+      "input": "Hola, quisiera saber cuántas horas libres tengo",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unknown_content",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-02",
+      "input": "Presentó una retención en mi plataforma, como puedo retirarla?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-03",
+      "input": "Como puedo agendas cita con tutores?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-04",
+      "input": "Como puedo agendar una cita con la psicologa?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-05",
+      "input": "Donde puedo investigar para presentar un supletorio",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-06",
+      "input": "Que becas y descuentos maneja la universidad?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-07",
+      "input": "Que documentos necesito para el proceso de postulacion a los grados?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-08",
+      "input": "Como puedo investigar sobre las practicas o pasantias de mi carrera?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-09",
+      "input": "Que opciones de postgrado tiene la universidad?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-10",
+      "input": "Que ofertas de intercambios maneja la universidad?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-11",
+      "input": "Donde puedo saber cuantas horas libres me faltan?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unknown_content",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-12",
+      "input": "Donde puedo apartar los espacios unab?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unsupported",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-13",
+      "input": "Dame información de flexiunab ()",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "unknown_content",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "R-14",
+      "input": "Donde puedo ver cuales me faltan (las pruebas son ccd, centro de competencias digitales)",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "reserved_primary",
+      "category": "ambiguous",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "O-01",
+      "input": "Hola, como puedo solicitar un certificado de materias matriculadas",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "development_overlap",
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "overlap_note": "Exact source text already represented as M3.2 development case P-05."
+    },
+    {
+      "id": "O-02",
+      "input": "Hola, muestrame mis horas libres faltantes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "development_overlap",
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "overlap_note": "Exact source text already represented as M3.2 development case P-03."
+    },
+    {
+      "id": "O-03",
+      "input": "muestrame las actividades de bienestar virtuales para esta semana",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "development_overlap",
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "overlap_note": "Exact source text already represented as M3.2 development case P-04."
+    },
+    {
+      "id": "O-04",
+      "input": "Que profesores estan disponibles para x materia?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "development_overlap",
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "overlap_note": "This source query was adapted during development into P-06; therefore it is not independent."
+    },
+    {
+      "id": "O-05",
+      "input": "Como puedo ver el pensul de mi carrera?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "development_overlap",
+      "category": "unsupported",
+      "provenance": "peer_authored",
+      "overlap_note": "Exact source text already represented as M3.2 development case P-07."
+    },
+    {
+      "id": "X-01",
+      "input": "O certificado de matrícula",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "contextual_fragment",
+      "category": "context_dependent",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "M-01",
+      "input": "Si es para horas libres algo tipo",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "meta_message",
+      "category": "not_a_standalone_query",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "M-02",
+      "input": "O para certificados",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "meta_message",
+      "category": "not_a_standalone_query",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "M-03",
+      "input": "le diría como",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "meta_message",
+      "category": "not_a_standalone_query",
+      "provenance": "peer_authored"
+    },
+    {
+      "id": "M-04",
+      "input": "o",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "cohort": "meta_message",
+      "category": "not_a_standalone_query",
+      "provenance": "peer_authored"
+    }
+  ]
+}
