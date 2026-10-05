@@ -1,0 +1,412 @@
+{
+  "artifact_type": "m3_2_intent_routing_cases",
+  "schema_version": "1",
+  "catalog_version": "1.1.0-draft",
+  "language": "es",
+  "purpose": "preimplementation_design_expectations",
+  "defined_before_implementation": true,
+  "default_context": {
+    "profile_selected": true,
+    "now": "2026-09-26T15:00:00-05:00"
+  },
+  "cases": [
+    {
+      "id": "V-01",
+      "input": "¿Podrías mostrarme mi progreso actual en el CCD?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida que solicita el progreso actual del perfil seleccionado.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-02",
+      "input": "Quiero revisar mi avance actualmente, por favor",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "profile_progress",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida de una consulta sobre el avance actual del perfil.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-03",
+      "input": "Quisiera conocer los cursos que ofrece el CCD",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "course_catalog",
+      "expected_parameters": {
+        "limit": 20
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida de una solicitud del catálogo completo de cursos.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-04",
+      "input": "¿Cuáles cursos tiene disponibles el CCD ahora?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "course_catalog",
+      "expected_parameters": {
+        "limit": 20,
+        "statuses": [
+          "available"
+        ]
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida que limita el catálogo a cursos disponibles.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-05",
+      "input": "Por favor, me puedes decir qué eventos hay esta semana",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "calendar_events",
+      "expected_parameters": {
+        "limit": 20,
+        "date_from": "2026-09-21",
+        "date_to": "2026-09-27"
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida de una consulta de eventos en la semana de referencia.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-06",
+      "input": "Muéstrame los anuncios que están vigentes ahora",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "announcements",
+      "expected_parameters": {
+        "limit": 20,
+        "temporal_status": "active",
+        "reference_time": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida de una consulta de anuncios activos en el momento de referencia.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "V-07",
+      "input": "Podrías decirme qué avisos están activos en este momento",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "announcements",
+      "expected_parameters": {
+        "limit": 20,
+        "temporal_status": "active",
+        "reference_time": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_response_variant": null,
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "rationale": "Paráfrasis válida que usa avisos como sinónimo de anuncios activos.",
+      "tags": [
+        "positive",
+        "valid_paraphrase"
+      ]
+    },
+    {
+      "id": "P-01",
+      "input": "¿Qué cursos del CCD me faltan por hacer?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unsupported",
+      "provenance": "peer_authored",
+      "rationale": "La consulta requiere derivar cursos pendientes, relación no soportada por los fast paths definidos.",
+      "tags": [
+        "negative",
+        "unsupported",
+        "relational_overlap"
+      ]
+    },
+    {
+      "id": "P-02",
+      "input": "¿Qué cursos del CCD me faltan por completar?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "peer_authored",
+      "rationale": "Combina lenguaje de catálogo y progreso sin expresar una intención simple inequívoca.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "relational_overlap"
+      ]
+    },
+    {
+      "id": "P-03",
+      "input": "Hola, muestrame mis horas libres faltantes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "rationale": "Solicita contenido que no pertenece a los dominios estructurados del router.",
+      "tags": [
+        "negative",
+        "unknown_content"
+      ]
+    },
+    {
+      "id": "P-04",
+      "input": "muestrame las actividades de bienestar virtuales para esta semana",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "rationale": "Solicita actividades de bienestar, dominio no cubierto por los fast paths vigentes.",
+      "tags": [
+        "negative",
+        "unknown_content"
+      ]
+    },
+    {
+      "id": "P-05",
+      "input": "Hola, como puedo solicitar un certificado de materias matriculadas",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "rationale": "Solicita un trámite académico ajeno a los dominios estructurados disponibles.",
+      "tags": [
+        "negative",
+        "unknown_content"
+      ]
+    },
+    {
+      "id": "P-06",
+      "input": "Que profesores estan disponibles para la materia Seguridad digital cotidiana?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unknown_content",
+      "provenance": "peer_authored",
+      "rationale": "Solicita disponibilidad de profesores, contenido no representado por los fast paths.",
+      "tags": [
+        "negative",
+        "unknown_content"
+      ]
+    },
+    {
+      "id": "P-07",
+      "input": "Como puedo ver el pensul de mi carrera?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "unsupported",
+      "provenance": "peer_authored",
+      "rationale": "Solicita un procedimiento no soportado por los fast paths del router.",
+      "tags": [
+        "negative",
+        "unsupported"
+      ]
+    },
+    {
+      "id": "A-01",
+      "input": "¿Cómo voy en mis cursos y qué eventos hay esta semana?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Combina progreso y calendario en una sola consulta compuesta.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "compound_guard"
+      ]
+    },
+    {
+      "id": "A-02",
+      "input": "Quiero saber mi avance y si hay anuncios vigentes",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Combina progreso y anuncios en una sola consulta compuesta.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "compound_guard"
+      ]
+    },
+    {
+      "id": "A-03",
+      "input": "Dime qué eventos hay esta semana y qué avisos están activos",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Combina calendario y anuncios en una sola consulta compuesta.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "compound_guard"
+      ]
+    },
+    {
+      "id": "A-04",
+      "input": "¿Qué cursos ofrece el CCD y cuáles ya completé?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Combina catálogo y progreso en una sola consulta compuesta.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "compound_guard"
+      ]
+    },
+    {
+      "id": "A-05",
+      "input": "Muéstrame mis cursos en progreso con las fechas de esta semana",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Superpone progreso y calendario sin separar una intención única.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "no_conjunction",
+        "relational_overlap"
+      ]
+    },
+    {
+      "id": "A-06",
+      "input": "¿Hay anuncios vigentes sobre los cursos disponibles?",
+      "context": {
+        "profile_selected": true,
+        "now": "2026-09-26T15:00:00-05:00"
+      },
+      "expected_route": "agent_fallback",
+      "expected_parameters": {},
+      "expected_response_variant": null,
+      "category": "ambiguous",
+      "provenance": "user_authored",
+      "rationale": "Relaciona anuncios vigentes con cursos disponibles y activa dos dominios estructurados.",
+      "tags": [
+        "negative",
+        "ambiguous",
+        "cross_intent",
+        "relational_overlap"
+      ]
+    }
+  ]
+}

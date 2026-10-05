@@ -1,0 +1,288 @@
+{
+  "evaluation_type": "m3_2_preimplementation_design_case_baseline",
+  "baseline_stage": "pre_m3_2_preweighted",
+  "repository_revision": "1865d6affb3300861fe8911377c55310a857e4f9",
+  "catalog_version": "1.1.0-draft",
+  "inputs": {
+    "fixture_sha256": "fba82e600db7c42f3aab2415261614ddb9f640316af83bb1e6cdc6f0a19213a3",
+    "catalog_sha256": "6673973f8c2e25b70025d854ce458ebcc48f4342eccf40753355ccced2a0749f",
+    "total_cases": 20,
+    "defined_before_implementation": true,
+    "cohort_counts": {
+      "V": 7,
+      "P": 7,
+      "A": 6
+    }
+  },
+  "metrics": {
+    "total_cases": 20,
+    "route_correct": 13,
+    "exact_correct": 13,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 7,
+    "wrong_nonfallback_route": 0,
+    "route_accuracy": 0.65,
+    "exact_case_accuracy": 0.65
+  },
+  "by_cohort": {
+    "V": {
+      "total_cases": 7,
+      "route_correct": 0,
+      "exact_correct": 0,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 7,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 0,
+      "exact_case_accuracy": 0
+    },
+    "P": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "A": {
+      "total_cases": 6,
+      "route_correct": 6,
+      "exact_correct": 6,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_category": {
+    "valid_paraphrase": {
+      "total_cases": 7,
+      "route_correct": 0,
+      "exact_correct": 0,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 7,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 0,
+      "exact_case_accuracy": 0
+    },
+    "unknown_content": {
+      "total_cases": 4,
+      "route_correct": 4,
+      "exact_correct": 4,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "unsupported": {
+      "total_cases": 2,
+      "route_correct": 2,
+      "exact_correct": 2,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "ambiguous": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_provenance": {
+    "peer_authored": {
+      "total_cases": 14,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 7,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 0.5,
+      "exact_case_accuracy": 0.5
+    },
+    "user_authored": {
+      "total_cases": 6,
+      "route_correct": 6,
+      "exact_correct": 6,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "mismatches": [
+    {
+      "id": "V-01",
+      "input": "¿Podrías mostrarme mi progreso actual en el CCD?",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "profile_progress",
+        "parameters": {
+          "limit": 20
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-02",
+      "input": "Quiero revisar mi avance actualmente, por favor",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "profile_progress",
+        "parameters": {
+          "limit": 20
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-03",
+      "input": "Quisiera conocer los cursos que ofrece el CCD",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "course_catalog",
+        "parameters": {
+          "limit": 20
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-04",
+      "input": "¿Cuáles cursos tiene disponibles el CCD ahora?",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "course_catalog",
+        "parameters": {
+          "limit": 20,
+          "statuses": [
+            "available"
+          ]
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-05",
+      "input": "Por favor, me puedes decir qué eventos hay esta semana",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "calendar_events",
+        "parameters": {
+          "limit": 20,
+          "date_from": "2026-09-21",
+          "date_to": "2026-09-27"
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-06",
+      "input": "Muéstrame los anuncios que están vigentes ahora",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "announcements",
+        "parameters": {
+          "limit": 20,
+          "temporal_status": "active",
+          "reference_time": "2026-09-26T15:00:00-05:00"
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    },
+    {
+      "id": "V-07",
+      "input": "Podrías decirme qué avisos están activos en este momento",
+      "category": "valid_paraphrase",
+      "provenance": "peer_authored",
+      "expected": {
+        "route": "announcements",
+        "parameters": {
+          "limit": 20,
+          "temporal_status": "active",
+          "reference_time": "2026-09-26T15:00:00-05:00"
+        },
+        "response_variant": null
+      },
+      "actual": {
+        "route": "agent_fallback",
+        "parameters": {},
+        "response_variant": null
+      },
+      "differing_fields": [
+        "route",
+        "parameters"
+      ]
+    }
+  ]
+}
