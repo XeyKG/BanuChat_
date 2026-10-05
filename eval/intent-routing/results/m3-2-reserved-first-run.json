@@ -1,0 +1,75 @@
+{
+  "evaluation_type": "m3_2_d_reserved_first_run",
+  "evaluation_stage": "M3.2-D",
+  "repository_revision": "478a37ec6234c2e278d1fa7746c85393ef2df0eb",
+  "router_frozen_commit": "e55ba47299822940b36332ec6d93cbd2bb553267",
+  "catalog_version": "1.2.0-draft",
+  "expectations_frozen_before_execution": true,
+  "inputs": {
+    "fixture_sha256": "6e84d3bf8c9c1fc9479ab61eb2c2d9a424b7103e2b22153b5737421e59fa4102",
+    "catalog_sha256": "af881e8399f7d43af291aa0ad16e34d89a159999d730ed021a821a23d414e95f",
+    "total_cases": 24,
+    "cohort_counts": {
+      "reserved_primary": 14,
+      "development_overlap": 5,
+      "contextual_fragment": 1,
+      "meta_message": 4
+    }
+  },
+  "primary_cohort": "reserved_primary",
+  "primary_metric": {
+    "total_cases": 14,
+    "route_correct": 14,
+    "exact_correct": 14,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 0,
+    "wrong_nonfallback_route": 0,
+    "route_accuracy": 1,
+    "exact_case_accuracy": 1,
+    "false_fast_path_rate": 0
+  },
+  "metrics_by_cohort": {
+    "reserved_primary": {
+      "total_cases": 14,
+      "route_correct": 14,
+      "exact_correct": 14,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1,
+      "false_fast_path_rate": 0
+    },
+    "development_overlap": {
+      "total_cases": 5,
+      "route_correct": 5,
+      "exact_correct": 5,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "contextual_fragment": {
+      "total_cases": 1,
+      "route_correct": 1,
+      "exact_correct": 1,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "meta_message": {
+      "total_cases": 4,
+      "route_correct": 4,
+      "exact_correct": 4,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "mismatches": []
+}
