@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   action: {
-    minHeight: 38,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: 19,

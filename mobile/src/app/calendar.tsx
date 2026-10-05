@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   filters: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.lg },
   filterButton: {
-    minHeight: 38,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: radii.pill,

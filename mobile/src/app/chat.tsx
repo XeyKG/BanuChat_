@@ -648,7 +648,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
   headerSubtitle: { color: colors.muted, fontSize: typography.caption, lineHeight: 17 },
   headerAction: {
-    minHeight: 38,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: 19,

@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
   skipButton: {
-    minHeight: 38,
+    minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: 19,

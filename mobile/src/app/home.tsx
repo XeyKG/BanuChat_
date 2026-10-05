@@ -178,7 +178,7 @@ export default function HomeScreen() {
               tint={colors.amber}
               tintSoft={colors.amberSoft}
               icon="doc"
-              onPress={() => router.push('./announcements')}
+              onPress={() => router.push('/announcements')}
               disabled={isStartingChat}
               delay={400}
             />

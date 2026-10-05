@@ -365,9 +365,9 @@ const styles = StyleSheet.create({
   conversationDate: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
   conversationMeta: { color: colors.muted, fontSize: typography.caption },
   deleteButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: layout.minTouchTarget,
+    height: layout.minTouchTarget,
+    borderRadius: layout.minTouchTarget / 2,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.errorSoft,

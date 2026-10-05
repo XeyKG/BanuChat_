@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   toggle: {
-    minHeight: 40,
+    minHeight: layout.minTouchTarget,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
