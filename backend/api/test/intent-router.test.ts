@@ -254,6 +254,84 @@ test("weighted matcher preserves profile, guard, parameter, and output safety", 
   assert.deepEqual(route("eventos esta semana"), expected("calendar_events", { limit: 20, date_from: "2026-09-21", date_to: "2026-09-27" }));
 });
 
+test("context modifiers stay zero-point scaffolding without inferring parameters", () => {
+  for (const content of [
+    "mi progreso actual",
+    "mi avance actualmente",
+    "¿Cuál es mi progreso actual?",
+  ]) {
+    assert.deepEqual(
+      route(content),
+      expected("profile_progress", { limit: 20 }),
+      content,
+    );
+  }
+  assert.deepEqual(route("anuncios ahora"), expected("agent_fallback", {}));
+  assert.deepEqual(
+    route("avisos activos ahora"),
+    expected("announcements", {
+      limit: 20,
+      temporal_status: "active",
+      reference_time: NOW,
+    }),
+  );
+});
+
+test("bare singular catalog-status evidence remains ambiguous regardless of scaffolding", () => {
+  for (const content of [
+    "curso disponible",
+    "el curso disponible",
+    "dime curso disponible",
+    "curso cerrado",
+    "curso archivado",
+    "actividad disponible",
+  ]) {
+    assert.deepEqual(route(content), expected("agent_fallback", {}), content);
+  }
+  assert.deepEqual(
+    route("cursos disponibles"),
+    expected("course_catalog", { limit: 20, statuses: ["available"] }),
+  );
+});
+
+test("mixed social scaffolding preserves legacy compatibility and permits explicit requests", () => {
+  assert.deepEqual(route("hola"), expected("basic_social", {}, "greeting"));
+  assert.deepEqual(route("gracias"), expected("basic_social", {}, "thanks"));
+  assert.deepEqual(
+    route("hola que cursos estan disponibles"),
+    expected("agent_fallback", {}),
+  );
+  const successful: Array<[string, IntentRoutingDecision]> = [
+    [
+      "hola quisiera conocer los cursos que ofrece el CCD",
+      expected("course_catalog", { limit: 20 }),
+    ],
+    [
+      "hola podrias mostrarme mi progreso actual en el CCD",
+      expected("profile_progress", { limit: 20 }),
+    ],
+    [
+      "gracias podrias mostrarme mi progreso actual en el CCD",
+      expected("profile_progress", { limit: 20 }),
+    ],
+    [
+      "buenas quisiera conocer los cursos que ofrece el CCD",
+      expected("course_catalog", { limit: 20 }),
+    ],
+    [
+      "porfa dime que eventos hay esta semana",
+      expected("calendar_events", {
+        limit: 20,
+        date_from: "2026-09-21",
+        date_to: "2026-09-27",
+      }),
+    ],
+  ];
+  for (const [content, decision] of successful) {
+    assert.deepEqual(route(content), decision, content);
+  }
+});
+
 test("lexical fillers are limited to five residual tokens", () => {
   assert.deepEqual(
     route("cual cual cual cual cual mi progreso"),

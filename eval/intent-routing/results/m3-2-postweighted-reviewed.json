@@ -1,0 +1,125 @@
+{
+  "evaluation_type": "m3_2_c_1_reviewed_postweighted_design_case_evaluation",
+  "baseline_stage": "post_m3_2_c_1_reviewed",
+  "repository_revision": "e954a57f32952abf284a0c5b4ac0fe4c2f7f6be4",
+  "fixture_declared_catalog_version": "1.1.0-draft",
+  "evaluated_catalog_version": "1.2.0-draft",
+  "inputs": {
+    "fixture_sha256": "fba82e600db7c42f3aab2415261614ddb9f640316af83bb1e6cdc6f0a19213a3",
+    "catalog_sha256": "af881e8399f7d43af291aa0ad16e34d89a159999d730ed021a821a23d414e95f",
+    "total_cases": 20,
+    "defined_before_implementation": true,
+    "cohort_counts": {
+      "V": 7,
+      "P": 7,
+      "A": 6
+    }
+  },
+  "metrics": {
+    "total_cases": 20,
+    "route_correct": 20,
+    "exact_correct": 20,
+    "unexpected_fast_path": 0,
+    "unexpected_fallback": 0,
+    "wrong_nonfallback_route": 0,
+    "route_accuracy": 1,
+    "exact_case_accuracy": 1
+  },
+  "by_cohort": {
+    "V": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "P": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "A": {
+      "total_cases": 6,
+      "route_correct": 6,
+      "exact_correct": 6,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_category": {
+    "valid_paraphrase": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "unknown_content": {
+      "total_cases": 4,
+      "route_correct": 4,
+      "exact_correct": 4,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "unsupported": {
+      "total_cases": 2,
+      "route_correct": 2,
+      "exact_correct": 2,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "ambiguous": {
+      "total_cases": 7,
+      "route_correct": 7,
+      "exact_correct": 7,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "by_provenance": {
+    "peer_authored": {
+      "total_cases": 14,
+      "route_correct": 14,
+      "exact_correct": 14,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    },
+    "user_authored": {
+      "total_cases": 6,
+      "route_correct": 6,
+      "exact_correct": 6,
+      "unexpected_fast_path": 0,
+      "unexpected_fallback": 0,
+      "wrong_nonfallback_route": 0,
+      "route_accuracy": 1,
+      "exact_case_accuracy": 1
+    }
+  },
+  "mismatches": []
+}

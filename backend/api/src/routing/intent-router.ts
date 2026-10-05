@@ -146,6 +146,7 @@ const EXPECTED_DECISION_POLICY = {
       "por",
       "esta",
       "estan",
+      "es",
       "tiene",
       "actual",
       "actualmente",
@@ -155,6 +156,28 @@ const EXPECTED_DECISION_POLICY = {
       "ccd",
     ],
     scaffolding_phrases: ["por favor"],
+    social_compatibility: "mixed_social_terms_require_explicit_request_term",
+    social_compatibility_terms: ["hola", "gracias"],
+    social_request_terms: [
+      "quiero",
+      "quisiera",
+      "podrias",
+      "puedes",
+      "puedo",
+      "muestrame",
+      "mostrarme",
+      "dame",
+      "dime",
+      "necesito",
+      "enseñame",
+      "decirme",
+      "decir",
+      "saber",
+      "revisar",
+      "conocer",
+      "consultar",
+      "ver",
+    ],
   },
 };
 
@@ -1155,6 +1178,55 @@ interface WeightedEvaluation {
   readonly eligible: boolean;
 }
 
+const SINGULAR_CATALOG_OBJECTS = new Set(["curso", "actividad"]);
+const CONTEXT_MODIFIER_TERMS = new Set([
+  "actual",
+  "actualmente",
+  "ahora",
+  "este",
+  "momento",
+]);
+
+function hasBareSingularCatalogStatusAmbiguity(
+  intent: CompiledIntent,
+  matchedGroups: readonly MatchedWeightedGroup[],
+): boolean {
+  if (intent.id !== "course_catalog" || matchedGroups.length !== 2) return false;
+  const objectGroup = matchedGroups.find(
+    (match) => match.group.id === "course_object",
+  );
+  const hasStatus = matchedGroups.some(
+    (match) => match.group.id === "catalog_status",
+  );
+  const hasOperation = matchedGroups.some(
+    (match) => match.group.id === "catalog_operation",
+  );
+  return (
+    objectGroup !== undefined &&
+    objectGroup.signals.length > 0 &&
+    objectGroup.signals.every((signal) =>
+      SINGULAR_CATALOG_OBJECTS.has(signal.form),
+    ) &&
+    hasStatus &&
+    !hasOperation
+  );
+}
+
+function isLegacyCatalogContextExtension(
+  catalog: CompiledCatalog,
+  content: string,
+  tokens: readonly string[],
+): boolean {
+  const withoutModifiers = tokens
+    .filter((token) => !CONTEXT_MODIFIER_TERMS.has(token))
+    .join(" ");
+  if (withoutModifiers === content) return false;
+  const courseCatalog = catalog.intents.find(
+    (intent) => intent.id === "course_catalog",
+  );
+  return courseCatalog?.rules.some((rule) => rule.text === withoutModifiers) ?? false;
+}
+
 function matchingTokenIndexes(
   tokens: readonly string[],
   phrase: readonly string[],
@@ -1372,15 +1444,7 @@ function weightedDiagnostics(
     const blocked =
       (intent.requiresProfile && !input.context.profile_selected) ||
       intent.exclusions.some((phrase) => containsDelimitedPhrase(content, phrase)) ||
-      (intent.id === "course_catalog" &&
-        ignoredTerms.length === 0 &&
-        matchedGroups.some(
-          (match) =>
-            match.group.id === "course_object" &&
-            match.signals.some((signal) => signal.form === "curso"),
-        ) &&
-        matchedGroups.some((match) => match.group.id === "catalog_status") &&
-        !matchedGroups.some((match) => match.group.id === "catalog_operation"));
+      hasBareSingularCatalogStatusAmbiguity(intent, matchedGroups);
     const eligible =
       !blocked &&
       merged !== null &&
@@ -1525,13 +1589,14 @@ function routeWithCatalogDiagnostics(
       decision_reason: legacy.reason,
     };
   }
+  const weightedPolicy = EXPECTED_DECISION_POLICY.weighted_matcher;
   if (
-    tokens.length > 1 &&
-    EXPECTED_DECISION_POLICY.standalone_social_allowlist.some((term) =>
+    weightedPolicy.social_compatibility_terms.some((term) =>
       tokens.includes(term),
-    )
+    ) &&
+    !weightedPolicy.social_request_terms.some((term) => tokens.includes(term))
   ) {
-    return fallback("mixed_social_request");
+    return fallback("social_compatibility_guard");
   }
   if (
     [...new Set(tokens)].some(
@@ -1543,18 +1608,8 @@ function routeWithCatalogDiagnostics(
   ) {
     return fallback("repeated_scaffolding_limit");
   }
-  const withoutContextModifiers = tokens
-    .filter((token) =>
-      !["actual", "actualmente", "ahora", "este", "momento"].includes(token),
-    )
-    .join(" ");
-  if (
-    withoutContextModifiers !== content &&
-    catalog.intents.some((intent) =>
-      intent.rules.some((rule) => rule.text === withoutContextModifiers),
-    )
-  ) {
-    return fallback("legacy_extension_guard");
+  if (isLegacyCatalogContextExtension(catalog, content, tokens)) {
+    return fallback("legacy_catalog_context_compatibility_guard");
   }
   return weightedDiagnostics(catalog, input, content, tokens);
 }

@@ -1395,6 +1395,7 @@
                 "por",
                 "esta",
                 "estan",
+                "es",
                 "tiene",
                 "actual",
                 "actualmente",
@@ -1405,6 +1406,31 @@
               ],
               "scaffolding_phrases": [
                 "por favor"
+              ],
+              "social_compatibility": "mixed_social_terms_require_explicit_request_term",
+              "social_compatibility_terms": [
+                "hola",
+                "gracias"
+              ],
+              "social_request_terms": [
+                "quiero",
+                "quisiera",
+                "podrias",
+                "puedes",
+                "puedo",
+                "muestrame",
+                "mostrarme",
+                "dame",
+                "dime",
+                "necesito",
+                "enseñame",
+                "decirme",
+                "decir",
+                "saber",
+                "revisar",
+                "conocer",
+                "consultar",
+                "ver"
               ]
             }
           }
