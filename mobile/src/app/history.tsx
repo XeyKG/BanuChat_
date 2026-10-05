@@ -209,11 +209,15 @@ export default function HistoryScreen() {
               <View style={styles.list}>
                 {conversations.map((conversation, index) => (
                   <FadeIn key={conversation.conversation_id} delay={80 + index * 60}>
-                    <PressableScale
-                      accessibilityRole="button"
-                      accessibilityLabel={`Abrir conversación del ${formatStartedAt(conversation.started_at)}`}
-                      onPress={() => openConversation(conversation.conversation_id)}>
-                      <View style={styles.conversationCard}>
+                    <View style={styles.conversationCard}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Abrir conversación del ${formatStartedAt(conversation.started_at)}`}
+                        onPress={() => openConversation(conversation.conversation_id)}
+                        style={({ pressed }) => [
+                          styles.openConversationButton,
+                          pressed && styles.pressed,
+                        ]}>
                         <View style={styles.conversationIcon}>
                           <ChatGlyph color={colors.accent} size={20} />
                         </View>
@@ -229,26 +233,26 @@ export default function HistoryScreen() {
                                 : `${conversation.message_count} mensajes`}
                           </Text>
                         </View>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel="Eliminar conversación"
-                          accessibilityState={{ busy: deletingId === conversation.conversation_id }}
-                          disabled={deletingId !== null}
-                          hitSlop={8}
-                          onPress={() => confirmDelete(conversation)}
-                          style={({ pressed }) => [
-                            styles.deleteButton,
-                            pressed && styles.pressed,
-                          ]}>
-                          {deletingId === conversation.conversation_id ? (
-                            <ActivityIndicator color={colors.error} size="small" />
-                          ) : (
-                            <TrashGlyph color={colors.error} size={17} />
-                          )}
-                        </Pressable>
-                        <ChevronGlyph color={colors.muted} size={15} />
-                      </View>
-                    </PressableScale>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Eliminar conversación"
+                        accessibilityState={{ busy: deletingId === conversation.conversation_id }}
+                        disabled={deletingId !== null}
+                        hitSlop={8}
+                        onPress={() => confirmDelete(conversation)}
+                        style={({ pressed }) => [
+                          styles.deleteButton,
+                          pressed && styles.pressed,
+                        ]}>
+                        {deletingId === conversation.conversation_id ? (
+                          <ActivityIndicator color={colors.error} size="small" />
+                        ) : (
+                          <TrashGlyph color={colors.error} size={17} />
+                        )}
+                      </Pressable>
+                      <ChevronGlyph color={colors.muted} size={15} />
+                    </View>
                   </FadeIn>
                 ))}
               </View>
@@ -333,13 +337,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingRight: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
     ...shadows.soft,
+  },
+  openConversationButton: {
+    flex: 1,
+    minHeight: 74,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingLeft: spacing.md,
+    paddingVertical: spacing.sm,
   },
   conversationIcon: {
     width: 42,

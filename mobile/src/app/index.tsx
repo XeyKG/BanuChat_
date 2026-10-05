@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/app-button';
 import { BrandMark, FadeIn } from '@/ui/animated';
 import { CalendarGlyph, ChartGlyph, SparkGlyph } from '@/ui/icons';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, layout, shadows, spacing, typography } from '@/ui/tokens';
 
 interface OnboardingSlide {
   key: string;
@@ -30,7 +30,7 @@ const SLIDES: OnboardingSlide[] = [
     key: 'assistant',
     eyebrow: 'Asistente académico',
     title: 'Pregunta. Banu responde con evidencia.',
-    body: 'BanuChat consulta el material del programa y responde con citas verificables: cada respuesta declara de dónde sale.',
+    body: 'BanuChat consulta el material disponible y muestra las fuentes asociadas cuando corresponde.',
     accent: colors.accent,
     accentSoft: colors.accentSoft,
   },

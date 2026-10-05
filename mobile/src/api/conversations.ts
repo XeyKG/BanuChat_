@@ -1,5 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
-import type { Citation } from '@/api/messages';
+import { isCitation, type Citation } from '@/api/messages';
 
 export interface CreatedConversation {
   conversation_id: string;
@@ -57,12 +57,10 @@ function isNonemptyString(value: unknown): value is string {
 function parseCreatedConversation(value: unknown): CreatedConversation {
   if (
     !isRecord(value) ||
-    typeof value.conversation_id !== 'string' ||
-    value.conversation_id.length === 0 ||
-    typeof value.profile_key !== 'string' ||
-    typeof value.profile_alias !== 'string' ||
-    value.profile_alias.trim().length === 0 ||
-    typeof value.created_at !== 'string'
+    !isNonemptyString(value.conversation_id) ||
+    !isNonemptyString(value.profile_key) ||
+    !isNonemptyString(value.profile_alias) ||
+    !isNonemptyString(value.created_at)
   ) {
     throw new Error('CREATE_CONVERSATION_INVALID_RESPONSE');
   }
@@ -98,30 +96,40 @@ function parseConversationSummary(value: unknown): ConversationSummary {
 }
 
 function parseHistoryMessage(value: unknown): HistoryMessage {
-  if (!isRecord(value) || !isNonemptyString(value.message_id) || !isNonemptyString(value.content)) {
+  if (!isRecord(value)) {
     throw new Error('CONVERSATION_INVALID_RESPONSE');
   }
 
-  if (value.role === 'user') {
+  if (
+    value.role === 'user' &&
+    isNonemptyString(value.message_id) &&
+    isNonemptyString(value.content) &&
+    isNonemptyString(value.created_at)
+  ) {
     return {
       message_id: value.message_id,
       role: 'user',
       content: value.content,
-      created_at: typeof value.created_at === 'string' ? value.created_at : '',
+      created_at: value.created_at,
     };
   }
 
-  if (value.role === 'assistant') {
-    const citations: Citation[] = Array.isArray(value.citations)
-      ? (value.citations as Citation[])
-      : [];
+  if (
+    value.role === 'assistant' &&
+    isNonemptyString(value.message_id) &&
+    isNonemptyString(value.content) &&
+    isNonemptyString(value.created_at) &&
+    typeof value.insufficient_evidence === 'boolean' &&
+    Array.isArray(value.citations) &&
+    value.citations.every(isCitation)
+  ) {
     return {
       message_id: value.message_id,
       role: 'assistant',
       content: value.content,
-      created_at: typeof value.created_at === 'string' ? value.created_at : '',
-      insufficient_evidence: value.insufficient_evidence === true,
-      citations,
+      created_at: value.created_at,
+      insufficient_evidence: value.insufficient_evidence,
+      citations: value.citations,
     };
   }
 
@@ -132,6 +140,7 @@ function parseConversationDetail(value: unknown): ConversationDetail {
   if (
     !isRecord(value) ||
     !isNonemptyString(value.conversation_id) ||
+    !isNonemptyString(value.started_at) ||
     !isRecord(value.profile) ||
     !isNonemptyString(value.profile.profile_key) ||
     !isNonemptyString(value.profile.alias) ||
@@ -142,7 +151,7 @@ function parseConversationDetail(value: unknown): ConversationDetail {
 
   return {
     conversation_id: value.conversation_id,
-    started_at: typeof value.started_at === 'string' ? value.started_at : '',
+    started_at: value.started_at,
     profile: { profile_key: value.profile.profile_key, alias: value.profile.alias },
     messages: value.messages.map(parseHistoryMessage),
   };

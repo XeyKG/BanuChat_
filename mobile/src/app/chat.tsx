@@ -27,15 +27,20 @@ import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
+type ConversationState = 'loading' | 'ready' | 'error' | 'profile_mismatch';
+interface ConversationLoadResult {
+  requestKey: string | null;
+  state: ConversationState;
+}
 
 const CHAT_INTRODUCTION =
   'Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?';
 
 const SUGGESTIONS = [
-  '¿Cuál es mi progreso actual?',
-  '¿Qué eventos hay en los próximos días?',
-  '¿Hay anuncios nuevos?',
-  '¿Qué dice el material sobre el programa?',
+  '¿Cuál es mi progreso?',
+  'Eventos de esta semana',
+  '¿Qué anuncios hay?',
+  '¿Qué puedes hacer?',
 ];
 
 const CHARACTER_LIMIT = 4000;
@@ -55,7 +60,11 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const isMountedRef = useRef(true);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [conversationLoadResult, setConversationLoadResult] = useState<ConversationLoadResult>({
+    requestKey: null,
+    state: 'loading',
+  });
+  const [conversationRetryCount, setConversationRetryCount] = useState(0);
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<SendError>(null);
@@ -72,30 +81,58 @@ export default function ChatScreen() {
 
   const conversationId = singleParam(params.conversation_id);
   const isConversationValid = conversationId !== null && UUID_PATTERN.test(conversationId);
+  const activeProfileKey = activeProfile?.profile_key ?? null;
+  const conversationRequestKey =
+    isConversationValid && conversationId !== null && activeProfileKey !== null
+      ? `${activeProfileKey}:${conversationId}:${conversationRetryCount}`
+      : null;
+  const conversationState =
+    conversationRequestKey !== null &&
+    conversationLoadResult.requestKey === conversationRequestKey
+      ? conversationLoadResult.state
+      : 'loading';
 
   useEffect(() => {
-    if (!isConversationValid || conversationId === null) return;
+    if (
+      !isConversationValid ||
+      conversationId === null ||
+      activeProfileKey === null ||
+      conversationRequestKey === null
+    ) {
+      return;
+    }
 
     let isMounted = true;
     void getConversation(conversationId)
       .then((detail) => {
         if (!isMounted) return;
+        if (detail.profile.profile_key !== activeProfileKey) {
+          setMessages([]);
+          setConversationLoadResult({
+            requestKey: conversationRequestKey,
+            state: 'profile_mismatch',
+          });
+          return;
+        }
         setMessages(detail.messages);
-        setIsLoadingHistory(false);
+        setConversationLoadResult({ requestKey: conversationRequestKey, state: 'ready' });
       })
       .catch(() => {
         if (!isMounted) return;
-        setMessages([]);
-        setIsLoadingHistory(false);
+        setConversationLoadResult({ requestKey: conversationRequestKey, state: 'error' });
       });
 
     return () => {
       isMounted = false;
     };
-  }, [conversationId, isConversationValid]);
+  }, [activeProfileKey, conversationId, conversationRequestKey, isConversationValid]);
 
   function returnHome() {
     router.replace('/home');
+  }
+
+  function retryConversationLoad() {
+    setConversationRetryCount((count) => count + 1);
   }
 
   if (activeProfile === null) return null;
@@ -116,12 +153,19 @@ export default function ChatScreen() {
   const activeConversationId = conversationId;
   const characterCount = Array.from(content).length;
   const isContentValid = content.trim().length > 0 && characterCount <= CHARACTER_LIMIT;
-  const isConversationLocked = sendError === 'uncertain' || sendError === 'invalid_response';
-  const showEmptyState = !isLoadingHistory && messages.length === 0;
+  const isConversationLocked =
+    conversationState !== 'ready' || sendError === 'uncertain' || sendError === 'invalid_response';
+  const showEmptyState = conversationState === 'ready' && messages.length === 0;
 
   async function submitMessage(text?: string) {
     const outgoing = (text ?? content).trim();
-    if (outgoing.length === 0 || characterCount > CHARACTER_LIMIT || isSending || isConversationLocked) {
+    if (
+      conversationState !== 'ready' ||
+      outgoing.length === 0 ||
+      characterCount > CHARACTER_LIMIT ||
+      isSending ||
+      isConversationLocked
+    ) {
       return;
     }
 
@@ -186,6 +230,43 @@ export default function ChatScreen() {
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
           <View style={styles.messageColumn}>
+            {conversationState === 'loading' && (
+              <View accessibilityLiveRegion="polite" style={styles.conversationStateCard}>
+                <Text style={styles.conversationStateText}>Cargando conversación...</Text>
+              </View>
+            )}
+
+            {conversationState === 'error' && (
+              <View accessibilityRole="alert" style={styles.conversationStateCard}>
+                <Text style={styles.conversationStateTitle}>
+                  No fue posible cargar la conversación
+                </Text>
+                <View style={styles.conversationStateActions}>
+                  <AppButton label="Reintentar" onPress={retryConversationLoad} />
+                  <AppButton label="Volver al inicio" onPress={returnHome} variant="secondary" />
+                </View>
+              </View>
+            )}
+
+            {conversationState === 'profile_mismatch' && (
+              <View accessibilityRole="alert" style={styles.conversationStateCard}>
+                <Text style={styles.conversationStateTitle}>
+                  Esta conversación pertenece a otro perfil de demostración
+                </Text>
+                <Text style={styles.conversationStateText}>
+                  Selecciona la conversación desde el historial del perfil activo.
+                </Text>
+                <View style={styles.conversationStateActions}>
+                  <AppButton label="Volver al inicio" onPress={returnHome} />
+                  <AppButton
+                    label="Ir al historial"
+                    onPress={() => router.replace('/history')}
+                    variant="secondary"
+                  />
+                </View>
+              </View>
+            )}
+
             {showEmptyState && (
               <View style={styles.emptyState}>
                 <FadeIn>
@@ -203,6 +284,8 @@ export default function ChatScreen() {
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Sugerencia: ${suggestion}`}
+                        accessibilityState={{ disabled: conversationState !== 'ready' }}
+                        disabled={conversationState !== 'ready'}
                         onPress={() => setContent(suggestion)}
                         style={({ pressed }) => [
                           styles.suggestionChip,
@@ -216,7 +299,7 @@ export default function ChatScreen() {
               </View>
             )}
 
-            {messages.map((message) =>
+            {conversationState === 'ready' && messages.map((message) =>
               message.role === 'user' ? (
                 <BubbleIn key={message.message_id} style={styles.userRow}>
                   <View style={styles.userBubble}>
@@ -246,7 +329,7 @@ export default function ChatScreen() {
               ),
             )}
 
-            {isSending && (
+            {conversationState === 'ready' && isSending && (
               <BubbleIn style={styles.assistantRow}>
                 <View style={styles.assistantAvatar}>
                   <BrandMark size={30} />
@@ -407,6 +490,34 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.7 },
   messageList: { flexGrow: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.lg },
   messageColumn: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', gap: spacing.md },
+  conversationStateCard: {
+    alignSelf: 'center',
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignItems: 'center',
+    gap: spacing.md,
+    marginVertical: spacing.xl,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.xl,
+    backgroundColor: colors.surface,
+    ...shadows.soft,
+  },
+  conversationStateTitle: {
+    color: colors.ink,
+    fontSize: typography.body,
+    lineHeight: 23,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  conversationStateText: {
+    color: colors.textSecondary,
+    fontSize: typography.small,
+    lineHeight: 21,
+    textAlign: 'center',
+  },
+  conversationStateActions: { width: '100%', gap: spacing.sm },
   emptyState: { gap: spacing.xl, paddingVertical: spacing.xl },
   emptyHero: { alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg },
   emptyMarkHalo: {

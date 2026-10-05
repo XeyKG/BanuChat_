@@ -60,18 +60,18 @@ interface PressableScaleProps extends PressableProps {
 export function PressableScale({ children, scaleTo = 0.97, style, ...rest }: PressableScaleProps) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.get() }],
   }));
 
   return (
     <Pressable
       {...rest}
       onPressIn={(event) => {
-        scale.value = withTiming(scaleTo, { duration: 110, easing: Easing.out(Easing.quad) });
+        scale.set(withTiming(scaleTo, { duration: 110, easing: Easing.out(Easing.quad) }));
         rest.onPressIn?.(event);
       }}
       onPressOut={(event) => {
-        scale.value = withTiming(1, { duration: 170, easing: Easing.out(Easing.quad) });
+        scale.set(withTiming(1, { duration: 170, easing: Easing.out(Easing.quad) }));
         rest.onPressOut?.(event);
       }}>
       <Animated.View style={[styles.stretch, animatedStyle, style]}>{children}</Animated.View>

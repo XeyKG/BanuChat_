@@ -83,12 +83,8 @@ export default function ProgressScreen() {
   }, [filter, profileKey, retryCount]);
 
   const summary = useMemo(() => {
-    if (courses.length === 0) {
-      return { average: 0, completed: 0, inProgress: 0, enrolled: 0 };
-    }
-    const total = courses.reduce((sum, course) => sum + course.progress_percent, 0);
     return {
-      average: Math.round(total / courses.length),
+      total: courses.length,
       completed: courses.filter((course) => course.status === 'completed').length,
       inProgress: courses.filter((course) => course.status === 'in_progress').length,
       enrolled: courses.filter((course) => course.status === 'enrolled').length,
@@ -153,8 +149,8 @@ export default function ProgressScreen() {
               <View style={styles.summaryCard}>
                 <View aria-hidden style={styles.summaryGlow} />
                 <View style={styles.summaryMain}>
-                  <Text style={styles.summaryLabel}>Promedio de avance</Text>
-                  <Text style={styles.summaryValue}>{summary.average}%</Text>
+                  <Text style={styles.summaryLabel}>Resumen del perfil</Text>
+                  <Text style={styles.summaryValue}>{summary.total} cursos</Text>
                 </View>
                 <View style={styles.summaryStats}>
                   <View style={styles.summaryStat}>

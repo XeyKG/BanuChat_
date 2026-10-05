@@ -74,23 +74,28 @@ function isCitationSourceKind(value: unknown): value is CitationSourceKind {
   );
 }
 
+export function isCitation(value: unknown): value is Citation {
+  return (
+    isRecord(value) &&
+    typeof value.index === 'number' &&
+    Number.isInteger(value.index) &&
+    value.index >= 0 &&
+    isCitationSourceKind(value.source_kind) &&
+    isNonemptyString(value.label) &&
+    isNonemptyString(value.locator) &&
+    isNonemptyString(value.release_id) &&
+    isNullableString(value.document_version_id) &&
+    isNullableString(value.artifact_url)
+  );
+}
+
 function parseCitation(value: unknown): Citation {
-  if (
-    !isRecord(value) ||
-    !Number.isInteger(value.index) ||
-    (value.index as number) < 0 ||
-    !isCitationSourceKind(value.source_kind) ||
-    !isNonemptyString(value.label) ||
-    !isNonemptyString(value.locator) ||
-    !isNonemptyString(value.release_id) ||
-    !isNullableString(value.document_version_id) ||
-    !isNullableString(value.artifact_url)
-  ) {
+  if (!isCitation(value)) {
     throw new MessageRequestError('invalid_response');
   }
 
   return {
-    index: value.index as number,
+    index: value.index,
     source_kind: value.source_kind,
     label: value.label,
     locator: value.locator,
