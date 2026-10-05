@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { createConversation } from '@/api/conversations';
 import { useSession } from '@/session/session-context';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
-import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, SparkGlyph } from '@/ui/icons';
+import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, DocGlyph, SparkGlyph } from '@/ui/icons';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
 interface QuickActionProps {
@@ -14,7 +14,7 @@ interface QuickActionProps {
   description: string;
   tint: string;
   tintSoft: string;
-  icon: 'calendar' | 'chart' | 'clock';
+  icon: 'calendar' | 'chart' | 'clock' | 'doc';
   onPress: () => void;
   disabled: boolean;
   delay: number;
@@ -34,6 +34,7 @@ function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabl
             {icon === 'calendar' && <CalendarGlyph color={tint} size={22} />}
             {icon === 'chart' && <ChartGlyph color={tint} size={22} />}
             {icon === 'clock' && <ClockGlyph color={tint} size={22} />}
+            {icon === 'doc' && <DocGlyph color={tint} size={22} />}
           </View>
           <View style={styles.quickCopy}>
             <Text style={styles.quickTitle}>{title}</Text>
@@ -172,6 +173,16 @@ export default function HomeScreen() {
               delay={340}
             />
             <QuickAction
+              title="Anuncios"
+              description="Novedades de la release sintética actual."
+              tint={colors.amber}
+              tintSoft={colors.amberSoft}
+              icon="doc"
+              onPress={() => router.push('./announcements')}
+              disabled={isStartingChat}
+              delay={400}
+            />
+            <QuickAction
               title="Historial"
               description="Tus conversaciones anteriores."
               tint={colors.accent}
@@ -179,11 +190,11 @@ export default function HomeScreen() {
               icon="clock"
               onPress={() => router.push('/history')}
               disabled={isStartingChat}
-              delay={400}
+              delay={460}
             />
           </View>
 
-          <FadeIn delay={460}>
+          <FadeIn delay={520}>
             <View style={styles.sessionSection}>
               <Text style={styles.sessionTitle}>Sesión de demostración</Text>
               <View style={styles.sessionActions}>

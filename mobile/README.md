@@ -32,7 +32,8 @@ Abre el proyecto con Expo Go en el teléfono Android.
 Implementado: Expo SDK 57, React Native + TypeScript, Expo Router, URL base de API
 configurable, sesión local para perfiles sintéticos, Home, navegación protegida,
 creación de conversación al abrir Chat, chat con citas, estados de carga y error,
-presentación local de Banu al iniciar el chat, calendario y progreso de cursos.
+presentación local de Banu al iniciar el chat, calendario, progreso de cursos,
+historial conversacional visible y consulta directa de anuncios sintéticos.
 M1–M5, M6.1, M6.1.1 y M6.1.2 fueron validados manualmente con Expo Go en un
 dispositivo Android físico. Véase el [checkpoint de evidencia](../eval/integration/results/j3-checkpoint-2026-10-03.md).
 M6.2 aplica consistencia y pulido visual al flujo existente sin ampliar su
@@ -48,6 +49,5 @@ En un despliegue institucional, la selección de perfiles sintéticos deberá
 sustituirse por un mecanismo de autenticación autorizado por la institución,
 a partir del cual el backend derive la identidad y permisos del usuario.
 
-Siguen pendientes la autenticación y autorización de usuario final, el historial
-conversacional visible en la UI, las notificaciones push y la distribución/operación
-en producción.
+Siguen pendientes la autenticación y autorización de usuario final, las
+notificaciones push y la distribución/operación en producción.
