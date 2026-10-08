@@ -125,8 +125,8 @@ Se rechazan segmentos `.`/`..`, separadores repetidos o finales y saltos de lín
 La ruta no empieza por `/data/synthetic`: es relativa a esa raíz.
 
 No son rutas absolutas del host, enlaces web, esquemas de archivo ni identificadores
-de red libres. MCP no construye ni acepta un sistema de enlaces; la futura REST
-resolverá el artefacto usando `document_version_id`, con controles de acceso y ruta.
+de red libres. MCP no construye ni acepta un sistema de enlaces; la API REST
+resuelve el artefacto usando `document_version_id`, con controles de acceso y ruta.
 
 La tupla release + claves de entidad + source fija la evidencia:
 para documentos, `document_version_id` y, si aplica, `chunk_id`;

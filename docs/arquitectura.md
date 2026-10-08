@@ -222,10 +222,15 @@ pendiente de diseño explícito y no se incorpora un proveedor en esta iteració
 
 ## Trazabilidad y evaluación
 
-| Objetivo | Interpretación vigente |
+Esta tabla organiza el trabajo técnico del repositorio de forma provisional y no
+constituye por sí sola una modificación aprobada de los objetivos académicos del
+anteproyecto. La alineación definitiva de OE1–OE6 con el documento académico y las
+decisiones del director del Proyecto de Grado sigue pendiente.
+
+| Objetivo | Interpretación técnica de trabajo |
 | --- | --- |
 | OE1 | RAG sobre corpus sintético: faithfulness ≥ 0,80; context precision ≥ 0,80; context recall ≥ 0,75; answer relevancy ≥ 0,80; MRR ≥ 0,70. |
-| OE2 reformulado | Ingesta de revisión sintética aprobada: objetivo <24h desde disponibilidad para ingesta y éxito >90 %, no medidos; separar espera y duración trigger→publicación del trabajo humano previo. |
+| OE2 — propuesta técnica provisional | Ingesta de revisión sintética aprobada: objetivo <24h desde disponibilidad para ingesta y éxito >90 %, no medidos; separar espera y duración trigger→publicación del trabajo humano previo. |
 | OE3 | Selección controlada y dinámica de herramientas MCP por el agente. |
 | OE4 | Orquestación E2E: publicación atómica, trazabilidad, sin pérdida/mezcla de items y current preservada ante fallos; todos los casos críticos deben cumplir lo esperado. Duración observada sin nuevo umbral. Se descarta la sincronización independiente de 30 min; redacción académica pendiente de actualización. |
 | OE5 | SUS promedio > 70/100, ningún resultado < 50/100 y completación de tareas > 85 %. |

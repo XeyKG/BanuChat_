@@ -25,8 +25,8 @@ recién migrada, como propietario de la migración. No prueba permisos de roles 
 Los fixtures SQL son datos efímeros de prueba, no corpus funcional ni un seed de ingesta.
 Sus nombres llevan `SYNTHETIC TEST`; revisiones, rutas y checksums son simulados y no
 afirman corresponder a archivos existentes. No se modifica `/data/synthetic` ni se leen
-archivos, APIs, modelos o fuentes institucionales. Una ingesta funcional futura debe
-validar sus propios archivos versionados; esta suite no sustituye esa validación.
+archivos, APIs, modelos o fuentes institucionales. La ingesta funcional implementada
+valida sus propios archivos versionados; esta suite no sustituye esa validación.
 
 Los vectores de 1024 dimensiones se construyen con las bases ortogonales e1/e2, sin IA.
 Toda la suite usa `BEGIN ISOLATION LEVEL READ COMMITTED` y termina en `ROLLBACK`:
