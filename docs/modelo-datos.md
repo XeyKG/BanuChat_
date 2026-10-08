@@ -1,5 +1,13 @@
 # Modelo de datos conceptual y lógico del MVP
 
+Nota de contexto: este documento conserva el diseño lógico aprobado y las
+revisiones históricas de Fase 1; sus referencias a aplicaciones, ingesta o modelos
+pendientes describen esa fase. La implementación posterior de ingesta, REST,
+router, Document RAG y mobile se documenta en [arquitectura](arquitectura.md),
+[backend](../backend/README.md) y [eval](../eval/README.md). La concreción física
+vigente está en [infra/db](../infra/db/README.md). Esta nota no altera decisiones
+del modelo ni acredita nuevamente pruebas históricas.
+
 Estado: modelo lógico aprobado, Fase 1. Su traducción al esquema físico inicial fue
 realizada; la migración inicial y la suite A–K fueron ejecutadas en PostgreSQL local
 desechable. Esto no valida todavía ingesta, backend, roles runtime ni concurrencia

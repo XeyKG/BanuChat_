@@ -1,16 +1,24 @@
-# Backend
+# Backend de BanuChat
 
-Frontera síncrona diseñada: Mobile → REST Backend API → Intent Router → fast path o Agent/RAG.
+El backend implementa la frontera síncrona **Mobile → REST Backend API → Intent
+Router determinista → servicios/renderers o Document RAG directo**. La app consume
+solo REST. N8N queda fuera de esta ruta y ya orquesta la ingesta manual asíncrona.
 
-- `api/`: REST público consumido por la app móvil y especificación del Intent Router.
-- `rag/`: ingesta, chunking, embeddings, retrieval y lógica futura relacionada.
-- `mcp-server/`: tools internas para Agent/RAG, que actúa como cliente MCP.
+- [api/](api/README.md): servidor REST, Intent Router `1.2.0-draft`, servicios de
+  progreso/calendario/anuncios, renderers estructurados y estáticos, retrieval,
+  generación Document RAG, historial y artefactos documentales.
+- [rag/](rag/README.md): core de ingesta TypeScript, preflight, chunking, embeddings,
+  publicación, recovery/retry explícitos, controles de aprobación/procedencia y
+  servicio HTTP interno con startup. Su recorrido manual N8N fue validado en N3.
+  El flujo conversacional Document RAG está implementado en `api/`.
+- [mcp-server/](mcp-server/README.md): contrato congelado de seis tools; todavía no
+  existe servidor MCP ejecutable ni tools integradas al fallback.
 
-Fast path y MCP reutilizarán Application Services. La app no consume MCP ni N8N
-directamente; N8N queda fuera del camino síncrono y orquestará la ingesta asíncrona
-de releases sintéticas completas.
+PostgreSQL + pgvector contiene la representación procesada de `/data/synthetic`.
+Ollama es el runtime local: `qwen3-embedding:0.6b` genera embeddings de 1024
+dimensiones; PostgreSQL/pgvector realiza búsqueda exacta por coseno;
+`qwen3:4b-instruct` genera las respuestas Document RAG.
 
-PostgreSQL contiene representaciones procesadas de `/data/synthetic`.
-Esta fase define el diseño; no existen implementaciones de estas aplicaciones.
-El proveedor/modelo del LLM generador sigue pendiente. Embeddings del MVP está fijado
-en Ollama local + `qwen3-embedding:0.6b`, 1024 dimensiones y `cosine`.
+La [arquitectura objetivo](../docs/arquitectura.md) conserva Agent/ReAct como cliente
+MCP y la reutilización de servicios de aplicación por sus tools. Su implementación
+e integración siguen pendientes. No existe integración institucional.

@@ -34,8 +34,10 @@ configurable, sesión local para perfiles sintéticos, Home, navegación protegi
 creación de conversación al abrir Chat, chat con citas, estados de carga y error,
 presentación local de Banu al iniciar el chat, calendario, progreso de cursos,
 historial conversacional visible y consulta directa de anuncios sintéticos.
-M1–M5, M6.1, M6.1.1 y M6.1.2 fueron validados manualmente con Expo Go en un
-dispositivo Android físico. Véase el [checkpoint de evidencia](../eval/integration/results/j3-checkpoint-2026-10-03.md).
+El [checkpoint histórico J3](../eval/integration/results/j3-checkpoint-2026-10-03.md)
+documenta las validaciones manuales M1–M5 con Expo Go en Android físico; no cubre
+historial y anuncios posteriores. Este README registra además las validaciones
+manuales de M6.1, M6.1.1 y M6.1.2, sin atribuirlas a J3.
 M6.2 aplica consistencia y pulido visual al flujo existente sin ampliar su
 alcance funcional; todavía requiere validación manual en el dispositivo físico.
 
@@ -51,9 +53,11 @@ reconciliar un turno confirmado o decidir explícitamente continuar si todavía 
 aparece. Esta recuperación permanece en memoria y no ofrece idempotencia durable ni
 una garantía de procesamiento exactamente una vez.
 
-En un despliegue institucional, la selección de perfiles sintéticos deberá
-sustituirse por un mecanismo de autenticación autorizado por la institución,
-a partir del cual el backend derive la identidad y permisos del usuario.
+La selección de perfiles conserva el alcance de demostración local con corpus
+sintético. Una futura autenticación de usuario final requiere diseño explícito;
+no hay despliegue, identidad ni integración institucional previstos en el alcance
+vigente. El backend actual usa Intent Router y Document RAG directo; Agent/ReAct
+y MCP siguen pendientes como arquitectura objetivo.
 
 Siguen pendientes la autenticación y autorización de usuario final, las
 notificaciones push y la distribución/operación en producción.

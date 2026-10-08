@@ -1,7 +1,8 @@
 # MCP Server
 
-Interfaz interna de herramientas controladas sobre una misma instancia PostgreSQL
-con pgvector. El agente actúa como cliente MCP; la app consume únicamente REST.
+Contrato de una interfaz interna prevista sobre una misma instancia PostgreSQL
+con pgvector. En la arquitectura objetivo, Agent/ReAct será cliente MCP; la app
+consume únicamente REST. El fallback actual ejecuta Document RAG directo sin MCP.
 
 ## Contrato de interfaces 2.0.0-draft
 
@@ -16,6 +17,8 @@ Las seis tools son de solo lectura sobre la release vigente del corpus sintétic
 devuelven release_id y procedencia reproducible. El perfil de demostración procede
 del contexto controlado del backend, no de un argumento del agente. No hay fuentes
 externas, selección histórica ni escrituras de corpus. El calendario procede de
-`/data/synthetic/calendars`. La futura REST resolverá los archivos para la app.
+`/data/synthetic/calendars`. La API REST ya resuelve artefactos documentales para la app.
 
-No se han implementado herramientas ni seleccionado el transporte o la autenticación local.
+Solo existen los contratos: todavía no hay servidor MCP ejecutable ni implementación
+de estas seis tools. Su transporte, autenticación interna e integración con
+Agent/ReAct siguen pendientes; los servicios REST existentes no equivalen a tools MCP.

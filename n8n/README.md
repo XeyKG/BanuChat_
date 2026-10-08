@@ -16,7 +16,8 @@ posee preflight, relaciones, parser, chunking, embeddings, DML, retry y publicac
 No SQL manual ni reglas complejas en nodos Code. No Execute Command ni webhook público.
 
 El primer workflow implementado usa solo trigger manual. Retry y scheduled quedan
-fuera de N2. Execute recibe referencia de aprobación, `source_git_revision` completo,
+pendientes como workflows N8N, junto con recover; el core/HTTP ya ofrece retry y
+recover explícitos. Execute recibe referencia de aprobación, `source_git_revision` completo,
 `pipeline_version` y `workflow_ref`.
 Salida: resultado, identidad de release, run/attempt y contadores por estado; errores
 saneados. Nunca paths libres, credenciales, SQL o corpus completo en los payloads.
@@ -35,7 +36,8 @@ camino manual local con `/execute`; `workflow_ref` referencia la definición bas
 un execution ID ni un objeto N8N garantizado idéntico byte por byte.
 Los logs solo contienen correlación, estados, tiempos y códigos técnicos seguros.
 
-N8N queda fuera del camino Mobile → REST → Intent Router → fast path / Agent-RAG.
+N8N queda fuera del camino actual Mobile → REST → Intent Router → servicios/renderers
+o Document RAG directo. Agent/ReAct y MCP son arquitectura objetivo pendiente.
 OE2 mantiene sus objetivos no medidos; OE4 verifica orquestación E2E y publicación
 atómica, no una latencia de calendario de 30 minutos. Véase el
 [plan de pruebas](../eval/ingestion/plan.md). Véanse [N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md)

@@ -1,19 +1,20 @@
 # Infraestructura local
 
-Configuración de diseño para desarrollo y demostraciones locales. El Compose declara
+Configuración para desarrollo y demostraciones locales, usada en N0/N3. El Compose declara
 una instancia PostgreSQL que incluye pgvector y un servicio N8N separado. No incluye
 backend ni app móvil, y no monta ni ejecuta migraciones.
 
 ## Variables y seguridad
 
 `/.env.example` documenta las variables. Usuario, contraseña y clave de cifrado se
-dejan vacíos y deben definirse privadamente antes de una futura ejecución autorizada.
+dejan vacíos y deben definirse privadamente para cada ejecución local.
 Compose exige los valores sensibles y solo publica puertos en `127.0.0.1`.
-La futura ejecución desde la raíz debe cargar explícitamente `.env` mediante
-`--env-file .env`, como figura en `AGENTS.md`.
+La ejecución desde la raíz debe cargar explícitamente `.env` mediante
+`docker compose --env-file .env -f infra/docker-compose.yml up -d`.
 
-No se ha diseñado aún la autenticación local de BanuChat. La clave de cifrado de N8N
-protege su configuración; no sustituye autenticación.
+La autenticación de usuario final sigue pendiente. El HTTP interno de ingesta ya
+usa un Bearer token de servicio; no autentica usuarios de la app. La clave de
+cifrado de N8N protege su configuración y no sustituye esas credenciales.
 
 ## Imágenes y persistencia
 
@@ -21,10 +22,9 @@ protege su configuración; no sustituye autenticación.
   Se conserva la imagen ya configurada `pgvector/pgvector:pg16` como única instancia,
   manteniendo PostgreSQL 16. Esta etiqueta conserva la versión mayor, pero no fija
   un parche ni un digest; el bloqueo exacto queda pendiente de validación del entorno.
-- N8N pasa de `n8nio/n8n:latest` a `n8nio/n8n:2.40.5`, release publicada el
-  21 de septiembre de 2026, identificada como Latest en la
-  [publicación oficial](https://github.com/n8n-io/n8n/releases/tag/n8n%402.40.5).
-  Es una referencia concreta para la siguiente validación; no se descargó ni ejecutó.
+- N8N está fijado en `n8nio/n8n:2.40.5`; fue levantado localmente con este Compose.
+  N0 validó preparación y N3 ejecutó el workflow manual E2E. La versión observada
+  en esas evidencias no afirma cuál es la versión más reciente publicada.
 - Se conserva el volumen lógico `pgvector_data` y el de N8N. Quitar la declaración
   del antiguo `postgres_data` no borra ni migra un volumen existente. Antes de un
   futuro arranque debe comprobarse si hay volúmenes previos: cambiar variables de
@@ -36,6 +36,15 @@ procesada. La imagen PostgreSQL incluye pgvector y la migración vigente habilit
 Compose no ejecuta automáticamente la migración: una base nueva sin aplicar
 `001_initial_schema.sql` no debe suponerse migrada.
 
-La conexión N8N → componente de ingesta mediante HTTP interno tiene diseño aprobado
-en el [ADR 0005](../docs/adr/0005-ingesta-reproducible-n8n.md), pero todavía no está
-implementada. No hay Google Sheets ni sistemas institucionales dentro del MVP.
+La conexión N8N → componente TypeScript de ingesta mediante HTTP interno está
+implementada: startup y `/status` se validaron en
+[N0](../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md), y
+el workflow manual importado ejecutó `/status` → `/execute` → publicación
+`ready/current`, seguido de `already_current`, en
+[N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
+N8N orquesta; validación, procesamiento y embeddings pertenecen a `backend/rag`.
+
+N3 usó Windows + Docker Desktop y `host.docker.internal`; no acredita una topología
+portable. Retry/recover/scheduled N8N y permisos/roles mínimos siguen pendientes.
+Backend, ingesta y mobile no están containerizados por este Compose; Ollama también
+se ejecuta por separado. No hay Google Sheets, integración o despliegue institucional.

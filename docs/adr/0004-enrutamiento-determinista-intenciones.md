@@ -2,10 +2,14 @@
 
 Estado: decisión arquitectónica aceptada por autorización explícita del proyecto.
 Catálogo y reglas iniciales: `1.0.0-draft`. Este ADR conserva la decisión
-arquitectónica original. Estado actual: router determinista implementado y
-productivo; fast paths despachados para progreso, calendario y anuncios; fallback
-Document RAG directo. Agent/ReAct y MCP interno siguen pendientes de integración.
-El refinamiento M3.1 está implementado en el catálogo `1.1.0-draft`.
+arquitectónica original. Actualización posterior: router determinista implementado
+en el prototipo, con M3.1 léxico y M3.2 ponderado; catálogo vigente `1.2.0-draft`.
+El dispatcher ejecuta progreso/calendario/anuncios y renderers estáticos de
+social/ayuda/fuera de alcance; el fallback actual es Document RAG directo con
+`qwen3:4b-instruct`. Agent/ReAct y MCP ejecutable siguen pendientes.
+Las referencias posteriores a política inicial, generación abierta y M3.1
+conservan sus etapas históricas. El detalle vigente y la evidencia M3.2 están en
+[la especificación](../enrutamiento-intenciones.md) y [eval](../../eval/README.md).
 
 ## Contexto y motivación
 

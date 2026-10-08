@@ -9,6 +9,15 @@ de UNAB/CCD. No significa que se haya ingerido a PostgreSQL ni demuestra métric
 RAG, RAGAS, rendimiento o usabilidad. No se ejecuta ingesta en este cierre.
 Universo único: **Programa Demo de Aprendizaje Digital**.
 
+Nota posterior: las frases de este README sobre no ejecutar ingesta/backend
+describen el cierre de aprobación/congelación de v1, no el runtime actual.
+Después se ingirió y validó v1 en
+[Implementación 3](../../eval/ingestion/results/implementation-3-e2e-2026-09-29.md)
+y en [N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md), que publicó una
+release `ready/current` con 76 items, 12 versiones documentales y 60 embeddings.
+La segunda ejecución manual N8N fue `already_current`. Se conservan intactos el
+contenido funcional, manifest, hashes, schemas y HUMAN_REVIEW de v1.
+
 Los **18 archivos funcionales y 76 items lógicos** identificados por manifest.json
 constituyen el contenido funcional de v1 congelado para ingesta. Cualquier cambio
 posterior de contenido debe producir una nueva revisión candidata, con validación

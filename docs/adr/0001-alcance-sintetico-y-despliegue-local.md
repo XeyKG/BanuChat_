@@ -3,6 +3,13 @@
 Fecha: 2026-09-22.
 Estado: aceptado por decisión del proyecto.
 
+Actualización posterior (documental): el contexto y decisión originales se
+conservan. ADR 0004 añadió el Intent Router; hoy REST, fast paths/renderers y
+Document RAG directo están implementados. Agent/ReAct y MCP ejecutable siguen
+como objetivo pendiente. SQL, dataset v1 y contratos REST/MCP están congelados
+según AGENTS.md; ingesta manual N8N ya fue validada en N3. El generador actual es
+`qwen3:4b-instruct` mediante Ollama. Véase [arquitectura](../arquitectura.md).
+
 ## Contexto
 
 El anteproyecto histórico describía despliegue en servidores UNAB, scraping del CCD

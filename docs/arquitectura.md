@@ -23,9 +23,9 @@ No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
 | Intent Router | Catálogo determinista: fast path seguro o fallback Document RAG directo actual; Agent/RAG permanece como objetivo. Clasifica sin LLM, embeddings ni N8N. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
 | Application Services | Lógica compartida con acceso consistente a PostgreSQL; implementada para los fast paths actuales y pendiente de reutilización por tools MCP. | `backend/api/` |
 | Agent/RAG objetivo | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; pendiente de integración en el fallback. | `backend/`, `backend/rag/` |
-| MCP Server interno objetivo | Herramientas controladas para el agente; pendiente de integración productiva con el fallback. | `backend/mcp-server/` |
+| MCP Server interno objetivo | Contrato de seis tools; servidor ejecutable e integración con Agent/ReAct pendientes. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
-| N8N | Orquesta ingesta asíncrona de releases sintéticas completas y aprobadas. | `n8n/workflows/` |
+| N8N | Workflow manual local validado en N3; orquesta ingesta asíncrona. Retry/recover/scheduled pendientes. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
 | Docker Compose local | Entorno de desarrollo y demostraciones iniciales. | `infra/docker-compose.yml` |
 
@@ -59,11 +59,12 @@ local con `qwen3-embedding:0.6b`, 1024 dimensiones y coseno
 
 El [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md) introduce el router.
 El fast path no llama a MCP ni al LLM generador; usa servicios compartidos y renderers.
-Ante ambigüedad, conflicto, texto residual o consulta compuesta se utiliza Agent/RAG.
+En este diseño objetivo, las decisiones de fallback se derivarán a Agent/ReAct;
+en el runtime actual se derivan a Document RAG directo.
 El diagrama muestra dependencias lógicas y retornos, no nuevos contenedores ni código.
 Las consultas REST directas siguen pudiendo utilizar servicios sin router ni agente.
 
-Ambas rutas citan evidencia verificable del corpus sintético, documental o estructurada,
+Las respuestas documentales y estructuradas citan evidencia verificable del corpus sintético,
 y declaran evidencia insuficiente cuando corresponda. Mantienen una release por turno.
 No presentan la simulación como información institucional vigente. Los documentos con
 `retrieval_mode=full_document` no se fragmentan ni vectorizan; se resuelven como
@@ -71,21 +72,24 @@ artefactos completos verificados por la ruta REST interna aprobada, no URLs exte
 
 ### Estado de implementación actual
 
-El vertical slice conversacional, validado inicialmente al commit
-`f47ec9e29b8c161a2c88a4eadf641dab2359a964` y comprobado después por J1 y J2,
-ejecuta este recorrido:
+El vertical slice conversacional fue validado inicialmente al commit
+`f47ec9e29b8c161a2c88a4eadf641dab2359a964` y comprobado después por J1 y J2.
+El HEAD actual incorpora además M3.1 y M3.2; catálogo `1.2.0-draft` y schema con
+`$id` de esa versión. El recorrido implementado es:
 
 ```mermaid
 flowchart LR
     mobile["Mobile App Expo / React Native"] -->|"REST"| api["Backend API"]
     api --> router["Intent Router determinista"]
     router -->|"Fast path"| fast["Progreso, calendario o anuncios"]
+    router -->|"Social, ayuda o fuera de alcance"| static["Renderer estático"]
     router -->|"Fallback documental"| rag["Document RAG directo"]
     fast --> db[("PostgreSQL + pgvector")]
     rag --> db
     rag --> ollama["Ollama local"]
     fast --> reply["Persistencia y respuesta REST"]
     rag --> reply
+    static --> reply
 ```
 
 La API expone actualmente `GET /api/v1/profiles`,
@@ -99,14 +103,27 @@ La API expone actualmente `GET /api/v1/profiles`,
 `GET /api/v1/profiles/{profile_key}/progress` y
 `GET /api/v1/announcements`.
 
-El fallback conversacional implementado hace retrieval documental exacto con
-`qwen3-embedding:0.6b`, genera con `qwen3:4b-instruct`, construye citas y persiste
-mensajes y citas. El recorrido RAG E2E real obtuvo HTTP 201.
+El dispatcher resuelve `profile_progress`, `calendar_events` y `announcements`
+con servicios de aplicación y renderers. `basic_social`, `capabilities_help` y
+`known_out_of_scope` usan renderers estáticos sin SQL de dominio ni generador.
+`course_catalog` y `document_lookup` están en el catálogo, pero el dispatcher los
+deriva a Document RAG; no tienen fast path ejecutable.
+
+Document RAG genera el embedding de la pregunta con `qwen3-embedding:0.6b` mediante
+Ollama, recupera hasta cinco fragmentos con búsqueda exacta por coseno en
+PostgreSQL + pgvector y genera con `qwen3:4b-instruct` mediante Ollama. Después
+construye citas de los fragmentos recuperados y persiste el turno. Ollama es el
+runtime de modelos; pgvector almacena y compara vectores, no genera embeddings.
+Si no hay fragmentos o el generador declara evidencia insuficiente, devuelve una
+respuesta de insuficiencia sin citas. La procedencia facilita verificación y no
+demuestra por sí sola faithfulness o exactitud. El E2E real obtuvo HTTP 201.
 
 Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback.
 Ambos siguen pendientes en la arquitectura objetivo.
 El cliente móvil M1–M5 está implementado y fue validado manualmente en Android
-físico. J1 comprobó operacionalmente la ruta REST con PostgreSQL/pgvector y Ollama
+físico. Historial y anuncios también están implementados; el estado de las etapas
+móviles posteriores y sus validaciones está en [Mobile](../mobile/README.md).
+J1 comprobó operacionalmente la ruta REST con PostgreSQL/pgvector y Ollama
 reales; J2 comprobó mediante HTTP en proceso el router real con SQL controlado y
 Document RAG simulado. Sus límites constan en el
 [checkpoint J3](../eval/integration/results/j3-checkpoint-2026-10-03.md).
@@ -115,9 +132,9 @@ Document RAG simulado. Sus límites constan en el
 
 ```mermaid
 flowchart LR
-    orchestrator["N8N: manual / retry"] -->|"HTTP privado de control"| ingestion["Componente TypeScript: implementation_revision"]
+    orchestrator["N8N: manual v1; retry/recover/scheduled pendientes"] -->|"HTTP privado de control"| ingestion["Componente TypeScript: implementation_revision"]
     source["Source checkout read-only: source_git_revision"] -->|"Bytes verificados de /data/synthetic"| ingestion
-    ingestion -->|"Embeddings de chunked"| ollama["Ollama local: Qwen3"]
+    ingestion -->|"Embeddings de chunked"| ollama["Ollama local: qwen3-embedding:0.6b"]
     ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
 ```
 
@@ -128,7 +145,7 @@ implementados. N0 validó localmente `/status`; N2 versionó e importó
 N8N 2.40.5: `not_started` llevó a `/execute` y publicó una release `ready/current`;
 la segunda ejecución fue `already_current`. Véase [evidencia N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
 El workflow permanece inactivo como automatización. Retry/recover/scheduled y una
-topología portable siguen pendientes. En la arquitectura objetivo, N8N orquesta
+topología portable siguen pendientes. En el recorrido implementado, N8N orquesta
 triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
 hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
 de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,
@@ -162,11 +179,12 @@ scheduled siguen pendientes; no se versionan secretos ni valores operacionales.
 
 ```mermaid
 flowchart TB
-    M["App móvil"] -->|"REST"| B["Backend API, Intent Router y Agent/RAG previstos"]
-    subgraph LOCAL["Equipo local: entorno previsto de Docker Compose"]
-        B -->|"Fallback MCP interno"| C["MCP Server previsto"]
-        B -->|"Fast path"| S["Servicios compartidos previstos"]
-        C --> S
+    M["App móvil Expo"] -->|"REST"| B["Backend API e Intent Router"]
+    subgraph LOCAL["Equipo local; Compose solo PostgreSQL y N8N"]
+        B -->|"Fast paths"| S["Servicios de aplicación"]
+        B -->|"Fallback actual"| R["Document RAG directo"]
+        R --> P
+        R --> O
         S --> P[("Única instancia PostgreSQL + pgvector")]
         N["N8N 2.40.5; manual v1 validado E2E localmente"] -->|"HTTP privado; status/execute"| I["Componente de ingesta backend/rag"]
         I -->|"Publicación completa"| P
@@ -213,15 +231,31 @@ pendiente de diseño explícito y no se incorpora un proveedor en esta iteració
 | OE5 | SUS promedio > 70/100, ningún resultado < 50/100 y completación de tareas > 85 %. |
 | OE6 | Estabilidad de contenedores locales, sin caídas > 5 minutos, y respuesta promedio < 5 segundos. |
 
-Estos son criterios para evaluaciones futuras; este cambio documental no acredita
-su cumplimiento experimental.
+Estos son criterios académicos, no resultados acreditados. Las evaluaciones
+versionadas cubren alcances parciales y no demuestran su cumplimiento integral.
 
-Como estado técnico, una muestra warm exploratoria de cinco solicitudes HTTP
-exitosas registró media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms
+Como antecedente histórico, G2 observó cinco solicitudes HTTP warm
+exitosas y registró media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms
 y máximo de 13511.09 ms; 0/5 estuvieron por debajo de 5000 ms. La referencia
 histórica de OE6 no se cumplió en esa muestra. No es un benchmark exhaustivo y no se
 modifica ni se acredita OE6. Véase
-[la evidencia versionada](../eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
+[la evidencia G2](../eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
+
+La evidencia posterior [L1-B](../eval/generation/results/l1-b-rag-latency-2026-10-03.md)
+observó diez POST warm secuenciales: media wall 4013.57 ms, mediana 3956.78 ms,
+mínimo 1883.42 ms y máximo/p95 nearest rank 6485.59 ms; 8/10 por debajo de 5000 ms.
+La generación tuvo media 3622.38 ms y la consulta vectorial DB 3.03 ms. Con n=10,
+el p95 coincide con el máximo y no es una estimación poblacional robusta. L1-B
+no acredita formalmente OE6 ni SLA; no se mezcla estadísticamente con G2 o L1.
+
+[K2 v1](../eval/retrieval/results/k2-v1-2026-10-01.md) midió retrieval sobre 18 casos
+chunked, top_k=5: MRR@5≈0.8519, Precision@5≈0.2222, Recall@5=Hit@5=1 (18/18 hits).
+La precisión coincide con el máximo teórico agregado del gold; no mide faithfulness,
+answer relevancy, UX ni latencia completa. Full_document quedó fuera del retrieval
+vectorial. [M3.2-D](../eval/intent-routing/results/m3-2-reserved-first-run.md) obtuvo
+14/14 route correct y exact correct en `reserved_primary`, cero fast paths
+inesperados (0 %). Todos esos casos eran negativos/fallback: no demuestra accuracy
+poblacional, recall positivo ni generalización. Véase [eval](../eval/README.md).
 
 ## Estado validado y trabajo pendiente
 
@@ -251,13 +285,14 @@ se conserva hasta disponer de implementación validada.
   `already_current` ([evidencia](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)).
   Retry/recover/scheduled, topología futura y permisos/roles mínimos siguen pendientes.
 - Consulta implementada: Intent Router determinista, fast paths de progreso,
-  calendario y anuncios, los tres endpoints REST descritos arriba, retrieval exacto,
+  calendario y anuncios, renderers social/ayuda/fuera de alcance, M3.1/M3.2,
+  los endpoints REST descritos arriba, retrieval exacto,
   Document RAG directo con generación Ollama, citas y persistencia; vertical slice
   RAG E2E real con HTTP 201.
-- Consulta pendiente: refinamiento M3.1 del Intent Router, Agent/ReAct real e
+- Consulta pendiente: Agent/ReAct real, servidor MCP ejecutable e
   integración productiva del MCP interno al fallback. J1 cubre una ruta operacional
   concreta, no todas las variantes o condiciones de concurrencia REST.
-- Producto/evaluación: autenticación de usuario final, RAGAS/MRR completas,
+- Producto/evaluación: autenticación de usuario final, RAGAS completa, SUS formal,
   pruebas formales con usuarios y notificaciones push reales. El MVP móvil de
   demostración M1–M5 ya existe; no hay despliegue institucional acreditado.
 

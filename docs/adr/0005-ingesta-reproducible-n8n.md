@@ -7,6 +7,11 @@ La opción 3 fue implementada y validada localmente para el recorrido manual N8N
 véase [evidencia N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Esta
 validación no demuestra métricas generales de ingesta, recuperación o rendimiento.
 
+Nota posterior de evaluación: retrieval K2, generación y latencia L1/L1-B tienen
+evidencias independientes [indexadas en eval](../../eval/README.md). Las frases de
+este ADR sobre mediciones pendientes corresponden a su contexto/alcance de ingesta;
+N3 no acredita esas métricas ni el cumplimiento integral de objetivos académicos.
+
 ## Contexto y autoridad
 
 El camino conversacional aprobado no cambia. Este ADR define exclusivamente la

@@ -10,7 +10,9 @@ Una sola instancia almacena relaciones y vectores; corpus exclusivamente sintét
 - Fuente de verdad: archivos y manifiesto versionados bajo /data/synthetic.
 - 16 tablas; releases completas inmutables, activación atómica y conservación histórica.
 - Embeddings: Ollama local, qwen3-embedding:0.6b, 1024 dimensiones, coseno.
-  El generador de respuestas sigue abierto. Véase [ADR 0003](../../docs/adr/0003-embedding-local-qwen3.md).
+  ADR 0003 dejó abierto el generador en su contexto histórico; actualmente
+  Document RAG usa `qwen3:4b-instruct` mediante Ollama en `backend/api`.
+  Véase [ADR 0003](../../docs/adr/0003-embedding-local-qwen3.md).
 - Columna document_chunks.embedding: vector(1024), un vector por chunk.
   Sin índices aproximados ni varias dimensiones operacionales.
 - PostgreSQL 16 incorpora gen_random_uuid() y sha256(bytea): no se requiere pgcrypto.
@@ -19,17 +21,20 @@ Una sola instancia almacena relaciones y vectores; corpus exclusivamente sintét
   [vector y coseno](https://github.com/pgvector/pgvector#reference).
 - La migración crea estructura, funciones y restricciones, no datasets, perfiles ni
   registros de configuración ficticios. No se crea un seed de embeddings.
-- La futura ingesta registrará la configuración real: revisión/digest local, versión
+- La ingesta implementada registra la configuración real: revisión/digest local, versión
   de Ollama, parámetros e instrucciones/preprocesamiento efectivos. Los DEFAULT conservan
   Ollama/Qwen como opción inicial; proveedor, modelo y revisión solo deben ser no vacíos.
   Los CHECK mantienen dimensión 1024 y métrica cosine. Otra identidad de modelo compatible
   no exige migración; requiere una configuración nueva y otra release.
   PostgreSQL deriva config_sha256 al insertar: la ingesta no calcula ni suministra el hash.
 
-No se debe aplicar esta reescritura sobre una instalación que hubiera usado el borrador.
-El proyecto confirmó que no existe base productiva ni datos que migrar. El schema se crea
+Al aprobar la reescritura del esquema, el proyecto confirmó que no existía base
+productiva ni datos que migrar. No debe aplicarse sobre una instalación previa:
+actualmente sí hay evidencia de bases locales con releases sintéticas publicadas.
+El schema se crea
 sin IF NOT EXISTS para fallar frente a una instalación previa en lugar de mezclar diseños.
-Compose permanece sin modificaciones; se ejecuta únicamente su servicio postgres para pruebas.
+El Compose declara PostgreSQL/pgvector y N8N, y no aplica SQL automáticamente.
+Las validaciones SQL aquí descritas corresponden a PostgreSQL desechable.
 
 ## Inventario físico
 
@@ -239,8 +244,9 @@ schema/tablas/funciones y EXECUTE por defecto para futuras funciones del propiet
   El borrado usa las dos cascadas de historial, no TRUNCATE.
 - **Evaluación/archivo:** acceso histórico explícito y separado; no concederlo al rol normal.
 
-Los futuros accesos estructurados y de historial necesitan superficies de lectura controladas
-antes del backend; no se crean endpoints ni contratos aquí. El propietario de migración es
+Los accesos estructurados y de historial ya existen en el backend con SQL explícito;
+su endurecimiento mediante roles/superficies de lectura controladas sigue pendiente.
+Esta migración no crea endpoints ni contratos. El propietario de migración es
 una cuenta administrativa confiable, no runtime. No se pretende proteger de un superusuario
 que elimine tablas o deshabilite las reglas.
 
@@ -281,6 +287,10 @@ cambio de release. Usa READ COMMITTED y revierte todos sus fixtures sintéticos 
 Siguen pendientes reintentos avanzados, concurrencia entre sesiones y permisos con roles
 no propietarios (incluido TRUNCATE). No se acreditan métricas OE1/OE2/OE4/OE6.
 
-Pendiente: configurar revisión real/receta de Ollama, fijar versión/digest de la imagen
-pgvector para futuras ejecuciones (digest observado registrado en tests), aprovisionar roles mínimos y definir retención
-y privacidad de sesiones. Ni modelo generador ni autenticación/push se implementan aquí.
+Las ejecuciones de ingesta ya registraron revisión/digest y receta efectivos de
+Ollama; véase [N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Esto no
+supone que una base nueva venga configurada. Siguen pendientes fijar versión/digest
+de la imagen pgvector para futuras ejecuciones (digest observado registrado en
+tests), aprovisionar roles mínimos y definir retención/privacidad de sesiones.
+Autenticación de usuario final y push siguen pendientes; el generador ya está
+implementado en la API. No se modifica SQL en esta actualización documental.

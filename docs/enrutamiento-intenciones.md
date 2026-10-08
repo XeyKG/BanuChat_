@@ -1,10 +1,12 @@
-# Intent Router determinista — diseño v1.1
+# Intent Router determinista — estado y especificación v1.2
 
-Estado: especificación y catálogo `1.1.0-draft`. El Intent Router determinista está
+Estado: catálogo `1.2.0-draft` y schema con `$id` de esa versión. El Intent Router está
 implementado. El dispatcher ejecuta fast paths para `profile_progress`,
 `calendar_events` y `announcements`, con sus servicios de aplicación y renderers.
-El fallback implementado es Document RAG directo; Agent/ReAct y MCP interno siguen
-pendientes como arquitectura objetivo. El refinamiento léxico M3.1 está implementado.
+También ejecuta renderers estáticos para `basic_social`, `capabilities_help` y
+`known_out_of_scope`. El fallback implementado es Document RAG directo; Agent/ReAct
+y el servidor MCP ejecutable siguen pendientes como arquitectura objetivo.
+M3.1 léxico y M3.2 ponderado están implementados.
 Aplica [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md). Las reglas y
 valores versionados residen en el [catálogo](../backend/api/intent-routing.catalog.json);
 su [schema](../backend/api/intent-routing.schema.json) es Draft 2020-12.
@@ -27,7 +29,8 @@ versión, ids de reglas, scores y motivo; no registrar texto sensible por defect
 
 No hay probabilidades ni confianza producida por IA. `priority` solo ordena la
 evaluación y el diagnóstico de forma reproducible; no elige ganador ante conflicto.
-Un catálogo inválido deshabilita el fast path; no se cargan reglas parcialmente.
+El router aislado devuelve fallback para un catálogo inválido; el startup REST
+rechaza iniciarse si `catalog_valid` no es true. No se cargan reglas parcialmente.
 La decisión interna de fallback se llama `agent_fallback`, pero hoy conduce a
 Document RAG directo, no a Agent/ReAct ni a MCP.
 
@@ -46,7 +49,8 @@ entregado al fallback conservan exactamente el original aceptado por REST.
    segmento rodeado de signos no es compuesto. Saltos vacíos laterales no cuentan.
 4. Reemplazar solo `¿ ? ¡ ! , . : ;` por espacios, nunca concatenar palabras. Los
    guiones de fechas ISO, barras, comillas y otros signos no se eliminan. Un carácter
-   no admitido por la gramática queda residual y conduce a fallback.
+   no admitido queda residual: invalida el matching completo previo y se evalúa
+   según las penalizaciones del matcher ponderado M3.2 si corresponde.
 5. Colapsar whitespace y recortar bordes de la copia. Se puede retirar una sola
    ocurrencia del sufijo completo «por favor», como cortesía; no otros prefijos,
    saludos, verbos, negaciones ni cláusulas.
@@ -63,7 +67,9 @@ compuestos, con límites de token/frase, no substring. «y» como palabra es con
 la letra y dentro de «ayuda» no lo es. Los marcadores `segun`, `compara` y similares
 envían la solicitud completa a fallback, no intentan resolver la relación.
 
-Evaluar todas las familias, sin cortocircuito por prioridad:
+Tras los guards, evaluar las reglas previas exactas, temporales, léxicas M3.1 y
+combinaciones, sin elegir por prioridad. Si esta etapa tiene evidencia, conserva
+su decisión (incluidos sus fallbacks) y no ejecuta el matcher ponderado:
 
 | Evidencia de matching | Puntos | Condición |
 | --- | ---: | --- |
@@ -90,7 +96,7 @@ globales, normalización, tamaños, parámetros, reglas temporales y variantes. 
 runtime rechaza un catálogo inválido al iniciar. No hay stemming, fuzzy matching,
 autocorrección, LLM, embeddings ni regex declaradas por el catálogo.
 
-El score de una familia es el máximo, no la suma. Exigir score >=80 y margen >=20
+En esta etapa previa, el score de una familia es el máximo, no la suma. Exigir score >=80 y margen >=20
 frente a otro candidato; además, **dos familias con score >=80 siempre hacen fallback**,
 incluso si hay margen o distinta prioridad. Esta regla más estricta domina al margen.
 Si dos reglas de una misma familia proponen parámetros distintos, hacer fallback.
@@ -99,22 +105,45 @@ Reglas solapadas con parámetros y variante idénticos se deduplican, sin sumar 
 Las exclusiones por familia invalidan sus coincidencias. Una consulta compuesta
 detectada por los marcadores globales se envía completa al fallback; no se elimina
 una cláusula para rescatar otra. No se enruta un substring reconocido dejando
-texto sin consumir. Una fecha ilegible, filtro extra,
+texto sin consumir en estas reglas completas. Una fecha ilegible, filtro extra,
 negación o petición de escritura no se corrige mediante adivinación.
 
 «curso», «fecha», «calendario», «notas» y «mis cursos» no activan fast path.
 La única excepción de una palabra es el conjunto social completo hola/gracias/adiós;
 no son tokens genéricos de dominio. «hola, cursos disponibles» no es saludo aislado.
-No se busca maximizar cobertura usando reglas compuestas progresivamente más complejas.
+M3.2 amplía cobertura con señales declaradas, conservando los guards de composición.
+
+### Matching ponderado M3.2
+
+Solo cuando las reglas previas no tienen evidencia, y después de los guards
+adicionales de compatibilidad social, repetición de relleno y contexto de catálogo,
+se evalúan `weighted_signal_groups` para `profile_progress`, `course_catalog`,
+`calendar_events` y `announcements`.
+
+Cada grupo aporta su peso una sola vez. La suma se limita a 100; se resta 25 por
+término desconocido único (máximo 50) y 30 si otra familia reúne al menos dos
+grupos. Los términos/frases de relleno declarados en `scaffolding_terms` y
+`scaffolding_phrases` no penalizan. El score final se limita inferiormente a cero.
+Por ello, la agregación `max_not_sum` y el consumo completo de la etapa previa
+no describen este matcher; aquí los residuales se penalizan, no se ignoran.
+
+Se exige al menos dos grupos, score final ≥80, margen ≥20 respecto al segundo
+candidato, parámetros resolubles y ausencia de bloqueos por perfil/exclusiones.
+Empates, margen insuficiente, score bajo, parámetros conflictivos o candidato
+bloqueado llevan a fallback. Los diagnósticos internos registran grupos, señales,
+penalizaciones y motivo; no son probabilidades ni amplían el JSON REST.
+Los pesos se calibraron con el conjunto de desarrollo M3.2, no con una población
+real. El código y catálogo son la referencia de los guards y valores exactos.
 
 ## 4. Familias y parámetros
 
-La tabla enumera familias y servicios lógicos del catálogo. En el flujo productivo
-de `POST /messages`, el dispatcher solo ejecuta como fast path
+La tabla enumera familias y servicios lógicos del catálogo. En el runtime del
+prototipo de `POST /messages`, el dispatcher ejecuta fast paths estructurados para
 `profile_progress`, `calendar_events` y `announcements`. Decisiones de
-`course_catalog`, `document_lookup`, `capabilities_help`, `basic_social` y
-`known_out_of_scope` llegan al fallback Document RAG directo; su presencia en el
-catálogo no equivale a un servicio o renderer productivo para esas rutas.
+`basic_social`, `capabilities_help` y `known_out_of_scope` usan renderers estáticos.
+Solo `course_catalog`, `document_lookup` y `agent_fallback` llegan al fallback
+Document RAG directo. Las dos primeras familias no tienen servicio/renderer
+despachado; clasificarlas no acredita implementación de su fast path.
 
 | Intención | Servicio lógico / renderer | Extracción acotada |
 | --- | --- | --- |
@@ -200,7 +229,7 @@ Flujo implementado de `POST /messages`:
    perfil confiable, release vigente `ready` y ordinal siguiente esperado. Un
    contexto inválido se rechaza antes de insertar mensajes.
 3. El Intent Router evalúa una copia normalizada del texto original y decide la
-   ruta. El dispatcher ejecuta uno de los tres fast paths implementados o deriva
+   ruta. El dispatcher ejecuta un servicio/renderer estructurado o estático, o deriva
    al fallback Document RAG directo con el texto original.
 4. Se obtiene o renderiza la respuesta y se validan release, citas y procedencia.
 5. Una única sentencia SQL persiste atómicamente el mensaje `user` original, el
@@ -231,20 +260,19 @@ ni tabla de reintentos.
 ## 7. Renderers, citas y listas vacías
 
 Los templates son de presentación, no otra base de hechos. Reciben valores de
-servicios, escapan texto para que títulos no inyecten Markdown/enlaces, conservan
-orden, distinguen null de valor y no inventan nombres, fechas o porcentajes.
+servicios, conservan orden, distinguen null de valor y no inventan nombres,
+fechas o porcentajes. Actualmente interpolan esos valores sin escape Markdown;
+no se acredita la protección frente a títulos que introduzcan sintaxis/enlaces.
+Añadir esa protección requiere una tarea funcional separada.
 Ejemplo no factual: «Se muestran {n} actividades completadas: {nombres}» con
 `n = filas recibidas`, no «tienes exactamente n» si existe limitación de resultados.
 No incluyen títulos/resultados del dataset como respuestas hardcodeadas.
 
 Los renderers de progreso, calendario y anuncios ya están implementados. Los
-textos estáticos siguientes son propuestas del catálogo; el dispatcher actual no
-los ejecuta como fast path: greeting → «Hola. ¿Qué necesitas consultar?»;
-thanks → «Con gusto.»; farewell → «Hasta luego.».
-capabilities → «Puedes consultar el catálogo, calendario, anuncios y progreso del
-perfil de demostración, localizar documentos y preguntar sobre los materiales
-sintéticos disponibles. No realizo inscripciones ni trámites reales.».
-not_available → «Esa información no está disponible en el prototipo sintético.».
+renderers estáticos también se ejecutan directamente por el dispatcher:
+`basic_social` admite greeting/thanks/farewell, `capabilities_help` usa capabilities
+y `known_out_of_scope` usa not_available. Los textos efectivos están en
+`backend/api/src/chat/chat-renderers.ts`, sin consulta al corpus ni generación.
 Son mensajes de interfaz y alcance, no hechos sobre cursos o personas. Si cambia
 el alcance aprobado, revisar estas plantillas junto con la versión del catálogo.
 
@@ -255,13 +283,13 @@ No se fabrican citas para una lista vacía, una ausencia o un texto estático.
 
 | Renderer / expectativa del catálogo | Evidencia para afirmaciones | Caso vacío / insuficiente |
 | --- | --- | --- |
-| Progreso | profile, profile_course; nombres del curso requieren además procedencia course en la misma release | Sin asociaciones coincidentes: explicitarlo, no asignar cero a cursos inexistentes |
+| Progreso | Actualmente cita profile y profile_course; obtiene nombres mediante JOIN con course de la misma release, sin cita course adicional | Sin asociaciones coincidentes: explicitarlo, no asignar cero a cursos inexistentes |
 | Catálogo | course por fila | Informar que no se encontraron cursos con esos filtros |
 | Calendario | calendar_event; no añadir hechos de curso/anuncio que no traiga evidencia | Informar rango consultado sin inventar agenda |
 | Anuncios | announcement, con referencia temporal efectiva | Informar ausencia de comunicaciones coincidentes |
 | Documentos | document con versión exacta; no citar chunks inexistentes | Sin coincidencias: no fabricar enlace ni sustituir por un título aproximado |
 | Capacidades / social | Ninguna: texto de interfaz, no hechos del corpus | citations=[], insufficient_evidence=false |
-| Fuera de alcance | Ninguna: límite del prototipo, no afirmación sobre el mundo | citations=[], insufficient_evidence=true |
+| Fuera de alcance | Ninguna: límite del prototipo, no afirmación sobre el mundo | Implementado: citations=[], insufficient_evidence=false; comunica un límite, no una falta de retrieval |
 
 Para resultados estructurados no vacíos y suficientes: insufficient_evidence=false.
 Para las listas vacías de los tres servicios despachados actualmente se usa la
@@ -272,8 +300,9 @@ evidencia coincidente, no una afirmación universal de inexistencia. Se pueden
 conservar citas de perfil si realmente se presenta su alias, pero no inventar una cita que
 «demuestre» la ausencia de filas. Todos los enums/campos REST permanecen iguales.
 
-Como propuesta de diseño pendiente, ProfileProgressService podría enriquecer su
-resultado interno con procedencia `course` del mismo snapshot para sustentar nombres;
+Como límite de procedencia, el JOIN de ProfileProgressService ya obtiene nombres
+del curso, pero su resultado/citas no incluyen la fuente `course`. Enriquecer su
+resultado interno con esa procedencia requiere una tarea funcional separada;
 un futuro adaptador MCP proyectaría exactamente su output congelado, sin propiedades
 extra. No se dispararía una segunda intención para ese join. Una comparación o
 recomendación entre dominios va al fallback actual; razonamiento mediante Agent/ReAct
@@ -303,7 +332,9 @@ El compilador valida ocho IDs únicos y enlaces a servicios correctos, IDs de re
 únicos, forma normalizada de las reglas léxicas, reglas temporales solo en calendario,
 parámetros por familia y variantes de respuesta admitidas. Un catálogo inválido
 impide iniciar el runtime. La regresión data-driven verifica las decisiones de los
-129 casos históricos y 25 casos M3.1; no cambia sus expectativas para aprobarlas.
+158 casos de `cases.json` (154 históricos hasta K1.1 y cuatro posteriores), según
+la [regresión M3.2 revisada](../eval/intent-routing/results/m3-2-regression-reviewed.md);
+no cambia sus expectativas para aprobarlas.
 JSON Schema por sí solo no demuestra que un renderer cite bien ni que el algoritmo
 funcione correctamente. Los formatos requieren validación explícita de fechas reales.
 
@@ -316,7 +347,17 @@ router ni constituye un resultado experimental. `backend/api/test/intent-router.
 sí ejecuta el router real y J2 lo ejercita por HTTP en
 `backend/api/test/intent-http-integration.test.ts`.
 
-## 9. Métricas futuras y límites de esta entrega
+## 9. Evidencia existente, métricas futuras y límites
+
+M3.1 y M3.2 cuentan con resultados versionados en
+[`eval/intent-routing/results`](../eval/intent-routing/results/). La evaluación
+[M3.2-D reservada](../eval/intent-routing/results/m3-2-reserved-first-run.md)
+registró `reserved_primary`: 14/14 route correct, 14/14 exact correct y cero
+fast paths inesperados (false fast-path rate 0 %). Todos los casos primarios eran
+negativos/fallback; no demuestra accuracy poblacional, generalización ni recall
+positivo. Los resultados de desarrollo y regresión se mantienen separados.
+
+Siguen por medir sobre muestras más amplias y con la metodología correspondiente:
 
 - fast_path_hit_rate: turnos elegibles clasificados a fast path / turnos elegibles;
   desglosar servicios frente a social/ayuda/fuera de alcance.
@@ -331,7 +372,7 @@ sí ejecuta el router real y J2 lo ejercita por HTTP en
 - Número/proporción de turnos que realmente invocan LLM generador, contado por
   invocación efectiva, no inferido automáticamente de la decisión de fallback.
 
-No hay mínimo arbitrario de ahorro ni resultados de accuracy en este documento.
+No hay mínimo arbitrario de ahorro ni evidencia de accuracy poblacional.
 Esta actualización documental no llama a Ollama, no ejecuta consultas ni cambia la
 semántica de los objetivos OE1–OE6. El router solo evita generación donde un renderer
 seguro basta; no sustituye evaluación de

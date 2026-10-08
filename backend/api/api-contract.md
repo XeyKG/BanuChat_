@@ -1,18 +1,19 @@
 # Contrato REST v1
 
-Versión: **1.0.0-draft**, especificación para aprobación, sin implementación.
+Versión: **1.0.0-draft**, contrato REST congelado con servidor y handlers implementados.
 La fuente machine-readable es [openapi.yaml](openapi.yaml), OpenAPI 3.1.0 con
 JSON Schema 2020-12. Está serializada en JSON, subconjunto válido de YAML 1.2,
 para permitir validación sintáctica con las herramientas locales sin dependencias.
-MCP 2.0 permanece congelado e independiente de esta propuesta REST.
+MCP 2.0 permanece congelado e independiente de este contrato REST.
 
 ## Frontera y alcance
 
 Mobile → REST Backend API → Intent Router para mensajes: fast path determinista
-o fallback Agent/RAG. El agente es cliente del
-servidor MCP interno; la app nunca consume MCP. Calendario, progreso y anuncios
-podrán consultar una capa de servicios compartida con MCP, sin ejecutar el agente.
-Esa capa tampoco se implementa aquí. No se ejecuta infraestructura.
+o fallback Document RAG directo actualmente. Agent/ReAct como cliente del servidor
+MCP interno forma parte de la arquitectura objetivo y sigue pendiente; la app
+nunca consume MCP. Calendario, progreso y anuncios ya consultan servicios de
+aplicación sin agente. Su reutilización por MCP sigue prevista. Esta nota de estado
+no altera endpoints, schemas, semántica ni códigos HTTP del contrato.
 
 Base relativa `/api/v1`; host y puerto no se fijan. Requests/responses son JSON
 con campos `snake_case`, salvo descarga binaria y respuestas sin contenido.
@@ -323,4 +324,5 @@ secuenciales. Una garantía durable de idempotencia requiere aprobación posteri
 No se modifica SQL, sus 16 entidades, contratos MCP 2.0, modelo de datos o datasets.
 El texto histórico de otras fuentes no introduce dependencias en este contrato.
 La validación estática no demuestra ejecución de rutas ni resultados de RAGAS/SUS:
-los objetivos OE1/OE3/OE5 se evaluarán cuando exista implementación autorizada.
+la evidencia ejecutada se indexa en [eval](../../eval/README.md). RAGAS completa,
+selección de tools por Agent/MCP y SUS formal siguen pendientes.

@@ -3,6 +3,14 @@
 Fecha: 2026-09-25.
 Estado: aceptado por decisión explícita del proyecto para el MVP.
 
+Actualización posterior: la selección del generador, abierta al tomar esta
+decisión, se concretó en `qwen3:4b-instruct` mediante Ollama para Document RAG.
+La ingesta y el registro de configuraciones efectivas ya existen. SQL conserva
+defaults de proveedor/modelo y CHECK de dimensión 1024/cosine; no fija el nombre
+del modelo con CHECK. La receta actual separa contexto documental nativo y query
+4096; [L1-B](../../eval/generation/results/l1-b-rag-latency-2026-10-03.md) registró
+document=32768/query=4096. El texto original siguiente conserva su contexto.
+
 ## Contexto
 
 El modelo lógico aprobado usa una configuración de embeddings por release y un embedding

@@ -11,11 +11,22 @@ documental, chunking/embeddings, publicación atómica y recovery/retry. Tambié
 implementados Approval Registry y loader seguro, vínculo approval↔source, procedencia
 del runtime checkout, servicio `execute`/`retry`/`recover`/`status`, observación real
 del WriterLease, transporte HTTP interno, Bearer service token y parser de
-configuración operacional. Faltan la composición/startup que levante todo como un
-servicio integrado y el consumo operacional desde N8N.
+configuración operacional. `src/main.ts` compone y levanta el servicio integrado.
+N0 validó startup/status; N2 versionó e importó el workflow manual y N3 lo ejecutó
+E2E desde N8N 2.40.5, con publicación `ready/current` y luego `already_current`.
+Véanse [N0](../../eval/ingestion/results/n0-local-operational-preparation-2026-10-02.md),
+[N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md) y el
+[runbook](../../n8n/workflows/ingestion-manual-v1-runbook.md).
 
-La suite unitaria actual registra **176 PASS / 0 FAIL / 0 SKIP**. La última
-validación PostgreSQL de 5I, separada, registró **38 PASS / 0 FAIL / 0 SKIP** sobre
+La consulta Document RAG está implementada en `backend/api`, con embedding de la
+pregunta mediante Ollama + `qwen3-embedding:0.6b`, búsqueda exacta en PostgreSQL +
+pgvector y generación mediante Ollama + `qwen3:4b-instruct`, seguida de citas y
+persistencia. Agent/ReAct y MCP ejecutable siguen pendientes. N8N no participa
+en esa ruta síncrona; sus workflows retry/recover/scheduled siguen pendientes,
+aunque retry y recover explícitos del core/HTTP ya existen.
+
+Como antecedente de la etapa 5I, este README registró **176 PASS / 0 FAIL / 0 SKIP**
+unitarios y **38 PASS / 0 FAIL / 0 SKIP** PostgreSQL, en corridas separadas sobre
 PostgreSQL 16.15 y pgvector 0.8.6. La E2E real histórica de Implementación 3 fue otra
 ejecución: **5 E2E PASS** y 60 embeddings reales con
 `qwen3-embedding:0.6b`. No se suman estas corridas en un total único.
@@ -128,14 +139,14 @@ del contenido. El hash documental no es el hash de concatenar los chunks.
 
 `full_document` evita extracción/chunking: cero chunks, cero embeddings y
 `content_sha256 = source_sha256`. Preflight puede leerlo para verificar bytes,
-UTF-8 y título; nunca se pasa al extractor. El artefacto histórico se resolverá
-posteriormente por REST interno aprobado, no por URL externa.
+UTF-8 y título; nunca se pasa al extractor. La API REST ya resuelve el artefacto
+verificando sus bytes/checksum; no usa una URL externa.
 
 El corpus actual produce **18 archivos, 76 items, 12 documentos y 60 chunks** en
 memoria. La suite cubre positivos, fallos con copias temporales, primitivas, receta
 y Git; si el SO impide crear enlaces, solo ese caso se marca SKIP con causa técnica.
 
-## PostgreSQL: staging parcial (implementación 2)
+## PostgreSQL: staging parcial (implementación 2, alcance histórico)
 
 Adaptador `pg` sin ORM; `@types/pg` solo para desarrollo. El core recibe un `Pool`
 configurado por el caller y no lee `.env` ni resuelve secretos. SQL explícito,
@@ -172,7 +183,10 @@ Dataset único: se inserta id=1/name=dataset_key solo si falta; si existe se com
 el nombre, sin UPDATE. La configuración recibida debe existir con dimensión 1024
 y métrica cosine. PostgreSQL calcula los hashes JSONB de manifest/pipeline;
 el código no los sustituye por SHA de JSON.stringify. El caller entrega una receta
-JSON canónica v1 sin secretos. El core ya dispone de controles implementados de aprobación y procedencia; la composición/startup operacional que los integra con las dependencias de ejecución continúa pendiente.
+JSON canónica v1 sin secretos. En esta etapa todavía no existía composición
+operacional; hoy `src/main.ts` integra controles de aprobación/procedencia y
+dependencias de ejecución. Los conteos siguientes describen staging parcial,
+no el estado publicado por N3.
 
 Estado esperado de v1 después de staging:
 
@@ -267,7 +281,7 @@ Véase el [registro de evidencia E2E](../../eval/ingestion/results/implementatio
   Referencia: [API embed](https://docs.ollama.com/api/embed) y
   [API tags](https://docs.ollama.com/api/tags).
 
-La receta efectiva candidata OPT-1D1 conserva `document.options.num_ctx` igual
+La receta efectiva implementada desde OPT-1D1 conserva `document.options.num_ctx` igual
 al contexto nativo de `/api/show` (32768 en el modelo actual) y fija
 `query.options.num_ctx=4096` en código. Rechaza un contexto nativo menor a 4096.
 La capacidad nativa del modelo es un límite, no el contexto que debe solicitar
@@ -275,7 +289,9 @@ cada query. La decisión usa [OPT-1C](../../eval/generation/results/opt1c-query-
 top-1 y conjunto top-5 iguales en 10/10 casos; L1-10 cambió solo el orden de
 tres resultados. La release histórica L1 conserva su receta original. Activar
 la nueva receta requiere registrar una nueva `embedding_config` y publicar una
-nueva release; este cambio no lo hace y no acredita aún latencia L1-B.
+nueva release. Posteriormente L1-B observó una release con query=4096 y
+document=32768; [su evidencia](../../eval/generation/results/l1-b-rag-latency-2026-10-03.md)
+registra la medición de latencia sin acreditar OE6 ni un SLA.
 - `resolveEmbeddingConfig` reutiliza igualdad de campos/JSONB; inserta sin hash JS,
   relee tras conflicto UNIQUE concurrente y nunca actualiza configuración inmutable.
 - `generateEmbeddings` limita el batch interno a 1–10 (default 10), por documento.
@@ -366,7 +382,7 @@ Runs/items anteriores son evidencia histórica inmutable. Las versiones/chunks d
 staging son representación candidata reparable, no un event log de cada vector
 parcial histórico. La limpieza de chunks no borra document_versions ni items.
 
-## Límites y siguiente implementación
+## Estado actual y límites pendientes
 
 El Approval Registry, la verificación approval↔source, la procedencia del runtime,
 el servicio interno y su transporte HTTP autenticado ya están implementados. La
@@ -376,15 +392,19 @@ operación `status` es read-only: su selector de identidad de control puede reso
 `running` y ausencia observable del WriterLease en la base actual; no depende de
 edad/timeout ni ejecuta recovery.
 
-Todavía no están implementados la composición/startup operacional del HTTP, la
-decisión final de topología/bind Docker-host, el workflow N8N funcional, retrieval
-productivo, Intent Router, Application Services, REST, Agent/MCP, generador LLM ni
-app móvil. RAGAS/MRR y evaluación con usuarios no están implementados ni validados.
-Embeddings implementados y validados en E2E real: Ollama local,
-`qwen3-embedding:0.6b`, 1024 dimensiones, coseno,
-búsqueda exacta sin HNSW/IVFFlat; proveedor/modelo generador todavía abierto.
-La publicación E2E de ingesta está validada dentro de este alcance; no se han
-demostrado métricas OE1/OE2/OE4, calidad RAGAS/MRR ni rendimiento del sistema.
+Están implementados startup HTTP y el workflow N8N manual. También existen REST,
+Intent Router M3.1/M3.2, servicios de aplicación, retrieval exacto, Document RAG
+con generador `qwen3:4b-instruct` y la app móvil; su estado específico está en
+[API](../api/README.md) y [Mobile](../../mobile/README.md). Embeddings usa Ollama
+local + `qwen3-embedding:0.6b`, 1024 dimensiones y coseno, sin HNSW/IVFFlat.
+
+Agent/ReAct y el servidor MCP ejecutable siguen pendientes, al igual que workflows
+N8N retry/recover/scheduled, topología portable y permisos mínimos. Hay evaluación
+retrieval [K2](../../eval/retrieval/results/k2-v1-2026-10-01.md) con MRR@5 y mediciones
+de generación/latencia [indexadas en eval](../../eval/README.md); no equivalen a
+RAGAS completa ni prueban todos los objetivos OE1/OE2/OE4/OE6. SUS y evaluación
+formal con usuarios siguen pendientes. Las cifras de las secciones por etapa son
+evidencia histórica separada y no resultados ejecutados nuevamente en esta auditoría.
 
 La raíz debe ser controlada, estable y montada read-only en el despliegue futuro.
 Las comprobaciones portables de Node no equivalen a un sandbox del SO ni garantizan
@@ -394,7 +414,7 @@ antes de publicar y conservar por separado fuente histórica/runtime, según
 [ADR 0005](../../docs/adr/0005-ingesta-reproducible-n8n.md) y
 [diseño de ingesta](../../docs/ingesta-reproducible.md).
 
-Antes de la siguiente fase quedan composición/startup, integración N8N, topología,
-montajes read-only y permisos mínimos operacionales pendientes. Recovery requiere decisión explícita;
+Para futuros despliegues quedan topología portable, montajes read-only y permisos
+mínimos operacionales pendientes. Recovery requiere decisión explícita;
 no hay scheduler, cola, timeout automático ni reconciliación automática de COMMIT incierto.
-N8N solo orquestará; no posee reglas de negocio ni genera contenido funcional.
+N8N ya orquesta el recorrido manual; no posee reglas de negocio ni genera contenido funcional.

@@ -4,7 +4,8 @@ Estado: core de ingesta, transporte HTTP y startup implementados. N0 validó sta
 `/status`; N2 versionó/importó el workflow manual; N3 validó la ejecución manual E2E
 con `/execute`, publicación `ready/current` y una segunda ejecución `already_current`.
 Véase [evidencia N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Retry,
-recover, scheduled y topología portable siguen pendientes. Diseño original:
+recover y scheduled en N8N, junto con topología portable, siguen pendientes;
+las operaciones explícitas del core/HTTP ya están implementadas. Diseño original:
 2026-09-26.
 Véanse [ADR 0005](adr/0005-ingesta-reproducible-n8n.md),
 [contrato físico](../infra/db/README.md) y [plan de pruebas](../eval/ingestion/plan.md).
@@ -562,7 +563,9 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
   se observó en Windows + Docker Desktop; no define topología Linux. No hay evidencia
   Linux ni institucional.
 - La E2E real verificó digest/runtime/opciones efectivos de Ollama y 60 embeddings;
-  todavía falta evaluar calidad de retrieval/RAG y no se acreditan RAGAS/MRR.
+  esa ejecución de ingesta no acredita calidad RAG. Posteriormente
+  [K2](../eval/retrieval/results/k2-v1-2026-10-01.md) midió retrieval/MRR@5;
+  RAGAS completa sigue pendiente. Los experimentos conservan alcances separados.
 - Auditar roles no propietarios, concurrencia y procedencia en retries con el plan;
   las pruebas SQL existentes no acreditan esos escenarios avanzados.
 - Conservar checkout/artefactos fuente históricos, código/build y receta del runtime
@@ -570,7 +573,8 @@ posteriormente; no se modifica el anteproyecto ni se afirman resultados ahora.
   sin ellos no se puede prometer reproducción ni descarga histórica disponible.
 - Modelo lógico conserva `item_key` e indicaciones antiguas; ADR 0003 dice DEFAULT/CHECK
   del nombre, pero SQL solo fija dimensión/cosine y defaults de proveedor/modelo.
-  Prevalece SQL. No se corrigen esos documentos fuera del alcance autorizado.
+  Prevalece SQL; los documentos históricos conservan sus decisiones originales
+  con notas de estado posterior cuando corresponde.
 - La arquitectura refleja SQL y suite A–K, además del core de ingesta validado por
   etapas y el camino manual N8N local de N3; ninguna de esas evidencias acredita el
   sistema conversacional completo.

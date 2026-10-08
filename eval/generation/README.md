@@ -1,4 +1,32 @@
-# Benchmark de generación G0
+# Generación y latencia — índice de experimentos
+
+Estos experimentos ya tienen resultados versionados; las secciones de metodología
+conservan sus recetas y contextos históricos, sin acreditar nuevas ejecuciones.
+El runtime Document RAG vigente usa `qwen3:4b-instruct` y un router `1.2.0-draft`.
+
+| Experimento | Evidencia | Alcance |
+| --- | --- | --- |
+| G0 v1 | [Resultado](results/g0-qwen3-4b-2026-10-01.md) | Generación aislada con qwen3:4b y diez contextos estáticos. |
+| G0 v2 | [Resultado](results/g0-v2-qwen3-4b-instruct-2026-10-01.md) | Comparación con qwen3:4b-instruct; diez terminaciones naturales bajo la receta G0. |
+| G1b | [Resultado](results/g1b-rag-output-limit-2026-10-01.md) | Límite de salida probado con un prompt/contexto RAG; 256 fue el menor límite ensayado con terminación natural. |
+| G2 | [Resultado](results/g2-rag-e2e-smoke-2026-10-01.md) | Smoke RAG E2E histórico y cinco observaciones warm; no es la medición más reciente. |
+| L1 | [Baseline](results/l1-rag-latency-2026-10-03.md) | Diez POST warm secuenciales y perfil por etapas; receta anterior. |
+| OPT-1C | [Resultado](results/opt1c-query-context-retrieval-2026-10-03.md) | Query num_ctx 32768/4096: top-1 y conjunto top-5 iguales en 10/10; orden igual en 9/10. No mide latencia. |
+| L1-B | [Medición posterior](results/l1-b-rag-latency-2026-10-03.md) | Mismo workload/metodología L1, release con query=4096/document=32768; media wall 4013.57 ms, mediana 3956.78 ms, mínimo 1883.42 ms, máximo/p95 6485.59 ms, 8/10 <5000 ms. Generación media 3622.38 ms; vector DB 3.03 ms. |
+
+Cada Markdown tiene JSON complementario con metadata y resultados. L1-B no
+acredita formalmente OE6 ni SLA: n=10, p95 nearest rank igual al máximo, sin
+inferencia poblacional. No se combinan G0, G2, J1, L1 y L1-B estadísticamente.
+RAGAS completa y evaluación formal con usuarios siguen pendientes.
+
+Limitación de reproducción en el HEAD actual: `run-rag-latency-profile.mjs`
+todavía exige `router.catalog_version === "1.1.0-draft"` en su preflight, aunque
+el catálogo vigente es `1.2.0-draft`. Las instrucciones L1/L1-B siguientes
+describen el instrumento y entorno históricos; una nueva corrida con el router
+actual requiere corregir ese runner en una tarea funcional separada. Esta
+auditoría conserva tanto el runner como sus resultados.
+
+## G0 v1: metodología histórica
 
 Benchmark reproducible, **generator-only**, para evaluar si `qwen3:4b` es un candidato viable como generador local del MVP de BanuChat. Usa diez contextos sintéticos congelados y llama directamente a la API local de Ollama; no ejecuta retrieval ni acredita OE6 end-to-end.
 
@@ -20,7 +48,7 @@ Los contextos son estáticos: el runner no hace retrieval ni consulta otras fuen
 
 Puede cambiarse el origen con `BANUCHAT_EVAL_OLLAMA_BASE_URL`, pero únicamente se aceptan URLs HTTP de loopback con host `127.0.0.1`, `localhost` o `[::1]`. No se permiten credenciales, rutas adicionales, query, fragmentos ni redirects. Cada petición tiene un timeout explícito de 180 segundos.
 
-## Ejecución futura
+## Comando del instrumento G0 v1
 
 Desde la raíz del repositorio:
 
@@ -85,7 +113,7 @@ Para cada ejecución medida, v2 registra `done`, `done_reason`, `thinking_presen
 
 `message.thinking` nunca se almacena: únicamente se registra el booleano `thinking_present`, y cualquier string no vacío aborta el benchmark. El diagnóstico de prefacio inspecciona, sin modificar ni rechazar la respuesta, el comienzo de sus primeros 200 caracteres para las frases documentadas en el runner. No usa un clasificador LLM ni altera las métricas de latencia.
 
-La ejecución futura es:
+El comando del instrumento G0 v2 es:
 
 ```powershell
 node eval/generation/run-benchmark-v2.mjs
@@ -100,7 +128,9 @@ eval/generation/results/g0-v2-qwen3-4b-instruct-AAAA-MM-DD.md
 
 El digest completo se obtiene de `GET /api/tags`; no se valida contra un digest o prefijo hardcodeado. El reporte Markdown añade `done_reason`, el diagnóstico de prefacio y los conteos de terminación natural, límite de longitud y prefacio conocido. Estas señales son diagnósticas y no afirman automáticamente la calidad académica de las respuestas.
 
-G0 v2 aún no tiene resultados ejecutados en este cambio, por lo que no corresponde comparar resultados con v1.
+G0 v2 ya tiene [resultados](results/g0-v2-qwen3-4b-instruct-2026-10-01.md).
+La comparación con v1 se limita a generación aislada bajo sus recetas congeladas;
+no se interpreta como latencia de POST /messages.
 
 ## L1: perfil reproducible de latencia Document RAG
 
@@ -111,7 +141,8 @@ solamente cada `question` y el contexto llega del retrieval real del corpus
 sintético. G0 sigue siendo el benchmark de generación; L1 no reemplaza G0 ni
 G2, y no mezcla sus resultados con J1. El runner verifica antes de medir que
 las diez preguntas L1 caigan en
-`agent_fallback` con el catálogo real `1.1.0-draft`. Durante cada solicitud
+`agent_fallback` con el catálogo histórico `1.1.0-draft` (el runner aún exige esa
+versión; véase la limitación de reproducción al inicio). Durante cada solicitud
 comprueba además una decisión de fallback y exactamente una invocación de
 Document RAG, embedding y generación.
 
@@ -142,7 +173,7 @@ rechazan cambios Git ajenos a los archivos L1 autorizados. El informe final
 registra el commit y los archivos L1 aún sin commit, además del SHA-256 del runner
 y del workload L1.
 
-La validación funcional, que se ejecutará después de revisar este cambio, usa
+El modo de validación funcional del instrumento histórico usa
 las dependencias reales y recorre los diez casos L1 secuencialmente:
 
 ```powershell
@@ -157,7 +188,7 @@ reintenta solicitudes y no crea resultados L1. Si falla un caso, informa su ID
 y la condición fallida, y aborta; cualquier sustitución requiere revisión del
 conjunto congelado.
 
-Para la ejecución real posterior se necesitan PostgreSQL/pgvector y Ollama locales,
+Para ejecutar el instrumento se necesitan PostgreSQL/pgvector y Ollama locales,
 la release sintética lista y las mismas variables de entorno que usa
 `backend/api` (`POSTGRES_*`, `BANUCHAT_GENERATOR_*` y opcionalmente
 `BANUCHAT_OLLAMA_BASE_URL`). Con `.env` local, el comando será:
@@ -166,7 +197,8 @@ la release sintética lista y las mismas variables de entorno que usa
 node --env-file=.env eval/generation/run-rag-latency-profile.mjs
 ```
 
-No ejecutar la medición hasta revisar el instrumento. El runner hace preflight de
+Una nueva medición requiere revisar primero la compatibilidad del instrumento.
+El runner hace preflight de
 release, versiones de PostgreSQL/pgvector y Ollama, modelos, digests y recetas.
 Luego levanta la API real en proceso en `127.0.0.1` con puerto efímero usando
 `createRuntimeApiServer`, `PgSqlClient`, Intent Router, clientes Ollama y
@@ -236,7 +268,7 @@ los agregados y el p95 nearest-rank. El runner sigue obteniendo de PostgreSQL la
 release actual y su receta real de embedding durante el preflight; no exige un ID
 de release hardcodeado.
 
-Desde la raíz del repositorio, la ejecución formal posterior será:
+L1-B ya tiene resultados; el comando de su instrumento histórico es:
 
 ```powershell
 node --env-file=.env eval/generation/run-rag-latency-profile.mjs --l1-b
@@ -253,7 +285,7 @@ eval/generation/results/l1-b-rag-latency-AAAA-MM-DD.md
 
 La configuración del CLI valida que los prefijos formales L1 y L1-B sean
 distintos. L1-B nunca apunta a `l1-rag-latency-AAAA-MM-DD.*`, por lo que no puede
-sobrescribir el baseline congelado. La comparación L1-B frente a L1 será
+sobrescribir el baseline congelado. La comparación L1-B frente a L1 es
 descriptiva bajo el mismo workload y metodología; no constituye una prueba
 general de SLA ni acredita por sí sola OE6.
 
@@ -276,7 +308,7 @@ node eval/generation/compare-query-context-retrieval.mjs --dry-run
 
 El dry-run valida el workload L1 congelado, su SHA-256 frente al baseline L1,
 los cambios Git permitidos y la URL loopback de Ollama. No abre PostgreSQL ni
-Ollama. Para la ejecución real posterior, compilar `backend/api` con
+Ollama. Para ejecutar el instrumento histórico, compilar `backend/api` con
 `npm run build` y usar PostgreSQL/pgvector, Ollama y las variables `POSTGRES_*`
 de `backend/api`; `BANUCHAT_OLLAMA_BASE_URL` solo acepta loopback:
 
@@ -303,5 +335,8 @@ y distancias. El Markdown resume qué casos conservan el top-5, cambian su
 orden o incorporan/sacan chunks. Un coseno alto entre vectores no basta para
 declarar equivalencia. Los resultados exploratorios se crean con `wx`, sin
 sobrescribir, en `results/opt1c-query-context-retrieval-AAAA-MM-DD.json` y
-`.md` (fecha `America/Bogota`). Esta primera entrega no ejecuta la comparación
-real ni cambia producción.
+`.md` (fecha `America/Bogota`). La comparación real ya fue ejecutada y su
+[evidencia](results/opt1c-query-context-retrieval-2026-10-03.md) está congelada.
+Repetirla exige la release/receta baseline y revisar sus precondiciones; el
+instrumento exploratorio no cambia producción. La receta query=4096 se implementó
+posteriormente y L1-B midió otra release; no se atribuye esa latencia a OPT-1C.

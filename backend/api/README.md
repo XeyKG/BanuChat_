@@ -1,4 +1,4 @@
-# API REST — especificación
+# API REST — contrato y estado implementado
 
 Contrato REST v1 documentado para la app React Native, con base `/api/v1`.
 Este directorio implementa servidor y handlers REST; Agent/ReAct no está implementado.
@@ -7,10 +7,10 @@ El fallback conversacional actual es Document RAG directo.
 El cliente Ollama de query usa `options.num_ctx` de la receta de la release
 consultada. Comprueba que el contexto nativo anunciado por `/api/show` sea al
 menos el solicitado y mantiene la dimensión exacta; ambos valores pueden ser
-distintos. La release actual `6a770ce7-13b7-4b0b-95ae-0c193fa0d655` usa
+distintos. La release observada en L1-B, `6a770ce7-13b7-4b0b-95ae-0c193fa0d655`, usa
 `document.options.num_ctx=32768` y `query.options.num_ctx=4096`. Su medición
-formal L1-B ya fue ejecutada y está versionada en
-[`eval/generation/results`](../../eval/generation/results/).
+L1-B ya fue ejecutada y está [versionada](../../eval/generation/results/l1-b-rag-latency-2026-10-03.md).
+Esto no verifica qué release está activa en una base local hoy ni acredita OE6.
 
 - [OpenAPI 3.1.0](openapi.yaml): contrato `1.0.0-draft`, serializado en JSON
   (subconjunto de YAML 1.2) para facilitar validación local sin dependencias.
@@ -25,11 +25,17 @@ embeddings ni generación. Las rutas todavía no implementadas productivamente y
 `agent_fallback` van a Document RAG directo como fallback actual.
 Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
-El catálogo del router es `1.1.0-draft`. M3.1 añadió `lexical_patterns` de score 90:
+El catálogo del router y el `$id` del schema son `1.2.0-draft`.
+M3.1 añadió `lexical_patterns` de score 90:
 cada regla exige todos sus grupos de señales delimitadas y consume el mensaje
 completo con hasta cinco tokens residuales de su propia lista `allowed_fillers`.
-Un residual desconocido deja la decisión en fallback; no hay stemming ni fuzzy
-matching. La regresión ejecuta los casos históricos y M3.1 de `cases.json`.
+Un residual desconocido invalida esa regla léxica. M3.2 añade matching ponderado
+para progreso, catálogo, calendario y anuncios cuando no hay evidencia de las reglas
+previas: suma grupos únicos, penaliza contenido desconocido/señales ajenas y exige
+al menos dos grupos, score ≥80 y margen ≥20, conservando guards y fallback.
+No hay stemming, fuzzy matching ni clasificación con IA. La regresión conserva
+los casos históricos/M3.1 de `cases.json`; las evaluaciones M3.2 se indexan en
+[eval](../../eval/README.md). Clasificar `course_catalog` no implementa su fast path.
 Las consultas REST directas usan los mismos servicios de aplicación y su futura
 reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
 N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP
@@ -56,5 +62,5 @@ mantiene su host fijo en `127.0.0.1`.
   [JSON Schema Draft 2020-12](intent-routing.schema.json), que valida catálogo y casos.
 - [Casos de diseño](../../eval/intent-routing/cases.json): expectativas de clasificación,
   no resultados ejecutados ni preguntas RAGAS. El router sí está implementado
-  productivamente; [intent-router.test.ts](test/intent-router.test.ts) lo prueba
+  en el runtime del prototipo; [intent-router.test.ts](test/intent-router.test.ts) lo prueba
   directamente y [J2](test/intent-http-integration.test.ts) lo prueba por HTTP.
