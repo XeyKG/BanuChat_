@@ -155,9 +155,9 @@
     },
     {
       "id": "M9-P-016", "split": "primary",
-      "question": "¿Por qué la fecha de una sesión no puede usarse como fecha de inicio del progreso, y qué representa cada una de esas fuentes?",
+      "question": "Al explicar cuándo comenzó una actividad, ¿cómo deben distinguirse la programación del calendario y la fecha de inicio registrada en el progreso?",
       "question_type": "multi_context_cross_document",
-      "reference_answer": "El calendario registra la programación temporal de eventos y no demuestra inscripción ni progreso. Las fechas de progreso pertenecen a la asociación entre perfil y curso; un inicio registrado incluso puede ser anterior a una práctica, por lo que no debe reemplazarse con la fecha de la primera sesión.",
+      "reference_answer": "El calendario establece la programación temporal del evento ficticio, pero no demuestra inscripción ni progreso. La fecha de inicio del progreso pertenece a la asociación entre perfil y curso y puede ser anterior a una sesión porque la actividad admite preparación; por eso una fuente no debe sustituirse artificialmente por la otra.",
       "relevant_contexts": [
         {"document_key": "doc-004", "ordinal": 3, "locator": "section:3:4. Inicio y finalización", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"},
         {"document_key": "doc-006", "ordinal": 0, "locator": "section:0:1. El calendario como fuente de fechas", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}
@@ -177,12 +177,12 @@
     },
     {
       "id": "M9-P-018", "split": "primary",
-      "question": "¿Qué aporta un evento `announcement_deadline` y qué debe consultarse en el anuncio para comprender completamente una convocatoria?",
+      "question": "¿Qué implica, dentro del escenario, compartir observaciones a partir de una convocatoria?",
       "question_type": "multi_context_cross_document",
-      "reference_answer": "El evento `announcement_deadline` representa el hito de cierre y se vincula con el anuncio; en esta versión coincide con el final de su vigencia. Para comprender la convocatoria deben leerse en el anuncio su descripción y ventana temporal, porque el título del evento no sustituye ese contenido.",
+      "reference_answer": "Una convocatoria puede invitar a preparar una práctica o compartir observaciones, pero no crea por sí misma un canal de inscripción, una notificación enviada ni una acción técnica. El material compartido debe contener solo lo necesario, excluir identidades o información real y mantener separados la consigna, el resultado y las observaciones.",
       "relevant_contexts": [
-        {"document_key": "doc-006", "ordinal": 1, "locator": "section:1:2. Tipos y relaciones", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"},
-        {"document_key": "doc-007", "ordinal": 3, "locator": "section:3:4. Relación con calendario y actividades", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}
+        {"document_key": "doc-007", "ordinal": 0, "locator": "section:0:1. Función de las comunicaciones", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"},
+        {"document_key": "doc-009", "ordinal": 3, "locator": "section:3:4. Cuidado al compartir resultados", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}
       ],
       "review_status": "draft"
     },
