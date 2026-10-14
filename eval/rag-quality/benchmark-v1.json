@@ -383,6 +383,190 @@
         {"document_key": "doc-003", "ordinal": 0, "locator": "section:0:1. Participar en una sesión", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}
       ],
       "review_status": "draft"
+    },
+    {
+      "id": "M9-P-041", "split": "primary",
+      "question": "¿Qué significa elegir un perfil de demostración y qué no acredita esa selección?",
+      "question_type": "single_context",
+      "reference_answer": "Elegir un perfil fija el contexto ficticio de la consulta y permite observar una situación de progreso. No inicia una sesión institucional ni acredita una relación académica o la identidad de una persona real.",
+      "relevant_contexts": [{"document_key": "doc-001", "ordinal": 2, "locator": "section:2:3. Perfiles y contexto de consulta", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-042", "split": "primary",
+      "question": "¿Por qué conviene aclarar los términos desconocidos de una consigna antes de avanzar con una copia de trabajo?",
+      "question_type": "single_context",
+      "reference_answer": "Aclarar primero el significado evita avanzar sin comprender y producir un resultado que no corresponda a lo solicitado. Después puede prepararse una copia de trabajo y continuar dentro del recorrido acotado del escenario.",
+      "relevant_contexts": [{"document_key": "doc-001", "ordinal": 5, "locator": "section:5:6. Límites y continuidad", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-043", "split": "primary",
+      "question": "¿Por qué un nombre parecido no basta para elegir la actividad de destino al proponer un cambio?",
+      "question_type": "single_context",
+      "reference_answer": "La semejanza del nombre no demuestra que dos actividades sean equivalentes. Antes de proponer el cambio hay que comprobar que la actividad de destino exista, admita nuevas incorporaciones y no tenga ya una asociación del perfil.",
+      "relevant_contexts": [{"document_key": "doc-002", "ordinal": 3, "locator": "section:3:4. Cambios de actividad", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-044", "split": "primary",
+      "question": "¿Qué debe aclararse cuando una propuesta de cambio puede reemplazar la relación anterior o mantenerla y añadir otra?",
+      "question_type": "single_context",
+      "reference_answer": "Debe indicarse si se quiere reemplazar la actividad anterior o conservarla y añadir otra, porque son intenciones distintas. La propuesta no debe mezclar alternativas sin señalar cuál se prefiere.",
+      "relevant_contexts": [{"document_key": "doc-002", "ordinal": 3, "locator": "section:3:4. Cambios de actividad", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-045", "split": "primary",
+      "question": "¿Qué valor tiene una nota local cuando una práctica se interrumpe y qué no debe convertirse?",
+      "question_type": "single_context",
+      "reference_answer": "La nota puede conservar el último paso realizado y lo que quedó pendiente para facilitar el retorno. No se convierte por sí misma en un nuevo campo del dataset ni en un reporte enviado automáticamente.",
+      "relevant_contexts": [{"document_key": "doc-003", "ordinal": 3, "locator": "section:3:4. Ausencias e interrupciones", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-046", "split": "primary",
+      "question": "Al retomar una actividad tras una mala interpretación, ¿cómo se comprueba que la nueva versión responde a la consigna?",
+      "question_type": "single_context",
+      "reference_answer": "Se vuelve a leer la consigna, se compara el borrador con el punto de interrupción y, si hace falta, se prepara otra copia explicando el ajuste. La comparación permite comprobar si la nueva interpretación responde realmente a lo solicitado.",
+      "relevant_contexts": [{"document_key": "doc-003", "ordinal": 4, "locator": "section:4:5. Retomar y revisar", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-047", "split": "primary",
+      "question": "¿Por qué un avance parcial no permite enumerar las tareas ya realizadas ni las que faltan?",
+      "question_type": "single_context",
+      "reference_answer": "El registro de avance no explica necesariamente todas las etapas anteriores. Para organizar lo pendiente hay que volver a la consigna y compararla con la evidencia de práctica, sin inventar una trayectoria a partir del porcentaje.",
+      "relevant_contexts": [{"document_key": "doc-004", "ordinal": 4, "locator": "section:4:5. Comprobar la lectura del progreso", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-048", "split": "primary",
+      "question": "¿Por qué el estado `enrolled` no permite prometer cuándo comenzará el trabajo?",
+      "question_type": "single_context",
+      "reference_answer": "`enrolled` representa una inscripción registrada con cero por ciento y sin fecha de finalización, pero describe solo la instantánea actual. No promete que el trabajo empiece en una fecha determinada ni permite completar una fecha ausente con el primer evento del calendario.",
+      "relevant_contexts": [{"document_key": "doc-004", "ordinal": 1, "locator": "section:1:2. Estados de la relación", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-049", "split": "primary",
+      "question": "¿Qué debe explicarse sobre una cantidad o etiqueta ficticia para que una evidencia sea comprensible?",
+      "question_type": "single_context",
+      "reference_answer": "Debe indicarse qué representa dentro del ejemplo y cómo se relaciona con el ejercicio. Los insumos deben ser inventados y suficientes para comprenderlo, sin añadir nombres de personas ni información de una organización real.",
+      "relevant_contexts": [{"document_key": "doc-005", "ordinal": 1, "locator": "section:1:2. Preparar una evidencia legible", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-050", "split": "primary",
+      "question": "¿Cómo se distingue una observación de una sugerencia en una devolución sobre una evidencia?",
+      "question_type": "single_context",
+      "reference_answer": "Una observación señala algo que puede comprobarse en el artefacto, como una explicación ausente. Una sugerencia propone cómo aclararlo; no debe atribuir intenciones a quien preparó el material.",
+      "relevant_contexts": [{"document_key": "doc-005", "ordinal": 3, "locator": "section:3:4. Criterios de lectura cualitativa", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-051", "split": "primary",
+      "question": "¿Por qué una solicitud de ayuda o una propuesta de cambio no reprograma una sesión?",
+      "question_type": "single_context",
+      "reference_answer": "Una solicitud de ayuda o una propuesta de cambio no modifica el evento del calendario. Si existen indicaciones horarias distintas y no pueden aclararse, se señala la discrepancia en lugar de elegir una hora arbitrariamente.",
+      "relevant_contexts": [{"document_key": "doc-006", "ordinal": 5, "locator": "section:5:6. Uso combinado con comunicaciones", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-052", "split": "primary",
+      "question": "¿Por qué un límite de resultados no demuestra que no existan más eventos dentro de un rango amplio?",
+      "question_type": "single_context",
+      "reference_answer": "El límite puede ocultar coincidencias adicionales aunque estén dentro del rango. Para localizar mejor los eventos conviene reducir el intervalo y elegir un tipo concreto, en vez de interpretar la lista acotada como un inventario completo.",
+      "relevant_contexts": [{"document_key": "doc-006", "ordinal": 3, "locator": "section:3:4. Selección por inicio", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-053", "split": "primary",
+      "question": "¿Qué restricciones debe cumplir un rango de consulta del calendario antes de ejecutarse?",
+      "question_type": "single_context",
+      "reference_answer": "El rango no puede estar invertido y tiene como máximo trescientos sesenta y seis días inclusivos. Si los extremos son inválidos, deben corregirse de forma explícita; no se intercambian silenciosamente.",
+      "relevant_contexts": [{"document_key": "doc-006", "ordinal": 3, "locator": "section:3:4. Selección por inicio", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-054", "split": "primary",
+      "question": "¿Cómo se clasifica un anuncio cuando la consulta ocurre exactamente en su inicio o en su cierre?",
+      "question_type": "single_context",
+      "reference_answer": "La ventana se considera incluida en el instante exacto de comienzo y también en el instante exacto de cierre. La clasificación debe hacerse comparando el instante de referencia con los límites de la ventana.",
+      "relevant_contexts": [{"document_key": "doc-007", "ordinal": 1, "locator": "section:1:2. Lectura de la ventana temporal", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-055", "split": "primary",
+      "question": "¿Por qué el título de un evento de cierre no basta para explicar el sentido de una convocatoria?",
+      "question_type": "single_context",
+      "reference_answer": "El evento destaca un hito temporal, mientras que el anuncio conserva la descripción y la ventana de la comunicación. Para explicar el sentido de la convocatoria se debe leer el anuncio y no solo el título del evento.",
+      "relevant_contexts": [{"document_key": "doc-007", "ordinal": 3, "locator": "section:3:4. Relación con calendario y actividades", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-056", "split": "primary",
+      "question": "¿Por qué una búsqueda sin resultados no permite afirmar que existe una comunicación oculta?",
+      "question_type": "single_context",
+      "reference_answer": "Puede ser necesario precisar el tema o ampliar el filtro temporal, pero aun así la ausencia de resultados sigue siendo una conclusión válida. No se garantiza una comunicación oculta ni se compensa la falta de evidencia generando anuncios.",
+      "relevant_contexts": [{"document_key": "doc-007", "ordinal": 5, "locator": "section:5:6. Comunicaciones incompletas y revisión", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-057", "split": "primary",
+      "question": "¿Qué comprobaciones iniciales ayudan a distinguir un resultado vacío de una falla del sistema?",
+      "question_type": "single_context",
+      "reference_answer": "Se revisan el perfil seleccionado, los filtros y la necesidad concreta. Una lista de progreso sin coincidencias puede deberse al estado elegido y un calendario vacío al rango consultado; ninguno demuestra por sí solo una falla del sistema.",
+      "relevant_contexts": [{"document_key": "doc-008", "ordinal": 2, "locator": "section:2:3. Comprobaciones iniciales", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-058", "split": "primary",
+      "question": "¿Qué información basta para describir una dificultad de un documento sin copiar datos privados?",
+      "question_type": "single_context",
+      "reference_answer": "Basta indicar el título y la sección afectada, y precisar si falta un insumo, no se entiende una instrucción o no puede leerse una parte. No es necesario incluir información personal, rutas del dispositivo ni capturas de servicios ajenos.",
+      "relevant_contexts": [{"document_key": "doc-008", "ordinal": 3, "locator": "section:3:4. Información que no debe compartirse", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-059", "split": "primary",
+      "question": "¿Por qué un ejemplo de incidencia puede reformularse con etiquetas inventadas en lugar de información real?",
+      "question_type": "single_context",
+      "reference_answer": "Porque en un ejercicio ficticio basta el nombre del material, el paso realizado y una descripción segura del resultado. Las etiquetas inventadas conservan el objetivo de la práctica sin usar información real para hacer el reporte más convincente.",
+      "relevant_contexts": [{"document_key": "doc-008", "ordinal": 3, "locator": "section:3:4. Información que no debe compartirse", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-060", "split": "primary",
+      "question": "¿Qué debe hacerse cuando una fuente no permite sostener una afirmación sobre una decisión?",
+      "question_type": "single_context",
+      "reference_answer": "Se identifica el documento y la sección usados para explicar la decisión y, si el texto no permite sostener la afirmación, se señala esa limitación. No se sustituye la instrucción por material externo solo porque parezca más detallado.",
+      "relevant_contexts": [{"document_key": "doc-009", "ordinal": 3, "locator": "section:3:4. Cuidado al compartir resultados", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-061", "split": "primary",
+      "question": "¿Por qué marcar como sintético un material no basta si parece contener datos reales?",
+      "question_type": "single_context",
+      "reference_answer": "La etiqueta de sintético describe la intención del escenario, pero no reemplaza comprobar qué contiene el material. Si parece incluir datos reales, debe evitarse su reutilización y señalarse el problema para revisión.",
+      "relevant_contexts": [{"document_key": "doc-009", "ordinal": 4, "locator": "section:4:5. Respuesta ante contenido inesperado", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-062", "split": "primary",
+      "question": "¿Qué fuente indica la FAQ para interpretar el avance de un perfil y por qué no debe deducirse de la cantidad de sesiones?",
+      "question_type": "single_context",
+      "reference_answer": "La FAQ remite al progreso del perfil seleccionado y al documento que explica sus estados y porcentajes. El avance no debe deducirse de la cantidad de sesiones porque los valores particulares pertenecen al registro de progreso.",
+      "relevant_contexts": [{"document_key": "doc-010", "ordinal": 2, "locator": "section:2:3. Participación y avance", "source_sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-063", "split": "primary",
+      "question": "¿Por qué la FAQ remite a registros distintos cuando se necesita el horario de un evento o la vigencia de una invitación?",
+      "question_type": "single_context",
+      "reference_answer": "El horario de un evento se consulta en el calendario y la ventana de una comunicación en el anuncio correspondiente. La FAQ ayuda a distinguir esas necesidades, pero no fija las fechas concretas.",
+      "relevant_contexts": [{"document_key": "doc-010", "ordinal": 3, "locator": "section:3:4. Fechas y anuncios", "source_sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"}],
+      "review_status": "draft"
     }
   ]
 }
