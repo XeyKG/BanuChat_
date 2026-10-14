@@ -342,12 +342,12 @@
     },
     {
       "id": "M9-P-037", "split": "primary",
-      "question": "Si se conoce el estado de disponibilidad de un curso pero un perfil no tiene una asociación de progreso con él, ¿cómo deben interpretarse esos datos sin mezclarlos?",
+      "question": "¿Cómo debe prepararse una práctica compartida para que otra persona pueda revisar las decisiones tomadas cuando la consigna admite interpretaciones distintas?",
       "question_type": "multi_context_same_document",
-      "reference_answer": "La disponibilidad debe interpretarse en el catálogo y no describe el avance de un perfil. La ausencia de asociación significa que no hay información de progreso para ese par y no debe convertirse en cero por ciento. El estado del curso y el estado del progreso responden preguntas diferentes.",
+      "reference_answer": "Primero se identifica el curso, se lee la secuencia apropiada y se prepara una copia de trabajo con insumos ficticios, dejando registrada cualquier ausencia. Durante la práctica se explican las decisiones, se distinguen las propuestas de los acuerdos y, si hay interpretaciones distintas, se vuelve al material y se conserva la duda hasta aclararla.",
       "relevant_contexts": [
-        {"document_key": "doc-004", "ordinal": 0, "locator": "section:0:1. Qué representa el avance", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"},
-        {"document_key": "doc-004", "ordinal": 5, "locator": "section:5:6. Consultas incompletas y cierre", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}
+        {"document_key": "doc-003", "ordinal": 1, "locator": "section:1:2. Preparación de la actividad", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"},
+        {"document_key": "doc-003", "ordinal": 2, "locator": "section:2:3. Acuerdos durante el trabajo", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}
       ],
       "review_status": "draft"
     },
@@ -364,9 +364,9 @@
     },
     {
       "id": "M9-P-039", "split": "primary",
-      "question": "¿Cómo debe verificarse una respuesta generada que menciona reglas, fechas, estados o porcentajes concretos del programa demo?",
+      "question": "¿Cómo debe auditarse una respuesta generada que suena convincente y mezcla una regla del programa con una fecha, estado o porcentaje concreto?",
       "question_type": "multi_context_cross_document",
-      "reference_answer": "Una explicación fluida no garantiza respaldo, por lo que primero se distinguen recomendaciones generales de datos concretos del escenario. Las reglas deben poder remitirse al documento y sección pertinentes, mientras que fechas, estados y porcentajes deben comprobarse en el registro estructurado correspondiente, sin inferirlos por palabras similares.",
+      "reference_answer": "La fluidez no garantiza respaldo: primero se separan las recomendaciones generales de las afirmaciones concretas del escenario. Después se remite cada regla al documento y sección pertinentes, y se contrastan las fechas, estados y porcentajes con el registro estructurado correspondiente; una coincidencia verbal no sustituye esa procedencia.",
       "relevant_contexts": [
         {"document_key": "doc-001", "ordinal": 4, "locator": "section:4:5. Lectura de respuestas y evidencia", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"},
         {"document_key": "doc-009", "ordinal": 2, "locator": "section:2:3. Lectura crítica de instrucciones", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}
@@ -375,12 +375,12 @@
     },
     {
       "id": "M9-P-040", "split": "primary",
-      "question": "¿Cómo debe presentarse para revisión el cierre de una sesión para distinguir lo producido, las observaciones y las instrucciones del ejercicio?",
+      "question": "Al preparar la entrega de una evidencia, ¿cómo se determina si existe una fecha y qué fuente debe consultarse sin deducirla de la descripción?",
       "question_type": "multi_context_cross_document",
-      "reference_answer": "El cierre separa el resultado, las observaciones y los pendientes. Al presentarlo para revisión se reúnen la consigna, el artefacto y una explicación breve de las decisiones, dejando claro qué es una instrucción del ejercicio y qué es una observación propia.",
+      "reference_answer": "La descripción de entrega no fija por sí misma un plazo. Si se necesita una fecha, debe consultarse el anuncio o evento correspondiente; el calendario es la fuente de los inicios y finales de los eventos y debe leerse identificando el evento concreto, sin trasladar fechas desde otra actividad ni inventar un límite.",
       "relevant_contexts": [
-        {"document_key": "doc-003", "ordinal": 5, "locator": "section:5:6. Cierre responsable", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"},
-        {"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}
+        {"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"},
+        {"document_key": "doc-006", "ordinal": 0, "locator": "section:0:1. El calendario como fuente de fechas", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}
       ],
       "review_status": "draft"
     }
