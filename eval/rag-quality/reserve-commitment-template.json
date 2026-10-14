@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "commitment_id": "banuchat-rag-quality-m9-reserve-v1",
+  "benchmark_id": "banuchat-rag-quality-m9-v1",
+  "expected_case_count": 20,
+  "hash_algorithm": "sha256",
+  "status": "draft"
+}

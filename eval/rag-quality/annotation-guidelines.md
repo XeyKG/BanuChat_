@@ -1,16 +1,18 @@
 # Guías de anotación del benchmark M9
 
 Estas reglas se aplicarán al pool candidato, al benchmark principal y al conjunto de
-reserva. Una candidata se acepta solamente cuando su pregunta, respuesta de referencia y
-contextos relevantes pueden fijarse antes de observar la salida del sistema.
+reserva. La reserva seguirá las mismas reglas, pero su contenido permanecerá fuera del
+repositorio de tuning y solo se versionará su compromiso no revelador. Una candidata se
+acepta solamente cuando su pregunta, respuesta de referencia y contextos relevantes
+pueden fijarse antes de observar la salida del sistema.
 
 ## Flujo de revisión
 
 1. Leer el contexto completo del corpus sintético, sin consultar fuentes externas.
 2. Redactar o revisar la pregunta sin mirar rankings ni respuestas del RAG.
 3. Escribir la respuesta de referencia desde la evidencia seleccionada.
-4. Registrar todos los contextos necesarios mediante `document_key`, `ordinal` y
-   `locator`.
+4. Registrar todos los contextos necesarios mediante `document_key`, `ordinal`,
+   `locator` y `source_sha256`.
 5. Clasificar el tipo de pregunta y revisar los criterios siguientes.
 6. Marcar `approved` únicamente tras resolver ambigüedades; usar `review_notes` cuando
    una decisión requiera explicación.
@@ -43,6 +45,11 @@ Una herramienta automática puede proponer candidatas, pero no aprobarlas.
 
 - Verificar que cada `document_key` sea uno de `doc-001` a `doc-010`.
 - Confirmar ordinal y locator contra el artefacto versionado.
+- Verificar que `source_sha256` sea el SHA-256 exacto del artefacto indicado por la
+  entrada aprobada del manifest; debe estar en minúsculas y tener 64 caracteres hex.
+- La identidad conceptual de una referencia es `document_key + ordinal + locator +
+  source_sha256`. Si cambia el artefacto fuente o su hash, se requiere revisión y una
+  nueva versión del benchmark.
 - No depender únicamente de UUIDs de una release; esos UUIDs se resolverán al ejecutar.
 - Incluir todos los contextos necesarios y excluir fragmentos meramente relacionados.
 

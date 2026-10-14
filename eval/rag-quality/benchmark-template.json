@@ -25,15 +25,7 @@
   },
   "top_k": 5,
   "splits": {
-    "primary": {
-      "target_case_count": 60,
-      "actual_case_count": 0
-    },
-    "reserve": {
-      "target_min_case_count": 20,
-      "target_max_case_count": 30,
-      "actual_case_count": 0
-    }
+    "primary": {"target_case_count": 60}
   },
   "cases": []
 }

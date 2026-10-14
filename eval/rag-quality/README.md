@@ -36,9 +36,10 @@ los 10 documentos `chunked`, `doc-001` a `doc-010`, que producen 60 chunks. Todo
 fuera de las métricas vectoriales principales. Sus rutas completas podrán evaluarse en
 otro protocolo, sin mezclarlas con MRR@5 o Recall@5.
 
-Las identidades conceptuales del gold son `document_key`, `ordinal` y `locator`. Un
-runner futuro podrá resolver los UUID de una release concreta y deberá comprobar que
-las referencias siguen apuntando al mismo contenido versionado.
+Las identidades conceptuales del gold son `document_key`, `ordinal`, `locator` y
+`source_sha256`. Este último es el SHA-256 del artefacto fuente aprobado en el manifest.
+Un runner futuro podrá resolver los UUID de una release concreta, pero deberá comprobar
+que las referencias siguen apuntando al mismo contenido versionado.
 
 ## D. Benchmark principal
 
@@ -53,12 +54,20 @@ Antes de la selección se preparará un pool aproximado de 100–120 candidatas.
 final por documento y tipo se registrará al congelar el benchmark; no se inventa en esta
 fase. La selección debe evitar que un único documento o formulación domine la muestra.
 
-## E. Conjunto de reserva
+## E. Conjunto de reserva y compromiso
 
-Se reservarán 20–30 preguntas revisadas que no se utilizarán durante el baseline. El
-split `reserve` permanecerá oculto al proceso de tuning y servirá como evidencia
-adicional de generalización si después se cambia el sistema. Su gold se define y congela
-con las mismas reglas que el split principal.
+Se prepararán 20–30 preguntas revisadas fuera del repositorio de desarrollo. `Oculto`
+significa que el contenido no está disponible para el tuning; poner casos etiquetados
+como `reserve` dentro del mismo JSON no cumple esa propiedad. El benchmark versionado
+contiene únicamente el split `primary`.
+
+Antes del tuning solo se puede versionar el compromiso no revelador de
+[reserve-commitment-template.json](reserve-commitment-template.json), validado por
+[reserve-commitment.schema.json](reserve-commitment.schema.json). No se inventan todavía
+ubicación externa, responsable, fecha ni hash. Al iniciar la primera evaluación de
+reserva se debe presentar el archivo controlado, verificar que su SHA-256 coincide
+exactamente con `content_sha256` y conservar después el archivo junto con la evidencia
+final.
 
 ## F. Construcción y revisión humana
 
@@ -78,7 +87,8 @@ Cada caso debe fijar antes de observar retrieval o generación:
 
 - pregunta exacta;
 - respuesta de referencia verificable y suficientemente completa;
-- uno o más contextos relevantes identificados por documento, ordinal y locator;
+- uno o más contextos relevantes identificados por documento, ordinal, locator y
+  `source_sha256`;
 - tipo de pregunta y split;
 - estado y notas de revisión.
 
@@ -180,9 +190,25 @@ registrará como mínimo:
 
 El contrato está en [benchmark.schema.json](benchmark.schema.json) y la plantilla aún
 vacía en [benchmark-template.json](benchmark-template.json). El schema prohíbe almacenar
-salidas observadas, scores o PASS/FAIL dentro del gold.
+salidas observadas, scores o PASS/FAIL dentro del gold. La cardinalidad de contextos por
+tipo se valida estructuralmente; la validez de locators, hashes y diversidad semántica
+queda para el validador de congelación.
 
-## O. Limitaciones
+## O. Invariantes del validador de congelación futuro
+
+Antes de marcar el benchmark como `frozen`, un validador deberá comprobar: IDs únicos;
+exactamente 60 casos `primary`, todos `approved`; representación de los 10 documentos
+elegibles; 10–15 preguntas multi-contexto; `single_context` con exactamente un contexto;
+`multi_context_same_document` con dos o más contextos del mismo `doc_key`;
+`multi_context_cross_document` con dos o más `doc_key` distintos; claves en `doc-001`
+a `doc-010`; ordinal y locator reales; `source_sha256` igual al artefacto del manifest;
+y ausencia de resultados observados en el gold.
+
+El schema no intenta expresar esas relaciones entre elementos ni verificar el contenido
+del corpus. Esa responsabilidad pertenece al validador de congelación y a la revisión
+humana.
+
+## P. Limitaciones
 
 - El corpus es pequeño, sintético y específico de BanuChat.
 - Sesenta casos no demuestran rendimiento universal ni uso institucional.
