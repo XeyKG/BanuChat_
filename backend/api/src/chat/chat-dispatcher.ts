@@ -7,6 +7,10 @@ import {
   type CalendarEventsInput,
 } from "../application/calendar-events.js";
 import {
+  getCourseCatalog,
+  type CourseCatalogStatus,
+} from "../application/course-catalog.js";
+import {
   getProfileProgress,
   type ProfileProgressStatus,
 } from "../application/profile-progress.js";
@@ -15,6 +19,7 @@ import {
   renderBasicSocial,
   renderCalendarEvents,
   renderCapabilitiesHelp,
+  renderCourseCatalog,
   renderKnownOutOfScope,
   renderProfileProgress,
 } from "./chat-renderers.js";
@@ -37,6 +42,18 @@ export async function dispatchChatQuery(
       now: input.now,
     },
   });
+
+  if (decision.route === "course_catalog") {
+    const result = await getCourseCatalog(dependencies.sql, {
+      ...(decision.parameters.statuses === undefined
+        ? {}
+        : { statuses: decision.parameters.statuses as readonly CourseCatalogStatus[] }),
+      ...(decision.parameters.limit === undefined
+        ? {}
+        : { limit: decision.parameters.limit }),
+    });
+    return renderCourseCatalog(result);
+  }
 
   if (decision.route === "profile_progress") {
     if (input.profile_key === null) return AGENT_FALLBACK;

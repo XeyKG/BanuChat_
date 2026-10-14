@@ -197,6 +197,26 @@ test("reconstructs a historical document citation", async () => {
   });
 });
 
+test("reconstructs course provenance using the answer release and course metadata join", async () => {
+  const sql = client([userRow, assistantRow], [citationRow({
+    source_kind: "course", document_version_id: null,
+    source_locator: "course:course_a", metadata_label: "Curso A",
+  })]);
+  const result = await getConversationDetail(sql, { conversation_id: CONVERSATION_ID });
+  const assistant = result.messages[1];
+  assert.equal(assistant?.role, "assistant");
+  if (assistant?.role !== "assistant") assert.fail("expected assistant");
+  assert.deepEqual(assistant.citations, [{
+    index: 0, source_kind: "course", label: "Curso: Curso A",
+    locator: "course:course_a", release_id: ANSWER_RELEASE_ID,
+    document_version_id: null, artifact_url: null,
+  }]);
+  assert.match(sql.calls[2]!.text, /WHEN 'course' THEN course\.name/u);
+  assert.match(sql.calls[2]!.text, /course\.dataset_release_id = mc\.dataset_release_id/u);
+  assert.match(sql.calls[2]!.text, /course\.course_key = mc\.course_key/u);
+  assert.doesNotMatch(JSON.stringify(result), /source_path|source_sha256|citation_records/u);
+});
+
 test("reconstructs every structured label with null document and artifact fields", async () => {
   const cases = [
     ["profile", "Perfil: Estudiante histórico"],

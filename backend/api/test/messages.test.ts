@@ -327,6 +327,44 @@ test("profile_progress persiste procedencia exacta y solo expone citas públicas
   assert.match(persistenceCall?.text ?? "", /\$3 \+ 1, 'assistant'/);
 });
 
+test("course_catalog persiste course_key y procedencia sin Document RAG", async () => {
+  const assistantContent = "Cursos del catálogo:\n- Curso A — disponible";
+  const sql = new FakeSqlClient([
+    contextRows(), releaseRows(), [{
+      course_key: "course_a", name: "Curso A", description: "Descripción sintética",
+      status: "available", source_path: "courses/catalog.json",
+      source_locator: "course:course_a", source_sha256: HASH,
+    }], persistedRows("cursos", assistantContent),
+  ]);
+  const result = await sendMessage(dependencies(sql, router({
+    route: "course_catalog", parameters: {}, response_variant: null,
+  })), { conversation_id: CONVERSATION_ID, content: "cursos", now: NOW });
+  const records: unknown = JSON.parse(String(sql.calls[3]?.values?.[6]));
+  assert.deepEqual(records, [{
+    citation_index: 0, dataset_release_id: RELEASE_ID, source_kind: "course",
+    course_key: "course_a", source_path: "courses/catalog.json",
+    source_locator: "course:course_a", source_sha256: HASH,
+    profile_key: null, event_key: null, announcement_key: null,
+    document_version_id: null, chunk_id: null,
+  }]);
+  assert.match(sql.calls[3]!.text, /INSERT INTO banuchat\.message_citations/u);
+  assert.deepEqual(result.assistant_message.citations, [{
+    index: 0, source_kind: "course", label: "Curso: Curso A",
+    locator: "course:course_a", release_id: RELEASE_ID,
+    document_version_id: null, artifact_url: null,
+  }]);
+  assert.doesNotMatch(JSON.stringify(result), /source_path|source_sha256|citation_records|"route"/u);
+});
+
+test("course_catalog rechaza rows inválidas como error de envío sin persistir", async () => {
+  const sql = new FakeSqlClient([contextRows(), releaseRows(), [{ course_key: "course_a" }]]);
+  await assert.rejects(sendMessage(dependencies(sql, router({
+    route: "course_catalog", parameters: {}, response_variant: null,
+  })), { conversation_id: CONVERSATION_ID, content: "cursos", now: NOW }),
+  expectReason("invalid_database_result"));
+  assert.equal(sql.calls.length, 3);
+});
+
 test("calendar_events persiste event_key", async () => {
   const assistantContent =
     "Encontré estos eventos:\n- 2026-10-01T14:00:00-05:00 — Sesión A";

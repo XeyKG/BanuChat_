@@ -1,5 +1,6 @@
 import type { AnnouncementsResult } from "../application/announcements.js";
 import type { CalendarEventsResult } from "../application/calendar-events.js";
+import type { CourseCatalogResult, CourseCatalogStatus } from "../application/course-catalog.js";
 import type {
   ProfileProgressResult,
   ProfileProgressStatus,
@@ -14,6 +15,12 @@ const PROFILE_STATUS_LABELS: Record<ProfileProgressStatus, string> = {
   enrolled: "inscrito",
   in_progress: "en progreso",
   completed: "completado",
+};
+
+const COURSE_STATUS_LABELS: Record<CourseCatalogStatus, string> = {
+  available: "disponible",
+  closed: "cerrado",
+  archived: "archivado",
 };
 
 const ANNOUNCEMENT_STATUS_LABELS = {
@@ -57,7 +64,7 @@ export function renderCapabilitiesHelp(releaseId: string): FastPathAnswer {
   return staticAnswer(
     "capabilities_help",
     releaseId,
-    "Puedo ayudarte a consultar el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
+    "Puedo ayudarte a consultar el catálogo de cursos y el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
   );
 }
 
@@ -96,6 +103,7 @@ function persistenceCitation(
     source_sha256: string;
   },
   identity:
+    | { source_kind: "course"; course_key: string }
     | { source_kind: "profile"; profile_key: string }
     | {
         source_kind: "profile_course";
@@ -115,6 +123,15 @@ function persistenceCitation(
     chunk_id: null,
   } as const;
 
+  if (identity.source_kind === "course") {
+    return {
+      ...base,
+      ...identity,
+      profile_key: null,
+      event_key: null,
+      announcement_key: null,
+    };
+  }
   if (identity.source_kind === "profile") {
     return {
       ...base,
@@ -147,6 +164,29 @@ function persistenceCitation(
     profile_key: null,
     course_key: null,
     event_key: null,
+  };
+}
+
+export function renderCourseCatalog(result: CourseCatalogResult): FastPathAnswer {
+  return {
+    kind: "answered",
+    route: "course_catalog",
+    release_id: result.release_id,
+    content: result.courses.length === 0
+      ? "No encontré cursos que coincidan con ese filtro."
+      : `Cursos del catálogo:\n${result.courses
+          .map((course) => `- ${course.name} — ${COURSE_STATUS_LABELS[course.status]}`)
+          .join("\n")}`,
+    insufficient_evidence: false,
+    citations: result.courses.map((course, index) =>
+      citation(index, "course", `Curso: ${course.name}`, course.source.source_locator, result.release_id),
+    ),
+    citation_records: result.courses.map((course, index) =>
+      persistenceCitation(index, result.release_id, course.source, {
+        source_kind: "course",
+        course_key: course.course_key,
+      }),
+    ),
   };
 }
 

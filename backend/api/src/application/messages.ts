@@ -15,6 +15,7 @@ import type { IntentRouter } from "../routing/intent-router-types.js";
 import { AnnouncementsError } from "./announcements-errors.js";
 import { CalendarEventsError } from "./calendar-events-errors.js";
 import { CurrentReleaseError } from "./current-release-errors.js";
+import { CourseCatalogError } from "./course-catalog-errors.js";
 import { SendMessageError } from "./messages-errors.js";
 import { ProfileProgressError } from "./profile-progress-errors.js";
 
@@ -329,6 +330,14 @@ function validateCitationPair(
     return false;
   }
 
+  if (record.source_kind === "course") {
+    return (
+      isStableKey(record.course_key) &&
+      record.profile_key === null &&
+      record.event_key === null &&
+      record.announcement_key === null
+    );
+  }
   if (record.source_kind === "profile") {
     return (
       isStableKey(record.profile_key) &&
@@ -462,6 +471,7 @@ export async function sendMessage(
     }
     if (
       error instanceof CalendarEventsError ||
+      error instanceof CourseCatalogError ||
       error instanceof AnnouncementsError
     ) {
       reject("invalid_database_result");

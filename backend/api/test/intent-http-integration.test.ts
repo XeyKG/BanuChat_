@@ -4,10 +4,13 @@ import test from "node:test";
 
 import {
   createRuntimeApiServer,
+  loadDefaultIntentRouter,
   type DocumentRagAnswer,
   type DocumentRagResponder,
   type SendMessageResult,
   type SqlQueryClient,
+  type IntentRouter,
+  type IntentRoutingDecision,
 } from "../src/index.js";
 
 const RELEASE_ID = "11111111-1111-4111-8111-111111111111";
@@ -109,8 +112,9 @@ async function withRuntimeServer(
   sql: ScriptedSqlClient,
   documentRag: DocumentRagResponder,
   action: (baseUrl: string) => Promise<void>,
+  loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
 ): Promise<void> {
-  const server = await createRuntimeApiServer(sql, documentRag);
+  const server = await createRuntimeApiServer(sql, documentRag, loadRouter);
   try {
     await new Promise<void>((resolve, reject) => {
       server.once("error", reject);
@@ -248,6 +252,115 @@ test("M6.1.1 real catalog renders HTTP greeting without Document RAG", async () 
     sql.assertComplete();
   });
 });
+
+for (const [prompt, statuses] of [
+  ["¿Qué cursos hay?", undefined],
+  ["¿Qué cursos están disponibles?", ["available"]],
+] as const) {
+  test(`M8.1 HTTP course_catalog: ${prompt}`, async () => {
+    const courseRows = [
+      { course_key: "course_a", name: "Curso A", description: "Descripción A", status: "available",
+        source_path: "courses/catalog.json", source_locator: "course:course_a", source_sha256: SHA256 },
+      { course_key: "course_b", name: "Curso B", description: "Descripción B", status: "closed",
+        source_path: "courses/catalog.json", source_locator: "course:course_b", source_sha256: SHA256 },
+    ];
+    const expectedRows = statuses === undefined ? courseRows : [courseRows[0]!];
+    let persistedContent = "";
+    let persistedRecords: Array<Record<string, unknown>> = [];
+    const sql = new ScriptedSqlClient([
+      conversationStep(),
+      { query: /JOIN banuchat\.dataset_releases/u,
+        rows: [{ release_id: RELEASE_ID, embedding_config_id: EMBEDDING_CONFIG_ID }] },
+      { query: /FROM banuchat\.courses/u, rows: (values) => {
+        assert.deepEqual(values, statuses === undefined
+          ? [RELEASE_ID, 20] : [RELEASE_ID, ["available"], 20]);
+        return expectedRows;
+      } },
+      { query: /INSERT INTO banuchat\.messages/u, rows: (values) => {
+        assert.ok(values);
+        persistedContent = String(values[4]);
+        persistedRecords = JSON.parse(String(values[6])) as Array<Record<string, unknown>>;
+        const step = persistenceStep();
+        assert.equal(typeof step.rows, "function");
+        return typeof step.rows === "function" ? step.rows(values) : step.rows;
+      } },
+      { query: /FROM banuchat\.conversations c/u, rows: [{
+        conversation_id: CONVERSATION_ID, dataset_release_id: RELEASE_ID,
+        profile_key: PROFILE_KEY, profile_alias: "Perfil Integración",
+        started_at: "2026-10-01T14:00:00.000Z",
+      }] },
+      { query: /FROM banuchat\.messages m/u, rows: () => [
+        { message_id: USER_MESSAGE_ID, ordinal: 0, role: "user", content: prompt,
+          created_at: "2026-10-01T14:00:01.000Z", answer_dataset_release_id: null, insufficient_evidence: false },
+        { message_id: ASSISTANT_MESSAGE_ID, ordinal: 1, role: "assistant", content: persistedContent,
+          created_at: "2026-10-01T14:00:01.001Z", answer_dataset_release_id: RELEASE_ID, insufficient_evidence: false },
+      ] },
+      { query: /FROM banuchat\.message_citations mc/u, rows: () => persistedRecords.map((record) => {
+        const course = courseRows.find((row) => row.course_key === record.course_key);
+        assert.ok(course);
+        return {
+          message_id: ASSISTANT_MESSAGE_ID, message_ordinal: 1,
+          citation_index: record.citation_index, dataset_release_id: record.dataset_release_id,
+          source_kind: record.source_kind, source_locator: record.source_locator,
+          document_version_id: record.document_version_id, metadata_label: course.name,
+        };
+      }) },
+    ]);
+    const decisions: IntentRoutingDecision[] = [];
+    const loadRouter = async (): Promise<IntentRouter> => {
+      const realRouter = await loadDefaultIntentRouter();
+      return {
+        catalog_valid: realRouter.catalog_valid, catalog_version: realRouter.catalog_version,
+        route(input) {
+          const decision = realRouter.route(input);
+          decisions.push(decision);
+          return decision;
+        },
+      };
+    };
+    let ragCalls = 0;
+    await withRuntimeServer(sql, async () => {
+      ragCalls++;
+      throw new Error("Document RAG must not run for course_catalog");
+    }, async (baseUrl) => {
+      const result = await postMessage(baseUrl, prompt);
+      assert.equal(decisions.length, 1);
+      assert.equal(decisions[0]?.route, "course_catalog");
+      assert.deepEqual(decisions[0]?.parameters.statuses, statuses);
+      assert.equal(ragCalls, 0);
+      assert.equal(result.assistant_message.insufficient_evidence, false);
+      assert.equal(result.assistant_message.citations.length, expectedRows.length);
+      assert.match(result.assistant_message.content, /Curso A — disponible/u);
+      if (statuses !== undefined) assert.doesNotMatch(result.assistant_message.content, /Curso B/u);
+      for (const [index, course] of expectedRows.entries()) {
+        assert.deepEqual(result.assistant_message.citations[index], {
+          index, source_kind: "course", label: `Curso: ${course.name}`,
+          locator: course.source_locator, release_id: RELEASE_ID,
+          document_version_id: null, artifact_url: null,
+        });
+        assert.deepEqual(persistedRecords[index], {
+          citation_index: index, source_kind: "course", course_key: course.course_key,
+          dataset_release_id: RELEASE_ID, source_path: course.source_path,
+          source_locator: course.source_locator, source_sha256: SHA256,
+          document_version_id: null, chunk_id: null, profile_key: null,
+          event_key: null, announcement_key: null,
+        });
+      }
+      const query = sql.calls[2]!.text;
+      assert.doesNotMatch(query, /profile_courses/u);
+      if (statuses !== undefined) assert.match(query, /status = ANY\(\$2::text\[\]\)/u);
+      else assert.doesNotMatch(query, /ANY/u);
+      assert.doesNotMatch(JSON.stringify(result), /"route"|source_path|source_sha256|citation_records/u);
+
+      const response = await fetch(`${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`);
+      assert.equal(response.status, 200);
+      const detail = await response.json() as { messages: SendMessageResult["assistant_message"][] };
+      assert.deepEqual(detail.messages[1]?.citations, result.assistant_message.citations);
+      assert.equal(detail.messages[1]?.content, result.assistant_message.content);
+      sql.assertComplete();
+    }, loadRouter);
+  });
+}
 
 test("J2.2 real catalog routes HTTP fallback to deterministic Document RAG", async () => {
   const sql = new ScriptedSqlClient([conversationStep(), persistenceStep()]);

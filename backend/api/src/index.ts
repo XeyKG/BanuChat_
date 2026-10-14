@@ -128,6 +128,17 @@ export {
   type StructuredSource,
 } from "./application/profile-progress.js";
 export {
+  getCourseCatalog,
+  type CourseCatalogInput,
+  type CourseCatalogStatus,
+  type CourseCatalogCourse,
+  type CourseCatalogResult,
+} from "./application/course-catalog.js";
+export {
+  CourseCatalogError,
+  type CourseCatalogErrorReason,
+} from "./application/course-catalog-errors.js";
+export {
   ProfileProgressError,
   type ProfileProgressErrorReason,
 } from "./application/profile-progress-errors.js";

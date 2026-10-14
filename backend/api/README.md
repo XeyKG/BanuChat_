@@ -17,12 +17,12 @@ Esto no verifica qué release está activa en una base local hoy ni acredita OE6
 - [Contrato humano](api-contract.md): endpoints, citas, consistencia, errores,
   reintentos y trazabilidad con PostgreSQL y MCP 2.0.
 
-Los mensajes pasan por Intent Router. Tres fast paths respaldados por datos,
-`profile_progress`, `calendar_events` y `announcements`, ejecutan servicio compartido
+Los mensajes pasan por Intent Router. Cuatro fast paths respaldados por datos,
+`course_catalog`, `profile_progress`, `calendar_events` y `announcements`, ejecutan servicio compartido
 y renderer determinista. Las rutas `basic_social`, `capabilities_help` y
 `known_out_of_scope` usan renderers estáticos deterministas, sin SQL de dominio,
-embeddings ni generación. Las rutas todavía no implementadas productivamente y
-`agent_fallback` van a Document RAG directo como fallback actual.
+embeddings ni generación. `document_lookup` sigue sin fast path ejecutable y,
+junto con `agent_fallback`, va a Document RAG directo como fallback actual.
 Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
 El catálogo del router y el `$id` del schema son `1.2.0-draft`.
@@ -35,7 +35,13 @@ previas: suma grupos únicos, penaliza contenido desconocido/señales ajenas y e
 al menos dos grupos, score ≥80 y margen ≥20, conservando guards y fallback.
 No hay stemming, fuzzy matching ni clasificación con IA. La regresión conserva
 los casos históricos/M3.1 de `cases.json`; las evaluaciones M3.2 se indexan en
-[eval](../../eval/README.md). Clasificar `course_catalog` no implementa su fast path.
+[eval](../../eval/README.md). M8.1 implementa el fast path conversacional
+`course_catalog` sobre `banuchat.courses` de la release vigente, sin requerir perfil
+en el dispatcher ni consultar `profile_courses`. Admite filtros `available`,
+`closed` y `archived`, límite por defecto 20 y máximo 50; produce citas `course`
+con procedencia persistida y reconstruible en el historial. No añade `/courses`.
+La integración HTTP usa el router real con SQL controlado y prueba envío/relectura
+de citas; la comprobación operacional con PostgreSQL local sigue pendiente.
 Las consultas REST directas usan los mismos servicios de aplicación y su futura
 reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
 N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP

@@ -24,6 +24,7 @@ interface PresentationCitationBase {
 export type PresentationCitation =
   | (PresentationCitationBase & {
       source_kind:
+        | "course"
         | "profile"
         | "profile_course"
         | "calendar_event"
@@ -50,6 +51,13 @@ interface StructuredPersistenceCitationBase
 }
 
 export type PersistenceCitation =
+  | (StructuredPersistenceCitationBase & {
+      source_kind: "course";
+      profile_key: null;
+      course_key: string;
+      event_key: null;
+      announcement_key: null;
+    })
   | (StructuredPersistenceCitationBase & {
       source_kind: "profile";
       profile_key: string;
@@ -91,6 +99,7 @@ export type PersistenceCitation =
 export interface FastPathAnswer {
   kind: "answered";
   route:
+    | "course_catalog"
     | "profile_progress"
     | "calendar_events"
     | "announcements"

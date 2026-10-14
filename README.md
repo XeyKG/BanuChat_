@@ -15,7 +15,7 @@ APIs ni integración real de UNAB/CCD, despliegue o autenticación institucional
 - La API REST implementa conversaciones, mensajes, historial, artefactos documentales
   y lecturas de perfiles/calendario/progreso/anuncios. El Intent Router determinista
   usa el catálogo `1.2.0-draft`: M3.1 léxico y M3.2 ponderado están implementados.
-  Despacha progreso, calendario y anuncios mediante servicios de aplicación, y
+  Despacha catálogo de cursos, progreso, calendario y anuncios mediante servicios de aplicación, y
   social/ayuda/fuera de alcance mediante renderers estáticos.
 - El fallback actual es Document RAG directo: embedding de la pregunta con
   `qwen3-embedding:0.6b` mediante Ollama → búsqueda exacta en PostgreSQL + pgvector

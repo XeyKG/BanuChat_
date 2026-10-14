@@ -446,7 +446,7 @@ test("capabilities_help describe solo capacidades disponibles sin SQL", async ()
     route: "capabilities_help",
     release_id: RELEASE_ID,
     content:
-      "Puedo ayudarte a consultar el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
+      "Puedo ayudarte a consultar el catálogo de cursos y el progreso del perfil de demostración, revisar eventos del calendario y anuncios, y responder preguntas basadas en los documentos y material disponible.",
     insufficient_evidence: false,
     citations: [],
     citation_records: [],
@@ -503,7 +503,6 @@ test("variantes estáticas incompatibles derivan a fallback sin SQL", async () =
 test("las rutas todavía no implementadas derivan a fallback sin SQL", async () => {
   const routes = [
     "agent_fallback",
-    "course_catalog",
     "document_lookup",
   ] as const;
 
@@ -519,6 +518,43 @@ test("las rutas todavía no implementadas derivan a fallback sin SQL", async () 
     });
     assert.equal(calls.length, 0);
   }
+});
+
+for (const status of [undefined, "available", "closed", "archived"] as const) {
+  test(`course_catalog ${status ?? "general"} usa SQL estructurado sin perfil ni fallback`, async () => {
+    const { router, inputs } = fakeRouter({
+      route: "course_catalog",
+      parameters: status === undefined ? {} : { statuses: [status], limit: 4 },
+      response_variant: null,
+    });
+    const { sql, calls } = fakeSql([releaseRows(), [{
+      course_key: "course_a", name: "Curso A", description: "Descripción sintética",
+      status: status ?? "available", source_path: "courses/catalog.json",
+      source_locator: "course:course_a", source_sha256: HASH,
+    }]]);
+    const result = await dispatchChatQuery({ router, sql }, { ...DEFAULT_INPUT, profile_key: null });
+    assert.equal(result.kind, "answered");
+    if (result.kind !== "answered") assert.fail("expected a fast path answer");
+    assert.equal(result.route, "course_catalog");
+    assert.equal(result.citations[0]?.source_kind, "course");
+    assert.equal(result.citation_records[0]?.course_key, "course_a");
+    assert.equal(inputs[0]?.context.profile_selected, false);
+    assert.equal(calls.length, 2);
+    assert.match(calls[1]!.text, /FROM banuchat\.courses/u);
+    assert.doesNotMatch(calls[1]!.text, /profile_courses/u);
+    assert.deepEqual(calls[1]!.values, status === undefined
+      ? [RELEASE_ID, 20] : [RELEASE_ID, [status], 4]);
+  });
+}
+
+test("course_catalog vacío se responde sin fallback", async () => {
+  const { router } = fakeRouter({ route: "course_catalog", parameters: {}, response_variant: null });
+  const { sql } = fakeSql([releaseRows(), []]);
+  const result = await dispatchChatQuery({ router, sql }, { ...DEFAULT_INPUT, profile_key: null });
+  assert.equal(result.kind, "answered");
+  if (result.kind !== "answered") assert.fail("expected a fast path answer");
+  assert.equal(result.route, "course_catalog");
+  assert.deepEqual(result.citations, []);
 });
 
 test("los errores de servicio se propagan", async () => {
