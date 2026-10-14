@@ -65,9 +65,17 @@ Antes del tuning solo se puede versionar el compromiso no revelador de
 [reserve-commitment-template.json](reserve-commitment-template.json), validado por
 [reserve-commitment.schema.json](reserve-commitment.schema.json). No se inventan todavía
 ubicación externa, responsable, fecha ni hash. Al iniciar la primera evaluación de
-reserva se debe presentar el archivo controlado, verificar que su SHA-256 coincide
-exactamente con `content_sha256` y conservar después el archivo junto con la evidencia
-final.
+reserva se debe presentar el archivo controlado, validarlo primero contra
+[reserve.schema.json](reserve.schema.json), serializar el objeto congelado como UTF-8 sin
+BOM, JSON con indentación de 2 espacios, saltos LF y exactamente un LF final, y calcular
+`content_sha256` sobre esos bytes canónicos. Solo después se debe verificar que coincide
+exactamente con el compromiso y ejecutar el reserve sobre el sistema ajustado. El archivo
+con contenido no se versionará antes de terminar tuning.
+
+El proceso o agente usado para tuning no recibe el contenido reserve. El proceso de
+curación puede prepararlo y revisarlo; durante tuning solo se expone el commitment. La
+preparación, ubicación externa, responsable, fecha, número exacto y hash final quedan
+pendientes hasta esa presentación controlada.
 
 ## F. Construcción y revisión humana
 
@@ -89,7 +97,7 @@ Cada caso debe fijar antes de observar retrieval o generación:
 - respuesta de referencia verificable y suficientemente completa;
 - uno o más contextos relevantes identificados por documento, ordinal, locator y
   `source_sha256`;
-- tipo de pregunta y split;
+- tipo de pregunta y, cuando aplique al benchmark principal, split;
 - estado y notas de revisión.
 
 El benchmark debe congelarse antes de ejecutar el sistema contra él. Los resultados del
@@ -106,7 +114,7 @@ completo. También se calcularán:
 - ID-based/context `Recall@5`: proporción de contextos gold presentes en el top-5;
 - resultados por caso y agregados por tipo y documento cuando sean interpretables.
 
-La identidad primaria se resolverá desde `document_key + ordinal + locator`; los UUID
+La identidad primaria se resolverá desde `document_key + ordinal + locator + source_sha256`; los UUID
 de release se registrarán como procedencia observada, no como única identidad del gold.
 
 ## I. Métricas RAGAS
@@ -199,8 +207,8 @@ queda para el validador de congelación.
 Antes de marcar el benchmark como `frozen`, un validador deberá comprobar: IDs únicos;
 exactamente 60 casos `primary`, todos `approved`; representación de los 10 documentos
 elegibles; 10–15 preguntas multi-contexto; `single_context` con exactamente un contexto;
-`multi_context_same_document` con dos o más contextos del mismo `doc_key`;
-`multi_context_cross_document` con dos o más `doc_key` distintos; claves en `doc-001`
+`multi_context_same_document` con dos o más contextos del mismo `document_key`;
+`multi_context_cross_document` con dos o más `document_key` distintos; claves en `doc-001`
 a `doc-010`; ordinal y locator reales; `source_sha256` igual al artefacto del manifest;
 y ausencia de resultados observados en el gold.
 

@@ -5,7 +5,7 @@
   "description": "Non-revealing commitment metadata; reserve questions and gold stay outside the tuning repository.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "commitment_id", "benchmark_id", "expected_case_count", "hash_algorithm", "status"],
+  "required": ["schema_version", "commitment_id", "benchmark_id", "hash_algorithm", "status"],
   "properties": {
     "schema_version": {"const": "1.0.0"},
     "commitment_id": {"type": "string", "pattern": "^banuchat-rag-quality-m9-reserve-v[1-9][0-9]*$"},
@@ -13,10 +13,10 @@
     "expected_case_count": {"type": "integer", "minimum": 20, "maximum": 30},
     "hash_algorithm": {"const": "sha256"},
     "status": {"enum": ["draft", "committed"]},
-    "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+    "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "SHA-256 of the exact canonical UTF-8 bytes of the frozen reserve file."}
   },
   "allOf": [
-    {"if": {"properties": {"status": {"const": "committed"}}, "required": ["status"]}, "then": {"required": ["content_sha256"]}},
+    {"if": {"properties": {"status": {"const": "committed"}}, "required": ["status"]}, "then": {"required": ["expected_case_count", "content_sha256"]}},
     {"if": {"properties": {"status": {"const": "draft"}}, "required": ["status"]}, "then": {"not": {"required": ["content_sha256"]}}}
   ]
 }
