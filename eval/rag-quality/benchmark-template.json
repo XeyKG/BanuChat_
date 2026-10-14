@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "benchmark_id": "banuchat-rag-quality-m9-v1",
+  "status": "draft",
+  "corpus": {
+    "dataset_key": "banuchat-synthetic",
+    "source_manifest": "data/synthetic/manifest.json",
+    "documents_index": "data/synthetic/documents/documents.json",
+    "eligible_retrieval_mode": "chunked",
+    "eligible_document_keys": [
+      "doc-001",
+      "doc-002",
+      "doc-003",
+      "doc-004",
+      "doc-005",
+      "doc-006",
+      "doc-007",
+      "doc-008",
+      "doc-009",
+      "doc-010"
+    ],
+    "excluded_document_keys": ["doc-011", "doc-012"],
+    "eligible_document_count": 10,
+    "documented_chunk_count": 60
+  },
+  "top_k": 5,
+  "splits": {
+    "primary": {
+      "target_case_count": 60,
+      "actual_case_count": 0
+    },
+    "reserve": {
+      "target_min_case_count": 20,
+      "target_max_case_count": 30,
+      "actual_case_count": 0
+    }
+  },
+  "cases": []
+}
+
