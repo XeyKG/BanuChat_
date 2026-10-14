@@ -13,6 +13,7 @@ El runtime Document RAG vigente usa `qwen3:4b-instruct` y un router `1.2.0-draft
 | L1 | [Baseline](results/l1-rag-latency-2026-10-03.md) | Diez POST warm secuenciales y perfil por etapas; receta anterior. |
 | OPT-1C | [Resultado](results/opt1c-query-context-retrieval-2026-10-03.md) | Query num_ctx 32768/4096: top-1 y conjunto top-5 iguales en 10/10; orden igual en 9/10. No mide latencia. |
 | L1-B | [Medición posterior](results/l1-b-rag-latency-2026-10-03.md) | Mismo workload/metodología L1, release con query=4096/document=32768; media wall 4013.57 ms, mediana 3956.78 ms, mínimo 1883.42 ms, máximo/p95 6485.59 ms, 8/10 <5000 ms. Generación media 3622.38 ms; vector DB 3.03 ms. |
+| M8.3-A | Diagnóstico de sensibilidad a paráfrasis | Compara dos formulaciones de una consulta sobre incidencias, tres veces cada una, observando embedding, retrieval y generación reales sin escribir en PostgreSQL. |
 
 Cada Markdown tiene JSON complementario con metadata y resultados. L1-B no
 acredita formalmente OE6 ni SLA: n=10, p95 nearest rank igual al máximo, sin
@@ -340,3 +341,56 @@ sobrescribir, en `results/opt1c-query-context-retrieval-AAAA-MM-DD.json` y
 Repetirla exige la release/receta baseline y revisar sus precondiciones; el
 instrumento exploratorio no cambia producción. La receta query=4096 se implementó
 posteriormente y L1-B midió otra release; no se atribuye esa latencia a OPT-1C.
+
+## M8.3-A: diagnóstico de sensibilidad a paráfrasis
+
+`run-m8-3-paraphrase-diagnostic.mjs` ejecuta el Document RAG productivo con dos
+preguntas congeladas en `m8-3-paraphrase-diagnostic-cases.json`: la formulación
+que omite «de la práctica» y la que incluye esa aclaración. Cada pregunta se
+evalúa tres veces en orden intercalado. No se define de antemano cuál debe pasar
+o fallar; el objetivo es observar si una variación léxica pequeña cambia el
+embedding, el top-5 recuperado o la respuesta del generador.
+
+El instrumento importa `generateDocumentRagAnswer` y las implementaciones reales
+compiladas de embedding, retrieval y generación. Los wrappers de evaluación
+registran los vectores de consulta, las filas recuperadas, el prompt exacto y la
+respuesta de Ollama. PostgreSQL se limita formalmente a sentencias `SELECT`; el
+runner rechaza cualquier intento de escritura. También exige que Git esté en
+`main`, que `HEAD` coincida con `origin/main`, y que los únicos cambios locales
+sean los archivos autorizados de M8.3-A dentro de `eval/generation/`.
+
+La revisión local no abre PostgreSQL ni Ollama y no crea resultados:
+
+```powershell
+node --check eval/generation/run-m8-3-paraphrase-diagnostic.mjs
+node eval/generation/run-m8-3-paraphrase-diagnostic.mjs --dry-run
+```
+
+La ejecución formal requiere `backend/api/dist`, PostgreSQL/pgvector y Ollama
+locales, la release sintética actual en estado `ready`, y las variables de
+entorno usadas por `backend/api`:
+
+```powershell
+node --env-file=.env eval/generation/run-m8-3-paraphrase-diagnostic.mjs
+```
+
+El preflight registra la revisión del repositorio, release, configuración y
+receta de embedding, versiones de PostgreSQL y pgvector, modelo y digest del
+embedding, y modelo, digest y parámetros del generador. La ejecución conserva
+`top_k=5`, `temperature=0` y `num_predict=256`. Por corrida se guardan hashes y
+contenido de los chunks, posiciones de `doc-008`, prompts exactos, salida cruda,
+marcador de evidencia insuficiente y métricas que expone el generador.
+
+La comparación principal usa la primera repetición de cada pregunta y reporta
+similitud coseno y diferencia máxima entre vectores, igualdad del top-1, conjunto
+y orden del top-5, intersección, Jaccard y posiciones de `doc-008`. Las tres
+repeticiones sirven para comprobar si el resultado observado es estable. La
+clasificación de causa es conservadora: puede señalar dominancia de retrieval o
+generación solamente cuando las observaciones la sostienen; en los demás casos
+queda como mixta o inconclusa.
+
+Una ejecución completa crea, sin sobrescribir, los archivos
+`results/m8-3-paraphrase-diagnostic-AAAA-MM-DD.json` y `.md`, con fecha de
+`America/Bogota`. Este diagnóstico usa dos preguntas y tres repeticiones, no es
+RAGAS, no estima calidad general ni significancia estadística, y no acredita por
+sí solo una corrección productiva.

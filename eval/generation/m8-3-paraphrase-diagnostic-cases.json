@@ -1,0 +1,16 @@
+{
+  "schema_version": "1",
+  "diagnostic_id": "banuchat-m8-3-paraphrase-sensitivity",
+  "purpose": "Diagnosticar en qué capa del Document RAG divergen dos paráfrasis sobre el reporte de una incidencia.",
+  "expected_relevant_document": "doc-008",
+  "cases": [
+    {
+      "id": "M8.3-A1",
+      "question": "¿Qué información debo incluir al reportar una incidencia?"
+    },
+    {
+      "id": "M8.3-A2",
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?"
+    }
+  ]
+}
