@@ -375,12 +375,12 @@
     },
     {
       "id": "M9-P-040", "split": "primary",
-      "question": "Al preparar la entrega de una evidencia, ¿cómo se determina si existe una fecha y qué fuente debe consultarse sin deducirla de la descripción?",
+      "question": "¿Cómo se distingue una inscripción registrada de la participación efectiva en una sesión del programa demo?",
       "question_type": "multi_context_cross_document",
-      "reference_answer": "La descripción de entrega no fija por sí misma un plazo. Si se necesita una fecha, debe consultarse el anuncio o evento correspondiente; el calendario es la fuente de los inicios y finales de los eventos y debe leerse identificando el evento concreto, sin trasladar fechas desde otra actividad ni inventar un límite.",
+      "reference_answer": "La inscripción es la asociación ficticia entre un perfil y una actividad y se comprueba en el progreso; por sí sola no demuestra que se haya desarrollado la práctica. La participación efectiva implica realizarla siguiendo instrucciones, expresar decisiones y revisar el resultado, por lo que no se infiere del mero registro de la actividad.",
       "relevant_contexts": [
-        {"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"},
-        {"document_key": "doc-006", "ordinal": 0, "locator": "section:0:1. El calendario como fuente de fechas", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}
+        {"document_key": "doc-002", "ordinal": 0, "locator": "section:0:1. Qué significa inscribirse", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"},
+        {"document_key": "doc-003", "ordinal": 0, "locator": "section:0:1. Participar en una sesión", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}
       ],
       "review_status": "draft"
     }
