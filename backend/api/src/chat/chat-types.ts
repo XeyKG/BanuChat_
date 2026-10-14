@@ -18,7 +18,6 @@ interface PresentationCitationBase {
   label: string;
   locator: string;
   release_id: string;
-  artifact_url: null;
 }
 
 export type PresentationCitation =
@@ -30,10 +29,12 @@ export type PresentationCitation =
         | "calendar_event"
         | "announcement";
       document_version_id: null;
+      artifact_url: null;
     })
   | (PresentationCitationBase & {
       source_kind: "document";
       document_version_id: string;
+      artifact_url: string | null;
     });
 
 interface PersistenceCitationSource {
@@ -89,7 +90,7 @@ export type PersistenceCitation =
   | (PersistenceCitationSource & {
       source_kind: "document";
       document_version_id: string;
-      chunk_id: string;
+      chunk_id: string | null;
       profile_key: null;
       course_key: null;
       event_key: null;
@@ -103,6 +104,7 @@ export interface FastPathAnswer {
     | "profile_progress"
     | "calendar_events"
     | "announcements"
+    | "document_lookup"
     | "basic_social"
     | "capabilities_help"
     | "known_out_of_scope";

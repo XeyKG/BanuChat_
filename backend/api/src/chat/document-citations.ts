@@ -59,7 +59,7 @@ export function buildDocumentCitations(
       locator: chunk.chunk_locator,
       release_id: chunk.release_id,
       document_version_id: chunk.document_version_id,
-      artifact_url: null,
+      artifact_url: `/api/v1/documents/${chunk.document_version_id}/artifact`,
     });
     citationRecords.push({
       citation_index: index,

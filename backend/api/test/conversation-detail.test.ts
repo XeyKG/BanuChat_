@@ -191,7 +191,7 @@ test("reconstructs a historical document citation", async () => {
         locator: "document:guide#section",
         release_id: ANSWER_RELEASE_ID,
         document_version_id: DOCUMENT_VERSION_ID,
-        artifact_url: null,
+        artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
       },
     ],
   });

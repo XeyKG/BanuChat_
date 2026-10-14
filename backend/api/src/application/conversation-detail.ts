@@ -98,7 +98,7 @@ export interface ConversationDetailCitation {
   locator: string;
   release_id: string;
   document_version_id: string | null;
-  artifact_url: null;
+  artifact_url: string | null;
 }
 
 export interface ConversationDetailUserMessage {
@@ -356,7 +356,10 @@ function attachCitations(
       locator: row.source_locator,
       release_id: row.dataset_release_id,
       document_version_id: documentVersionId,
-      artifact_url: null,
+      artifact_url:
+        documentVersionId === null
+          ? null
+          : `/api/v1/documents/${documentVersionId}/artifact`,
     });
   }
 }

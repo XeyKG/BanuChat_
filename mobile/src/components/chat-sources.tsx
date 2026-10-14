@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Citation, CitationSourceKind } from '@/api/messages';
@@ -44,7 +45,21 @@ function sourceDetail(citation: Citation): string | null {
     : null;
 }
 
+function hasOpenableDocument(citation: Citation): citation is Citation & {
+  source_kind: 'document';
+  document_version_id: string;
+  artifact_url: string;
+} {
+  return (
+    citation.source_kind === 'document' &&
+    citation.document_version_id !== null &&
+    citation.artifact_url ===
+      `/api/v1/documents/${citation.document_version_id}/artifact`
+  );
+}
+
 export function ChatSources({ citations }: { citations: Citation[] }) {
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const sourceCount = citations.length;
 
@@ -71,6 +86,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
         <View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} style={styles.list}>
           {citations.map((citation) => {
             const detail = sourceDetail(citation);
+            const canOpenDocument = hasOpenableDocument(citation);
             return (
               <View key={citation.index} style={styles.source}>
                 <View style={styles.sourceIndexBadge}>
@@ -80,6 +96,26 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
                   <Text style={styles.sourceKind}>{KIND_LABELS[citation.source_kind]}</Text>
                   <Text style={styles.sourceLabel}>{readableLabel(citation)}</Text>
                   {detail !== null && <Text style={styles.sourceDetail}>{detail}</Text>}
+                  {canOpenDocument && (
+                    <Pressable
+                      accessibilityLabel={`Abrir documento ${readableLabel(citation)}`}
+                      accessibilityRole="button"
+                      onPress={() =>
+                        router.push({
+                          pathname: '/document',
+                          params: {
+                            document_version_id: citation.document_version_id,
+                            title: readableLabel(citation),
+                          },
+                        })
+                      }
+                      style={({ pressed }) => [
+                        styles.openDocument,
+                        pressed && styles.pressed,
+                      ]}>
+                      <Text style={styles.openDocumentText}>Abrir documento</Text>
+                    </Pressable>
+                  )}
                 </View>
               </View>
             );
@@ -146,4 +182,20 @@ const styles = StyleSheet.create({
   },
   sourceLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700', lineHeight: 20 },
   sourceDetail: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  openDocument: {
+    minHeight: layout.minTouchTarget,
+    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.accent,
+    backgroundColor: colors.surface,
+  },
+  openDocumentText: {
+    color: colors.accentStrong,
+    fontSize: typography.small,
+    fontWeight: '800',
+  },
 });

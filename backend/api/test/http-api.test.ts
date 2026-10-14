@@ -1070,7 +1070,7 @@ test("GET /conversations/{id} round-trips messages and a document citation", asy
                 locator: "document:guide#section",
                 release_id: RELEASE_ID,
                 document_version_id: DOCUMENT_VERSION_ID,
-                artifact_url: null,
+                artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
               },
             ],
           },

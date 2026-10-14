@@ -362,6 +362,159 @@ for (const [prompt, statuses] of [
   });
 }
 
+for (const [prompt, title, retrievalMode] of [
+  [
+    "Muéstrame la guía integradora completa",
+    "Guía completa de actividad integradora",
+    "full_document",
+  ],
+  [
+    "Localiza el material sobre soporte",
+    "Soporte y reporte de incidencias",
+    "chunked",
+  ],
+] as const) {
+  test(`M8.2 HTTP document_lookup: ${prompt}`, async () => {
+    let persistedContent = "";
+    let persistedRecords: Array<Record<string, unknown>> = [];
+    const documentRow = {
+      document_key: retrievalMode === "full_document" ? "integration-guide" : "support-guide",
+      retrieval_mode: retrievalMode,
+      document_version_id: DOCUMENT_VERSION_ID,
+      title,
+      mime_type: "text/markdown",
+      source_path: `documents/${retrievalMode}-guide.md`,
+      source_locator: `document:${retrievalMode}-guide`,
+      source_sha256: SHA256,
+    };
+    const sql = new ScriptedSqlClient([
+      conversationStep(),
+      {
+        query: /JOIN banuchat\.dataset_releases/u,
+        rows: [{ release_id: RELEASE_ID, embedding_config_id: EMBEDDING_CONFIG_ID }],
+      },
+      {
+        query: /FROM banuchat\.document_versions dv/u,
+        rows: (values) => {
+          assert.deepEqual(
+            values,
+            retrievalMode === "full_document"
+              ? [RELEASE_ID, title, "full_document", 10]
+              : [RELEASE_ID, title, 10],
+          );
+          return [documentRow];
+        },
+      },
+      {
+        query: /INSERT INTO banuchat\.messages/u,
+        rows: (values) => {
+          assert.ok(values);
+          persistedContent = String(values[4]);
+          persistedRecords = JSON.parse(String(values[6])) as Array<Record<string, unknown>>;
+          const step = persistenceStep();
+          assert.equal(typeof step.rows, "function");
+          return typeof step.rows === "function" ? step.rows(values) : step.rows;
+        },
+      },
+      {
+        query: /FROM banuchat\.conversations c/u,
+        rows: [{
+          conversation_id: CONVERSATION_ID,
+          dataset_release_id: RELEASE_ID,
+          profile_key: PROFILE_KEY,
+          profile_alias: "Perfil Integración",
+          started_at: "2026-10-01T14:00:00.000Z",
+        }],
+      },
+      {
+        query: /FROM banuchat\.messages m/u,
+        rows: () => [
+          {
+            message_id: USER_MESSAGE_ID,
+            ordinal: 0,
+            role: "user",
+            content: prompt,
+            created_at: "2026-10-01T14:00:01.000Z",
+            answer_dataset_release_id: null,
+            insufficient_evidence: false,
+          },
+          {
+            message_id: ASSISTANT_MESSAGE_ID,
+            ordinal: 1,
+            role: "assistant",
+            content: persistedContent,
+            created_at: "2026-10-01T14:00:01.001Z",
+            answer_dataset_release_id: RELEASE_ID,
+            insufficient_evidence: false,
+          },
+        ],
+      },
+      {
+        query: /FROM banuchat\.message_citations mc/u,
+        rows: () => [{
+          message_id: ASSISTANT_MESSAGE_ID,
+          message_ordinal: 1,
+          citation_index: 0,
+          dataset_release_id: RELEASE_ID,
+          source_kind: "document",
+          source_locator: documentRow.source_locator,
+          document_version_id: DOCUMENT_VERSION_ID,
+          metadata_label: title,
+        }],
+      },
+    ]);
+    const decisions: IntentRoutingDecision[] = [];
+    const loadRouter = async (): Promise<IntentRouter> => {
+      const realRouter = await loadDefaultIntentRouter();
+      return {
+        catalog_valid: realRouter.catalog_valid,
+        catalog_version: realRouter.catalog_version,
+        route(input) {
+          const decision = realRouter.route(input);
+          decisions.push(decision);
+          return decision;
+        },
+      };
+    };
+    let ragCalls = 0;
+
+    await withRuntimeServer(
+      sql,
+      async () => {
+        ragCalls += 1;
+        throw new Error("Document RAG must not run for document_lookup");
+      },
+      async (baseUrl) => {
+        const result = await postMessage(baseUrl, prompt);
+        assert.equal(decisions[0]?.route, "document_lookup");
+        assert.equal(decisions[0]?.parameters.query, title);
+        assert.equal(ragCalls, 0);
+        assert.deepEqual(result.assistant_message.citations, [{
+          index: 0,
+          source_kind: "document",
+          label: `Documento: ${title}`,
+          locator: documentRow.source_locator,
+          release_id: RELEASE_ID,
+          document_version_id: DOCUMENT_VERSION_ID,
+          artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
+        }]);
+        assert.equal(persistedRecords[0]?.chunk_id, null);
+        assert.equal(persistedRecords[0]?.document_version_id, DOCUMENT_VERSION_ID);
+        assert.doesNotMatch(JSON.stringify(result), /"route"|source_path|source_sha256|citation_records/u);
+
+        const response = await fetch(`${baseUrl}/api/v1/conversations/${CONVERSATION_ID}`);
+        assert.equal(response.status, 200);
+        const detail = await response.json() as {
+          messages: Array<{ citations?: SendMessageResult["assistant_message"]["citations"] }>;
+        };
+        assert.deepEqual(detail.messages[1]?.citations, result.assistant_message.citations);
+        sql.assertComplete();
+      },
+      loadRouter,
+    );
+  });
+}
+
 test("J2.2 real catalog routes HTTP fallback to deterministic Document RAG", async () => {
   const sql = new ScriptedSqlClient([conversationStep(), persistenceStep()]);
   const ragInputs: Array<{ release_id: string; query: string }> = [];
@@ -374,7 +527,7 @@ test("J2.2 real catalog routes HTTP fallback to deterministic Document RAG", asy
       label: "Documento sintético",
       locator: "document:test#chunk-1",
       release_id: RELEASE_ID,
-      artifact_url: null,
+      artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
       source_kind: "document",
       document_version_id: DOCUMENT_VERSION_ID,
     }],

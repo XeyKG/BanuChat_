@@ -1,6 +1,7 @@
 import type { AnnouncementsResult } from "../application/announcements.js";
 import type { CalendarEventsResult } from "../application/calendar-events.js";
 import type { CourseCatalogResult, CourseCatalogStatus } from "../application/course-catalog.js";
+import type { DocumentLookupResult } from "../application/document-lookup.js";
 import type {
   ProfileProgressResult,
   ProfileProgressStatus,
@@ -187,6 +188,55 @@ export function renderCourseCatalog(result: CourseCatalogResult): FastPathAnswer
         course_key: course.course_key,
       }),
     ),
+  };
+}
+
+export function renderDocumentLookup(
+  result: DocumentLookupResult,
+): FastPathAnswer {
+  if (result.documents.length === 0) {
+    return {
+      kind: "answered",
+      route: "document_lookup",
+      release_id: result.release_id,
+      content: "No encontré un documento que coincida con esa búsqueda.",
+      insufficient_evidence: false,
+      citations: [],
+      citation_records: [],
+    };
+  }
+
+  return {
+    kind: "answered",
+    route: "document_lookup",
+    release_id: result.release_id,
+    content: `Encontré ${
+      result.documents.length === 1 ? "este documento" : "estos documentos"
+    }:\n${result.documents.map((document) => `- ${document.title}`).join("\n")}`,
+    insufficient_evidence: false,
+    citations: result.documents.map((document, index) => ({
+      index,
+      source_kind: "document",
+      label: `Documento: ${document.title}`,
+      locator: document.source.source_locator,
+      release_id: result.release_id,
+      document_version_id: document.document_version_id,
+      artifact_url: `/api/v1/documents/${document.document_version_id}/artifact`,
+    })),
+    citation_records: result.documents.map((document, index) => ({
+      citation_index: index,
+      dataset_release_id: result.release_id,
+      source_kind: "document",
+      source_path: document.source.source_path,
+      source_locator: document.source.source_locator,
+      source_sha256: document.source.source_sha256,
+      document_version_id: document.document_version_id,
+      chunk_id: null,
+      profile_key: null,
+      course_key: null,
+      event_key: null,
+      announcement_key: null,
+    })),
   };
 }
 

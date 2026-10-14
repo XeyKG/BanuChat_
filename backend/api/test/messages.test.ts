@@ -93,7 +93,7 @@ function documentAnswer(
         label: "Guía sintética",
         locator: "document:guia#chunk-1",
         release_id: RELEASE_ID,
-        artifact_url: null,
+        artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
         source_kind: "document",
         document_version_id: DOCUMENT_VERSION_ID,
       },
@@ -365,6 +365,47 @@ test("course_catalog rechaza rows inválidas como error de envío sin persistir"
   assert.equal(sql.calls.length, 3);
 });
 
+test("document_lookup persiste una cita documental sin chunk", async () => {
+  const assistantContent = "Encontré este documento:\n- Guía completa";
+  const sql = new FakeSqlClient([
+    contextRows(),
+    releaseRows(),
+    [{
+      document_key: "full-guide",
+      retrieval_mode: "full_document",
+      document_version_id: DOCUMENT_VERSION_ID,
+      title: "Guía completa",
+      mime_type: "text/markdown",
+      source_path: "documents/full-guide.md",
+      source_locator: "document:full-guide",
+      source_sha256: HASH,
+    }],
+    persistedRows("guía completa", assistantContent),
+  ]);
+
+  const result = await sendMessage(
+    dependencies(sql, router({
+      route: "document_lookup",
+      parameters: { query: "Guía completa", retrieval_mode: "full_document" },
+      response_variant: null,
+    })),
+    { conversation_id: CONVERSATION_ID, content: "guía completa", now: NOW },
+  );
+
+  assert.deepEqual(result.assistant_message.citations, [{
+    index: 0,
+    source_kind: "document",
+    label: "Documento: Guía completa",
+    locator: "document:full-guide",
+    release_id: RELEASE_ID,
+    document_version_id: DOCUMENT_VERSION_ID,
+    artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
+  }]);
+  const records = JSON.parse(String(sql.calls[3]?.values?.[6])) as Array<Record<string, unknown>>;
+  assert.equal(records[0]?.document_version_id, DOCUMENT_VERSION_ID);
+  assert.equal(records[0]?.chunk_id, null);
+});
+
 test("calendar_events persiste event_key", async () => {
   const assistantContent =
     "Encontré estos eventos:\n- 2026-10-01T14:00:00-05:00 — Sesión A";
@@ -510,10 +551,33 @@ test("agent_fallback usa la release y query exactas y persiste citas documentale
     label: "Guía sintética",
     locator: "document:guia#chunk-1",
     release_id: RELEASE_ID,
-    artifact_url: null,
+    artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
     source_kind: "document",
     document_version_id: DOCUMENT_VERSION_ID,
   });
+});
+
+test("rechaza una URL documental que no coincide con el endpoint derivado", async () => {
+  const answer = documentAnswer({
+    citations: [{
+      index: 0,
+      label: "Guía sintética",
+      locator: "document:guia#chunk-1",
+      release_id: RELEASE_ID,
+      source_kind: "document",
+      document_version_id: DOCUMENT_VERSION_ID,
+      artifact_url: "https://example.com/document.md",
+    }],
+  });
+  const sql = new FakeSqlClient([contextRows()]);
+  await assert.rejects(
+    sendMessage(
+      dependencies(sql, fallbackRouter(), async () => answer),
+      { conversation_id: CONVERSATION_ID, content: "consulta", now: NOW },
+    ),
+    expectReason("invalid_database_result"),
+  );
+  assert.equal(sql.calls.length, 1);
 });
 
 test("insufficient evidence se persiste como respuesta válida sin citas", async () => {

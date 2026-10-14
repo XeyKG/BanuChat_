@@ -17,12 +17,14 @@ Esto no verifica qué release está activa en una base local hoy ni acredita OE6
 - [Contrato humano](api-contract.md): endpoints, citas, consistencia, errores,
   reintentos y trazabilidad con PostgreSQL y MCP 2.0.
 
-Los mensajes pasan por Intent Router. Cuatro fast paths respaldados por datos,
-`course_catalog`, `profile_progress`, `calendar_events` y `announcements`, ejecutan servicio compartido
-y renderer determinista. Las rutas `basic_social`, `capabilities_help` y
+Los mensajes pasan por Intent Router. Cinco fast paths respaldados por datos,
+`course_catalog`, `profile_progress`, `calendar_events`, `announcements` y
+`document_lookup`, ejecutan servicio de aplicación y renderer determinista. Las rutas
+`basic_social`, `capabilities_help` y
 `known_out_of_scope` usan renderers estáticos deterministas, sin SQL de dominio,
-embeddings ni generación. `document_lookup` sigue sin fast path ejecutable y,
-junto con `agent_fallback`, va a Document RAG directo como fallback actual.
+embeddings ni generación. `document_lookup` resuelve títulos canónicos por metadata
+exacta en la release vigente, sin consultar chunks. `agent_fallback` va a Document
+RAG directo para preguntas sobre el contenido.
 Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
 El catálogo del router y el `$id` del schema son `1.2.0-draft`.
@@ -42,6 +44,10 @@ en el dispatcher ni consultar `profile_courses`. Admite filtros `available`,
 con procedencia persistida y reconstruible en el historial. No añade `/courses`.
 La integración HTTP usa el router real con SQL controlado y prueba envío/relectura
 de citas; la comprobación operacional con PostgreSQL local sigue pendiente.
+M8.2 añade `document_lookup`: descubre tanto documentos `chunked` como
+`full_document`, persiste la versión documental con `chunk_id` nulo y expone la ruta
+relativa verificada del artifact. Las citas documentales de RAG conservan su UUID de
+chunk y también pueden abrir el documento original.
 Las consultas REST directas usan los mismos servicios de aplicación y su futura
 reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
 N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP

@@ -500,24 +500,17 @@ test("variantes estáticas incompatibles derivan a fallback sin SQL", async () =
   }
 });
 
-test("las rutas todavía no implementadas derivan a fallback sin SQL", async () => {
-  const routes = [
-    "agent_fallback",
-    "document_lookup",
-  ] as const;
-
-  for (const route of routes) {
-    const { router } = fakeRouter({
-      route,
-      parameters: {},
-      response_variant: null,
-    });
-    const { sql, calls } = fakeSql([]);
-    assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
-      kind: "agent_fallback",
-    });
-    assert.equal(calls.length, 0);
-  }
+test("agent_fallback se conserva sin consultar SQL", async () => {
+  const { router } = fakeRouter({
+    route: "agent_fallback",
+    parameters: {},
+    response_variant: null,
+  });
+  const { sql, calls } = fakeSql([]);
+  assert.deepEqual(await dispatchChatQuery({ router, sql }, DEFAULT_INPUT), {
+    kind: "agent_fallback",
+  });
+  assert.equal(calls.length, 0);
 });
 
 for (const status of [undefined, "available", "closed", "archived"] as const) {

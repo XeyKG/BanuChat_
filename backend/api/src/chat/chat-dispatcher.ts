@@ -11,6 +11,10 @@ import {
   type CourseCatalogStatus,
 } from "../application/course-catalog.js";
 import {
+  lookupDocuments,
+  type DocumentLookupInput,
+} from "../application/document-lookup.js";
+import {
   getProfileProgress,
   type ProfileProgressStatus,
 } from "../application/profile-progress.js";
@@ -20,6 +24,7 @@ import {
   renderCalendarEvents,
   renderCapabilitiesHelp,
   renderCourseCatalog,
+  renderDocumentLookup,
   renderKnownOutOfScope,
   renderProfileProgress,
 } from "./chat-renderers.js";
@@ -71,6 +76,22 @@ export async function dispatchChatQuery(
         : { limit: decision.parameters.limit }),
     });
     return renderProfileProgress(result);
+  }
+
+  if (decision.route === "document_lookup") {
+    const { query } = decision.parameters;
+    if (query === undefined) return AGENT_FALLBACK;
+
+    const result = await lookupDocuments(dependencies.sql, {
+      query,
+      ...(decision.parameters.retrieval_mode === undefined
+        ? {}
+        : { retrieval_mode: decision.parameters.retrieval_mode }),
+      ...(decision.parameters.limit === undefined
+        ? {}
+        : { limit: decision.parameters.limit }),
+    } satisfies DocumentLookupInput);
+    return renderDocumentLookup(result);
   }
 
   if (decision.route === "calendar_events") {

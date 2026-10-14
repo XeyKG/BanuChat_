@@ -47,7 +47,7 @@ test("maps one retrieved chunk to exact document citations", () => {
         locator: "section:introduction",
         release_id: RELEASE_ID,
         document_version_id: DOCUMENT_VERSION_ID,
-        artifact_url: null,
+        artifact_url: `/api/v1/documents/${DOCUMENT_VERSION_ID}/artifact`,
       },
     ],
     citation_records: [

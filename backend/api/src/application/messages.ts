@@ -18,6 +18,7 @@ import { CurrentReleaseError } from "./current-release-errors.js";
 import { CourseCatalogError } from "./course-catalog-errors.js";
 import { SendMessageError } from "./messages-errors.js";
 import { ProfileProgressError } from "./profile-progress-errors.js";
+import { DocumentLookupError } from "./document-lookup-errors.js";
 
 const DATASET_ID = 1;
 const UUID_PATTERN =
@@ -300,7 +301,6 @@ function validateCitationPair(
     !isNonblank(citation.label) ||
     !isNonblank(citation.locator) ||
     citation.locator !== record.source_locator ||
-    citation.artifact_url !== null ||
     !isNonblank(record.source_path) ||
     !isNonblank(record.source_locator) ||
     !isSha256(record.source_sha256)
@@ -313,7 +313,10 @@ function validateCitationPair(
       record.source_kind === "document" &&
       isUuid(citation.document_version_id) &&
       record.document_version_id === citation.document_version_id &&
-      isUuid(record.chunk_id) &&
+      (citation.artifact_url === null ||
+        citation.artifact_url ===
+          `/api/v1/documents/${citation.document_version_id}/artifact`) &&
+      (record.chunk_id === null || isUuid(record.chunk_id)) &&
       record.profile_key === null &&
       record.course_key === null &&
       record.event_key === null &&
@@ -324,6 +327,7 @@ function validateCitationPair(
   if (
     record.source_kind === "document" ||
     citation.document_version_id !== null ||
+    citation.artifact_url !== null ||
     record.document_version_id !== null ||
     record.chunk_id !== null
   ) {
@@ -472,7 +476,8 @@ export async function sendMessage(
     if (
       error instanceof CalendarEventsError ||
       error instanceof CourseCatalogError ||
-      error instanceof AnnouncementsError
+      error instanceof AnnouncementsError ||
+      error instanceof DocumentLookupError
     ) {
       reject("invalid_database_result");
     }

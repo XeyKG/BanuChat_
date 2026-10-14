@@ -63,6 +63,9 @@ function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string';
 }
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 function isCitationSourceKind(value: unknown): value is CitationSourceKind {
   return (
     value === 'document' ||
@@ -75,18 +78,33 @@ function isCitationSourceKind(value: unknown): value is CitationSourceKind {
 }
 
 export function isCitation(value: unknown): value is Citation {
-  return (
-    isRecord(value) &&
-    typeof value.index === 'number' &&
-    Number.isInteger(value.index) &&
-    value.index >= 0 &&
-    isCitationSourceKind(value.source_kind) &&
-    isNonemptyString(value.label) &&
-    isNonemptyString(value.locator) &&
-    isNonemptyString(value.release_id) &&
-    isNullableString(value.document_version_id) &&
-    isNullableString(value.artifact_url)
-  );
+  if (
+    !(
+      isRecord(value) &&
+      typeof value.index === 'number' &&
+      Number.isInteger(value.index) &&
+      value.index >= 0 &&
+      isCitationSourceKind(value.source_kind) &&
+      isNonemptyString(value.label) &&
+      isNonemptyString(value.locator) &&
+      isNonemptyString(value.release_id) &&
+      isNullableString(value.document_version_id) &&
+      isNullableString(value.artifact_url)
+    )
+  ) {
+    return false;
+  }
+
+  if (value.source_kind === 'document') {
+    return (
+      typeof value.document_version_id === 'string' &&
+      UUID_PATTERN.test(value.document_version_id) &&
+      (value.artifact_url === null ||
+        value.artifact_url === `/api/v1/documents/${value.document_version_id}/artifact`)
+    );
+  }
+
+  return value.document_version_id === null && value.artifact_url === null;
 }
 
 function parseCitation(value: unknown): Citation {

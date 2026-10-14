@@ -139,6 +139,17 @@ export {
   type CourseCatalogErrorReason,
 } from "./application/course-catalog-errors.js";
 export {
+  lookupDocuments,
+  type DocumentLookupDocument,
+  type DocumentLookupInput,
+  type DocumentLookupResult,
+  type DocumentRetrievalMode,
+} from "./application/document-lookup.js";
+export {
+  DocumentLookupError,
+  type DocumentLookupErrorReason,
+} from "./application/document-lookup-errors.js";
+export {
   ProfileProgressError,
   type ProfileProgressErrorReason,
 } from "./application/profile-progress-errors.js";

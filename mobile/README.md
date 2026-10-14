@@ -33,7 +33,8 @@ Implementado: Expo SDK 57, React Native + TypeScript, Expo Router, URL base de A
 configurable, sesión local para perfiles sintéticos, Home, navegación protegida,
 creación de conversación al abrir Chat, chat con citas, estados de carga y error,
 presentación local de Banu al iniciar el chat, calendario, progreso de cursos,
-historial conversacional visible y consulta directa de anuncios sintéticos.
+historial conversacional visible, consulta directa de anuncios sintéticos y apertura
+interna de fuentes documentales desde respuestas nuevas o conversaciones reabiertas.
 El [checkpoint histórico J3](../eval/integration/results/j3-checkpoint-2026-10-03.md)
 documenta las validaciones manuales M1–M5 con Expo Go en Android físico; no cubre
 historial y anuncios posteriores. Este README registra además las validaciones
@@ -52,6 +53,12 @@ POST automáticamente. El usuario puede comprobar manualmente el historial para
 reconciliar un turno confirmado o decidir explícitamente continuar si todavía no
 aparece. Esta recuperación permanece en memoria y no ofrece idempotencia durable ni
 una garantía de procesamiento exactamente una vez.
+
+Las fuentes documentales con artifact disponible abren un visor interno que solicita
+el archivo exclusivamente por `document_version_id`. El visor trata el cuerpo como
+texto seleccionable, muestra el Markdown sintético sin ejecutar HTML ni enlaces y
+maneja carga, error, 404 y reintento. El corpus actual usa Markdown; la app no afirma
+interpretar otros formatos documentales.
 
 La selección de perfiles conserva el alcance de demostración local con corpus
 sintético. Una futura autenticación de usuario final requiere diseño explícito;

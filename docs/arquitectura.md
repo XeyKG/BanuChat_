@@ -81,7 +81,7 @@ El HEAD actual incorpora además M3.1 y M3.2; catálogo `1.2.0-draft` y schema c
 flowchart LR
     mobile["Mobile App Expo / React Native"] -->|"REST"| api["Backend API"]
     api --> router["Intent Router determinista"]
-    router -->|"Fast path"| fast["Catálogo de cursos, progreso, calendario o anuncios"]
+    router -->|"Fast path"| fast["Catálogo, progreso, calendario, anuncios o documentos"]
     router -->|"Social, ayuda o fuera de alcance"| static["Renderer estático"]
     router -->|"Fallback documental"| rag["Document RAG directo"]
     fast --> db[("PostgreSQL + pgvector")]
@@ -103,15 +103,19 @@ La API expone actualmente `GET /api/v1/profiles`,
 `GET /api/v1/profiles/{profile_key}/progress` y
 `GET /api/v1/announcements`.
 
-El dispatcher resuelve `course_catalog`, `profile_progress`, `calendar_events` y `announcements`
-con servicios de aplicación y renderers. `basic_social`, `capabilities_help` y
+El dispatcher resuelve `course_catalog`, `profile_progress`, `calendar_events`,
+`announcements` y `document_lookup` con servicios de aplicación y renderers.
+`basic_social`, `capabilities_help` y
 `known_out_of_scope` usan renderers estáticos sin SQL de dominio ni generador.
 M8.1 implementa `course_catalog` como fast path estructurado sobre `banuchat.courses`
 de la release vigente: oferta general sin perfil requerido por el dispatcher,
 filtros `available`/`closed`/`archived` y citas `course` con `course_key` y procedencia.
 No añade endpoint REST de cursos. Sus pruebas usan SQL controlado y cubren
 persistencia/relectura de citas por HTTP; la prueba operacional local queda pendiente.
-`document_lookup` sigue pendiente como fast path y se deriva a Document RAG.
+M8.2 implementa `document_lookup` por coincidencia exacta del título canónico en la
+release vigente. No usa embeddings ni generación, permite descubrir documentos
+`full_document` sin chunks y deriva el artifact documental para abrirlo desde Mobile.
+Document RAG permanece como fallback para preguntas sobre contenido.
 
 Document RAG genera el embedding de la pregunta con `qwen3-embedding:0.6b` mediante
 Ollama, recupera hasta cinco fragmentos con búsqueda exacta por coseno en
@@ -294,7 +298,8 @@ se conserva hasta disponer de implementación validada.
   `already_current` ([evidencia](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)).
   Retry/recover/scheduled, topología futura y permisos/roles mínimos siguen pendientes.
 - Consulta implementada: Intent Router determinista, fast paths de catálogo de cursos,
-  progreso, calendario y anuncios, renderers social/ayuda/fuera de alcance, M3.1/M3.2,
+  progreso, calendario, anuncios y localización documental, renderers
+  social/ayuda/fuera de alcance, M3.1/M3.2,
   los endpoints REST descritos arriba, retrieval exacto,
   Document RAG directo con generación Ollama, citas y persistencia; vertical slice
   RAG E2E real con HTTP 201.
