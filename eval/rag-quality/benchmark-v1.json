@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0.0",
+  "benchmark_id": "banuchat-rag-quality-m9-v1",
+  "status": "draft",
+  "corpus": {
+    "dataset_key": "banuchat-synthetic",
+    "source_manifest": "data/synthetic/manifest.json",
+    "documents_index": "data/synthetic/documents/documents.json",
+    "eligible_retrieval_mode": "chunked",
+    "eligible_document_keys": [
+      "doc-001", "doc-002", "doc-003", "doc-004", "doc-005",
+      "doc-006", "doc-007", "doc-008", "doc-009", "doc-010"
+    ],
+    "excluded_document_keys": ["doc-011", "doc-012"],
+    "eligible_document_count": 10,
+    "documented_chunk_count": 60
+  },
+  "top_k": 5,
+  "splits": {"primary": {"target_case_count": 60}},
+  "cases": [
+    {
+      "id": "M9-P-001", "split": "primary",
+      "question": "¿Qué diferencia existe entre una actividad y una sesión en el programa demo, y qué no permite demostrar la existencia de una respecto de la otra?",
+      "question_type": "single_context",
+      "reference_answer": "Una actividad presenta un tema de trabajo y permite describir decisiones; una sesión es un encuentro programado. Consultar una actividad no confirma que haya una sesión disponible, y encontrar una sesión no demuestra que un perfil participe en ella.",
+      "relevant_contexts": [{"document_key": "doc-001", "ordinal": 0, "locator": "section:0:1. Alcance del programa demo", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-002", "split": "primary",
+      "question": "¿Cómo se diferencian un curso cerrado y uno archivado respecto de nuevas incorporaciones y de la evidencia previa que pueden conservar?",
+      "question_type": "single_context",
+      "reference_answer": "Un curso cerrado no admite nuevas asociaciones, aunque puede conservar perfiles previamente registrados y su avance. Un curso archivado se mantiene como referencia, tampoco admite nuevas incorporaciones y puede conservar evidencia de trabajo finalizado.",
+      "relevant_contexts": [{"document_key": "doc-002", "ordinal": 1, "locator": "section:1:2. Disponibilidad y selección", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-003", "split": "primary",
+      "question": "¿Cómo debe manejarse un desacuerdo sobre la interpretación de una consigna durante una práctica compartida?",
+      "question_type": "single_context",
+      "reference_answer": "Se distinguen las propuestas de los acuerdos, se vuelve al material y la duda se conserva como tal hasta aclararla. Los comentarios deben centrarse en las acciones, la claridad y la consistencia del ejercicio, no en características personales.",
+      "relevant_contexts": [{"document_key": "doc-003", "ordinal": 2, "locator": "section:2:3. Acuerdos durante el trabajo", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-004", "split": "primary",
+      "question": "Si una actividad completada tiene fecha de finalización pero no de inicio, ¿puede calcularse su duración o reconstruirse la fecha faltante?",
+      "question_type": "single_context",
+      "reference_answer": "No. La fecha de inicio ausente debe conservarse como ausencia y no puede inventarse para estimar una duración. Calcular un intervalo requiere ambas fechas y, aun teniéndolas, ese intervalo no demuestra horas efectivas de dedicación.",
+      "relevant_contexts": [{"document_key": "doc-004", "ordinal": 3, "locator": "section:3:4. Inicio y finalización", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-005", "split": "primary",
+      "question": "¿Cuál es el propósito de la evaluación formativa del programa demo y qué resultados no produce?",
+      "question_type": "single_context",
+      "reference_answer": "Su propósito es revisar un artefacto ficticio para reconocer decisiones claras, dificultades y posibilidades de mejora, ayudando a comprender el proceso de trabajo. No produce calificaciones, comparaciones ni resultados con validez externa, y el asistente no recibe ni aprueba entregas automáticamente.",
+      "relevant_contexts": [{"document_key": "doc-005", "ordinal": 0, "locator": "section:0:1. Propósito formativo", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-006", "split": "primary",
+      "question": "¿Qué significa que un evento no tenga final registrado y qué inferencias deben evitarse?",
+      "question_type": "single_context",
+      "reference_answer": "Significa únicamente que el dato de final no está especificado. No implica duración ilimitada ni permite calcular el final usando el evento siguiente; un hito puntual puede conservar solo el inicio sin que se le invente una duración.",
+      "relevant_contexts": [{"document_key": "doc-006", "ordinal": 4, "locator": "section:4:5. Finales ausentes y cambios", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-007", "split": "primary",
+      "question": "¿Cómo debe responderse ante una contradicción aparente entre la descripción de una comunicación y su ventana temporal?",
+      "question_type": "single_context",
+      "reference_answer": "La contradicción debe reportarse para revisión. No se corrige silenciosamente la fuente ni se elige la fecha más conveniente; mientras se aclara, se separan los datos observados de la interpretación incierta.",
+      "relevant_contexts": [{"document_key": "doc-007", "ordinal": 5, "locator": "section:5:6. Comunicaciones incompletas y revisión", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-008", "split": "primary",
+      "question": "Si una incidencia admite varias interpretaciones y falta una indicación indispensable, ¿cómo debe continuarse la revisión?",
+      "question_type": "single_context",
+      "reference_answer": "Las interpretaciones posibles se describen brevemente y se identifica cuál necesita confirmación. No se cambia el objetivo para completar el ejercicio; si falta una indicación indispensable, el paso queda pendiente hasta obtener información suficiente.",
+      "relevant_contexts": [{"document_key": "doc-008", "ordinal": 4, "locator": "section:4:5. Revisión de una incidencia", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-009", "split": "primary",
+      "question": "¿Qué límites deben tener las conclusiones obtenidas de una actividad ficticia de seguridad?",
+      "question_type": "single_context",
+      "reference_answer": "Las conclusiones deben limitarse a lo observado en los ejemplos ficticios: clasificar mensajes inventados no acredita reconocer todos los riesgos ni equivale a auditar un entorno real. Al terminar también debe comprobarse que las copias de trabajo sigan separadas de las fuentes y no contengan información innecesaria.",
+      "relevant_contexts": [{"document_key": "doc-009", "ordinal": 5, "locator": "section:5:6. Límites de las conclusiones", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-010", "split": "primary",
+      "question": "¿Cuál es la primera fuente que recomienda la FAQ para buscar un tema de aprendizaje, un horario o la interpretación de una regla?",
+      "question_type": "single_context",
+      "reference_answer": "Para un tema de aprendizaje recomienda empezar por el catálogo; para un horario, consultar el calendario; y para interpretar una regla, buscar el documento dedicado a ese asunto. La FAQ orienta la primera consulta y remite a las fuentes correspondientes.",
+      "relevant_contexts": [{"document_key": "doc-010", "ordinal": 0, "locator": "section:0:1. Elegir por dónde comenzar", "source_sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-011", "split": "primary",
+      "question": "¿Qué condiciones distinguen una propuesta de inscripción bien preparada de una inscripción realmente confirmada?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "La propuesta debe identificar el curso, el perfil y la intención, comprobar si la asociación ya existe y quedar sin aplicar si falta información. Solo puede considerarse confirmada cuando el ajuste aparece en la información de participación disponible; una promesa en el diálogo no basta.",
+      "relevant_contexts": [
+        {"document_key": "doc-002", "ordinal": 2, "locator": "section:2:3. Preparación de una propuesta", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"},
+        {"document_key": "doc-002", "ordinal": 5, "locator": "section:5:6. Confirmación y casos incompletos", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-012", "split": "primary",
+      "question": "¿Hasta dónde llega la ayuda ante una dificultad del programa demo y cómo se decide si continuar o dejar un paso pendiente?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "La ayuda organiza una descripción, remite al material pertinente y busca aclarar el siguiente paso, pero no abre solicitudes ni promete canales o tiempos de resolución. Tras una aclaración se retoma desde un punto conocido; si la dificultad persiste, el paso afectado puede quedar pendiente y solo continúan tareas independientes. La ayuda termina cuando el siguiente paso está claro o se reconoce qué información falta.",
+      "relevant_contexts": [
+        {"document_key": "doc-008", "ordinal": 0, "locator": "section:0:1. Alcance de la ayuda", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"},
+        {"document_key": "doc-008", "ordinal": 5, "locator": "section:5:6. Continuación segura", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-013", "split": "primary",
+      "question": "¿Cómo debe gestionarse la copia principal de una evidencia antes y después de recibir devolución para que las revisiones sean trazables?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "Antes de compartir se selecciona la copia principal y se aclara si reemplaza un borrador anterior. Tras la devolución se prepara una nueva copia que muestre qué se conservó, qué cambió y por qué, sin borrar la interpretación previa ni tratar todas las versiones como equivalentes.",
+      "relevant_contexts": [
+        {"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"},
+        {"document_key": "doc-005", "ordinal": 4, "locator": "section:4:5. Ajustes y nueva revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-014", "split": "primary",
+      "question": "Si dos eventos tienen títulos parecidos, ¿qué datos permiten distinguirlos y cómo se interpreta después el vínculo de cada tipo?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "Se revisan la identidad o clave, título, descripción, tipo, inicio, final y vínculo, en vez de fusionarlos por semejanza del nombre. Luego el tipo determina la relación: `course_session` se vincula con un curso, `announcement_deadline` con un anuncio y `general` no tiene un vínculo exclusivo inferible.",
+      "relevant_contexts": [
+        {"document_key": "doc-006", "ordinal": 0, "locator": "section:0:1. El calendario como fuente de fechas", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"},
+        {"document_key": "doc-006", "ordinal": 1, "locator": "section:1:2. Tipos y relaciones", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-015", "split": "primary",
+      "question": "¿Cómo se pasa de una coincidencia en la búsqueda de comunicaciones a una propuesta de participación sin inventar requisitos ni canales?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "La coincidencia textual sirve para localizar una comunicación, pero no prueba que cubra toda la necesidad ni autoriza trasladar requisitos de otra convocatoria. Antes de proponer participación se identifica la actividad y la información realmente presente; si faltan requisitos o mecanismos de respuesta, se reconoce la ausencia y no se inventan formularios, contactos o canales.",
+      "relevant_contexts": [
+        {"document_key": "doc-007", "ordinal": 2, "locator": "section:2:3. Consulta y búsqueda", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"},
+        {"document_key": "doc-007", "ordinal": 4, "locator": "section:4:5. Respuesta a una invitación", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-016", "split": "primary",
+      "question": "¿Por qué la fecha de una sesión no puede usarse como fecha de inicio del progreso, y qué representa cada una de esas fuentes?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "El calendario registra la programación temporal de eventos y no demuestra inscripción ni progreso. Las fechas de progreso pertenecen a la asociación entre perfil y curso; un inicio registrado incluso puede ser anterior a una práctica, por lo que no debe reemplazarse con la fecha de la primera sesión.",
+      "relevant_contexts": [
+        {"document_key": "doc-004", "ordinal": 3, "locator": "section:3:4. Inicio y finalización", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"},
+        {"document_key": "doc-006", "ordinal": 0, "locator": "section:0:1. El calendario como fuente de fechas", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-017", "split": "primary",
+      "question": "¿Por qué una evidencia completa o una devolución favorable no bastan para declarar finalizada una actividad, y qué datos caracterizan realmente el estado `completed`?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "La evidencia y la devolución describen el ejercicio, pero no confirman por sí solas un cambio en el registro de progreso. El estado `completed` se caracteriza por cien por ciento de avance y una fecha de finalización en la asociación; aun así, no constituye certificación, calificación ni resultado académico real.",
+      "relevant_contexts": [
+        {"document_key": "doc-005", "ordinal": 5, "locator": "section:5:6. Relación con progreso y límites", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"},
+        {"document_key": "doc-004", "ordinal": 1, "locator": "section:1:2. Estados de la relación", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-018", "split": "primary",
+      "question": "¿Qué aporta un evento `announcement_deadline` y qué debe consultarse en el anuncio para comprender completamente una convocatoria?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "El evento `announcement_deadline` representa el hito de cierre y se vincula con el anuncio; en esta versión coincide con el final de su vigencia. Para comprender la convocatoria deben leerse en el anuncio su descripción y ventana temporal, porque el título del evento no sustituye ese contenido.",
+      "relevant_contexts": [
+        {"document_key": "doc-006", "ordinal": 1, "locator": "section:1:2. Tipos y relaciones", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"},
+        {"document_key": "doc-007", "ordinal": 3, "locator": "section:3:4. Relación con calendario y actividades", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-019", "split": "primary",
+      "question": "Si durante una práctica aparece contenido que parece real o sensible, ¿cómo se documenta la incidencia sin amplificar la exposición?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "La incidencia se describe indicando qué se intentaba hacer, qué ocurrió y qué se esperaba, sin incluir información personal, rutas ni capturas ajenas. El material sospechoso no se reutiliza; se detiene su difusión y se reporta el tipo de problema sin reproducir el contenido sensible.",
+      "relevant_contexts": [
+        {"document_key": "doc-008", "ordinal": 1, "locator": "section:1:2. Describir lo observado", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"},
+        {"document_key": "doc-009", "ordinal": 4, "locator": "section:4:5. Respuesta ante contenido inesperado", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-020", "split": "primary",
+      "question": "¿Cómo debe usarse la FAQ para encaminar una solicitud de cambio o retiro, y qué decisiones distintas exige después la fuente autoritativa?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "La FAQ sirve para aclarar primero si la intención es cambiar de actividad o retirarse y remite al procedimiento autoritativo. Allí, cambiar exige decidir qué ocurre con la relación anterior y cuál será la actividad de destino, mientras que retirarse expresa dejar una relación concreta y no equivale a haberla completado.",
+      "relevant_contexts": [
+        {"document_key": "doc-010", "ordinal": 1, "locator": "section:1:2. Inscripción y cambios", "source_sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"},
+        {"document_key": "doc-002", "ordinal": 3, "locator": "section:3:4. Cambios de actividad", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"},
+        {"document_key": "doc-002", "ordinal": 4, "locator": "section:4:5. Retiro y cancelación de participación", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}
+      ],
+      "review_status": "draft"
+    }
+  ]
+}

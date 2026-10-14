@@ -1,7 +1,8 @@
 # M9 — Protocolo de evaluación formal de calidad RAG para OE1
 
-Estado: **protocolo en preparación**. El benchmark no está construido ni congelado,
-RAGAS no se ha ejecutado y no existen resultados M9.
+Estado: **piloto de candidatas en revisión**. [benchmark-v1.json](benchmark-v1.json)
+contiene 20 candidatas `draft`; el benchmark aún no está completo ni congelado, RAGAS
+no se ha ejecutado y no existen resultados M9.
 
 ## A. Propósito
 
@@ -73,9 +74,11 @@ exactamente con el compromiso y ejecutar el reserve sobre el sistema ajustado. E
 con contenido no se versionará antes de terminar tuning.
 
 El proceso o agente usado para tuning no recibe el contenido reserve. El proceso de
-curación puede prepararlo y revisarlo; durante tuning solo se expone el commitment. La
-preparación, ubicación externa, responsable, fecha, número exacto y hash final quedan
-pendientes hasta esa presentación controlada.
+curación puede prepararlo y revisarlo; durante tuning solo se expone el commitment. El
+reserve real debe quedar creado, congelado y con su SHA-256 comprometido en Git antes de
+ejecutar el baseline principal. Así, ni ese baseline ni un tuning posterior pueden
+influir en su contenido. La ubicación externa, responsable, fecha, número exacto y hash
+final quedan pendientes hasta la preparación controlada.
 
 ## F. Construcción y revisión humana
 
