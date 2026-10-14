@@ -14,6 +14,7 @@ El runtime Document RAG vigente usa `qwen3:4b-instruct` y un router `1.2.0-draft
 | OPT-1C | [Resultado](results/opt1c-query-context-retrieval-2026-10-03.md) | Query num_ctx 32768/4096: top-1 y conjunto top-5 iguales en 10/10; orden igual en 9/10. No mide latencia. |
 | L1-B | [Medición posterior](results/l1-b-rag-latency-2026-10-03.md) | Mismo workload/metodología L1, release con query=4096/document=32768; media wall 4013.57 ms, mediana 3956.78 ms, mínimo 1883.42 ms, máximo/p95 6485.59 ms, 8/10 <5000 ms. Generación media 3622.38 ms; vector DB 3.03 ms. |
 | M8.3-A | Diagnóstico de sensibilidad a paráfrasis | Compara dos formulaciones de una consulta sobre incidencias, tres veces cada una, observando embedding, retrieval y generación reales sin escribir en PostgreSQL. |
+| M8.3-B | Diagnóstico de paridad E2E | Compara Document RAG interno, POST /messages y GET conversation con las dos preguntas congeladas de M8.3-A. |
 
 Cada Markdown tiene JSON complementario con metadata y resultados. L1-B no
 acredita formalmente OE6 ni SLA: n=10, p95 nearest rank igual al máximo, sin
@@ -394,3 +395,46 @@ Una ejecución completa crea, sin sobrescribir, los archivos
 `America/Bogota`. Este diagnóstico usa dos preguntas y tres repeticiones, no es
 RAGAS, no estima calidad general ni significancia estadística, y no acredita por
 sí solo una corrección productiva.
+
+## M8.3-B: paridad Document RAG, REST y persistencia
+
+`run-m8-3-e2e-parity.mjs` reutiliza exactamente las dos preguntas congeladas de
+M8.3-A y ejecuta tres repeticiones intercaladas por pregunta. Cada repetición
+crea una conversación nueva para el perfil sintético `profile-001`, envía la
+pregunta mediante `POST /messages` y reconstruye el turno con `GET conversation`.
+
+El servidor se crea en proceso con `createRuntimeApiServer`, escucha solo en
+loopback y usa PostgreSQL, Intent Router, Document RAG, embedding y generador
+productivos desde `backend/api/dist`. Los wrappers observan la decisión del
+router, el top-5, la salida interna del RAG, la respuesta HTTP y el mensaje
+persistido sin cambiar inputs u outputs. El preflight exige igualdad exacta de
+release, configuración de embedding, modelos, digests, runtimes, recetas y
+`top_k=5` frente al resultado congelado de M8.3-A.
+
+Después de cada repetición, el instrumento exige `DELETE 204` y confirma la
+ausencia mediante `GET 404`. Si falla una dependencia o no puede confirmarse el
+cleanup, aborta sin escribir resultados parciales y no reintenta el mensaje.
+
+Desde la raíz del repositorio:
+
+```powershell
+cd backend/api
+npm run build
+cd ../..
+node --check eval/generation/run-m8-3-e2e-parity.mjs
+node eval/generation/run-m8-3-e2e-parity.mjs --dry-run
+node --env-file=.env eval/generation/run-m8-3-e2e-parity.mjs
+```
+
+El `--dry-run` valida el fixture, el baseline, sus hashes, `dist`, el catálogo y
+las rutas de ambas preguntas. No abre PostgreSQL, Ollama ni servidor HTTP y no
+escribe resultados. Una ejecución formal completa crea sin sobrescribir:
+
+```text
+eval/generation/results/m8-3-e2e-parity-AAAA-MM-DD.json
+eval/generation/results/m8-3-e2e-parity-AAAA-MM-DD.md
+```
+
+M8.3-B es un diagnóstico de paridad con seis conversaciones sintéticas
+temporales. No es RAGAS, no demuestra calidad global o estabilidad general del
+RAG y no cambia producción.

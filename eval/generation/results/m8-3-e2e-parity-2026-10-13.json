@@ -1,0 +1,1472 @@
+{
+  "schema_version": "1",
+  "diagnostic_id": "banuchat-m8-3-e2e-parity",
+  "metadata": {
+    "implementation_revision": "06955940865dc6b6d23888254a41e0b125902f35",
+    "origin_main_revision": "06955940865dc6b6d23888254a41e0b125902f35",
+    "implementation_changed_paths": [
+      "eval/generation/README.md",
+      "eval/generation/run-m8-3-e2e-parity.mjs"
+    ],
+    "generated_at": "2026-10-14T03:05:19.547Z",
+    "timezone": "America/Bogota",
+    "baseline_implementation_revision": "c4cc054cac714792264b97923b547caf63864681",
+    "baseline_fixture_sha256": "8121279aa2968ee6f2c76b06d0142193fb15d9792e4ec7fff8a478f29a5c765e",
+    "baseline_result_sha256": "5d578db6dd0f0b49136f12e4e7536ac1d708f7f60d8bca2051c3eb5540368cef",
+    "runner_sha256": "39b3194ecbabfec400feca93b425cad6d97516c3f09057f3a917a0c2af18f433",
+    "execution_order": "A1,B1,A2,B2,A3,B3",
+    "repetitions_per_case": 3,
+    "profile_key": "profile-001"
+  },
+  "route_preflight": {
+    "M8.3-A1": {
+      "route": "agent_fallback",
+      "route_type": null,
+      "requires_profile": null,
+      "response_variant": null,
+      "parameters": {}
+    },
+    "M8.3-A2": {
+      "route": "agent_fallback",
+      "route_type": null,
+      "requires_profile": null,
+      "response_variant": null,
+      "parameters": {}
+    }
+  },
+  "preflight": {
+    "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+    "embedding_config_id": "0c9bd084-29ad-4e26-ab17-d4a5aad24cdb",
+    "postgres_server_version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "pgvector_version": "0.8.6",
+    "embedding": {
+      "model": "qwen3-embedding:0.6b",
+      "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "runtime_version": "0.35.0",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "query_recipe": {
+        "options": {
+          "num_ctx": 4096
+        },
+        "truncate": false,
+        "dimensions": 1024,
+        "input_prefix": null,
+        "normalization": "none"
+      }
+    },
+    "generator": {
+      "model": "qwen3:4b-instruct",
+      "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+      "runtime_version": "0.35.0",
+      "recipe": {
+        "think": false,
+        "stream": false,
+        "options": {
+          "temperature": 0,
+          "num_predict": 256
+        },
+        "keep_alive": "5m"
+      }
+    },
+    "top_k": 5
+  },
+  "runs": [
+    {
+      "case_id": "M8.3-A1",
+      "repetition": 1,
+      "question": "¿Qué información debo incluir al reportar una incidencia?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.3554945992080676,
+          "cosine_similarity": 0.6445054007919324,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.4136586785316425,
+          "cosine_similarity": 0.5863413214683575,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.4670532823990987,
+          "cosine_similarity": 0.5329467176009013,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.5474833463162152,
+          "cosine_similarity": 0.4525166536837848,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "fd58c54e-d194-42d9-8db0-c5637c02229f",
+          "ordinal": 2,
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.5515210001754156,
+          "cosine_similarity": 0.4484789998245844,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de instrucción, insumo o lectura de contenido.  \n- Si el resultado fue incierto, describir esa incertidumbre.  \n- Si se desconoce un detalle, señalarlo como desconocido.  \n- Si el paso pudo repetirse, indicarlo.  \n- Si hay ambigüedades, señalarlas y proponer cómo continuar.  \n- No incluir información personal, rutas del dispositivo o capturas de servicios ajenos.  \n- No presentar reconstrucciones como registros exactos.  \n- No suponer que la aclaración corrigió automáticamente el progreso.  \n- No rellenar resultados faltantes para aparentar completitud.  \n\nLa ayuda termina cuando el siguiente paso está claro o se reconoce qué información falta.",
+        "generated_content_sha256": "d932bc47c1c0b85a41e9fff46bf6093a4392db7dfa345ef1104a3df80df6ee05",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1442,
+        "eval_count": 213,
+        "total_duration_ms": 18776.7104
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "7b9166bb534b1d94b179f5356da56c128415a1e3415e0455c43dffaca8d09616",
+          "query": "¿Qué información debo incluir al reportar una incidencia?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "d932bc47c1c0b85a41e9fff46bf6093a4392db7dfa345ef1104a3df80df6ee05",
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de instrucción, insumo o lectura de contenido.  \n- Si el resultado fue incierto, describir esa incertidumbre.  \n- Si se desconoce un detalle, señalarlo como desconocido.  \n- Si el paso pudo repetirse, indicarlo.  \n- Si hay ambigüedades, señalarlas y proponer cómo continuar.  \n- No incluir información personal, rutas del dispositivo o capturas de servicios ajenos.  \n- No presentar reconstrucciones como registros exactos.  \n- No suponer que la aclaración corrigió automáticamente el progreso.  \n- No rellenar resultados faltantes para aparentar completitud.  \n\nLa ayuda termina cuando el siguiente paso está claro o se reconoce qué información falta.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "fd58c54e-d194-42d9-8db0-c5637c02229f"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:2:3. Comprobaciones iniciales"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "92e6875b-a951-4b10-a855-4ee16aa18699",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de instrucción, insumo o lectura de contenido.  \n- Si el resultado fue incierto, describir esa incertidumbre.  \n- Si se desconoce un detalle, señalarlo como desconocido.  \n- Si el paso pudo repetirse, indicarlo.  \n- Si hay ambigüedades, señalarlas y proponer cómo continuar.  \n- No incluir información personal, rutas del dispositivo o capturas de servicios ajenos.  \n- No presentar reconstrucciones como registros exactos.  \n- No suponer que la aclaración corrigió automáticamente el progreso.  \n- No rellenar resultados faltantes para aparentar completitud.  \n\nLa ayuda termina cuando el siguiente paso está claro o se reconoce qué información falta.",
+          "content_sha256": "d932bc47c1c0b85a41e9fff46bf6093a4392db7dfa345ef1104a3df80df6ee05",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "92e6875b-a951-4b10-a855-4ee16aa18699",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de instrucción, insumo o lectura de contenido.  \n- Si el resultado fue incierto, describir esa incertidumbre.  \n- Si se desconoce un detalle, señalarlo como desconocido.  \n- Si el paso pudo repetirse, indicarlo.  \n- Si hay ambigüedades, señalarlas y proponer cómo continuar.  \n- No incluir información personal, rutas del dispositivo o capturas de servicios ajenos.  \n- No presentar reconstrucciones como registros exactos.  \n- No suponer que la aclaración corrigió automáticamente el progreso.  \n- No rellenar resultados faltantes para aparentar completitud.  \n\nLa ayuda termina cuando el siguiente paso está claro o se reconoce qué información falta.",
+          "content_sha256": "d932bc47c1c0b85a41e9fff46bf6093a4392db7dfa345ef1104a3df80df6ee05",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    },
+    {
+      "case_id": "M8.3-A2",
+      "repetition": 1,
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.29341417194135255,
+          "cosine_similarity": 0.7065858280586474,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.36149503955215334,
+          "cosine_similarity": 0.6385049604478467,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.42293393376688326,
+          "cosine_similarity": 0.5770660662331167,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.4508828579326999,
+          "cosine_similarity": 0.5491171420673001,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "aeab109c-87f2-49b3-982f-633a2c575350",
+          "ordinal": 0,
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.4696834195792028,
+          "cosine_similarity": 0.5303165804207972,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+        "generated_content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1455,
+        "eval_count": 185,
+        "total_duration_ms": 13626.8449
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "dd3abb30dff319125301593b8825b0ce96d18f640d43fc80d40724ee99f20623",
+          "query": "¿Qué información debería incluir al reportar una incidencia de la práctica?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "aeab109c-87f2-49b3-982f-633a2c575350"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:0:1. Alcance de la ayuda"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "2cef8b4c-ec65-4b46-805e-c2852685dbeb",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "2cef8b4c-ec65-4b46-805e-c2852685dbeb",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    },
+    {
+      "case_id": "M8.3-A1",
+      "repetition": 2,
+      "question": "¿Qué información debo incluir al reportar una incidencia?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.35311183678409486,
+          "cosine_similarity": 0.6468881632159051,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.41186317973254916,
+          "cosine_similarity": 0.5881368202674508,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.4652223587034271,
+          "cosine_similarity": 0.5347776412965729,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.5441235663227775,
+          "cosine_similarity": 0.4558764336772225,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "fd58c54e-d194-42d9-8db0-c5637c02229f",
+          "ordinal": 2,
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.5500747054503206,
+          "cosine_similarity": 0.44992529454967944,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+        "generated_content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1442,
+        "eval_count": 193,
+        "total_duration_ms": 11514.1501
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "7b9166bb534b1d94b179f5356da56c128415a1e3415e0455c43dffaca8d09616",
+          "query": "¿Qué información debo incluir al reportar una incidencia?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "fd58c54e-d194-42d9-8db0-c5637c02229f"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:2:3. Comprobaciones iniciales"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "64b2f839-0411-4bd0-8f83-12d4d3c3ac01",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "64b2f839-0411-4bd0-8f83-12d4d3c3ac01",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    },
+    {
+      "case_id": "M8.3-A2",
+      "repetition": 2,
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.2941599803900674,
+          "cosine_similarity": 0.7058400196099326,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.36182344469251126,
+          "cosine_similarity": 0.6381765553074887,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.42399673557103823,
+          "cosine_similarity": 0.5760032644289618,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.45225965976713534,
+          "cosine_similarity": 0.5477403402328647,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "aeab109c-87f2-49b3-982f-633a2c575350",
+          "ordinal": 0,
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.47078920107139266,
+          "cosine_similarity": 0.5292107989286073,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+        "generated_content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1455,
+        "eval_count": 185,
+        "total_duration_ms": 11358.5494
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "dd3abb30dff319125301593b8825b0ce96d18f640d43fc80d40724ee99f20623",
+          "query": "¿Qué información debería incluir al reportar una incidencia de la práctica?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "aeab109c-87f2-49b3-982f-633a2c575350"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:0:1. Alcance de la ayuda"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "a145b385-717b-40d7-af08-728acf5965a3",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "a145b385-717b-40d7-af08-728acf5965a3",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    },
+    {
+      "case_id": "M8.3-A1",
+      "repetition": 3,
+      "question": "¿Qué información debo incluir al reportar una incidencia?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.35311183678409486,
+          "cosine_similarity": 0.6468881632159051,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.41186317973254916,
+          "cosine_similarity": 0.5881368202674508,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.4652223587034271,
+          "cosine_similarity": 0.5347776412965729,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.5441235663227775,
+          "cosine_similarity": 0.4558764336772225,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "fd58c54e-d194-42d9-8db0-c5637c02229f",
+          "ordinal": 2,
+          "locator": "section:2:3. Comprobaciones iniciales",
+          "cosine_distance": 0.5500747054503206,
+          "cosine_similarity": 0.44992529454967944,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+        "generated_content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1442,
+        "eval_count": 193,
+        "total_duration_ms": 12259.2275
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "7b9166bb534b1d94b179f5356da56c128415a1e3415e0455c43dffaca8d09616",
+          "query": "¿Qué información debo incluir al reportar una incidencia?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "fd58c54e-d194-42d9-8db0-c5637c02229f"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:2:3. Comprobaciones iniciales"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "2a21b7b1-5f3a-43d0-8dda-a19bfab9fc25",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "2a21b7b1-5f3a-43d0-8dda-a19bfab9fc25",
+          "insufficient_evidence": false,
+          "content": "Debes incluir:\n\n- Qué se intentaba hacer.  \n- Qué ocurrió (observación, no interpretación).  \n- Qué se esperaba según el material.  \n- Si el problema es falta de insumo, ambigüedad en instrucción o imposibilidad de lectura.  \n- Si el resultado fue visible o incierto, y si se puede confirmar el último paso.  \n- Si el paso pudo repetirse bajo condiciones similares.  \n- Si hay ambigüedades o faltas de criterios, señálalas concretamente.  \n- Si falta información indispensable, indícalo y no supongas soluciones.  \n\nNo incluir información personal, rutas del dispositivo, capturas de servicios ajenos ni datos sensibles. Si se requiere una reconstrucción, debe ser claramente indicada como tal y no presentada como registro exacto.",
+          "content_sha256": "f17900cdcea98637c255762bd54e157fab00356bbd78f080e9f52d4291623adf",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:2:3. Comprobaciones iniciales"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    },
+    {
+      "case_id": "M8.3-A2",
+      "repetition": 3,
+      "question": "¿Qué información debería incluir al reportar una incidencia de la práctica?",
+      "route": {
+        "route": "agent_fallback",
+        "route_type": null,
+        "requires_profile": null,
+        "response_variant": null,
+        "parameters": {}
+      },
+      "rag_call_count": 1,
+      "embedding_call_count": 1,
+      "generator_call_count": 1,
+      "retrieval": [
+        {
+          "rank": 1,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+          "ordinal": 3,
+          "locator": "section:3:4. Información que no debe compartirse",
+          "cosine_distance": 0.2941599803900674,
+          "cosine_similarity": 0.7058400196099326,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 2,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+          "ordinal": 1,
+          "locator": "section:1:2. Describir lo observado",
+          "cosine_distance": 0.36182344469251126,
+          "cosine_similarity": 0.6381765553074887,
+          "relevant_doc_008_chunk": true
+        },
+        {
+          "rank": 3,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+          "ordinal": 4,
+          "locator": "section:4:5. Revisión de una incidencia",
+          "cosine_distance": 0.42399673557103823,
+          "cosine_similarity": 0.5760032644289618,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 4,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+          "ordinal": 5,
+          "locator": "section:5:6. Continuación segura",
+          "cosine_distance": 0.45225965976713534,
+          "cosine_similarity": 0.5477403402328647,
+          "relevant_doc_008_chunk": false
+        },
+        {
+          "rank": 5,
+          "document_key": "doc-008",
+          "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+          "chunk_id": "aeab109c-87f2-49b3-982f-633a2c575350",
+          "ordinal": 0,
+          "locator": "section:0:1. Alcance de la ayuda",
+          "cosine_distance": 0.47078920107139266,
+          "cosine_similarity": 0.5292107989286073,
+          "relevant_doc_008_chunk": false
+        }
+      ],
+      "doc_008_ranks": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "relevant_doc_008_rank": 2,
+      "generator": {
+        "generated_content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+        "generated_content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+        "contains_insufficient_evidence": false,
+        "done_reason": "stop",
+        "prompt_eval_count": 1455,
+        "eval_count": 185,
+        "total_duration_ms": 11421.5105
+      },
+      "internal_rag": {
+        "input": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "query_sha256": "dd3abb30dff319125301593b8825b0ce96d18f640d43fc80d40724ee99f20623",
+          "query": "¿Qué información debería incluir al reportar una incidencia de la práctica?"
+        },
+        "output": {
+          "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+          "insufficient_evidence": false,
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "citation_count": 5,
+          "document_version_ids": [
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+          ],
+          "chunk_ids": [
+            "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+            "079c3d4c-f668-4f47-850d-f4cf25516662",
+            "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+            "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+            "aeab109c-87f2-49b3-982f-633a2c575350"
+          ],
+          "locators": [
+            "section:3:4. Información que no debe compartirse",
+            "section:1:2. Describir lo observado",
+            "section:4:5. Revisión de una incidencia",
+            "section:5:6. Continuación segura",
+            "section:0:1. Alcance de la ayuda"
+          ],
+          "artifact_urls": [
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+            "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          ]
+        }
+      },
+      "http": {
+        "status": 201,
+        "assistant_message": {
+          "message_id": "6ea42aa8-6cc5-4558-a60b-3d0dc3bfaea2",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "get": {
+        "status": 200,
+        "assistant_message": {
+          "message_id": "6ea42aa8-6cc5-4558-a60b-3d0dc3bfaea2",
+          "insufficient_evidence": false,
+          "content": "- Qué se intentaba hacer  \n- Qué ocurrió  \n- Qué se esperaba según el material  \n- Una descripción segura del resultado, sin incluir información personal o sensible  \n- Distinguir observación de interpretación  \n- Indicar si el comportamiento pudo repetirse  \n- Señalar si falta información indispensable  \n- No incluir rutas del dispositivo, capturas de servicios ajenos o datos privados  \n- Si hay ambigüedades, señalarlas concretamente y explicar cómo se puede continuar  \n- No presentar reconstrucciones como registros exactos  \n- No suponer que la aclaración corrigió automáticamente todos los borradores  \n- No rellenar resultados faltantes para aparentar una ejecución completa  \n- Delimitar claramente el problema y evitar acciones inseguras  \n\nEvidencia suficiente.",
+          "content_sha256": "39f174d08f3051255a10434d7028c54a5fcdf50bed65041dc37cc6939cdfbe6f",
+          "citations": {
+            "count": 5,
+            "document_version_ids": [
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+              "7c1b3379-1198-4c65-a9ad-8058f23b4844"
+            ],
+            "locators": [
+              "section:3:4. Información que no debe compartirse",
+              "section:1:2. Describir lo observado",
+              "section:4:5. Revisión de una incidencia",
+              "section:5:6. Continuación segura",
+              "section:0:1. Alcance de la ayuda"
+            ],
+            "artifact_urls": [
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact",
+              "/api/v1/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+            ]
+          }
+        }
+      },
+      "parity": {
+        "rag_to_http": {
+          "applicable": true,
+          "insufficient_flag_equal": true,
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "all_equal": true
+        },
+        "http_to_get": {
+          "content_exact_equal": true,
+          "content_sha_equal": true,
+          "insufficient_flag_equal": true,
+          "citation_count_equal": true,
+          "document_ids_equal": true,
+          "locators_equal": true,
+          "artifact_urls_equal": true,
+          "all_equal": true
+        }
+      },
+      "cleanup": {
+        "delete_status": 204,
+        "confirmation_get_status": 404,
+        "confirmed": true
+      }
+    }
+  ],
+  "summary": {
+    "M8.3-A1": {
+      "internal_rag": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "http": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "get": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "routes": [
+        "agent_fallback"
+      ],
+      "retrieval_stable": false,
+      "generator_outputs_stable": false
+    },
+    "M8.3-A2": {
+      "internal_rag": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "http": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "get": {
+        "answered": 3,
+        "insufficient": 0,
+        "unavailable": 0
+      },
+      "routes": [
+        "agent_fallback"
+      ],
+      "retrieval_stable": false,
+      "generator_outputs_stable": true
+    }
+  },
+  "classification": "FULL_PARITY",
+  "limitations": [
+    "Dos preguntas con tres repeticiones no constituyen una muestra estadística.",
+    "El diagnóstico no es RAGAS ni demuestra calidad global del RAG.",
+    "La conclusión se limita a la revisión, release, modelos y recetas registrados."
+  ]
+}
