@@ -15,6 +15,7 @@ Esta auditoría documental no vuelve a ejecutar sus pruebas ni acredita nuevos P
 | Latencia Document RAG | [G2](generation/results/g2-rag-e2e-smoke-2026-10-01.md) es el smoke histórico; [L1](generation/results/l1-rag-latency-2026-10-03.md) es baseline; [L1-B](generation/results/l1-b-rag-latency-2026-10-03.md) es posterior. L1-B: diez warm secuenciales, media 4013.57 ms, mediana 3956.78 ms, mínimo 1883.42 ms, máximo/p95 nearest rank 6485.59 ms, 8/10 <5000 ms; generación media 3622.38 ms, vector DB 3.03 ms. No acredita formalmente OE6, SLA ni distribución poblacional. |
 | Ingesta | [Plan e índices](ingestion/plan.md): Implementación 3 con embeddings reales, Implementación 4 con embeddings TEST_ONLY, N0 preparación y [N3](ingestion/results/n3-n8n-e2e-2026-10-02.md) manual N8N E2E. N3 publicó ready/current y luego already_current; no cubre todos los escenarios ni workflows retry/recover/scheduled. |
 | Integración y mobile | [J1/J2/J3](integration/README.md): smoke con servicios reales, HTTP con SQL controlado/RAG simulado y checkpoint histórico de validaciones móviles. Las etapas posteriores y sus límites están en [Mobile](../mobile/README.md). J3 no sustituye el estado vigente ni valida Agent/MCP. |
+| Mobile M7.4 | [Plan funcional congelado antes de la ejecución](mobile/m7-4-validation-plan.md), preparado en M7.4-A para Android físico + Expo Go; la regla de congelación se aplica al commitear. Resultados todavía pendientes. No es SUS ni evaluación formal con usuarios. |
 
 ## Pendiente
 
