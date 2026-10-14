@@ -1,7 +1,7 @@
 # M9 — Protocolo de evaluación formal de calidad RAG para OE1
 
-Estado: **piloto de candidatas en revisión**. [benchmark-v1.json](benchmark-v1.json)
-contiene 20 candidatas `draft`; el benchmark aún no está completo ni congelado, RAGAS
+Estado: **pool de candidatas en revisión**. [benchmark-v1.json](benchmark-v1.json)
+contiene 40 candidatas `draft`; el benchmark aún no está completo ni congelado, RAGAS
 no se ha ejecutado y no existen resultados M9.
 
 ## A. Propósito

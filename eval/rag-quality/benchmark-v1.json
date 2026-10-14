@@ -208,6 +208,181 @@
         {"document_key": "doc-002", "ordinal": 4, "locator": "section:4:5. Retiro y cancelación de participación", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}
       ],
       "review_status": "draft"
+    },
+    {
+      "id": "M9-P-021", "split": "primary",
+      "question": "¿Por qué una descripción del catálogo no basta para reconstruir requisitos, duración o condiciones detalladas de una actividad?",
+      "question_type": "single_context",
+      "reference_answer": "El catálogo ofrece nombres, descripciones breves y estados para distinguir temas, pero no documenta necesariamente programas detallados. Si la descripción es insuficiente, debe reconocerse el límite y consultarse el material disponible, sin completar requisitos, duración o condiciones mediante suposiciones.",
+      "relevant_contexts": [{"document_key": "doc-001", "ordinal": 1, "locator": "section:1:2. Recorrido inicial", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-022", "split": "primary",
+      "question": "¿Por qué explicar cómo se revisaría un registro o un retiro no demuestra que la operación se haya realizado?",
+      "question_type": "single_context",
+      "reference_answer": "Porque una explicación describe cómo consultar o interpretar las fuentes, pero no ejecuta cambios. Explicar un registro no inscribe a nadie y explicar un retiro no cancela una participación; las recomendaciones no deben presentarse como operaciones aprobadas.",
+      "relevant_contexts": [{"document_key": "doc-001", "ordinal": 4, "locator": "section:4:5. Lectura de respuestas y evidencia", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-023", "split": "primary",
+      "question": "¿Qué representa una inscripción dentro del programa demo y qué alcance real no debe atribuírsele?",
+      "question_type": "single_context",
+      "reference_answer": "Representa una asociación ficticia entre un perfil y una actividad. No equivale a matrícula, compromiso económico ni trámite administrativo real, y su existencia debe consultarse en el progreso del perfil en vez de deducirse de haber leído una descripción o invitación.",
+      "relevant_contexts": [{"document_key": "doc-002", "ordinal": 0, "locator": "section:0:1. Qué significa inscribirse", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-024", "split": "primary",
+      "question": "¿Qué debe hacerse cuando el perfil o el curso de una solicitud no aparecen claramente identificados?",
+      "question_type": "single_context",
+      "reference_answer": "Debe revisarse la selección o comunicarse la falta de evidencia. El perfil o el curso no se reconstruyen a partir de una descripción aproximada y, si el ajuste no figura en la información de participación, no puede considerarse confirmado.",
+      "relevant_contexts": [{"document_key": "doc-002", "ordinal": 5, "locator": "section:5:6. Confirmación y casos incompletos", "source_sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-025", "split": "primary",
+      "question": "¿Cómo debe prepararse una sesión si la guía requiere un insumo que no está disponible?",
+      "question_type": "single_context",
+      "reference_answer": "Se identifica el curso, se revisa la secuencia completa de la guía y se prepara una copia de trabajo con insumos ficticios. Si falta un insumo indicado, se registra la ausencia y se solicita aclaración, sin sustituirlo por material real.",
+      "relevant_contexts": [{"document_key": "doc-003", "ordinal": 1, "locator": "section:1:2. Preparación de la actividad", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-026", "split": "primary",
+      "question": "¿Qué elementos deben distinguirse al cerrar una sesión para que el resultado pueda revisarse con claridad?",
+      "question_type": "single_context",
+      "reference_answer": "Deben separarse el resultado, las observaciones y los pendientes. El resultado es el artefacto preparado, las observaciones explican las decisiones y los pendientes identifican lo que todavía requiere revisión.",
+      "relevant_contexts": [{"document_key": "doc-003", "ordinal": 5, "locator": "section:5:6. Cierre responsable", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-027", "split": "primary",
+      "question": "¿Por qué la ausencia de una asociación entre un perfil y un curso no debe informarse como cero por ciento de avance?",
+      "question_type": "single_context",
+      "reference_answer": "Porque no disponer de una asociación significa que no hay información de progreso para ese par. Es distinto de encontrar una inscripción registrada que indique expresamente trabajo no iniciado; por eso no se asigna cero por defecto.",
+      "relevant_contexts": [{"document_key": "doc-004", "ordinal": 0, "locator": "section:0:1. Qué representa el avance", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-028", "split": "primary",
+      "question": "¿Qué límites deben respetarse al comparar porcentajes de progreso entre perfiles?",
+      "question_type": "single_context",
+      "reference_answer": "Los valores deben conservarse, incluidos sus decimales, sin convertir diferencias pequeñas en juicios de desempeño. La comparación solo muestra diversidad de situaciones ficticias y no establece una clasificación ni una competencia entre personas.",
+      "relevant_contexts": [{"document_key": "doc-004", "ordinal": 2, "locator": "section:2:3. Interpretación de porcentajes", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-029", "split": "primary",
+      "question": "¿La descripción de entrega de una evidencia establece por sí misma un plazo para presentarla?",
+      "question_type": "single_context",
+      "reference_answer": "No. La descripción de entrega no incorpora un plazo propio. Si se necesita una ventana temporal, debe consultarse el anuncio o evento correspondiente; si no hay fecha publicada, no se deduce de otra actividad ni se supone recepción indefinida.",
+      "relevant_contexts": [{"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-030", "split": "primary",
+      "question": "¿Cómo debe corregirse una categoría ambigua en una evidencia sin ampliar el ejercicio con reglas externas?",
+      "question_type": "single_context",
+      "reference_answer": "La categoría puede precisarse usando los mismos insumos ficticios y una definición fundada en la consigna. No se inventa una regla institucional para respaldarla; si todavía falta información, esa limitación puede mantenerse como conclusión válida.",
+      "relevant_contexts": [{"document_key": "doc-005", "ordinal": 4, "locator": "section:4:5. Ajustes y nueva revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-031", "split": "primary",
+      "question": "Si no aparece una sesión futura, ¿puede inferirse que se repetirá semanalmente porque existe otro evento con un título parecido?",
+      "question_type": "single_context",
+      "reference_answer": "No. No se supone una repetición semanal ni se usan horarios de otros programas. Cada sesión requiere una programación explícita y un título parecido no basta para inferir el siguiente encuentro.",
+      "relevant_contexts": [{"document_key": "doc-006", "ordinal": 5, "locator": "section:5:6. Uso combinado con comunicaciones", "source_sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-032", "split": "primary",
+      "question": "¿Qué conclusiones no pueden extraerse sobre cursos o progreso únicamente porque una comunicación esté vigente?",
+      "question_type": "single_context",
+      "reference_answer": "La vigencia de una comunicación no determina la disponibilidad de los cursos ni abre nuevas inscripciones. Leer una convocatoria o participar en una actividad opcional tampoco modifica el progreso, que requiere evidencia propia de la relación entre perfil y curso.",
+      "relevant_contexts": [{"document_key": "doc-007", "ordinal": 3, "locator": "section:3:4. Relación con calendario y actividades", "source_sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-033", "split": "primary",
+      "question": "¿Por qué decir que una lista aparece vacía es distinto de afirmar que todos los datos fueron borrados?",
+      "question_type": "single_context",
+      "reference_answer": "La lista vacía describe un resultado visible, mientras que afirmar que los datos se borraron atribuye una causa que necesita evidencia adicional. Separar observación e interpretación evita incorporar una explicación imaginada al reporte.",
+      "relevant_contexts": [{"document_key": "doc-008", "ordinal": 1, "locator": "section:1:2. Describir lo observado", "source_sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-034", "split": "primary",
+      "question": "¿Por qué los perfiles de demostración no deben enriquecerse con nombres, contactos o datos biográficos?",
+      "question_type": "single_context",
+      "reference_answer": "Porque son identidades ficticias destinadas a contextualizar consultas y situaciones de avance, no personas reales. Añadir nombres, contactos o rasgos biográficos rompería la frontera controlada del escenario y podría incorporar información innecesaria.",
+      "relevant_contexts": [{"document_key": "doc-009", "ordinal": 0, "locator": "section:0:1. Uso acotado del escenario", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-035", "split": "primary",
+      "question": "¿Cómo orienta la FAQ una dificultad causada por una instrucción confusa o por materiales insuficientes?",
+      "question_type": "single_context",
+      "reference_answer": "Ante una instrucción confusa recomienda describir lo observado y el paso afectado sin suponer la causa, y remite al documento de soporte. Para decidir qué materiales usar remite a las pautas de seguridad; si la información no basta, se señala la ausencia y no se completa con hechos externos.",
+      "relevant_contexts": [{"document_key": "doc-010", "ordinal": 5, "locator": "section:5:6. Dificultades y límites", "source_sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"}],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-036", "split": "primary",
+      "question": "¿Cómo se elige la fuente adecuada para una regla del programa y qué debe hacerse si esa fuente no permite sostener la respuesta buscada?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "Se usa el mapa de materiales para acudir al documento específico de inscripción, participación, progreso, evaluación, calendario, convocatorias, soporte o seguridad, según la regla consultada. Si las fuentes no permiten sostener una afirmación, se reconoce la información insuficiente y se decide entre leer la regla pertinente, consultar el registro relacionado o describir una incidencia segura.",
+      "relevant_contexts": [
+        {"document_key": "doc-001", "ordinal": 3, "locator": "section:3:4. Mapa de materiales", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"},
+        {"document_key": "doc-001", "ordinal": 5, "locator": "section:5:6. Límites y continuidad", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-037", "split": "primary",
+      "question": "Si se conoce el estado de disponibilidad de un curso pero un perfil no tiene una asociación de progreso con él, ¿cómo deben interpretarse esos datos sin mezclarlos?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "La disponibilidad debe interpretarse en el catálogo y no describe el avance de un perfil. La ausencia de asociación significa que no hay información de progreso para ese par y no debe convertirse en cero por ciento. El estado del curso y el estado del progreso responden preguntas diferentes.",
+      "relevant_contexts": [
+        {"document_key": "doc-004", "ordinal": 0, "locator": "section:0:1. Qué representa el avance", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"},
+        {"document_key": "doc-004", "ordinal": 5, "locator": "section:5:6. Consultas incompletas y cierre", "source_sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-038", "split": "primary",
+      "question": "¿Cómo se traduce la frontera ficticia del escenario en decisiones concretas al preparar una práctica?",
+      "question_type": "multi_context_same_document",
+      "reference_answer": "La práctica debe mantenerse dentro de un universo inventado, sin datos personales ni hechos de organizaciones reales. Para aplicarlo se trabaja sobre una copia separada de las instrucciones, usando palabras, formas, cantidades y relaciones ficticias; no se incorporan documentos personales, capturas de cuentas ni mensajes reales.",
+      "relevant_contexts": [
+        {"document_key": "doc-009", "ordinal": 0, "locator": "section:0:1. Uso acotado del escenario", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"},
+        {"document_key": "doc-009", "ordinal": 1, "locator": "section:1:2. Materiales y copias de trabajo", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-039", "split": "primary",
+      "question": "¿Cómo debe verificarse una respuesta generada que menciona reglas, fechas, estados o porcentajes concretos del programa demo?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "Una explicación fluida no garantiza respaldo, por lo que primero se distinguen recomendaciones generales de datos concretos del escenario. Las reglas deben poder remitirse al documento y sección pertinentes, mientras que fechas, estados y porcentajes deben comprobarse en el registro estructurado correspondiente, sin inferirlos por palabras similares.",
+      "relevant_contexts": [
+        {"document_key": "doc-001", "ordinal": 4, "locator": "section:4:5. Lectura de respuestas y evidencia", "source_sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"},
+        {"document_key": "doc-009", "ordinal": 2, "locator": "section:2:3. Lectura crítica de instrucciones", "source_sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"}
+      ],
+      "review_status": "draft"
+    },
+    {
+      "id": "M9-P-040", "split": "primary",
+      "question": "¿Cómo debe presentarse para revisión el cierre de una sesión para distinguir lo producido, las observaciones y las instrucciones del ejercicio?",
+      "question_type": "multi_context_cross_document",
+      "reference_answer": "El cierre separa el resultado, las observaciones y los pendientes. Al presentarlo para revisión se reúnen la consigna, el artefacto y una explicación breve de las decisiones, dejando claro qué es una instrucción del ejercicio y qué es una observación propia.",
+      "relevant_contexts": [
+        {"document_key": "doc-003", "ordinal": 5, "locator": "section:5:6. Cierre responsable", "source_sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"},
+        {"document_key": "doc-005", "ordinal": 2, "locator": "section:2:3. Presentación para revisión", "source_sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"}
+      ],
+      "review_status": "draft"
     }
   ]
 }
