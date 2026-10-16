@@ -2,670 +2,953 @@
 
 ## 1. Propósito
 
-Auditoría A4, versión preliminar, iniciada el **2026-10-15** y completada el
-**2026-10-16**. Comparar cuatro capas para
-preparar decisiones trazables con el director: A) anteproyecto histórico;
-B) estado comprobable del repositorio BanuChat; C) evidencia/discovery del CCD;
-D) decisión académica necesaria. Se identifican coherencias, diferencias,
-afirmaciones sin respaldo y riesgos de alcance, sin reescribir capítulos ni
-modificar objetivos, implementación o contratos.
+**A4.1 — cotejado contra el anteproyecto original, 2026-10-16.** Esta revisión
+corrige A4 mediante lectura directa completa de las **27 páginas** del PDF, incluida
+la inspección visual de las figuras 1 y 2 y de las tablas de cronograma y tecnologías.
+La pregunta, el objetivo general y OE1–OE6 se transcriben desde la fuente primaria.
+No se reescribe el anteproyecto ni se modifican sus objetivos fuera de esta matriz.
 
-**Límite de la fuente histórica:** el texto original completo no fue aportado en
-esta tarea ni localizado mediante búsqueda de archivos PDF/Word y nombres de
-anteproyecto/propuesta en el repositorio. Tampoco se localizó en la búsqueda
-textual acotada una transcripción de la pregunta u objetivo general. No se afirma
-que ese documento no exista fuera de este alcance. La capa A se reconstruye desde
-los compromisos descritos en la solicitud A4 y referencias históricas internas;
-**no contiene citas literales verificadas, páginas ni redacciones completas de OE**.
-El cotejo con la versión radicada es una decisión P0 pendiente.
+HEAD esperado y comprobado: `2bcdabb574315cb94d1827e43649c8e94ebec88d`.
+Árbol limpio al iniciar A4.1. Los cuatro documentos académicos/discovery ya están
+versionados; solo se modifica esta matriz. La comparación Git con el HEAD de A4
+muestra únicamente la incorporación de esos cuatro documentos, sin cambios de
+implementación. Se contrastaron además composición del runtime, estado MCP,
+Mobile, Compose y workflow manual. Las pruebas históricas no se ejecutaron de nuevo.
 
-El anteproyecto se trata como antecedente histórico/preliminar, sin presumir su
-estado formal de aprobación. **Un ADR técnico no equivale a autorización del
-director o la facultad.** Que el repositorio haya excluido una integración no
-demuestra que se haya modificado el compromiso académico correspondiente.
+### Fuentes, precedencia y método
 
-HEAD inspeccionado: `d82fff84d94ca8121cd5c66bcea3b56efd0127fd`. Re-baseline, matriz
-de información y D3 ya estaban presentes, sin commit; se preservan íntegros.
-Todas las lecturas mínimas solicitadas del repositorio están disponibles. La
-auditoría lee evidencias históricas; no repite sus pruebas ni acredita un nuevo
-resultado operacional del HEAD actual.
-
-| Referencia | Fuente | Alcance de la evidencia |
+| Clase | Referencia | Fuente y alcance |
 | --- | --- | --- |
-| H1 | Solicitud A4 recibida el 2026-10-15 | Historia reportada: RAG, datos CCD, RPA/scraping, Agentic AI/MCP, BPM/N8N, Google Sheets, Mobile, Docker, On-Premise, evaluación y 16 semanas. Distribución temática de OE1–OE6 suministrada por el equipo, pendiente de cotejo literal. |
-| E1 | [AGENTS.md](../../AGENTS.md), [README](../../README.md), [arquitectura](../arquitectura.md) | Alcance vigente, flujo actual y objetivo, interpretación técnica provisional de OE y sus límites. |
-| E2 | [ADR 0001](../adr/0001-alcance-sintetico-y-despliegue-local.md) | Antecedente histórico de fuentes reales/despliegue y decisión técnica de corpus sintético/local. No prueba aprobación académica de la sustitución. |
-| E3 | [API runtime](../../backend/api/src/main.ts), [dispatcher](../../backend/api/src/chat/chat-dispatcher.ts), [MCP README](../../backend/mcp-server/README.md), [Compose](../../infra/docker-compose.yml) | Composición REST/router/RAG directo, fast paths, MCP solo contratado y servicios locales declarados. Inspección estática, no ejecución actual. |
-| E4 | [Workflow manual](../../n8n/workflows/ingestion-manual-v1.json), [N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md) | JSON con manualTrigger y active=false; recorrido manual local documentado, publicación y no-op posterior. No prueba scraping, scheduling ni BPM institucional. |
-| E5 | [K2](../../eval/retrieval/results/k2-v1-2026-10-01.md) | Retrieval sintético, 18 casos chunked y top_k=5; no calidad de generación ni efecto institucional. |
-| E6 | [L1-B](../../eval/generation/results/l1-b-rag-latency-2026-10-03.md) | Diez solicitudes warm secuenciales, resultados locales de latencia; no SLA ni cumplimiento formal de OE6. |
-| E7 | [M9 README](../../eval/rag-quality/README.md), [benchmark-v1.json](../../eval/rag-quality/benchmark-v1.json) | Conteo verificado: 63 casos, 63 IDs únicos M9-P-001–M9-P-063, todos draft; benchmark global draft. Sin RAGAS ni resultados M9 acreditados. |
-| E8 | [Re-baseline](banuchat-rebaseline-2026-10.md), [matriz de información](../discovery/ccd-information-matrix.md), [D3](../discovery/ccd-conceptual-domain-model.md) | Pausas y descubrimiento preliminar. CP-01–CP-04 son contexto público reportado sin originales/URLs/vigencia verificados. D3 contiene hipótesis, no validación institucional. |
-| E9 | [Evaluaciones](../../eval/README.md), [Mobile](../../mobile/README.md) | Evidencias por etapa y límites; app implementada y comprobaciones manuales reportadas, sin SUS ni evaluación formal de usuarios acreditada. |
+| SOURCE_A | A0 — Anteproyecto original completo | [PDF original](C:/Users/samue/Downloads/PGI_63765_AutomatizaciónCCD_RouteAI.pdf), 27 páginas, portada 2026. Fuente de lo que el documento promete; no acredita implementación, realidad institucional ni aprobación. |
+| SOURCE_B | E1 | [AGENTS.md](../../AGENTS.md), [README](../../README.md), [arquitectura](../arquitectura.md): alcance técnico vigente y estado documentado. |
+| SOURCE_B | E2 | [ADR 0001](../adr/0001-alcance-sintetico-y-despliegue-local.md): decisión interna sintética/local, no sustitución académica de A0. |
+| SOURCE_B | E3 | [Runtime](../../backend/api/src/main.ts), [dispatcher](../../backend/api/src/chat/chat-dispatcher.ts), [MCP](../../backend/mcp-server/README.md), [Compose](../../infra/docker-compose.yml): REST/router/RAG directo, contrato MCP y contenedores declarados. |
+| SOURCE_B | E4 | [Workflow manual](../../n8n/workflows/ingestion-manual-v1.json), [N3](../../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md): orquestación manual local y evidencia histórica acotada. |
+| SOURCE_B | E5 | [K2](../../eval/retrieval/results/k2-v1-2026-10-01.md): retrieval sintético, no calidad generativa o impacto CCD. |
+| SOURCE_B | E6 | [L1-B](../../eval/generation/results/l1-b-rag-latency-2026-10-03.md): diez solicitudes warm secuenciales locales; no SLA ni cumplimiento integral de OE6. |
+| SOURCE_B | E7 | [M9](../../eval/rag-quality/README.md), [benchmark](../../eval/rag-quality/benchmark-v1.json): 63 candidatas draft, sin evaluación RAGAS ejecutada. |
+| SOURCE_B / SOURCE_D | E8 | [Re-baseline](banuchat-rebaseline-2026-10.md): hechos técnicos, límites y decisiones provisionales distinguidos en su texto. Su limitación histórica corresponde a aquella revisión y no se edita aquí. |
+| SOURCE_C | C1 | [Matriz CCD](../discovery/ccd-information-matrix.md): CP-01–CP-04 reportados por el equipo, 40 preguntas y fuentes pendientes. No originales públicos verificados ni autorización. |
+| SOURCE_C | C2 | [D3](../discovery/ccd-conceptual-domain-model.md): conceptos/relaciones candidatos, Curso frente a Oferta, vigencia y fronteras personales; no modelo institucional aprobado. |
+| SOURCE_B | E9 | [Evaluaciones](../../eval/README.md), [Mobile](../../mobile/README.md): implementación y verificaciones por etapas; SUS, usuarios formales y push pendientes. |
+| SOURCE_D | Esta auditoría | Inferencias de coherencia/viabilidad y recomendaciones para decisión. No atribuirlas a A0, al CCD o al director. |
 
-Para leer las afirmaciones: **historia reportada** remite a H1/E2;
-**evidencia** remite a archivos inspeccionados; **inferencia** identifica el juicio
-de esta auditoría; **decisión propuesta** no tiene aprobación atribuida. Estas
-marcas de procedencia son distintas de las clasificaciones académicas de la sección 2.
-No se consultaron fuentes, APIs ni infraestructura real UNAB/CCD.
+Identidad de A0: SHA-256
+`F1C97304C52415DFA348201C1265DAC47ED208ABA9E30F542498FD0D08B90E7A`.
+El enlace es local y depende de conservar el archivo; hash, nombre, sección y
+página permiten identificar la copia sin incorporarla al repositorio.
+
+Las páginas citadas son posiciones PDF **1–27, contando portada**, coherentes con
+el índice. Las citas literales normalizan únicamente espacios y saltos de línea;
+se conserva vocabulario, puntuación y nombre histórico. Los resúmenes se identifican
+como tales. Se leyó todo el texto extraíble y se revisaron visualmente las únicas
+dos imágenes incrustadas, las tablas y los enunciados/umbrales centrales; no quedaron
+páginas ilegibles o contenido inaccesible identificado.
+
+A0 prueba el compromiso escrito, **no su aprobación o radicación formal**. Ese
+estado administrativo continúa sin evidencia aportada. Un ADR técnico no equivale
+a autorización del director/facultad. El PDF tampoco autoriza usar documentos CCD
+o acceder a sistemas. No se realizó investigación web ni conexión institucional.
+
+### Inventario de cotejo previo a la corrección
+
+Los 40 puntos siguientes son resúmenes fieles de SOURCE_A, con localizador y
+destino en esta matriz. Las contradicciones no se corrigen dentro de A0.
+
+| Nº | Elemento | Hallazgo en A0 | Localizador A0 / análisis aquí |
+| --- | --- | --- | --- |
+| 01 | Título | Automatización inteligente de gestión de información CCD mediante RAG y orquestación; nombre histórico. | p. 1 / §3 |
+| 02 | Introducción | Tres pilares, dispersión, sobrecarga, Agentic AI, RAG/N8N, Mobile y servidores UNAB. | p. 4, §1 / §4 y §9 |
+| 03 | Problema | Desactualización, contradicciones, consultas repetitivas, ausencia de solución móvil unificada y consulta personal en tiempo real. | p. 4, §2.1 / §4 |
+| 04 | Árbol | Causas directas/indirectas, problema central, consecuencias y efectos; incluye falta de base vectorial como causa. | p. 5, figura 1 / §4 |
+| 05 | Pregunta | RAG y N8N forman parte del enunciado; centralización, optimización, reducción de carga y experiencia. | p. 5, §2.3 / §5 literal |
+| 06 | Justificación | Garantías de exactitud, autonomía, acceso y soberanía; presupone servidores disponibles. | pp. 5–7, §3 / §4, §9 y §12 |
+| 07 | Objetivo general | Artefacto, RAG/base vectorial, N8N y React Native para dominio CCD y beneficios. | p. 7, §4 / §6 literal |
+| 08 | OE1 | Motor PostgreSQL + pgvector/RAG con documentos oficiales verificados. | p. 7, §5.1 / §7 |
+| 09 | OE2 | RPA basada en scraping periódico de oferta, convocatorias y novedades. | p. 7, §5.2 / §7 |
+| 10 | OE3 | Enfoque agéntico, RAG, embeddings/pgvector y MCP explícitos. | p. 7, §5.3 / §7 |
+| 11 | OE4 | BPM/N8N para lógica y flujos conversacionales con agente y fuentes estructuradas/no estructuradas. | pp. 7–8, §5.4 / §7 |
+| 12 | OE5 | React Native y UX intuitiva, accesible y optimizada para consulta académica. | p. 8, §5.5 / §7 |
+| 13 | OE6 | On-Premise universitario/Docker, integración, precisión y usuarios reales UNAB. | p. 8, §5.6 / §7 |
+| 14 | Marco de referencia | Tres pilares y contexto informativo institucional; no demuestra por sí mismo su vigencia. | p. 8, §6 / §4 y §8 |
+| 15 | Corpus | Propuesta de Competencias Digitales, lineamientos diagnósticos, guías y resoluciones. | p. 8, §6 / §8 |
+| 16 | Arquitectura | Figura agéntica; cuatro capas en §11.4; tres capas en anexo C. | pp. 10–11, 19, 24 / §9 |
+| 17 | RAG | Recuperación documental y generación; garantías formuladas en términos absolutos. | pp. 6, 9, 19, 24–25 / §9 y §12 |
+| 18 | PostgreSQL/pgvector | Almacenamiento relacional/vectorial, embeddings y similitud coseno. | pp. 7, 9, 11, 19, 24 / §9 |
+| 19 | N8N | Orquesta consultas/BPM y, en paralelo, ingesta, scraping, calendarios y notificaciones. | pp. 6, 9–12, 18–21 / §9 |
+| 20 | RPA/scraping | Captura periódica web; tabla tecnológica selecciona N8N HTTP + Cheerio. | pp. 7, 12, 20, 24 / §7 y §9 |
+| 21 | Agentic AI | Obligación OE3; resultados precisan ReAct y selección dinámica. | pp. 7, 10–12, 20 / §7 |
+| 22 | MCP | Obligación OE3; servidor y código/documentación de interfaces exigidos. | pp. 7, 11–12, 20–21 / §7 |
+| 23 | BPM | Reglas académicas, ciclo de consulta y gobierno de flujos N8N. | pp. 7–8, 12, 18 / §7 y §9 |
+| 24 | Google Sheets | Calendarios; integración y máximo de 30 minutos de sincronización. | pp. 6, 9, 11, 20–22 / §9 y §12 |
+| 25 | React Native | Exigido en OE5; tabla de opciones seleccionadas también enumera Flutter. | pp. 8, 10, 18–19, 21, 23 / §9 |
+| 26 | Docker | Despliegue de la solución en servidores locales universitarios. | pp. 4, 7–8, 18, 21–24 / §9 |
+| 27 | On-Premise | Compromiso explícito, no mera posibilidad; viabilidad y costo se dan por garantizados. | pp. 7–8, 21, 24 / §7 y §12 |
+| 28 | Metodología | Investigación aplicada, iterativa/incremental, enfoque mixto. | p. 17, §11.1 / §10 |
+| 29 | DSR | Artefacto evaluado en condiciones de uso real; referencia Hevner. | p. 17 / §10 |
+| 30 | Scrum/adaptación | Cuatro fases en 16 semanas; adaptación académica declarada. | pp. 17–18 / §10 y §13 |
+| 31 | Entrevistas | Coordinador CCD y muestra de 10–15 estudiantes; cuestionario de caracterización. | p. 18, §11.3 / §10 |
+| 32 | Usuarios | Muestra mínima de 10 usuarios reales de distintos programas para OE5; pilotos CCD en OE6. | pp. 8, 18, 21 / §10 y §12 |
+| 33 | SUS | 10 ítems, promedio >70, ningún individuo <50, cinco tareas con completación >85 %. | pp. 18, 21, 25 / §12 |
+| 34 | RAG/RAGAS | 50–80 preguntas generadas sintéticamente desde documentos institucionales, cinco métricas. | p. 20 / §11 y §12 |
+| 35 | Resultados | Sistema integrado de nivel industrial, agentes/BPM/MCP y alta disponibilidad; documentación y caso de estudio. | pp. 19–22 / §12 |
+| 36 | Métricas/umbrales | Metas por OE, con bases y criterios diferentes; algunas sin protocolo operacional completo. | pp. 20–21 / §12 |
+| 37 | Cronograma | 16 semanas del semestre 2026-2, tabla y cinco hitos; diferencias frente a fases narradas. | pp. 17–18, 22–23 / §13 |
+| 38 | Tecnologías | Selecciones y alternativas de DB, N8N, LLM externo/local, móvil, infraestructura y scraping. | pp. 23–24, tabla 4 / §9 |
+| 39 | Ética | Abstención, fuentes, accesibilidad, consentimiento/minimización/anonimización, riesgo mínimo autodeclarado y consulta no vinculante. | pp. 15–17 / §10 |
+| 40 | Referencias | Bibliografía en construcción; artículos, herramientas, normas y afirmaciones requieren verificación externa posterior. | pp. 13–16, 25–27 / §12 |
+
+### Correcciones sustanciales respecto de A4
+
+- Se sustituye H1 por A0 para la historia: pregunta, objetivo general y los seis OE
+  están disponibles y cotejados. La pregunta P0 sobre conseguir el texto desaparece.
+- OE3 exige Agentic AI/MCP y OE4 exige N8N en la conversación; no son solo menciones
+  teóricas ni compromisos que deban suponerse. On-Premise universitario es explícito.
+- A0 ya dispone perfiles estudiantiles **sintéticos** en el resultado OE4. La brecha
+  de corpus institucional no se puede extender indiscriminadamente a esos perfiles.
+- Las guías completas sin indexación vectorial ya estaban previstas en A0, pp. 8/24.
+  El patrón actual es coherente en ese aspecto, aunque sus artefactos sean ficticios.
+- RAGAS y los umbrales provienen de §12.2, no del texto literal de OE1. Las preguntas
+  sintéticas prometidas se derivan de documentos institucionales; no equivalen a
+  preguntas sobre documentos enteramente sintéticos.
+- Se recuperan los compromisos omitidos o poco precisos: tres flujos automáticos
+  de scraping, cinco tareas UX, mínimo diez usuarios, notificaciones push, latencia
+  de calendario ≤30 min, cobertura del 100 % y respuesta promedio **≤5 s**.
+- Se documentan tensiones propias de A0: capas/rutas, hitos/fases, Flutter en tabla
+  de selección, perfiles ficticios frente a personalización/credenciales, absolutos
+  de disponibilidad y soberanía frente a tolerancias/LLM externo.
+- Las 16 semanas ya tienen ubicación histórica: semestre 2026-2. Sigue faltando
+  confirmar cuánto tiempo queda y qué replanificación está aprobada.
 
 ## 2. Convenciones de clasificación
 
+SOURCE_A/B/C identifican evidencia histórica, técnica y de discovery; SOURCE_D
+identifica inferencias/recomendaciones. Las clasificaciones siguientes son juicios
+académicos de esta auditoría, no estados de aprobación. Se combinan con `;`.
+
 | Clasificación académica | Definición |
 | --- | --- |
-| CONSISTENT | Existe coherencia en el aspecto y alcance comparados; no equivale a objetivo cumplido ni aprobación. |
-| NEEDS_REWORDING | La formulación debe distinguir alcance, estado, mecanismo o límites para no afirmar más de lo demostrado. |
-| NEEDS_EVIDENCE | Falta evidencia concreta para sostener, verificar o dar por cumplido el compromiso. |
-| NEEDS_DIRECTOR_APPROVAL | El cambio afecta el compromiso académico y debe revisarse con el director y el proceso académico aplicable, aún por confirmar. |
-| TECHNICALLY_OBSOLETE | Una descripción histórica no representa el runtime/alcance técnico actual. No implica que el requisito académico haya sido eliminado. |
-| SCOPE_RISK | La amplitud, dependencias o incertidumbre amenazan un resultado verificable en el plazo. |
-| UNSUPPORTED | Afirmación que carece de respaldo en las fuentes disponibles; no significa falsedad demostrada. |
-| KEEP_PROVISIONAL | Elemento plausible que puede conservarse para discusión, condicionado a justificación, evidencia y decisiones pendientes. |
+| CONSISTENT | Coherencia en el aspecto comparado, sin acreditar cumplimiento integral. |
+| NEEDS_REWORDING | La formulación requiere precisión de alcance, mecanismo o resultado. |
+| NEEDS_EVIDENCE | Falta respaldo para validar una afirmación o acreditar el compromiso. |
+| NEEDS_DIRECTOR_APPROVAL | Cambiar el compromiso requiere decisión del director y confirmación del proceso académico aplicable. |
+| TECHNICALLY_OBSOLETE | La descripción histórica no representa el runtime vigente; no elimina la obligación académica. |
+| SCOPE_RISK | Amplitud o dependencias amenazan una entrega verificable en el plazo. |
+| UNSUPPORTED | La afirmación no tiene respaldo suficiente en las fuentes leídas; no equivale a falsedad demostrada. |
+| KEEP_PROVISIONAL | Elemento plausible sujeto a evidencia y decisiones pendientes. |
 
-Se permiten combinaciones separadas por `;`. Estas son las únicas clasificaciones
-académicas generales. La sección 9 usa las etiquetas técnicas solicitadas; la 12
-usa marcas locales de intensidad/medibilidad; la 13 prioridades de planificación.
-Ninguna de ellas sustituye la clasificación de la matriz maestra.
+Etiquetas locales de métricas (§12): `PROJECT_DEFINED_TARGET` = criterio elegido
+por el proyecto; `EXTERNAL_STANDARD` = estándar externo cuya autoridad/aplicación
+debe acreditarse; `UNSUPPORTED_TARGET` = meta sin sustento de factibilidad o
+demostración suficiente; `AMBIGUOUS_TARGET` = faltan definición, denominador,
+condiciones o criterio operativo. Pueden coexistir. Ningún umbral numérico de A0
+se certifica aquí como EXTERNAL_STANDARD. `REFERENCE_NEEDS_VERIFICATION` marca
+fuentes/afirmaciones para revisión posterior, sin declararlas falsas.
+
+§13 conserva MUST_HAVE/SHOULD_HAVE/FUTURE como prioridades propuestas; §18 usa
+MVP_ACADEMIC_DEFENSIBLE, DESIRABLE, FUTURE y OUT_OF_SCOPE_CANDIDATE. No sustituyen
+la clasificación académica ni autorizan exclusiones.
 
 ## 3. Cambio de nombre
 
-**Nombre histórico: Route AI.** H1 y E2 lo identifican exclusivamente con el
-anteproyecto. **Nombre vigente: BanuChat**, confirmado por E1.
+Título histórico literal, A0 p. 1:
 
-Decisión técnica confirmada: toda propuesta nueva utiliza BanuChat. En una futura
-actualización académica deben revisarse portada, título, resumen, objetivos donde
-aparezca el nombre, diagramas, figuras, instrumentos, anexos y referencias internas.
-El original histórico y sus citas deben conservar identificación y trazabilidad;
-no se renombra retrospectivamente evidencia ni se modifica el documento radicado aquí.
+> Sistema de Automatización Inteligente para la Gestión de Información Académica del Centro de Competencias Digitales (CCD) mediante Arquitectura RAG y Orquestación de Flujos (Route AI)
 
-Clasificación: **NEEDS_REWORDING**; **NEEDS_DIRECTOR_APPROVAL** para confirmar la
-forma de reflejar el cambio en la versión académica oficial. El procedimiento no
-se conoce y no se inventa.
+**Nombre vigente: BanuChat**, SOURCE_B/E1. El nombre anterior aparece aquí solo
+en citas o identificación de A0. En una futura versión académica deberán revisarse
+portada, títulos, figuras, instrumentos, anexos y referencias internas conservando
+la identidad del original. Clasificación: NEEDS_REWORDING;
+NEEDS_DIRECTOR_APPROVAL respecto de su formalización académica.
 
-El cambio de nombre por sí solo **no cambia problema, objetivos, arquitectura,
-alcance ni metodología**. No puede usarse para encubrir la sustitución de corpus,
-la eliminación de un OE o el abandono de un despliegue prometido.
+El cambio de nombre por sí solo no cambia problema, objetivos, corpus,
+arquitectura, metodología o alcance. No se modifica A0 ni se presume aprobación.
 
 ## 4. Planteamiento del problema
 
-**Anteproyecto:** H1 pide auditar las afirmaciones siguientes; falta su formulación
-literal y sus referencias originales. **Repositorio:** E1/E3 prototipan consultas
-con respuestas estructuradas/documentales, procedencia y una app sobre ficción
-controlada. **Discovery:** E8 reporta rutas, ofertas y varios canales, pero no
-aporta medición del problema ni confirma inexistencia de un servicio unificado.
+SOURCE_A, §1/§2.1/§6, pp. 4/8, afirma problemas institucionales; SOURCE_B prototipa
+consulta estructurada/documental sobre ficción controlada. SOURCE_C reporta varios
+canales y dominios, pero no acredita frecuencia, carga, desactualización o ausencia
+de soluciones. Que A0 contenga la afirmación no demuestra que la institución la
+haya confirmado ni que hoy siga vigente.
 
-| Afirmación histórica a cotejar | Evidencia disponible repo/discovery | Evidencia pendiente | ¿Demasiado fuerte? / clasificación | Dirección de reformulación propuesta |
-| --- | --- | --- | --- | --- |
-| Información fragmentada | CP-03 reporta varios sistemas y CP-02/CP-04 publicaciones diversas. El prototipo reúne fuentes sintéticas. | Mapa de fuentes/tareas y observación de discontinuidades concretas, validados por CCD. | Sí, si se deduce fragmentación de la mera pluralidad; NEEDS_EVIDENCE; NEEDS_REWORDING. | Investigar dificultades de localización y coherencia en tareas delimitadas, sin declarar fragmentación general ya demostrada. |
-| Consultas repetitivas | No hay registros institucionales ni frecuencia de consultas aportados. Los casos sintéticos no miden demanda. | Registros agregados autorizados, entrevistas o evidencia equivalente con población y periodo definidos. | Sin respaldo actual; UNSUPPORTED; NEEDS_EVIDENCE. | Presentarla como hipótesis de necesidad que debe contrastarse, no como hecho cuantificado. |
-| Carga administrativa elevada | No se midieron tiempos, volumen, costos ni reparto de trabajo. | Definición operacional y línea base autorizada; tareas, actores y periodo comparables. | «Elevada» y «reducción» son conclusiones no sustentadas; UNSUPPORTED; NEEDS_REWORDING. | Delimitar apoyo informativo y, si se acuerda medir impacto, establecer primero una línea base. |
-| Información desactualizada | E8 advierte que reglas/fechas cambian; no aporta casos verificados de desactualización. | Comparaciones fechadas contra fuente autoritativa y criterio de vigencia. | Cambio temporal no prueba desactualización; NEEDS_EVIDENCE; NEEDS_REWORDING. | Formular la necesidad de identificar vigencia y procedencia, sin atribuir fallos institucionales no observados. |
-| Canales múltiples | CP-03 reporta Cosmos, MiPortalU, Banner y Canvas para usos distintos; sin originales examinados. | Confirmar canales, funciones, públicos y fuentes maestras; obtener referencia autorizada. | Plausible como antecedente, no problema por sí solo; KEEP_PROVISIONAL; NEEDS_EVIDENCE. | Describir canales reportados y evaluar si su distribución dificulta tareas concretas. |
-| Inexistencia de sistema unificado | No hay inventario institucional completo ni consulta al CCD acreditada. | Confirmación competente sobre servicios existentes y definición de «unificado». | Afirmación de inexistencia no demostrada; UNSUPPORTED; NEEDS_REWORDING. | Preguntar qué mecanismos actuales resuelven la necesidad y qué brecha residual justificaría BanuChat. |
+| Afirmación de A0 | Evidencia actual B/C y pendiente | Juicio SOURCE_D / clasificación | Dirección de corrección propuesta |
+| --- | --- | --- | --- |
+| Fragmentación y omnicanalidad sin unificación, p. 4 | C1 reporta canales distintos; falta mapa validado de fuentes, tareas y discontinuidades. | Pluralidad no prueba fragmentación problemática. NEEDS_EVIDENCE; NEEDS_REWORDING. | Describir brechas observables y su población/contexto. |
+| Consultas repetitivas y alta carga administrativa, p. 4 | No hay registros institucionales o línea base de volumen/tiempos acreditados. | UNSUPPORTED; NEEDS_EVIDENCE. | Formular hipótesis a contrastar y acordar medición antes de prometer reducción. |
+| Información desactualizada/contradictoria, p. 4 | C1/C2 reconocen temporalidad; no aportan casos comprobados contra fuente competente. | NEEDS_EVIDENCE; NEEDS_REWORDING. | Documentar ejemplos, fechas, fuentes y reglas de prevalencia. |
+| Herramientas actuales estáticas/manuales, sin razonamiento semántico ni integración real, p. 4 | No se inspeccionaron sistemas institucionales. | UNSUPPORTED; NEEDS_EVIDENCE. | Levantar capacidades reales; no convertir ausencia de inspección en inexistencia. |
+| Ningún sistema institucional unifica recuperación y automatización en una solución móvil, p. 4 | No hay inventario institucional completo ni comparación verificable. | UNSUPPORTED; NEEDS_REWORDING. | Delimitar la brecha frente a servicios existentes y verificar la exclusividad. |
+| Cupos por pilares, perfil e historial personal en tiempo real, pp. 4/6 | C2 distingue Curso/Oferta, estado personal y cupos sin fuente confirmada. E9 solo perfiles ficticios. | SCOPE_RISK; NEEDS_EVIDENCE. | Acordar si se trata de orientación, demostración sintética o consulta autorizada; no prometer acceso vivo. |
+| Mejora sustancial/total accesibilidad y exactitud garantizada, justificación pp. 6–7 | E5/E6/E9 son evidencia técnica parcial; sin estudio de mejora, accesibilidad formal o impacto. | UNSUPPORTED; NEEDS_REWORDING. | Sustituir absolutos por resultados acotados que puedan evaluarse con un protocolo aceptado. |
 
-Inferencia: el problema defendible todavía debe acotarse a usuarios, tareas,
-información y criterios de resultado confirmados. Que el prototipo responda
-preguntas sintéticas no demuestra necesidad, causalidad ni impacto administrativo.
+**Árbol del problema, A0 p. 5, figura 1 (lectura visual):** el centro es la dificultad
+de acceso centralizado y eficiente a información académica/administrativa CCD.
+Causas directas: fragmentación; inexistencia de canal automatizado 24/7; chats sin
+contexto institucional real. Indirectas: carencia de una base vectorial unificada,
+actualización manual y falta de integración calendario–datos estudiantiles.
+Consecuencias: inscripción tardía por desconocimiento, respuestas imprecisas y
+dificultad de escalar soporte. Efectos: deserción/falta de interés, sobrecarga de
+canales y percepción de obsolescencia tecnológica.
+
+SOURCE_D: el árbol incorpora una solución elegida (base vectorial) como causa de
+un problema organizacional sin demostrar su necesidad. La cadena causal hasta
+deserción no tiene medición aportada. Clasificación NEEDS_EVIDENCE; UNSUPPORTED;
+NEEDS_REWORDING. Debe revisarse con evidencia, sin tratar sus flechas como causalidad
+validada. No se redibuja ni se cambia el árbol original en esta tarea.
+
+La justificación §3.5, p. 7, presupone servidores proporcionados y viabilidad
+garantizada. Su presencia escrita no acredita acceso, capacidad, soporte o costos;
+esas dependencias siguen abiertas en SOURCE_C.
 
 ## 5. Pregunta de investigación
 
-No se dispone del enunciado literal; **no puede dictaminarse su validez final**.
-H1 pide revisar el posible acoplamiento de la pregunta a RAG, N8N y tecnologías
-específicas. Clasificación: **NEEDS_EVIDENCE; NEEDS_REWORDING;
-NEEDS_DIRECTOR_APPROVAL** si se altera el compromiso radicado.
+**Transcripción literal de SOURCE_A, A0 §2.3, p. 5:**
 
-| Riesgo a cotejar en el original | Juicio provisional | Decisión necesaria |
-| --- | --- | --- |
-| La pregunta obliga a usar RAG para toda consulta | E3/E8 distinguen consultas estructuradas, explicación documental y lookup; no todas necesitan generación. | Preguntar por capacidad/resultado evaluable y justificar RAG solo para tareas pertinentes. |
-| N8N se convierte en condición de solución o en beneficio demostrado | E4 respalda orquestación manual local, no superioridad ni mejora institucional. | Distinguir mecanismo de ingesta de fenómeno que se investiga. |
-| Una lista de tecnologías reemplaza la incertidumbre investigable | Inferencia: podría convertir una solución elegida en parte del problema sin comprobar necesidad. | Identificar qué se desea conocer/evaluar y qué decisiones técnicas son instrumentales. |
-| Se promete reducir carga o mejorar experiencia solo por construir el sistema | E9 no acredita estudio de impacto ni SUS. | Elegir resultados medibles y protocolo, o limitar la afirmación a evaluación de prototipo. |
+> ¿De qué manera el diseño e implementación de un sistema de automatización inteligente basado en arquitectura RAG (Retrieval-Augmented Generation) y orquestación de flujos con N8N puede centralizar y optimizar el acceso a la información académica del Centro de Competencias Digitales (CCD) de la UNAB, reduciendo la carga administrativa y mejorando la experiencia de consulta de los estudiantes?
 
-Dirección propuesta: una pregunta centrada en el apoyo a tareas informativas
-delimitadas, con corpus, población y criterios de evaluación explícitos. No se
-redacta una pregunta final ni se afirma que la histórica deba abandonarse antes
-de leerla y revisarla con el director.
+| Dimensión | Cotejo e inferencia SOURCE_D |
+| --- | --- |
+| Fenómeno | Acceso a información académica CCD y su relación con carga administrativa y experiencia de consulta. |
+| Resultado planteado | Centralizar/optimizar, reducir carga y mejorar experiencia; son resultados a investigar, no efectos demostrados. |
+| Tecnologías prescritas | RAG y N8N están dentro del enunciado, no solo en el diseño posterior. Son mecanismos y a la vez condiciones constitutivas de la solución investigada. |
+| Coherencia con B | Existe artefacto móvil/RAG y orquestación de ingesta; no se ha medido reducción de carga, optimización institucional ni mejora comparativa de UX. |
+| Coherencia con C | Necesidad, población, fuentes y tareas aún por validar; consulta documental y estructurada pueden requerir mecanismos distintos. |
+| Riesgo de formulación | La pregunta preselecciona solución y beneficios sin explicitar comparación, línea base, instrumento o límites del corpus. No obliga literalmente a usar RAG en toda consulta, pero §11.4 sí generaliza el recorrido documental. |
+| Dirección de corrección | Acordar resultado evaluable, corpus y población; justificar los mecanismos sin dar por logrado el efecto institucional. Cambiar el enunciado requiere aprobación. |
+
+Clasificación: **KEEP_PROVISIONAL** para la necesidad investigable;
+**NEEDS_REWORDING; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK** para alcance,
+beneficios y prescripción tecnológica. Se conserva la pregunta histórica, sin
+redactar ni aprobar su sustituta.
 
 ## 6. Objetivo general
 
-La cadena **problema → pregunta → objetivo general → artefacto → evaluación** no
-está reconciliada académicamente. E1/E8 describen un prototipo sintético; H1 reporta
-promesas de fuentes reales, automatización e infraestructura institucional.
-No se dispone del objetivo general literal para atribuirle una redacción concreta.
+**Transcripción literal de SOURCE_A, A0 §4, p. 7:**
 
-| Aspecto a auditar | Evidencia/inferencia | Dirección de corrección, no texto final |
+> Diseñar e implementar un sistema de automatización inteligente para la gestión y consulta de información académica del Centro de Competencias Digitales (CCD) de la UNAB, mediante la integración de una arquitectura RAG sobre base de datos vectorial, flujos de orquestación automatizados en N8N y una aplicación móvil multiplataforma desarrollada en React Native, con el fin de centralizar el acceso a la información institucional, reducir la carga administrativa y mejorar la experiencia de los estudiantes en la adopción de la Ruta de Competencias Digitales.
+
+| Fragmento/compromiso histórico | Estado B / contraste C | Clasificación y decisión propuesta D |
 | --- | --- | --- |
-| Prescripción de muchas tecnologías | H1 enumera RAG, N8N, Agent/MCP, BPM/RPA y otros componentes; no se conoce cuáles están en el objetivo general o solo en el diseño. | Separar contribución académica y resultados de mecanismos; conservar tecnologías solo con necesidad y alcance justificables. |
-| Reducción de carga administrativa | Sin línea base ni evaluación de impacto disponibles. | No afirmarla como resultado obtenido; mantenerla solo como efecto a evaluar si existe diseño viable y aprobado. |
-| Mejora de experiencia | Mobile existe, pero las comprobaciones manuales no equivalen a mejora de UX demostrada. | Delimitar evaluación de usabilidad y tareas, sin prometer superioridad sin comparación pertinente. |
-| Elementos no implementados | Agent/ReAct, MCP ejecutable y operación institucional pendientes; scraping real excluido del alcance técnico vigente. | Distinguir artefacto actual, trabajo necesario aprobado y candidatos a diferir. |
-| Dominio real | D3 separa Curso/Oferta y fronteras personales como hipótesis; fuentes maestras y permisos pendientes. | Resolver corpus y tareas antes de prometer cobertura institucional. |
+| Diseñar e implementar un sistema para gestión y consulta | Hay prototipo implementado; C2 propone consulta informativa y separa transacciones. | CONSISTENT; NEEDS_REWORDING. Precisar qué significa gestión; §10.5 de A0 limita el asistente a consulta no vinculante. |
+| RAG sobre base vectorial | PostgreSQL/pgvector y RAG directo presentes; falta corpus institucional y evaluación formal. | CONSISTENT; NEEDS_EVIDENCE. No equiparar implementación con validación integral. |
+| Flujos automatizados N8N | Ingesta manual local; A0 OE4/figura 2 incluyen conversación y reglas. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL. Resolver función, automatismo y vínculo con OE2/OE4. |
+| Aplicación React Native multiplataforma | Base Expo/React Native implementada y verificaciones Android reportadas; no garantía de toda plataforma/condición. | CONSISTENT; NEEDS_EVIDENCE. Validar cobertura y UX exigidas. |
+| Información institucional CCD | Documentos y datos funcionales ficticios; C1/C2 no aportan corpus autorizado. | NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK. Resolver alcance de documentos oficiales frente a baseline sintético. |
+| Centralización, reducción de carga y mejora en adopción de la ruta | Sin línea base institucional, estudio comparativo ni evidencia de adopción. | UNSUPPORTED; NEEDS_REWORDING; NEEDS_EVIDENCE. Acordar indicadores/método o acotar formalmente los beneficios. |
 
-Clasificación general: **NEEDS_REWORDING; NEEDS_EVIDENCE;
-NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK**. La dirección propuesta es formular un
-objetivo verificable para un artefacto y evaluación delimitados, preservando
-la pregunta investigable. No se cambia el objetivo en ningún otro documento.
+Agentic AI, MCP, Docker y On-Premise **no están nombrados en el objetivo general**;
+sí son compromisos expresos en OE3/OE6 y otras secciones. No deben añadirse a su
+transcripción ni ignorarse al evaluar el alcance total. El objetivo general
+prescribe RAG, base vectorial, N8N y React Native. La cadena problema → pregunta →
+objetivo → artefacto → evaluación sigue requiriendo reconciliación académica.
 
 ## 7. Objetivos específicos
 
-La asociación OE1–OE6 proviene de H1 y se contrasta con la interpretación técnica
-de E1; **no es transcripción ni modificación de los objetivos radicados**. Cada
-tabla responde necesidad, implementación, tamaño, plazo, entregable, verificabilidad,
-validación y aprobación. Los juicios de viabilidad son inferencias: no se conoce
-capacidad del equipo, dedicación, semanas transcurridas ni tiempos de acceso externo.
+Cada cita es SOURCE_A, A0 §5; las filas de validación provienen de §12.2 cuando se
+indica. Actividad implícita, brecha, necesidad/viabilidad y decisiones son SOURCE_D;
+no se presentan como texto literal. Los seis objetivos se conservan con sus
+entregables e impactos. Clasificar una parte CONSISTENT no acredita el OE completo.
 
-### OE1 — RAG, pgvector, corpus y evaluación
+### OE1 — Motor semántico, corpus institucional y evaluación
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: RAG + pgvector + documentos institucionales + RAGAS. | Document RAG directo y pgvector sobre corpus sintético; sin evaluación formal M9. | E3/E5/E7; E8 exige identificar qué tareas son documentales. | La necesidad de responder con evidencia es plausible; RAG no es necesario para todas las consultas. La implementación es parcial respecto de la promesa real. | KEEP_PROVISIONAL; NEEDS_EVIDENCE; NEEDS_REWORDING | Confirmar preguntas/corpus y el alcance de RAG con el director y CCD. |
-| Tamaño y 16 semanas | Extensión literal del objetivo no disponible. | Pipeline y app reutilizables; documentos reales/permisos pendientes. | E1/E8. | Ampliar corpus, adaptar formatos, diseñar benchmark y evaluar puede ser grande. Cabida solo condicional con corpus acotado y acceso resuelto temprano; no garantizada. | SCOPE_RISK | Acotar corpus/tareas y reservar esfuerzo de evaluación antes de añadir funcionalidades. |
-| Entregable y verificabilidad | H1: recuperación/generación evaluada; detalle de entregables por cotejar. | Hay runtime, evidencia K2 y protocolo M9 draft. | E5/E7. | Entregable candidato: artefacto reproducible, corpus permitido, protocolo y resultados. K2 no prueba generación ni dominio real. | CONSISTENT; NEEDS_EVIDENCE | Acordar corpus, métricas, gold, muestra y criterio de aceptación antes de ejecutar evaluación final. |
-| Validación y aprobación | RAGAS e información institucional reportados. | K2: 18 casos sintéticos; M9: 63 draft, sin RAGAS. | E5/E7/E8. | Hay validación técnica parcial, no cumplimiento integral. Cambiar corpus o métrica/alcance sustancial necesita revisión. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Decidir si se acepta evaluación sintética o se exige corpus real autorizado; no acreditar OE1 ahora. |
+**Transcripción literal, A0 p. 7:**
 
-### OE2 — RPA, scraping y actualización automática
+> Construir un motor de búsqueda semántica mediante la implementación de una base de datos vectorial con PostgreSQL + pgvector y arquitectura RAG, que permita indexar documentos institucionales del CCD y garantizar que las respuestas del sistema se fundamenten exclusivamente en información oficial y verificada.
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: RPA/web scraping y actualización automática de fuentes reales. | Ingesta validada de fuente sintética aprobada; N8N manual. No scraping real ni integración institucional en el alcance vigente. | E1/E2/E4. | Mantener información vigente puede ser necesario; scraping/RPA no se justifican sin fuente y acceso. Lo implementado no equivale al objetivo histórico. | TECHNICALLY_OBSOLETE; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Confirmar si el compromiso es la actualización verificable o las técnicas concretas; no renombrar ingesta como RPA. |
-| Tamaño y 16 semanas | Automatización institucional, extensión exacta por cotejar. | Falta contrato de fuente, frecuencia y acceso; scheduled/retry/recover N8N pendientes. | E4/E8. | Dependencias externas y operación hacen alto el riesgo. No es defendible garantizarlo en 16 semanas con acceso aún desconocido. | SCOPE_RISK | Limitar a una fuente autorizada o proponer sustituir/diferir el objetivo mediante aprobación. |
-| Entregable y verificabilidad | Captura/actualización reportada, sin detalle literal. | Workflow manual, validación y publicación trazable. | E4: publicación y posterior already_current; no scheduling. | Entregable candidato: ingesta reproducible con fuente, corte y fallos documentados. Es distinto de RPA/scraping. | NEEDS_REWORDING; KEEP_PROVISIONAL | Acordar qué se mide desde disponibilidad de fuente y qué entrega cumple el objetivo revisado. |
-| Validación y aprobación | Actualización automática reportada. | E1 propone <24 h y éxito >90 % como interpretación técnica, no medidos. | E1/E4: N3 no acredita esas métricas. | No atribuir origen radicado ni cumplimiento a esos umbrales sin cotejo. Sustituir fuentes reales por fixture es cambio académico. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Ratificar o cambiar métricas, fuente y técnica; preservar el OE histórico hasta decisión formal. |
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | Motor PostgreSQL + pgvector/RAG para indexar documentos CCD y fundamentar exclusivamente en información oficial verificada. RAGAS no aparece en la oración del OE; sí en su resultado §12.2, p. 20. |
+| Actividad implícita | Obtener corpus autorizado, distinguir documentos vectorizables/completos, indexar, recuperar, generar y verificar respaldo. |
+| Entregable | Motor y base vectorial con corpus institucional; §12.2 añade evaluación sobre 50–80 preguntas derivadas de esos documentos. |
+| Validación prometida | RAGAS: faithfulness ≥0,80, context precision ≥0,80, context recall ≥0,75, answer relevancy ≥0,80; MRR ≥0,70. El PDF no fija k para MRR. Véase §12. |
+| Estado repo | E3/E5/E7: RAG y pgvector sobre corpus sintético; K2 retrieval parcial; M9 draft sin ejecución RAGAS. |
+| Discovery | C1/C2: fuentes, vigencia, permisos y tareas documentales pendientes. Las guías no deben asumirse corpus fragmentable. |
+| Brecha | Corpus oficial y calidad generativa no acreditados. Preguntas generadas sintéticamente desde documentos reales no equivalen a preguntas sobre ficción. |
+| Clasificación | CONSISTENT; NEEDS_EVIDENCE; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK |
+| Decisión requerida | Mantener necesidad de respuesta sustentada; decidir corpus aceptable, alcance documental y protocolo, sin acreditar cumplimiento ahora. |
+| Impacto de modificarlo | Cambian validez externa, gold, contribución y resultados. Es verificable con corpus/protocolo delimitados; acceso y revisión condicionan cabida en 16 semanas. No se elimina el OE. |
 
-### OE3 — Agentic AI y MCP
+### OE2 — Extracción RPA/scraping y actualización automática
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: agente y MCP; E1 interpreta selección dinámica de tools. | Router determinista, servicios y RAG directo; contrato MCP de seis tools, sin servidor ejecutable ni ciclo ReAct integrado. | E3; runtime no compone un agente. | Router y generación no demuestran Agentic AI. Necesidad de selección dinámica aún no justificada con tareas reales. | NEEDS_EVIDENCE; KEEP_PROVISIONAL | Determinar si Agent/MCP es contribución obligatoria, medio opcional o candidato a diferir. |
-| Tamaño y 16 semanas | Alcance exacto del agente por cotejar. | Faltan implementación, integración, permisos y evaluación de herramientas. | E1/E3/E8. | Añadir agente y servidor con dominio desconocido amplía diseño y evaluación. Cabida incierta; especialmente riesgoso junto a integración real. | SCOPE_RISK | Exigir casos que no resuelvan adecuadamente los caminos actuales antes de asignar esfuerzo. |
-| Entregable y verificabilidad | Agente con herramientas reportado. | Solo contrato y servicios reutilizables; no evidencia de selección dinámica ejecutada. | E3/E9. | Si se mantiene: agente/servidor operativo y evaluación de selección, límites y errores. El contrato solo no satisface ese entregable. | NEEDS_EVIDENCE; NEEDS_REWORDING | Acordar casos, protocolo y criterios de herramientas antes de implementar. |
-| Validación y aprobación | No se conoce validación literal prometida. | No hay evaluación ejecutada de Agent/MCP acreditada. | E1/E9. | No se puede marcar como cumplido ni eliminarlo porque el fallback directo ya funciona. | NEEDS_DIRECTOR_APPROVAL; NEEDS_EVIDENCE | Aprobar mantenimiento, acotación, sustitución o diferimiento; actualizar trazabilidad y resultados esperados. |
+**Transcripción literal, A0 p. 7:**
 
-### OE4 — BPM, N8N e integración estructurada
+> Desarrollar los módulos de extracción y actualización automática de datos mediante técnicas de RPA ( Robotic Process Automation ) basados en web scraping periódico, para consolidar e integrar la información dispersa de la oferta académica, convocatorias y novedades del CCD en una base de datos relacional y vectorial.
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: BPM/N8N e integración estructurada, con Google Sheets entre compromisos históricos. | N8N orquesta ingesta asíncrona manual; calendario en releases sintéticas. Google Sheets excluido técnicamente. | E1/E2/E4. | N8N demuestra orquestación concreta, no por sí solo modelado/mejora de un proceso institucional BPM. | NEEDS_REWORDING; TECHNICALLY_OBSOLETE; KEEP_PROVISIONAL | Definir si OE4 exige gestión de procesos institucionales o coordinación técnica de ingesta. |
-| Tamaño y 16 semanas | Límites y dependencias de BPM/integración por cotejar. | No hay fuente/calendario real autorizado ni proceso institucional levantado. | E8. | BPM amplio más conectores y evaluación de procesos presenta alto riesgo; un flujo acotado puede ser viable con fuente y criterios definidos. | SCOPE_RISK | Evitar duplicar OE2: separar adquisición/validación de fuente y coordinación/publicación si ambos se mantienen. |
-| Entregable y verificabilidad | Flujo e integración reportados. | Workflow versionado y recorrido N3. E1 propone publicación atómica, trazabilidad y conservación de current ante fallo. | E1/E4. | Entregable candidato verificable: flujo reproducible y pruebas de consistencia/fallos pertinentes. No equivale a mejorar BPM sin modelo y línea base. | CONSISTENT; NEEDS_EVIDENCE; NEEDS_REWORDING | Aprobar entregable revisado; confirmar fuentes y descartar o justificar Google Sheets como medio obligatorio. |
-| Validación y aprobación | No se dispone del criterio literal de integración/tiempo. | N3 cubre camino manual exitoso y no-op; no todos los fallos ni scheduling. E1 excluye sincronización independiente de 30 min. | E1/E4. | Cambiar fuente, automatismo o umbral afecta evaluación académica. La exclusión técnica no lo formaliza. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Ratificar alcance y métricas; no presentar N3 como cumplimiento integral de OE4. |
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | Exige extracción y actualización automática mediante RPA basada en web scraping periódico para oferta académica, convocatorias y novedades CCD, en base relacional y vectorial. |
+| Actividad implícita | Definir páginas objetivo y permisos, extraer, verificar datos, programar frecuencia, actualizar y medir errores/frescura respecto de la publicación original. |
+| Entregable | Módulos de extracción; §12.2, p. 20, concreta pipelines N8N autónomos y frecuencia configurable, no una carga manual. |
+| Validación prometida | Al menos tres flujos de scraping automáticos exitosos sin intervención manual durante las pruebas; latencia <24 h desde publicación en sitio CCD; extracción correcta >90 % de documentos sobre páginas objetivo. |
+| Estado repo | E1/E2/E4: fuente de verdad sintética versionada; N8N manual delega procesamiento en backend/rag. No scraping real ni scheduling implementado en el workflow. |
+| Discovery | Canales técnicos, páginas, permisos, cadencia y autoridad sin confirmar. No se presupone API ni se sustituye su ausencia por scraping. |
+| Brecha | La ingesta actual no es RPA y no mide captura desde sitio institucional. E1 cambia el origen del reloj a disponibilidad para ingesta y la métrica a éxito: no son equivalentes al criterio A0. |
+| Clasificación | TECHNICALLY_OBSOLETE; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK |
+| Decisión requerida | Decidir si conservar técnicas expresas o aprobar sustitución por ingesta controlada con fuente/métrica revisadas. Actualización puede ser necesaria; RPA debe justificarse por la fuente. |
+| Impacto de modificarlo | Afecta fuente, mecanismo, número de flujos, frecuencia y denominador. Verificable con acceso y protocolo, pero alto riesgo de tamaño/plazo; 16 semanas no garantizadas. Mantener trazabilidad del OE. |
 
-### OE5 — Mobile React Native y UX
+### OE3 — Núcleo agéntico y MCP
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: aplicación móvil React Native y experiencia de usuario. | Mobile Expo/React Native implementado; chat, citas, fuentes, calendario, progreso e historial sintéticos. | E9 y E1. | Coherencia de canal/tecnología; utilidad para tareas reales y mejora de UX aún deben validarse. | CONSISTENT; NEEDS_EVIDENCE | Confirmar usuarios/tareas prioritarias sin ampliar pantallas a entidades todavía no validadas. |
-| Tamaño y 16 semanas | Cobertura de app/UX por cotejar. | Hay base funcional; falta evaluación formal y alguna validación manual posterior. | E9. | Adaptación limitada y estudio acotado son condicionalmente viables; identidad real, transacciones y nuevas integraciones amplían mucho el alcance. | SCOPE_RISK; KEEP_PROVISIONAL | Congelar cobertura esencial y asegurar participantes/protocolo antes de comprometer validación. |
-| Entregable y verificabilidad | App y validación con usuarios reportadas. | Artefacto móvil disponible y verificaciones por etapas. | E9. | Entregable candidato: app demostrable, tareas, instrumento, resultados y límites. Implementación sola no demuestra UX. | CONSISTENT; NEEDS_EVIDENCE | Definir entorno, tareas, población, reclutamiento y tratamiento de datos de evaluación. |
-| Validación y aprobación | SUS/usuarios según H1; umbrales literales por cotejar. | E1 registra SUS medio >70, ningún resultado <50 y tareas >85 % como criterios; sin resultados SUS acreditados. | E1/E9. | No convertir pruebas físicas del desarrollador en estudio con usuarios ni cumplimiento de umbrales. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Acordar protocolo; cualquier sustitución de usuarios por revisión técnica requiere aprobación y limitación explícita. |
+**Transcripción literal, A0 p. 7:**
 
-### OE6 — On-Premise, Docker y evaluación operacional
+> Diseñar y construir el núcleo de procesamiento e inteligencia artificial bajo un enfoque agéntico ( Agentic AI ), implementando la arquitectura RAG mediante el almacenamiento de embeddings en pgvector y la estandarización de herramientas de consulta a través del protocolo MCP ( Model Context Protocol ).
 
-| Elemento | Anteproyecto histórico | Estado del repo | Evidencia disponible | Problema | Clasificación | Decisión requerida |
-| --- | --- | --- | --- | --- | --- | --- |
-| Necesidad e implementación | H1: On-Premise UNAB, Docker, métricas y usuarios reales. | Compose local parcial para PostgreSQL/N8N; no despliegue institucional acreditado. | E2/E3/E4/E6. | Reproducibilidad local es útil, pero no sustituye infraestructura institucional ni disponibilidad productiva. | TECHNICALLY_OBSOLETE; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Confirmar si On-Premise institucional es requisito evaluable o aspiración que puede diferirse. |
-| Tamaño y 16 semanas | Topología y exigencia operacional literal desconocidas. | Sin infraestructura, acceso, operación ni responsables institucionales confirmados. | E8. | Es una dependencia externa de alto riesgo; no se puede garantizar despliegue, seguridad, usuarios y estabilidad dentro del plazo actual desconocido. | SCOPE_RISK | Separar validación local de eventual despliegue; acotar la entrega académica con el director. |
-| Entregable y verificabilidad | Entorno y métricas reportados. | Configuración local y evidencia de latencia existen. | E3/E6. | Entregable candidato: entorno reproducible y protocolo con entorno/carga definidos. No llamarlo «industrial» ni «alta disponibilidad». | KEEP_PROVISIONAL; NEEDS_REWORDING | Fijar qué se considera despliegue, disponibilidad, respuesta y evidencia aceptable. |
-| Validación y aprobación | Métricas/usuarios reportados; detalle literal pendiente. | E1 registra media <5 s y ausencia de caídas >5 min como referencias; L1-B media 4013.57 ms en 10 warm, 8/10 <5 s, sin acreditar OE6. | E1/E6/E9. | Media de una muestra no demuestra SLA, estabilidad prolongada o validación con usuarios; no duplicar UX de OE5 como evidencia operacional. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Aprobar entorno y protocolo; decidir qué evaluación corresponde a OE5 y cuál a OE6. |
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | Enfoque Agentic AI, RAG, embeddings en pgvector y estandarización de herramientas mediante MCP son obligaciones explícitas del OE, no solo marco teórico. |
+| Actividad implícita | Construir agente y servidor, integrar fuentes/herramientas, definir tareas de varios pasos y comprobar selección, límites y coherencia. |
+| Entregable | §12.2, p. 20: LLM con ciclo ReAct, servidor MCP, código de endpoints y documentación de interfaces dinámicas. |
+| Validación prometida | Demostración de evaluación autónoma de intención y selección de herramienta MCP adecuada para tareas de múltiples pasos; pruebas de coherencia conversacional. No fija tasa numérica de éxito. |
+| Estado repo | E3: Intent Router determinista, servicios y RAG directo; MCP solo contrato de seis tools. No ejecutable ni ciclo ReAct integrado. |
+| Discovery | C1/C2 no prueban necesidad de agente ni acceso a las herramientas/fuentes reales. Consultas estructuradas pueden resolverse sin selección generativa. |
+| Brecha | RAG/embeddings cubren parte del mecanismo, pero router no es agente y REST no es servidor MCP. El contrato no satisface el entregable operativo. |
+| Clasificación | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK; KEEP_PROVISIONAL |
+| Decisión requerida | Confirmar mantenimiento, acotación o diferimiento explícito de la obligación ya identificada, con justificación y criterio de selección/control. |
+| Impacto de modificarlo | Cambia contribución de autonomía, interfaces, arquitectura y evaluación. Es verificable si se operacionalizan tareas/éxito; construirlo junto a integración real eleva tamaño y riesgo en 16 semanas. No se borra por funcionar el RAG directo. |
 
-Inferencia transversal: **OE2, OE3, OE4 y OE6 tienen el mayor riesgo de alcance y
-dependencia externa**. OE1 y OE5 conservan una base técnica más cercana a sus temas,
-pero siguen pendientes corpus/protocolo y validación. No se borra ningún OE ni se
-declara su cumplimiento académico en esta auditoría.
+### OE4 — BPM/N8N y conversación
+
+**Transcripción literal, A0 pp. 7–8:**
+
+> Orquestar la lógica de interacción, los flujos conversacionales y el cumplimiento de las directrices institucionales bajo principios de BPM ( Business Process Management ) mediante la plataforma N8N, integrando el agente inteligente con los canales de datos estructurados y no estructurados.
+
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | N8N debe orquestar lógica de interacción, flujos conversacionales y cumplimiento de directrices institucionales bajo BPM, integrando agente y canales estructurados/no estructurados. |
+| Actividad implícita | Identificar reglas/proceso de consulta, modelar flujos, integrar agente, calendario y perfiles; comprobar tránsito y sincronización. |
+| Entregable | §12.2, pp. 20–21: flujos N8N documentados, Google Sheets para calendario y PostgreSQL para perfiles estudiantiles sintéticos. |
+| Validación prometida | E2E N8N → pgvector → Backend API → App sin pérdida/corrupción; calendario con latencia máxima 30 min; 100 % de flujos de §11.4 cubiertos por casos documentados. |
+| Estado repo | E4: N8N fuera del chat, ingesta manual local; calendario dentro de releases sintéticas, sin Sheets; perfiles ficticios coherentes con ese punto de A0. |
+| Discovery | Directrices institucionales, fuente del calendario, procesos y condiciones de acceso pendientes. La mención de plataformas no demuestra interfaces disponibles. |
+| Brecha | Cambio sustancial de responsabilidad síncrona a asíncrona, eliminación técnica de Sheets/30 min y validación distinta. Publicación atómica no sustituye automáticamente esos compromisos. |
+| Clasificación | TECHNICALLY_OBSOLETE; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK |
+| Decisión requerida | Precisar BPM como modelado de reglas/ciclo de consulta prometido y decidir si se sustituye por orquestación de ingesta. Resolver fuente, tiempo y cobertura, manteniendo visible la coherencia de perfiles sintéticos. |
+| Impacto de modificarlo | Afecta arquitectura, reglas, entregables e integración; evitar duplicación con OE2. Flujo acotado es verificable; proceso institucional más agente/Sheets sin accesos es alto riesgo en 16 semanas. No reducirlo a 'usa N8N'. |
+
+### OE5 — Aplicación móvil y UX
+
+**Transcripción literal, A0 p. 8:**
+
+> Desarrollar la interfaz móvil del sistema Route AI utilizando el framework React Native, garantizando una experiencia de usuario intuitiva, accesible y optimizada para la consulta de la ruta académica por parte de los estudiantes.
+
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | React Native para consulta académica con UX intuitiva, accesible y optimizada; la garantía requiere evidencia. |
+| Actividad implícita | Construir e integrar app, definir tareas de usuario, probar plataformas/accesibilidad y evaluar uso con instrumento y participantes. |
+| Entregable | §12.2, p. 21: consulta en lenguaje natural, calendario, historial de cursos y notificaciones push, integración completa REST. |
+| Validación prometida | SUS de 10 ítems, mínimo 10 usuarios reales UNAB de distintos programas; media >70/100, nadie <50/100, completación >85 % de cinco tareas. No enumera esas cinco tareas. |
+| Estado repo | E9: Expo 57/React Native, chat/citas, calendario, progreso e historial conversacional sintéticos; push pendiente; verificaciones manuales Android no equivalen a SUS. |
+| Discovery | Población, tareas, reclutamiento y cobertura de historial académico por confirmar. Historial conversacional no prueba historial de cursos. |
+| Brecha | Base móvil reutilizable, pero faltan push y validación formal exigidos; no se acredita accesibilidad integral ni beneficio comparativo. |
+| Clasificación | CONSISTENT; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK |
+| Decisión requerida | Mantener canal y delimitar módulos, corpus del historial y protocolo. Diferir push o sustituir población/instrumento requiere aprobación, no reclasificación automática como deseable. |
+| Impacto de modificarlo | Cambia cobertura funcional y evidencia UX. Entregable verificable; adaptación acotada es plausible, pero sesiones/reclutamiento y funcionalidades pendientes condicionan 16 semanas. No declarar OE5 cumplido. |
+
+### OE6 — Despliegue universitario y evaluación integral
+
+**Transcripción literal, A0 p. 8:**
+
+> Desplegar la solución informática bajo un modelo On-Premise utilizando la infraestructura de servidores proporcionada por la universidad mediante contenedores Docker, y evaluar su desempeño integral mediante pruebas de integración, métricas de precisión en recuperación de información y pruebas de usabilidad con usuarios reales de la comunidad estudiantil UNAB.
+
+| Elemento | Cotejo y decisión |
+| --- | --- |
+| Texto/alcance histórico | Despliegue On-Premise en servidores proporcionados por la universidad mediante Docker; integración, precisión y usabilidad con estudiantes reales UNAB. |
+| Actividad implícita | Obtener entorno y accesos, desplegar componentes, instrumentar estabilidad/latencia y reunir resultados técnicos y de usuarios. |
+| Entregable | §12.2, p. 21: sistema completamente desplegado, informes de evaluación, arquitectura lógica/física, MCP, nodos BPM/N8N, manual y repositorio replicable. |
+| Validación prometida | Sin interrupciones no planificadas >5 min y respuesta promedio no mayor a 5 s (≤5); 100 % de objetivos de evaluación planificados, métricas agénticas/RAG, BPM/RPA y SUS con pilotos CCD. |
+| Estado repo | E3: Compose local parcial PostgreSQL/N8N, sin despliegue UNAB. E6: 10 warm locales, media 4013.57 ms, 8/10 <5000 ms; no estabilidad longitudinal ni aceptación formal. |
+| Discovery | Infraestructura, recursos, permisos y operación institucional sin confirmación. Usuarios del estudio distintos del corpus funcional. |
+| Brecha | Local no equivale a institucional. La arquitectura del repo usa <5 s, mientras A0 usa ≤5 s. Tampoco prueba 'estabilidad absoluta' ni el total de cobertura. |
+| Clasificación | TECHNICALLY_OBSOLETE; NEEDS_REWORDING; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK |
+| Decisión requerida | Decidir si se mantiene el despliegue expreso o se aprueba sustitución local; definir ventana, carga, interrupción, componentes y criterios, coordinando UX con OE5. |
+| Impacto de modificarlo | Afecta entorno, recursos, operación, informes y aceptación integral. Es verificable tras definir protocolo; depende de accesos y de OE1–OE5, por lo que concentra alto riesgo para 16 semanas. No eliminarlo silenciosamente. |
+
+SOURCE_D: **OE2, OE3, OE4 y OE6 concentran el mayor riesgo**. OE1 dispone de base
+técnica pero diverge en corpus y evaluación; OE5 conserva canal/tecnología, aunque
+faltan funcionalidades y estudio. El costo de añadir agentes, fuentes vivas,
+automatización, infraestructura y usuarios simultáneamente no se puede inferir
+solo de cuánto código existe. No hay calendario restante ni capacidad confirmados.
 
 ## 8. Corpus y fuentes de información
 
-| Capa | Estado | Implicación |
-| --- | --- | --- |
-| Anteproyecto histórico, H1/E2 | Documentos institucionales CCD y fuentes reales reportados como compromiso. | Debe cotejarse qué corpus, acceso y validación exigía exactamente. |
-| Repositorio, E1/E7 | Corpus funcional 100 % sintético en `/data/synthetic`; representación procesada en PostgreSQL. | Es útil para reproducibilidad, regresiones y demostración; no cumple automáticamente la promesa de corpus institucional real. |
-| Discovery, E8 | Información pública reportada, entidades candidatas y fuentes internas pendientes. No hay originales/URLs comprobados en estos artefactos ni autorización de integración. | No equivale a corpus obtenido, representativo ni utilizable por BanuChat. |
+**PROTOTIPO SINTÉTICO ≠ CORPUS INSTITUCIONAL PROMETIDO.** El primero es un baseline
+técnico útil para desarrollo, regresión y reproducibilidad. No satisface por sí
+solo la promesa de documentos oficiales de A0 ni demuestra representatividad CCD.
 
-Clasificación de la discrepancia: **NEEDS_REWORDING; NEEDS_EVIDENCE;
-NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK**. Decisión académica requerida: determinar
-si un prototipo sintético explícitamente delimitado satisface el trabajo, o si
-debe incorporar un corpus real autorizado para responder la pregunta y objetivos.
+| Fuente/tipo | Qué dice SOURCE_A | Estado SOURCE_B / SOURCE_C | Reconciliación SOURCE_D |
+| --- | --- | --- | --- |
+| Propuesta de Competencias Digitales de la UNAB | Corpus inicial nombrado en §6, p. 8. | Corpus actual sintético; C1 necesita definición curricular/autoridad, sin original obtenido. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL si se sustituye por ficción. |
+| Lineamientos de evaluación diagnóstica | Corpus inicial, §6, p. 8. | C1 D10/D11 y C2 requieren reglas/convocatorias, vigencia y permisos. | No inventar umbrales diagnósticos ni confundir reglas y resultado individual. |
+| Guías de cátedra | §6, p. 8: referencia directa, sin fragmentación vectorial; anexo C, p. 24: documento completo por enlace, no indexado en base vectorial. | E1/E7: full_document sin chunks/embeddings; entrega actual por REST de Markdown sintético. C1 D05 requiere guías autorizadas. | CONSISTENT en separación de modos; NEEDS_EVIDENCE en originales, formatos y acceso. No atribuir la exclusión vectorial solo a un cambio posterior del repo. |
+| Resoluciones vigentes CCD | Corpus inicial, §6, p. 8. | C1 D21, autoridad y versiones pendientes. | Vigencia normativa no se deduce de una release técnica. |
+| PDF, Excel, sitios web y canales informales | §6, p. 8, describe dispersión; §11.4, p. 19, procesa PDF/Excel/HTML; anexo C, p. 24, PDF/Excel/web. | El corpus documental funcional actual usa Markdown; no acredita extracción de esos originales. | Distinguir formato de fuente competente. Mencionar canales informales no los autoriza como conocimiento oficial. |
+| Oferta, convocatorias y novedades/noticias | OE2 y resultado p. 20: extracción periódica del sitio CCD. | Datos estructurados ficticios; C1 D06/D16/D25 pendientes. | Necesita fuente, corte y contrato de actualización; no trasladar catálogo sintético a oferta/NRC. |
+| Calendario Google Sheets | §§3.2/7.3/12.2, pp. 6/9/20–21. | Calendario versionado sintético, sin conector Sheets; C1 D17 no confirma fuente real. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL para sustituir el medio/criterio. |
+| Perfiles estudiantiles | Resultado OE4 p. 20 dice expresamente **sintéticos**; otras secciones hablan de perfil/historial y credenciales universitarias. | Perfiles ficticios actuales coherentes con ese resultado; C2 separa eventual información personal y permisos. | CONSISTENT para el fixture; NEEDS_REWORDING ante la tensión interna. No afirmar que A0 exige todos los datos personales reales ni que todos sus datos podían ser ficticios. |
+| Preguntas de evaluación | Resultado OE1 p. 20: generación sintética RAGAS desde documentos institucionales indexados. | M9: preguntas sobre corpus funcional sintético. | La técnica de generar preguntas no cambia la naturaleza de los documentos de origen. |
 
-Si se exige corpus real, definir fuente, permiso, cobertura y evaluación antes de
-prometerlo; si no se obtiene acceso, revisar el alcance con el director. Si se
-acepta corpus sintético, formalizar el cambio y limitar las conclusiones. No
-reclasificar el dataset como real, sobrescribir v1 ni mezclar datos personales
-de pruebas de usabilidad con el corpus funcional.
+Clasificación global de la discrepancia documental: NEEDS_EVIDENCE;
+NEEDS_DIRECTOR_APPROVAL; NEEDS_REWORDING; SCOPE_RISK. Debe decidirse si se mantiene
+el corpus institucional o se acepta formalmente una evaluación del prototipo
+sintético, con conclusiones delimitadas. Si se exige corpus real y no hay acceso,
+corresponde revisar alcance; no suplirlo con datos ficticios presentados como reales.
+
+La lectura de A0 no obtiene los documentos que este enumera ni los convierte en
+disponibles. Tampoco modifica el congelamiento de dataset v1, SQL, REST o MCP.
 
 ## 9. Arquitectura
 
-**Histórica, reconstruida desde H1/E2:** aplicación móvil y tecnologías RAG,
-PostgreSQL/pgvector, N8N, Agent/MCP, BPM/RPA, scraping, Google Sheets, Docker y
-On-Premise UNAB. No se conoce el diagrama original completo ni se reconstruye
-una topología exacta inventada.
+### Reconstrucción exclusivamente desde SOURCE_A
 
-**Actual, evidencia E1/E3:** Mobile → REST → Intent Router → fast paths/renderers
-o Document RAG directo → persistencia/respuesta. N8N queda fuera de consultas y
-orquesta ingesta sintética manual local. Agent/ReAct y MCP ejecutable pendientes.
+A0 §7.6/figura 2, pp. 10–11: estudiante → app React Native → petición HTTPS/JSON →
+N8N como motor BPM → flujos conversacionales → agente LLM/ReAct → servidor MCP →
+pgvector, PostgreSQL/perfiles y Google Sheets/calendarios. En paralelo, web CCD/
+portales → bot de scraping/RPA → actualización de tablas/datos. La figura representa
+almacenamientos separados lógicamente; **no prueba servidores físicos distintos**.
 
-**Provisional para contrastar con discovery, inferencia E8:** conservar la separación
-de consulta estructurada, explicación documental, lookup y orientación; fuentes,
-identidad y operación se deciden con el CCD. No existe todavía una arquitectura
-institucional aprobada ni se requiere un agente para toda consulta.
+§11.4, p. 19, enumera cuatro capas: ingesta/vectorización, orquestación, generación
+RAG y presentación. En la capa de generación describe backend → búsqueda coseno →
+prompt → LLM ante cada consulta, sin detallar agente/MCP. Anexo C, p. 24, enumera
+tres: ingesta/procesamiento, interacción del usuario y RAG, con Mobile → Backend API.
+Estas descripciones no ofrecen un mapeo explícito entre sus capas y la figura 2.
 
-Las etiquetas de esta tabla son únicamente técnicas para esta sección. `KEEP`
-preserva un principio/activo dentro de su alcance; `KEEP_PROVISIONAL` lo condiciona;
-`REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE` propone exclusión, sin ejecutarla;
-`NEEDS_JUSTIFICATION` exige necesidad demostrable; `NEEDS_DIRECTOR_APPROVAL`
-identifica impacto académico.
+**SOURCE_B:** Mobile → REST → Intent Router → servicios/renderers o Document RAG
+directo; N8N orquesta manualmente ingesta asíncrona y delega procesamiento al core
+TypeScript. Agent/ReAct y MCP ejecutable pendientes. SOURCE_D propone conservar
+esa base para discutir alcance, sin llamarla implementación literal de A0.
 
-| Elemento | Histórico reportado frente a estado actual | Etiqueta técnica | Decisión académica/provisional y dependencia |
-| --- | --- | --- | --- |
-| Mobile | H1 compromete app; E9 la implementa en React Native/Expo con datos sintéticos. | KEEP | Conservar el activo; confirmar tareas/usuarios y no confundir demo con operación institucional. |
-| REST | Su papel exacto en el original no consta; hoy es la frontera implementada. | KEEP | Documentar la frontera real en la futura arquitectura, sin atribuirla a un texto histórico no leído. |
-| N8N | Tecnología histórica; hoy ingesta manual asíncrona, no gateway conversacional. | KEEP_PROVISIONAL; NEEDS_DIRECTOR_APPROVAL | Conservar solo la función justificable; formalizar cualquier sustitución del compromiso histórico de automatización/proceso. |
-| RAG | Tema central histórico; hoy generación documental directa sobre ficción. | KEEP_PROVISIONAL; NEEDS_DIRECTOR_APPROVAL | Delimitar tareas, corpus y evaluación. El cambio de corpus requiere decisión académica. |
-| PostgreSQL | Presencia histórica reportada y persistencia actual. | KEEP_PROVISIONAL | Conservar base técnica mientras se define información autorizada; no copiar el modelo sintético al CCD. |
-| pgvector | Presencia histórica reportada; retrieval exacto actual. | KEEP_PROVISIONAL | Justificar recuperación vectorial según corpus y preguntas, sin tuning ni índices nuevos en esta auditoría. |
-| Agent/ReAct | Compromiso histórico reportado, objetivo técnico aún pendiente. | NEEDS_JUSTIFICATION; NEEDS_DIRECTOR_APPROVAL | Mantener solo si contribuye a tareas/objetivo evaluable; posible diferimiento, sin eliminarlo por decisión técnica unilateral. |
-| MCP | Contrato de seis tools; no servidor ejecutable integrado. | NEEDS_JUSTIFICATION; NEEDS_DIRECTOR_APPROVAL | Un contrato no cumple una promesa de herramientas ejecutadas. Evaluar su necesidad junto con OE3. |
-| BPM | H1 lo incluye; E4 acredita un flujo técnico, no una intervención BPM institucional evaluada. | NEEDS_JUSTIFICATION; REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE; NEEDS_DIRECTOR_APPROVAL | O definir proceso, actores, mejora y validación, o reformular hacia orquestación técnica con aprobación. No equiparar la herramienta con la metodología. |
-| RPA | H1 lo incluye; no hay evidencia de robot institucional en el alcance inspeccionado. | NEEDS_JUSTIFICATION; REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE; NEEDS_DIRECTOR_APPROVAL | No construir automatización de interfaz sin necesidad/acceso; retirar o sustituir la promesa solo con justificación aprobada. |
-| Scraping | Antecedente reportado por H1/E2; expresamente fuera del alcance técnico vigente. | REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE; NEEDS_DIRECTOR_APPROVAL | Una fuente entregada o canal autorizado podría volverlo innecesario. No elegir scraping por ausencia de API ni afirmar permiso. |
-| Google Sheets | Compromiso histórico reportado; calendario actual en dataset sintético. | REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE; NEEDS_DIRECTOR_APPROVAL | Confirmar si fue requisito o medio propuesto; no conservarlo sin fuente real que lo justifique. |
-| Docker | Activo local: Compose solo PostgreSQL/N8N. | KEEP | Preservar reproducibilidad local; no presentar todos los componentes como contenedorizados. |
-| On-Premise UNAB | Antecedente H1/E2; no despliegue institucional acreditado. | REMOVE_FROM_ACADEMIC_SCOPE_CANDIDATE; NEEDS_DIRECTOR_APPROVAL | Confirmar si se permite despliegue local como entregable; son entornos académicamente distintos. |
+| Componente histórico | Rol según PDF | Estado repo | Compatibilidad | Problema | Decisión |
+| --- | --- | --- | --- | --- | --- |
+| Mobile / React Native | OE5, pp. 8/21: NLP, calendario, historial y push. | Expo/React Native y REST; push pendiente. | CONSISTENT; NEEDS_EVIDENCE | Canal presente, cobertura y evaluación incompletas. | Mantener base; aprobar cualquier reducción de módulos. |
+| REST / Backend API | Fase 3 p. 18 y anexo C p. 24 conectan app y backend por REST. | Frontera vigente. | CONSISTENT | Su relación con N8N directo en figura 2 no queda unificada. | Explicar topología única en futura revisión aprobada. |
+| N8N | Gobierno conversacional/BPM e ingesta periódica, pp. 6/9–12/18–21. | Solo orquestación manual asíncrona, fuera del chat. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | Cambia el rol de OE4 y el automatismo de OE2. | Decidir sustitución/acotación; no reintroducirlo en chat aquí. |
+| RAG | OE1/OE3 y §11.4; respuesta documental generada. | RAG directo solo para fallback, junto a rutas deterministas. | CONSISTENT; NEEDS_REWORDING | A0 generaliza consulta vectorial; B distingue mecanismos. | Justificar rutas y corpus, sin afirmar agente implementado. |
+| PostgreSQL | Datos relacionales/perfiles; figura 2 y OE4. | Instancia única relacional + pgvector, corpus sintético. | CONSISTENT; NEEDS_EVIDENCE | Modelo sintético no prueba el modelo CCD. | Reutilizar principio, mantener SQL congelado. |
+| pgvector | Embeddings y similitud coseno, pp. 7/9/19/24. | Exacto, 1024 dimensiones, coseno; Ollama genera embeddings. | CONSISTENT; KEEP_PROVISIONAL | A0 no fija modelo/dimensión ni índices. | No atribuir parámetros actuales al PDF ni cambiar receta en A4.1. |
+| Agent/ReAct | OE3 exige enfoque agéntico; resultado p. 20 concreta ReAct. | Pendiente; router determinista no equivale. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Falta núcleo y selección dinámica evaluada. | Justificar mantenimiento o diferimiento formal. |
+| MCP | OE3 exige protocolo; resultado exige servidor y endpoints. | Contrato de seis tools, sin ejecutable. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Es obligación expresa, no solo marco teórico. | Acordar entregable y evaluación o aprobar sustitución. |
+| BPM | §7.8/7.9 p. 12: reglas académicas/ciclo de consulta mediante workflows. | Flujo técnico de ingesta, sin BPM conversacional acreditado. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | La herramienta sola no valida reglas/proceso ni mejora institucional. | Delimitar qué modelado/control exige y su evidencia. |
+| RPA | OE2/§7.8: captura autónoma mediante interfaces web. | Sin robot/scraping institucional. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | No corresponde llamar RPA al core de ingesta actual. | Justificar técnica o sustitución según fuente autorizada. |
+| Scraping | Sitio CCD periódico; tabla 4 elige N8N HTTP + Cheerio. | Excluido del alcance técnico vigente. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | Obligación histórica frente a prohibición vigente y permisos desconocidos. | Resolver académicamente; no ejecutar scraping. |
+| Google Sheets | Calendarios e integración OE4, ≤30 min. | Excluido; calendario en release sintética. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | No basta cambiar el nombre de la fuente manteniendo la métrica. | Acordar fuente y evaluación revisadas. |
+| Docker | Solución completa en servidores universitarios, OE6. | Compose solo PostgreSQL/N8N local. | CONSISTENT; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Herramienta presente no demuestra topología completa ni entorno prometido. | Distinguir reproducibilidad local de despliegue académico exigido. |
+| On-Premise UNAB | OE6 y resultado p. 21 obligan servidores proporcionados por universidad. | No despliegue institucional acreditado. | TECHNICALLY_OBSOLETE; SCOPE_RISK; NEEDS_DIRECTOR_APPROVAL | No era solo aspiración; recursos y acceso no probados. | Mantener o sustituir expresamente, con impacto en OE6. |
 
-Intent Router, fast paths y Document Lookup son adiciones visibles en el runtime
-actual; su relación con la redacción académica deberá explicarse sin atribuir al
-anteproyecto un diseño no comprobado. La reutilización técnica no acredita por sí
-sola cumplimiento de OE ni autoriza nuevas integraciones.
+### Tensiones internas del PDF y diferencias concretas
+
+| ID | Evidencia SOURCE_A | Juicio SOURCE_D y decisión |
+| --- | --- | --- |
+| INT-01 | Cuatro capas en §11.4 p. 19 frente a tres en anexo C p. 24, ambas remiten a figura 2. | NEEDS_REWORDING. Podrían ser vistas distintas, pero falta correspondencia explícita; no elegir una silenciosamente. |
+| INT-02 | Figura 2/§7.6 coloca N8N y agente/MCP en consulta; anexo C describe Backend API/RAG directo y §11.4 omite agente/MCP al describir generación. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL si se cambia OE3/OE4. La omisión no anula la obligación expresa; aclarar recorrido y responsabilidades. |
+| INT-03 | Figura 2 separa relacional/vectorial; §7.2/tabla 4 hablan de extensión pgvector e integración en PostgreSQL. | NEEDS_REWORDING. Ambigüedad de representación lógica/física, no prueba de obligación de dos servidores. |
+| INT-04 | OE5, objetivo general y fases eligen React Native; tabla 4 p. 23 enumera “Flutter, React Native” en opción seleccionada. | NEEDS_REWORDING. Aclarar la selección; no autoriza incorporar Flutter. |
+| INT-05 | Soberanía absoluta y costos eliminados, pp. 6–7/24, junto a APIs LLM externas opcionales, pp. 15/23. | UNSUPPORTED; NEEDS_REWORDING. On-Premise de parte de la solución no demuestra ausencia de transferencias o costos; falta modelo de operación elegido. |
+| INT-06 | Perfiles sintéticos OE4, p. 20, frente a historial/perfil personal pp. 4/6 y credenciales universitarias §9.2 p. 15. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL. Acordar qué es simulado y qué, si algo, requiere identidad/dato real. No inferir transacciones: §10.5 limita a consulta. |
+| INT-07 | Arquitectura de ingesta general fragmenta textos; §6/anexo C exceptúan guías de cátedra. | CONSISTENT si se respeta la excepción; NEEDS_REWORDING para explicitarla en la vista general. No es obligación de vectorizar todas las guías. |
+
+El PDF plantea alternativas de LLM externo o local, no obliga a OpenAI ni fija
+los modelos Qwen actuales. La elección local tiene un antecedente compatible en
+tabla 4, pero sus resultados, licencias y límites deben evaluarse por separado.
+No se agregan tecnologías ni se modifica ningún contrato para reconciliar estas vistas.
 
 ## 10. Metodología
 
-H1 solicita auditar investigación aplicada, DSR, Scrum/adaptación, entrevistas,
-usuarios, SUS, RAGAS y 16 semanas. Sin el texto original no se certifica qué
-definición, secuencia o instrumento quedó radicado. Los juicios siguientes son
-inferencias y direcciones de revisión, no una metodología reescrita.
+SOURCE_A §11, pp. 17–19, declara investigación aplicada, enfoque **mixto**:
+cualitativo en requerimientos y cuantitativo en evaluación. Adopta DSR y Scrum
+adaptado con cuatro fases. El inventario siguiente relaciona método y compromiso;
+no acredita que las actividades hayan ocurrido.
 
-| Elemento histórico reportado | Evidencia actual | Incoherencia/riesgo | Dirección de reconciliación | Clasificación |
-| --- | --- | --- | --- | --- |
-| Investigación aplicada | Hay artefacto técnico y evaluaciones sintéticas; necesidad institucional aún por contrastar. | Implementar tecnología no prueba solución de un problema real ni impacto. | Conectar tarea validada, artefacto y evaluación dentro del alcance aprobado. | KEEP_PROVISIONAL; NEEDS_EVIDENCE |
-| DSR | Iteraciones técnicas y evidencia versionada; no se acreditó el ciclo académico completo ni sus registros formales. | Etiquetar retrospectivamente cada cambio como fase cumplida puede falsear la metodología. | Presentar ciclos reales de diseño/prototipado y sus límites; justificar su encaje académico con el director. | NEEDS_REWORDING; NEEDS_EVIDENCE |
-| Scrum/adaptación | Implementación incremental documentada; no se inspeccionó evidencia de ceremonias, roles o sprints formales. | Commits y etiquetas de etapas no prueban Scrum. | Describir prácticas realmente usadas y la adaptación, sin inventar reuniones ni artefactos. | NEEDS_EVIDENCE; NEEDS_REWORDING |
-| Entrevistas y levantamiento | E8 prepara preguntas y modelo conceptual; no acredita entrevistas realizadas ni validación del CCD. | Presentar discovery como insumo ya completado de una implementación previa. | Registrar levantamiento pendiente y explicar que la base inicial fue sintética. | NEEDS_EVIDENCE; NEEDS_REWORDING |
-| Usuarios | E9 reporta pruebas manuales del prototipo; no estudio formal con población institucional. | Mezclar teléfono físico con usuarios representativos. | Definir población, tareas, acceso y tratamiento de datos de la evaluación, separados del corpus funcional. | NEEDS_EVIDENCE |
-| SUS | Sin resultados acreditados. | Declarar mejora de experiencia desde validación funcional. | Acordar protocolo, participantes y criterio; reportar limitaciones de muestra e interpretación. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL |
-| RAGAS | Protocolo M9 y pool draft; evaluación no ejecutada. | Confundir retrieval K2 con calidad RAG integral. | Definir corpus y benchmark pertinente, congelar protocolo y registrar evaluación cuando se autorice. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL |
-| 16 semanas | Horizonte reportado; fecha de inicio, dedicación y disponibilidad externa no aportadas. | Tratar accesos, revisión y usuarios como recursos garantizados. | Reestimar tras decisiones P0 y mostrar dependencias; no producir fechas ficticias. | SCOPE_RISK; NEEDS_EVIDENCE |
-
-### Secuencia que puede documentarse sin falsearla
-
-| Evidencia cronológica | Qué ocurrió o qué consta | Cómo describirlo académicamente |
+| Método/instrumento prometido | Vínculo objetivo → actividad → entregable/validación | Estado B/C y brecha D |
 | --- | --- | --- |
-| ADR 0001, 2026-09-22 | Decisión interna de alcance sintético/local. | Decisión técnica temprana; aprobación académica del cambio no acreditada. |
-| K2, 2026-10-01 | Evaluación de retrieval sintético versionada. | Validación técnica preliminar de un corpus de desarrollo. |
-| N3, 2026-10-02 | Ejecución manual local de ingesta desde N8N. | Comprobación de un recorrido técnico; no integración institucional. |
-| L1-B, evidencia fechada 2026-10-03 en el repositorio | Medición warm local con revisión y entorno registrados. | Observación de rendimiento bajo condiciones acotadas, no SLA. |
-| Re-baseline y discovery, 2026-10-15 | Documentos para iniciar/ordenar levantamiento, con supuestos explícitos. | Revisión de alcance posterior al prototipado inicial; no entrevistas ni confirmación institucional ya realizadas. |
+| Investigación aplicada/DSR, p. 17 | Artefacto que resuelve problema organizacional, evaluado en uso real; todos los OE. | Hay iteraciones y baseline sintético; necesidad institucional/uso real no acreditados. NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL si cambia el entorno evaluable. |
+| Scrum adaptado, cuatro fases, pp. 17–18 | Requerimientos/diseño, backend, móvil y evaluación. | A0 no detalla cadencia de sprints, ceremonias, roles o instrumentos para demostrar adaptación. Implementación incremental no acredita Scrum por sí sola. NEEDS_REWORDING; NEEDS_EVIDENCE. |
+| Entrevistas semiestructuradas, p. 18 | Coordinador CCD y 10–15 estudiantes de distintos programas; alimentan requisitos del conjunto y UX de OE5. | C1/C2 preparan preguntas, no acreditan entrevistas. Se especifica muestra de levantamiento, distinta de los ≥10 de evaluación SUS. |
+| Cuestionario de caracterización, p. 18 | Patrones, información demandada y canales; insumo para problema, alcance y diseño. | No se incluye instrumento completo ni respuesta/codificación en las fuentes. Actividad vinculada indirectamente, sin OE de levantamiento independiente. |
+| Corpus y benchmark RAG, pp. 18/20 | OE1: documentos indexados, 50–80 preguntas; evaluación retrieval/RAGAS. | M9 es preparación sobre corpus sintético; no ejecución ni aceptación del corpus real. |
+| Pruebas Agent/MCP, p. 20 | OE3: selección dinámica y coherencia conversacional, servidor/interfaces. | Sin protocolo cuantitativo o casos de éxito/fallo concretos en A0; componente pendiente en B. |
+| Integración/sincronización, pp. 20–21 | OE2/OE4/OE6: automatismo, transmisión íntegra, tiempos y cobertura. | N3 cubre camino manual local; no mide tres flujos automáticos ni 30 min desde Sheets. |
+| SUS y cinco tareas, p. 21 | OE5 y validación integral OE6; ≥10 usuarios UNAB de distintos programas, 10 ítems y umbrales. | No estudio formal acreditado; A0 no enumera las cinco tareas ni detalla reclutamiento, orden, registro de tiempos/errores o análisis completo. |
+| Desempeño/estabilidad, p. 21 | OE6: contenedores, red institucional, promedio ≤5 s e interrupciones ≤5 min. | Faltan ventana/carga y definición de uso normal; L1-B es local y acotado. |
+| Documentación y caso de estudio, p. 22 | Transferencia técnica, informe y posible ponencia. | Entregables documentales previstos; una ponencia es posibilidad, no publicación realizada ni aceptada. |
 
-La secuencia defendible es **prototipado sintético y validación técnica preliminar →
-reconciliación/levantamiento → posible adaptación y evaluación del alcance aprobado**.
-No reordenar fechas para fingir que el modelo técnico se derivó de un levantamiento
-institucional ya terminado. Un objetivo revisado deberá enlazar actividad,
-entregable, evidencia y tiempo; ninguna etapa se declara completada por el mero
-hecho de estar prevista en un plan.
+**Vacíos de trazabilidad detectados (SOURCE_D):**
+
+- Método sin operacionalización suficiente: Scrum adaptado y DSR están nombrados,
+  pero no definen en A0 todos sus registros/ciclos; no se afirma que carezcan de
+  relación con objetivos, sino que falta evidencia de aplicación.
+- Objetivo/compromiso sin actividad dedicada: ReAct/MCP se describen en fase 2,
+  pero no tienen filas propias en el cronograma; no inferir que no existen en A0.
+- Actividad sin entregable plenamente especificado: entrevistas/cuestionario tienen
+  como salida global requisitos, pero faltan guion, corpus de respuestas y método
+  de análisis; BPM no aporta un modelo concreto de reglas/proceso.
+- Métrica sin instrumento completo: extracción >90 %, cobertura 100 %, estabilidad
+  y tareas >85 % carecen de universo/ventana/protocolo detallados. SUS sí nombra
+  instrumento; RAGAS sí nombra framework, pero falta configuración reproducible.
+- Resultado sin método de validación de efecto: reducir carga, mejorar adopción y
+  optimizar significativamente no tienen línea base/comparación definida. SUS mide
+  percepción de usabilidad y no acredita por sí solo reducción de carga administrativa.
+- OE6 vuelve a reunir evaluaciones de otros OE; debe mapear evidencia compartida
+  sin contar dos veces una prueba como estudios independientes.
+
+### Ética y alcance personal según A0
+
+§§9–10, pp. 15–17, prevén consentimiento cuando se registran conversaciones,
+minimización/anonimización, trazabilidad, abstención sin evidencia, accesibilidad,
+políticas institucionales y autorizaciones de contenido. A0 declara riesgo mínimo
+y ausencia de menores/datos sensibles/intervención vinculante. Son compromisos y
+autoclasificación del documento, **no dictamen institucional o jurídico verificado**.
+
+SOURCE_D: conservar abstención, procedencia y separación de corpus y participantes;
+confirmar población, tratamiento, instrumentos y revisión aplicable antes de un
+estudio. No se solicita información personal aquí. §10.5 respalda mantener
+transacciones/decisiones vinculantes fuera del alcance; el antecedente no promete
+inscribir, cobrar o modificar expedientes. Las referencias normativas quedan para
+verificación posterior en §12, sin investigación web ni interpretación legal nueva.
+
+### Cronología real frente al plan histórico
+
+E2 (2026-09-22), K2 (2026-10-01), N3 (2026-10-02) y L1-B (archivo fechado
+2026-10-03) preceden al re-baseline/discovery (2026-10-15) y al cotejo A4.1
+(2026-10-16). La lectura del PDF no cambia esa secuencia ni acredita entrevistas
+anteriores. Describir prototipado sintético → reconciliación/levantamiento →
+adaptación/evaluación autorizadas; no fingir que el software nació de un
+levantamiento institucional completo. La futura redacción metodológica debe
+explicar iteraciones y limitaciones, sin inventar sesiones o resultados.
 
 ## 11. Evaluación RAG / M9
 
-Evidencia inspeccionada, no ejecutada nuevamente en A4:
+**SOURCE_A, A0 §12.2, p. 20:** 50–80 preguntas de prueba derivadas de documentos
+institucionales indexados, construidas siguiendo generación sintética RAGAS.
+El PDF nombra faithfulness, context precision, context recall, answer relevancy
+y MRR. §11.2, p. 18, también cita precision@k/recall@k/MRR. No identifica M9
+como etapa ni especifica k para el MRR histórico.
 
-- **K2:** 18 casos chunked sintéticos, top_k=5, MRR@5=0.8519,
-  Precision@5≈0.2222, Recall@5=Hit@5=1. Los documentos full_document quedaron
-  fuera del vectorial. No mide faithfulness, generación, UX ni efecto CCD.
-- **M9:** el JSON contiene 63 candidatas únicas, M9-P-001–M9-P-063,
-  todas `draft`; estado global `draft`. No es benchmark final institucional ni
-  conjunto aprobado/congelado. El README documenta que RAGAS no se ejecutó.
-- **Pausa:** E8 congela expansión P-064+, RAGAS final y tuning por dependencia de
-  definición del dominio. Es una decisión documental de trabajo, no un estado
-  automatizado del JSON ni prueba de aprobación académica.
-- **Targets:** E7 registra faithfulness/context precision/answer relevancy ≥0.80,
-  context recall ≥0.75 y MRR@5 ≥0.70 como criterios del proyecto, no estándares
-  universales ni resultados. Su origen y encaje en la versión radicada requieren cotejo.
+**SOURCE_B:** K2 evalúa retrieval de 18 casos chunked sintéticos con top_k=5:
+MRR@5≈0.8519, Precision@5≈0.2222, Recall@5=Hit@5=1. No mide generación, UX,
+efecto institucional ni todo OE1. Full_document queda fuera del vectorial.
+El JSON M9 conserva 63 candidatas, IDs únicos M9-P-001–M9-P-063, todas draft,
+estado global draft; no hay benchmark final congelado ni RAGAS ejecutada.
 
-El índice general E9 usa la expresión ambigua «sin preguntas reales» para M9 y
-no refleja el pool actual. Si «reales» significa institucionales, no hay contradicción
-con los drafts sintéticos; si significa preguntas escritas, el resumen quedó atrás.
-Para el conteo prevalece el JSON inspeccionado. No se modifica el índice.
+| Diferencia | Cotejo y decisión SOURCE_D |
+| --- | --- |
+| Naturaleza del corpus | A0 exige documentos oficiales; E7 usa los 10 documentos chunked sintéticos. Resolver académicamente antes de acreditar OE1. |
+| Naturaleza de las preguntas | “Sintéticas” en A0 describe generación del test desde documentos institucionales; no autoriza sustituirlos por documentos ficticios. |
+| Cantidad | A0: 50–80 preguntas evaluadas; M9 planea 60 principales, pool de 100–120 y reserva de 20–30. Sesenta caben en el rango, pero pool/reserva y cobertura son un diseño posterior, no texto de A0. Los 63 drafts no acreditan el conjunto final. |
+| Métricas | MRR@5 actual es truncado; A0 dice MRR sin k. Precision@5 no es context precision RAGAS. Documentar operacionalización y aceptación, sin igualarlas. |
+| Calidad | El PDF no fija juez, modelo, revisión humana, versiones o cálculo completo; E7 prepara reproducibilidad, aún sin ejecutar. |
+| Pausa | E8 pausa P-064+, RAGAS final, tuning, cambios de embeddings/chunking e índices aproximados. A4.1 no reabre esos trabajos. |
 
-Clasificación: **CONSISTENT** como prototipado y validación técnica preliminar;
-**NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL** para su aceptación como evaluación
-académica final. No mezclar estadísticamente K2, generación, latencia y M9 ni
-transformar Precision@5 en context precision de RAGAS. Conservar gold, revisión,
-entorno, resultados y límites; si se exige dominio real, diseñar después un
-benchmark pertinente sin reutilizar automáticamente los drafts como reserva limpia.
+Presentación defendible: **prototipado y validación técnica preliminar** con
+procedencia y límites. Clasificación CONSISTENT para ese uso; NEEDS_EVIDENCE;
+NEEDS_DIRECTOR_APPROVAL para corpus y evaluación académica final. Conservar
+gold/reserva y evitar contaminación; no mezclar estadísticamente K2, latencia y M9.
+
+El resumen de E9 “sin preguntas reales” sigue siendo ambiguo: puede significar
+ausencia de preguntas institucionales, no ausencia de drafts. Para conteo prevalece
+el JSON inspeccionado. No se modifica eval ni se declara un nuevo PASS.
 
 ## 12. Resultados esperados
 
-Se auditan las expresiones señaladas en H1, **sin atribuirlas como citas verificadas
-del original**. Marcas locales: `UNSUPPORTED` sin respaldo disponible;
-`TOO_STRONG` excede el alcance de la evidencia; `MEASURABLE` admite evaluación si se
-operacionaliza; `NOT_MEASURABLE` no es evaluable en su formulación actual;
-`REMOVE_OR_REWORD` propone retirar o reformular, sin hacerlo en el anteproyecto.
-Ser medible no significa estar medido ni demostrado.
+### Metas exactas y naturaleza del criterio
 
-| Afirmación histórica a cotejar | Evidencia/inferencia de auditoría | Marcas locales | Dirección de redacción defendible propuesta |
+Todas las metas siguientes se cotejaron contra A0 §§11.3/12.2, pp. 18/20–21.
+Son **metas históricas, no resultados**. Un framework o instrumento externo no
+convierte automáticamente sus cortes elegidos por el proyecto en estándares
+universales. Las etiquetas de esta tabla son las locales definidas en §2.
+
+| ID / OE | Meta o requisito exacto de A0 | Tipo | Evidencia B / ambigüedad y decisión D |
 | --- | --- | --- | --- |
-| «Nivel industrial» | No se define estándar, carga, seguridad, operación o aceptación; E3/E4 describen entorno local. | UNSUPPORTED; TOO_STRONG; NOT_MEASURABLE; REMOVE_OR_REWORD | Prototipo reproducible evaluado bajo condiciones y límites explícitos. |
-| Alta disponibilidad | No se acreditan redundancia, monitoreo prolongado ni protocolo de disponibilidad. | UNSUPPORTED; TOO_STRONG; MEASURABLE; REMOVE_OR_REWORD | Medir estabilidad local con duración/carga definidas, si ese es el alcance aprobado. |
-| Reducción de carga administrativa | No hay línea base o comparación institucional. | UNSUPPORTED; MEASURABLE; REMOVE_OR_REWORD | Evaluar apoyo a tareas informativas; prometer efecto administrativo solo con diseño de medición viable. |
-| Optimización significativa | No se define variable ni significancia; L1-B tiene interpretación descriptiva limitada. | UNSUPPORTED; TOO_STRONG; NOT_MEASURABLE; REMOVE_OR_REWORD | Reportar diferencias observadas para una métrica y condiciones predefinidas, sin generalización indebida. |
-| Información institucional siempre exacta | Corpus real no obtenido; citas no garantizan verdad y reglas cambian. El absoluto no se puede acreditar con una muestra. | UNSUPPORTED; TOO_STRONG; NOT_MEASURABLE; REMOVE_OR_REWORD | Respuestas sustentadas en fuentes autorizadas, con versión, límites y declaración de evidencia insuficiente, sujetas a evaluación. |
-| Autonomía | Hay rutas deterministas e ingesta iniciada manualmente; no autonomía general demostrada. | UNSUPPORTED; TOO_STRONG; NOT_MEASURABLE; REMOVE_OR_REWORD | Describir exactamente qué pasos se ejecutan automáticamente y cuáles requieren decisión humana. |
-| Agentic AI | E3 confirma fallback directo y agente pendiente. | UNSUPPORTED; MEASURABLE; REMOVE_OR_REWORD | Registrar como objetivo pendiente solo si se mantiene y se define evaluación de comportamiento/herramientas. |
-| BPM/RPA | E4 acredita un flujo técnico; no robot ni intervención institucional de procesos evaluada. | UNSUPPORTED; MEASURABLE; REMOVE_OR_REWORD | Orquestación asíncrona trazable para el alcance realmente implementado, con aprobación si sustituye el compromiso histórico. |
-| On-Premise UNAB | No existe despliegue institucional acreditado; Compose local no es equivalente. | UNSUPPORTED; MEASURABLE; REMOVE_OR_REWORD | Ejecución local reproducible, si el director acepta el cambio de entregable; despliegue institucional quedaría condicionado. |
-| Mejora de experiencia | App y comprobaciones funcionales presentes, sin SUS ni comparación formal. | UNSUPPORTED; MEASURABLE; REMOVE_OR_REWORD | Evaluación de usabilidad y completación de tareas según protocolo acordado, sin afirmar mejora antes de medir. |
+| MET-01 / OE1 | faithfulness ≥0,80 | PROJECT_DEFINED_TARGET | Sin RAGAS ejecutada. Fijar versión, juez y cálculo antes de evaluación final. |
+| MET-02 / OE1 | context precision ≥0,80 | PROJECT_DEFINED_TARGET | K2 Precision@5 no la sustituye. |
+| MET-03 / OE1 | context recall ≥0,75 | PROJECT_DEFINED_TARGET | Recall@5 determinista no demuestra por sí solo esta métrica. |
+| MET-04 / OE1 | answer relevancy ≥0,80 | PROJECT_DEFINED_TARGET | Generación existente no acredita el umbral. |
+| MET-05 / OE1 | MRR ≥0,70 | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | A0 lo explica como “posición media del primer fragmento relevante”; esa glosa no explicita el recíproco. Acordar fórmula y k; M9 usa MRR@5. No corregir silenciosamente el PDF. |
+| MET-06 / OE1 | 50–80 preguntas desde documentos institucionales, generación sintética RAGAS | PROJECT_DEFINED_TARGET | M9 planea 60 sobre corpus ficticio. Cantidad compatible no resuelve origen ni validación. |
+| MET-07 / OE2 | Al menos tres flujos de scraping automáticos exitosos, sin intervención manual durante pruebas | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | N3 es manual. Falta ventana y aclarar qué distingue los tres flujos; no reducirlos a tres ejecuciones de un mismo flujo sin decisión. |
+| MET-08 / OE2 | Actualización del corpus inferior a 24 h desde publicación en sitio CCD | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Repo interpreta disponibilidad de revisión sintética para ingesta: distinto origen del reloj. Definir observación de publicación y fin de actualización. |
+| MET-09 / OE2 | Extracción correcta de documentos superior al 90 % sobre páginas objetivo | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Falta universo, denominador y criterio de extracción correcta; éxito de jobs no es necesariamente esta tasa. |
+| MET-10 / OE3 | Selección autónoma de herramienta MCP apropiada para tarea de múltiples pasos; coherencia conversacional | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Sin tasa numérica ni protocolo detallado; no inventar “90 %” u otro umbral. Agente/servidor pendientes. |
+| MET-11 / OE4 | Transmisión sin pérdida/corrupción en ningún nodo del recorrido N8N → pgvector → Backend API → App | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Definir casos y aserciones sobre recorrido real. N3 no demuestra todo ese E2E. |
+| MET-12 / OE4 | Latencia máxima de sincronización del calendario: 30 min respecto de fuente de origen (≤30 min) | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Sheets excluido del runtime; publicar calendario con releases no valida esa sincronización. |
+| MET-13 / OE4 | 100 % de flujos definidos en §11.4, con casos documentados | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Falta catálogo cerrado y relación con capas/figura; “casos críticos” del repo no equivale automáticamente al mismo universo. |
+| MET-14 / OE5 | SUS de 10 ítems, muestra mínima de 10 usuarios reales UNAB de distintos programas | PROJECT_DEFINED_TARGET | No resultados formales. Cantidad de entrevistas 10–15 en §11.3 no reemplaza esta muestra. |
+| MET-15 / OE5 | SUS promedio superior a 70/100 (>70) | PROJECT_DEFINED_TARGET | A0 atribuye categoría “Bueno” a Bangor; REFERENCE_NEEDS_VERIFICATION para su interpretación. No certifica un corte universal. |
+| MET-16 / OE5 | Ningún participante con SUS inferior a 50/100 (cada puntaje ≥50) | PROJECT_DEFINED_TARGET | No se convierte en “todos >50”; verificar la atribución interpretativa y reportar distribución cuando se evalúe. |
+| MET-17 / OE5 | Completación de tareas superior al 85 % sobre cinco tareas de prueba | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | A0 no enumera las cinco tareas ni define agregación por participante/intento. Falta protocolo antes de medir. |
+| MET-18 / OE6 | “disponibilidad y estabilidad absoluta” de todos los contenedores durante pruebas, sin interrupciones no planificadas superiores a 5 min | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET; UNSUPPORTED_TARGET | Absoluto tensionado por tolerancia a interrupciones de hasta 5 min; falta duración de pruebas y definición de incidente. |
+| MET-19 / OE6 | Respuesta promedio no mayor a 5 segundos (≤5 s), uso normal/red institucional | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | E1 dice <5 s; diferencia de frontera. L1-B media 4013.57 ms local no acredita carga/entorno institucional ni todo OE6. |
+| MET-20 / OE6 | Informes con cobertura del 100 % de objetivos de evaluación planificados | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | Debe fijarse denominador y trazabilidad a resultados. No equivale a que todos los criterios se cumplan por existir un informe. |
+| MET-21 / OE6 | Integrar métricas agénticas/RAG, BPM/RPA y SUS, más documentación técnica completa | PROJECT_DEFINED_TARGET; AMBIGUOUS_TARGET | A0 llama cualitativos a resultados SUS pese a su puntuación cuantitativa; separar comentarios y puntajes. No hay resultado agéntico o estudio SUS acreditado. |
 
-Retirar superlativos para escribir con precisión es distinto de eliminar un
-resultado obligatorio: si cambia el compromiso evaluable, requiere revisión
-académica y actualización trazable, no solo edición de estilo.
+**Diferencias con documentos del repo que se reportan sin corregirlos:**
+E1 sustituye la procedencia/medición OE2, excluye Sheets y sincronización de 30 min
+en OE4, y usa <5 s frente al ≤5 s de A0. Son desviaciones a reconciliar; no impiden
+esta auditoría ni autorizan cambiar arquitectura/eval/contratos. Las metas
+numéricas de RAG sí coinciden, con la salvedad MRR/MRR@5.
+
+### Afirmaciones fuertes y resultados no demostrados
+
+| Expresión histórica y localizador A0 | Clasificación académica D | Problema y dirección de corrección |
+| --- | --- | --- |
+| “nivel industrial”, §12.1 p. 19 | UNSUPPORTED; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | No define aceptación industrial. Proponer prototipo evaluado bajo condiciones explícitas, si se acepta el cambio. |
+| “alta disponibilidad interna”, p. 20 | UNSUPPORTED; NEEDS_EVIDENCE; NEEDS_REWORDING | No deriva de Docker. Es medible con ventana, topología y carga; no acreditada por una corrida local. |
+| “soberanía absoluta”, §3.2 p. 6 | UNSUPPORTED; NEEDS_REWORDING | Convivencia con LLM externo opcional exige delimitar flujos/transferencias, sin afirmar cumplimiento legal. |
+| “Reducción de costos a cero”, tabla 4 p. 24 | UNSUPPORTED; NEEDS_REWORDING | No hay presupuesto/costo total ni prueba de recursos gratuitos; distinguir costo de licencia, infraestructura y operación. |
+| “mejora sustancial”, §3.3 p. 6 | UNSUPPORTED; NEEDS_EVIDENCE | Requiere comparación y definición de experiencia; SUS posterior aislado no prueba por sí solo mejora respecto de situación previa. |
+| “optimizar significativamente”, §12.1 p. 20 | UNSUPPORTED; NEEDS_REWORDING | Falta variable, comparación e interpretación de significancia. Expresar resultados observados con límites. |
+| “garantizando trazabilidad y exactitud”, §3.2 p. 6; coherencia “siempre”, §7.1 p. 9 | UNSUPPORTED; NEEDS_REWORDING | Citas/retrieval no garantizan verdad universal. Evaluar respaldo y abstención; no se encontró una meta numérica de “precisión garantizada” distinta de §12.2. |
+| Centralizar/reducir carga administrativa, pregunta/OG/resultado, pp. 5/7/20 | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Sin línea base ni estudio de efecto. Medirlo o acordar delimitación formal, no presentarlo como logrado. |
+| Autonomía de agente y captura, pp. 6/20 | NEEDS_EVIDENCE; SCOPE_RISK | Son comportamientos evaluables, pero actualmente pendientes. Definir tareas/límites; no llamar autónoma a la ingesta manual. |
+| Total accesibilidad/compatibilidad, pp. 6/10/16/20 | UNSUPPORTED; NEEDS_REWORDING; NEEDS_EVIDENCE | Plataforma elegida no garantiza accesibilidad, conectividad o toda condición de dispositivo. Definir y probar cobertura. |
+
+La documentación, informes y caso de estudio potencial de §12.3, p. 22, son
+entregables plausibles; no equivalen a publicación, aval CCD o transferencia
+institucional completada. No se mantienen superlativos para ocultar brechas.
+
+### Referencias y afirmaciones para verificación posterior
+
+**No se consultó la web ni se verificó validez externa.** Todas las filas llevan
+REFERENCE_NEEDS_VERIFICATION; las observaciones siguientes derivan del cotejo
+interno de A0, no de concluir que una referencia es falsa.
+
+| Ref. | Fuente/afirmación en A0 | Verificación pendiente |
+| --- | --- | --- |
+| REF-01 | Chatbot institucional Universidad de los Andes con RAG y limitaciones móviles/dinámicas, §8.2 p. 13 | Identificar proyecto, publicación, fecha y evidencia; no se identifica una entrada específica de ese proyecto en bibliografía pp. 25–27. |
+| REF-02 | Tabla competitiva Watson, Dialogflow, bots WhatsApp/Telegram y afirmación “ninguna combina”, pp. 14 | Verificar versiones, alcance de productos, costos y sustento de exclusividad/alta alucinación; no generalizar por canal. |
+| REF-03 | N8N “Apache 2.0” en §9.3/glosario; Docker “Apache 2.0”; React Native MIT y PostgreSQL similar MIT/BSD, pp. 15/25 | Verificar producto, versión, componente y términos aplicables; no usar estas atribuciones como licencia comprobada. |
+| REF-04 | Permiso académico de APIs LLM y soberanía/costos, pp. 7/15/23–24 | Verificar términos del proveedor/versiones, datos transmitidos y costos reales; no configurar servicios en esta tarea. |
+| REF-05 | Ley 1581, Ley 23 y políticas UNAB; consentimiento/credenciales/autorizaciones, pp. 15–17 | Verificar textos aplicables, fuentes institucionales y proceso pertinente. Autoclasificación de riesgo mínimo no es aprobación. |
+| REF-06 | ISO/IEC 27001, ISO/IEC 25010 y WCAG 2.1, pp. 15–16 | Verificar ediciones, alcance y criterios que realmente se adoptarán. EXTERNAL_STANDARD es categoría potencial, no certificación de adopción/cumplimiento ni de sus umbrales en este proyecto. |
+| REF-07 | Brooke (1996), Bangor et al. (2009), SUS >70 “Bueno” y <50, pp. 18/21/25–26 | Verificar referencias, escala, interpretación y justificación de cortes; distinguir instrumento de metas propias. |
+| REF-08 | Es et al. (2023), RAGAS y generación sintética/definiciones, pp. 20/26; Manning, p. 27 | Verificar publicación, versión del framework, generación del conjunto y fórmula MRR; no atribuir los targets a estándares universales. |
+| REF-09 | Lewis et al. (2020), Fan et al. (2024), Brodeur/Dugas/Murray (2024), pp. 13/26–27 | Verificar identidad/DOI, variantes y conclusiones concretas que respaldan; ninguna cita autoriza garantías absolutas. |
+| REF-10 | Hevner et al. (2004), pp. 17/26; Scrum adaptado p. 17 | Verificar encaje de DSR y describir prácticas reales; no se identifica referencia bibliográfica específica de Scrum en la lista final. |
+| REF-11 | DigComp 2.1, UNESCO, MinTIC y afirmaciones de tres pilares/inversión/carga/deserción, pp. 4–8/13/26–27 | Separar marco externo de diagnóstico UNAB; obtener evidencia institucional y referencias exactas. No hay estadística local cuantificada que justifique inventar una magnitud. |
+| REF-12 | Vaswani, Merkel, Richardson/Ruby, manuales AWS/Google/Meta/N8N/pgvector/PostgreSQL, pp. 25–27 | Verificar títulos, fechas, versiones, enlaces y pertinencia de cada referencia; presencia bibliográfica no demuestra uso en implementación. |
+| REF-13 | Bibliografía “en construcción” y enlace a normasapa.in, p. 25 | Completar trazabilidad y comprobar autoridad/consistencia de estilo; no tratar el enlace como norma institucional verificada. |
 
 ## 13. Cronograma de 16 semanas
 
-Inferencia de viabilidad, no cronograma definitivo. No se conoce si las 16 semanas
-son totales o restantes, ni la dedicación, capacidad o ventanas institucionales.
-Por ello no se asignan duraciones inventadas ni fechas de entrega. La experiencia
-ya implementada reduce trabajo técnico, pero no elimina permisos, revisión ni usuarios.
+**SOURCE_A:** anexo A, pp. 22–23, ubica las 16 semanas en **2026-2**. Se leyó
+visualmente la tabla completa para conservar la posición de sus marcas, que
+la extracción de texto aislada pierde. Las semanas siguientes son del plan
+histórico, no nuevas fechas de ejecución ni estimaciones del trabajo restante.
 
-| Trabajo | Prioridad candidata | Dependencia y riesgo de plazo |
-| --- | --- | --- |
-| Confirmar alcance académico y fuente histórica | MUST_HAVE | Desbloquea qué puede evaluarse; precede a ampliar implementación. |
-| Discovery CCD y fuentes/autoridad | MUST_HAVE | Reunión y decisiones externas; no asumir disponibilidad inmediata. |
-| Modelado validado del alcance elegido | MUST_HAVE | Depende del dominio; no diseñar entidades reales con hipótesis abiertas. |
-| Conservar/adaptar el prototipo esencial | MUST_HAVE | Solo a tareas confirmadas; reutilizar app, consulta y trazabilidad. |
-| Evaluación técnica/RAG pertinente y documentación | MUST_HAVE | Corpus, protocolo y criterios aprobados; no equivale a ejecutar M9 ahora. |
-| Evaluación de usuarios acordada | MUST_HAVE si se mantiene OE5 | Depende de población, convocatoria, tratamiento de datos y disponibilidad; no puede desaparecer por falta de tiempo sin decisión. |
-| Integración acotada con corpus real autorizado | SHOULD_HAVE si es opcional; MUST_HAVE si el director la exige | Sin acceso confirmado no es una promesa planificable. Definir alternativa aprobada ante bloqueo. |
-| Pulido móvil y pruebas adicionales focalizadas | SHOULD_HAVE | Después de asegurar tareas, validación y documentación esenciales. |
-| Datos personales, transacciones y varios sistemas | FUTURE propuesto | Identidad, permisos y reglas múltiples multiplican dependencias. |
-| Agent/MCP, RPA/BPM amplio y despliegue institucional | FUTURE propuesto, sujeto a decisión sobre OE | No pueden reclasificarse como futuros unilateralmente si son obligatorios. |
+La correspondencia de OE y entregables de la tabla siguiente es SOURCE_D cuando
+el anexo no los nombra; los criterios se remiten a §12.2 de A0. “No asignado”
+significa sin fila propia, no que el componente no se mencione en el documento.
 
-| Combinación | Juicio relativo de viabilidad |
+| Actividad literal/resumida de tabla 3 | Semanas marcadas | OE relacionado | Entregable y validación vinculados | Dependencia/riesgo D |
+| --- | --- | --- | --- | --- |
+| Levantamiento de requerimientos | S1–S2 | Transversal, especialmente OE1/OE5 | Requisitos y entrevistas de fase 1; no criterio cuantitativo de cierre. | Acceso al coordinador y 10–15 estudiantes, fuentes y permisos. |
+| Diseño de arquitectura técnica | S1–S4 | OE1–OE6 | Documento arquitectura/requisitos, fase 1. | Diseño se solapa con levantamiento; necesita revisión de supuestos. |
+| Infraestructura On-Premise UNAB + Docker | S3–S5 | OE6 | Entorno configurado; luego pruebas de integración/desempeño. | Recursos/credenciales no acreditados; hito S4 anterior al cierre S5. |
+| Base vectorial PostgreSQL + pgvector | S4–S6 | OE1/OE3 | Base operativa; motor/evaluación posterior. | Corpus y arquitectura aún en elaboración al inicio. |
+| Pipelines de ingesta y embeddings N8N | S5–S7 | OE1/OE2/OE4 | Ingesta e indexación; scraping/frescura según §12.2. | Fuentes, extracción y permisos; no fila propia para tres flujos RPA. |
+| Integración LLM vía API + módulo RAG | S6–S8 | OE1/OE3 | Backend RAG, hito S8; métricas posteriores. | No fila explícita para servidor MCP o ciclo ReAct y su evaluación. |
+| Sincronización Google Sheets | S7–S8 | OE4 | Calendario sincronizado y meta ≤30 min. | Fuente y acceso no demostrados. |
+| App móvil, consulta NLP | S9–S11 | OE5 | Consulta integrada REST. | Backend y fase 2 aún activos según narrativa. |
+| App móvil, calendario e historial | S10–S12 | OE5/OE4 | Módulos y fuentes; pruebas E2E/UX. | Delimitar perfiles sintéticos e historial académico. |
+| App móvil, notificaciones push | S11–S12 | OE5 | Notificaciones integradas. | Funcionalidad obligada en resultado, hoy pendiente. |
+| Pruebas de integración | S12–S13 | OE2/OE4/OE6 | Casos y cobertura de flujos/objetivos. | Empiezan mientras concluyen módulos; no dejar cobertura final sin reserva. |
+| Evaluación de precisión RAG | S13–S14 | OE1/OE6 | Métricas del benchmark institucional. | Necesita corpus estable, gold, configuración y sistema evaluable. |
+| Usabilidad con usuarios SUS | S14–S15 | OE5/OE6 | ≥10 usuarios, SUS y cinco tareas. | Reclutamiento/consentimiento; posible solapamiento con fin de desarrollo. |
+| Ajustes iterativos y correcciones | S15–S16 | Transversal | Correcciones motivadas por evaluación. | Cambios tras evaluación necesitan registrar qué resultados siguen aplicando. |
+| Documentación final y entrega | S16 | OE6 y §12.3 | Informes, arquitectura, manual y repositorio. | Una semana marcada al final deja poco margen si se pospone toda la escritura. |
+
+### Contradicciones y huecos del plan original
+
+- **INT-08, infraestructura:** fase 2 narrativa S5–S10 incluye aprovisionamiento;
+  tabla lo sitúa S3–S5 y hito p. 23 exige entorno configurado en S4. No son el mismo
+  intervalo. No se desplazan semanas en A0 para hacerlos coincidir.
+- **INT-09, fases/pruebas:** narrativa móvil S9–S14 frente a filas S9–S12; pruebas
+  fase 4 S13–S16 frente a integración S12–S13. Los solapamientos pueden ser
+  deliberados (A0 explica S9/S10), pero falta distinguir integración progresiva
+  y cierre definitivo para interpretar hitos.
+- Hitos A0 p. 23: S4 arquitectura/entorno; S8 backend RAG/corpus; S12 app integrada;
+  S15 evaluación con usuarios; S16 entrega. Backend RAG S8 no demuestra que también
+  estén completos agente/MCP, aunque fase 2 los agrupa hasta S10.
+- OE3 carece de fila propia para construcción/pruebas ReAct/MCP. OE4 no separa
+  modelado de reglas/BPM. OE6 no asigna una ventana concreta de observación de
+  estabilidad/carga. Son huecos de trazabilidad, no prueba de horas exactas faltantes.
+- No se asignan filas explícitas a autorizaciones, revisión/limpieza del corpus,
+  preparación/revisión del benchmark o reclutamiento. Pueden formar parte de fases,
+  pero su disponibilidad no puede darse por garantizada.
+- No se observa evaluación RAG anterior a la fila de RAG; sí pruebas de integración
+  coincidiendo con cierre móvil y SUS coincidiendo con el último tramo narrativo.
+  Es un riesgo que requiere control de versiones y criterios de entrada, no una
+  contradicción que deba inventarse.
+
+SOURCE_D: OE2/OE3/OE4/OE6 combinados con corpus institucional, push y usuarios
+suponen riesgo alto para 16 semanas con accesos aún desconocidos. No se cuantifican
+horas ni se garantiza inviabilidad matemática; se señala que el conjunto no es
+defendible como compromiso incondicional sin capacidad y dependencias resueltas.
+El tiempo restante debe confirmarse; no se reinician dieciséis semanas aquí.
+
+| Prioridad propuesta | Trabajo y condición |
 | --- | --- |
-| Reconciliación + prototipo local acotado + evaluación/documentación | La más defendible con los activos existentes; aceptación del corpus y usuarios siguen condicionantes. No garantiza plazo. |
-| Lo anterior + corpus documental real acotado mediante canal autorizado | Viabilidad condicionada a obtener permisos/fuentes temprano y limitar formatos/alcance. |
-| Lo anterior + múltiples integraciones + progreso personal + autenticación + transacciones | Inferencia de riesgo muy alto: no es razonable comprometer el conjunto en 16 semanas con dependencias aún desconocidas. |
-| Además Agent/ReAct/MCP + scraping/RPA + BPM institucional + On-Premise/alta disponibilidad + evaluación formal completa | La acumulación excede razonablemente un alcance defendible de 16 semanas en las condiciones conocidas. No es una estimación numérica: exige accesos, operación y varias evaluaciones no resueltas. |
+| MUST_HAVE | Resolver alcance académico, corpus, fuentes y tareas; conservar baseline; acordar evaluación, usuarios, evidencia y documentación. |
+| MUST_HAVE mientras siga exigido en A0 | Agent/MCP, RPA/scraping, BPM/N8N conversacional, Sheets, push y On-Premise no se vuelven opcionales por decisión técnica. Mantenerlos o formalizar cambios antes de replanificar. |
+| SHOULD_HAVE | Mejoras adicionales de cobertura/presentación una vez asegurada la entrega aprobada; no incluye degradar compromisos explícitos sin permiso. |
+| FUTURE propuesto | Capacidades que se acuerde diferir, con NEEDS_DIRECTOR_APPROVAL si están comprometidas en A0. Integraciones personales nuevas y transacciones no se incorporan por defecto. |
 
-Decisión propuesta: elegir un conjunto mínimo evaluable, confirmar qué se difiere
-y conservar tiempo para evidencia y escritura. No usar la cantidad de código
-existente como sustituto de esa evaluación de dependencias.
+No se crea un cronograma nuevo. La propuesta MVP de §18 depende de estas decisiones.
 
 ## 14. Matriz maestra de reconciliación
 
-La columna histórica resume H1/E2; no sustituye el cotejo del original. Las
-clasificaciones usan exclusivamente la sección 2. «Responsable de decisión»
-identifica **categorías que deben intervenir**, no personas, competencias legales
-ni un procedimiento institucional confirmado. Varias categorías no implican
-aprobación conjunta ya obtenida; el trámite académico aplicable sigue por confirmar.
+Capa histórica basada en **A0**, no en H1. Las columnas B/C describen evidencia
+disponible; riesgo, clasificación y decisión son SOURCE_D. Se conservan A4-01–24
+por tema y se añaden A4-25–32. A4-24 deja de ser ausencia de fuente y registra el
+cotejo completado y la aprobación aún pendiente. Responsables son categorías,
+sin asignar personas ni inventar procesos institucionales.
 
 | ID | Sección | Afirmación/compromiso histórico | Estado actual repo | Discovery/evidencia CCD | Clasificación | Riesgo | Decisión requerida | Responsable de decisión | Impacto si cambia |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| A4-01 | Nombre | H1/E2 identifican un nombre anterior. | BanuChat es el nombre vigente, E1. | El nombre no valida el dominio ni acceso. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Confundir cambio nominal con cambio de alcance. | Confirmar actualización de la versión académica preservando historia. | EQUIPO; DIRECTOR; FACULTAD/PROCESO_ACADÉMICO | Portada, títulos, referencias y anexos; no altera por sí mismo OE. |
-| A4-02 | Problema | Fragmentación, repetición, carga y desactualización a cotejar, H1. | Prototipo de consulta sintética, E1/E3. | Canales reportados; sin línea base del problema, E8. | NEEDS_EVIDENCE; NEEDS_REWORDING; UNSUPPORTED | Construir la justificación sobre impactos no observados. | Validar brecha, tareas y evidencia antes de afirmar magnitud. | EQUIPO; CCD; DIRECTOR | Problema, justificación, pregunta y medición de efectos. |
-| A4-03 | Pregunta | Posible dependencia de RAG/N8N; texto literal ausente. | Solución híbrida con caminos sin generación. | D3 distingue datos, documentos y fronteras personales. | NEEDS_EVIDENCE; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Forzar tecnologías por redacción. | Cotejar y centrar pregunta en resultado investigable. | DIRECTOR; EQUIPO | Pregunta, objetivo general y criterios de evaluación. |
-| A4-04 | Objetivo general | Promesa de solución/beneficios institucionales reportada; literal pendiente. | Artefacto técnico parcial, sin impacto institucional acreditado. | Necesidad, fuentes y usuarios aún por validar. | NEEDS_REWORDING; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Confundir construir con demostrar mejora. | Acotar resultado, población, corpus y validación. | DIRECTOR; EQUIPO | Objetivo general, OE, metodología y resultados. |
-| A4-05 | OE1 | RAG sobre documentos institucionales, H1. | Document RAG sobre corpus sintético, E3/E7. | Documentos internos/autoridad/uso pendientes, E8. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Evaluar dominio distinto del prometido. | Decidir corpus aceptable y alcance documental. | DIRECTOR; CCD; EQUIPO | Corpus, pregunta evaluable, pruebas y límites de generalización. |
-| A4-06 | OE1/evaluación | Evaluación RAG/RAGAS reportada. | K2 retrieval sintético; sin RAGAS M9 ejecutada. | No benchmark final del CCD. | NEEDS_EVIDENCE; NEEDS_REWORDING | Acreditar calidad generativa con retrieval. | Acordar protocolo final y presentar K2 como preliminar. | DIRECTOR; EQUIPO | Evidencia OE1 y resultados esperados. |
-| A4-07 | OE2 | RPA/scraping y actualización automática, H1/E2. | Fuente sintética aprobada e ingesta N8N manual, E4. | APIs, permisos y frecuencia no confirmados. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Sustituir objetivo sin formalizarlo o automatizar fuente inexistente. | Mantener con justificación, sustituir por ingesta verificable o diferir. | DIRECTOR; CCD; EQUIPO | Técnica, fuente, entregable y métrica de actualización. |
-| A4-08 | OE3 | Agentic AI/MCP, H1. | Contrato MCP sin ejecutable; RAG directo, E3. | Necesidad de herramientas aún no demostrada. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Añadir complejidad o declarar agente inexistente. | Confirmar obligatoriedad y evaluación; acotar/diferir si se aprueba. | DIRECTOR; EQUIPO | Objetivo, arquitectura y evaluación de selección de herramientas. |
-| A4-09 | OE4 | BPM/N8N e integración estructurada, H1. | Orquestación manual de releases; E4 no acredita BPM institucional. | Procesos/fuentes no levantados completamente. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Equiparar workflow con mejora de procesos. | Delimitar proceso, coordinación técnica y relación con OE2. | DIRECTOR; CCD; EQUIPO | Actividades, entregable y criterios de orquestación/integración. |
-| A4-10 | OE5 | App React Native y UX, H1. | Mobile implementado; validación manual parcial, E9. | Tareas/usuarios reales por confirmar. | CONSISTENT; NEEDS_EVIDENCE; KEEP_PROVISIONAL | Presentar pruebas del desarrollador como UX formal. | Acordar estudio y mantener cobertura esencial. | EQUIPO; DIRECTOR; CCD | Instrumentos, participantes, tareas y límites UX. |
-| A4-11 | OE6 | On-Premise UNAB, Docker y métricas, H1/E2. | Compose parcial local; L1-B acotado, E3/E6. | Infraestructura y operación no confirmadas. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Declarar despliegue institucional o SLA desde ejecución local. | Confirmar requisito de entorno y evaluación operacional aceptable. | DIRECTOR; CCD; FACULTAD/PROCESO_ACADÉMICO | Despliegue, recursos, protocolo y alcance académico. |
-| A4-12 | Corpus | Fuentes reales CCD como base funcional, H1. | `/data/synthetic` es fuente de verdad, E1. | CP preliminares no son corpus autorizado. | NEEDS_DIRECTOR_APPROVAL; NEEDS_EVIDENCE; NEEDS_REWORDING | Reetiquetar datos ficticios como institucionales. | Formalizar corpus sintético o exigir corpus real delimitado. | DIRECTOR; CCD; EQUIPO | Contribución, validez externa y plan de evaluación. |
-| A4-13 | Arquitectura | Topología histórica exacta no disponible. | REST/router/fast paths/lookup/RAG directo, E3. | Mecanismo depende de tipo de información, D3. | NEEDS_REWORDING; KEEP_PROVISIONAL | Documentar diagrama objetivo como runtime. | Mostrar arquitectura actual y objetivo condicionado por separado. | EQUIPO; DIRECTOR | Diagramas, justificación y trazabilidad con OE3/OE4. |
-| A4-14 | Calendario/Google Sheets | Google Sheets entre medios históricos, H1/E2. | Calendario dentro de releases sintéticas; Sheets excluido. | Fuente de calendario real desconocida. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | Conservar una dependencia no justificada o retirarla sin aprobación. | Confirmar si era medio o requisito; proponer eliminación del medio si procede. | DIRECTOR; CCD; EQUIPO | Fuente, automatización y posibles criterios de OE4. |
-| A4-15 | Integración | Información real y automatización reportadas. | Sin APIs reales UNAB/CCD en alcance vigente, E1/E3. | Sistemas mencionados no prueban interfaces ni acceso. | NEEDS_EVIDENCE; SCOPE_RISK | Diseñar conectores o permisos imaginarios. | Confirmar canal técnico y autorización por fuente antes de comprometer integración. | CCD; EQUIPO; DIRECTOR | Viabilidad, operación y cronograma. |
-| A4-16 | Personalización | Alcance histórico individual literal por cotejar. | Perfiles ficticios no autentican, E1/E9. | Progreso, historial, elegibilidad y cupos siguen sin fuente/acceso. | NEEDS_EVIDENCE; SCOPE_RISK; KEEP_PROVISIONAL | Confundir demo con expediente autorizado. | Mantener consultas personales fuera del MVP candidato salvo necesidad y autorización. | CCD; DIRECTOR; EQUIPO | Identidad, permisos, corpus y alcance funcional. |
-| A4-17 | Metodología | DSR/Scrum/entrevistas reportados, H1. | Prototipado y pruebas preceden a discovery documentado, E4–E8. | Entrevistas/validación CCD no acreditadas. | NEEDS_REWORDING; NEEDS_EVIDENCE | Falsear la secuencia de investigación. | Describir ciclos y prácticas reales; documentar levantamiento posterior. | EQUIPO; DIRECTOR | Metodología, bitácora, limitaciones y cronograma. |
-| A4-18 | Usuarios/SUS | Evaluación con usuarios, H1. | Sin resultados formales acreditados, E9. | Población/reclutamiento por acordar. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Sustituir usuarios por pruebas técnicas sin reconocerlo. | Acordar protocolo viable o alternativa expresamente aprobada. | DIRECTOR; EQUIPO; CCD | OE5/OE6, instrumentos y conclusiones. |
-| A4-19 | M9 | Evaluación final institucional reportada en el alcance histórico, no protocolo M9 original. | 63 drafts sintéticos; pausas documentadas, E7/E8. | Dominio real no congelado. | NEEDS_REWORDING; NEEDS_EVIDENCE | Sobreajuste o presentar desarrollo como benchmark final. | Preservar drafts; definir evaluación posterior al acuerdo de corpus. | EQUIPO; DIRECTOR | Comparabilidad, gold, reserva y evidencia OE1. |
-| A4-20 | Resultados/impacto | Carga reducida, optimización, exactitud o nivel industrial a auditar, H1. | Evidencia local parcial; no impacto ni garantía universal. | Sin línea base ni validación institucional. | UNSUPPORTED; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Sobreafirmación de resultados. | Eliminar superlativos; aprobar resultados medibles y delimitados. | DIRECTOR; EQUIPO | Resultados esperados, hipótesis y conclusiones. |
-| A4-21 | Disponibilidad/rendimiento | Alta disponibilidad y métricas operacionales a cotejar. | L1-B: 10 warm, media 4013.57 ms; no acredita estabilidad, E6. | Carga/infraestructura institucional desconocidas. | NEEDS_EVIDENCE; NEEDS_REWORDING | Confundir media muestral con SLA. | Definir entorno, carga, duración y criterios antes de evaluar. | EQUIPO; DIRECTOR | OE6 y protocolo operacional. |
-| A4-22 | Cronograma | Horizonte de 16 semanas, H1. | Base implementada con pendientes técnicos y académicos. | Accesos, fuentes y usuarios sin calendario confirmado. | SCOPE_RISK; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Prometer simultáneamente integración, agentes, automatización y despliegue. | Confirmar semanas disponibles, capacidad y alcance mínimo. | DIRECTOR; EQUIPO | Priorización, entregables y actividades diferidas. |
-| A4-23 | Aprobaciones | Estado de aprobación del texto original desconocido. | ADR técnicos y contratos congelados; no constancia de cambio académico. | Aprobación CCD tampoco acreditada. | NEEDS_DIRECTOR_APPROVAL; NEEDS_EVIDENCE | Tratar decisión técnica como autorización académica. | Confirmar proceso aplicable y registrar decisiones con trazabilidad. | DIRECTOR; FACULTAD/PROCESO_ACADÉMICO | Validez de cambios de objetivos, alcance y resultados. |
-| A4-24 | Fuente histórica/referencias | Versión original completa no disponible para cotejo. | Hay resúmenes históricos y documentos de estado. | Discovery no sustituye fuente académica. | NEEDS_EVIDENCE | Atribuir al original formulaciones o métricas no leídas. | Obtener versión pertinente y completar referencias/páginas antes de reescribir. | EQUIPO; DIRECTOR | Precisión de toda la reconciliación y futura actualización. |
+| A4-01 | Nombre | A0 p. 1 y citas conservan nombre histórico. | BanuChat vigente, E1. | No acredita validación institucional. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Confundir nombre y alcance. | Formalizar nombre preservando historia. | EQUIPO; DIRECTOR; FACULTAD/PROCESO_ACADÉMICO | Portada, títulos y referencias internas. |
+| A4-02 | Problema | A0 pp. 4–5 afirma carga, desactualización, inexistencia de solución y árbol causal. | Prototipo sintético, E1/E3. | C1/C2 sin línea base ni inventario institucional completo. | NEEDS_EVIDENCE; NEEDS_REWORDING; UNSUPPORTED | Causalidad/impacto no demostrados. | Validar problema, población y tareas. | EQUIPO; CCD; DIRECTOR | Problema, justificación y evaluación de efectos. |
+| A4-03 | Pregunta | A0 §2.3 p. 5 exige RAG/N8N y plantea reducir carga/mejorar experiencia. | Consulta híbrida, sin estudio de efecto. | Fuentes/necesidad por validar. | NEEDS_REWORDING; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Solución y beneficios preseleccionados. | Acordar pregunta evaluable y límites. | DIRECTOR; EQUIPO | Pregunta, método y resultados. |
+| A4-04 | Objetivo general | A0 §4 p. 7: sistema RAG/vectorial, N8N, React Native y beneficios CCD. | Artefacto parcial local. | Sin corpus ni validación institucional obtenidos. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Construir no demuestra mejora. | Delimitar contribución, dominio y efecto medible. | DIRECTOR; EQUIPO | OG, OE, metodología y conclusiones. |
+| A4-05 | OE1/corpus | A0 pp. 7–8: indexar documentos oficiales verificados. | Documentos ficticios, E1/E7. | C1 D01/D10/D21 pendientes. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Evaluar dominio distinto. | Mantener corpus real o aprobar sustitución delimitada. | DIRECTOR; CCD; EQUIPO | Corpus y validez externa. |
+| A4-06 | OE1/evaluación | A0 p. 20: RAGAS y 50–80 preguntas desde corpus institucional. | K2 parcial; M9 sin RAGAS. | Gold real no disponible. | NEEDS_EVIDENCE; NEEDS_REWORDING | Confundir generación sintética de preguntas y corpus ficticio. | Acordar protocolo/corpus y MRR truncado. | DIRECTOR; EQUIPO | Evidencia OE1 y aceptación. |
+| A4-07 | OE2 | A0 pp. 7/20 exige RPA/scraping periódico y tres flujos automáticos. | Ingesta sintética manual; sin scraping. | Fuentes/acceso desconocidos. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Sustituir técnica y criterio sin formalizar. | Mantener o sustituir obligación y métricas con aprobación. | DIRECTOR; CCD; EQUIPO | Adquisición, automatismo y evaluación. |
+| A4-08 | OE3 | A0 pp. 7/20 exige Agentic AI, MCP, ReAct y selección dinámica. | Router/RAG directo; solo contrato MCP. | Necesidad de herramientas no validada. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Declarar agente desde router o contrato. | Justificar mantenimiento/acotación/diferimiento expreso. | DIRECTOR; EQUIPO | Núcleo, interfaces y contribución. |
+| A4-09 | OE4 | A0 pp. 7–8/12: BPM/N8N rige conversación y directrices. | N8N fuera de consulta, E3/E4. | Reglas/proceso aún por validar. | TECHNICALLY_OBSOLETE; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Confundir ingesta con BPM conversacional. | Acordar significado/entregable revisado. | DIRECTOR; CCD; EQUIPO | Arquitectura, reglas y pruebas. |
+| A4-10 | OE5 | A0 pp. 8/21: app React Native, UX y módulos incluidos push. | App parcial, push y SUS pendientes. | Tareas/usuarios por acordar. | CONSISTENT; NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Llamar completa a demo. | Mantener cobertura o aprobar reducción; evaluar UX. | EQUIPO; DIRECTOR; CCD | Funciones y criterios de usuario. |
+| A4-11 | OE6 | A0 pp. 8/21 obliga servidores UNAB/Docker y evaluación integral. | Compose parcial local, sin despliegue UNAB. | Recursos/permisos no confirmados. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL; SCOPE_RISK | Presentar local como institucional. | Confirmar mantenimiento o sustitución formal. | DIRECTOR; CCD; FACULTAD/PROCESO_ACADÉMICO | Entorno, recursos y aceptación. |
+| A4-12 | Corpus/fuentes | A0 p. 8 enumera propuesta, lineamientos, guías y resoluciones. | /data/synthetic fuente de verdad. | No originales autorizados. | NEEDS_DIRECTOR_APPROVAL; NEEDS_EVIDENCE | Asumir que leer A0 obtiene su corpus. | Decidir corpus y permisos por documento. | DIRECTOR; CCD; EQUIPO | Cobertura y evaluación. |
+| A4-13 | Arquitectura | A0 pp. 10–11/19/24: figura agéntica, cuatro capas y tres capas. | REST/router/fast paths/RAG directo. | Mecanismos candidatos por tipo de información. | NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Elegir una vista que oculte obligaciones. | Explicar INT-01/02 y acordar arquitectura evaluable. | EQUIPO; DIRECTOR | Diagramas y trazabilidad OE3/OE4. |
+| A4-14 | Sheets/calendario | A0 pp. 20–21 exige Sheets y máximo 30 min. | Calendario en releases, Sheets excluido. | Fuente de calendario no confirmada. | TECHNICALLY_OBSOLETE; NEEDS_DIRECTOR_APPROVAL | Métrica incompatible con fuente actual. | Acordar fuente y criterio sustitutos o mantenerlos. | DIRECTOR; CCD; EQUIPO | OE4, sincronización y pruebas. |
+| A4-15 | Integración | A0 pp. 18–21 presupone fuentes locales/web y conexiones. | Sin integración UNAB/CCD. | No API o contrato de acceso confirmado. | NEEDS_EVIDENCE; SCOPE_RISK | Diseñar conectores inexistentes. | Resolver fuente, canal, autorización y viabilidad. | CCD; EQUIPO; DIRECTOR | Dependencias y plazo. |
+| A4-16 | Perfiles/historial | A0 p. 20 exige perfiles sintéticos; pp. 4/6/15 hablan de personalización/credenciales. | Perfiles ficticios sin autenticación, historial de chat. | C2 separa estado personal y permisos. | CONSISTENT; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Afirmar que todo perfil debía ser real o que chat es historial académico. | Delimitar simulación, historial y autenticación; INT-06. | CCD; DIRECTOR; EQUIPO | Identidad, datos y cobertura UX. |
+| A4-17 | Metodología | A0 pp. 17–18: aplicada/mixta, DSR, Scrum, entrevistas 10–15. | Prototipo/pruebas antes de discovery documentado. | Entrevistas no acreditadas. | NEEDS_REWORDING; NEEDS_EVIDENCE | Falsear secuencia o prácticas. | Documentar ciclos reales e instrumentos pendientes. | EQUIPO; DIRECTOR | Método, bitácora y límites. |
+| A4-18 | Usuarios/SUS | A0 p. 21: ≥10 usuarios UNAB, SUS y cinco tareas. | Sin estudio formal acreditado. | Reclutamiento/protocolo pendientes. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Sustituir estudio por prueba del desarrollador. | Acordar ejecución o alternativa expresamente aprobada. | DIRECTOR; EQUIPO; CCD | OE5/OE6 e interpretación. |
+| A4-19 | M9 | A0 p. 20 promete evaluación, no la etapa M9 por nombre. | 63 drafts sintéticos, pausados por E8. | Corpus/gold institucional pendiente. | NEEDS_EVIDENCE; NEEDS_REWORDING | Acreditar final desde pool de desarrollo. | Preservar y decidir protocolo posterior al alcance. | EQUIPO; DIRECTOR | Comparabilidad y validez. |
+| A4-20 | Impacto/resultados | A0 pp. 6/19–20: industrial, mejora sustancial y optimización significativa. | Evidencia local parcial. | Sin línea base institucional. | UNSUPPORTED; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Sobreafirmación. | Medir efectos o aprobar resultados acotados. | DIRECTOR; EQUIPO | Resultados y conclusiones. |
+| A4-21 | Estabilidad/latencia | A0 p. 21: absoluto, cortes >5 min prohibidos y media ≤5 s. | L1-B local; E1 escribe <5 s. | Carga/operación no confirmadas. | NEEDS_REWORDING; NEEDS_EVIDENCE | SLA inferido y frontera cambiada. | Definir condiciones/tolerancia; conservar exactitud histórica. | EQUIPO; DIRECTOR | Protocolo OE6. |
+| A4-22 | Cronograma | A0 pp. 17–18/22–23: 16 semanas 2026-2, fases/tabla/hitos discrepantes. | Base existente con pendientes. | Accesos/usuarios sin agenda confirmada. | SCOPE_RISK; NEEDS_REWORDING; NEEDS_DIRECTOR_APPROVAL | Sobrecarga y dependencias invisibles. | Resolver INT-08/09 y tiempo restante antes de replanificar. | DIRECTOR; EQUIPO | Prioridades, hitos y entregables. |
+| A4-23 | Aprobaciones | A0 es anteproyecto; no aporta por sí solo constancia de aprobación de cambios. | ADR internos no equivalen a decisión académica. | Permisos CCD tampoco acreditados. | NEEDS_DIRECTOR_APPROVAL; NEEDS_EVIDENCE | Confundir fuentes y autoridad. | Confirmar estado y formalización aplicable. | DIRECTOR; FACULTAD/PROCESO_ACADÉMICO | Validez de cambios. |
+| A4-24 | Fuente histórica | A0 completo leído, identificado por hash y páginas. | A4 anterior dependía de H1; corregida en A4.1. | No convierte A0 en validación de discovery. | CONSISTENT; NEEDS_EVIDENCE | Confundir copia leída y versión formalmente aprobada. | Conservar trazabilidad; confirmar solo estado académico, no pedir nuevamente el texto. | EQUIPO; DIRECTOR | Precisión y procedencia de la reconciliación. |
+| A4-25 | Guías completas | A0 pp. 8/24 excluye fragmentación/indexación vectorial y ofrece enlace íntegro. | full_document sin chunks/vectores; artefacto REST sintético. | Guías reales no obtenidas. | CONSISTENT; NEEDS_EVIDENCE | Inventar contradicción donde hay continuidad. | Conservar principio; validar originales/formato/acceso. | EQUIPO; CCD | Modos de recuperación y límites del corpus. |
+| A4-26 | Push | A0 pp. 18–19/21–22 compromete notificaciones. | Pendientes, E1/E9. | Eventos/fuentes por confirmar. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Reducir obligación a mejora opcional. | Mantener o aprobar diferimiento explícito. | DIRECTOR; EQUIPO | OE5, app y planificación. |
+| A4-27 | Tecnología móvil | A0 p. 23 selecciona “Flutter, React Native”; OE5 exige React Native. | Expo/React Native. | No decisión CCD sobre framework. | NEEDS_REWORDING | Ambigüedad editorial de selección. | Aclarar INT-04 sin introducir otra tecnología. | EQUIPO; DIRECTOR | Tabla tecnológica, no migración. |
+| A4-28 | Licencias/referencias | A0 pp. 13–16/25–27 contiene atribuciones y bibliografía en construcción. | Repo no prueba corrección externa de A0. | Sin verificación institucional adicional. | NEEDS_EVIDENCE; NEEDS_REWORDING | Usar referencias no verificadas como autoridad. | Revisar REF-01–13 en tarea posterior; no web aquí. | EQUIPO; DIRECTOR | Justificación, referencias y límites. |
+| A4-29 | Ética/identidad | A0 pp. 15–17 prevé consentimiento, políticas, anonimización y riesgo mínimo autodeclarado. | Perfil sintético y sesión no autentican; no estudio formal. | Acceso/población por confirmar. | NEEDS_EVIDENCE; NEEDS_DIRECTOR_APPROVAL | Tomar autoclasificación como autorización. | Acordar protocolo y revisión aplicable sin inventar trámite. | DIRECTOR; CCD; EQUIPO; FACULTAD/PROCESO_ACADÉMICO | Datos de estudio y validación. |
+| A4-30 | Costos/soberanía | A0 pp. 6/24: absolutos frente a opción LLM externo pp. 15/23. | Ollama local, entorno parcial. | Recursos institucionales no acreditados. | UNSUPPORTED; NEEDS_REWORDING | Garantías no sustentadas; INT-05. | Delimitar operación/costos y qué se evalúa. | EQUIPO; DIRECTOR | Viabilidad y resultados. |
+| A4-31 | Fórmula/targets | A0 p. 20 nombra MRR sin k y glosa posición media; metas propias. | M9 MRR@5, aún sin resultados. | Benchmark real pendiente. | NEEDS_REWORDING; NEEDS_EVIDENCE | Equiparar métricas distintas o universales. | Acordar fórmula, k, agregación y procedencia de metas. | EQUIPO; DIRECTOR | Evaluación OE1. |
+| A4-32 | Frontera informativa | A0 §10.5 p. 17 excluye decisiones académicas vinculantes. | Consulta sobre ficción, sin transacciones institucionales. | C1/C2 mantienen escrituras/decisiones personales bloqueadas. | CONSISTENT; KEEP_PROVISIONAL | Ampliar gestión a pagos/inscripciones no prometidos. | Conservar límite de consulta; delimitar estado personal aparte. | EQUIPO; DIRECTOR; CCD | MVP y alcance funcional. |
 
 ## 15. Decisiones que pueden tomarse técnicamente
 
-Decisiones propuestas dentro del alcance ya autorizado, sin modificar el compromiso
-académico ni habilitar implementación en A4:
+Dentro de lo autorizado, el equipo puede describir el runtime con precisión,
+conservar nombre BanuChat y procedencia histórica, corregir esta auditoría desde
+A0, distinguir perfiles sintéticos de corpus documental y guías completas de
+fragmentos, y preservar resultados con sus límites. También puede registrar las
+diferencias de umbrales y preparar decisiones sin alterar los otros documentos.
 
-- Describir con precisión el runtime actual y distinguirlo del objetivo Agent/MCP.
-- Usar BanuChat en documentación nueva, conservando el nombre anterior solo como
-  referencia histórica; no alterar por ello el documento radicado.
-- Preservar dataset v1, contratos, artefactos y resultados con su procedencia y
-  límites; no sumar corridas incompatibles ni atribuir resultados no ejecutados.
-- Identificar M9 como corpus de desarrollo sintético y mantener las pausas vigentes.
-- Separar catálogo/oferta, regla/decisión personal, fuente/canal y prueba manual/
-  evaluación formal como distinciones de análisis.
-- Preparar matrices, inventarios y preguntas sin afirmar aprobaciones ni integrar
-  fuentes reales.
-
-Estas decisiones mejoran exactitud y trazabilidad. No facultan al equipo para
-declarar cumplido un OE, sustituir datos reales por sintéticos como criterio final,
-eliminar evaluaciones o cambiar unilateralmente el despliegue prometido.
+No equivale a aprobar un nuevo alcance. Se conservan dataset v1 y contratos
+congelados, N8N fuera del chat, MCP/Agent como pendientes y pausas de E8. Esta
+tarea no autoriza implementarlos, descartar objetivos o reabrir M9.
 
 ## 16. Decisiones que requieren aprobación académica
 
-| Cambio candidato | Por qué afecta el compromiso | Qué confirmar/formalizar |
+| Cambio candidato frente a compromiso expreso A0 | Clasificación | Decisión y efecto |
 | --- | --- | --- |
-| Cambiar alcance, problema, pregunta u objetivo general | Modifica la contribución que se evaluará y la cadena metodológica. | Redacción vigente, justificación, impactos y aceptación del director/proceso aplicable. |
-| Sustituir corpus institucional por sintético, o definir alcance híbrido | Cambia validez externa y evidencia esperada. | Corpus aceptable, límites de conclusiones y evaluación correspondiente. |
-| Eliminar, sustituir, fusionar o diferir OE | Cambia los compromisos específicos. | Decisión por OE con entregable/validación alternativos y trazabilidad; no borrado silencioso. |
-| Eliminar On-Premise institucional y conservar ejecución local | Modifica entorno, operación y posible criterio de OE6. | Si era requisito evaluable o aspiración, y qué evidencia local sería admisible. |
-| Eliminar scraping/RPA y conservar ingesta autorizada | Cambia técnica y potencialmente alcance de OE2. | Necesidad real, alternativa de fuente y métrica revisada. |
-| Eliminar/diferir Agent/ReAct o MCP | Afecta OE3 y resultados de autonomía/herramientas. | Obligatoriedad, beneficio esperado, validación o sustitución justificada. |
-| Reformular BPM/N8N/Google Sheets | Puede cambiar proceso, fuente y automatismo de OE4. | Alcance real de gestión de procesos frente a orquestación técnica. |
-| Sustituir evaluación con usuarios, métricas o resultados sustanciales | Cambia evidencia de calidad/usabilidad/impacto. | Protocolo y criterios revisados; no reemplazar resultados por implementación. |
+| Corpus institucional → prototipo documental enteramente sintético | NEEDS_DIRECTOR_APPROVAL | Afecta OE1, pregunta, OG, gold y validez externa; no se confunde con los perfiles ya sintéticos de OE4. |
+| RPA/scraping autónomo → ingesta controlada manual o desde archivos | NEEDS_DIRECTOR_APPROVAL | Sustituye técnica, fuente, automatismo y metas de OE2. |
+| Diferir/eliminar Agent/ReAct o servidor MCP | NEEDS_DIRECTOR_APPROVAL | Cambia OE3 explícito y entregables/resultados, no una simple opción del marco teórico. |
+| N8N/BPM conversacional → orquestación asíncrona de ingesta | NEEDS_DIRECTOR_APPROVAL | Cambia OE4 y requiere explicar reglas, fuentes y evaluación alternativas. |
+| Sheets/≤30 min → calendario por releases | NEEDS_DIRECTOR_APPROVAL | Cambia resultado OE4, origen y criterio temporal. |
+| Diferir push o reducir cobertura móvil/historial | NEEDS_DIRECTOR_APPROVAL | Cambia resultado OE5 y tareas evaluables. |
+| On-Premise universitario → entorno local del equipo | NEEDS_DIRECTOR_APPROVAL | Cambia OE6, recursos, operación y evidencia requerida. |
+| Reducir muestra, sustituir usuarios/SUS o cambiar métricas sustancialmente | NEEDS_DIRECTOR_APPROVAL | Cambia validación OE1/OE5/OE6; el cambio debe tener justificación y protocolo. |
+| Reformular problema, pregunta, OG, OE o beneficios garantizados | NEEDS_DIRECTOR_APPROVAL | Modifica la contribución evaluable, más allá de una corrección editorial. |
 
-No se conoce aquí el procedimiento UNAB para estos cambios. Debe confirmarse con
-el director y, si corresponde, con la categoría FACULTAD/PROCESO_ACADÉMICO; no se
-inventan formularios, comités, plazos ni competencias. Autorización académica y
-autorización de acceso/uso de datos por el CCD siguen siendo decisiones diferentes.
+A4.1 no decide el procedimiento UNAB ni inventa formularios, comités o plazos.
+Debe confirmarse con DIRECTOR y, cuando corresponda, FACULTAD/PROCESO_ACADÉMICO.
+La autorización de datos/fuentes/infraestructura por el CCD es distinta de la
+aceptación académica. No se envió ningún mensaje ni se contactó a terceros.
 
 ## 17. Preguntas para el director
 
-Preguntas propuestas, sin respuestas ni aprobaciones presumidas. P0 condiciona el
-alcance y la evaluación; P1 concreta el trabajo tras esas decisiones; P2 mejora la
-presentación y continuidad sin bloquear la definición inicial. Los IDs permiten
-registrar posteriormente respuesta, fecha, evidencia e impacto en A4-01–A4-24.
+Se conserva la identificación DIR-01–13 con formulación revisada y se añade DIR-14.
+Se retira la petición de obtener/transcribir el original: ya está leído. Se
+mantiene la pregunta sobre su estado formal, que el PDF por sí solo no acredita.
+Las P0 resuelven cambios de compromisos conocidos, no dudas sobre lo que dice A0.
 
-| ID | Prioridad | Pregunta concreta | Qué desbloquea |
+| ID | Prioridad | Pregunta concreta | Decisión que desbloquea |
 | --- | --- | --- | --- |
-| DIR-01 | P0 | ¿Cuál es la versión del anteproyecto que debe cotejarse, cuál es su estado de aprobación y puede actualizarse formalmente? ¿Con quién debe confirmarse el procedimiento aplicable? | Fuente histórica verificable y vía de formalización; A4-23/24. |
-| DIR-02 | P0 | ¿Es admisible evaluar el proyecto con corpus sintético explícitamente declarado, o se exige corpus real del CCD? Si se exige, ¿cuál sería el mínimo de fuentes y tareas aceptable y qué alternativa se admite si el CCD no autoriza acceso? | Corpus, límites de contribución y dependencia institucional; A4-05/12/15. |
-| DIR-03 | P0 | ¿OE2, OE3 y OE4 deben mantenerse literalmente, o puede proponerse su reformulación, sustitución o agrupación con entregables y criterios verificables? | Resolver la diferencia entre automatización prometida y prototipo existente; A4-07/08/09. |
-| DIR-04 | P0 | ¿Agent/ReAct y MCP son requisitos obligatorios de OE3? Si lo son, ¿qué tarea y evidencia demostrarían su aporte frente al flujo determinista/RAG directo actual? | Necesidad y tamaño del trabajo de agentes/herramientas; A4-08/13. |
-| DIR-05 | P0 | ¿On-Premise UNAB es un requisito evaluable de OE6 o una aspiración? ¿Podría aceptarse una demostración local reproducible con límites explícitos si no existe infraestructura institucional disponible? | Entorno exigible y evidencia operacional; A4-11/21. |
-| DIR-06 | P0 | ¿Qué validación mínima con usuarios y qué población se exigirán? ¿Qué alternativa debe acordarse si no es posible reclutar participantes del CCD dentro del plazo? | Viabilidad de OE5/OE6, SUS y estudio de tareas; A4-10/18. |
-| DIR-07 | P0 | ¿Las 16 semanas corresponden al horizonte original o al trabajo restante? ¿Qué fecha, capacidad y entregables deben usarse para decidir el alcance mínimo? | Planificación realista y priorización; A4-22. |
-| DIR-08 | P0 | ¿Puede delimitarse la contribución a calidad de respuestas, funcionamiento y usabilidad del prototipo, dejando reducción de carga e impacto institucional como hipótesis no demostradas salvo que se acuerde su medición? | Coherencia entre problema, objetivos, evaluación y resultados; A4-02/04/20. |
-| DIR-09 | P1 | Una vez decidido el corpus, ¿qué protocolo, métricas, criterios de aceptación y revisión del gold deben usarse para la evaluación RAG? ¿RAGAS es obligatorio o un medio que debe justificarse? | Diseño de evaluación final, distinto de K2 y M9 draft; A4-06/19. |
-| DIR-10 | P1 | ¿Qué tareas del dominio deben priorizarse y qué evidencia del CCD se necesita para validar reglas, fuentes y vigencia, sin asumir acceso a información personal? | Delimitación funcional y fuentes autoritativas; A4-02/15/16. |
-| DIR-11 | P1 | ¿Es adecuada una descripción de DSR iterativa que reconozca el prototipado previo al levantamiento institucional? ¿Qué prácticas e instrumentos realmente usados deben documentarse? | Metodología y cronología honestas; A4-17. |
-| DIR-12 | P2 | ¿Cómo debe registrarse el cambio de nombre en el documento oficial y sus anexos conservando la trazabilidad de versiones? | Consistencia editorial sin alterar la historia; A4-01. |
-| DIR-13 | P2 | ¿Qué pendientes conviene presentar como trabajo futuro y con qué nivel de detalle, sin convertirlos en compromisos de esta entrega? | Presentación de límites y continuidad; A4-08/09/11/22. |
+| DIR-01 | P0 | ¿Cuál es el estado de aprobación de esta copia del anteproyecto y cómo deben formalizarse los cambios de alcance identificados en A4.1? | Proceso aplicable y trazabilidad de decisiones, sin volver a pedir el texto. |
+| DIR-02 | P0 | ¿Se mantiene el corpus institucional de OE1/§6 o puede aprobarse una evaluación con documentos sintéticos? Si se mantiene, ¿cuál es el corpus mínimo y qué alternativa se acepta ante falta de acceso? | Fuente, contribución y evaluación. Los perfiles sintéticos de OE4 no resuelven esta diferencia. |
+| DIR-03 | P0 | OE2 exige RPA/scraping periódico y tres flujos automáticos: ¿se mantiene o puede sustituirse por ingesta controlada? ¿Qué fuente, automatismo y métricas reemplazarían los históricos? | OE2 y dependencia de fuente/permiso. |
+| DIR-04 | P0 | OE3 exige Agentic AI/MCP y §12.2 concreta ReAct: ¿deben completarse en esta entrega o puede aprobarse su acotación/diferimiento? ¿Qué tareas demostrarían su aporte? | Núcleo agéntico, tools y evaluación propia. |
+| DIR-05 | P0 | OE6 obliga servidores universitarios/Docker: ¿se mantiene ese despliegue o puede sustituirse formalmente por demostración local reproducible? | Recursos y aceptación del entorno. |
+| DIR-06 | P0 | ¿Se mantienen mínimo diez usuarios reales UNAB de distintos programas, SUS y cinco tareas? ¿Cómo acordar reclutamiento/protocolo o una alternativa formal si no hay disponibilidad? | Validación OE5/OE6. |
+| DIR-07 | P0 | Dado el plan original de 16 semanas en 2026-2 y sus discrepancias de fases/hitos, ¿qué plazo restante y capacidad deben usarse para replanificar tras aprobar alcance? | Viabilidad, sin reiniciar el horizonte por supuesto. |
+| DIR-08 | P0 | ¿Se exige medir reducción de carga y mejora de adopción/experiencia con línea base, o puede limitarse la contribución a calidad y usabilidad del prototipo con conclusiones acotadas? | Pregunta, OG y resultados verificables. |
+| DIR-09 | P1 | ¿Cómo se operacionalizan MRR/MRR@5, RAGAS, gold, denominadores de cobertura/extracción y ventana/carga de estabilidad, conservando o revisando explícitamente los umbrales? | Protocolo; elevar a P0 si impide definir la entrega. |
+| DIR-10 | P1 | ¿Cómo se delimitan los perfiles sintéticos ya previstos, historial de cursos, credenciales de §9.2 y los módulos push comprometidos? ¿Se aprueba algún diferimiento funcional? | Resolver INT-06 y cobertura OE5; elevar a P0 si afecta el núcleo. |
+| DIR-11 | P1 | ¿Cómo documentar DSR/Scrum adaptado y el prototipado previo al levantamiento sin alterar la cronología, y qué registros faltan para evaluar el método? | Metodología real y evidencia. |
+| DIR-12 | P2 | ¿Cómo formalizar el nombre BanuChat y corregir tablas/figuras inconsistentes conservando el original histórico? | Consistencia editorial. |
+| DIR-13 | P2 | ¿Qué alcance y pendientes aprobados deben presentarse como trabajo futuro, y cómo cerrar la verificación de referencias antes de la siguiente versión académica? | Límites y referencias. |
+| DIR-14 | P0 | OE4 sitúa BPM/N8N en conversación y §12.2 exige Sheets/≤30 min: ¿se acepta sustituir ese papel por ingesta asíncrona? ¿Qué reglas, flujo y evidencia constituyen el entregable revisado? | Frontera arquitectónica y sustitución de OE4. |
 
-Las respuestas del director sobre alcance no sustituyen las autorizaciones del
-CCD sobre fuentes, participantes o infraestructura. Las decisiones que dependan
-de ambos deben conservar ambas condiciones, sin asumir una respuesta por silencio.
+No hay respuestas asumidas ni aprobación por silencio. Las preguntas de permisos,
+autoridad y fuente de C1/C2 siguen requiriendo confirmación CCD.
 
 ## 18. Propuesta de alcance defendible
 
-**Decisión propuesta, pendiente de aprobación académica.** El núcleo candidato es
-un prototipo móvil de consulta con trazabilidad de fuentes, arquitectura actual
-explicada y evaluación delimitada. Su carácter defendible depende de resolver P0,
-no se deduce de que el código exista. El corpus sintético permite demostrar
-comportamiento técnico; su suficiencia como entrega académica está por decidir.
+**SOURCE_D: propuesta condicionada, no cambio aprobado de A0.** Se recalcula el
+núcleo desde los compromisos cotejados. No se puede llamar cumplido al anteproyecto
+original con una selección parcial del runtime. Cada reducción explícita conserva
+NEEDS_DIRECTOR_APPROVAL; si se rechaza, la capacidad vuelve al alcance exigible y
+debe revisarse el plazo. No se elimina ningún OE.
 
-El costo es una **inferencia cualitativa del esfuerzo restante relativo**:
-bajo = principalmente documentación/reutilización; medio = preparación y
-validación acotadas; alto = implementación o coordinación relevante;
-indeterminado = depende de permisos, fuentes o recursos no confirmados.
-No son horas, semanas ni estimaciones comprometidas. Incluso un componente ya
-implementado requiere trabajo para acreditar su evaluación.
+Costo aproximado **relativo del trabajo restante**, no horas/semanas: bajo =
+documentación/reutilización acotada; medio = ajustes, preparación y validación
+delimitados; alto = implementación/integración o coordinación relevante;
+indeterminado = permisos, fuentes o recursos externos no confirmados.
 
-### MVP ACADÉMICO DEFENDIBLE
+### MVP_ACADEMIC_DEFENSIBLE
 
-| Elemento candidato | Necesidad | Dependencia | Evidencia y límite | Costo relativo |
+| Elemento propuesto | Necesidad | Dependencia / cambio frente a A0 | Evidencia y límite | Costo relativo |
 | --- | --- | --- | --- | --- |
-| Alcance, tareas y modelo conceptual delimitados | Conectar problema, pregunta, OE y evaluación; distinguir catálogo/oferta y reglas/decisiones personales. | DIR-01/02/08/10 y revisión del dominio por fuentes pertinentes. | E8 ofrece hipótesis y preguntas; no validación del CCD. | Medio; coordinación institucional indeterminada. |
-| Corpus versionado con procedencia, vigencia y límites declarados | Hacer reproducible y auditable lo consultado. | Decisión DIR-02. Si se exige corpus real, disponer primero de autorización y una selección acotada; cambiar el corpus funcional requiere una tarea explícita posterior. | E1/E2 acreditan el corpus sintético vigente. E8 no aporta un corpus real autorizado. | Bajo/medio para documentar y evaluar el sintético; indeterminado para incorporar uno real. |
-| Flujo Mobile → REST → router → fast paths o Document RAG directo | Entregar consultas delimitadas mediante mecanismos acordes al tipo de información. | Tareas/corpus acordados y cobertura de rutas; resolver DIR-03/04 si se pretende diferir Agent/MCP. | E1/E3/E9 muestran la base implementada; no acreditan integraciones o identidad institucional. | Medio para ajustar y verificar el alcance seleccionado. |
-| Ingesta local reproducible mediante backend/rag y N8N manual | Sostener trazabilidad y actualización controlada del corpus de prueba. | Aceptación explícita de este entregable respecto de OE2/OE4; mantener contratos y dataset congelados mientras no exista otra tarea autorizada. | E4 documenta ingesta manual local; no cumple por sí sola scraping/RPA, BPM ni sincronización periódica. | Bajo/medio al reutilizar la base; una fuente nueva elevaría el costo. |
-| Evaluación de respuestas y funcionamiento con protocolo previo | Acreditar resultados del prototipo sin equiparar retrieval con calidad generativa. | DIR-02/09; conjunto de evaluación revisado, criterios definidos y reapertura explícita del trabajo pausado. | E5/E6 son antecedentes parciales; E7 son candidatas draft, no evaluación final. | Medio/alto por diseño, revisión y ejecución controlada. |
-| Validación de usabilidad y tareas según protocolo aceptado | Sustentar conclusiones sobre uso de la app, sin prometer mejora institucional no medida. | DIR-06; participantes, instrumentos y condiciones acordados, o alternativa académica explícitamente aceptada. | E9 acredita implementación y pruebas manuales reportadas; no resultados SUS ni estudio formal. | Medio más coordinación indeterminada. |
-| Demostración local reproducible y documentación de resultados/límites | Permitir revisión del artefacto y de lo que se ha demostrado. | DIR-05/07/08; entorno, carga y criterios aceptados. | E3 ofrece Compose parcial y E6 una corrida local limitada; no despliegue institucional ni SLA. | Medio; no incluye operación institucional. |
+| Alcance de consulta informativa, tareas y reglas delimitadas | Conectar problema, pregunta, artefacto y evaluación sin decisiones vinculantes. | Validación del dominio y DIR-08; restringir beneficios/gestión de OG requiere NEEDS_DIRECTOR_APPROVAL. | A0 §10.5 respalda consulta; C1/C2 aportan hipótesis, no validación. | Medio más coordinación indeterminada. |
+| Corpus versionado y trazable | Sustentar consultas y reproducibilidad. | Elegir corpus institucional acotado autorizado o corpus sintético académicamente aceptado. La segunda rama requiere NEEDS_DIRECTOR_APPROVAL sobre OE1; ninguna integración real está autorizada por A4.1. | A0 §6/§12.2 exige documentos oficiales; E1/E7 conserva fixture útil, sin validez externa acreditada. | Medio con fixture; alto/indeterminado para originales/formato/acceso. |
+| RAG documental, consulta estructurada y documentos completos | Reutilizar respuestas con evidencia y distinguir tareas que no requieren generación. | Mantener arquitectura B requiere decisión expresa sobre OE3/OE4; diferir agente/MCP/N8N conversacional: NEEDS_DIRECTOR_APPROVAL. | E3 funcional parcial; full_document coincide conceptualmente con A0 pp. 8/24. | Medio para cobertura/evaluación acotadas. |
+| Ingesta controlada local y calendario versionado | Mantener procedencia y actualización reproducible del corpus de demostración. | Sustituye RPA/scraping automático y Sheets/≤30 min: NEEDS_DIRECTOR_APPROVAL para OE2/OE4, con nuevos criterios explícitos. | E4 acredita ingesta manual local; no captura institucional ni sincronización histórica. | Bajo/medio al reutilizar, mayor si cambia fuente. |
+| App React Native con módulos acordados y perfiles sintéticos explícitos | Entregar consulta, fuentes y calendario en canal prometido. | Conservar perfiles es coherente con OE4; diferir push o reducir historial de cursos requiere NEEDS_DIRECTOR_APPROVAL sobre resultado OE5. | E9 app presente; historial de chat no sustituye historial académico, push pendiente. | Medio; push elevaría costo/dependencias. |
+| Evaluación RAG, funcional y UX según protocolo aceptado | Demostrar resultados delimitados y reconocer incertidumbre. | Corpus/benchmark revisados; mínimo diez usuarios/cinco tareas/SUS mientras no se apruebe cambio. Alterar población/métricas exige NEEDS_DIRECTOR_APPROVAL; reabrir M9 requiere tarea posterior explícita. | A0 pp. 20–21 fija metas; E5/E6 son antecedentes parciales, E7/E9 no acreditan evaluación final. | Medio/alto; reclutamiento indeterminado. |
+| Demostración reproducible local, informes y límites | Permitir revisar artefacto y resultados. | Sustituye On-Premise UNAB de OE6: NEEDS_DIRECTOR_APPROVAL. Definir carga/ventana y no prometer nivel industrial. | E3 Compose parcial y E6 medición local. | Medio. |
 
-La rama sintética y la rama de corpus real delimitado son **alternativas por
-resolver**, no dos entregas acumuladas. Si el corpus real resulta obligatorio y
-no se obtiene acceso, existe un bloqueo de alcance que debe volver al director;
-no se considera cumplido mediante sustitución silenciosa. La factibilidad del
-núcleo en 16 semanas es condicional a reutilizar la base y cerrar dependencias
-temprano; no se certifica sin conocer el tiempo restante.
+Las ramas de corpus no son entregas acumuladas. Si se exige corpus institucional
+y no hay autorización, se vuelve al director; no se considera satisfecho con
+ficción. La viabilidad en el horizonte requiere reutilizar la base, reducir
+explícitamente obligaciones con aprobación y asegurar validación/documentación.
+No es una garantía de terminar en el tiempo restante desconocido.
 
-### DESEABLE
+### DESIRABLE
 
-| Elemento candidato | Necesidad | Dependencia | Evidencia y límite | Costo relativo |
+| Elemento propuesto | Necesidad | Dependencia / relación con A0 | Evidencia y límite | Costo relativo |
 | --- | --- | --- | --- | --- |
-| Ampliar cobertura de preguntas/tareas ya acordadas | Mejorar utilidad y detectar límites después de asegurar el núcleo. | Corpus autorizado y evaluación mínima preparada; no ampliar primero M9 pausado. | E7/E8 permiten identificar huecos, no garantizan casos finales válidos. | Medio. |
-| Mejorar presentación móvil a partir de hallazgos de usuarios | Corregir dificultades observadas, sin añadir funciones especulativas. | Estudio aceptado y hallazgos concretos. | E9 ofrece una app reutilizable; aún no hay evidencia formal de esas dificultades. | Bajo/medio por correcciones delimitadas. |
-| Segunda revisión de fuentes/gold y prueba adicional de reproducibilidad | Reforzar calidad y trazabilidad de conclusiones. | Disponibilidad de revisores y corpus estable. | E5/E7 muestran la necesidad de distinguir desarrollo y evaluación final; no acreditan revisión institucional. | Medio. |
+| Más cobertura de preguntas dentro del alcance aprobado | Robustecer evidencia después de asegurar el conjunto final. | Gold/corpus estables; no ampliar ahora M9. No reemplaza las 50–80 preguntas históricas por una muestra arbitrariamente menor. | E7 protocolo de desarrollo; sin evaluación final. | Medio. |
+| Mejoras móviles motivadas por resultados observados | Corregir dificultades concretas y mejorar comprensión de fuentes. | Estudio y hallazgos; la validación UX mínima de A0 no se degrada a opcional. | E9 base reutilizable, sin hallazgos formales aún. | Bajo/medio. |
+| Revisión adicional de gold/procedencia y reproducibilidad | Fortalecer conclusiones sin nuevas tecnologías. | Revisores disponibles y corpus permitido; no inventar validación CCD. | E7 prepara revisión; no acredita que haya ocurrido. | Medio. |
 
-### FUTURO
+### FUTURE
 
-Esta ubicación es una propuesta de diferimiento: si DIR-03/04/05 confirma un
-requisito obligatorio, debe reconsiderarse el núcleo y su costo, no declararse
-automáticamente fuera de esta entrega.
-
-| Elemento candidato | Necesidad | Dependencia | Evidencia y límite | Costo relativo |
+| Elemento candidato a diferir | Necesidad potencial | Dependencia / aprobación requerida | Evidencia y límite | Costo relativo |
 | --- | --- | --- | --- | --- |
-| Agent/ReAct y MCP ejecutable | Justificables para tareas que requieran herramientas y aporten un beneficio evaluable. | Necesidad demostrada, aprobación del diferimiento de OE3 o alcance posterior explícito. | E3: contrato MCP y arquitectura objetivo; no integración actual. | Alto. |
-| Scheduling y workflows N8N de retry/recover | Justificables por una cadencia y operación aprobadas. | Fuente, frecuencia, política de recuperación y autorización de implementación. | E4: recorrido manual; los workflows pendientes no están acreditados. | Medio/alto. |
-| Conectores e infraestructura institucional | Justificables si la entrega acordada exige fuentes vivas u operación en UNAB. | Interfaces, permisos, responsables y recursos confirmados; aprobación sobre OE2/OE4/OE6. | E8 enumera vacíos; la mención de sistemas no acredita APIs ni disponibilidad. | Alto/indeterminado. |
+| Agent/ReAct y MCP ejecutable | Selección de herramientas para tareas justificadas. | A0 OE3 lo exige: NEEDS_DIRECTOR_APPROVAL para diferirlo, con impacto en contribución/evaluación. | E3 solo contrato; C2 no demuestra necesidad institucional. | Alto. |
+| Scheduling y workflows de retry/recover | Actualización con cadencia y operación acordadas. | Diferir automatismo histórico OE2 requiere NEEDS_DIRECTOR_APPROVAL; retry/recover son pendientes técnicos y no metas literales independientes de A0. | E4 manual; core y workflow son capas distintas. | Medio/alto. |
+| Push | Notificaciones sobre eventos/convocatorias. | A0 resultado OE5 lo exige: NEEDS_DIRECTOR_APPROVAL para diferir; confirmar fuente/eventos. | E1/E9 pendiente. | Medio/alto. |
+| Conectores e infraestructura institucional | Fuente viva u operación en entorno UNAB si se mantienen. | NEEDS_DIRECTOR_APPROVAL sobre OE2/OE4/OE6, además de permiso institucional; no conector hipotético. | C1/C2 sin acceso/infraestructura confirmados. | Alto/indeterminado. |
 
-### FUERA DEL ALCANCE CANDIDATO
+### OUT_OF_SCOPE_CANDIDATE
 
-No hay eliminación académica ejecutada. Cada candidato requiere justificar su
-impacto y, cuando afecta un compromiso histórico, aprobación según la sección 16.
-
-| Elemento candidato | Necesidad | Dependencia para excluir o reconsiderar | Evidencia y límite | Costo relativo de mantenerlo |
+| Elemento candidato | Necesidad/justificación | Dependencia / aprobación requerida | Evidencia y límite | Costo relativo de mantenerlo |
 | --- | --- | --- | --- | --- |
-| Scraping/RPA y Google Sheets como medios obligatorios | Necesidad no demostrada; la selección debe seguir la fuente y el proceso acordados. | Cotejar OE2/OE4 y aprobar medios alternativos, sin borrar la necesidad de actualización. | E2/E4: alcance sintético e ingesta local; no fuente real accesible acreditada. | Alto/indeterminado. |
-| Gestión BPM institucional y automatización de trámites | Excede una consulta informativa y requiere procesos levantados y validación propia. | Aclarar OE4 y separar orquestación de ingesta de gestión institucional. | E4 no demuestra BPM ni efectos sobre procesos CCD. | Alto/indeterminado. |
-| Historial/progreso real, elegibilidad individual, cupos en vivo y transacciones | No necesarios para demostrar consultas documentales/catalográficas acotadas; necesidad personal pendiente. | Acordar límites funcionales; reconsiderar solo con fuentes, identidad y permisos definidos. | E1/E8/E9: perfiles sintéticos, acceso personal no confirmado. | Alto/indeterminado. |
-| Alta disponibilidad, nivel industrial y exactitud institucional garantizada | No son promesas defendibles con evidencia local parcial; reemplazar por criterios acotados y medibles. | Aprobación de resultados esperados revisados, especialmente OE6. | E6 no prueba SLA y E8 no garantiza vigencia/autoridad institucional. | Alto/indeterminado; no estimable desde el prototipo. |
-| Reducción de carga u optimización significativa como resultado ya asegurado | Un efecto requiere línea base y diseño de medición; no deriva de construir la app. | DIR-08: retirar la garantía o definir un estudio viable y su alcance. | E8/E9 no acreditan línea base ni efecto institucional. | Alto/indeterminado para medirlo con rigor. |
+| Scraping/RPA, Sheets y BPM conversacional como medios obligatorios | Deben justificarse por tarea/fuente; la base asíncrona actual podría satisfacer un alcance revisado. | Son explícitos en A0: NEEDS_DIRECTOR_APPROVAL para excluir/sustituir. No se declara innecesaria toda actualización ni toda regla. | A0 OE2/OE4 y resultados; E4 difiere sustancialmente. | Alto/indeterminado. |
+| “Industrial”, alta disponibilidad, soberanía absoluta y costo cero | No tienen respaldo operativo/presupuestal suficiente; reemplazar por evidencia acotada. | NEEDS_DIRECTOR_APPROVAL si cambia resultado exigible; verificación posterior de referencias. | A0 §§3/12/tabla 4; E3/E6 no acreditan esos absolutos. | Alto/indeterminado. |
+| Reducción de carga o mejora de adopción como efecto garantizado | Falta línea base y diseño de efecto; no se infiere de SUS. | NEEDS_DIRECTOR_APPROVAL para acotar pregunta/OG/resultados. Si se mantiene, diseñar medición viable. | A0 pp. 5/7/20; sin evidencia institucional de efecto. | Alto/indeterminado. |
+| Datos personales reales/cupos en vivo | A0 menciona usos personales pero también perfiles sintéticos; falta delimitar el compromiso. | Aclarar INT-06 con NEEDS_DIRECTOR_APPROVAL cuando se reduzca una expectativa explícita; permisos CCD separados. | C2 sin fuentes/acceso; E9 sesión ficticia. | Alto/indeterminado. |
+| Inscribir, pagar, corregir expedientes o emitir dictámenes vinculantes | No necesarios para el canal informativo; no son una obligación explícita que deba inventarse. | CONSISTENT con A0 §10.5. Cualquier ampliación exige alcance/autorización nuevos. | C1/C2 los mantienen como fronteras no habilitadas. | Alto/indeterminado si se propusieran. |
 
-No se añaden tecnologías. Esta propuesta no autoriza implementación, acceso a
-fuentes ni reapertura de M9/tuning; prepara una decisión de alcance. Cualquier
-trabajo posterior debe traducir la decisión aprobada a tareas explícitas.
+No se agregan tecnologías ni se autoriza implementar Astra 5, cambiar SQL,
+integrar fuentes reales o ejecutar evaluación/tuning. La propuesta prepara decisiones.
 
 ## 19. Orden recomendado de actualización académica
 
-Secuencia futura propuesta; esta auditoría no ejecuta las reescrituras:
+Secuencia futura, sin ejecutar aquí la reescritura:
 
-1. **Confirmar alcance.** Cotejar el original, resolver P0 y registrar qué cambios
-   fueron aceptados, por quién y con qué evidencia. Precisar corpus, entorno y
-   tiempo restante antes de comprometer implementación.
-2. **Cerrar problema.** Separar observaciones, hipótesis y brechas sin evidencia;
-   incorporar solo respaldo verificable y delimitar población/tareas.
-3. **Pregunta.** Formular una pregunta investigable coherente con la brecha y el
-   alcance, sin imponer tecnologías cuya necesidad no esté justificada.
-4. **Objetivo general.** Alinear contribución, artefacto y validación; distinguir
-   construcción del sistema y efectos que necesitarían medición adicional.
-5. **OE.** Resolver OE1–OE6 individualmente, preservando trazabilidad del original
-   al cambio aprobado, entregable, criterio y evidencia prevista.
-6. **Metodología.** Describir ciclos reales, instrumentos y evaluación futura;
-   reconocer el prototipado anterior al levantamiento institucional.
-7. **Arquitectura.** Documentar runtime actual, adaptaciones autorizadas y trabajo
-   futuro; mantener N8N fuera del camino síncrono y distinguir contrato de ejecutable.
-8. **Resultados.** Expresar resultados esperados medibles y límites; separar
-   evidencia ya obtenida, evaluación pendiente e impacto no demostrado.
-9. **Cronograma.** Planificar con capacidad y fechas confirmadas, dependencias
-   externas, validación y documentación; no comprimir pendientes por omisión.
-10. **Referencias.** Consolidar citas y anexos verificables, versión del original,
-    procedencia de fuentes y evidencias de decisiones. La captura de referencias
-    acompaña todos los pasos anteriores; aquí se cierra su consistencia editorial.
+1. **Confirmar alcance y formalización.** Resolver P0 usando A0 ya cotejado;
+   registrar decisión, justificación, responsable confirmado y evidencia.
+2. **Cerrar problema.** Respaldar diagnóstico/árbol, población y brecha; separar
+   afirmaciones institucionales de hipótesis y de soluciones preseleccionadas.
+3. **Pregunta.** Alinear resultado investigable y mecanismos justificados.
+4. **Objetivo general.** Precisar artefacto, dominio y beneficios evaluables.
+5. **OE.** Conservar traza de cada enunciado A0 a la modificación aprobada,
+   entregable, criterio y evidencia; no omitir OE2/OE3/OE4/OE6.
+6. **Metodología.** Describir cronología real, DSR/Scrum efectivamente usados,
+   instrumentos, muestras, ética y protocolos; no inventar prácticas pasadas.
+7. **Arquitectura.** Resolver tres/cuatro capas y rutas divergentes; distinguir
+   runtime, arquitectura aprobada futura y pendientes, manteniendo contratos
+   congelados hasta una tarea técnica autorizada.
+8. **Resultados.** Operacionalizar metas, denominadores y límites; separar targets
+   propios, referencias externas y resultados realmente obtenidos.
+9. **Cronograma.** Corregir coherencia entre fases, tabla e hitos con plazo/capacidad
+   confirmados; incluir fuentes, permisos, benchmark y usuarios.
+10. **Referencias.** Verificar REF-01–13 y cerrar trazabilidad bibliográfica/editorial.
+    La recopilación de evidencias acompaña los pasos previos; no se pospone la
+    validación de una premisa crítica hasta el final.
 
-Después debe comprobarse la coherencia de la cadena problema → pregunta →
-objetivos → actividades → entregables → validación → resultados → cronograma.
-Si una decisión cambia un eslabón, se revisan sus dependencias, sin presumir que
-una corrección de redacción resuelve un cambio sustancial de alcance.
+Después comprobar problema → pregunta → objetivos → actividades → entregables →
+validación → resultados → cronograma. La existencia de esta matriz no equivale
+a que esa cadena haya sido aprobada o completada.
 
 ## 20. CHECKPOINT BANUCHAT ACADÉMICO
 
 ### Decisiones confirmadas
 
-Confirmadas **dentro del alcance técnico/documental vigente**, no como aprobación
-académica: nombre BanuChat; corpus funcional sintético; runtime REST/router/fast
-paths/RAG directo; N8N para ingesta manual local; distinción entre arquitectura
-actual y Agent/MCP objetivo. Se conservan dataset v1, SQL y contratos congelados.
-Se mantienen las pausas documentadas de M9 y tuning. A4 produce únicamente esta
-matriz; no modifica objetivos, anteproyecto ni implementación. No hay constancia
-aportada de aprobación académica de los cambios candidatos.
+Confirmado documentalmente: A0 completo leído y cotejado, pregunta/OG/OE transcritos,
+corpus, arquitectura, metodología, métricas y cronograma identificados por páginas.
+Corregida la dependencia histórica de H1 y retirada la limitación de falta de texto.
+
+Confirmado técnicamente en el alcance vigente: BanuChat, corpus funcional sintético,
+REST/router/fast paths/RAG directo, N8N manual asíncrono, MCP/Agent pendientes y
+Compose parcial local. Se preservan contratos/dataset congelados y pausas de E8.
+**No se acredita aprobación académica de los cambios candidatos.**
 
 ### Decisiones provisionales
 
-MVP acotado de consulta, evaluación reproducible y validación de uso según
-protocolo aceptado; reutilización de arquitectura actual; posible reformulación
-de OE2/OE3/OE4/OE6. Corpus admisible y entorno final permanecen abiertos. Las
-clasificaciones y costos son juicios de auditoría, sujetos al cotejo del original
-y a decisiones académicas e institucionales pertinentes.
+MVP revisado de consulta y evaluación acotadas, sujeto a resolver corpus,
+objetivos, automatismo, usuarios, entorno y beneficios. Las exclusiones de
+obligaciones de A0 requieren NEEDS_DIRECTOR_APPROVAL. Costos relativos y
+juicios de viabilidad son SOURCE_D, no presupuestos ni plazos comprometidos.
 
 ### Elementos descartados candidatos
 
-Scraping/RPA y Google Sheets como medios impuestos; BPM institucional amplio;
-transacciones y datos personales reales; promesas de nivel industrial, alta
-disponibilidad, exactitud garantizada o impacto asegurado. On-Premise y Agent/MCP
-son candidatos a diferimiento o reformulación, no eliminaciones confirmadas.
-Ningún OE fue borrado y ningún candidato altera por sí solo el compromiso vigente.
+RPA/scraping y Sheets obligatorios, BPM conversacional, garantías industriales/
+absolutas e impacto asegurado: posibles sustituciones con aprobación e impacto
+registrado. Agent/MCP, push y On-Premise son candidatos a diferimiento formal,
+no elementos ya eliminados. Transacciones vinculantes permanecen fuera de la
+propuesta informativa, coherentemente con §10.5 de A0. Ningún OE fue borrado.
 
 ### Preguntas pendientes
 
-Prioridad DIR-01–DIR-08: versión y estado del anteproyecto, procedimiento de
-actualización, corpus aceptable, exigibilidad de OE2/OE3/OE4 y Agent/MCP,
-On-Premise, validación con usuarios, tiempo disponible y alcance de los resultados.
-DIR-09–DIR-13 concretan evaluación, tareas, metodología y presentación posterior.
-Fuentes autoritativas, acceso y validación CCD siguen pendientes; el contexto
-público reportado no resuelve esas dependencias.
+P0 revisadas: DIR-01–08 y DIR-14. Ya no se pregunta cuál es el texto literal ni
+si A0 menciona MCP, RPA o On-Premise; se pregunta qué cambios pueden aprobarse y
+con qué entregables. Sigue pendiente el estado formal de aprobación, la
+disponibilidad de fuentes/infraestructura/usuarios y el tiempo restante.
 
 ### Secciones afectadas
 
-Nombre/portada y referencias internas; problema y justificación; pregunta;
-objetivo general y OE; corpus; metodología; arquitectura; evaluación; resultados;
-cronograma; referencias y anexos. La matriz A4-01–A4-24 identifica los impactos.
-No se ha reescrito ninguna de esas secciones en el anteproyecto.
+Toda la cadena académica: nombre/título, problema/árbol, justificación, pregunta,
+OG/OE, corpus, arquitectura, metodología/ética, resultados/metas, cronograma,
+tecnologías y referencias. A4-01–32 conserva trazabilidad; no se cambian esas
+secciones en el PDF ni en otros documentos del repositorio.
 
 ### Implicaciones sobre objetivos
 
-OE2/OE3/OE4/OE6 concentran el mayor riesgo por medios no implementados,
-dependencias externas y diferencia entre promesa y evidencia. OE1 necesita
-resolver corpus y evaluación; OE5 necesita validación de uso. Implementación
-parcial no acredita cumplimiento. Todo cambio sustancial debe quedar aprobado y
-trazado por objetivo, con entregable y criterio de verificación.
+Mayor brecha: OE2 por captura automática real; OE3 por agente/MCP expresos;
+OE4 por papel conversacional/BPM/Sheets; OE6 por entorno universitario y evaluación
+integral. OE1 mantiene brecha de corpus/validación y OE5 de push/UX/cobertura.
+Perfiles sintéticos y guías sin vectorizar son continuidades comprobadas de A0,
+no divergencias que deban atribuirse al repositorio.
 
 ### Implicaciones sobre arquitectura
 
-La base actual puede sostener el núcleo propuesto si se acepta su alcance.
-Agent/ReAct y MCP siguen como objetivo pendiente, sin integración acreditada;
-su incorporación o diferimiento exige resolver la necesidad académica y técnica.
-Fuentes reales, datos personales y despliegue institucional introducirían
-dependencias aún no confirmadas. Esta auditoría no crea componentes ni cambia
-contratos para anticiparlas.
+Resolver INT-01–07 y distinguir las vistas históricas de la base actual. El
+fallback directo puede reutilizarse bajo alcance revisado, pero no cumple por
+sí solo OE3. N8N asíncrono no equivale al papel histórico OE4. El PDF no obliga
+a dos servidores PostgreSQL ni a Flutter ni a proveedor LLM externo.
+No se rediseña o implementa ninguna de esas decisiones aquí.
 
 ### Implicaciones sobre cronograma
 
-Las 16 semanas son un horizonte reportado, no una estimación del tiempo restante.
-La viabilidad requiere decidir alcance, corpus, usuarios y entorno antes de
-planificar. Acumular integración institucional, agentes, RPA/BPM, operación y
-evaluación completa supone un riesgo alto según las dependencias observadas.
-El plan posterior debe reservar trabajo para validación y documentación y prever
-el retorno al director si una condición institucional necesaria no se resuelve.
+Dieciséis semanas corresponden al plan histórico 2026-2, no al tiempo restante.
+INT-08/09, tareas sin fila propia y dependencias externas deben resolverse antes
+de replanificar. No sumar integración real, agentes, automatización, push,
+infraestructura y evaluación como si sus recursos estuvieran garantizados.
+La documentación final y la validación requieren esfuerzo explícito y evidencia,
+no se consideran terminadas por haber construido este inventario.
