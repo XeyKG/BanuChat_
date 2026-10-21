@@ -1,5 +1,11 @@
 # Base de datos de BanuChat
 
+BCH-03 incremento 1 prepara un entorno CCD independiente en
+`infra/docker-compose.ccd.yml`. No se ejecutó ni se aplicó SQL. La migración inicial
+se conserva intacta; el delta mínimo para habilitar un manifiesto CCD real y sus
+dependencias en los servicios están en [desarrollo CCD](ccd-local-development.md).
+El resto de este README describe la persistencia sintética existente.
+
 Estado: migración inicial ejecutada en PostgreSQL local desechable; suite de integración
 A–K disponible en [tests](tests/README.md). No implica validación de aplicaciones ni de roles runtime.
 Destino: base vacía PostgreSQL 16 + extensión pgvector en el esquema public.

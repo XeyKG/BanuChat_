@@ -13,15 +13,20 @@ el estado técnico actual.
 
 ## Restricciones de datos
 
-Todo el corpus funcional del MVP es **100% sintético** y versionado en:
+El corpus de demostración histórico es **100% sintético**, congelado en
+`/data/synthetic`. BCH-03 autoriza además un corpus CCD seleccionado para desarrollo
+local, separado en `data/ccd`, según ADR 0006.
 
-`/data/synthetic`
-
-No usar, buscar, copiar ni incorporar datos reales de personas, UNAB o CCD.
+La carpeta externa `CCD_DOCUMENTACION` es fuente exclusivamente de lectura. Solo
+incorporar derivados depurados del subconjunto autorizado; no originales internos
+íntegros, expedientes ni datos personales reales. El contenido CCD local no público
+debe quedar excluido de Git por defecto. La validación del equipo no es aval CCD.
 
 No hacer scraping ni consumir sitios/APIs reales de UNAB o CCD.
 
-`/data/synthetic` es la fuente de verdad. PostgreSQL contiene su representación procesada.
+`/data/synthetic` sigue siendo la fuente de verdad de la demo. El corpus CCD conserva
+su propio manifiesto, procedencia y límites; nunca usar la demo como fallback
+institucional silencioso. PostgreSQL CCD deberá estar aislado de la demo.
 
 No modificar el dataset v1 congelado salvo autorización explícita.
 
@@ -83,6 +88,8 @@ No leer todos estos documentos por defecto.
 
 SQL, dataset v1, REST y contrato MCP se consideran congelados salvo autorización
 explícita de la tarea.
+En BCH-03 incremento 1 se autorizan contrato CCD, preparación en memoria y diseño
+del delta de persistencia; no se ejecuta carga PostgreSQL ni se modifica REST/MCP.
 
 ## Reglas de implementación
 

@@ -2,6 +2,14 @@
 
 ## Alcance vigente
 
+Actualización BCH-03 incremento 1 (2026-10-21): ADR 0006 permite preparar M01/M12
+con información CCD seleccionada para pruebas locales. `backend/rag/src/ccd`
+implementa validación de contrato/procedencia y derivados en memoria; el contenido
+local de `data/ccd` queda fuera de Git. Aún no hay carga ni consultas CCD acreditadas.
+La persistencia CCD será aislada. El alcance sintético descrito a continuación
+corresponde al runtime de demostración conservado, no a una prohibición de la nueva
+preparación autorizada. Véase [ADR 0006](adr/0006-corpus-ccd-seleccionado-local.md).
+
 BanuChat es un proyecto académico cuyo MVP está en implementación incremental. Todo
 dato funcional (documentos, cursos, calendarios, convocatorias y perfiles) es
 sintético y tiene
@@ -12,7 +20,8 @@ Este documento aplica las decisiones de `AGENTS.md` y del
 [ADR 0001](adr/0001-alcance-sintetico-y-despliegue-local.md).
 El anteproyecto es una referencia histórica: su despliegue en servidores UNAB,
 scraping del CCD e integraciones institucionales fueron descartados.
-No se accederá a datos, APIs, páginas ni infraestructura real de UNAB/CCD.
+Para la demo no se accede a datos, APIs, páginas ni infraestructura UNAB/CCD.
+La excepción CCD usa únicamente archivos externos seleccionados, sin scraping ni APIs.
 
 ## Componentes y responsabilidades
 

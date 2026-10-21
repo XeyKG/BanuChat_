@@ -7,6 +7,8 @@ export { verifySourceCheckout } from './source/git-source-verifier.js';
 export type { SourceCheckoutOptions } from './source/git-source-verifier.js';
 export { validateSyntheticContent } from './preflight/content.js';
 export { SYNTHETIC_V1_PROFILE } from './preflight/profile.js';
+export { prepareCcdCorpus, ccdSnapshotFiles } from './ccd/prepare.js';
+export type { CcdCorpus, CcdUnit, CcdSource, CcdReference, PreparedCcdCorpus } from './ccd/prepare.js';
 export { decodeUtf8, parseStrictJson } from './preflight/json.js';
 export { resolveJsonPointer } from './preflight/pointer.js';
 export { validateCivilDate, parseTimestamp, validateInterval } from './preflight/dates.js';

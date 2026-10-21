@@ -1,0 +1,7 @@
+# Cualquier contenido institucional nuevo queda ignorado por defecto.
+*
+!.gitignore
+!README.md
+!schemas/
+schemas/*
+!schemas/corpus.schema.json

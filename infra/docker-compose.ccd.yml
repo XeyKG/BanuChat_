@@ -1,0 +1,15 @@
+# Entorno exclusivo BCH-03. No montar volúmenes de la demo ni aplicar SQL al arrancar.
+name: banuchat-ccd-dev
+services:
+  postgres-ccd:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: banuchat_ccd_dev
+      POSTGRES_USER: ${CCD_POSTGRES_USER:?Define CCD_POSTGRES_USER en .env.ccd local}
+      POSTGRES_PASSWORD: ${CCD_POSTGRES_PASSWORD:?Define CCD_POSTGRES_PASSWORD en .env.ccd local}
+    ports:
+      - "127.0.0.1:${CCD_POSTGRES_PORT:-55433}:5432"
+    volumes:
+      - ccd_pgvector_data:/var/lib/postgresql/data
+volumes:
+  ccd_pgvector_data:

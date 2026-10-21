@@ -13,7 +13,8 @@
     "test": "node --import tsx --test test/*.test.ts",
     "test:db": "node --import tsx --test test/db/*.test.ts",
     "test:e2e:ingestion": "node --import tsx --test test/e2e/*.test.ts",
-    "validate:dataset": "tsx src/cli.ts"
+    "validate:dataset": "tsx src/cli.ts",
+    "prepare:ccd": "tsx src/ccd/cli.ts"
   },
   "dependencies": {
     "ajv": "^8.17.1",

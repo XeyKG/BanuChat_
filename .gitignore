@@ -5,6 +5,7 @@
 **/.env
 **/.env.*
 !**/.env.example
+!infra/.env.ccd.example
 secrets/
 .secrets/
 *.secret
@@ -64,3 +65,11 @@ Thumbs.db
 Desktop.ini
 
 # data/synthetic y workflows JSON se versionan.
+
+# BCH-03: todo contenido CCD local es privado por defecto; solo contrato y guías.
+/data/ccd/*
+!/data/ccd/.gitignore
+!/data/ccd/README.md
+!/data/ccd/schemas/
+/data/ccd/schemas/*
+!/data/ccd/schemas/corpus.schema.json

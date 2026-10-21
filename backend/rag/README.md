@@ -1,5 +1,14 @@
 # RAG e ingesta — estado implementado
 
+BCH-03 incremento 1 añade una frontera CCD independiente: `src/ccd/prepare.ts`
+valida M01/M12, verifica originales externos con `SafeReader`/SHA-256 y prepara
+dos documentos y dos chunks con alcance y procedencia. No usa la receta sintética
+ni escribe en PostgreSQL/Ollama. `npm run prepare:ccd` permite validar en memoria
+y escribir opcionalmente un snapshot local sin sobrescrituras. Véanse
+[contrato y comandos CCD](../../data/ccd/README.md) y
+[delta de persistencia pendiente](../../infra/db/ccd-local-development.md).
+El core de ingesta descrito debajo sigue siendo el de v1; aún no admite CCD.
+
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
 SHA-256 físico, identidades/relaciones, verificador Git local separado y extracción/

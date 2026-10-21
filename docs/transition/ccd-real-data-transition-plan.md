@@ -1,5 +1,12 @@
 # Plan de transición de BanuChat hacia fuentes reales del CCD
 
+Actualización de estado BCH-03 incremento 1 (2026-10-21): Sala de Control autorizó
+la preparación técnica local de M01/M12 según [ADR 0006](../adr/0006-corpus-ccd-seleccionado-local.md).
+Esta excepción levanta el bloqueo técnico de preparación para ese subconjunto;
+no acredita aval institucional, puertas académicas, carga PostgreSQL ni consultas.
+El cuerpo T5 siguiente se conserva como antecedente. El estado ejecutado está en
+[el checkpoint del incremento](bch03-increment-1-checkpoint.md).
+
 Documento T5 de planificación · 2026-10-16 · Estado: propuesta condicionada, sin autorización de implementación.
 
 Baseline inspeccionado: `7eaaa463084745e8b1639b8d304c61456ab5ad93`. El HEAD coincide con el solicitado y el árbol de trabajo estaba limpio. Este documento no acredita ejecución institucional ni modifica los compromisos académicos.
