@@ -1,5 +1,20 @@
 # Persistencia local CCD — delta del incremento 1
 
+## Chat HTTP local del incremento 3
+
+`003_ccd_chat_demo.sql` se aplica exclusivamente en CCD publicado y sin chats
+previos: `npm run ccd:local -- chat-migrate` desde `backend/rag`. No repetir sobre
+la instalación ya migrada. Añade una tabla de contexto técnico fuera del corpus,
+con clave y alias fijos, release FK e inmutabilidad; la FK de conversaciones CCD
+ahora apunta a ese contexto. No añade registros a `synthetic_profiles`, no modifica
+el corpus ni las guardas de mensajes/citas y no cambia la FK de la base sintética.
+
+El caso HTTP se inicia desde `backend/api` con `npm run test:ccd:http`. Usa la API
+real compilada y verifica historial/citas; escribe solo historial CCD. La demo
+sintética se comprueba solo con GET. El runner cierra exclusivamente sus listeners;
+PostgreSQL y volúmenes quedan activos. Los detalles están en
+[checkpoint 3](../../docs/transition/bch03-increment-3-checkpoint.md).
+
 ## Estado ejecutado en BCH-03 incremento 2
 
 Primera ingesta realizada en `banuchat_ccd_dev`, proyecto `banuchat-ccd-dev`, servicio

@@ -93,6 +93,9 @@ del delta de persistencia; no se ejecuta carga PostgreSQL ni se modifica REST/MC
 Ese límite corresponde al incremento 1. BCH-03 incremento 2 autoriza la migración
 CCD adicional, carga M01/M12 y validación directa de Document RAG exclusivamente
 en `banuchat_ccd_dev`; se mantiene aislada la demo y no se cambia REST/MCP.
+Incremento 3 autoriza chat HTTP CCD local, contexto técnico de demostración separado
+del corpus y migración 003 exclusiva CCD. Mantener los schemas REST; la adaptación
+semántica de `profile_key` está documentada en `backend/api/api-contract.md`.
 
 ## Reglas de implementación
 

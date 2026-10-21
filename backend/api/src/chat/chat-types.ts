@@ -1,5 +1,6 @@
 import type { SqlQueryClient } from "../data/sql-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
+import type { DemoMode } from "../application/demo-mode.js";
 
 export interface ChatDispatchInput {
   content: string;
@@ -9,6 +10,7 @@ export interface ChatDispatchInput {
 }
 
 export interface ChatDispatchDependencies {
+  demo_mode?: DemoMode;
   sql: SqlQueryClient;
   router: IntentRouter;
 }

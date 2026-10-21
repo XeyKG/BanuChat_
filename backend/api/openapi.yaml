@@ -4,7 +4,7 @@
   "info": {
     "title": "BanuChat REST API",
     "version": "1.0.0-draft",
-    "description": "Contrato REST v1 para demostración sintética local, con implementación disponible en el backend local. Mobile consume solo REST; MCP es una frontera interna distinta. Objetos JSON snake_case cerrados. No hay autenticación real. Consultar api-contract.md para concurrencia, reintentos, pertenencia de release y resolución de artefactos. Se rechazan query parameters desconocidos y cuerpos en GET/DELETE. No se implementa catálogo de cursos."
+    "description": "Contrato REST v1 para demostración local. Por defecto usa corpus y perfiles sintéticos; BCH-03/3 añade el modo CCD aislado con un contexto técnico sin identidad institucional, conservando campos y schemas. Mobile consume solo REST; MCP es una frontera interna distinta. Objetos JSON snake_case cerrados. No hay autenticación real. Consultar api-contract.md para la extensión semántica CCD, concurrencia, reintentos, pertenencia de release y artefactos. Se rechazan query parameters desconocidos y cuerpos en GET/DELETE. No existe endpoint de catálogo de cursos."
   },
   "servers": [
     {
@@ -17,8 +17,8 @@
     "/profiles": {
       "get": {
         "operationId": "list_profiles",
-        "summary": "Listar perfiles sintéticos de demostración",
-        "description": "Solo perfiles de la release vigente ready, orden profile_key ascendente. 200 con lista vacía si no hay perfiles; 404 si no hay release vigente. No consulta al agente.",
+        "summary": "Listar perfiles de demostración o el contexto técnico local CCD",
+        "description": "Solo perfiles de la release vigente ready, orden profile_key ascendente. En modo CCD devuelve el contexto ccd-local-demo, sin identidad institucional; ver api-contract.md. 200 con lista vacía si no hay perfiles; 404 si no hay release vigente. No consulta al agente.",
         "responses": {
           "200": {
             "description": "Perfiles disponibles; no son cuentas autenticadas.",
@@ -53,8 +53,8 @@
     "/conversations": {
       "post": {
         "operationId": "create_conversation",
-        "summary": "Crear conversación para un perfil sintético",
-        "description": "Valida el perfil en la release vigente y guarda la relación exacta release/perfil. created_at es la proyección de conversations.started_at, sin columna adicional. No idempotente.",
+        "summary": "Crear conversación para un perfil demo o contexto técnico CCD",
+        "description": "Valida perfil o contexto técnico CCD en la release vigente y guarda la relación exacta release/clave. El contexto CCD no identifica a un estudiante. created_at es la proyección de conversations.started_at, sin columna adicional. No idempotente.",
         "requestBody": {
           "required": true,
           "content": {
@@ -163,7 +163,7 @@
         "description": "Perfil/alias de la release de apertura, no de la vigente. Mensajes ordenados por ordinal interno ascendente; citas ordenadas por index. Historial completo del prototipo, sin truncamiento silencioso ni paginación.",
         "responses": {
           "200": {
-            "description": "Historial visible y perfil sintético de apertura.",
+            "description": "Historial visible y perfil demo o contexto técnico CCD de apertura, según el modo local.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/no_store"
@@ -511,7 +511,7 @@
       ],
       "get": {
         "operationId": "get_document_artifact",
-        "summary": "Descargar un documento sintético por versión",
+        "summary": "Descargar un artefacto documental verificado del corpus del modo local",
         "description": "Solo UUID; no acepta rutas ni selectores de release. Resuelve versión ready de una release publicada ready, vigente o histórica, y bytes exactos de su revisión. Verifica contención real dentro de /data/synthetic, incluidos symlinks/junctions, y checksum interno antes de servir. Si no se conservan los bytes históricos exactos: 404, nunca sustituir por el archivo actual. No invoca al agente.",
         "responses": {
           "200": {

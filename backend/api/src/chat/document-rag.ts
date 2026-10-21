@@ -134,7 +134,7 @@ export async function generateDocumentRagAnswer(
         ? DOCUMENT_RAG_SYSTEM_PROMPT.replace(
           'un asistente de demostración que responde únicamente con la evidencia sintética proporcionada',
           'un asistente de pruebas locales que responde únicamente con la evidencia CCD seleccionada proporcionada, validada por el equipo y sin aval institucional formal',
-        )
+        ) + '\n\nSitúa las respuestas institucionales en el periodo documentado 202660. En respuestas de contacto indica ese periodo y que la vigencia actual no está ratificada; no presentes el correo como directorio vigente confirmado.'
         : DOCUMENT_RAG_SYSTEM_PROMPT,
       user_prompt: buildUserPrompt(chunks, retrievalInput.query),
     },

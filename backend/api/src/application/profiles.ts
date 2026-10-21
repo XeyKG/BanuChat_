@@ -1,14 +1,15 @@
 import type { SqlQueryClient } from "../data/sql-client.js";
 import { resolveCurrentRelease } from "./current-release.js";
 import { ProfilesError } from "./profiles-errors.js";
+import { profileRelation, type DemoMode } from "./demo-mode.js";
 
 const STABLE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 
-const LIST_PROFILES_QUERY = `
+const LIST_PROFILES_QUERY = (mode: DemoMode) => `
 SELECT
   profile_key,
   alias
-FROM banuchat.synthetic_profiles
+FROM ${profileRelation(mode)}
 WHERE dataset_release_id = $1
 ORDER BY profile_key ASC
 `;
@@ -38,9 +39,10 @@ function isNonblankString(value: unknown): value is string {
 
 export async function listProfiles(
   client: SqlQueryClient,
+  mode: DemoMode = "synthetic",
 ): Promise<ProfilesResult> {
   const release = await resolveCurrentRelease(client);
-  const result = await client.query<ProfileRow>(LIST_PROFILES_QUERY, [
+  const result = await client.query<ProfileRow>(LIST_PROFILES_QUERY(mode), [
     release.release_id,
   ]);
 

@@ -74,6 +74,17 @@ documentales y la decisión de validación del equipo para auditar la respuesta.
 
 ## Estado
 
+BCH-03 incremento 3 verificó el chat completo por HTTP local: creación con el
+contexto técnico `ccd-local-demo`, mensajes, citas en PostgreSQL, descarga de
+artefactos e historial. No son perfiles de estudiantes. No se modificaron corpus,
+release ni vectores. Mobile CCD y acceso LAN siguen pendientes. Véase
+[checkpoint 3](../../docs/transition/bch03-increment-3-checkpoint.md).
+Para repetir el flujo HTTP desde `backend/api`: `npm run test:ccd:http`; para usar
+el listener local manualmente: `npm run start:ccd` (antes `npm run build`).
+El verificador del incremento 2 se conserva como evidencia histórica y comprueba
+huellas del código de ingesta de aquella ejecución; no sustituye el verificador
+HTTP del incremento 3 ni autoriza cambiar la procedencia de la release existente.
+
 BCH-03 incremento 2 publicó dos documentos / dos chunks / dos embeddings en la
 base local aislada `banuchat_ccd_dev`. Se validaron dos consultas documentales y un
 caso negativo mediante Document RAG directo, con citas y artefactos verificados.

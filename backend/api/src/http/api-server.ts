@@ -17,6 +17,7 @@ import {
   type DocumentRagResponder,
 } from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
+import type { DemoMode } from "../application/demo-mode.js";
 import {
   getDocumentArtifact,
   type DocumentArtifactResult,
@@ -56,6 +57,7 @@ const PROFILE_PROGRESS_STATUSES = new Set<ProfileProgressStatus>(["enrolled", "i
 const ANNOUNCEMENT_STATUSES = new Set<AnnouncementTemporalStatus>(["active", "upcoming", "expired", "all"]);
 
 export interface ApiServerDependencies {
+  demo_mode?: DemoMode;
   sql: SqlQueryClient;
   router: IntentRouter;
   document_rag: DocumentRagResponder;
@@ -355,7 +357,7 @@ async function handleRequest(
 
   if (request.method === "GET" && isProfilesPath) {
     try {
-      const result = await listProfiles(dependencies.sql);
+      const result = await listProfiles(dependencies.sql, dependencies.demo_mode);
       sendJson(response, 200, result);
     } catch (error) {
       sendError(response, describeHttpError(error));
@@ -367,7 +369,7 @@ async function handleRequest(
     try {
       requireJsonContentType(request);
       const input = parseCreateConversationBody(await readRequestBody(request));
-      const result = await createConversation(dependencies.sql, input);
+      const result = await createConversation(dependencies.sql, input, dependencies.demo_mode);
       sendJson(response, 201, result, {
         Location: `/api/v1/conversations/${result.conversation_id}`,
       });
@@ -399,7 +401,7 @@ async function handleRequest(
       try {
         const result = await getConversationDetail(dependencies.sql, {
           conversation_id: conversationId,
-        });
+        }, dependencies.demo_mode);
         sendJson(response, 200, result);
       } catch (error) {
         sendError(response, describeHttpError(error));
@@ -453,6 +455,7 @@ async function handleRequest(
               sql: dependencies.sql,
               router: dependencies.router,
               document_rag: dependencies.document_rag,
+              demo_mode: dependencies.demo_mode ?? "synthetic",
             },
             {
               conversation_id: conversationId,

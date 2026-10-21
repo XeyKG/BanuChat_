@@ -8,6 +8,13 @@ publicó M01/M12 y comprobó Document RAG directamente en entorno local. Su evid
 y límites están en [el checkpoint](../transition/bch03-increment-2-checkpoint.md).
 El texto de decisión del incremento 1 siguiente se conserva como antecedente.
 
+Incremento 3 (base `c61f306`) autoriza el flujo conversacional HTTP CCD local.
+Se añade un contexto técnico fuera del corpus y una FK exclusiva CCD mediante
+migración 003, porque la FK original exigía un estudiante sintético inexistente.
+No se crean estudiantes, identidad ni autenticación ficticias. Se conservan los
+schemas REST y se documenta la semántica local de `profile_key` en el contrato.
+La demo sintética y los documentos/vectores publicados permanecen intactos.
+
 ## Contexto
 
 ADR 0001 estableció el alcance exclusivamente sintético. BCH-01 produjo un

@@ -19,6 +19,7 @@ import { CourseCatalogError } from "./course-catalog-errors.js";
 import { SendMessageError } from "./messages-errors.js";
 import { ProfileProgressError } from "./profile-progress-errors.js";
 import { DocumentLookupError } from "./document-lookup-errors.js";
+import type { DemoMode } from "./demo-mode.js";
 
 const DATASET_ID = 1;
 const UUID_PATTERN =
@@ -185,6 +186,7 @@ SELECT
 `;
 
 export interface SendMessageDependencies {
+  demo_mode?: DemoMode;
   sql: SqlQueryClient;
   router: IntentRouter;
   document_rag: DocumentRagResponder;
@@ -457,10 +459,10 @@ export async function sendMessage(
   let dispatched;
   try {
     dispatched = await dispatchChatQuery(
-      { sql: dependencies.sql, router: dependencies.router },
+      { sql: dependencies.sql, router: dependencies.router, demo_mode: dependencies.demo_mode ?? "synthetic" },
       {
         content: input.content,
-        profile_key: context.profile_key,
+        profile_key: dependencies.demo_mode === "ccd_local" ? null : context.profile_key,
         release_id: context.dataset_release_id,
         now: input.now,
       },

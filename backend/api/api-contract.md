@@ -6,6 +6,37 @@ JSON Schema 2020-12. Está serializada en JSON, subconjunto válido de YAML 1.2,
 para permitir validación sintáctica con las herramientas locales sin dependencias.
 MCP 2.0 permanece congelado e independiente de este contrato REST.
 
+## Extensión semántica local BCH-03 incremento 3
+
+Autorizada por Sala de Control para conectar M01/M12 al chat. No se modifican
+rutas, métodos, campos, schemas, obligatoriedad, códigos ni formatos de citas.
+El resto de este contrato conserva la semántica de la demo sintética por defecto.
+
+En `BANUCHAT_DEMO_MODE=ccd_local`, exclusivamente sobre `banuchat_ccd_dev`,
+`GET /profiles` devuelve un único contexto técnico `ccd-local-demo`, alias
+«Demostración CCD local — sin identidad institucional». `profile_key` sirve en
+este modo para agrupar historial local compartido, no identifica un estudiante.
+No hay autenticación ni aislamiento entre personas que conozcan ese contexto/UUID.
+`POST /conversations` valida esa clave contra `ccd_demo_contexts`, no contra el
+corpus de perfiles sintéticos; la FK CCD exige la misma pareja release/contexto.
+El alias histórico se conserva al releer el detalle. No se crean perfiles sintéticos
+ni se añade una unidad al manifiesto CCD. Es una adaptación semántica de modo demo,
+necesaria porque la FK sintética impedía abrir conversaciones con un corpus sin
+estudiantes. La migración 003 se aplica solo a CCD; la demo original conserva su FK.
+
+El contexto nunca se entrega al router como un perfil de estudiante seleccionado.
+Router y catálogo se reutilizan; en CCD el dispatcher deriva el antiguo
+`known_out_of_scope` sintético a Document RAG (M12 ahora admite contacto), delimita
+ayuda/saludo y limita las rutas estructuradas no incorporadas. Reglas sin respaldo
+deben abstenerse. Los artefactos documentales se resuelven exclusivamente desde el
+snapshot depurado CCD. El modo sintético conserva su comportamiento.
+
+No se agrega memoria: el historial se persiste/relee, pero no se envían mensajes
+anteriores al generador. No se implementan Agent/ReAct, MCP ni identidad institucional.
+Este modo escucha únicamente en loopback y puerto 3001 por defecto; Mobile físico
+no queda habilitado para acceder por LAN en este incremento. Véase
+[checkpoint BCH-03/3](../../docs/transition/bch03-increment-3-checkpoint.md).
+
 ## Frontera y alcance
 
 Mobile → REST Backend API → Intent Router para mensajes: fast path determinista

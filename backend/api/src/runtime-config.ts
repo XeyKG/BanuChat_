@@ -1,9 +1,11 @@
+import type { DemoMode } from "./application/demo-mode.js";
 const LOOPBACK_HOST = "127.0.0.1" as const;
 const LAN_BIND_HOST = "0.0.0.0" as const;
 
 type ApiHost = typeof LOOPBACK_HOST | typeof LAN_BIND_HOST;
 
 export interface RuntimeConfig {
+  demo_mode: DemoMode;
   postgres: {
     host: typeof LOOPBACK_HOST;
     port: number;
@@ -30,7 +32,7 @@ function readApiHost(environment: NodeJS.ProcessEnv): ApiHost {
 
 function requireValue(
   environment: NodeJS.ProcessEnv,
-  name: "POSTGRES_DB" | "POSTGRES_USER" | "POSTGRES_PASSWORD",
+  name: "POSTGRES_DB" | "POSTGRES_USER" | "POSTGRES_PASSWORD" | "CCD_POSTGRES_USER" | "CCD_POSTGRES_PASSWORD",
 ): string {
   const value = environment[name];
   if (value === undefined || value.trim().length === 0) {
@@ -41,7 +43,7 @@ function requireValue(
 
 function readPort(
   environment: NodeJS.ProcessEnv,
-  name: "POSTGRES_PORT" | "BANUCHAT_API_PORT",
+  name: "POSTGRES_PORT" | "BANUCHAT_API_PORT" | "CCD_POSTGRES_PORT",
   defaultValue: number,
 ): number {
   const value = environment[name];
@@ -62,7 +64,19 @@ function readPort(
 export function loadRuntimeConfig(
   environment: NodeJS.ProcessEnv = process.env,
 ): RuntimeConfig {
+  const mode = environment.BANUCHAT_DEMO_MODE ?? "synthetic";
+  if (mode !== "synthetic" && mode !== "ccd_local") throw new Error("BANUCHAT_DEMO_MODE");
+  if (mode === "ccd_local") {
+    if (readApiHost(environment) !== LOOPBACK_HOST) throw new Error("CCD_LOOPBACK_REQUIRED");
+    const port = readPort(environment, "CCD_POSTGRES_PORT", 55433);
+    if (port === 5432) throw new Error("CCD_ISOLATED_PORT_REQUIRED");
+    return { demo_mode: mode, postgres: { host: LOOPBACK_HOST, port, database: "banuchat_ccd_dev",
+      user: requireValue(environment, "CCD_POSTGRES_USER"), password: requireValue(environment, "CCD_POSTGRES_PASSWORD") },
+      api: { host: LOOPBACK_HOST, port: readPort(environment, "BANUCHAT_API_PORT", 3001) } };
+  }
+  if (environment.POSTGRES_DB === "banuchat_ccd_dev") throw new Error("CCD_EXPLICIT_MODE_REQUIRED");
   return {
+    demo_mode: mode,
     postgres: {
       host: LOOPBACK_HOST,
       port: readPort(environment, "POSTGRES_PORT", 5432),

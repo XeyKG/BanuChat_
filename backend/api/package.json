@@ -9,7 +9,9 @@
     "build": "tsc -p tsconfig.build.json",
     "test": "node --import tsx --test test/*.test.ts",
     "start": "node dist/main.js",
-    "start:local": "node --env-file=../../.env dist/main.js"
+    "start:local": "node --env-file=../../.env dist/main.js",
+    "start:ccd": "node --env-file=../../infra/.env.ccd dist/main.js",
+    "test:ccd:http": "node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-chat-http.mts"
   },
   "dependencies": {
     "pg": "^8.16.0"

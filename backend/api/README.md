@@ -1,5 +1,34 @@
 # API REST — contrato y estado implementado
 
+BCH-03 incremento 3 incorpora un modo de chat CCD local sin cambiar schemas REST.
+Tras aplicar `003_ccd_chat_demo.sql` solo en CCD, `GET /profiles` expone el contexto
+`ccd-local-demo` claramente rotulado sin identidad institucional. No es un estudiante
+ni una autenticación. El chat usa el router existente, persistencia atómica y Document
+RAG con evidencia CCD; historial y artefactos conservan citas verificadas. La demo
+sintética permanece como modo por defecto. Véase la justificación en
+[el contrato](api-contract.md) y [checkpoint](../../docs/transition/bch03-increment-3-checkpoint.md).
+
+Desde este directorio, con `infra/.env.ccd` local (ignorado) configurado según el
+ejemplo, incluidos digest y versión efectivos del generador:
+
+```powershell
+npm run build
+npm run start:ccd
+# Verificación operacional explícita, con DB/Ollama reales y chats CCD nuevos:
+npm run test:ccd:http
+```
+
+El listener CCD queda en `127.0.0.1:3001`; valida la base fija `banuchat_ccd_dev`,
+credenciales `CCD_POSTGRES_*`, release CCD publicada y contexto de demo. Rechaza
+port PostgreSQL 5432 y bind LAN para este modo. No hay fallback a la demo sintética.
+La prueba inicia/detiene sus propios listeners, persiste solo historial CCD y hace
+GET de solo lectura contra la demo sintética. Guarda evidencia en `data/ccd/evidence`.
+No ejecutarla junto a un listener propio en 3001/3302. No hay retry de mensajes.
+
+Mobile sigue sin modificaciones: cuerpo REST compatible, pero requiere adecuar sus
+rótulos/perfil demo, capacidades disponibles y acceso de red antes de probar CCD en
+un dispositivo físico. No se acreditó una prueba móvil ni se abrió LAN en este cambio.
+
 Contrato REST v1 documentado para la app React Native, con base `/api/v1`.
 Este directorio implementa servidor y handlers REST; Agent/ReAct no está implementado.
 El fallback conversacional actual es Document RAG directo.

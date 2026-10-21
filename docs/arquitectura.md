@@ -8,8 +8,12 @@ implementa validación de contrato/procedencia y derivados en memoria; el conten
 local de `data/ccd` queda fuera de Git. Ese fue el alcance del incremento 1.
 Incremento 2 ya publicó M01/M12 en PostgreSQL CCD aislado y validó tres consultas
 por Document RAG directo con Ollama, incluyendo abstención por evidencia insuficiente.
-No acredita el chat completo, Mobile ni identidad institucional. Véase el
+Ese incremento no acreditaba el chat HTTP, Mobile ni identidad institucional. Véase el
 [checkpoint BCH-03/2](transition/bch03-increment-2-checkpoint.md).
+Incremento 3 conecta el chat REST existente a CCD con un contexto técnico local,
+router, citas persistidas y relectura de historial. Sigue sin memoria generativa,
+Mobile CCD ni autenticación institucional; el contexto no representa un estudiante.
+Véase [BCH-03/3](transition/bch03-increment-3-checkpoint.md).
 La persistencia CCD será aislada. El alcance sintético descrito a continuación
 corresponde al runtime de demostración conservado, no a una prohibición de la nueva
 preparación autorizada. Véase [ADR 0006](adr/0006-corpus-ccd-seleccionado-local.md).

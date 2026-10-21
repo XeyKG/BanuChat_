@@ -10,7 +10,7 @@ import { invariant } from '../db/errors.js';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 try {
   const operation = process.argv[2];
-  invariant(process.argv.length === 3 && (operation === 'migrate' || operation === 'ingest' || operation === 'inspect'));
+  invariant(process.argv.length === 3 && ['migrate', 'ingest', 'inspect', 'chat-migrate'].includes(operation ?? ''));
   const { pool, identity } = await connectCcdLocal();
   try {
     const reader = await SafeReader.create(root);
@@ -20,6 +20,9 @@ try {
       await pool.query((await reader.read('infra/db/001_initial_schema.sql')).toString('utf8'));
       await pool.query((await reader.read('infra/db/002_ccd_local_manifest.sql')).toString('utf8'));
       console.log(JSON.stringify({ identity, migrations_applied: ['001_initial_schema.sql', '002_ccd_local_manifest.sql'] }));
+    } else if (operation === 'chat-migrate') {
+      await pool.query((await reader.read('infra/db/003_ccd_chat_demo.sql')).toString('utf8'));
+      console.log(JSON.stringify({ identity, migrations_applied: ['003_ccd_chat_demo.sql'] }));
     } else if (operation === 'ingest') {
       invariant(process.env.CCD_INSTITUTIONAL_ROOT);
       const result = await ingestCcdCorpus(pool, new OllamaClient('http://127.0.0.1:11434'), {

@@ -1,5 +1,6 @@
 import type { SqlQueryClient } from "../data/sql-client.js";
 import { ConversationDetailError } from "./conversation-detail-errors.js";
+import { profileRelation, type DemoMode } from "./demo-mode.js";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -7,7 +8,7 @@ const STABLE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-const CONVERSATION_DETAIL_QUERY = `
+const CONVERSATION_DETAIL_QUERY = (mode: DemoMode) => `
 SELECT
   c.id AS conversation_id,
   c.dataset_release_id,
@@ -15,7 +16,7 @@ SELECT
   c.started_at,
   sp.alias AS profile_alias
 FROM banuchat.conversations c
-LEFT JOIN banuchat.synthetic_profiles sp
+LEFT JOIN ${profileRelation(mode)} sp
   ON sp.dataset_release_id = c.dataset_release_id
  AND sp.profile_key = c.profile_key
 WHERE c.id = $1
@@ -367,6 +368,7 @@ function attachCitations(
 export async function getConversationDetail(
   client: SqlQueryClient,
   input: GetConversationDetailInput,
+  mode: DemoMode = "synthetic",
 ): Promise<ConversationDetailResult> {
   if (
     input === null ||
@@ -377,7 +379,7 @@ export async function getConversationDetail(
   }
 
   const conversationResult = await client.query<ConversationRow>(
-    CONVERSATION_DETAIL_QUERY,
+    CONVERSATION_DETAIL_QUERY(mode),
     [input.conversation_id],
   );
   if (conversationResult.rows.length === 0) {

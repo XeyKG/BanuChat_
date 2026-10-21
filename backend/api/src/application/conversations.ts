@@ -1,6 +1,7 @@
 import type { SqlQueryClient } from "../data/sql-client.js";
 import { resolveCurrentRelease } from "./current-release.js";
 import { CreateConversationError } from "./conversations-errors.js";
+import { profileRelation, type DemoMode } from "./demo-mode.js";
 
 const DATASET_ID = 1;
 const STABLE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
@@ -9,13 +10,13 @@ const UUID_PATTERN =
 const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-const CREATE_CONVERSATION_QUERY = `
+const CREATE_CONVERSATION_QUERY = (mode: DemoMode) => `
 WITH selected_profile AS (
   SELECT
     sp.dataset_release_id,
     sp.profile_key,
     sp.alias
-  FROM banuchat.synthetic_profiles sp
+  FROM ${profileRelation(mode)} sp
   JOIN banuchat.datasets d
     ON d.id = 1
    AND d.current_release_id = sp.dataset_release_id
@@ -131,6 +132,7 @@ async function diagnoseMissingInsert(
 export async function createConversation(
   client: SqlQueryClient,
   input: CreateConversationInput,
+  mode: DemoMode = "synthetic",
 ): Promise<CreatedConversation> {
   if (
     input === null ||
@@ -142,7 +144,7 @@ export async function createConversation(
 
   const release = await resolveCurrentRelease(client);
   const result = await client.query<CreatedConversationRow>(
-    CREATE_CONVERSATION_QUERY,
+    CREATE_CONVERSATION_QUERY(mode),
     [release.release_id, input.profile_key],
   );
 

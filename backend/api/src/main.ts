@@ -1,4 +1,4 @@
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 
 import { Pool } from "pg";
 
@@ -8,7 +8,8 @@ import { PgSqlClient } from "./data/pg-client.js";
 import type { SqlQueryClient } from "./data/sql-client.js";
 import { loadGeneratorRuntimeConfig } from "./generation/generator-client.js";
 import { OllamaGeneratorClient } from "./generation/ollama-generator-client.js";
-import { createApiServer } from "./http/api-server.js";
+import { createApiServer, type ApiServerDependencies } from "./http/api-server.js";
+import { assertCcdChatDatabase } from "./ccd-runtime.js";
 import { OllamaQueryEmbeddingClient } from "./retrieval/ollama-query-embedding-client.js";
 import { loadDefaultIntentRouter } from "./routing/intent-router.js";
 import type { IntentRouter } from "./routing/intent-router-types.js";
@@ -18,12 +19,13 @@ export async function createRuntimeApiServer(
   sql: SqlQueryClient,
   documentRag: DocumentRagResponder,
   loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
+  options: Pick<ApiServerDependencies, "demo_mode" | "document_artifact"> = {},
 ): Promise<ReturnType<typeof createApiServer>> {
   const router = await loadRouter();
   if (router.catalog_valid !== true) {
     throw new Error("intent_router_catalog_invalid");
   }
-  return createApiServer({ sql, router, document_rag: documentRag });
+  return createApiServer({ sql, router, document_rag: documentRag, ...options });
 }
 
 async function closeHttpServer(
@@ -60,6 +62,7 @@ export async function startApi(): Promise<void> {
 
     const sql = new PgSqlClient(pool);
     await sql.query<{ ok: number }>("SELECT 1 AS ok");
+    if (config.demo_mode === "ccd_local") await assertCcdChatDatabase(sql);
 
     const queryEmbeddingClient = new OllamaQueryEmbeddingClient(
       generatorRuntime.base_url,
@@ -72,11 +75,17 @@ export async function startApi(): Promise<void> {
           query_embedding_client: queryEmbeddingClient,
           generator_client: generatorClient,
           generator_config: generatorRuntime.generator,
+          evidence_mode: config.demo_mode,
         },
         input,
       );
 
-    server = await createRuntimeApiServer(sql, documentRag);
+    server = await createRuntimeApiServer(sql, documentRag, loadDefaultIntentRouter, {
+      demo_mode: config.demo_mode,
+      ...(config.demo_mode === "ccd_local" ? { document_artifact: {
+        root: fileURLToPath(new URL("../../../data/ccd/local/m01-m12/", import.meta.url)),
+      } } : {}),
+    });
     await new Promise<void>((resolve, reject) => {
       const handleError = (error: Error): void => reject(error);
       server?.once("error", handleError);
@@ -107,7 +116,7 @@ export async function startApi(): Promise<void> {
     process.once("SIGINT", () => void shutdown());
     process.once("SIGTERM", () => void shutdown());
     console.log(
-      `BanuChat API listening on http://${config.api.host}:${config.api.port}`,
+      `BanuChat API (${config.demo_mode}) listening on http://${config.api.host}:${config.api.port}`,
     );
   } catch {
     if (server !== undefined) {
