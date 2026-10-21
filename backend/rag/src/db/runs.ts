@@ -1,14 +1,16 @@
 import type { ManifestItem } from '../types.js';
 import type { WriterLease } from './writer-lock.js';
 import { DatabaseError, invariant } from './errors.js';
+import { storageCounts, type StorageRecipe } from './recipe.js';
 
 export function provenance(item: Readonly<ManifestItem>): [string, string, string] {
   return [item.path, item.locator, item.sha256];
 }
 export async function openRun(lease: WriterLease, release: string, workflow: string,
-  items: readonly ManifestItem[], trigger: 'manual' | 'retry' = 'manual'): Promise<string> {
+  items: readonly ManifestItem[], trigger: 'manual' | 'retry' = 'manual',
+  recipe: StorageRecipe = 'synthetic_v1'): Promise<string> {
   invariant(trigger === 'manual' || trigger === 'retry');
-  invariant(items.length === 76);
+  invariant(items.length === storageCounts(recipe).items);
   invariant((await lease.query('SELECT id FROM banuchat.datasets WHERE id=1 FOR UPDATE')).rowCount === 1);
   const candidate = await lease.query<{ status: string }>(
     'SELECT status FROM banuchat.dataset_releases WHERE id=$1 AND dataset_id=1 FOR UPDATE', [release]);

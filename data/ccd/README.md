@@ -74,8 +74,25 @@ documentales y la decisión de validación del equipo para auditar la respuesta.
 
 ## Estado
 
-Dos documentos / dos chunks preparados; cero embeddings generados. Sin carga SQL,
-sin consultas reales acreditadas. El escritor sintético sigue rechazando este
-contrato por diseño; no falsear la marca sintética ni usar casts para saltar controles.
-El siguiente paso de ejecución está delimitado en
-[persistencia CCD](../../infra/db/ccd-local-development.md).
+BCH-03 incremento 2 publicó dos documentos / dos chunks / dos embeddings en la
+base local aislada `banuchat_ccd_dev`. Se validaron dos consultas documentales y un
+caso negativo mediante Document RAG directo, con citas y artefactos verificados.
+El chat completo y Mobile CCD no están acreditados. La actualidad institucional
+sigue sin ratificarse; la validación del equipo no se convirtió en aval CCD.
+
+Desde `backend/rag`, con `infra/.env.ccd` local configurado:
+
+```powershell
+npm run ccd:local -- inspect
+npm run ccd:verify -- validators
+npm run ccd:verify -- queries
+```
+
+La evidencia y respuestas están en `data/ccd/evidence/increment-2/`, ignoradas por
+Git. Las consultas no crean perfiles ni conversaciones. `ccd:local -- ingest`
+devuelve `already_current` si coinciden corpus, modelo y código; rechaza reemplazar
+una candidata anterior/diferente y no hace retry/recovery automático. El comando
+`migrate` exige destino vacío: no volver a ejecutarlo sobre la base ya migrada.
+El escritor sintético mantiene su contrato. Para operación y pruebas véanse
+[persistencia CCD](../../infra/db/ccd-local-development.md) y
+[checkpoint](../../docs/transition/bch03-increment-2-checkpoint.md).

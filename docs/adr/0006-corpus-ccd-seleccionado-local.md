@@ -3,6 +3,11 @@
 Fecha: 2026-10-21.
 Estado: aceptado técnicamente por Sala de Control, BCH-03 incremento 1.
 
+Ejecución posterior autorizada: BCH-03 incremento 2 aplicó el delta exclusivo CCD,
+publicó M01/M12 y comprobó Document RAG directamente en entorno local. Su evidencia
+y límites están en [el checkpoint](../transition/bch03-increment-2-checkpoint.md).
+El texto de decisión del incremento 1 siguiente se conserva como antecedente.
+
 ## Contexto
 
 ADR 0001 estableció el alcance exclusivamente sintético. BCH-01 produjo un

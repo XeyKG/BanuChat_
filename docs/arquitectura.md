@@ -5,7 +5,11 @@
 Actualización BCH-03 incremento 1 (2026-10-21): ADR 0006 permite preparar M01/M12
 con información CCD seleccionada para pruebas locales. `backend/rag/src/ccd`
 implementa validación de contrato/procedencia y derivados en memoria; el contenido
-local de `data/ccd` queda fuera de Git. Aún no hay carga ni consultas CCD acreditadas.
+local de `data/ccd` queda fuera de Git. Ese fue el alcance del incremento 1.
+Incremento 2 ya publicó M01/M12 en PostgreSQL CCD aislado y validó tres consultas
+por Document RAG directo con Ollama, incluyendo abstención por evidencia insuficiente.
+No acredita el chat completo, Mobile ni identidad institucional. Véase el
+[checkpoint BCH-03/2](transition/bch03-increment-2-checkpoint.md).
 La persistencia CCD será aislada. El alcance sintético descrito a continuación
 corresponde al runtime de demostración conservado, no a una prohibición de la nueva
 preparación autorizada. Véase [ADR 0006](adr/0006-corpus-ccd-seleccionado-local.md).

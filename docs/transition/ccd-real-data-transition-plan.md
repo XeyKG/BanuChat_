@@ -1,5 +1,11 @@
 # Plan de transición de BanuChat hacia fuentes reales del CCD
 
+Estado posterior BCH-03 incremento 2: primera carga M01/M12 y tres consultas por
+Document RAG directo acreditadas en base CCD local aislada; no se amplía el corpus
+ni se dan por cumplidos compromisos académicos. Véase
+[checkpoint ejecutado](bch03-increment-2-checkpoint.md). Las restricciones de
+preparación de T5/incremento 1 que siguen abajo describen sus etapas históricas.
+
 Actualización de estado BCH-03 incremento 1 (2026-10-21): Sala de Control autorizó
 la preparación técnica local de M01/M12 según [ADR 0006](../adr/0006-corpus-ccd-seleccionado-local.md).
 Esta excepción levanta el bloqueo técnico de preparación para ese subconjunto;

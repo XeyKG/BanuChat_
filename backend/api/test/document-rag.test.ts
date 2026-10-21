@@ -216,6 +216,19 @@ PREGUNTA:
   );
 });
 
+test("CCD mode changes only the evidence label and preserves insufficient evidence handling", async () => {
+  const fake = fakeDependencies([chunk()], "EVIDENCIA_INSUFICIENTE");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "Regla sin respaldo",
+  });
+  assert.match(fake.generator_calls[0]!.input.system_prompt, /evidencia CCD seleccionada/);
+  assert.match(fake.generator_calls[0]!.input.system_prompt, /sin aval institucional formal/);
+  assert.doesNotMatch(fake.generator_calls[0]!.input.system_prompt, /evidencia sintética/);
+  assert.equal(answer.insufficient_evidence, true);
+  assert.deepEqual(answer.citations, []);
+  assert.deepEqual(answer.citation_records, []);
+});
+
 test("uses a defensive system prompt and excludes operational metadata from the user prompt", async () => {
   const fake = fakeDependencies([chunk()]);
   await generateDocumentRagAnswer(fake.dependencies, {

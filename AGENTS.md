@@ -90,6 +90,9 @@ SQL, dataset v1, REST y contrato MCP se consideran congelados salvo autorizació
 explícita de la tarea.
 En BCH-03 incremento 1 se autorizan contrato CCD, preparación en memoria y diseño
 del delta de persistencia; no se ejecuta carga PostgreSQL ni se modifica REST/MCP.
+Ese límite corresponde al incremento 1. BCH-03 incremento 2 autoriza la migración
+CCD adicional, carga M01/M12 y validación directa de Document RAG exclusivamente
+en `banuchat_ccd_dev`; se mantiene aislada la demo y no se cambia REST/MCP.
 
 ## Reglas de implementación
 

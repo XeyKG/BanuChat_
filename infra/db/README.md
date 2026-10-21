@@ -1,7 +1,14 @@
 # Base de datos de BanuChat
 
+BCH-03 incremento 2 aplicó `001_initial_schema.sql` sin modificar y
+`002_ccd_local_manifest.sql` exclusivamente sobre `banuchat_ccd_dev`, vacía y con
+servicio/volumen CCD verificados. La release M01/M12 está `ready/current`; no se
+aplicó el delta sobre la demo. La configuración y ejecución vigentes están en
+[desarrollo CCD](ccd-local-development.md) y el
+[checkpoint](../../docs/transition/bch03-increment-2-checkpoint.md).
+
 BCH-03 incremento 1 prepara un entorno CCD independiente en
-`infra/docker-compose.ccd.yml`. No se ejecutó ni se aplicó SQL. La migración inicial
+`infra/docker-compose.ccd.yml`. En ese incremento no se ejecutó ni se aplicó SQL. La migración inicial
 se conserva intacta; el delta mínimo para habilitar un manifiesto CCD real y sus
 dependencias en los servicios están en [desarrollo CCD](ccd-local-development.md).
 El resto de este README describe la persistencia sintética existente.

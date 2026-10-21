@@ -37,6 +37,7 @@ export interface DocumentRagDependencies {
   query_embedding_client: QueryEmbeddingClient;
   generator_client: GeneratorClient;
   generator_config: GeneratorConfig;
+  evidence_mode?: 'synthetic' | 'ccd_local';
 }
 
 export interface DocumentRagInput {
@@ -129,7 +130,12 @@ export async function generateDocumentRagAnswer(
 
   const generated = await dependencies.generator_client.generate(
     {
-      system_prompt: DOCUMENT_RAG_SYSTEM_PROMPT,
+      system_prompt: dependencies.evidence_mode === 'ccd_local'
+        ? DOCUMENT_RAG_SYSTEM_PROMPT.replace(
+          'un asistente de demostración que responde únicamente con la evidencia sintética proporcionada',
+          'un asistente de pruebas locales que responde únicamente con la evidencia CCD seleccionada proporcionada, validada por el equipo y sin aval institucional formal',
+        )
+        : DOCUMENT_RAG_SYSTEM_PROMPT,
       user_prompt: buildUserPrompt(chunks, retrievalInput.query),
     },
     dependencies.generator_config,

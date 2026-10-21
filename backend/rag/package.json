@@ -14,7 +14,9 @@
     "test:db": "node --import tsx --test test/db/*.test.ts",
     "test:e2e:ingestion": "node --import tsx --test test/e2e/*.test.ts",
     "validate:dataset": "tsx src/cli.ts",
-    "prepare:ccd": "tsx src/ccd/cli.ts"
+    "prepare:ccd": "tsx src/ccd/cli.ts",
+    "ccd:local": "node --env-file=../../infra/.env.ccd --import tsx src/ccd/load-local.ts",
+    "ccd:verify": "node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-local-check.mts"
   },
   "dependencies": {
     "ajv": "^8.17.1",

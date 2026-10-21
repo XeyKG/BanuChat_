@@ -3,6 +3,7 @@ import type { WriterLease } from './writer-lock.js';
 import { invariant } from './errors.js';
 import { findItem } from './structured.js';
 import { finishItem, provenance } from './runs.js';
+import { storageCounts, type StorageRecipe } from './recipe.js';
 
 export async function resolveDocument(lease: WriterLease, document: Readonly<DocumentRecord>): Promise<string> {
   const existing = await lease.query<{ id: string; retrieval_mode: string }>(
@@ -18,7 +19,8 @@ export async function resolveDocument(lease: WriterLease, document: Readonly<Doc
   return inserted.rows[0].id;
 }
 export async function stageDocuments(lease: WriterLease, release: string, run: string,
-  documents: readonly DocumentRecord[], derivatives: readonly DocumentDerivatives[], items: readonly ManifestItem[], retry = false): Promise<void> {
+  documents: readonly DocumentRecord[], derivatives: readonly DocumentDerivatives[], items: readonly ManifestItem[], retry = false,
+  recipe: StorageRecipe = 'synthetic_v1'): Promise<void> {
   for (const document of documents) {
     const derived = derivatives.find(value => value.document_key === document.document_key);
     invariant(derived);
@@ -26,7 +28,7 @@ export async function stageDocuments(lease: WriterLease, release: string, run: s
     await lease.transaction(async () => {
       const id = await resolveDocument(lease, document);
       const full = document.retrieval_mode === 'full_document';
-      invariant(full ? derived.chunks.length === 0 : derived.chunks.length === 6);
+      invariant(full ? derived.chunks.length === 0 : derived.chunks.length === storageCounts(recipe).perDocument);
       let versionId: string;
       const previous = retry ? (await lease.query<{ id: string; exact: boolean }>(`SELECT id,
         ROW(version_label,title,source_path,source_locator,source_sha256,content_sha256,mime_type)

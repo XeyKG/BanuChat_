@@ -1,5 +1,6 @@
 import type { WriterLease } from './writer-lock.js';
-import type { StageInput } from './types.js';
+import type { DocumentDerivatives, ManifestItem } from '../types.js';
+import { storageCounts, type StorageRecipe } from './recipe.js';
 import type { EmbeddingClient, EmbeddingConfig } from '../ollama/types.js';
 import { assertSameRuntime } from '../ollama/config.js';
 import { validateVectors, vectorLiteral } from '../ollama/client.js';
@@ -9,7 +10,11 @@ import { findItem } from './structured.js';
 
 interface ChunkRow { id: string; ordinal: number; content: string; content_sha256: string; locator: string }
 export async function generateEmbeddings(lease: WriterLease, release: string, run: string,
-  input: StageInput, client: EmbeddingClient, config: EmbeddingConfig, batchSize = 10): Promise<number> {
+  input: { embeddingConfigId: string; derivatives: readonly DocumentDerivatives[];
+    validated: { manifest: { items: readonly ManifestItem[] } } },
+  client: EmbeddingClient, config: EmbeddingConfig, batchSize = 10,
+  recipe: StorageRecipe = 'synthetic_v1'): Promise<number> {
+  const expectedChunks = storageCounts(recipe).perDocument;
   invariant(Number.isInteger(batchSize) && batchSize >= 1 && batchSize <= 10);
   const associated = await lease.query(`SELECT r.id FROM banuchat.dataset_releases r
     JOIN banuchat.embedding_configs e ON e.id=r.embedding_config_id
@@ -25,11 +30,11 @@ export async function generateEmbeddings(lease: WriterLease, release: string, ru
     const version = await lease.query<{ id: string }>(`SELECT v.id FROM banuchat.document_versions v
       JOIN banuchat.documents d ON d.id=v.document_id WHERE v.dataset_release_id=$1 AND d.document_key=$2
       AND v.ingestion_run_id=$3 AND v.processing_status='pending' AND d.retrieval_mode='chunked'`, [release, derived.document_key, run]);
-    invariant(version.rows[0] && derived.chunks.length === 6);
+    invariant(version.rows[0] && derived.chunks.length === expectedChunks);
     const versionId = version.rows[0].id;
     const chunks = await lease.query<ChunkRow>(`SELECT id,ordinal,content,content_sha256,locator FROM banuchat.document_chunks
       WHERE dataset_release_id=$1 AND document_version_id=$2 ORDER BY ordinal`, [release, versionId]);
-    invariant(chunks.rows.length === 6);
+    invariant(chunks.rows.length === expectedChunks);
     for (const [index, row] of chunks.rows.entries()) {
       const expected = derived.chunks[index];
       invariant(expected && row.ordinal === expected.ordinal && row.content === expected.content
@@ -57,7 +62,7 @@ export async function generateEmbeddings(lease: WriterLease, release: string, ru
         count(*) FILTER (WHERE embedding IS NOT NULL AND generation_run_id=$1
         AND embedding_generated_at >= (SELECT started_at FROM banuchat.ingestion_runs WHERE id=$1))::integer AS valid
         FROM banuchat.document_chunks WHERE dataset_release_id=$2 AND document_version_id=$3`, [run, release, versionId]);
-      invariant(complete.rows[0]?.total === 6 && complete.rows[0].valid === 6);
+      invariant(complete.rows[0]?.total === expectedChunks && complete.rows[0].valid === expectedChunks);
       const updated = await lease.query(`UPDATE banuchat.document_versions SET processing_status='ready'
         WHERE id=$1 AND dataset_release_id=$2 AND ingestion_run_id=$3 AND processing_status='pending'`, [versionId, release, run]);
       invariant(updated.rowCount === 1);

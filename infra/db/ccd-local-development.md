@@ -1,5 +1,51 @@
 # Persistencia local CCD — delta del incremento 1
 
+## Estado ejecutado en BCH-03 incremento 2
+
+Primera ingesta realizada en `banuchat_ccd_dev`, proyecto `banuchat-ccd-dev`, servicio
+`postgres-ccd`, volumen exclusivo y puerto loopback 55433. Se comprobó destino vacío
+antes de aplicar `001` intacta y `002_ccd_local_manifest.sql`. Solo M01/M12: dos
+documentos/versiones/chunks/embeddings, release `ready/current`. Sin escritura en la
+demo. Los resultados exactos están en
+[el checkpoint](../../docs/transition/bch03-increment-2-checkpoint.md).
+
+El diseño del incremento 1 que sigue más abajo se conserva como antecedente;
+las adaptaciones que describía como pendientes ya están implementadas.
+
+Operación implementada desde `backend/rag` (usa `infra/.env.ccd`, no versionado):
+
+```powershell
+# Solo sobre una base CCD nueva y vacía, después de verificar su identidad:
+npm run ccd:local -- migrate
+# Admisión SQL sin persistir pruebas (rollback):
+npm run ccd:verify -- validators
+# Primera carga explícita; no reemplaza una release diferente:
+npm run ccd:local -- ingest
+npm run ccd:local -- inspect
+# Document RAG directo, tres preguntas y evidencia local:
+npm run ccd:verify -- queries
+```
+
+No repetir `migrate` en la instalación existente. `connectCcdLocal` comprueba labels
+de proyecto/servicio, imagen, volumen, puerto loopback y `current_database()` antes
+de SQL. `load-local.ts` rechaza migraciones en destinos con tablas/esquemas previos.
+La migración adicional falla fuera de `banuchat_ccd_dev` o si ya hay corpus cargado;
+no modifica tablas iniciales ni permite multidataset. Mantiene el validador v1 y
+añade la rama CCD con scope, C/M, fuentes, huellas, límites y referencias.
+
+El escritor usa `StorageRecipe` explícita, sin modificar defaults v1. La segunda
+invocación idéntica observada fue `already_current`, con cero embeddings nuevos.
+No hay retry/recovery automático. Un corpus o código distinto exige otra tarea de
+actualización: esta entrada de primera carga lo rechaza, no sobrescribe.
+
+La ruta de consultas usa SQL CCD, `getDocumentArtifact` con raíz CCD y el modo
+`evidence_mode: ccd_local`. El modo sintético conserva su prompt. La ruta real de
+chat/perfiles no se altera; no se persisten conversaciones ni `message_citations`.
+Las citas devueltas se guardan en la evidencia local y se cotejan con artefactos/DB.
+No se abren puertos adicionales para API/Mobile ni se publica contenido institucional.
+
+## Antecedente: diseño del incremento 1
+
 Estado: diseño acotado para la primera carga posterior. Sin SQL aplicado, servicios
 arrancados ni base CCD creada en este incremento. No cambiar `001_initial_schema.sql`.
 

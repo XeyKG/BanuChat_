@@ -1,5 +1,14 @@
 # RAG e ingesta — estado implementado
 
+BCH-03 incremento 2 implementa `src/ccd/ingest.ts` y el comando `npm run ccd:local`:
+verificación de destino Docker/base CCD, migración exclusiva, carga manual, inspección
+y no-op idempotente. Reutiliza lease, staging documental, configuración/embeddings y
+publicación, con receta CCD explícita 2 items / 2 documentos / 2 chunks; los defaults
+v1 y sus conteos se conservan. Fuentes externas identificadas por snapshot/hashes;
+`git_revision` CCD identifica solo la base del código, complementada por huellas de
+los archivos ejecutados. La carga real y las consultas directas quedaron acreditadas
+en [BCH-03/2](../../docs/transition/bch03-increment-2-checkpoint.md).
+
 BCH-03 incremento 1 añade una frontera CCD independiente: `src/ccd/prepare.ts`
 valida M01/M12, verifica originales externos con `SafeReader`/SHA-256 y prepara
 dos documentos y dos chunks con alcance y procedencia. No usa la receta sintética
@@ -7,7 +16,9 @@ ni escribe en PostgreSQL/Ollama. `npm run prepare:ccd` permite validar en memori
 y escribir opcionalmente un snapshot local sin sobrescrituras. Véanse
 [contrato y comandos CCD](../../data/ccd/README.md) y
 [delta de persistencia pendiente](../../infra/db/ccd-local-development.md).
-El core de ingesta descrito debajo sigue siendo el de v1; aún no admite CCD.
+La preparación anterior continúa siendo de solo lectura salvo escritura opcional
+del snapshot. El escritor CCD se invoca por separado; el core histórico descrito
+debajo conserva su comportamiento v1 por defecto.
 
 Paquete privado `@banuchat/rag`, ESM y TypeScript estricto (ES2022).
 Implementa foundation, lectura segura, preflight de contenido, siete schemas locales,
