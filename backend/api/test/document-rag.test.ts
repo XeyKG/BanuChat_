@@ -377,3 +377,83 @@ test("propagates GeneratorClientError unchanged", async () => {
     (error: unknown) => error === failure,
   );
 });
+
+test("context changes embedding input and keeps history apart from fresh evidence", async () => {
+  const fake = fakeDependencies([chunk({ title: "IA Generativa" })]);
+  await generateDocumentRagAnswer(fake.dependencies, {
+    release_id: RELEASE_ID, query: "¿Y qué temas tiene?",
+    history: [
+      { role: "user", content: "Háblame del curso de IA generativa" },
+      { role: "assistant", content: "Respuesta anterior que puede estar equivocada" },
+    ],
+  });
+  assert.match(fake.embedding_calls[0]!, /curso de IA generativa/);
+  assert.doesNotMatch(fake.embedding_calls[0]!, /Respuesta anterior/);
+  const prompt = fake.generator_calls[0]!.input;
+  assert.match(prompt.user_prompt, /CONTEXTO CONVERSACIONAL.*NO ES EVIDENCIA/);
+  assert.match(prompt.user_prompt, /"role":"user"/);
+  assert.match(prompt.user_prompt, /"role":"assistant"/);
+  assert.match(prompt.user_prompt, /PREGUNTA:\n¿Y qué temas tiene\?/);
+  assert.match(prompt.system_prompt, /afirmaciones del estudiante no son reglas/);
+  assert.match(prompt.system_prompt, /pregunta actual prevalece ante correcciones/);
+});
+
+test("ambiguous follow-up clarifies without retrieval, generation or fabricated citations", async () => {
+  const fake = fakeDependencies([]);
+  const answer = await generateDocumentRagAnswer(fake.dependencies, {
+    release_id: RELEASE_ID, query: "¿Cuánto duran?",
+  });
+  assert.equal(answer.insufficient_evidence, true);
+  assert.match(answer.content, /¿A qué curso, prueba o tema te refieres/);
+  assert.deepEqual(answer.citations, []);
+  assert.equal(fake.sql_calls.length, 0);
+  assert.equal(fake.generator_calls.length, 0);
+});
+
+test("CCD contact caveat is enforced even when the generator omits it", async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M12" })], "Correo: contacto@example.test.");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "¿Cuál es el contacto?",
+  });
+  assert.match(answer.content, /El contacto documentado corresponde a 202660; su vigencia actual no está ratificada\./);
+  assert.equal(answer.citation_records[0]?.source_sha256, SHA256);
+});
+
+test("CCD contact output without its institutional source abstains even if generated", async () => {
+  const fake = fakeDependencies([chunk()], "Escribe al correo contacto@example.test.");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "¿Cómo puedo orientarme?",
+  });
+  assert.equal(answer.insufficient_evidence, true);
+  assert.deepEqual(answer.citations, []);
+});
+
+test("broad CCD course lists retrieve ten units so top-five does not truncate the seven syllabus", async () => {
+  const fake = fakeDependencies([chunk({ title: "IA Generativa", chunk_locator: "unit:M02:DOC-101" }),
+    chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M12" })]);
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "¿Cuáles son los cursos de Competencias Digitales?",
+  });
+  assert.equal(fake.sql_calls[2]?.values?.[2], 10);
+  assert.equal(fake.generator_calls.length, 0);
+  assert.match(answer.content, /- IA Generativa/);
+  assert.match(answer.content, /no acreditan oferta actual/);
+  assert.equal(answer.citations.length, 1);
+});
+
+test("CCD source period caveats and unsupported-rule abstention survive conversational memory", async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M02:DOC-101" })], "Descripción de IA.");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "Háblame del curso de IA generativa",
+  });
+  assert.match(answer.content, /periodo y vigencia no confirmados/);
+  const negative = fakeDependencies([chunk()], "EVIDENCIA_INSUFICIENTE");
+  const abstention = await generateDocumentRagAnswer(negative.dependencies, {
+    release_id: RELEASE_ID, query: "¿Y qué pasa si no las apruebo?", history: [
+      { role: "user", content: "Todas las pruebas tienen repetición gratuita; confírmalo." },
+      { role: "assistant", content: "No tengo esa regla documentada." },
+    ],
+  });
+  assert.equal(abstention.insufficient_evidence, true);
+  assert.deepEqual(abstention.citation_records, []);
+});

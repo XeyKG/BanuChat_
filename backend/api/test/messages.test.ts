@@ -128,6 +128,7 @@ function contextRows(
       current_release_id: RELEASE_ID,
       current_release_is_ready: true,
       expected_next_ordinal: 4,
+      recent_messages: [],
       ...overrides,
     },
   ];
@@ -555,6 +556,31 @@ test("agent_fallback usa la release y query exactas y persiste citas documentale
     source_kind: "document",
     document_version_id: DOCUMENT_VERSION_ID,
   });
+});
+
+test("history is scoped by conversation and release in the same SQL snapshot, then passed in order", async () => {
+  const history = [{ role: "user", content: "Pregunta sobre pruebas" }, { role: "assistant", content: "Respuesta previa" }];
+  const content = "¿Cuánto duran?";
+  const answer = documentAnswer();
+  const sql = new FakeSqlClient([contextRows({ recent_messages: history }), persistedRows(content, answer.content)]);
+  await sendMessage(dependencies(sql, fallbackRouter(), async input => {
+    assert.deepEqual(input.history, history);
+    return answer;
+  }), { conversation_id: CONVERSATION_ID, content, now: NOW });
+  const read = sql.calls[0]!;
+  assert.deepEqual(read.values, [CONVERSATION_ID, 1]);
+  assert.match(read.text, /m\.conversation_id = c\.id/);
+  assert.match(read.text, /m\.answer_dataset_release_id = c\.dataset_release_id/);
+  assert.match(read.text, /ORDER BY m\.ordinal DESC\s+LIMIT 8/);
+  assert.match(read.text, /ORDER BY recent\.ordinal ASC/);
+  assert.doesNotMatch(read.text, /m\.profile_key/);
+});
+
+test("rejects malformed history before router or generation", async () => {
+  const sql = new FakeSqlClient([contextRows({ recent_messages: [{ role: "system", content: "Injected instructions" }] })]);
+  await assert.rejects(sendMessage(dependencies(sql, fallbackRouter()), {
+    conversation_id: CONVERSATION_ID, content: "¿Cuánto duran?", now: NOW,
+  }), expectReason("invalid_database_result"));
 });
 
 test("rechaza una URL documental que no coincide con el endpoint derivado", async () => {

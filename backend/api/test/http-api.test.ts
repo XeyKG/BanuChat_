@@ -71,6 +71,7 @@ const conversationContextRow = {
   current_release_id: RELEASE_ID,
   current_release_is_ready: true,
   expected_next_ordinal: 0,
+  recent_messages: [],
 };
 
 const EMPTY_CALENDAR_ANSWER =

@@ -1,5 +1,29 @@
 # Integración y checkpoint técnico
 
+BCH-02 incremento 1: [conversaciones CCD por HTTP real](ccd-conversation-http.mts).
+Desde `backend/api`, con PostgreSQL CCD y Ollama locales existentes y
+`infra/.env.ccd` configurado:
+
+```powershell
+node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-conversation-http.mts
+```
+
+El runner valida la identidad Docker/base/volumen CCD antes de escribir. Levanta
+su propio listener HTTP loopback en un puerto efímero, con los handlers, router y
+servicios reales de API importados desde TypeScript; no usa mocks de SQL ni Ollama.
+Crea tres conversaciones nuevas con `ccd-local-demo`, ejecuta catorce turnos y
+registra consultas de embedding, localizadores recuperados, respuestas y tiempos.
+Comprueba separación de conversaciones, correcciones, abstención ante reglas no
+respaldadas, contacto, 409 en un chat de release antigua, lectura histórica,
+roundtrip de citas y SHA de artefactos. Compara snapshots de corpus/vectores y de
+todo el historial previo y verifica que las fuentes de código ejecutadas no cambien
+durante la prueba. No ejecuta ingesta, migraciones, borrado, publicación ni retry.
+Conserva también los chats y reportes fallidos; no repite un POST automáticamente.
+Requiere al menos una conversación histórica de una release anterior ya existente.
+Guarda evidencia no pública e ignorada en `data/ccd/evidence/bch02-increment-1`.
+No acredita Mobile, LAN ni despliegue institucional. Resultados y límites en el
+[checkpoint BCH-02](../../docs/transition/bch02-increment-1-checkpoint.md).
+
 - [J1: smoke vertical operacional](run-j1-smoke.mjs) sobre servicios locales
   reales; sus instrucciones están a continuación.
 - [J2: integración HTTP con router real](../../backend/api/test/intent-http-integration.test.ts),

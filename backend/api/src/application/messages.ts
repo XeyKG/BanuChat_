@@ -20,6 +20,7 @@ import { SendMessageError } from "./messages-errors.js";
 import { ProfileProgressError } from "./profile-progress-errors.js";
 import { DocumentLookupError } from "./document-lookup-errors.js";
 import type { DemoMode } from "./demo-mode.js";
+import { boundConversationContext, type ConversationMessage } from "../chat/conversation-context.js";
 
 const DATASET_ID = 1;
 const UUID_PATTERN =
@@ -33,6 +34,18 @@ const CONVERSATION_CONTEXT_QUERY = `
 SELECT
   c.dataset_release_id,
   c.profile_key,
+  COALESCE((
+    SELECT jsonb_agg(jsonb_build_object('role', recent.role, 'content', recent.content)
+      ORDER BY recent.ordinal ASC)
+    FROM (
+      SELECT m.role, left(m.content, 1200) AS content, m.ordinal
+      FROM banuchat.messages m
+      WHERE m.conversation_id = c.id
+        AND (m.role = 'user' OR m.answer_dataset_release_id = c.dataset_release_id)
+      ORDER BY m.ordinal DESC
+      LIMIT 8
+    ) recent
+  ), '[]'::jsonb) AS recent_messages,
   d.current_release_id,
   EXISTS (
     SELECT 1
@@ -225,6 +238,7 @@ export interface SendMessageResult {
 }
 
 interface ConversationContextRow {
+  recent_messages: unknown;
   dataset_release_id: unknown;
   profile_key: unknown;
   current_release_id: unknown;
@@ -456,6 +470,13 @@ export async function sendMessage(
     reject("current_release_changed");
   }
 
+  if (!Array.isArray(context.recent_messages) || context.recent_messages.some(
+    (message: unknown) => typeof message !== "object" || message === null ||
+      !("role" in message) || (message.role !== "user" && message.role !== "assistant") ||
+      !("content" in message) || typeof message.content !== "string",
+  )) reject("invalid_database_result");
+  const history = boundConversationContext(context.recent_messages as ConversationMessage[]);
+
   let dispatched;
   try {
     dispatched = await dispatchChatQuery(
@@ -501,6 +522,7 @@ export async function sendMessage(
       answer = await dependencies.document_rag({
         release_id: context.dataset_release_id,
         query: input.content,
+        ...(history.length === 0 ? {} : { history }),
       });
     } catch (error) {
       if (error instanceof GeneratorClientError) {

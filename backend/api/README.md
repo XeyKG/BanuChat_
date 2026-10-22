@@ -1,5 +1,32 @@
 # API REST — contrato y estado implementado
 
+BCH-02 incremento 1 incorpora continuidad en Document RAG. El envío lee los últimos
+ocho mensajes de la misma conversación y release, ordenados por ordinal, dentro
+del mismo snapshot SQL que comprueba la release y el próximo ordinal. Cada mensaje
+aporta hasta 1.200 caracteres Unicode, con presupuesto total de 6.000. El contexto
+no se busca por `profile_key`: compartir `ccd-local-demo` no comparte memoria.
+Los seguimientos reconocidos por reglas léxicas incorporan el tema y refinamientos
+recientes del usuario a la consulta de embedding (máximo 4.000 caracteres). La
+generación recibe preguntas y respuestas anteriores como contexto no confiable,
+separado de la evidencia documental recuperada nuevamente. Las correcciones actuales
+prevalecen; las preguntas autónomas y los cambios explícitos de tema cortan ese contexto.
+Una referencia ambigua sin antecedente solicita aclaración, con evidencia insuficiente
+y sin citas, embeddings ni generación. No hay resumen persistido ni llamada LLM adicional.
+
+El listado amplio de cursos CCD recupera diez unidades y enumera por metadata los
+syllabus M02 recuperados, con sus citas y límites; la prueba detectó que el top-5
+omitía cursos. Las consultas específicas conservan top-5 y generación. Las respuestas
+CCD añaden por código límites temporales según sus fuentes. Una respuesta de contacto
+requiere M12 y añade siempre la advertencia «202660; su vigencia actual no está
+ratificada»; sin M12 se abstiene. El historial no aporta citas ni autoriza reglas.
+Se mantiene como limitación independiente que las respuestas generadas citan también
+documentos secundarios del top-5. No cambia el contrato REST, SQL ni MCP.
+
+La lectura de chats de releases anteriores y sus citas permanece disponible; enviar
+otro mensaje devuelve 409. Debe abrirse una conversación nueva; el tratamiento visual
+de ese caso queda pendiente en Mobile. No se consulta conocimiento de dos releases.
+Véase [CHECKPOINT BCH-02 incremento 1](../../docs/transition/bch02-increment-1-checkpoint.md).
+
 BCH-03 incremento 4 admite releases CCD `ccd-1.0.0` y `ccd-1.1.0`, con contexto
 técnico por release. En CCD, `course_catalog` consulta descripciones mediante RAG,
 sin afirmar oferta vigente; el modo sintético conserva el fast path estructurado.
