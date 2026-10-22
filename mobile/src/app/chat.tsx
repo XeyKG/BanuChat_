@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { getConversation } from '@/api/conversations';
+import { createConversation, getConversation } from '@/api/conversations';
+import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import {
   MessageRequestError,
   sendMessage,
@@ -27,7 +28,7 @@ import { BrandMark, BubbleIn, FadeIn, TypingIndicator } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
-type SendError = 'http' | 'uncertain' | 'invalid_response' | null;
+type SendError = 'http' | 'conflict' | 'uncertain' | 'invalid_response' | null;
 type ConversationState = 'loading' | 'ready' | 'error' | 'profile_mismatch';
 type ReconciliationState =
   | 'awaiting_check'
@@ -82,12 +83,15 @@ export default function ChatScreen() {
   const [content, setContent] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<SendError>(null);
+  const [isStartingNew, setIsStartingNew] = useState(false);
+  const [newConversationError, setNewConversationError] = useState(false);
   const [pendingUncertainSend, setPendingUncertainSend] =
     useState<PendingUncertainSend | null>(null);
   const [reconciliationState, setReconciliationState] =
     useState<ReconciliationState | null>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
     };
@@ -172,7 +176,7 @@ export default function ChatScreen() {
   const characterCount = Array.from(content).length;
   const isContentValid = content.trim().length > 0 && characterCount <= CHARACTER_LIMIT;
   const isConversationLocked =
-    conversationState !== 'ready' || sendError === 'uncertain' || sendError === 'invalid_response';
+    conversationState !== 'ready' || sendError === 'conflict' || sendError === 'uncertain' || sendError === 'invalid_response';
   const showEmptyState = conversationState === 'ready' && messages.length === 0;
 
   async function submitMessage(text?: string) {
@@ -209,6 +213,9 @@ export default function ChatScreen() {
         if (error.kind === 'timeout' || error.kind === 'network') {
           setSendError('uncertain');
           setReconciliationState('awaiting_check');
+        } else if (error.kind === 'conflict') {
+          setPendingUncertainSend(null);
+          setSendError('conflict');
         } else if (error.kind === 'invalid_response') {
           setPendingUncertainSend(null);
           setSendError('invalid_response');
@@ -222,6 +229,25 @@ export default function ChatScreen() {
       }
     } finally {
       if (isMountedRef.current) setIsSending(false);
+    }
+  }
+
+  async function openNewConversation() {
+    if (activeProfile === null || isStartingNew) return;
+    setIsStartingNew(true);
+    setNewConversationError(false);
+    try {
+      const created = await createConversation(activeProfile.profile_key);
+      if (!isMountedRef.current) return;
+      setMessages([]);
+      setContent('');
+      setSendError(null);
+      setPendingUncertainSend(null);
+      router.replace({ pathname: '/chat', params: { conversation_id: created.conversation_id } });
+    } catch {
+      if (isMountedRef.current) setNewConversationError(true);
+    } finally {
+      if (isMountedRef.current) setIsStartingNew(false);
     }
   }
 
@@ -315,7 +341,7 @@ export default function ChatScreen() {
             </View>
             <View style={styles.headerCopy}>
               <Text style={styles.headerTitle}>Banu</Text>
-              <Text style={styles.headerSubtitle}>Asistente académico · {activeProfile.alias}</Text>
+              <Text style={styles.headerSubtitle}>{isCcdLocal() ? 'Demostración CCD local · sin identidad institucional' : `Asistente académico · ${activeProfile.alias}`}</Text>
             </View>
           </View>
           <Pressable
@@ -338,6 +364,7 @@ export default function ChatScreen() {
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
           <View style={styles.messageColumn}>
+            {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
             {conversationState === 'loading' && (
               <View accessibilityLiveRegion="polite" style={styles.conversationStateCard}>
                 <Text style={styles.conversationStateText}>Cargando conversación...</Text>
@@ -359,7 +386,7 @@ export default function ChatScreen() {
             {conversationState === 'profile_mismatch' && (
               <View accessibilityRole="alert" style={styles.conversationStateCard}>
                 <Text style={styles.conversationStateTitle}>
-                  Esta conversación pertenece a otro perfil de demostración
+                  {isCcdLocal() ? 'Conversación no disponible en esta apertura local' : 'Esta conversación pertenece a otro perfil de demostración'}
                 </Text>
                 <Text style={styles.conversationStateText}>
                   Selecciona la conversación desde el historial del perfil activo.
@@ -383,11 +410,11 @@ export default function ChatScreen() {
                       <BrandMark size={64} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
-                    <Text style={styles.emptyBody}>{CHAT_INTRODUCTION}</Text>
+                    <Text style={styles.emptyBody}>{isCcdLocal() ? 'Hola, soy Banu. Puedo orientarte sobre los documentos CCD seleccionados, sus cursos, pruebas y contacto. Puedes hacer preguntas de seguimiento y abrir las fuentes. No determino progreso personal ni reglas sin respaldo documental.' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
                 <View style={styles.suggestionGrid}>
-                  {SUGGESTIONS.map((suggestion, index) => (
+                  {(isCcdLocal() ? ['¿Cuáles son los cursos de Competencias Digitales?', '¿Qué son las pruebas diagnósticas?', '¿Cuál es el correo de contacto del CCD?', '¿Qué puedes hacer?'] : SUGGESTIONS).map((suggestion, index) => (
                     <FadeIn key={suggestion} delay={140 + index * 80}>
                       <Pressable
                         accessibilityRole="button"
@@ -454,6 +481,13 @@ export default function ChatScreen() {
         </ScrollView>
 
         <View style={styles.composer}>
+          {sendError === 'conflict' && (
+            <View accessibilityRole="alert" style={styles.errorBanner}>
+              <Text style={styles.errorText}>No se puede continuar esta conversación. La revisión documental pudo cambiar o existe una operación concurrente. El historial se conserva. Abre una conversación nueva para usar la revisión actual; no se trasladarán mensajes.</Text>
+              <AppButton label="Abrir conversación nueva" loading={isStartingNew} onPress={() => void openNewConversation()} />
+              {newConversationError && <Text style={styles.errorText}>No fue posible crear otra conversación. El historial sigue disponible.</Text>}
+            </View>
+          )}
           {sendError === 'http' && (
             <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
               <Text style={styles.errorText}>No fue posible obtener una respuesta. Inténtalo de nuevo.</Text>

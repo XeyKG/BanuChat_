@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -141,11 +142,12 @@ export default function HistoryScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle={`Perfil: ${activeProfile.alias}`}
-        title="Historial"
+        subtitle={isCcdLocal() ? 'Solo conversaciones de esta apertura local' : `Perfil: ${activeProfile.alias}`}
+        title={isCcdLocal() ? 'Historial de demostración' : 'Historial'}
       />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
+          {isCcdLocal() && <Text style={styles.stateText}>{CCD_NOTICE} Al recargar o finalizar, se pierde esta lista local; el backend conserva los chats. No se enumeran conversaciones de otras aperturas.</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator
@@ -171,7 +173,7 @@ export default function HistoryScreen() {
                 <View style={styles.emptyIconHalo}>
                   <ChatGlyph color={colors.accent} size={34} />
                 </View>
-                <Text style={styles.stateTitle}>Aún no tienes conversaciones</Text>
+                <Text style={styles.stateTitle}>{isCcdLocal() ? 'No hay conversaciones en esta apertura' : 'Aún no tienes conversaciones'}</Text>
                 <Text style={styles.stateText}>
                   Inicia tu primera conversación con Banu y aparecerá aquí.
                 </Text>
@@ -234,7 +236,7 @@ export default function HistoryScreen() {
                           </Text>
                         </View>
                       </Pressable>
-                      <Pressable
+                      {!isCcdLocal() && <Pressable
                         accessibilityRole="button"
                         accessibilityLabel="Eliminar conversación"
                         accessibilityState={{ busy: deletingId === conversation.conversation_id }}
@@ -250,7 +252,7 @@ export default function HistoryScreen() {
                         ) : (
                           <TrashGlyph color={colors.error} size={17} />
                         )}
-                      </Pressable>
+                      </Pressable>}
                       <ChevronGlyph color={colors.muted} size={15} />
                     </View>
                   </FadeIn>

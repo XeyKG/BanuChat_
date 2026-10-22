@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
+import { isCcdLocal } from '@/config/demo-mode';
 import {
   Pressable,
   ScrollView,
@@ -72,6 +73,7 @@ export default function OnboardingScreen() {
   const [viewportWidth, setViewportWidth] = useState(0);
 
   const isLastSlide = activeIndex === SLIDES.length - 1;
+  if (isCcdLocal()) return <Redirect href="/profiles" />;
 
   function goToProfiles() {
     router.replace('/profiles');

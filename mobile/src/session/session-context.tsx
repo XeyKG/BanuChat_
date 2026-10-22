@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { clearOperatorConversations } from './operator-conversations';
 
 export interface ActiveProfile {
   profile_key: string;
@@ -19,7 +20,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () => ({
       activeProfile,
       selectProfile: setActiveProfile,
-      clearSession: () => setActiveProfile(null),
+      clearSession: () => { clearOperatorConversations(); setActiveProfile(null); },
     }),
     [activeProfile],
   );

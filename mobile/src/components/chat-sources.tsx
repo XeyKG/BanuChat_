@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Citation, CitationSourceKind } from '@/api/messages';
+import { isCcdLocal } from '@/config/demo-mode';
 import { DocGlyph } from '@/ui/icons';
 import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
@@ -74,7 +75,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
         <View style={styles.toggleLeft}>
           <DocGlyph color={colors.accent} size={15} />
           <Text style={styles.toggleText}>
-            {sourceCount === 1 ? '1 fuente verificada' : `${sourceCount} fuentes verificadas`}
+            {isCcdLocal() ? (sourceCount === 1 ? '1 fuente documental' : `${sourceCount} fuentes documentales`) : (sourceCount === 1 ? '1 fuente verificada' : `${sourceCount} fuentes verificadas`)}
           </Text>
         </View>
         <Text aria-hidden style={styles.toggleSymbol}>

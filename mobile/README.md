@@ -4,6 +4,87 @@ Aplicación móvil en Expo + React Native + TypeScript, inicializada con Expo SD
 57 y Expo Router. El dispositivo principal para desarrollo es un teléfono Android
 real con Expo Go.
 
+## Demostración CCD local — BCH-02 incremento 3
+
+Modo explícito `EXPO_PUBLIC_DEMO_MODE=ccd_local`. El valor por defecto es
+`synthetic`; no se cambia `.env.local` automáticamente ni se migra Expo/React Native.
+La pantalla inicial identifica una demostración local para un operador, sin identidad
+institucional, autenticación ni privacidad por usuario. No muestra el contexto técnico
+como estudiante. Home prioriza el chat; calendario, progreso y anuncios están ocultos
+y protegidos en Expo Router. Las fuentes y el visor conservan el contrato REST y
+presentan los límites/advertencias que devuelve el backend sin resumirlos.
+
+El historial CCD no enumera `/conversations?profile_key=ccd-local-demo`. Registra
+solo IDs creados por esta apertura en memoria, consulta individualmente esos chats
+y rechaza GET/POST de otros IDs antes de usar la red. No hay borrado CCD en la UI
+ni en su cliente API. Finalizar o recargar pierde esa lista local; el backend sigue
+conservando los chats. Es un alcance de interfaz para el operador, **no autorización
+por usuario**: otros procesos locales aún podrían consultar el backend sin autenticación.
+No compartir esta demostración entre personas ni abrir el listener en LAN.
+
+Un HTTP 409 bloquea la continuación, conserva los mensajes y ofrece crear otra
+conversación vacía por acción explícita. No se trasladan ni reenvían mensajes. REST
+usa el mismo código `CONFLICT` para cambio de release y concurrencia; Mobile no
+inventa una causa más precisa. Timeout/red siguen sin repetir el POST automáticamente.
+
+La API CCD debe escuchar **solo en `127.0.0.1:3001`**. El cliente CCD rechaza URLs
+LAN/públicas, credenciales y rutas distintas de `/api/v1`. Admite loopback, el alias
+de host del emulador Android `10.0.2.2` y el preview web loopback descrito abajo.
+Para un dispositivo USB con ADB operativo, la ruta prevista es:
+
+```powershell
+# Con un dispositivo autorizado visible en `adb devices -l`:
+adb reverse tcp:3001 tcp:3001
+adb reverse tcp:8081 tcp:8081
+# Desde mobile, sin cambiar la configuración de la API:
+$env:EXPO_PUBLIC_DEMO_MODE='ccd_local'
+$env:EXPO_PUBLIC_API_BASE_URL='http://127.0.0.1:3001/api/v1'
+npx expo start --localhost --port 8081
+```
+
+Abrir Expo Go compatible con el SDK 57 mediante `exp://127.0.0.1:8081`. Para un AVD
+operativo, el host de API puede ser `http://10.0.2.2:3001/api/v1`, conservando el
+bind del backend en loopback. **Estas rutas Android no se acreditaron en este
+incremento**: el SDK existe, pero `adb devices -l` no encontró dispositivo y
+`emulator -list-avds` no enumeró AVD. No se instaló ni generó Android nativo.
+
+La comprobación realizada fue **Expo Web**, con viewport 390 × 844 para el chat CCD,
+API real, PostgreSQL CCD y Ollama. Se utilizó un relay de desarrollo del mismo origen,
+exclusivo de loopback: frontend `127.0.0.1:8083` → API fija `127.0.0.1:3001`.
+No modifica CORS ni el listener de API; el relay valida Host/Origin y no admite DELETE.
+Es una herramienta de evaluación local, no hosting ni un servicio institucional.
+
+```powershell
+# Terminal API, desde backend/api:
+npm run start:ccd
+# Terminal frontend, desde mobile:
+$env:EXPO_PUBLIC_DEMO_MODE='ccd_local'
+$env:EXPO_PUBLIC_API_BASE_URL='http://127.0.0.1:8083/api/v1'
+$env:EXPO_NO_TELEMETRY='1'
+npx expo export --platform web --output-dir .expo/ccd-web
+node scripts/serve-local-web.mjs ccd_local
+# Abrir http://127.0.0.1:8083 en el navegador local.
+```
+
+El preview guarda transacciones en `.expo/ccd_local-evidence`, ignorado por Git.
+Solo para probar el 409 sin cambiar releases, crear allí el archivo
+`simulate-conflict-once`: el siguiente POST de mensajes recibe un 409 marcado
+`simulated: true` en la evidencia, sin llegar al backend; el archivo se renombra
+al consumirse. No está habilitado por defecto ni forma parte del cliente móvil/API.
+
+Validación local:
+
+```powershell
+npm run typecheck
+npm run lint -- --no-cache
+npm run test:local
+```
+
+Las seis pruebas usan el `tsx` ya instalado en `backend/api/node_modules` para
+evitar otra dependencia móvil; requieren instalar previamente las dependencias API.
+El [CHECKPOINT incremento 3](../docs/transition/bch02-increment-3-checkpoint.md)
+registra resultados, capturas, conexión real, bloqueos y límites de plataforma.
+
 La app consume exclusivamente la API REST de BanuChat; no accede directamente a
 MCP, N8N ni PostgreSQL. Para configurar la URL de API local, copia `.env.example`
 a `.env.local` y define `EXPO_PUBLIC_API_BASE_URL`. Por ejemplo:
@@ -13,7 +94,7 @@ EXPO_PUBLIC_API_BASE_URL=http://<IP-LAN-DEL-PC>:3000/api/v1
 ```
 
 `EXPO_PUBLIC_*` se incluye en el bundle de la app y no debe contener secretos.
-La URL del API no es un secreto. En pruebas LAN, el backend debe escuchar
+La URL del API no es un secreto. **Solo para el modo sintético**, en pruebas LAN el backend debe escuchar
 temporalmente en `0.0.0.0`, y el celular y el PC deben estar conectados a la misma
 red privada. El teléfono debe conectarse a la IP privada del PC, no a `0.0.0.0`.
 No expongas el API a Internet.
@@ -60,8 +141,8 @@ texto seleccionable, muestra el Markdown sintético sin ejecutar HTML ni enlaces
 maneja carga, error, 404 y reintento. El corpus actual usa Markdown; la app no afirma
 interpretar otros formatos documentales.
 
-La selección de perfiles conserva el alcance de demostración local con corpus
-sintético. Una futura autenticación de usuario final requiere diseño explícito;
+La selección de perfiles del modo sintético conserva su alcance de demostración;
+el modo CCD usa el contexto técnico sin identidad descrito arriba. Una futura autenticación de usuario final requiere diseño explícito;
 no hay despliegue, identidad ni integración institucional previstos en el alcance
 vigente. El backend actual usa Intent Router y Document RAG directo; Agent/ReAct
 y MCP siguen pendientes como arquitectura objetivo.

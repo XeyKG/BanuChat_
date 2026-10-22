@@ -4,6 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { getProfiles, type ProfileSummary } from '@/api/profiles';
+import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { AppButton } from '@/components/app-button';
 import { useSession } from '@/session/session-context';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
@@ -28,7 +29,7 @@ export default function ProfileSelectorScreen() {
       .then((result) => {
         if (!isMounted) return;
         setProfiles(result.profiles);
-        setSelectedProfile(null);
+        setSelectedProfile(isCcdLocal() ? result.profiles[0] : null);
         setLoadState('success');
       })
       .catch(() => {
@@ -66,10 +67,9 @@ export default function ProfileSelectorScreen() {
                 <BrandMark size={40} />
                 <Text style={styles.brandName}>BanuChat</Text>
               </View>
-              <Text style={styles.title}>Elige tu perfil</Text>
+              <Text style={styles.title}>{isCcdLocal() ? 'Demostración CCD local' : 'Elige tu perfil'}</Text>
               <Text style={styles.helperText}>
-                Selecciona un perfil de demostración para comenzar. Toda la información es
-                completamente sintética.
+                {isCcdLocal() ? CCD_NOTICE + ' El contexto técnico no identifica a un estudiante. Solo se mostrarán conversaciones creadas durante esta apertura; se conservan en el backend compartido.' : 'Selecciona un perfil de demostración para comenzar. Toda la información es completamente sintética.'}
               </Text>
             </View>
           </FadeIn>
@@ -115,16 +115,16 @@ export default function ProfileSelectorScreen() {
                   return (
                     <FadeIn key={profile.profile_key} delay={120 + index * 90}>
                       <PressableScale
-                        accessibilityLabel={`Seleccionar perfil ${profile.alias}`}
+                        accessibilityLabel={isCcdLocal() ? 'Seleccionar demostración CCD local' : `Seleccionar perfil ${profile.alias}`}
                         accessibilityRole="radio"
                         accessibilityState={{ checked: isSelected, disabled: isContinuing }}
                         disabled={isContinuing}
                         onPress={() => setSelectedProfile(profile)}>
                         <View style={[styles.profileOption, isSelected && styles.profileOptionSelected]}>
-                          <MonogramAvatar alias={profile.alias} size={48} />
+                          {!isCcdLocal() && <MonogramAvatar alias={profile.alias} size={48} />}
                           <View style={styles.profileCopy}>
-                            <Text style={styles.profileLabel}>Perfil de demostración</Text>
-                            <Text style={styles.profileAlias}>{profile.alias}</Text>
+                            <Text style={styles.profileLabel}>{isCcdLocal() ? 'Un operador · sin identidad institucional' : 'Perfil de demostración'}</Text>
+                            <Text style={styles.profileAlias}>{isCcdLocal() ? 'Consultar documentos CCD' : profile.alias}</Text>
                           </View>
                           {isSelected ? (
                             <View style={styles.selectionMarkSelected}>
@@ -143,7 +143,7 @@ export default function ProfileSelectorScreen() {
               <FadeIn delay={140 + profiles.length * 90}>
                 <AppButton
                   disabled={selectedProfile === null}
-                  label="Continuar"
+                  label={isCcdLocal() ? 'Abrir demostración' : 'Continuar'}
                   loading={isContinuing}
                   loadingLabel="Continuando..."
                   onPress={continueWithSelectedProfile}

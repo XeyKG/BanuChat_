@@ -1,5 +1,25 @@
 # Integración y checkpoint técnico
 
+BCH-02 incremento 3 prueba la interfaz existente de Expo Web con API CCD real;
+no sustituye una prueba Android. El relay local y los comandos están en
+[Mobile](../../mobile/README.md). `ccd-mobile-state.mts` captura/compara corpus e
+historial y coteja los POST de interfaz con SQL y hashes de artefactos, sin escribir
+en PostgreSQL. Desde `backend/api`, antes/después de una corrida nueva:
+
+```powershell
+node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-mobile-state.mts before
+# Interacción con la app y backend reales; no reenviar un POST fallido.
+node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-mobile-state.mts after
+```
+
+El baseline se crea con `wx`: no sobrescribirlo ni borrar evidencia anterior para
+repetir la corrida. Para otra evaluación debe elegirse explícitamente un directorio
+nuevo en el verificador. El script después lee los logs del preview CCD de esta
+corrida; no es un E2E que automatice la UI. Evidencia privada e ignorada en
+`data/ccd/evidence/bch02-increment-3` y `mobile/.expo/*-evidence`. Resultados y
+distinción entre 409 real/simulado en el
+[checkpoint](../../docs/transition/bch02-increment-3-checkpoint.md).
+
 BCH-02 incremento 2: [conversaciones CCD por HTTP real](ccd-conversation-http.mts),
 ampliación del runner de continuidad del incremento 1.
 Desde `backend/api`, con PostgreSQL CCD y Ollama locales existentes y

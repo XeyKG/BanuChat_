@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
+import { isCcdLocal } from '@/config/demo-mode';
 
 export interface ProfileSummary {
   profile_key: string;
@@ -57,5 +58,10 @@ export async function getProfiles(): Promise<ProfilesResponse> {
     throw new Error('PROFILES_RESPONSE_INVALID');
   }
 
-  return parseProfilesResponse(payload);
+  const result = parseProfilesResponse(payload);
+  const ccd = result.profiles.filter(profile => profile.profile_key === 'ccd-local-demo');
+  if (isCcdLocal() ? ccd.length !== 1 || result.profiles.length !== 1 : ccd.length > 0) {
+    throw new Error('DEMO_MODE_MISMATCH');
+  }
+  return result;
 }

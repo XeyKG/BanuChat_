@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
+import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useSession } from '@/session/session-context';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
 import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, DocGlyph, SparkGlyph } from '@/ui/icons';
@@ -102,14 +103,14 @@ export default function HomeScreen() {
                 <BrandMark size={36} />
                 <Text style={styles.brandName}>BanuChat</Text>
               </View>
-              <MonogramAvatar alias={activeProfile.alias} size={40} />
+              {!isCcdLocal() && <MonogramAvatar alias={activeProfile.alias} size={40} />}
             </View>
           </FadeIn>
 
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
-              <Text style={styles.greeting}>Hola, {activeProfile.alias}</Text>
-              <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
+              <Text style={styles.greeting}>{isCcdLocal() ? 'Demostración CCD local' : `Hola, ${activeProfile.alias}`}</Text>
+              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : '¿Qué quieres consultar hoy?'}</Text>
             </View>
           </FadeIn>
 
@@ -130,8 +131,8 @@ export default function HomeScreen() {
                 <Text style={styles.heroTitle}>Pregúntale a Banu</Text>
                 <Text style={styles.heroBody}>
                   {isStartingChat
-                    ? 'Creando una conversación segura...'
-                    : 'Progreso, eventos, anuncios y material del programa, con citas verificables.'}
+                    ? (isCcdLocal() ? 'Creando una conversación de demostración...' : 'Creando una conversación segura...')
+                    : (isCcdLocal() ? 'Consulta los documentos CCD, pregunta de nuevo y abre las fuentes de las respuestas.' : 'Progreso, eventos, anuncios y material del programa, con citas verificables.')}
                 </Text>
                 <View style={styles.heroCtaRow}>
                   {isStartingChat && <ActivityIndicator color={colors.white} size="small" />}
@@ -152,7 +153,7 @@ export default function HomeScreen() {
             <FadeIn delay={230}>
               <Text style={styles.sectionLabel}>Accesos directos</Text>
             </FadeIn>
-            <QuickAction
+            {!isCcdLocal() && <><QuickAction
               title="Calendario"
               description="Actividades de los próximos 30 días."
               tint={colors.violet}
@@ -182,9 +183,10 @@ export default function HomeScreen() {
               disabled={isStartingChat}
               delay={400}
             />
+            </>}
             <QuickAction
               title="Historial"
-              description="Tus conversaciones anteriores."
+              description={isCcdLocal() ? 'Solo las creadas durante esta apertura. Historial compartido en el backend, sin privacidad por usuario.' : 'Tus conversaciones anteriores.'}
               tint={colors.accent}
               tintSoft={colors.accentSoft}
               icon="clock"
@@ -196,23 +198,23 @@ export default function HomeScreen() {
 
           <FadeIn delay={520}>
             <View style={styles.sessionSection}>
-              <Text style={styles.sessionTitle}>Sesión de demostración</Text>
+              <Text style={styles.sessionTitle}>{isCcdLocal() ? 'Operador local · memoria temporal' : 'Sesión de demostración'}</Text>
               <View style={styles.sessionActions}>
-                <Pressable
+                {!isCcdLocal() && <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ disabled: isStartingChat }}
                   disabled={isStartingChat}
                   onPress={endSession}
                   style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
                   <Text style={styles.changeProfileLabel}>Cambiar perfil</Text>
-                </Pressable>
+                </Pressable>}
                 <Pressable
                   accessibilityRole="button"
                   accessibilityState={{ disabled: isStartingChat }}
                   disabled={isStartingChat}
                   onPress={endSession}
                   style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
-                  <Text style={styles.closeSessionLabel}>Cerrar sesión demo</Text>
+                  <Text style={styles.closeSessionLabel}>{isCcdLocal() ? 'Finalizar apertura local' : 'Cerrar sesión demo'}</Text>
                 </Pressable>
               </View>
             </View>

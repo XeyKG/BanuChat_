@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
+import { assertConversationAllowed } from '@/session/operator-conversations';
 
 export const MESSAGE_TIMEOUT_MS = 90_000;
 
@@ -42,7 +43,7 @@ export interface SendMessageResponse {
   assistant_message: SentAssistantMessage;
 }
 
-export type MessageRequestErrorKind = 'http' | 'timeout' | 'network' | 'invalid_response';
+export type MessageRequestErrorKind = 'http' | 'conflict' | 'timeout' | 'network' | 'invalid_response';
 
 export class MessageRequestError extends Error {
   constructor(readonly kind: MessageRequestErrorKind) {
@@ -181,6 +182,7 @@ export async function sendMessage(
   conversationId: string,
   content: string,
 ): Promise<SendMessageResponse> {
+  assertConversationAllowed(conversationId);
   const controller = new AbortController();
   let didTimeout = false;
   const timeout = setTimeout(() => {
@@ -204,6 +206,9 @@ export async function sendMessage(
       throw new MessageRequestError(didTimeout ? 'timeout' : 'network');
     }
 
+    if (response.status === 409) {
+      throw new MessageRequestError('conflict');
+    }
     if (response.status !== 201) {
       throw new MessageRequestError('http');
     }

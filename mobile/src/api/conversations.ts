@@ -1,4 +1,6 @@
 import { getApiBaseUrl } from '@/config/api';
+import { isCcdLocal } from '@/config/demo-mode';
+import { assertConversationAllowed, operatorConversationIds, rememberConversation } from '@/session/operator-conversations';
 import { isCitation, type Citation } from '@/api/messages';
 
 export interface CreatedConversation {
@@ -180,10 +182,21 @@ export async function createConversation(profileKey: string): Promise<CreatedCon
     throw new Error('CREATE_CONVERSATION_INVALID_RESPONSE');
   }
 
-  return parseCreatedConversation(payload);
+  const result = parseCreatedConversation(payload);
+  if (result.profile_key !== profileKey) throw new Error('CREATE_CONVERSATION_INVALID_RESPONSE');
+  rememberConversation(result.conversation_id);
+  return result;
 }
 
 export async function listConversations(profileKey: string): Promise<ConversationSummary[]> {
+  if (isCcdLocal()) {
+    const details = await Promise.all(operatorConversationIds().map(getConversation));
+    return details.map(detail => ({
+      conversation_id: detail.conversation_id, profile_key: detail.profile.profile_key,
+      started_at: detail.started_at, message_count: detail.messages.length,
+      last_message_at: detail.messages.at(-1)?.created_at ?? null,
+    })).reverse();
+  }
   const query = new URLSearchParams({ profile_key: profileKey, limit: '50' });
   let response: Response;
   try {
@@ -213,6 +226,7 @@ export async function listConversations(profileKey: string): Promise<Conversatio
 }
 
 export async function getConversation(conversationId: string): Promise<ConversationDetail> {
+  assertConversationAllowed(conversationId);
   let response: Response;
   try {
     response = await fetch(
@@ -234,10 +248,13 @@ export async function getConversation(conversationId: string): Promise<Conversat
     throw new Error('CONVERSATION_INVALID_RESPONSE');
   }
 
-  return parseConversationDetail(payload);
+  const result = parseConversationDetail(payload);
+  if (result.conversation_id !== conversationId) throw new Error('CONVERSATION_INVALID_RESPONSE');
+  return result;
 }
 
 export async function deleteConversation(conversationId: string): Promise<void> {
+  if (isCcdLocal()) throw new Error('CCD_HISTORY_DELETION_DISABLED');
   let response: Response;
   try {
     response = await fetch(
