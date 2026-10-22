@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Alert,
@@ -68,15 +68,16 @@ export default function HistoryScreen() {
         setConversations([]);
         setLoadState('error');
       });
+    return () => {
+      isMounted = false;
+    };
   }, [activeProfile]);
 
   useEffect(() => {
     if (activeProfile === null) router.replace('/profiles');
   }, [activeProfile, router]);
 
-  useEffect(() => {
-    loadConversations();
-  }, [loadConversations]);
+  useFocusEffect(loadConversations);
 
   function retry() {
     setLoadState('loading');
