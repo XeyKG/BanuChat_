@@ -1,5 +1,37 @@
 # Corpus CCD local — BCH-03 incremento 1
 
+## Ampliación publicada en el incremento 4
+
+La versión `bch03-ccd-local-2` usa `schemas/corpus-1.1.schema.json` y vive en
+`local/expanded-v2`, ignorado por Git. Conserva M01/M12 sin cambios de contenido y
+añade siete resúmenes M02 (DOC-098–104, C05, descripción/competencias/temáticas,
+§2–4 de cada syllabus) y una unidad `TEST_ORIENTATION` (DOC-110 §2, C11/M04 en
+la auditoría: solo propósito, estructura y duración para 202660). Esta última etiqueta
+técnica no admite los efectos académicos bloqueados de M04.
+
+Cada curso tiene periodo no confirmado: el nombre del PDF no prueba su oferta
+actual. Los nuevos derivados tienen estado `source_checked_local_candidate`,
+revisión de fuentes durante la implementación; no validación nueva del equipo ni
+aval CCD. M01/M12 conservan `team_validated_local_candidate`. Las huellas físicas,
+localizadores y límites completos están en el manifiesto privado. Solo el contenido
+depurado produce embeddings; no se incorporan los PDF completos ni sus metadatos
+como documentos adicionales.
+
+La receta explícita `ccd_expanded_v1` admite exactamente diez unidades conocidas,
+un chunk por unidad y nueve fuentes. No flexibiliza los conteos sintéticos ni el
+contrato original. Para preparar desde `backend/rag`:
+
+```powershell
+npm run prepare:ccd -- --corpus-root ../../data/ccd/local/expanded-v2 --institutional-root <raíz-local>
+```
+
+Añadir `--write-snapshot` únicamente para materializar un snapshot nuevo.
+El procedimiento y resultados actuales están en
+[checkpoint 4](../../docs/transition/bch03-increment-4-checkpoint.md). Las secciones
+siguientes describen el antecedente M01/M12. Los verificadores de incrementos 2/3
+son históricos y esperan aquella release de dos unidades; el runner actual es
+`eval/integration/ccd-expansion.mts`.
+
 Contrato independiente del dataset sintético: `schemas/corpus.schema.json`, versión
 `ccd-1.0.0`. Solo M01/M12, validación del equipo y uso en desarrollo local; sin aval
 institucional formal ni actualidad ratificada. No contiene datos personales.

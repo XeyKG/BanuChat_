@@ -4,10 +4,18 @@ import { storageCounts, type StorageRecipe } from './recipe.js';
 
 /** succeeded and ready/current commit together; defaults preserve the frozen v1 counts. */
 export async function finalizeAndPublish(lease: WriterLease, release: string, run: string,
-  recipe: StorageRecipe = 'synthetic_v1'): Promise<void> {
+  recipe: StorageRecipe = 'synthetic_v1', transition?: { expectedRelease: string }): Promise<void> {
   const expected = storageCounts(recipe);
   await lease.transaction(async () => {
     invariant((await lease.query('SELECT id FROM banuchat.datasets WHERE id=1 FOR UPDATE')).rowCount === 1);
+    if (transition) {
+      invariant(recipe === 'ccd_expanded_v1');
+      const pointer = await lease.query<{ current_release_id: string }>('SELECT current_release_id FROM banuchat.datasets WHERE id=1');
+      invariant(pointer.rows[0]?.current_release_id === transition.expectedRelease);
+      const context = await lease.query(`INSERT INTO banuchat.ccd_demo_contexts(dataset_release_id,profile_key,alias)
+        SELECT $1,profile_key,alias FROM banuchat.ccd_demo_contexts WHERE dataset_release_id=$2 AND profile_key='ccd-local-demo'`, [release, transition.expectedRelease]);
+      invariant(context.rowCount === 1);
+    }
     const candidate = await lease.query<{ status: string }>('SELECT status FROM banuchat.dataset_releases WHERE id=$1 AND dataset_id=1 FOR UPDATE', [release]);
     invariant(candidate.rows[0]?.status === 'staging');
     const attempt = await lease.query<{ status: string }>('SELECT status FROM banuchat.ingestion_runs WHERE id=$1 AND dataset_release_id=$2 FOR UPDATE', [run, release]);

@@ -134,7 +134,7 @@ export async function generateDocumentRagAnswer(
         ? DOCUMENT_RAG_SYSTEM_PROMPT.replace(
           'un asistente de demostración que responde únicamente con la evidencia sintética proporcionada',
           'un asistente de pruebas locales que responde únicamente con la evidencia CCD seleccionada proporcionada, validada por el equipo y sin aval institucional formal',
-        ) + '\n\nSitúa las respuestas institucionales en el periodo documentado 202660. En respuestas de contacto indica ese periodo y que la vigencia actual no está ratificada; no presentes el correo como directorio vigente confirmado.'
+        ) + '\n\nRespeta el periodo específico de cada fuente. Los lineamientos corresponden a 202660; los syllabus son ediciones entregadas cuyo periodo y vigencia no están confirmados: no les atribuyas 202660 ni oferta actual. En respuestas de contacto indica 202660 y que la vigencia actual no está ratificada. Describe cursos y propósito de pruebas solo con contenido respaldado; no deduzcas cupos, horarios, gratuidad, elegibilidad, equivalencias, reconocimiento ni exenciones académicas.'
         : DOCUMENT_RAG_SYSTEM_PROMPT,
       user_prompt: buildUserPrompt(chunks, retrievalInput.query),
     },

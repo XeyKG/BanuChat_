@@ -14,6 +14,7 @@ import { finalizeAndPublish } from '../db/finalize.js';
 import { withAttemptFailure } from '../db/failure.js';
 import { assertSameRuntime } from '../ollama/config.js';
 import type { EmbeddingClient } from '../ollama/types.js';
+import { storageCounts } from '../db/recipe.js';
 
 const execute = promisify(execFile);
 export async function captureCcdCode(root: string) {
@@ -24,7 +25,8 @@ export async function captureCcdCode(root: string) {
   invariant(/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(baseline));
   const scope = ['backend/rag/src', 'backend/rag/package.json', 'backend/rag/package-lock.json',
     'backend/rag/tsconfig.json', 'data/ccd/schemas',
-    'infra/db/001_initial_schema.sql', 'infra/db/002_ccd_local_manifest.sql'];
+    'infra/db/001_initial_schema.sql', 'infra/db/002_ccd_local_manifest.sql',
+    'infra/db/003_ccd_chat_demo.sql', 'infra/db/004_ccd_expanded_manifest.sql'];
   const names = new Set((await git('ls-files', '-z', '--', ...scope) +
     await git('ls-files', '--others', '--exclude-standard', '-z', '--', ...scope)).split('\0').filter(Boolean));
   const reader = await SafeReader.create(root);
@@ -41,20 +43,25 @@ export async function assertCcdDatabase(pool: Pool): Promise<void> {
 
 /** Manual CCD execution only. No implicit retry/recovery and no synthetic coercion. */
 export async function ingestCcdCorpus(pool: Pool, client: EmbeddingClient, options: {
-  corpusRoot: string; institutionalRoot: string; runtimeRoot: string;
+  corpusRoot: string; institutionalRoot: string; runtimeRoot: string; expectedCurrentReleaseId?: string;
 }) {
   await assertCcdDatabase(pool);
   const prepared = await prepareCcdCorpus(options);
+  const expanded = prepared.corpus.schema_version === 'ccd-1.1.0';
+  const recipe = expanded ? 'ccd_expanded_v1' : 'ccd_local';
+  const counts = storageCounts(recipe);
+  invariant(!expanded || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(options.expectedCurrentReleaseId ?? ''));
   const local = await SafeReader.create(options.corpusRoot);
   for (const [name, bytes] of ccdSnapshotFiles(prepared)) invariant(bytes.equals(await local.read(name)));
   const code = await captureCcdCode(options.runtimeRoot);
   const pipeline = { ...prepared.pipeline, source_revision_kind: 'local_snapshot_sha256',
-    source_snapshot_sha256: prepared.corpus_sha256, ...code };
+    source_snapshot_sha256: prepared.corpus_sha256, ...code,
+    ...(expanded ? { predecessor_release_id: options.expectedCurrentReleaseId } : {}) };
   return withWriterLease(pool, async lease => {
     const config = await client.inspect();
     const embeddingConfigId = await resolveEmbeddingConfig(lease, config);
     const setup = await lease.transaction(async () => {
-      const dataset = await lease.query<{ name: string }>('SELECT name FROM banuchat.datasets WHERE id=1 FOR UPDATE');
+      const dataset = await lease.query<{ name: string; current_release_id: string }>('SELECT name,current_release_id FROM banuchat.datasets WHERE id=1 FOR UPDATE');
       if (!dataset.rows.length) await lease.query('INSERT INTO banuchat.datasets (id,name) VALUES (1,$1)', [prepared.corpus.dataset_key]);
       else invariant(dataset.rows[0]?.name === prepared.corpus.dataset_key);
       const values = [code.code_base_git_revision, JSON.stringify(prepared.manifest), JSON.stringify(pipeline), embeddingConfigId];
@@ -66,32 +73,39 @@ export async function ingestCcdCorpus(pool: Pool, client: EmbeddingClient, optio
         invariant(existing.rows[0].status === 'ready' && existing.rows[0].current);
         return { release: existing.rows[0].id, run: null };
       }
-      // First-load command will not silently replace an older or failed candidate.
-      invariant((await lease.query('SELECT id FROM banuchat.dataset_releases')).rowCount === 0);
+      if (expanded) {
+        invariant(dataset.rows[0]?.current_release_id === options.expectedCurrentReleaseId);
+        invariant((await lease.query("SELECT id FROM banuchat.dataset_releases WHERE status<>'ready'")).rowCount === 0);
+        const previous = await lease.query<{ manifest: typeof prepared.manifest }>('SELECT manifest FROM banuchat.dataset_releases WHERE id=$1', [options.expectedCurrentReleaseId]);
+        for (const key of ['ccd-m01', 'ccd-m12']) {
+          invariant(previous.rows[0]?.manifest.items.find(item => item.key === key)?.sha256 === prepared.manifest.items.find(item => item.key === key)?.sha256);
+        }
+      } else invariant((await lease.query('SELECT id FROM banuchat.dataset_releases')).rowCount === 0);
       const release = await lease.query<{ id: string }>(`INSERT INTO banuchat.dataset_releases
         (dataset_id,git_revision,manifest,pipeline_config,embedding_config_id,dataset_schema_version,status)
-        VALUES (1,$1,$2::jsonb,$3::jsonb,$4,'ccd-1.0.0','staging') RETURNING id`, values);
+        VALUES (1,$1,$2::jsonb,$3::jsonb,$4,$5,'staging') RETURNING id`, [...values, prepared.corpus.schema_version]);
       invariant(release.rows[0]);
-      const run = await openRun(lease, release.rows[0].id, 'bch03-ccd-manual-v1', prepared.manifest.items, 'manual', 'ccd_local');
+      const run = await openRun(lease, release.rows[0].id, expanded ? 'bch03-ccd-expanded-v1' : 'bch03-ccd-manual-v1', prepared.manifest.items, 'manual', recipe);
       return { release: release.rows[0].id, run };
     });
     if (setup.run === null) return { outcome: 'already_current', release_id: setup.release, embeddings_generated: 0 };
     return withAttemptFailure(lease, setup.release, setup.run, async () => {
       await stageDocuments(lease, setup.release, setup.run!, prepared.documents, prepared.derivatives,
-        prepared.manifest.items, false, 'ccd_local');
+        prepared.manifest.items, false, recipe);
       const count = await generateEmbeddings(lease, setup.release, setup.run!, {
         embeddingConfigId, derivatives: prepared.derivatives, validated: { manifest: prepared.manifest },
-      }, client, config, 2, 'ccd_local');
-      invariant(count === 2);
+      }, client, config, 2, recipe);
+      invariant(count === counts.chunks);
       assertSameRuntime(config, await client.inspect());
       const revalidated = await prepareCcdCorpus(options);
       invariant(revalidated.corpus_sha256 === prepared.corpus_sha256
         && revalidated.schema_sha256 === prepared.schema_sha256
         && JSON.stringify(await captureCcdCode(options.runtimeRoot)) === JSON.stringify(code));
       for (const [name, bytes] of ccdSnapshotFiles(revalidated)) invariant(bytes.equals(await local.read(name)));
-      await finalizeAndPublish(lease, setup.release, setup.run!, 'ccd_local');
+      await finalizeAndPublish(lease, setup.release, setup.run!, recipe,
+        expanded ? { expectedRelease: options.expectedCurrentReleaseId! } : undefined);
       return { outcome: 'published', release_id: setup.release, run_id: setup.run,
-        documents: 2, chunks: 2, embeddings_generated: count, embedding_config: config,
+        documents: counts.documents, chunks: counts.chunks, embeddings_generated: count, embedding_config: config,
         source_snapshot_sha256: prepared.corpus_sha256, code_provenance: code };
     });
   });

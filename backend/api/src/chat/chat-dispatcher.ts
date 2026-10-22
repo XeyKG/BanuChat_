@@ -49,13 +49,14 @@ export async function dispatchChatQuery(
   });
 
   if (dependencies.demo_mode === "ccd_local") {
-    const scope = "Demostración CCD local, sin identidad institucional. Solo consulta estructura de la ruta y contacto documentados para 202660; no determina progreso, oferta, pagos ni reglas académicas individuales.";
+    const scope = "Demostración CCD local, sin identidad institucional. Consulta estructura de la ruta, contacto, descripciones de cursos y orientación general sobre pruebas según los documentos disponibles; no determina progreso, oferta, pagos ni reglas académicas individuales ni acredita vigencia actual.";
     if (decision.route === "capabilities_help" ||
       (decision.route === "basic_social" && decision.response_variant === "greeting")) {
       return { kind: "answered", route: decision.route, release_id: input.release_id, content: scope,
         insufficient_evidence: false, citations: [], citation_records: [] };
     }
-    if (["course_catalog", "profile_progress", "calendar_events", "announcements"].includes(decision.route)) {
+    if (decision.route === "course_catalog") return AGENT_FALLBACK;
+    if (["profile_progress", "calendar_events", "announcements"].includes(decision.route)) {
       return { kind: "answered", route: "known_out_of_scope", release_id: input.release_id, content: scope,
         insufficient_evidence: true, citations: [], citation_records: [] };
     }

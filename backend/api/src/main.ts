@@ -84,6 +84,10 @@ export async function startApi(): Promise<void> {
       demo_mode: config.demo_mode,
       ...(config.demo_mode === "ccd_local" ? { document_artifact: {
         root: fileURLToPath(new URL("../../../data/ccd/local/m01-m12/", import.meta.url)),
+        version_roots: {
+          "bch03-m01-m12-local-1": fileURLToPath(new URL("../../../data/ccd/local/m01-m12/", import.meta.url)),
+          "bch03-ccd-local-2": fileURLToPath(new URL("../../../data/ccd/local/expanded-v2/", import.meta.url)),
+        },
       } } : {}),
     });
     await new Promise<void>((resolve, reject) => {

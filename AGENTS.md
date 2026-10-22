@@ -96,6 +96,10 @@ en `banuchat_ccd_dev`; se mantiene aislada la demo y no se cambia REST/MCP.
 Incremento 3 autoriza chat HTTP CCD local, contexto técnico de demostración separado
 del corpus y migración 003 exclusiva CCD. Mantener los schemas REST; la adaptación
 semántica de `profile_key` está documentada en `backend/api/api-contract.md`.
+Incremento 4 autoriza la ampliación CCD seleccionada (M02, DOC-098–104, y orientación
+general de pruebas de DOC-110), contrato `ccd-1.1.0`, migración 004 exclusiva CCD
+y publicación de otra release sin borrar la anterior. No habilita reglas académicas
+contradictorias, oferta vigente ni autenticación institucional.
 
 ## Reglas de implementación
 

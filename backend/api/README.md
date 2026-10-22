@@ -1,5 +1,14 @@
 # API REST — contrato y estado implementado
 
+BCH-03 incremento 4 admite releases CCD `ccd-1.0.0` y `ccd-1.1.0`, con contexto
+técnico por release. En CCD, `course_catalog` consulta descripciones mediante RAG,
+sin afirmar oferta vigente; el modo sintético conserva el fast path estructurado.
+El prompt respeta el periodo de cada evidencia. Las raíces de artefactos CCD se
+seleccionan por versión admitida, conservando citas históricas. Conversaciones de
+una release anterior se pueden leer; enviarles otro mensaje devuelve 409 y exige
+abrir una nueva. No cambia la forma REST ni se añade consulta semántica histórica.
+Ver [checkpoint 4](../../docs/transition/bch03-increment-4-checkpoint.md).
+
 BCH-03 incremento 3 incorpora un modo de chat CCD local sin cambiar schemas REST.
 Tras aplicar `003_ccd_chat_demo.sql` solo en CCD, `GET /profiles` expone el contexto
 `ccd-local-demo` claramente rotulado sin identidad institucional. No es un estudiante

@@ -20,7 +20,8 @@ const DOCUMENT_ARTIFACT_QUERY = `
 SELECT
   dv.id,
   dv.source_path,
-  dv.source_sha256
+  dv.source_sha256,
+  dv.version_label
 FROM banuchat.document_versions dv
 JOIN banuchat.dataset_releases dr
   ON dr.dataset_id = dv.dataset_id
@@ -41,6 +42,7 @@ export interface DocumentArtifactFileSystem {
 
 export interface DocumentArtifactStorage {
   root: string;
+  version_roots?: Readonly<Record<string, string>>;
   filesystem?: DocumentArtifactFileSystem;
 }
 
@@ -107,10 +109,16 @@ export async function getDocumentArtifact(
   }
 
   const filesystem = storage.filesystem ?? FILESYSTEM;
+  let configuredRoot = storage.root;
+  if (storage.version_roots) {
+    if (!("version_label" in row) || typeof row.version_label !== "string" ||
+      !Object.hasOwn(storage.version_roots, row.version_label)) throw new DocumentArtifactError("not_found");
+    configuredRoot = storage.version_roots[row.version_label]!;
+  }
   let root: string;
   try {
-    if (!isAbsolute(storage.root)) throw new DocumentArtifactError("filesystem_error");
-    root = await filesystem.realpath(storage.root);
+    if (!isAbsolute(configuredRoot)) throw new DocumentArtifactError("filesystem_error");
+    root = await filesystem.realpath(configuredRoot);
     if (!isAbsolute(root) || !(await filesystem.stat(root)).isDirectory()) {
       throw new DocumentArtifactError("filesystem_error");
     }

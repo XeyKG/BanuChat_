@@ -56,6 +56,25 @@ test("artifact canonicalizes uppercase UUID and returns only exact verified byte
   ]);
 });
 
+test("artifact selects an allowlisted historical version root, not the current root", async () => {
+  const filesystem = new ArtifactFileSystem();
+  const sql = new ArtifactSqlClient([{ ...ARTIFACT_ROW, version_label: "old-version" }]);
+  const result = await getDocumentArtifact(sql, { document_version_id: DOCUMENT_ID }, {
+    root: resolve(ARTIFACT_ROOT, "current"), version_roots: { "old-version": ARTIFACT_ROOT }, filesystem,
+  });
+  assert.deepEqual(result.bytes, ARTIFACT_BYTES);
+  assert.equal(filesystem.calls[0]?.path, ARTIFACT_ROOT);
+});
+
+test("artifact refuses an unadmitted version label before reading any filesystem path", async () => {
+  const filesystem = new ArtifactFileSystem();
+  const sql = new ArtifactSqlClient([{ ...ARTIFACT_ROW, version_label: "unknown" }]);
+  await assert.rejects(getDocumentArtifact(sql, { document_version_id: DOCUMENT_ID }, {
+    root: ARTIFACT_ROOT, version_roots: { "old-version": ARTIFACT_ROOT }, filesystem,
+  }), hasReason("not_found"));
+  assert.equal(filesystem.calls.length, 0);
+});
+
 test("artifact SQL selects exactly the ready version in its ready release, including historical releases", async () => {
   const sql = new ArtifactSqlClient();
   await retrieve(sql);

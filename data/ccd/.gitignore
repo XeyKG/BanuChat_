@@ -5,3 +5,4 @@
 !schemas/
 schemas/*
 !schemas/corpus.schema.json
+!schemas/corpus-1.1.schema.json

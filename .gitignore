@@ -73,3 +73,4 @@ Desktop.ini
 !/data/ccd/schemas/
 /data/ccd/schemas/*
 !/data/ccd/schemas/corpus.schema.json
+!/data/ccd/schemas/corpus-1.1.schema.json

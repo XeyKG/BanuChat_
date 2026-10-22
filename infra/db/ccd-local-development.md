@@ -1,5 +1,39 @@
 # Persistencia local CCD — delta del incremento 1
 
+## Transición ejecutada en el incremento 4
+
+`004_ccd_expanded_manifest.sql` amplía exclusivamente el validador CCD en la base
+existente; conserva la rama original y la sintética. No modifica 001/002/003 ni
+reinicializa tablas. Aplicar una sola vez, con la release CCD original publicada:
+`npm run ccd:local -- expand-migrate` desde `backend/rag`.
+
+La publicación usa `npm run ccd:local -- ingest-expanded <release-predecesora>`.
+Esta operación exige snapshot `local/expanded-v2` revalidado, identidad Docker/DB CCD,
+puntero predecesor explícito y ausencia de releases incompletas. Staging, embeddings,
+validaciones de integridad, nuevo contexto `ccd-local-demo` y cambio de puntero
+reutilizan la ingesta y publicación existentes; los dos últimos ocurren en la misma
+transacción final bajo bloqueo. Un puntero distinto aborta sin publicar. Una invocación
+idéntica devuelve `already_current`; no reactiva releases históricas ni ejecuta retry.
+
+Las conversaciones anteriores siguen legibles, con mensajes y citas inmutables.
+Enviarles preguntas tras cambiar la release devuelve 409; abrir otra conversación
+para usar el corpus actual. Los artefactos históricos se sirven desde una lista
+explícita de raíces por versión, con verificación SHA; no hay consulta semántica
+histórica ni mezcla silenciosa de releases. La forma REST permanece intacta.
+
+Verificación ampliada desde `backend/rag`:
+
+```powershell
+node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-expansion.mts http
+```
+
+Requiere API compilada, PostgreSQL/Ollama y puertos 3001/3302 libres. El runner
+crea historial CCD, comprueba el previo y usa solo GET en la demo sintética. El modo
+`preflight` se ejecutó antes de cargar (validador con rollback y snapshot histórico);
+no debe repetirse como preparación de una base ya ampliada.
+
+Resultados y límites: [checkpoint 4](../../docs/transition/bch03-increment-4-checkpoint.md).
+
 ## Chat HTTP local del incremento 3
 
 `003_ccd_chat_demo.sql` se aplica exclusivamente en CCD publicado y sin chats

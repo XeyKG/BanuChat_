@@ -43,15 +43,17 @@ test("CCD contact previously classified out of scope reaches RAG; help and unsup
     catalog_valid: true, catalog_version: "fixture", route: () => ({ route, parameters: {},
       response_variant: route === "capabilities_help" ? "capabilities" : "not_available" }),
   });
-  const fallback = await dispatchChatQuery({ sql, router: routerFor("known_out_of_scope"), demo_mode: "ccd_local" }, input);
-  assert.deepEqual(fallback, { kind: "agent_fallback" });
-  for (const route of ["capabilities_help", "course_catalog"] as const) {
+  for (const route of ["known_out_of_scope", "course_catalog"] as const) {
+    const fallback = await dispatchChatQuery({ sql, router: routerFor(route), demo_mode: "ccd_local" }, input);
+    assert.deepEqual(fallback, { kind: "agent_fallback" });
+  }
+  for (const route of ["capabilities_help"] as const) {
     const answer = await dispatchChatQuery({ sql, router: routerFor(route), demo_mode: "ccd_local" }, input);
     assert.equal(answer.kind, "answered");
     if (answer.kind === "answered") {
       assert.match(answer.content, /sin identidad institucional/);
       assert.deepEqual(answer.citation_records, []);
-      assert.equal(answer.insufficient_evidence, route === "course_catalog");
+      assert.equal(answer.insufficient_evidence, false);
     }
   }
 });

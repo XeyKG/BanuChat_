@@ -10,7 +10,8 @@ import { invariant } from '../db/errors.js';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
 try {
   const operation = process.argv[2];
-  invariant(process.argv.length === 3 && ['migrate', 'ingest', 'inspect', 'chat-migrate'].includes(operation ?? ''));
+  invariant((process.argv.length === 3 && ['migrate', 'ingest', 'inspect', 'chat-migrate', 'expand-migrate'].includes(operation ?? ''))
+    || (process.argv.length === 4 && operation === 'ingest-expanded'));
   const { pool, identity } = await connectCcdLocal();
   try {
     const reader = await SafeReader.create(root);
@@ -23,13 +24,17 @@ try {
     } else if (operation === 'chat-migrate') {
       await pool.query((await reader.read('infra/db/003_ccd_chat_demo.sql')).toString('utf8'));
       console.log(JSON.stringify({ identity, migrations_applied: ['003_ccd_chat_demo.sql'] }));
-    } else if (operation === 'ingest') {
+    } else if (operation === 'expand-migrate') {
+      await pool.query((await reader.read('infra/db/004_ccd_expanded_manifest.sql')).toString('utf8'));
+      console.log(JSON.stringify({ identity, migrations_applied: ['004_ccd_expanded_manifest.sql'] }));
+    } else if (operation === 'ingest' || operation === 'ingest-expanded') {
       invariant(process.env.CCD_INSTITUTIONAL_ROOT);
       const result = await ingestCcdCorpus(pool, new OllamaClient('http://127.0.0.1:11434'), {
-        corpusRoot: path.join(root, 'data/ccd/local/m01-m12'), institutionalRoot: process.env.CCD_INSTITUTIONAL_ROOT,
+        corpusRoot: path.join(root, operation === 'ingest-expanded' ? 'data/ccd/local/expanded-v2' : 'data/ccd/local/m01-m12'), institutionalRoot: process.env.CCD_INSTITUTIONAL_ROOT,
         runtimeRoot: root,
+        ...(operation === 'ingest-expanded' ? { expectedCurrentReleaseId: process.argv[3]! } : {}),
       });
-      const evidence = path.join(root, 'data/ccd/evidence/increment-2');
+      const evidence = path.join(root, operation === 'ingest-expanded' ? 'data/ccd/evidence/increment-4' : 'data/ccd/evidence/increment-2');
       await mkdir(evidence, { recursive: true });
       await writeFile(path.join(evidence, `ingestion-${Date.now()}.json`), JSON.stringify({ identity, result }, null, 2) + '\n', { flag: 'wx' });
       console.log(JSON.stringify({ identity, outcome: result.outcome, release_id: result.release_id,
