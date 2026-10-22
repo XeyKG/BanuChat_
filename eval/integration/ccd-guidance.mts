@@ -126,6 +126,12 @@ try {
       if(scenario.id==='T02') check(`${scenario.id}/${index+1} useful U03, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U03'));});
       if(['T03','T05','T06','T09'].includes(scenario.id)) check(`${scenario.id}/${index+1} useful U04 limits, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U04'));});
       if(scenario.id.startsWith('T10')) check(`${scenario.id} clarification isolated`,()=>{assert.equal(answer.insufficient_evidence,true);assert.match(answer.content,/refieres|contexto/);assert.equal(answer.citations.length,0);});
+      if(scenario.id==='T07') check(`T07/${index+1} pertinent content, citations and caveats`,()=>{
+       assert.deepEqual(answer.citations,[]);
+       assert.doesNotMatch(answer.content,/Inform[aá]tica|transici[oó]n|reconocimientos?|homolog|pilar|202660|202560|202610|hist[oó]ric|vigencia|matr[ií]cula/iu);
+       assert.equal(hasUnbackedGuidanceClaim(answer.content),false);
+       assert.doesNotMatch(answer.content,/\b(?:la ausencia|no asistir|no presentarse) (?:equivale|cuenta|se considera|significa).*reprob/iu);
+      });
       if(scenario.id==='T08'&&index===2) check('course recovery does not grant a new-test exemption',()=>{assert.doesNotMatch(answer.content,/no (?:se requiere|es necesario|debes|tienes que|necesitas).*present/iu);assert.match(answer.content,/confirm|verific|comprobar/iu);});
       if((scenario.id==='T12'&&index===3)||(scenario.id==='REG'&&index===5)) check(`${scenario.id} contact really answered with pertinent caveat`,()=>{assert.equal(answer.insufficient_evidence,false);assert.deepEqual(answer.citations.map((c:any)=>c.locator),['unit:M12']);assert.match(answer.content,/vigencia actual no está ratificada/);});
      }

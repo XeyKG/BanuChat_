@@ -9,7 +9,7 @@ import type {
 import type { QueryEmbeddingClient } from "../retrieval/query-embedding-client.js";
 import { buildDocumentCitations } from "./document-citations.js";
 import { resolveConversationQuery, type ConversationMessage } from "./conversation-context.js";
-import { asksUnsupportedTestRule, CCD_GUIDANCE_INSTRUCTION, GROUNDED_ANSWER_INSTRUCTION, hasUnbackedGuidanceClaim, isCourseFailureContext, parseGroundedAnswer, selectCcdEvidence } from "./document-evidence.js";
+import { asksUnsupportedTestRule, ccdGuidanceTopic, CCD_GUIDANCE_INSTRUCTION, GROUNDED_ANSWER_INSTRUCTION, hasUnbackedGuidanceClaim, isCourseFailureContext, parseGroundedAnswer, selectCcdEvidence } from "./document-evidence.js";
 import type {
   PersistenceCitation,
   PresentationCitation,
@@ -186,8 +186,10 @@ export async function generateDocumentRagAnswer(
 
   // Listing the admitted syllabus requires titles, not a large generation prompt.
   // This targeted metadata rendering also avoids omitting a course in a follow-up.
-  const guidanceEvidence = dependencies.evidence_mode === 'ccd_local'
-    && chunks.some(chunk => chunk.chunk_locator === 'unit:U03' || chunk.chunk_locator === 'unit:U04');
+  const guidanceTopic = dependencies.evidence_mode === 'ccd_local'
+    ? ccdGuidanceTopic(input.query, resolved.history) : undefined;
+  const primary = guidanceTopic ? chunks.find(chunk => chunk.chunk_locator === `unit:${guidanceTopic}`) : undefined;
+  const guidanceEvidence = primary !== undefined;
   const explicitContact = dependencies.evidence_mode === 'ccd_local'
     && chunks.every(chunk => chunk.chunk_locator === 'unit:M12')
     && /contacto|correo|email/iu.test(input.query);
@@ -215,7 +217,6 @@ export async function generateDocumentRagAnswer(
     dependencies.generator_config,
   );
 
-  const primary = chunks.find(chunk => chunk.chunk_locator === 'unit:U03' || chunk.chunk_locator === 'unit:U04');
   if (guidanceEvidence && primary && generated.content.trim() === INSUFFICIENT_EVIDENCE_MARKER) {
     const excerpt = guidanceExcerpt(primary, input.query, isCourseFailureContext(input.query, resolved.history));
     if (excerpt) generated.content = `${excerpt}\nFUENTES: [${chunks.indexOf(primary) + 1}]`;
@@ -236,7 +237,7 @@ export async function generateDocumentRagAnswer(
       supportingChunks = supportingChunks.filter(chunk => chunk.chunk_locator !== 'unit:M12');
     }
     if (supportingChunks.length === 0) return insufficientEvidenceAnswer(input.release_id);
-    const primaryGuidance = chunks.find(chunk => chunk.chunk_locator === 'unit:U03' || chunk.chunk_locator === 'unit:U04');
+    const primaryGuidance = primary;
     // A categorical denial is no more justified than a grant. Replace only that
     // unsafe negative formulation with a literal, admitted contextual passage.
     const deniesKnownConsequence = primaryGuidance?.chunk_locator === 'unit:U03'

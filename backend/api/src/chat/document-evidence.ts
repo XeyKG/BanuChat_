@@ -9,12 +9,10 @@ function normalize(text: string): string {
 /** A conversational antecedent, not eligibility or institutional evidence. */
 export function ccdGuidanceTopic(query: string, history: readonly ConversationMessage[]): 'U03' | 'U04' | undefined {
   const subjects = [query, ...history.filter(m => m.role === 'user').map(m => m.content).reverse()];
-  let unsupported = false;
   for (const subject of subjects) {
     const text = normalize(subject);
-    unsupported ||= asksUnsupportedTestRule(subject);
     if (/\b(?:contacto|correo|email)\b/u.test(text) || /\b(?:duracion|cuanto duran?|estructura|proposito|resultados?|inmediata|plataforma)\b/u.test(text)) return undefined;
-    if (/\b(?:informatica|transicion|antigu\p{L}*|homolog\p{L}*|equivalen\p{L}*|reconoc\p{L}*|word|powerpoint|excel|tec|dual|continuos|cohorte)\b/u.test(text)) return 'U04';
+    if (/\b(?:informatica|transicion|antigu\p{L}*|homolog\p{L}*|equivalen\p{L}*|reconoc\p{L}*|word|powerpoint|excel)\b/u.test(text)) return 'U04';
     if (/\b(?:corrijo|correccion|fue)\b.*\bcurso\b/u.test(text)) return 'U03';
     if (/\b(?:reprob\p{L}*|reprueb\p{L}*|pierdo|pierda|perdi|perder|perdido|perdida)\b|\bno (?:\p{L}+ ){0,3}(?:aprob\p{L}*|valid\p{L}*|super\p{L}*)\b/u.test(text)) return 'U03';
     // A fresh, named syllabus must not inherit an earlier test consequence.
@@ -22,7 +20,7 @@ export function ccdGuidanceTopic(query: string, history: readonly ConversationMe
       && !/\b(?:eso|equivale|significa|quiere decir)\b/u.test(text)) return undefined;
     if (/\bpruebas?\b/u.test(text) && !asksUnsupportedTestRule(subject)) return undefined;
   }
-  return unsupported ? 'U04' : undefined;
+  return undefined;
 }
 
 /** Latest explicit user antecedent distinguishes course recovery from a failed new test. */
@@ -59,7 +57,8 @@ export function selectCcdEvidence(
     });
     if (courses.length > 0) return courses;
   }
-  return [...chunks];
+  // Unrecognized topics must not acquire guidance merely because it was retrieved.
+  return chunks.filter(chunk => !['unit:U03', 'unit:U04'].includes(chunk.chunk_locator));
 }
 
 /** Reject positive authorizations; mentioning a blocked situation or its uncertainty is allowed. */
@@ -96,7 +95,7 @@ No se han admitido el cronograma/requisitos de pruebas, plataformas/resultados, 
 
 /** TEST_ORIENTATION admits description only, never effects, fees or individual eligibility. */
 export function asksUnsupportedTestRule(query: string): boolean {
-  return /\b(?:gratuit\p{L}*|gratis|repet\p{L}*|homolog\p{L}*|exen\p{L}*|reconoc\p{L}*|equivalen\p{L}*|elegib\p{L}*|obligatori\p{L}*|oportunidades|puntos|puntaje|pierda\p{L}*|reprueb\p{L}*)\b|\bsin costo\b|\bno asisti\b|\bno (?:l[oa]s? )?presente\b|\bno (?:l[oa]s? )?aprueb\p{L}*/u.test(normalize(query));
+  return /\b(?:gratuit\p{L}*|gratis|repet\p{L}*|homolog\p{L}*|exen\p{L}*|reconoc\p{L}*|equivalen\p{L}*|elegib\p{L}*|obligatori\p{L}*|oportunidades|intentos?|derecho|puntos|puntaje|pierda\p{L}*|reprueb\p{L}*)\b|\bsin costo\b|\bno asisti\b|\bno (?:l[oa]s? )?presente\b|\bno (?:l[oa]s? )?aprueb\p{L}*|\badmision tardia\b|\badmit\p{L}* (?:\p{L}+ ){0,3}(?:despues|tarde|posterior\p{L}*)\b/u.test(normalize(query));
 }
 
 /** A private generation protocol, not a REST field. Invalid references fail closed. */

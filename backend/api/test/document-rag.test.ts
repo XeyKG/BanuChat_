@@ -574,6 +574,48 @@ test('empty guidance generation uses a literal retrieved passage, not a fabricat
   assert.equal(fake.generator_calls.length,1);
 });
 
+test('T07 cannot replace generator insufficiency with unrelated U03/U04 passages or caveats', async () => {
+  const retrieved = [
+    chunk({chunk_locator:'unit:U04',content:'# Transición\n\nLa transición de Informática reconoce avance aprobado. Para decidir reconocimientos debe verificarse el plan.'}),
+    chunk({chunk_locator:'unit:U03',content:'# Prueba\n\nLos lineamientos de 202660 indican cursar la asignatura del pilar.'}),
+    chunk({chunk_locator:'unit:TEST_ORIENTATION'}),
+  ];
+  const history: {role:'user'|'assistant';content:string}[]=[];
+  for (const query of ['No asistí a la prueba','Me admitieron después de la primera fecha','¿Es otro intento gratis?']) {
+    const fake=fakeDependencies(retrieved,'EVIDENCIA_INSUFICIENTE');
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query,history});
+    assert.equal(answer.insufficient_evidence,true,query);
+    assert.deepEqual(answer.citations,[],query);assert.deepEqual(answer.citation_records,[],query);
+    assert.doesNotMatch(answer.content,/Informática|transición|202660|pilar|vigencia|gratuidad/iu);
+    assert.equal(fake.generator_calls.length,0,query);
+    for(const call of fake.generator_calls) assert.doesNotMatch(call.input.user_prompt,/Localizador: unit:U0[34]/u);
+    history.push({role:'user',content:query},{role:'assistant',content:answer.content});
+  }
+});
+
+test('an unrecognized topic cannot activate literal guidance even when both guidance units are retrieved', async () => {
+  const fake=fakeDependencies([
+    chunk({chunk_locator:'unit:U04',content:'# Transición\n\nLa transición de Informática contempla reconocer cursos.'}),
+    chunk({chunk_locator:'unit:U03',content:'# Prueba\n\nLos lineamientos de 202660 describen un pilar.'}),
+  ],'EVIDENCIA_INSUFICIENTE');
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Necesito un procedimiento no especificado'});
+  assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);
+  assert.equal(fake.generator_calls.length,0);
+});
+
+test('generator insufficiency for an unrecognized topic remains insufficient after generic retrieval filtering', async () => {
+  const fake=fakeDependencies([
+    chunk({chunk_locator:'unit:U04',content:'# Transición\n\nLa transición de Informática contempla reconocer cursos.'}),
+    chunk({chunk_locator:'unit:U03',content:'# Prueba\n\nLos lineamientos de 202660 describen un pilar.'}),
+    chunk({chunk_locator:'unit:TEST_ORIENTATION'}),
+  ],'EVIDENCIA_INSUFICIENTE');
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Necesito un procedimiento no especificado'});
+  assert.equal(fake.generator_calls.length,1);
+  assert.doesNotMatch(fake.generator_calls[0]!.input.user_prompt,/Localizador: unit:U0[34]/u);
+  assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);assert.deepEqual(answer.citation_records,[]);
+  assert.doesNotMatch(answer.content,/transición|202660|vigencia/iu);
+});
+
 test('course failure cannot exempt a student from new tests by categorical denial', async () => {
   const fake = fakeDependencies([chunk({chunk_locator:'unit:U03',content:'# Scope\n\nConsecuencia histórica de prueba.\n\n- Las reglas particulares de recuperación de un curso reprobado requieren confirmación del CCD/programa. No aplicar la consecuencia de prueba a curso.'})],
     'No, no se requiere presentar nuevas pruebas si se trata de un curso reprobado.\nFUENTES: [1]');

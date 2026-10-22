@@ -21,7 +21,7 @@ test('admitted guidance explains bounded situations without using vector rank or
   assert.equal(ccdGuidanceTopic('Corrijo: fue un curso reprobado, no una prueba', history), 'U03');
   assert.equal(ccdGuidanceTopic('Corrijo: fue un curso, no una prueba', history), 'U03');
   assert.equal(ccdGuidanceTopic('¿Eso quiere decir que aprobé IA Generativa?', [{role:'user',content:'Tengo Excel aprobado del plan anterior'}]), 'U04');
-  assert.equal(ccdGuidanceTopic('Presenté las nuevas pruebas por primera vez sin costo; otro estudiante también las solicitó', []), 'U04');
+  assert.equal(ccdGuidanceTopic('Presenté las nuevas pruebas por primera vez sin costo; otro estudiante también las solicitó', []), undefined);
   assert.deepEqual(selectCcdEvidence(all, 'Ahora quiero el contacto del CCD', history), [contact]);
   assert.deepEqual(selectCcdEvidence(all, '¿Cuánto duran?', history), [tests]);
   assert.deepEqual(selectCcdEvidence(all, 'Corrijo: IA Generativa, ¿qué temas tiene?', history), [ia]);
@@ -38,6 +38,24 @@ test('positive authorizations fail closed while uncertainty and known historical
     'Si tienes Excel aprobado del plan anterior, se debe comprobar el plan con el CCD.',
     'La evidencia no confirma gratuidad, repetición gratuita ni primera presentación gratuita.',
     'Se debe comprobar si el curso está reconocido mediante el plan académico.']) assert.equal(hasUnbackedGuidanceClaim(content), false, content);
+});
+
+test('unsupported absence, cost or eligibility alone never establish a transition topic', () => {
+  const all = [...chunks, failure, transition];
+  for (const query of ['No asistí a la prueba', 'Me admitieron después de la primera fecha',
+    '¿Es otro intento gratis?', '¿Soy elegible como continuo?', 'Presenté las nuevas pruebas por primera vez sin costo; otro estudiante también las solicitó']) {
+    assert.equal(ccdGuidanceTopic(query, []), undefined, query);
+    assert.ok(selectCcdEvidence(all, query, []).every(c => !['unit:U03', 'unit:U04'].includes(c.chunk_locator)), query);
+  }
+  assert.equal(ccdGuidanceTopic('¿Puedo pedir la primera gratis?', [{role:'user',content:'Me quedaron pruebas de Informática pendientes'}]), 'U04');
+  assert.equal(ccdGuidanceTopic('Presenté las nuevas pruebas por primera vez sin costo; otro estudiante también las solicitó',
+    [{role:'user',content:'Me quedaron pruebas de Informática pendientes'}]), 'U04');
+  assert.equal(ccdGuidanceTopic('¿Es otro intento gratis?', [{role:'assistant',content:'La transición de Informática permite repetir'}]), undefined);
+});
+
+test('generic retrieval cannot reintroduce either guidance unit without a pertinent topic', () => {
+  assert.deepEqual(selectCcdEvidence([failure, transition], 'Necesito un procedimiento no especificado', []), []);
+  assert.deepEqual(selectCcdEvidence([failure, contact, transition], 'Necesito un procedimiento no especificado', []), [contact]);
 });
 
 test("course source is selected by title even when it is ranked last", () => {
@@ -65,7 +83,8 @@ test("private source protocol selects a subset in declared order and strips its 
 });
 
 test("test description is admitted but unsupported effects and free repetition are not", () => {
-  for (const question of ["¿Y qué pasa si no las apruebo?", "¿Puedo repetirlas gratuitamente?", "¿Con 70 puntos quedo exento?"]) {
+  for (const question of ["¿Y qué pasa si no las apruebo?", "¿Puedo repetirlas gratuitamente?", "¿Con 70 puntos quedo exento?",
+    'Me admitieron después de la primera fecha', 'Fui admitido tarde', 'Admisión tardía', '¿Tengo derecho a otro intento?']) {
     assert.equal(asksUnsupportedTestRule(question), true);
   }
   assert.equal(asksUnsupportedTestRule("Explica propósito, duración, estructura y límites de las pruebas"), false);
