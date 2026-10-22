@@ -10,7 +10,7 @@ const DECIMAL_PATTERN = /^\d+(?:\.\d+)?$/;
 const RFC3339_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|([+-])(\d{2}):(\d{2}))$/;
 
-const PROFILE_QUERY = `
+export const PROFILE_QUERY = `
 SELECT
   profile_key,
   alias,
@@ -22,7 +22,7 @@ WHERE dataset_release_id = $1
   AND profile_key = $2
 `;
 
-const PROGRESS_QUERY_BASE = `
+export const PROGRESS_QUERY_BASE = `
 SELECT
   pc.course_key,
   c.name AS course_name,
@@ -107,7 +107,7 @@ function reject(reason: "invalid_argument" | "invalid_database_result"): never {
   throw new ProfileProgressError(reason);
 }
 
-function validateInput(input: ProfileProgressInput): {
+export function validateProgressInput(input: ProfileProgressInput): {
   statuses: readonly ProfileProgressStatus[] | undefined;
   limit: number;
 } {
@@ -243,30 +243,16 @@ export async function getProfileProgress(
   client: SqlQueryClient,
   input: ProfileProgressInput,
 ): Promise<ProfileProgressResult> {
-  const { statuses, limit } = validateInput(input);
+  const { statuses, limit } = validateProgressInput(input);
   const release = await resolveCurrentRelease(client);
 
   const profileResult = await client.query<unknown>(PROFILE_QUERY, [
     release.release_id,
     input.profile_key,
   ]);
-  if (profileResult.rows.length === 0) {
-    throw new ProfileProgressError("profile_not_found");
-  }
-  if (profileResult.rows.length !== 1) {
-    reject("invalid_database_result");
-  }
 
-  const profileRow = profileResult.rows[0];
-  if (
-    !isRecord(profileRow) ||
-    !isStableKey(profileRow.profile_key) ||
-    profileRow.profile_key !== input.profile_key ||
-    !isNonblank(profileRow.alias)
-  ) {
-    reject("invalid_database_result");
-  }
-  const profileSource = validateSource(profileRow);
+  // Preserve REST's early failure before reading courses for an absent/invalid profile.
+  normalizeProgressResult(release.release_id, input.profile_key, profileResult.rows, []);
 
   const hasStatusFilter = statuses !== undefined;
   const progressQuery = hasStatusFilter
@@ -280,7 +266,31 @@ export async function getProfileProgress(
     progressValues,
   );
 
-  const courses = progressResult.rows.map((row): ProfileProgressCourse => {
+  return normalizeProgressResult(release.release_id, input.profile_key, profileResult.rows, progressResult.rows);
+}
+
+export function normalizeProgressResult(
+  release_id: string, profile_key: string, profileRows: unknown[], courseRows: unknown[],
+): ProfileProgressResult {
+  if (profileRows.length === 0) {
+    throw new ProfileProgressError("profile_not_found");
+  }
+  if (profileRows.length !== 1) {
+    reject("invalid_database_result");
+  }
+
+  const profileRow = profileRows[0];
+  if (
+    !isRecord(profileRow) ||
+    !isStableKey(profileRow.profile_key) ||
+    profileRow.profile_key !== profile_key ||
+    !isNonblank(profileRow.alias)
+  ) {
+    reject("invalid_database_result");
+  }
+  const profileSource = validateSource(profileRow);
+
+  const courses = courseRows.map((row): ProfileProgressCourse => {
     if (
       !isRecord(row) ||
       !isStableKey(row.course_key) ||
@@ -326,7 +336,7 @@ export async function getProfileProgress(
   });
 
   return {
-    release_id: release.release_id,
+    release_id: release_id,
     profile: {
       profile_key: profileRow.profile_key,
       alias: profileRow.alias,

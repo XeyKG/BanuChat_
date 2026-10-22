@@ -98,7 +98,7 @@ function validateQueryRecipe(value: unknown): QueryEmbeddingRecipe {
   };
 }
 
-function validateConfigRow(value: unknown): QueryEmbeddingConfig {
+export function validateQueryEmbeddingConfig(value: unknown): QueryEmbeddingConfig {
   if (!isRecord(value) || !isRecord(value.parameters)) {
     return reject("embedding_config_invalid");
   }
@@ -142,7 +142,7 @@ export async function retrieveDocumentChunksForQuery(
   if (configResult.rows.length !== 1) {
     return reject("invalid_database_result");
   }
-  const config = validateConfigRow(configResult.rows[0]);
+  const config = validateQueryEmbeddingConfig(configResult.rows[0]);
 
   let vector: number[];
   try {

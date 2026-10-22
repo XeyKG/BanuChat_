@@ -11,7 +11,7 @@ const CIVIL_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const RFC3339_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|([+-])(\d{2}):(\d{2}))$/;
 
-const CALENDAR_QUERY_BASE = `
+export const CALENDAR_QUERY_BASE = `
 SELECT
   ce.event_key,
   ce.title,
@@ -146,7 +146,7 @@ function parseCivilDate(value: unknown): number | undefined {
   return daysBeforeYear + monthOffset + leapAdjustment + day;
 }
 
-function validateInput(input: CalendarEventsInput): {
+export function validateCalendarInput(input: CalendarEventsInput): {
   eventTypes: readonly CalendarEventType[] | undefined;
   limit: number;
 } {
@@ -253,7 +253,7 @@ function normalizeNullableStableKey(value: unknown): string | null {
   return isStableKey(value) ? value : reject("invalid_database_result");
 }
 
-function normalizeRow(row: unknown): CalendarEventResult {
+export function normalizeCalendarRow(row: unknown): CalendarEventResult {
   if (
     !isRecord(row) ||
     !isStableKey(row.event_key) ||
@@ -310,7 +310,7 @@ export async function getCalendarEvents(
   client: SqlQueryClient,
   input: CalendarEventsInput,
 ): Promise<CalendarEventsResult> {
-  const { eventTypes, limit } = validateInput(input);
+  const { eventTypes, limit } = validateCalendarInput(input);
   const release = await resolveCurrentRelease(client);
 
   const hasEventTypeFilter = eventTypes !== undefined;
@@ -324,6 +324,6 @@ export async function getCalendarEvents(
 
   return {
     release_id: release.release_id,
-    events: result.rows.map(normalizeRow),
+    events: result.rows.map(normalizeCalendarRow),
   };
 }

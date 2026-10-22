@@ -114,7 +114,7 @@ function validateInput(input: DocumentLookupInput): {
   return { query, retrievalMode: input.retrieval_mode, limit };
 }
 
-function normalizeRow(row: unknown): DocumentLookupDocument {
+export function normalizeDocumentRow(row: unknown): DocumentLookupDocument {
   if (
     !isRecord(row) ||
     typeof row.document_key !== "string" ||
@@ -164,6 +164,6 @@ export async function lookupDocuments(
 
   return {
     release_id: release.release_id,
-    documents: result.rows.map(normalizeRow),
+    documents: result.rows.map(normalizeDocumentRow),
   };
 }

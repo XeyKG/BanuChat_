@@ -9,7 +9,7 @@ const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const RFC3339_PATTERN =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(Z|([+-])(\d{2}):(\d{2}))$/;
 
-const ANNOUNCEMENTS_QUERY_BASE = `
+export const ANNOUNCEMENTS_QUERY_BASE = `
 SELECT
   a.announcement_key,
   a.title,
@@ -142,7 +142,7 @@ function parseRfc3339(value: string): number | undefined {
   return Number.isFinite(instant) ? instant : undefined;
 }
 
-function validateInput(input: AnnouncementsInput): ValidatedInput {
+export function validateAnnouncementsInput(input: AnnouncementsInput): ValidatedInput {
   if (!isRecord(input)) {
     return reject("invalid_argument");
   }
@@ -243,7 +243,7 @@ function deriveStatus(
   return "expired";
 }
 
-function normalizeRow(
+export function normalizeAnnouncementRow(
   row: unknown,
   referenceInstant: number,
 ): AnnouncementResult {
@@ -292,7 +292,7 @@ export async function getAnnouncements(
   client: SqlQueryClient,
   input: AnnouncementsInput,
 ): Promise<AnnouncementsResult> {
-  const validated = validateInput(input);
+  const validated = validateAnnouncementsInput(input);
   const release = await resolveCurrentRelease(client);
   const values: unknown[] = [release.release_id];
   let query = ANNOUNCEMENTS_QUERY_BASE;
@@ -327,7 +327,7 @@ export async function getAnnouncements(
     release_id: release.release_id,
     reference_time: validated.referenceTime,
     announcements: result.rows.map((row) =>
-      normalizeRow(row, validated.referenceInstant),
+      normalizeAnnouncementRow(row, validated.referenceInstant),
     ),
   };
 }

@@ -7,7 +7,7 @@ const MAX_LIMIT = 50;
 const STABLE_KEY_PATTERN = /^[a-z0-9][a-z0-9_-]{0,127}$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 
-const COURSE_CATALOG_QUERY_BASE = `
+export const COURSE_CATALOG_QUERY_BASE = `
 SELECT
   course_key,
   name,
@@ -87,7 +87,7 @@ function validateInput(input: CourseCatalogInput): {
   return { statuses: input.statuses, limit };
 }
 
-function normalizeRow(row: unknown): CourseCatalogCourse {
+export function normalizeCourseRow(row: unknown): CourseCatalogCourse {
   if (
     !isRecord(row) ||
     typeof row.course_key !== "string" ||
@@ -131,5 +131,5 @@ export async function getCourseCatalog(
     : [release.release_id, limit];
   const result = await client.query<unknown>(query, values);
 
-  return { release_id: release.release_id, courses: result.rows.map(normalizeRow) };
+  return { release_id: release.release_id, courses: result.rows.map(normalizeCourseRow) };
 }
