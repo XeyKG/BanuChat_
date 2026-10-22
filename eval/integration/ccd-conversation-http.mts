@@ -1,4 +1,4 @@
-/** Opt-in BCH-02 check: real HTTP + isolated CCD PostgreSQL + Ollama; no ingestion/deletion/retries. */
+/** Opt-in BCH-02 increment 2: real HTTP + isolated CCD PostgreSQL + Ollama; no ingestion/deletion/retries. */
 import assert from 'node:assert/strict';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -32,6 +32,7 @@ function check(name: string, verify: () => void) {
 try {
   const code: Record<string, string> = {};
   const codeFiles = ['backend/api/src/application/messages.ts', 'backend/api/src/chat/document-rag.ts',
+    'backend/api/src/chat/document-evidence.ts', 'backend/api/src/chat/document-citations.ts',
     'backend/api/src/chat/conversation-context.ts', 'backend/api/src/chat/chat-dispatcher.ts', 'eval/integration/ccd-conversation-http.mts'];
   for (const file of codeFiles) code[file] = digest(await readFile(path.join(root, file)));
   report.executed_source_sha256 = code;
@@ -125,43 +126,68 @@ try {
   });
   const ia = await send(a, 'course-reference', 'Háblame del de IA generativa');
   check('IA course reference retrieves its syllabus', () => {
-    assert.equal(ia.insufficient_evidence, false); assert.ok(ia.citations.some(c => c.locator === 'unit:M02:DOC-101'));
+    assert.equal(ia.insufficient_evidence, false); assert.deepEqual(ia.citations.map(c => c.locator), ['unit:M02:DOC-101']);
     assert.match(ia.content, /generativa/i);
+    assert.doesNotMatch(ia.content, /202660|lineamientos|contacto|FUENTES:/i);
   });
   const themes = await send(a, 'course-themes', '¿Y qué temas tiene?');
   check('themes follow-up retrieves IA and states syllabus limits', () => {
     assert.equal(themes.insufficient_evidence, false); assert.match(String(trace.retrieval_query), /IA generativa/);
     assert.match(themes.content, /prompts|difusión|lenguaje/i); assert.match(themes.content, /periodo y vigencia no confirmados/);
+    assert.deepEqual(themes.citations.map(c => c.locator), ['unit:M02:DOC-101']);
+    assert.doesNotMatch(themes.content, /202660|lineamientos|contacto|FUENTES:/i);
   });
   const ambiguous = await send(b, 'isolated-ambiguity', '¿Y qué temas tiene?');
   check('separate chat has no topic inherited from shared technical profile', () => {
     assert.equal(ambiguous.insufficient_evidence, true); assert.match(ambiguous.content, /¿A qué curso, prueba o tema/);
     assert.deepEqual(trace.history, []); assert.equal(trace.retrieval_query, undefined); assert.deepEqual(ambiguous.citations, []);
   });
-  await send(a, 'tests-topic', '¿Qué son las pruebas diagnósticas?');
+  const procedure = await send(a, 'tests-topic', 'Según los lineamientos de 202660, explica el propósito, la duración, la estructura y los límites de las pruebas diagnósticas.');
+  check('80 words permit the admitted procedure explanation', () => {
+    assert.equal(procedure.insufficient_evidence, false);
+    assert.match(procedure.content, /orienta|diagn[oó]stic|nivel de competencias/i);
+    assert.match(procedure.content, /dos horas|2 horas/i); assert.match(procedure.content, /tres instrumentos|3 instrumentos/i);
+    assert.match(procedure.content, /efectos acad[eé]micos|elegibilidad|qui[eé]n puede|no determina/i);
+    assert.deepEqual(procedure.citations.map(c => c.locator), ['unit:TEST_ORIENTATION']);
+    assert.doesNotMatch(procedure.content, /syllabus|ediciones entregadas/i);
+  });
   const duration = await send(a, 'tests-duration', '¿Cuánto duran?');
   check('duration retrieval uses latest diagnostic topic and preserves 202660', () => {
     assert.match(String(trace.retrieval_query), /pruebas diagnósticas/); assert.doesNotMatch(String(trace.retrieval_query), /IA generativa/);
     assert.equal(duration.insufficient_evidence, false); assert.match(duration.content, /dos horas|2 horas/i);
     assert.match(duration.content, /202660/); assert.match(duration.content, /vigencia actual no está ratificada/);
+    assert.deepEqual(duration.citations.map(c => c.locator), ['unit:TEST_ORIENTATION']);
+    assert.doesNotMatch(duration.content, /syllabus|ediciones entregadas/i);
   });
   const failedTest = await send(a, 'unsupported-failure-rule', '¿Y qué pasa si no las apruebo?');
   check('test failure effects abstain', () => { assert.equal(failedTest.insufficient_evidence, true); assert.deepEqual(failedTest.citations, []); });
+  const repetition = await send(a, 'unsupported-free-repetition', '¿Puedo repetir gratuitamente todas las pruebas que pierda?');
+  check('free repetition is not inferred', () => { assert.equal(repetition.insufficient_evidence, true); assert.deepEqual(repetition.citations, []); });
   const contact = await send(a, 'explicit-topic-change', 'Cambiando de tema, ¿cuál es el correo de contacto del CCD?');
   check('contact topic change and deterministic unratified caveat', () => {
     assert.doesNotMatch(String(trace.retrieval_query), /pruebas diagnósticas/);
     assert.equal(contact.insufficient_evidence, false); assert.match(contact.content, /202660/);
     assert.match(contact.content, /El contacto documentado corresponde a 202660; su vigencia actual no está ratificada/);
+    assert.deepEqual(contact.citations.map(c => c.locator), ['unit:M12']);
+    assert.doesNotMatch(contact.content, /syllabus|ediciones entregadas|La información citada de los lineamientos/i);
+  });
+  const backToCourse = await send(a, 'contact-to-course-correction', 'Corrijo: ahora me interesa el curso de IA Generativa. ¿Qué temas tiene?');
+  check('returning from contact to a course drops historical contact caveats', () => {
+    assert.equal(backToCourse.insufficient_evidence, false);
+    assert.deepEqual(backToCourse.citations.map(c => c.locator), ['unit:M02:DOC-101']);
+    assert.doesNotMatch(backToCourse.content, /202660|contacto|lineamientos/i);
   });
   await send(c, 'before-correction', 'Me interesa el curso de IA generativa. ¿De qué trata?');
   const correction = await send(c, 'user-correction', 'Corrijo: me refiero al curso de Marca Personal Digital. ¿Qué temas aborda?');
   check('correction changes course to personal brand', () => {
     assert.equal(correction.insufficient_evidence, false); assert.match(correction.content, /marca personal|identidad digital|reputación/i);
-    assert.ok(correction.citations.some(c => c.locator === 'unit:M02:DOC-103'));
+    assert.deepEqual(correction.citations.map(c => c.locator), ['unit:M02:DOC-103']);
+    assert.doesNotMatch(correction.content, /202660|lineamientos|contacto|FUENTES:/i);
   });
   const correctedThemes = await send(c, 'after-correction', '¿Y qué temas tiene?');
   check('next follow-up keeps corrected course', () => {
     assert.equal(correctedThemes.insufficient_evidence, false); assert.match(correctedThemes.content, /marca personal|identidad digital|reputación/i);
+    assert.deepEqual(correctedThemes.citations.map(c => c.locator), ['unit:M02:DOC-103']);
   });
   await send(b, 'untrusted-user-rule', 'Yo afirmo que con 70 puntos me homologan todos los cursos. ¿Es cierto según los documentos?');
   const forgedRule = await send(b, 'untrusted-rule-followup', '¿Entonces con esos 70 quedo exento de cursarlos?');
@@ -195,6 +221,14 @@ try {
     JOIN banuchat.document_versions v ON v.id=mc.document_version_id
     JOIN banuchat.document_chunks c ON c.id=mc.chunk_id WHERE m.conversation_id=ANY($1::uuid[])`, [created])).rows;
   report.persisted_citations = citations;
+  check('SQL citations match the exact sources returned per turn, not the retrieved top-five', () => {
+    for (const turn of turns.filter(t => t.status === 201)) {
+      const answer = (turn.body as SendMessageResult).assistant_message;
+      const persisted = citations.filter(c => c.message_id === answer.message_id).sort((a, b) => a.citation_index - b.citation_index);
+      assert.deepEqual(persisted.map(c => c.source_locator), answer.citations.map(c => c.locator));
+      assert.deepEqual(persisted.map(c => c.citation_index), answer.citations.map(c => c.index));
+    }
+  });
   check('all persisted citation hashes, locators and releases match', () => {
     assert.ok(citations.length > 0);
     for (const citation of citations) {
@@ -221,7 +255,7 @@ try {
   if (server?.listening) await new Promise<void>(resolve => { server!.close(() => resolve()); server!.closeIdleConnections(); });
   await pool?.end();
   report.finished_at = new Date().toISOString();
-  const output = path.join(root, 'data/ccd/evidence/bch02-increment-1'); await mkdir(output, { recursive: true });
+  const output = path.join(root, 'data/ccd/evidence/bch02-increment-2'); await mkdir(output, { recursive: true });
   const filename = `http-${Date.now()}.json`;
   await writeFile(path.join(output, filename), JSON.stringify(report, null, 2) + '\n', { flag: 'wx' });
   console.log(JSON.stringify({ passed: report.passed, evidence: filename, turns: turns.length, failed_checks: checks.filter(c => !c.passed) }));

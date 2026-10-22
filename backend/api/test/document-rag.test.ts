@@ -411,7 +411,7 @@ test("ambiguous follow-up clarifies without retrieval, generation or fabricated 
 });
 
 test("CCD contact caveat is enforced even when the generator omits it", async () => {
-  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M12" })], "Correo: contacto@example.test.");
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M12" })], "Correo: contacto@example.test.\nFUENTES: [1]");
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
     release_id: RELEASE_ID, query: "¿Cuál es el contacto?",
   });
@@ -420,7 +420,7 @@ test("CCD contact caveat is enforced even when the generator omits it", async ()
 });
 
 test("CCD contact output without its institutional source abstains even if generated", async () => {
-  const fake = fakeDependencies([chunk()], "Escribe al correo contacto@example.test.");
+  const fake = fakeDependencies([chunk()], "Escribe al correo contacto@example.test.\nFUENTES: [1]");
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
     release_id: RELEASE_ID, query: "¿Cómo puedo orientarme?",
   });
@@ -442,7 +442,7 @@ test("broad CCD course lists retrieve ten units so top-five does not truncate th
 });
 
 test("CCD source period caveats and unsupported-rule abstention survive conversational memory", async () => {
-  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M02:DOC-101" })], "Descripción de IA.");
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M02:DOC-101", title: "IA Generativa" })], "Descripción de IA.\nFUENTES: [1]");
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
     release_id: RELEASE_ID, query: "Háblame del curso de IA generativa",
   });
@@ -456,4 +456,70 @@ test("CCD source period caveats and unsupported-rule abstention survive conversa
   });
   assert.equal(abstention.insufficient_evidence, true);
   assert.deepEqual(abstention.citation_records, []);
+});
+
+test("CCD course evidence excludes secondary sources from generation, citations and caveats", async () => {
+  const fake = fakeDependencies([
+    chunk({ title: "Contacto", chunk_locator: "unit:M12" }),
+    chunk({ title: "IA Generativa", chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M02:DOC-101" }),
+  ], "El curso aborda modelos de lenguaje.\nFUENTES: [1]");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "Háblame del curso de IA generativa",
+  });
+  assert.equal(answer.insufficient_evidence, false);
+  assert.deepEqual(answer.citations.map(c => c.locator), ["unit:M02:DOC-101"]);
+  assert.equal(answer.citation_records[0]?.chunk_id, OTHER_CHUNK_ID);
+  assert.equal(answer.citation_records[0]?.source_sha256, SHA256);
+  assert.equal(answer.citation_records[0]?.citation_index, 0);
+  assert.doesNotMatch(fake.generator_calls[0]!.input.user_prompt, /Título: Contacto/);
+  assert.doesNotMatch(answer.content, /202660|contacto|FUENTES:/);
+  assert.match(answer.content, /periodo y vigencia no confirmados/);
+});
+
+test("CCD only persists declared valid sources, with contiguous public indexes", async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M01" }),
+    chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M02:DOC-101" })], "Respuesta.\nFUENTES: [2]");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "Consulta general",
+  });
+  assert.deepEqual(answer.citation_records.map(c => [c.citation_index, c.chunk_id]), [[0, OTHER_CHUNK_ID]]);
+  assert.doesNotMatch(answer.content, /202660/);
+});
+
+test("CCD malformed references abstain without exposing protocol or persisting citations", async () => {
+  for (const output of ["Respuesta.\nFUENTES: [2]", "Respuesta sin fuentes", "Respuesta.\nFUENTES: [1], [1]"]) {
+    const fake = fakeDependencies([chunk()], output);
+    const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+      release_id: RELEASE_ID, query: "Consulta general",
+    });
+    assert.equal(answer.insufficient_evidence, true);
+    assert.deepEqual(answer.citation_records, []);
+    assert.doesNotMatch(answer.content, /FUENTES:/);
+  }
+});
+
+test("test source cannot authorize academic effects even if a generator would assert no consequences", async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: "unit:TEST_ORIENTATION" })],
+    "No hay consecuencias académicas.\nFUENTES: [1]");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "¿Y qué pasa si no las apruebo?",
+    history: [{ role: "user", content: "¿Qué son las pruebas diagnósticas?" }],
+  });
+  assert.equal(answer.insufficient_evidence, true);
+  assert.deepEqual(answer.citation_records, []);
+  assert.equal(fake.generator_calls.length, 0);
+});
+
+test("a correction from contact to a course does not inherit contact caveats or abstention", async () => {
+  const fake = fakeDependencies([
+    chunk({ chunk_locator: "unit:M12" }),
+    chunk({ title: "IA Generativa", chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M02:DOC-101" }),
+  ], "El curso aborda modelos de lenguaje.\nFUENTES: [1]");
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
+    release_id: RELEASE_ID, query: "Corrijo: me interesa el curso de IA Generativa",
+    history: [{ role: "user", content: "¿Cuál es el correo de contacto?" }],
+  });
+  assert.equal(answer.insufficient_evidence, false);
+  assert.deepEqual(answer.citations.map(c => c.locator), ["unit:M02:DOC-101"]);
+  assert.doesNotMatch(answer.content, /contacto|202660/);
 });

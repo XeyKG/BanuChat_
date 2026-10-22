@@ -1,5 +1,27 @@
 # API REST — contrato y estado implementado
 
+BCH-02 incremento 2 limita la evidencia CCD antes de generar: identifica el tema
+explícito más reciente del usuario por título de syllabus (también sin el sufijo
+Digital/Digitales), orientación de pruebas o contacto, sin usar la posición vectorial
+como prueba de respaldo. El generador CCD declara únicamente las fuentes utilizadas
+en una línea privada `FUENTES: [1]`. La API valida formato, rango, unicidad y ausencia
+de referencias numéricas en el cuerpo; ante una referencia inválida o ausente se
+abstiene sin citas. Esa línea se elimina antes de persistir/exponer la respuesta.
+`buildDocumentCitations` recibe solo los fragmentos seleccionados y renumera desde
+cero con el mismo contrato de citas existente; no se modifican citas históricas.
+
+Las advertencias deterministas se calculan con esas mismas fuentes: syllabus sin
+periodo/vigencia confirmados, pruebas/lineamientos de 202660 y contacto M12 con vigencia
+actual no ratificada. El tema antiguo de contacto no contamina una corrección hacia
+un curso. Las consultas reconocidas de efectos, repetición gratuita o elegibilidad
+no pueden usar TEST_ORIENTATION para autorizar reglas: se abstienen antes de generar.
+La instrucción de 80 palabras se conserva; una prueba real de propósito, duración,
+estructura y límites respondió con detalle suficiente. Las descripciones siguen
+siendo generadas, con continuidad y aclaraciones; no se añade un FAQ de respuestas.
+La demo sintética conserva su comportamiento previo de citas. Las referencias
+válidas garantizan pertenencia al contexto, no una demostración automática de cada
+afirmación. Ver [CHECKPOINT incremento 2](../../docs/transition/bch02-increment-2-checkpoint.md).
+
 BCH-02 incremento 1 incorpora continuidad en Document RAG. El envío lee los últimos
 ocho mensajes de la misma conversación y release, ordenados por ordinal, dentro
 del mismo snapshot SQL que comprueba la release y el próximo ordinal. Cada mensaje
@@ -19,8 +41,8 @@ omitía cursos. Las consultas específicas conservan top-5 y generación. Las re
 CCD añaden por código límites temporales según sus fuentes. Una respuesta de contacto
 requiere M12 y añade siempre la advertencia «202660; su vigencia actual no está
 ratificada»; sin M12 se abstiene. El historial no aporta citas ni autoriza reglas.
-Se mantiene como limitación independiente que las respuestas generadas citan también
-documentos secundarios del top-5. No cambia el contrato REST, SQL ni MCP.
+El exceso de citas secundarias quedó registrado en el incremento 1 y se corrige
+para CCD en el incremento 2 descrito arriba. No cambia el contrato REST, SQL ni MCP.
 
 La lectura de chats de releases anteriores y sus citas permanece disponible; enviar
 otro mensaje devuelve 409. Debe abrirse una conversación nueva; el tratamiento visual

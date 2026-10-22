@@ -9,6 +9,7 @@ import type {
 import type { QueryEmbeddingClient } from "../retrieval/query-embedding-client.js";
 import { buildDocumentCitations } from "./document-citations.js";
 import { resolveConversationQuery, type ConversationMessage } from "./conversation-context.js";
+import { asksUnsupportedTestRule, GROUNDED_ANSWER_INSTRUCTION, parseGroundedAnswer, selectCcdEvidence } from "./document-evidence.js";
 import type {
   PersistenceCitation,
   PresentationCitation,
@@ -152,10 +153,16 @@ export async function generateDocumentRagAnswer(
   }
   const chunks = broadCcdCourses
     ? retrieved.filter(chunk => chunk.chunk_locator.startsWith("unit:M02:"))
-    : retrieved;
+    : dependencies.evidence_mode === "ccd_local"
+      ? selectCcdEvidence(retrieved, input.query, resolved.history)
+      : retrieved;
 
   if (chunks.length === 0) {
     return insufficientEvidenceAnswer(retrievalInput.release_id);
+  }
+  if (dependencies.evidence_mode === "ccd_local" &&
+    chunks.some(chunk => chunk.chunk_locator === "unit:TEST_ORIENTATION") && asksUnsupportedTestRule(input.query)) {
+    return insufficientEvidenceAnswer(input.release_id);
   }
 
   // Listing the admitted syllabus requires titles, not a large generation prompt.
@@ -169,6 +176,7 @@ export async function generateDocumentRagAnswer(
           'un asistente de demostración que responde únicamente con la evidencia sintética proporcionada',
           'un asistente de pruebas locales que responde únicamente con la evidencia CCD seleccionada proporcionada, validada por el equipo y sin aval institucional formal',
         ) + '\n\nRespeta el periodo específico de cada fuente. Los lineamientos corresponden a 202660; los syllabus son ediciones entregadas cuyo periodo y vigencia no están confirmados: no les atribuyas 202660 ni oferta actual. En respuestas de contacto indica 202660 y que la vigencia actual no está ratificada. Describe cursos y propósito de pruebas solo con contenido respaldado; no deduzcas cupos, horarios, gratuidad, elegibilidad, equivalencias, reconocimiento ni exenciones académicas.'
+        + `\n\n${GROUNDED_ANSWER_INSTRUCTION}`
         : DOCUMENT_RAG_SYSTEM_PROMPT,
       user_prompt: buildUserPrompt(chunks, input.query, resolved.history),
     },
@@ -179,17 +187,23 @@ export async function generateDocumentRagAnswer(
     return insufficientEvidenceAnswer(retrievalInput.release_id);
   }
 
-  const { citations, citation_records } = buildDocumentCitations(chunks);
   let content = generated.content;
+  let supportingChunks = chunks;
+  if (dependencies.evidence_mode === "ccd_local" && !broadCcdCourses) {
+    const grounded = parseGroundedAnswer(content, chunks.length);
+    if (!grounded) return insufficientEvidenceAnswer(input.release_id);
+    content = grounded.content;
+    supportingChunks = grounded.source_indexes.map(index => chunks[index]!);
+  }
   if (dependencies.evidence_mode === "ccd_local") {
-    const contactAnswer = /contact|correo|e-?mail|@/iu.test(`${resolved.retrieval_query} ${content}`);
-    const contactSource = chunks.some(chunk => chunk.chunk_locator === "unit:M12");
+    const contactSource = supportingChunks.some(chunk => chunk.chunk_locator === "unit:M12");
+    const contactAnswer = contactSource || /contact|correo|e-?mail|@/iu.test(`${input.query} ${content}`);
     if (contactAnswer && !contactSource) return insufficientEvidenceAnswer(input.release_id);
     const limits: string[] = [];
-    if (chunks.some(chunk => ["unit:M01", "unit:M12", "unit:TEST_ORIENTATION"].includes(chunk.chunk_locator))) {
+    if (supportingChunks.some(chunk => ["unit:M01", "unit:TEST_ORIENTATION"].includes(chunk.chunk_locator))) {
       limits.push("La información citada de los lineamientos 202660 se limita a la población descrita en esas fuentes; su vigencia actual no está ratificada.");
     }
-    if (chunks.some(chunk => chunk.chunk_locator.startsWith("unit:M02:"))) {
+    if (supportingChunks.some(chunk => chunk.chunk_locator.startsWith("unit:M02:"))) {
       limits.push("Los syllabus citados son ediciones entregadas, con periodo y vigencia no confirmados; no acreditan oferta actual.");
     }
     // Enforce the contact caveat after generation, including indirect follow-ups.
@@ -198,6 +212,7 @@ export async function generateDocumentRagAnswer(
     }
     if (limits.length > 0) content += `\n\n${limits.join("\n")}`;
   }
+  const { citations, citation_records } = buildDocumentCitations(supportingChunks);
   return {
     release_id: retrievalInput.release_id,
     content,
