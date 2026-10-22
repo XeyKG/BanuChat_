@@ -58,6 +58,11 @@ test('generic retrieval cannot reintroduce either guidance unit without a pertin
   assert.deepEqual(selectCcdEvidence([failure, contact, transition], 'Necesito un procedimiento no especificado', []), [contact]);
 });
 
+test('an unrecognized singular themes reference cannot fall back to the full evidence pool',()=>{
+  assert.deepEqual(selectCcdEvidence(chunks,'¿Y qué temas tiene?',[{role:'user',content:'Quiero información general'}]),[]);
+  assert.deepEqual(selectCcdEvidence(chunks,'Consulta general autónoma',[]),chunks);
+});
+
 test("course source is selected by title even when it is ranked last", () => {
   assert.deepEqual(selectCcdEvidence(chunks, "Háblame del curso de IA generativa", []), [ia]);
   assert.deepEqual(selectCcdEvidence(chunks, "¿Y qué temas tiene?", [

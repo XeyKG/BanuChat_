@@ -28,6 +28,15 @@ function normalize(query: string): string {
     .replace(/[¿?¡!.,;:]/gu, " ").replace(/\s+/gu, " ").trim();
 }
 
+export function isCcdCourseCatalogQuery(query: string): boolean {
+  return /(?:cuales|que|lista|catalogo).*cursos.*competencias digitales/u.test(normalize(query));
+}
+
+/** Reuses the existing singular follow-up form; does not infer a course from an assistant's list. */
+export function isCourseTopicsFollowUp(query: string): boolean {
+  return /^(?:y )?que temas (?:tiene|incluye)$/u.test(normalize(query));
+}
+
 export function isContextualFollowUp(query: string): boolean {
   const text = normalize(query);
   // A declared subject starts a new topic even if prefixed with “y”.
@@ -51,6 +60,7 @@ export function resolveConversationQuery(query: string, messages: readonly Conve
   retrieval_query: string;
   history: ConversationMessage[];
   needs_clarification: boolean;
+  clarification_kind?: 'course';
 } {
   if (!isContextualFollowUp(query)) {
     return { retrieval_query: query, history: [], needs_clarification: false };
@@ -74,6 +84,11 @@ export function resolveConversationQuery(query: string, messages: readonly Conve
   const antecedents = active.filter(message => message.role === "user");
   if (!hasSubject || antecedents.length === 0) {
     return { retrieval_query: query, history: [], needs_clarification: true };
+  }
+  if (isCourseTopicsFollowUp(query) && antecedents.some(m => isCcdCourseCatalogQuery(m.content))
+    && antecedents.every(m => isCcdCourseCatalogQuery(m.content) || isCourseTopicsFollowUp(m.content)
+      || /^(?:hola|gracias|muchas gracias|adios|que puedes hacer|ayuda)$/u.test(normalize(m.content)))) {
+    return { retrieval_query: query, history: [], needs_clarification: true, clarification_kind: 'course' };
   }
   // Only student text goes to the embedding. Previous generated answers cannot
   // seed a rule or replace the freshly retrieved evidence.

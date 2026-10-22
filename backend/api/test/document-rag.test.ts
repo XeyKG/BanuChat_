@@ -616,6 +616,51 @@ test('generator insufficiency for an unrecognized topic remains insufficient aft
   assert.doesNotMatch(answer.content,/transición|202660|vigencia/iu);
 });
 
+test('catalog-only themes ask which course before SQL, embedding or generation', async () => {
+  const fake=fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'})],'Invented answer');
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'¿Y qué temas tiene?',history:[
+    {role:'user',content:'¿Cuáles son los cursos de Competencias Digitales?'},
+    {role:'assistant',content:'IA Generativa, Marca Personal y otros cursos.'},
+  ]});
+  assert.match(answer.content,/¿De cuál curso quieres conocer los temas\?/u);
+  assert.deepEqual(answer.citations,[]);assert.deepEqual(answer.citation_records,[]);
+  assert.equal(answer.insufficient_evidence,true);
+  assert.equal(fake.sql_calls.length,0);assert.equal(fake.embedding_calls.length,0);assert.equal(fake.generator_calls.length,0);
+});
+
+test('themes without history clarify without embedding; a named course after a catalog keeps DOC-101', async () => {
+  const empty=fakeDependencies([chunk()]);
+  const unknown=await generateDocumentRagAnswer({...empty.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'¿Y qué temas tiene?'});
+  assert.match(unknown.content,/contexto|cuál curso/u);assert.deepEqual(unknown.citations,[]);
+  assert.equal(empty.sql_calls.length,0);assert.equal(empty.embedding_calls.length,0);assert.equal(empty.generator_calls.length,0);
+  const known=fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'})],'Aborda modelos de lenguaje.\nFUENTES: [1]');
+  const answer=await generateDocumentRagAnswer({...known.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'¿Y qué temas tiene?',history:[
+    {role:'user',content:'¿Cuáles son los cursos de Competencias Digitales?'},{role:'assistant',content:'Siete cursos.'},
+    {role:'user',content:'Háblame del de IA Generativa'},{role:'assistant',content:'Descripción de IA.'},
+  ]});
+  assert.equal(answer.insufficient_evidence,false);assert.deepEqual(answer.citations.map(c=>c.locator),['unit:M02:DOC-101']);
+  assert.equal(known.embedding_calls.length,1);assert.equal(known.generator_calls.length,1);
+});
+
+test('catalog corrections, independent questions and changes to tests or contact retain their sources',async()=>{
+  const catalog={role:'user' as const,content:'¿Cuáles son los cursos de Competencias Digitales?'};
+  for(const scenario of [
+    {q:'Corrijo: me refiero a Marca Personal, ¿qué temas aborda?',history:[catalog],locator:'unit:M02:DOC-103',text:'Temas documentados.'},
+    {q:'¿Qué temas tiene el curso de IA Generativa?',history:[],locator:'unit:M02:DOC-101',text:'Temas documentados.'},
+    {q:'¿Cuánto duran?',history:[{role:'user' as const,content:'¿Qué son las pruebas diagnósticas?'}],locator:'unit:TEST_ORIENTATION',text:'Duración documentada en 202660.'},
+    {q:'Ahora quiero el contacto del CCD',history:[catalog],locator:'unit:M12',text:'El correo documentado es demo@example.test.'},
+  ]){
+    const fake=fakeDependencies([
+      chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'}),
+      chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103'}),
+      chunk({chunk_locator:'unit:TEST_ORIENTATION'}),chunk({chunk_locator:'unit:M12'}),
+    ],scenario.text+'\nFUENTES: [1]');
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:scenario.q,history:scenario.history});
+    assert.equal(answer.insufficient_evidence,false,scenario.q);assert.deepEqual(answer.citations.map(c=>c.locator),[scenario.locator]);
+    assert.equal(fake.embedding_calls.length,1);assert.equal(fake.generator_calls.length,1);
+  }
+});
+
 test('course failure cannot exempt a student from new tests by categorical denial', async () => {
   const fake = fakeDependencies([chunk({chunk_locator:'unit:U03',content:'# Scope\n\nConsecuencia histórica de prueba.\n\n- Las reglas particulares de recuperación de un curso reprobado requieren confirmación del CCD/programa. No aplicar la consecuencia de prueba a curso.'})],
     'No, no se requiere presentar nuevas pruebas si se trata de un curso reprobado.\nFUENTES: [1]');

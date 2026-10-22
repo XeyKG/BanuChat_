@@ -8,7 +8,7 @@ import type {
 } from "../generation/generator-client.js";
 import type { QueryEmbeddingClient } from "../retrieval/query-embedding-client.js";
 import { buildDocumentCitations } from "./document-citations.js";
-import { resolveConversationQuery, type ConversationMessage } from "./conversation-context.js";
+import { isCcdCourseCatalogQuery, isCourseTopicsFollowUp, resolveConversationQuery, type ConversationMessage } from "./conversation-context.js";
 import { asksUnsupportedTestRule, ccdGuidanceTopic, CCD_GUIDANCE_INSTRUCTION, GROUNDED_ANSWER_INSTRUCTION, hasUnbackedGuidanceClaim, isCourseFailureContext, parseGroundedAnswer, selectCcdEvidence } from "./document-evidence.js";
 import type {
   PersistenceCitation,
@@ -146,12 +146,10 @@ export async function generateDocumentRagAnswer(
   const resolved = resolveConversationQuery(input.query, input.history ?? []);
   if (resolved.needs_clarification) {
     return { ...insufficientEvidenceAnswer(input.release_id),
-      content: "¿A qué curso, prueba o tema te refieres? Necesito ese contexto para buscar evidencia y orientarte." };
+      content: resolved.clarification_kind === 'course' ? '¿De cuál curso quieres conocer los temas?'
+        : "¿A qué curso, prueba o tema te refieres? Necesito ese contexto para buscar evidencia y orientarte." };
   }
-  const broadCcdCourses = dependencies.evidence_mode === "ccd_local" &&
-    /(?:cuales|que|lista|catalogo).*cursos.*competencias digitales/u.test(
-      input.query.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase(),
-    );
+  const broadCcdCourses = dependencies.evidence_mode === "ccd_local" && isCcdCourseCatalogQuery(input.query);
   const retrievalInput = {
     release_id: input.release_id,
     query: resolved.retrieval_query,
@@ -177,6 +175,9 @@ export async function generateDocumentRagAnswer(
       : retrieved;
 
   if (chunks.length === 0) {
+    if (dependencies.evidence_mode === 'ccd_local' && isCourseTopicsFollowUp(input.query)) {
+      return { ...insufficientEvidenceAnswer(input.release_id), content: '¿De cuál curso quieres conocer los temas?' };
+    }
     return insufficientEvidenceAnswer(retrievalInput.release_id);
   }
   if (dependencies.evidence_mode === "ccd_local" &&

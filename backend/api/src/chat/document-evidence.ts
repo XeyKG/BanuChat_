@@ -1,5 +1,5 @@
 import type { RetrievedDocumentChunk } from "../application/document-retrieval.js";
-import type { ConversationMessage } from "./conversation-context.js";
+import { isCourseTopicsFollowUp, type ConversationMessage } from "./conversation-context.js";
 
 function normalize(text: string): string {
   return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase()
@@ -58,6 +58,7 @@ export function selectCcdEvidence(
     if (courses.length > 0) return courses;
   }
   // Unrecognized topics must not acquire guidance merely because it was retrieved.
+  if (isCourseTopicsFollowUp(query)) return [];
   return chunks.filter(chunk => !['unit:U03', 'unit:U04'].includes(chunk.chunk_locator));
 }
 

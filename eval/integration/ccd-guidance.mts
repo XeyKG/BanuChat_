@@ -13,21 +13,24 @@ import {assertCcdChatDatabase} from '../../backend/api/src/ccd-runtime.js';
 import {createRuntimeApiServer} from '../../backend/api/src/main.js';
 import {generateDocumentRagAnswer} from '../../backend/api/src/chat/document-rag.js';
 import {hasUnbackedGuidanceClaim} from '../../backend/api/src/chat/document-evidence.js';
-import {loadGeneratorRuntimeConfig} from '../../backend/api/src/generation/generator-client.js';
+import {GeneratorClientError,loadGeneratorRuntimeConfig} from '../../backend/api/src/generation/generator-client.js';
 import {OllamaGeneratorClient} from '../../backend/api/src/generation/ollama-generator-client.js';
 import {OllamaQueryEmbeddingClient} from '../../backend/api/src/retrieval/ollama-query-embedding-client.js';
+import {tracedGeneratorFetch,type ProviderEvent} from './ccd-generation-trace.mjs';
+import {scenarioTurns,dependenciesSatisfied,scenarioMetrics,evaluationCheck,checkMetrics,type EvaluationCheck} from './conversation-evaluation.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const out=path.join(root,'data/ccd/evidence/increment-5');await mkdir(out,{recursive:true});
 const hash=(v:string|Uint8Array)=>createHash('sha256').update(v).digest('hex');
 const mode=process.argv[2];assert.ok(['baseline','preflight','http'].includes(mode??''));
-const scope=process.argv[3];assert.ok(scope===undefined||(mode==='http'&&scope==='contact'));
+const scope=process.argv[3];assert.ok(scope===undefined||(mode==='http'&&['contact','ambiguity'].includes(scope)));
 const {pool,identity}=await connectCcdLocal();
-const checks:{name:string;passed:boolean}[]=[];
+const checks:EvaluationCheck[]=[];
 const turns:Record<string,unknown>[]=[];
 const report:Record<string,unknown>={started_at:new Date().toISOString(),mode,identity,checks,turns};
 let server:Awaited<ReturnType<typeof createRuntimeApiServer>>|undefined;
 let synthetic:ChildProcess|undefined;
-const check=(name:string,verify:()=>void)=>{try{verify();checks.push({name,passed:true});}catch{checks.push({name,passed:false});}};
+const check=(name:string,verify:()=>void)=>{checks.push(evaluationCheck(name,verify));};
+const notEvaluable=(name:string,reason:string)=>{checks.push(evaluationCheck(name,undefined,reason));};
 const capture=async()=>({
  releases:(await pool.query('SELECT id,status,manifest,pipeline_config,manifest_sha256,pipeline_sha256,embedding_config_id,dataset_schema_version FROM banuchat.dataset_releases ORDER BY id')).rows,
  current:(await pool.query('SELECT current_release_id FROM banuchat.datasets WHERE id=1')).rows[0].current_release_id as string,
@@ -40,6 +43,9 @@ const capture=async()=>({
 async function request(route:string,method='GET',body?:unknown,base='http://127.0.0.1:3001/api/v1') {
  const response=await fetch(base+route,{method,signal:AbortSignal.timeout(180000),...(body===undefined?{}:{headers:{'content-type':'application/json'},body:JSON.stringify(body)})});
  return {status:response.status,body:await response.json() as any};
+}
+async function observedRequest(route:string,method='GET',body?:unknown){
+ try{return await request(route,method,body);}catch{return {status:null,body:{error:{code:'EVALUATION_TRANSPORT_UNCERTAIN'}},uncertain:true};}
 }
 try {
  if(mode==='baseline') {
@@ -85,13 +91,15 @@ try {
    const runtime=loadGeneratorRuntimeConfig();report.generator=runtime.generator;
    const embedder=new OllamaQueryEmbeddingClient(runtime.base_url);
    let trace:Record<string,unknown>={};
-   const generator=new OllamaGeneratorClient(runtime.base_url,30000,async(url,init)=>{
-    const r=await fetch(url,init);if(new URL(String(url)).pathname==='/api/chat'){
-     const raw=await r.clone().json() as any;trace.ollama={status:r.status,done:raw.done,done_reason:raw.done_reason,eval_count:raw.eval_count};
-    }return r;
-   });
-   server=await createRuntimeApiServer(pool,input=>generateDocumentRagAnswer({sql:pool,evidence_mode:'ccd_local',query_embedding_client:embedder,generator_config:runtime.generator,
-    generator_client:{async generate(input,config){trace.selected_locators=[...input.user_prompt.matchAll(/Localizador: (.+)/gu)].map(m=>m[1]);const result=await generator.generate(input,config);trace.generated=result.content;return result;}}},input),undefined,
+   report.test_conditions={operator_idle_confirmed:process.env.BANUCHAT_EVAL_IDLE_CONFIRMED==='1',resource_evidence:process.env.BANUCHAT_EVAL_RESOURCE_FILE?path.basename(process.env.BANUCHAT_EVAL_RESOURCE_FILE):null};
+   server=await createRuntimeApiServer(pool,input=>generateDocumentRagAnswer({sql:pool,evidence_mode:'ccd_local',query_embedding_client:{async embedQuery(text,config){trace.embedding_calls=Number(trace.embedding_calls??0)+1;return embedder.embedQuery(text,config);}},generator_config:runtime.generator,
+    generator_client:{async generate(input,config){
+     trace.generator_calls=Number(trace.generator_calls??0)+1;trace.selected_locators=[...input.user_prompt.matchAll(/Localizador: (.+)/gu)].map(m=>m[1]);
+     trace.prompt_utf8_bytes=Buffer.byteLength(input.system_prompt+input.user_prompt);
+     const events:ProviderEvent[]=[];trace.provider_events=events;const generator=new OllamaGeneratorClient(runtime.base_url,30000,tracedGeneratorFetch(events));
+     try{const result=await generator.generate(input,config);trace.generated=result.content;return result;}
+     catch(error){trace.generator_failure=error instanceof GeneratorClientError?error.reason:'unclassified';throw error;}
+    }}},input),undefined,
     {demo_mode:'ccd_local',document_artifact:{root:path.join(root,'data/ccd/local/m01-m12'),version_roots:{'bch03-m01-m12-local-1':path.join(root,'data/ccd/local/m01-m12'),'bch03-ccd-local-2':path.join(root,'data/ccd/local/expanded-v2'),'bch03-ccd-local-3':path.join(root,'data/ccd/local/guidance-v3')}}});
    await new Promise<void>((resolve,reject)=>{server!.once('error',reject);server!.listen(3001,'127.0.0.1',resolve);});
    const cases=[
@@ -109,38 +117,76 @@ try {
     {id:'T11',coverage:'U04_two_reported_cases_not_universal_policy',q:['Contacté al CCD, solicité y presenté las nuevas pruebas por primera vez sin costo. Otro estudiante en situación semejante también realizó la solicitud.','¿Puedo decirles a todos que tienen ese derecho?','¿Y si luego la repruebo?']},
     {id:'T12',coverage:'description_contact_admitted_threshold_results_not_admitted',q:['La hice virtual en 202660 y no aparece la nota de la prueba','¿Es inmediata?','Obtuve exactamente 70 puntos en un pilar: ¿es menos de lo exigido?','Ahora quiero el contacto del CCD']},
     {id:'REG',coverage:'existing_ten_units_regression',q:['¿Cuáles son los cursos de Competencias Digitales?','Háblame del de IA Generativa','¿Y qué temas tiene?','Corrijo: me refiero a Marca Personal, ¿qué temas aborda?','Cambiando de tema, ¿cuánto duran las pruebas diagnósticas de 202660?','Ahora quiero el contacto del CCD']},
+    {id:'AMB',coverage:'catalog_is_not_an_individual_course',q:['¿Cuáles son los cursos de Competencias Digitales?','¿Y qué temas tiene?']},
+    {id:'AMB_FRESH',coverage:'themes_without_any_antecedent',q:['¿Y qué temas tiene?']},
    ];
-   const selectedCases=scope==='contact'?cases.filter(c=>['T12','REG'].includes(c.id)):cases;
+   const selectedCases=scope==='contact'?cases.filter(c=>['T12','REG'].includes(c.id)):scope==='ambiguity'?cases.filter(c=>['AMB','AMB_FRESH'].includes(c.id)):cases;
    const created:string[]=[];report.cases=selectedCases;report.scope=scope??'all';
+   const scenarios:any[]=[];report.scenarios=scenarios;
    for(const scenario of selectedCases){
     const creation=await request('/conversations','POST',{profile_key:'ccd-local-demo'});assert.equal(creation.status,201);
     const id=creation.body.conversation_id as string;created.push(id);
+    // Explicit contact/duration changes do not depend on a failed previous theme.
+    const overrides:Record<number,number[]>=scenario.id==='REG'?{4:[1],5:[],6:[]}:scenario.id==='T12'?{4:[]}:{};
+    const states=scenarioTurns(scenario.q,overrides);const scenarioReport:any={id:scenario.id,conversation_id:id,turns:states};scenarios.push(scenarioReport);
+    const expectedMessages:any[]=[];let historyReliable=true;
     for(const [index,question] of scenario.q.entries()){
-     trace={};const started=performance.now();const result=await request(`/conversations/${id}/messages`,'POST',{content:question});
-     turns.push({scenario:scenario.id,turn:index+1,conversation_id:id,question,coverage:scenario.coverage,elapsed_ms:performance.now()-started,...trace,result});
-     check(`${scenario.id}/${index+1} HTTP 201`,()=>assert.equal(result.status,201));
+     const state=states[index]!;trace={embedding_calls:0,generator_calls:0};const started=performance.now();
+     let result:any={status:null,body:{}};let persisted=false;
+     if(!historyReliable||!dependenciesSatisfied(state,states)){
+      state.state='not_evaluable';state.reason=historyReliable?'required antecedent did not complete':'history unavailable or uncertain POST';
+     }else{
+      const prior=await observedRequest(`/conversations/${id}`);
+      if(prior.status!==200){historyReliable=false;state.state='not_evaluable';state.reason='could not establish persisted antecedent';}
+      else{
+       state.attempted=true;result=await observedRequest(`/conversations/${id}/messages`,'POST',{content:question});
+       // A GET observes the outcome; the POST is never retried, including uncertain outcomes.
+       const actual=await observedRequest(`/conversations/${id}`);
+       const pair=[result.body?.user_message,result.body?.assistant_message];
+       if(result.status===201&&pair.every(Boolean)&&actual.status===200){
+        try{assert.equal(actual.body.messages.length,prior.body.messages.length+2);
+         for(const message of pair)assert.deepEqual(actual.body.messages.find((m:any)=>m.message_id===message.message_id),message);
+         persisted=true;expectedMessages.push(...pair);
+        }catch{persisted=false;}
+       }
+       state.state=persisted?'completed':'failed';if(!persisted)state.reason=result.status===201?'response persistence not verified':`HTTP ${result.status??'uncertain'}`;
+       historyReliable=actual.status===200&&!('uncertain' in result);
+      }
+     }
+     turns.push({scenario:scenario.id,turn:index+1,conversation_id:id,question,depends_on:state.depends_on,evaluation_state:state.state,coverage:scenario.coverage,elapsed_ms:performance.now()-started,...trace,result});
+     if(state.attempted)check(`${scenario.id}/${index+1} HTTP 201`,()=>assert.equal(result.status,201));
+     else notEvaluable(`${scenario.id}/${index+1} HTTP 201`,state.reason!);
+     if(result.status===201)check(`${scenario.id}/${index+1} response persisted`,()=>assert.equal(persisted,true));
+     else notEvaluable(`${scenario.id}/${index+1} response persisted`,state.reason!);
      const answer=result.body.assistant_message;
-     if(answer){
-      check(`${scenario.id}/${index+1} no positive unsupported guidance`,()=>assert.equal(hasUnbackedGuidanceClaim(answer.content),false));
-      check(`${scenario.id}/${index+1} protocol private`,()=>assert.doesNotMatch(answer.content,/FUENTES:/));
-      if(scenario.id==='T02') check(`${scenario.id}/${index+1} useful U03, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U03'));});
-      if(['T03','T05','T06','T09'].includes(scenario.id)) check(`${scenario.id}/${index+1} useful U04 limits, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U04'));});
-      if(scenario.id.startsWith('T10')) check(`${scenario.id} clarification isolated`,()=>{assert.equal(answer.insufficient_evidence,true);assert.match(answer.content,/refieres|contexto/);assert.equal(answer.citations.length,0);});
-      if(scenario.id==='T07') check(`T07/${index+1} pertinent content, citations and caveats`,()=>{
+     const contentCheck=(name:string,verify:()=>void)=>{if(answer)check(name,verify);else notEvaluable(name,state.reason??'no assistant response');};
+      contentCheck(`${scenario.id}/${index+1} no positive unsupported guidance`,()=>assert.equal(hasUnbackedGuidanceClaim(answer.content),false));
+      contentCheck(`${scenario.id}/${index+1} protocol private`,()=>assert.doesNotMatch(answer.content,/FUENTES:/));
+      if(scenario.id==='T02') contentCheck(`${scenario.id}/${index+1} useful U03, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U03'));});
+      if(['T03','T05','T06','T09'].includes(scenario.id)) contentCheck(`${scenario.id}/${index+1} useful U04 limits, not empty abstention`,()=>{assert.equal(answer.insufficient_evidence,false);assert.ok(answer.citations.some((c:any)=>c.locator==='unit:U04'));});
+      if(scenario.id.startsWith('T10')) contentCheck(`${scenario.id} clarification isolated`,()=>{assert.equal(answer.insufficient_evidence,true);assert.match(answer.content,/refieres|contexto/);assert.equal(answer.citations.length,0);});
+      if(scenario.id==='T07') contentCheck(`T07/${index+1} pertinent content, citations and caveats`,()=>{
        assert.deepEqual(answer.citations,[]);
        assert.doesNotMatch(answer.content,/Inform[aá]tica|transici[oó]n|reconocimientos?|homolog|pilar|202660|202560|202610|hist[oó]ric|vigencia|matr[ií]cula/iu);
        assert.equal(hasUnbackedGuidanceClaim(answer.content),false);
        assert.doesNotMatch(answer.content,/\b(?:la ausencia|no asistir|no presentarse) (?:equivale|cuenta|se considera|significa).*reprob/iu);
       });
-      if(scenario.id==='T08'&&index===2) check('course recovery does not grant a new-test exemption',()=>{assert.doesNotMatch(answer.content,/no (?:se requiere|es necesario|debes|tienes que|necesitas).*present/iu);assert.match(answer.content,/confirm|verific|comprobar/iu);});
-      if((scenario.id==='T12'&&index===3)||(scenario.id==='REG'&&index===5)) check(`${scenario.id} contact really answered with pertinent caveat`,()=>{assert.equal(answer.insufficient_evidence,false);assert.deepEqual(answer.citations.map((c:any)=>c.locator),['unit:M12']);assert.match(answer.content,/vigencia actual no está ratificada/);});
-     }
-     console.log(JSON.stringify({case:scenario.id,turn:index+1,status:result.status,insufficient:answer?.insufficient_evidence,citations:answer?.citations.map((c:any)=>c.locator)}));
+      if(scenario.id==='T08'&&index===2) contentCheck('T08 course recovery does not grant a new-test exemption',()=>{assert.doesNotMatch(answer.content,/no (?:se requiere|es necesario|debes|tienes que|necesitas).*present/iu);assert.match(answer.content,/confirm|verific|comprobar/iu);});
+      if((scenario.id==='T12'&&index===3)||(scenario.id==='REG'&&index===5)) contentCheck(`${scenario.id} contact really answered with pertinent caveat`,()=>{assert.equal(answer.insufficient_evidence,false);assert.deepEqual(answer.citations.map((c:any)=>c.locator),['unit:M12']);assert.match(answer.content,/vigencia actual no está ratificada/);});
+      if((scenario.id==='AMB'&&index===1)||scenario.id==='AMB_FRESH')contentCheck(`${scenario.id} clarification without embedding or generation`,()=>{
+       assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);
+       assert.match(answer.content,scenario.id==='AMB'?/¿De cuál curso quieres conocer los temas\?/u:/contexto|cuál curso/u);
+       assert.equal(trace.embedding_calls,0);assert.equal(trace.generator_calls,0);
+      });
+     console.log(JSON.stringify({case:scenario.id,turn:index+1,state:state.state,status:result.status,insufficient:answer?.insufficient_evidence,citations:answer?.citations.map((c:any)=>c.locator)}));
     }
-    const detail=await request(`/conversations/${id}`);check(`${scenario.id} persisted history equals responses`,()=>{
-     assert.equal(detail.status,200);assert.equal(detail.body.messages.length,scenario.q.length*2);
-     for(const t of turns.filter(t=>t.conversation_id===id)){const a=(t.result as any).body.assistant_message;assert.deepEqual(detail.body.messages.find((m:any)=>m.message_id===a.message_id),a);}
+    scenarioReport.metrics=scenarioMetrics(states);
+    const detail=await observedRequest(`/conversations/${id}`);check(`${scenario.id} persisted history equals completed responses`,()=>{
+     assert.equal(detail.status,200);assert.deepEqual(detail.body.messages,expectedMessages);
     });
+    check(`${scenario.id} required script complete`,()=>assert.equal(scenarioReport.metrics.script_complete,true));
+    scenarioReport.checks=checkMetrics(checks.filter(c=>c.name.startsWith(scenario.id+' ' )||c.name.startsWith(scenario.id+'/')));
+    scenarioReport.integral_pass=scenarioReport.metrics.script_complete&&scenarioReport.checks.failed===0&&scenarioReport.checks.not_evaluable===0;
    }
    for(const chat of before.history){const r=await request(`/conversations/${chat.id}`);check(`historical GET ${chat.id}`,()=>assert.equal(r.status,200));}
    if(before.history[0]){const r=await request(`/conversations/${before.history[0].id}/messages`,'POST',{content:'¿Qué indicaban los lineamientos?'});check('old release message returns 409',()=>assert.equal(r.status,409));}
@@ -151,7 +197,11 @@ try {
    check('all citations persist actual hash/locator/release',()=>assert.ok(citations.every(c=>c.hash_matches&&c.locator_matches&&c.release_matches)));
    const artifacts=(await pool.query('SELECT id,source_sha256 FROM banuchat.document_versions WHERE processing_status=\'ready\' ORDER BY id')).rows;
    for(const artifact of artifacts){const r=await fetch(`http://127.0.0.1:3001/api/v1/documents/${artifact.id}/artifact`);check(`artifact ${artifact.id}`,()=>assert.equal(r.status,200));const bytes=new Uint8Array(await r.arrayBuffer());check(`artifact hash ${artifact.id}`,()=>assert.equal(hash(bytes),artifact.source_sha256));}
-   const after=await capture();check('previous histories preserved after HTTP',()=>assert.deepEqual(after.history.filter(c=>before.history.some(b=>b.id===c.id)),before.history));
+   const after=await capture();check('previous histories preserved after HTTP',()=>assert.deepEqual(after.history.filter(c=>current.history.some(b=>b.id===c.id)),current.history));
+   check('all current and historical releases unchanged after HTTP',()=>assert.deepEqual(after.releases,current.releases));
+   check('all current and historical chunks and vectors unchanged after HTTP',()=>assert.deepEqual(after.chunks,current.chunks));
+   report.preserved_conversations=current.history.length;
+   report.turn_metrics=scenarios.reduce((acc:any,s:any)=>{for(const k of ['planned','attempted','completed','failed','not_evaluable'])acc[k]+=s.metrics[k];return acc;},{planned:0,attempted:0,completed:0,failed:0,not_evaluable:0});
    report.counts=(await pool.query(`SELECT r.id,r.status,d.current_release_id=r.id AS current,(SELECT count(*)::int FROM banuchat.document_versions v WHERE v.dataset_release_id=r.id) AS documents,
     (SELECT count(*)::int FROM banuchat.document_chunks c WHERE c.dataset_release_id=r.id) AS chunks,(SELECT count(embedding)::int FROM banuchat.document_chunks c WHERE c.dataset_release_id=r.id) AS embeddings FROM banuchat.dataset_releases r JOIN banuchat.datasets d ON d.id=r.dataset_id ORDER BY r.id`)).rows;
    loadEnvFile(path.join(root,'.env'));
@@ -162,10 +212,10 @@ try {
    report.synthetic_read_only=true;
   }
  }
- report.passed=checks.every(c=>c.passed);if(!report.passed)process.exitCode=1;
+ report.check_metrics=checkMetrics(checks);report.passed=checks.every(c=>c.status==='passed');if(!report.passed)process.exitCode=1;
 }catch(error){report.passed=false;report.error=error instanceof Error?error.message:'Check failed';process.exitCode=1;console.error('CCD_GUIDANCE_CHECK_FAILED; private evidence saved');}
 finally{
  if(server?.listening)await new Promise<void>(resolve=>server!.close(()=>resolve()));
  if(synthetic&&synthetic.exitCode===null){const done=new Promise<void>(resolve=>synthetic!.once('exit',()=>resolve()));synthetic.kill('SIGTERM');await done;}
- await pool.end();report.finished_at=new Date().toISOString();const name=`${mode}-${Date.now()}.json`;await writeFile(path.join(out,name),JSON.stringify(report,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({passed:report.passed,evidence:name,checks:checks.length,failed:checks.filter(c=>!c.passed).length}));
+ await pool.end();report.finished_at=new Date().toISOString();report.check_metrics=checkMetrics(checks);const name=`${mode}-${Date.now()}.json`;await writeFile(path.join(out,name),JSON.stringify(report,null,2)+'\n',{flag:'wx'});console.log(JSON.stringify({passed:report.passed,evidence:name,check_metrics:report.check_metrics,turn_metrics:report.turn_metrics}));
 }

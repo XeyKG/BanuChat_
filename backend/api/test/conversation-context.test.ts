@@ -41,6 +41,18 @@ test("ambiguous references without a user antecedent require clarification", () 
   assert.equal(resolveConversationQuery("¿Cuánto duran las pruebas diagnósticas?", []).needs_clarification, false);
 });
 
+test('a catalog does not identify one course for a singular themes follow-up', () => {
+  const history=[user('¿Cuáles son los cursos de Competencias Digitales?'),assistant('IA Generativa, Marca Personal y cinco cursos más.')];
+  assert.equal(resolveConversationQuery('¿Y qué temas tiene?',history).needs_clarification,true);
+  history.push(user('¿Y qué temas tiene?'),assistant('¿De cuál curso quieres conocer los temas?'));
+  assert.equal(resolveConversationQuery('¿Y qué temas tiene?',history).needs_clarification,true);
+  history.push(user('Háblame del de IA Generativa'),assistant('Descripción documentada.'));
+  assert.equal(resolveConversationQuery('¿Y qué temas tiene?',history).needs_clarification,false);
+  assert.equal(resolveConversationQuery('Corrijo: me refiero a Marca Personal, ¿qué temas aborda?',history).needs_clarification,false);
+  assert.equal(resolveConversationQuery('Ahora quiero el contacto del CCD',history).needs_clarification,false);
+  assert.equal(resolveConversationQuery('¿Qué temas tiene el curso de IA Generativa?',[]).needs_clarification,false);
+});
+
 test("context and retrieval budgets count Unicode characters and prefer recent messages", () => {
   const history = Array.from({ length: 12 }, (_, index) => user(`${index}:` + "😀".repeat(2000)));
   const bounded = boundConversationContext(history);
