@@ -32,8 +32,17 @@ export function isContextualFollowUp(query: string): boolean {
   const text = normalize(query);
   // A declared subject starts a new topic even if prefixed with “y”.
   if (/^(?:cambiando de tema|otro tema|ahora (?:quiero|hablemos|sobre))/u.test(text)) return false;
+  if (/^(?:tengo|ingrese|soy)\b/u.test(text)
+    && /\b(?:informatica|antigu\p{L}*|word|excel|tec|dual)\b/u.test(text)) return false;
+  if (/^(?:soy|ingrese|ingreso|nunca (?:la|las|hice)|no powerpoint)/u.test(text)
+    && !/\b(?:prueba|curso|informatica|pilar|ccd|word|excel|tec|dual)\b/u.test(text)) return true;
+  if (/^(?:puedo|podria|tengo derecho).*\b(?:repetir|otra oportunidad|primera)\b/u.test(text)
+    && !/\b(?:pruebas?|cursos?|informatica)\b/u.test(text)) return true;
   return /^(?:y\b|pero\b|entonces\b|hablame del de\b|(?:me refiero|quise decir|corrijo|correccion|perdon)\b)/u.test(text)
-    || /\b(?:ese|esa|eso|esos|esas|anterior|el primero|el segundo|el tercero)\b/u.test(text)
+    || /^(?:la de|el de|me aplica|es inmediata|es inmediato|tengo que presentar|no powerpoint)\b/u.test(text)
+    || /^(?:donde|cuando)\b.*\b(?:la|lo|las|los)\b/u.test(text)
+    || /\b(?:ese|esa|eso|esos|esas|anterior|el primero|el segundo|el tercero|la primera|repetirla|repetirlas|presentarla|presentarlas)\b/u.test(text)
+    || /^(?:tengo (?:el )?pilar|que me falta)/u.test(text)
     || /^(?:que temas (?:tiene|incluye)|cuanto duran?|cuanto cuesta)$/u.test(text)
     || /^(?:como (?:lo|la|los|las)\b|que pasa si no (?:la|lo|las|los)\b)/u.test(text);
 }

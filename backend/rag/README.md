@@ -1,5 +1,15 @@
 # RAG e ingesta — estado implementado
 
+BCH-03 incremento 5 añade contrato CCD `ccd-1.2.0` y receta explícita
+`ccd_guidance_v1`: doce documentos/chunks, conservando los diez anteriores y
+añadiendo solo U03/U04. Usa el lease y finalizador existentes, verifica los hashes
+de todos los artefactos predecesores y publica el contexto/puntero en la misma
+transacción. La migración adicional `005_ccd_guidance_manifest.sql` valida solo
+CCD; conserva las ramas sintética y CCD anteriores. No reejecutar migraciones
+históricas ni reemplazar snapshots. El contenido depurado y evidencia son privados
+en `data/ccd/local/guidance-v3` y `data/ccd/evidence/increment-5`. Véase
+[checkpoint 5](../../docs/transition/bch03-increment-5-checkpoint.md).
+
 BCH-03 incremento 2 implementa `src/ccd/ingest.ts` y el comando `npm run ccd:local`:
 verificación de destino Docker/base CCD, migración exclusiva, carga manual, inspección
 y no-op idempotente. Reutiliza lease, staging documental, configuración/embeddings y

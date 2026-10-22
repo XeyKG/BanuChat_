@@ -8,7 +8,7 @@ export async function assertCcdChatDatabase(sql: SqlQueryClient): Promise<void> 
        JOIN banuchat.datasets d ON d.current_release_id=ctx.dataset_release_id AND d.name='banuchat-ccd-local'
        JOIN banuchat.dataset_releases r ON r.id=ctx.dataset_release_id AND r.status='ready'
        WHERE ctx.profile_key='ccd-local-demo' AND r.manifest->'synthetic'='false'::jsonb
-         AND r.manifest->>'schema_version' IN ('ccd-1.0.0','ccd-1.1.0')) AS contexts,
+         AND r.manifest->>'schema_version' IN ('ccd-1.0.0','ccd-1.1.0','ccd-1.2.0')) AS contexts,
       (SELECT count(*)::int FROM banuchat.synthetic_profiles) AS synthetic_profiles`);
   const row = result.rows[0];
   if (result.rows.length !== 1 || row?.database !== "banuchat_ccd_dev" || row.contexts !== 1 || row.synthetic_profiles !== 0) {

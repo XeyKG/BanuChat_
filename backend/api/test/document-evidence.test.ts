@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { asksUnsupportedTestRule, parseGroundedAnswer, selectCcdEvidence } from "../src/chat/document-evidence.js";
+import { asksUnsupportedTestRule, ccdGuidanceTopic, hasUnbackedGuidanceClaim, parseGroundedAnswer, selectCcdEvidence } from "../src/chat/document-evidence.js";
 import type { RetrievedDocumentChunk } from "../src/application/document-retrieval.js";
 
 // Selection consumes metadata only; no distance or similarity is used as support.
@@ -9,6 +9,36 @@ const brand = { title: "Marca Personal Digital", chunk_locator: "unit:M02:DOC-10
 const contact = { title: "Contacto CCD", chunk_locator: "unit:M12" } as RetrievedDocumentChunk;
 const tests = { title: "Pruebas", chunk_locator: "unit:TEST_ORIENTATION" } as RetrievedDocumentChunk;
 const chunks = [brand, contact, tests, ia];
+const failure = { title: 'Historical failure', chunk_locator: 'unit:U03' } as RetrievedDocumentChunk;
+const transition = { title: 'Transition', chunk_locator: 'unit:U04' } as RetrievedDocumentChunk;
+
+test('admitted guidance explains bounded situations without using vector rank or old assistant rules', () => {
+  const all = [...chunks, failure, transition];
+  assert.deepEqual(selectCcdEvidence(all, 'No aprobé una prueba nueva de 202660', []), [contact, failure]);
+  const history = [{ role: 'user' as const, content: 'No aprobé una prueba nueva de 202660' }];
+  assert.equal(ccdGuidanceTopic('¿Puedo repetir gratis?', history), 'U03');
+  assert.deepEqual(selectCcdEvidence(all, 'Me quedaron pruebas antiguas de Informática pendientes', []), [contact, transition]);
+  assert.equal(ccdGuidanceTopic('Corrijo: fue un curso reprobado, no una prueba', history), 'U03');
+  assert.equal(ccdGuidanceTopic('Corrijo: fue un curso, no una prueba', history), 'U03');
+  assert.equal(ccdGuidanceTopic('¿Eso quiere decir que aprobé IA Generativa?', [{role:'user',content:'Tengo Excel aprobado del plan anterior'}]), 'U04');
+  assert.equal(ccdGuidanceTopic('Presenté las nuevas pruebas por primera vez sin costo; otro estudiante también las solicitó', []), 'U04');
+  assert.deepEqual(selectCcdEvidence(all, 'Ahora quiero el contacto del CCD', history), [contact]);
+  assert.deepEqual(selectCcdEvidence(all, '¿Cuánto duran?', history), [tests]);
+  assert.deepEqual(selectCcdEvidence(all, 'Corrijo: IA Generativa, ¿qué temas tiene?', history), [ia]);
+});
+
+test('positive authorizations fail closed while uncertainty and known historical consequences remain speakable', () => {
+  for (const content of ['Puedes repetir gratis.', 'Tienes derecho a otra oportunidad.', 'La primera presentación es gratuita.',
+    'Si aprobaste Word, tienes el pilar reconocido.', 'Quedas inscrito automáticamente.', 'Dame tu UID.',
+    'No es una norma general, pero puedes repetir gratis.', 'No hay norma, puedes repetir gratis.', 'No necesitas pagar para repetir.']) assert.equal(hasUnbackedGuidanceClaim(content), true, content);
+  for (const content of ['En 202660, los pilares no validados se completaban cursando la asignatura correspondiente.',
+    'No se ha demostrado repetición gratuita. Primera presentación y repetición son diferentes.',
+    'No puedo confirmar que tengas ese pilar reconocido; debe comprobarse con tu programa.',
+    'No localizar una norma no demuestra que el procedimiento nunca existió.',
+    'Si tienes Excel aprobado del plan anterior, se debe comprobar el plan con el CCD.',
+    'La evidencia no confirma gratuidad, repetición gratuita ni primera presentación gratuita.',
+    'Se debe comprobar si el curso está reconocido mediante el plan académico.']) assert.equal(hasUnbackedGuidanceClaim(content), false, content);
+});
 
 test("course source is selected by title even when it is ranked last", () => {
   assert.deepEqual(selectCcdEvidence(chunks, "Háblame del curso de IA generativa", []), [ia]);

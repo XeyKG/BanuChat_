@@ -51,3 +51,17 @@ test("context and retrieval budgets count Unicode characters and prefer recent m
   const long = "¿Y " + "😀".repeat(3995) + "?";
   assert.ok(Array.from(resolveConversationQuery(long, history).retrieval_query).length <= 4000);
 });
+
+test('cohort refinements and repetition keep the scenario but a fresh conversation cannot borrow it', () => {
+  const history = [user('No aprobé la prueba nueva de 202660'), assistant('Orientación histórica.')];
+  for (const q of ['Soy de primer ingreso virtual en 202660', '¿Puedo repetir gratis?', '¿Puedo pedir la primera gratis ahora?']) {
+    assert.match(resolveConversationQuery(q, history).retrieval_query, /No aprobé/);
+  }
+  assert.equal(resolveConversationQuery('¿Puedo repetirla gratis?', []).needs_clarification, true);
+  assert.match(resolveConversationQuery('Corrijo: fue un curso, no una prueba', history).retrieval_query, /Consulta actual: Corrijo/);
+  assert.equal(resolveConversationQuery('Tengo Excel aprobado del plan anterior', []).needs_clarification, false);
+  assert.equal(resolveConversationQuery('Ingresé en 202510 y quiero la oportunidad de antiguos', []).needs_clarification, false);
+  for (const q of ['La de un pilar de 202660', '¿Dónde y cuándo la presento?', '¿Me aplica el mismo plan?', '¿Es inmediata?', '¿Tengo que presentar las nuevas?']) {
+    assert.match(resolveConversationQuery(q, history).retrieval_query, /No aprobé/);
+  }
+});

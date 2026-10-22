@@ -6,21 +6,21 @@ import { parseStrictJson } from '../preflight/json.js';
 import { SafeReader } from '../source/safe-reader.js';
 import type { Chunk, DocumentDerivatives, DocumentRecord } from '../types.js';
 
-export type CcdSourceId = 'DOC-110' | 'BCH01-CIERRE' | 'DOC-098' | 'DOC-099' | 'DOC-100' | 'DOC-101' | 'DOC-102' | 'DOC-103' | 'DOC-104';
+export type CcdSourceId = 'DOC-110' | 'BCH01-CIERRE' | 'DOC-098' | 'DOC-099' | 'DOC-100' | 'DOC-101' | 'DOC-102' | 'DOC-103' | 'DOC-104' | 'DOC-116' | 'DOC-076';
 export interface CcdSource { id: CcdSourceId; path: string; sha256: string }
 export interface CcdReference { source_id: CcdSource['id']; locator: string }
 export interface CcdUnit {
-  id: string; group: 'M01' | 'M12' | 'M02' | 'TEST_ORIENTATION'; c_units: string[];
-  title: string; retrieval_mode: 'chunked'; period: '202660' | 'Edición entregada; periodo no confirmado'; population: string;
+  id: string; group: 'M01' | 'M12' | 'M02' | 'TEST_ORIENTATION' | 'U03' | 'U04'; c_units: string[];
+  title: string; retrieval_mode: 'chunked'; period: '202660' | 'Edición entregada; periodo no confirmado' | 'Transición 202560–202610; actualidad no confirmada'; population: string;
   applicability_status: 'current_applicability_unconfirmed';
   editorial_status: 'team_validated_local_candidate' | 'source_checked_local_candidate'; content: string;
-  limits: string[]; references: CcdReference[]; topics?: string[];
+  limits: string[]; references: CcdReference[]; topics?: string[]; scenario_refs?: string[];
 }
 export interface CcdCorpus {
-  schema_version: 'ccd-1.0.0' | 'ccd-1.1.0'; dataset_key: 'banuchat-ccd-local'; version: string;
+  schema_version: 'ccd-1.0.0' | 'ccd-1.1.0' | 'ccd-1.2.0'; dataset_key: 'banuchat-ccd-local'; version: string;
   synthetic: false; use_scope: 'local_development_only';
   validation: { status: 'team_validated' | 'source_checked_local'; institutional_approval: false;
-    authorization_ref: 'BCH-03/incremento-1' | 'BCH-03/incremento-4'; note: string };
+    authorization_ref: 'BCH-03/incremento-1' | 'BCH-03/incremento-4' | 'BCH-03/incremento-5'; note: string; review_package_sha256?: string };
   sources: CcdSource[]; units: CcdUnit[];
 }
 export interface PreparedCcdCorpus {
@@ -38,7 +38,7 @@ export interface PreparedCcdCorpus {
     items: { kind: 'document'; key: string; path: string; locator: 'document'; sha256: string; retrieval_mode: 'chunked' }[];
     ccd_provenance: { corpus_sha256: string; schema_sha256: string; corpus: CcdCorpus };
   };
-  pipeline: { pipeline_version: 'ccd-local-unit-v1' | 'ccd-local-unit-v1.1'; chunking: 'one_scoped_unit';
+  pipeline: { pipeline_version: 'ccd-local-unit-v1' | 'ccd-local-unit-v1.1' | 'ccd-local-unit-v1.2'; chunking: 'one_scoped_unit';
     synthetic_banner: 'not_applicable'; schema_sha256: string };
 }
 
@@ -49,6 +49,8 @@ const expected = {
 } as const;
 
 export function ccdUnitPolicy(unit: CcdUnit) {
+  if (unit.group === 'U03') return { id: 'ccd-u03', c: ['C53'], source: 'DOC-110', cell: '01_Admision_M01_M12!F5', period: '202660' };
+  if (unit.group === 'U04') return { id: 'ccd-u04', c: ['C09', 'C10'], source: 'DOC-116', cell: '01_Admision_M01_M12!F11', period: 'Transición 202560–202610; actualidad no confirmada' };
   if (unit.group === 'M01' || unit.group === 'M12') return { ...expected[unit.group], source: 'DOC-110', period: '202660' };
   if (unit.group === 'TEST_ORIENTATION') return { id: 'ccd-tests-overview', c: ['C11'], source: 'DOC-110',
     cell: '07_Bloqueos!A3:H3', period: '202660' };
@@ -67,15 +69,16 @@ export async function prepareCcdCorpus(options: {
     const corpusBytes = await local.read('corpus.json');
     const parsed = parseStrictJson(corpusBytes);
     requireValid(parsed && typeof parsed === 'object' && !Array.isArray(parsed), 'schema');
-    const expanded = parsed['schema_version'] === 'ccd-1.1.0';
-    const schemaBytes = await (await SafeReader.create(schemaRoot)).read(expanded ? 'corpus-1.1.schema.json' : 'corpus.schema.json');
+    const guidance = parsed['schema_version'] === 'ccd-1.2.0';
+    const expanded = guidance || parsed['schema_version'] === 'ccd-1.1.0';
+    const schemaBytes = await (await SafeReader.create(schemaRoot)).read(guidance ? 'corpus-1.2.schema.json' : expanded ? 'corpus-1.1.schema.json' : 'corpus.schema.json');
     const schema = parseStrictJson(schemaBytes);
     requireValid(schema && typeof schema === 'object' && !Array.isArray(schema), 'schema');
     const validate = new Ajv2020({ strict: true, allErrors: false }).compile<CcdCorpus>(schema);
     requireValid(validate(parsed), 'schema');
     const corpus = parsed;
     const sources = new Map(corpus.sources.map(source => [source.id, source]));
-    const sourceIds = expanded ? ['DOC-110', 'BCH01-CIERRE', 'DOC-098', 'DOC-099', 'DOC-100', 'DOC-101', 'DOC-102', 'DOC-103', 'DOC-104'] : ['DOC-110', 'BCH01-CIERRE'];
+    const sourceIds = expanded ? ['DOC-110', 'BCH01-CIERRE', 'DOC-098', 'DOC-099', 'DOC-100', 'DOC-101', 'DOC-102', 'DOC-103', 'DOC-104', ...(guidance ? ['DOC-116', 'DOC-076'] : [])] : ['DOC-110', 'BCH01-CIERRE'];
     requireValid(sources.size === sourceIds.length && sourceIds.every(id => sources.has(id as CcdSourceId)), 'identity');
     requireValid(new Set(corpus.sources.map(source => source.path)).size === sourceIds.length, 'identity');
     for (const source of corpus.sources) {
@@ -92,6 +95,10 @@ export async function prepareCcdCorpus(options: {
       unitIds.add(unit.id);
       requireValid(unit.references.some(ref => ref.source_id === mapping.source)
         && unit.references.some(ref => ref.source_id === 'BCH01-CIERRE' && ref.locator === mapping.cell), 'relation');
+      if (unit.group === 'U04') requireValid(unit.references.some(ref => ref.source_id === 'DOC-076'), 'relation');
+      if (unit.group === 'U03' || unit.group === 'U04') {
+        requireValid(JSON.stringify(unit.scenario_refs) === JSON.stringify(unit.group === 'U03' ? ['R07'] : ['R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R18']), 'relation');
+      }
       requireValid(new Set(unit.references.map(ref => `${ref.source_id}:${ref.locator}`)).size === unit.references.length, 'identity');
       const provenance = unit.references.map(ref => {
         const source = sources.get(ref.source_id);
@@ -116,7 +123,7 @@ export async function prepareCcdCorpus(options: {
       derivatives.push({ document_key: unit.id, retrieval_mode: 'chunked',
         source_sha256: digest, content_sha256: digest, chunks: [chunk] });
     }
-    requireValid(unitIds.size === (expanded ? 10 : 2), 'identity');
+    requireValid(unitIds.size === (guidance ? 12 : expanded ? 10 : 2), 'identity');
     const corpusSha256 = sha256(corpusBytes);
     const schemaSha256 = sha256(schemaBytes);
     const manifest: PreparedCcdCorpus['manifest'] = {
@@ -127,7 +134,7 @@ export async function prepareCcdCorpus(options: {
         path: document.artifact_path, locator: 'document', sha256: sha256(artifacts.get(document.artifact_path)!), retrieval_mode: 'chunked' })),
       ccd_provenance: { corpus_sha256: corpusSha256, schema_sha256: schemaSha256, corpus },
     };
-    const pipeline: PreparedCcdCorpus['pipeline'] = { pipeline_version: expanded ? 'ccd-local-unit-v1.1' : 'ccd-local-unit-v1',
+    const pipeline: PreparedCcdCorpus['pipeline'] = { pipeline_version: guidance ? 'ccd-local-unit-v1.2' : expanded ? 'ccd-local-unit-v1.1' : 'ccd-local-unit-v1',
       chunking: 'one_scoped_unit', synthetic_banner: 'not_applicable', schema_sha256: schemaSha256 };
     // Verify sources again after derivation. External source must stay read-only.
     for (const source of corpus.sources) requireValid(sha256(await external.read(source.path)) === source.sha256, 'hash');

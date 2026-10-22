@@ -428,13 +428,13 @@ test("CCD contact output without its institutional source abstains even if gener
   assert.deepEqual(answer.citations, []);
 });
 
-test("broad CCD course lists retrieve ten units so top-five does not truncate the seven syllabus", async () => {
+test("CCD retrieves the twelve admitted units before selecting metadata so syllabus are not truncated", async () => {
   const fake = fakeDependencies([chunk({ title: "IA Generativa", chunk_locator: "unit:M02:DOC-101" }),
     chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M12" })]);
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
     release_id: RELEASE_ID, query: "¿Cuáles son los cursos de Competencias Digitales?",
   });
-  assert.equal(fake.sql_calls[2]?.values?.[2], 10);
+  assert.equal(fake.sql_calls[2]?.values?.[2], 12);
   assert.equal(fake.generator_calls.length, 0);
   assert.match(answer.content, /- IA Generativa/);
   assert.match(answer.content, /no acreditan oferta actual/);
@@ -522,4 +522,78 @@ test("a correction from contact to a course does not inherit contact caveats or 
   assert.equal(answer.insufficient_evidence, false);
   assert.deepEqual(answer.citations.map(c => c.locator), ["unit:M02:DOC-101"]);
   assert.doesNotMatch(answer.content, /contacto|202660/);
+});
+
+test('U03 provides useful historical guidance with its own persisted citation and deterministic period restriction', async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: 'unit:U03' }), chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: 'unit:M12' })],
+    'En 202660, los pilares no validados debían completarse cursando la asignatura correspondiente. No se acredita repetición gratuita.\nFUENTES: [1]');
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: 'ccd_local' }, {
+    release_id: RELEASE_ID, query: 'No aprobé una prueba nueva de 202660, ¿qué indicaban los lineamientos?',
+  });
+  assert.equal(answer.insufficient_evidence, false);
+  assert.match(answer.content, /asignatura correspondiente/);
+  assert.match(answer.content, /no determina automáticamente el procedimiento vigente de otro periodo/);
+  assert.deepEqual(answer.citation_records.map(c => c.source_locator), ['unit:U03']);
+  assert.doesNotMatch(answer.content, /El contacto documentado/);
+  assert.match(fake.generator_calls[0]!.input.system_prompt, /curso reprobado/);
+});
+
+test('U04 explains transition limits and can cite M12 for the actual documented channel', async () => {
+  const fake = fakeDependencies([chunk({ chunk_locator: 'unit:U04' }), chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: 'unit:M12' })],
+    'La transición contempla comprobar los cursos aprobados, sin decidir equivalencias individuales. Puedes consultar al CCD mediante ccdigital@example.test.\nFUENTES: [1], [2]');
+  const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: 'ccd_local' }, {
+    release_id: RELEASE_ID, query: 'Me quedaron pruebas antiguas de Informática pendientes',
+  });
+  assert.equal(answer.insufficient_evidence, false);
+  assert.match(answer.content, /transición citada es histórica/);
+  assert.match(answer.content, /vigencia actual no está ratificada/);
+  assert.deepEqual(answer.citations.map(c => c.locator), ['unit:U04', 'unit:M12']);
+});
+
+test('admitted guidance cannot authorize rights or evade the primary source using only a contact citation', async () => {
+  for (const output of ['Puedes repetir gratis.\nFUENTES: [1]',
+    'Si aprobaste Word, tienes el pilar reconocido.\nFUENTES: [1]',
+    'Dame tu UID.\nFUENTES: [1]', 'Consulta de transición.\nFUENTES: [2]']) {
+    const fake = fakeDependencies([chunk({ chunk_locator: 'unit:U04' }), chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: 'unit:M12' })], output);
+    const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: 'ccd_local' }, {
+      release_id: RELEASE_ID, query: 'Tengo pruebas antiguas pendientes de Informática',
+    });
+    assert.equal(answer.insufficient_evidence, true); assert.deepEqual(answer.citation_records, []);
+  }
+});
+
+test('empty guidance generation uses a literal retrieved passage, not a fabricated rule or another model attempt', async () => {
+  const source = '# Historical scope\n\nLos lineamientos de 202660 describen cursar la asignatura del pilar no validado. La gestión no es automática.\n\nPeriodo de la fuente: 202660.\n';
+  const fake = fakeDependencies([chunk({chunk_locator:'unit:U03',content:source})], 'EVIDENCIA_INSUFICIENTE');
+  const result = await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {
+    release_id:RELEASE_ID,query:'No aprobé una prueba nueva de 202660',
+  });
+  assert.equal(result.insufficient_evidence,false);
+  assert.match(result.content,/Los lineamientos de 202660 describen cursar/);
+  assert.deepEqual(result.citations.map(c=>c.locator),['unit:U03']);
+  assert.equal(fake.generator_calls.length,1);
+});
+
+test('course failure cannot exempt a student from new tests by categorical denial', async () => {
+  const fake = fakeDependencies([chunk({chunk_locator:'unit:U03',content:'# Scope\n\nConsecuencia histórica de prueba.\n\n- Las reglas particulares de recuperación de un curso reprobado requieren confirmación del CCD/programa. No aplicar la consecuencia de prueba a curso.'})],
+    'No, no se requiere presentar nuevas pruebas si se trata de un curso reprobado.\nFUENTES: [1]');
+  const result = await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {
+    release_id:RELEASE_ID,query:'¿Tengo que presentar las nuevas?',history:[{role:'user',content:'No aprobé la prueba de 202660'},{role:'user',content:'Corrijo: fue un curso, no una prueba'}],
+  });
+  assert.equal(result.insufficient_evidence,false);
+  assert.match(result.content,/requieren confirmación/);
+  assert.doesNotMatch(result.content,/no se requiere presentar/);
+  assert.deepEqual(result.citations.map(c=>c.locator),['unit:U03']);
+});
+
+test('explicit contact after unsupported results uses only the contact source without unrelated history', async () => {
+  const fake = fakeDependencies([chunk({chunk_locator:'unit:M12'})], 'El correo documentado es demo@example.test.\nFUENTES: [1]');
+  const result = await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {
+    release_id:RELEASE_ID,query:'Ahora quiero el contacto del CCD',history:[{role:'user',content:'Obtuve exactamente 70 puntos'}],
+  });
+  assert.equal(result.insufficient_evidence,false);
+  assert.doesNotMatch(fake.generator_calls[0]!.input.user_prompt,/70 puntos/);
+  assert.match(fake.generator_calls[0]!.input.system_prompt,/único fragmento es \[1\], de contacto/);
+  assert.match(result.content,/vigencia actual no está ratificada/);
+  assert.deepEqual(result.citations.map(c=>c.locator),['unit:M12']);
 });

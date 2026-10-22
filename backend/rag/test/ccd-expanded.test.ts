@@ -9,12 +9,13 @@ import { storageCounts } from '../src/db/recipe.js';
 import { finalizeAndPublish } from '../src/db/finalize.js';
 import type { WriterLease } from '../src/db/writer-lock.js';
 
-async function fixture(t: TestContext) {
+async function fixture(t: TestContext, guidance = false) {
   const root = await temporaryDirectory(t); const corpusRoot = path.join(root, 'local'); const institutionalRoot = path.join(root, 'sources');
   await mkdir(corpusRoot); await mkdir(institutionalRoot);
   const ids: CcdSourceId[] = ['DOC-110', 'BCH01-CIERRE', 'DOC-098', 'DOC-099', 'DOC-100', 'DOC-101', 'DOC-102', 'DOC-103', 'DOC-104'];
+  if (guidance) ids.push('DOC-116', 'DOC-076');
   for (const id of ids) await writeFile(path.join(institutionalRoot, `${id}.bin`), `fictional ${id}`);
-  const units: CcdUnit[] = ids.filter(id => id !== 'BCH01-CIERRE' && id !== 'DOC-110').map(id => ({
+  const units: CcdUnit[] = ids.filter(id => /^DOC-(098|099|10[0-4])$/.test(id)).map(id => ({
     id: `ccd-m02-${id.toLowerCase()}`, group: 'M02', c_units: ['C05'], title: `Fictional course ${id}`,
     content: 'Fictional descriptive evidence.', topics: ['Fictional topic A', 'Fictional topic B'], retrieval_mode: 'chunked',
     period: 'Edición entregada; periodo no confirmado', population: 'Fictional population', applicability_status: 'current_applicability_unconfirmed',
@@ -33,6 +34,18 @@ async function fixture(t: TestContext) {
     use_scope: 'local_development_only', validation: { status: 'source_checked_local', institutional_approval: false,
       authorization_ref: 'BCH-03/incremento-4', note: 'Fictional fixture only.' },
     sources: ids.map(id => ({ id, path: `${id}.bin`, sha256: sha256(Buffer.from(`fictional ${id}`)) })), units };
+  if (guidance) {
+    corpus.schema_version = 'ccd-1.2.0'; corpus.validation.authorization_ref = 'BCH-03/incremento-5';
+    corpus.validation.review_package_sha256 = 'a'.repeat(64);
+    for (const group of ['U03', 'U04'] as const) units.push({ id: group === 'U03' ? 'ccd-u03' : 'ccd-u04', group,
+      c_units: group === 'U03' ? ['C53'] : ['C09', 'C10'], title: 'Fictional scoped guidance', content: 'Fictional historical evidence, no entitlement.',
+      retrieval_mode: 'chunked', period: group === 'U03' ? '202660' : 'Transición 202560–202610; actualidad no confirmada',
+      population: 'Fictional scope', applicability_status: 'current_applicability_unconfirmed', editorial_status: 'source_checked_local_candidate',
+      limits: ['No personal equivalences or free repetition.'], scenario_refs: group === 'U03' ? ['R07'] : ['R12', 'R13', 'R14', 'R15', 'R16', 'R17', 'R18'],
+      references: [{ source_id: group === 'U03' ? 'DOC-110' : 'DOC-116', locator: 'fictional section' },
+        ...(group === 'U04' ? [{ source_id: 'DOC-076' as const, locator: 'fictional orientation' }] : []),
+        { source_id: 'BCH01-CIERRE', locator: group === 'U03' ? '01_Admision_M01_M12!F5' : '01_Admision_M01_M12!F11' }] });
+  }
   const save = () => writeFile(path.join(corpusRoot, 'corpus.json'), JSON.stringify(corpus, null, 2) + '\n'); await save();
   return { corpus, corpusRoot, institutionalRoot, save };
 }
@@ -45,6 +58,23 @@ test('expanded recipe admits seven distinct descriptive course units and scoped 
   assert.match(course.content, /periodo no confirmado/); assert.match(course.content, /Fictional topic A/);
   assert.match(course.content, /Síntesis cotejada/); assert.doesNotMatch(course.content, /Validación del equipo;/);
 });
+
+test('guidance admits exactly two new scoped units and preserves all ten prior artifact bytes', async t => {
+  const old = await prepareCcdCorpus(await fixture(t)); const next = await prepareCcdCorpus(await fixture(t, true));
+  assert.equal(next.documents.length, 12);
+  assert.deepEqual(storageCounts('ccd_guidance_v1'), { items: 12, documents: 12, chunks: 12, perDocument: 1 });
+  for (const [name, bytes] of old.artifacts) assert.ok(bytes.equals(next.artifacts.get(name)!));
+  assert.equal(new Set(next.derivatives.map(d => d.chunks[0]!.locator)).size, 12);
+});
+for (const [label, mutate] of [
+  ['restricted source', (c: CcdCorpus) => { c.sources[10]!.id = 'DOC-112' as CcdSourceId; }],
+  ['missing guidance', (c: CcdCorpus) => { c.units.pop(); }],
+  ['wrong scenario', (c: CcdCorpus) => { c.units.at(-1)!.scenario_refs = ['R07']; }],
+  ['missing transition source', (c: CcdCorpus) => { c.units.at(-1)!.references = c.units.at(-1)!.references.filter(r => r.source_id !== 'DOC-076'); }],
+  ['false institutional approval', (c: CcdCorpus) => { c.validation.institutional_approval = true as false; }],
+  ['wrong historical period', (c: CcdCorpus) => { c.units.at(-1)!.period = '202660'; }],
+  ['missing package hash', (c: CcdCorpus) => { delete c.validation.review_package_sha256; }],
+] as const) test(`guidance rejects ${label}`, async t => { const f = await fixture(t, true); mutate(f.corpus); await f.save(); await assert.rejects(prepareCcdCorpus(f)); });
 for (const [label, mutate] of [
   ['duplicate course', (c: CcdCorpus) => { c.units[1] = c.units[0]!; }],
   ['missing syllabus', (c: CcdCorpus) => { c.sources.pop(); }],

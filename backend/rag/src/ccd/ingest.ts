@@ -26,7 +26,7 @@ export async function captureCcdCode(root: string) {
   const scope = ['backend/rag/src', 'backend/rag/package.json', 'backend/rag/package-lock.json',
     'backend/rag/tsconfig.json', 'data/ccd/schemas',
     'infra/db/001_initial_schema.sql', 'infra/db/002_ccd_local_manifest.sql',
-    'infra/db/003_ccd_chat_demo.sql', 'infra/db/004_ccd_expanded_manifest.sql'];
+    'infra/db/003_ccd_chat_demo.sql', 'infra/db/004_ccd_expanded_manifest.sql', 'infra/db/005_ccd_guidance_manifest.sql'];
   const names = new Set((await git('ls-files', '-z', '--', ...scope) +
     await git('ls-files', '--others', '--exclude-standard', '-z', '--', ...scope)).split('\0').filter(Boolean));
   const reader = await SafeReader.create(root);
@@ -47,8 +47,9 @@ export async function ingestCcdCorpus(pool: Pool, client: EmbeddingClient, optio
 }) {
   await assertCcdDatabase(pool);
   const prepared = await prepareCcdCorpus(options);
-  const expanded = prepared.corpus.schema_version === 'ccd-1.1.0';
-  const recipe = expanded ? 'ccd_expanded_v1' : 'ccd_local';
+  const guidance = prepared.corpus.schema_version === 'ccd-1.2.0';
+  const expanded = guidance || prepared.corpus.schema_version === 'ccd-1.1.0';
+  const recipe = guidance ? 'ccd_guidance_v1' : expanded ? 'ccd_expanded_v1' : 'ccd_local';
   const counts = storageCounts(recipe);
   invariant(!expanded || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(options.expectedCurrentReleaseId ?? ''));
   const local = await SafeReader.create(options.corpusRoot);
@@ -77,7 +78,9 @@ export async function ingestCcdCorpus(pool: Pool, client: EmbeddingClient, optio
         invariant(dataset.rows[0]?.current_release_id === options.expectedCurrentReleaseId);
         invariant((await lease.query("SELECT id FROM banuchat.dataset_releases WHERE status<>'ready'")).rowCount === 0);
         const previous = await lease.query<{ manifest: typeof prepared.manifest }>('SELECT manifest FROM banuchat.dataset_releases WHERE id=$1', [options.expectedCurrentReleaseId]);
-        for (const key of ['ccd-m01', 'ccd-m12']) {
+        const preserved = guidance ? previous.rows[0]?.manifest.items.map(item => item.key) : ['ccd-m01', 'ccd-m12'];
+        invariant(preserved && (!guidance || preserved.length === 10));
+        for (const key of preserved) {
           invariant(previous.rows[0]?.manifest.items.find(item => item.key === key)?.sha256 === prepared.manifest.items.find(item => item.key === key)?.sha256);
         }
       } else invariant((await lease.query('SELECT id FROM banuchat.dataset_releases')).rowCount === 0);
@@ -85,7 +88,7 @@ export async function ingestCcdCorpus(pool: Pool, client: EmbeddingClient, optio
         (dataset_id,git_revision,manifest,pipeline_config,embedding_config_id,dataset_schema_version,status)
         VALUES (1,$1,$2::jsonb,$3::jsonb,$4,$5,'staging') RETURNING id`, [...values, prepared.corpus.schema_version]);
       invariant(release.rows[0]);
-      const run = await openRun(lease, release.rows[0].id, expanded ? 'bch03-ccd-expanded-v1' : 'bch03-ccd-manual-v1', prepared.manifest.items, 'manual', recipe);
+      const run = await openRun(lease, release.rows[0].id, guidance ? 'bch03-ccd-guidance-v1' : expanded ? 'bch03-ccd-expanded-v1' : 'bch03-ccd-manual-v1', prepared.manifest.items, 'manual', recipe);
       return { release: release.rows[0].id, run };
     });
     if (setup.run === null) return { outcome: 'already_current', release_id: setup.release, embeddings_generated: 0 };

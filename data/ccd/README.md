@@ -1,5 +1,40 @@
 # Corpus CCD local — BCH-03 incremento 1
 
+## Orientación histórica — incremento 5
+
+Contrato adicional `schemas/corpus-1.2.schema.json`, versión local
+`bch03-ccd-local-3`, snapshot privado `local/guidance-v3`. Conserva exactamente los
+diez artefactos anteriores. Añade `ccd-u03`/U03 (DOC-110 §2 B016 y §8 B078/B081–B088,
+R07) y `ccd-u04`/U04 (DOC-116 B003/B015–B018 y DOC-076 P004/P010–P013, R12–R18).
+Las referencias del cierre son trazabilidad de los temas bloqueados, no su aval:
+la admisión acotada procede de la instrucción BCH-03/incremento-5 y del paquete
+aceptado, cuya huella se conserva en `validation.review_package_sha256`.
+
+Los nuevos derivados son `source_checked_local_candidate`: cotejo de fuentes para
+desarrollo local, sin afirmar otra validación humana o institucional. M01/M12
+conservan su estado previo. U03 es exclusivamente histórica de 202660; U04 exige
+comprobar programa/plan/cohorte/modalidad y reconocimientos. No admite reglas de
+gratuidad, elegibilidad general, equivalencias AND/OR o personales, tarifas ni
+matrícula automática. Los relatos de dos solicitudes de transición no se incorporan
+como norma ni como documentos vectorizados. DOC-108 y DOC-112 se usan únicamente
+para conciliación interna y no forman parte del inventario de artefactos.
+
+Publicación manual realizada con predecesora explícita, sin sobrescribir carpetas:
+
+```powershell
+# Solo la primera vez en CCD: no reaplicar 001–004 ni repetir 005 ya instalada.
+npm run ccd:local -- guidance-migrate
+npm run prepare:ccd -- --corpus-root ../../data/ccd/local/guidance-v3 --institutional-root <raíz-local>
+# El snapshot completo debe materializarse antes con --write-snapshot, sin sobrescritura.
+npm run ccd:local -- ingest-guidance <release-predecesora>
+```
+
+Receta `ccd_guidance_v1`: 12 unidades, 12 chunks y 11 referencias de fuente, sin
+duplicar TEST_ORIENTATION/M12. Los embeddings se generan por release; los históricos
+se conservan. Solo se permite la transición esperada desde las diez unidades
+anteriores. Preparación, preflight, respuestas y límites están en
+[checkpoint 5](../../docs/transition/bch03-increment-5-checkpoint.md).
+
 ## Ampliación publicada en el incremento 4
 
 La versión `bch03-ccd-local-2` usa `schemas/corpus-1.1.schema.json` y vive en

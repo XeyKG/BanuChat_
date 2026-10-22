@@ -1,5 +1,24 @@
 # API REST — contrato y estado implementado
 
+BCH-03 incremento 5 añade orientación histórica U03 (pilar no validado en 202660)
+y U04 (transición desde Informática). CCD recupera las doce unidades de la release
+antes de seleccionar por tema; la distancia vectorial no acredita soporte. El
+selector conserva correcciones y distingue un curso reprobado de una prueba nueva,
+una prueba antigua pendiente y un curso antiguo aprobado. Para U03/U04, la generación
+usa antecedentes del usuario y evidencia fresca; las respuestas anteriores no se
+reutilizan como fundamento. El historial persistido sigue completo y por release.
+
+Las salidas positivas de gratuidad, reconocimiento personal, matrícula automática
+y otras autorizaciones no admitidas se rechazan. Si el generador devuelve únicamente
+el marcador de insuficiencia, puede presentarse un pasaje literal breve de U03/U04
+con su cita y límites; una negación categórica de oportunidades también se sustituye
+por evidencia acotada. No hay segunda generación ni retry de POST. Referencias
+numéricas inválidas siguen fallando de forma cerrada. No se usan originales privados
+como artefactos, ni se afirma que la falta de una norma demuestre inexistencia de un
+procedimiento. La cuestión de los dos casos relatados sigue requiriendo confirmación
+institucional, sin regla universal de gratuidad. Véase
+[checkpoint 5](../../docs/transition/bch03-increment-5-checkpoint.md).
+
 BCH-02 incremento 2 limita la evidencia CCD antes de generar: identifica el tema
 explícito más reciente del usuario por título de syllabus (también sin el sufijo
 Digital/Digitales), orientación de pruebas o contacto, sin usar la posición vectorial
