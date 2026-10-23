@@ -1,0 +1,519 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B/503 diagnosis",
+  "started_at": "2026-10-23T17:45:42.179Z",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "mode": "ccd_local",
+  "cases": [
+    {
+      "case": "course_short_title",
+      "http_status": 201,
+      "duration_ms": 13088,
+      "error_code": null,
+      "request_id": null,
+      "history_status": 200,
+      "persisted_messages": 2,
+      "uncertain": false,
+      "trace": [
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "start"
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "ok",
+          "duration_ms": 4,
+          "rows": 1
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "start"
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "conversation_context",
+          "event": "start"
+        },
+        {
+          "stage": "conversation_context",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "router",
+          "event": "decision",
+          "route": "agent_fallback"
+        },
+        {
+          "stage": "rag",
+          "event": "start"
+        },
+        {
+          "stage": "embedding_configuration",
+          "event": "start"
+        },
+        {
+          "stage": "embedding_configuration",
+          "event": "ok",
+          "duration_ms": 4,
+          "rows": 1
+        },
+        {
+          "stage": "embedding",
+          "event": "start"
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 1
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 25
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 17
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/embed",
+          "status": 200,
+          "duration_ms": 3767,
+          "embedding_count": 1,
+          "dimension": 1024
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 3
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 25
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 12
+        },
+        {
+          "stage": "embedding",
+          "event": "ok",
+          "dimension": 1024
+        },
+        {
+          "stage": "authenticated_retrieval",
+          "event": "start"
+        },
+        {
+          "stage": "authenticated_retrieval",
+          "event": "ok",
+          "duration_ms": 5,
+          "rows": 12
+        },
+        {
+          "stage": "generation",
+          "event": "start",
+          "prompt_utf8_bytes": 6974,
+          "prompt_sha256": "97f03fc3a1acdd2da324529ddff82c3945dc18eaa347b5e723eb597717f73510",
+          "evidence_fragments": 1
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 14
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 26
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 12
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/chat",
+          "status": 200,
+          "duration_ms": 8984,
+          "done": true,
+          "done_reason": "stop",
+          "content_nonblank": true,
+          "content_characters": 302,
+          "thinking_nonempty": false,
+          "eval_count": 78,
+          "prompt_eval_count": 1883
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 3
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 33
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 22
+        },
+        {
+          "stage": "generation",
+          "event": "validated"
+        },
+        {
+          "stage": "rag",
+          "event": "validated",
+          "citations": 1,
+          "insufficient_evidence": false
+        },
+        {
+          "stage": "persist_turn",
+          "event": "start"
+        },
+        {
+          "stage": "persist_turn",
+          "event": "ok",
+          "duration_ms": 22,
+          "rows": 1
+        }
+      ]
+    },
+    {
+      "case": "course_long_title",
+      "http_status": 503,
+      "duration_ms": 3052,
+      "error_code": "DEPENDENCY_UNAVAILABLE",
+      "request_id": "9dbcd7b1-c6bf-4e0f-b764-76ce3f3d1425",
+      "history_status": 200,
+      "persisted_messages": 0,
+      "uncertain": false,
+      "trace": [
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 1,
+          "rows": 1
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "start"
+        },
+        {
+          "stage": "authentication_sql",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "start"
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "ok",
+          "duration_ms": 1,
+          "rows": 1
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "start"
+        },
+        {
+          "stage": "resource_authorization",
+          "event": "ok",
+          "duration_ms": 2,
+          "rows": 1
+        },
+        {
+          "stage": "conversation_context",
+          "event": "start"
+        },
+        {
+          "stage": "conversation_context",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "router",
+          "event": "decision",
+          "route": "agent_fallback"
+        },
+        {
+          "stage": "rag",
+          "event": "start"
+        },
+        {
+          "stage": "embedding_configuration",
+          "event": "start"
+        },
+        {
+          "stage": "embedding_configuration",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 1
+        },
+        {
+          "stage": "embedding",
+          "event": "start"
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 9
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 28
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 26
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/embed",
+          "status": 200,
+          "duration_ms": 2723,
+          "embedding_count": 1,
+          "dimension": 1024
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 1
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 22
+        },
+        {
+          "stage": "embedding",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 11
+        },
+        {
+          "stage": "embedding",
+          "event": "ok",
+          "dimension": 1024
+        },
+        {
+          "stage": "authenticated_retrieval",
+          "event": "start"
+        },
+        {
+          "stage": "authenticated_retrieval",
+          "event": "ok",
+          "duration_ms": 3,
+          "rows": 12
+        },
+        {
+          "stage": "generation",
+          "event": "start",
+          "prompt_utf8_bytes": 20661,
+          "prompt_sha256": "707b3db8ff6178f49d2374ccfe40abbe35f0c4b4bc7541be4d8982db9f75014d",
+          "evidence_fragments": 10
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/version",
+          "status": 200,
+          "duration_ms": 11
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/tags",
+          "status": 200,
+          "duration_ms": 35
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/show",
+          "status": 200,
+          "duration_ms": 18
+        },
+        {
+          "stage": "generation",
+          "event": "ollama_response",
+          "path": "/api/chat",
+          "status": 400,
+          "duration_ms": 79,
+          "provider_error_category": "unclassified_provider_error",
+          "provider_error_sha256": "ecf812b4843bf3dd8ff7f3ca035b8f601d25ac558f96f18b010d4c51a1f722e5",
+          "done": false,
+          "done_reason": "other",
+          "content_nonblank": false,
+          "content_characters": 0,
+          "thinking_nonempty": false
+        },
+        {
+          "stage": "generation",
+          "event": "error",
+          "reason": "invalid_generator_response"
+        },
+        {
+          "stage": "rag",
+          "event": "error",
+          "reason": "invalid_generator_response"
+        }
+      ]
+    }
+  ],
+  "product_changes": false,
+  "original_databases_accessed": false,
+  "corpus_before": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "existing_history_before": "a4d63545ee3dec628d571bbe8260aec1",
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  },
+  "authentication": {
+    "login": 200,
+    "me": 200,
+    "capabilities": [
+      "chat",
+      "history",
+      "documents"
+    ]
+  },
+  "logout": 204,
+  "corpus_after": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "corpus_unchanged": true,
+  "existing_history_after": "a4d63545ee3dec628d571bbe8260aec1",
+  "existing_history_unchanged": true,
+  "finished_at": "2026-10-23T17:45:59.058Z"
+}

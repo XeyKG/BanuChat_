@@ -1,0 +1,210 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B/503 diagnosis",
+  "at": "2026-10-23T17:41:49.000Z",
+  "phase": "preflight",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "host": "127.0.0.1",
+  "port": 55443,
+  "scope": {
+    "database_name": "banuchat_ccd_auth_i1b_test",
+    "evidence_mode": "ccd_local",
+    "dataset_name": "banuchat-ccd-local"
+  },
+  "runtime_guard": true,
+  "release_configurations": [
+    {
+      "release_id": "3d6cedac-0e86-40c8-909b-d3ff6e8ab741",
+      "status": "ready",
+      "current": true,
+      "provider": "ollama",
+      "model": "qwen3-embedding:0.6b",
+      "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "parameters": {
+        "query": {
+          "options": {
+            "num_ctx": 4096
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "document": {
+          "options": {
+            "num_ctx": 32768
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "runtime_version": "0.35.0"
+      }
+    },
+    {
+      "release_id": "5834fc47-57c5-498b-98fc-4190330155e4",
+      "status": "ready",
+      "current": false,
+      "provider": "ollama",
+      "model": "qwen3-embedding:0.6b",
+      "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "parameters": {
+        "query": {
+          "options": {
+            "num_ctx": 4096
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "document": {
+          "options": {
+            "num_ctx": 32768
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "runtime_version": "0.35.0"
+      }
+    },
+    {
+      "release_id": "fb8538af-3280-4a1b-889c-a27564381996",
+      "status": "ready",
+      "current": false,
+      "provider": "ollama",
+      "model": "qwen3-embedding:0.6b",
+      "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "parameters": {
+        "query": {
+          "options": {
+            "num_ctx": 4096
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "document": {
+          "options": {
+            "num_ctx": 32768
+          },
+          "truncate": false,
+          "dimensions": 1024,
+          "input_prefix": null,
+          "normalization": "none"
+        },
+        "runtime_version": "0.35.0"
+      }
+    }
+  ],
+  "embedding": {
+    "provider": "ollama",
+    "model": "qwen3-embedding:0.6b",
+    "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "dimension": 1024,
+    "distance_metric": "cosine",
+    "runtime_version": "0.35.0",
+    "query": {
+      "dimensions": 1024,
+      "truncate": false,
+      "input_prefix": null,
+      "normalization": "none",
+      "options": {
+        "num_ctx": 4096
+      }
+    }
+  },
+  "ollama_version": "0.35.0",
+  "models": [
+    {
+      "name": "qwen3-embedding:0.6b",
+      "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "capabilities": [
+        "tools",
+        "thinking",
+        "embedding"
+      ],
+      "architecture": "qwen3",
+      "native_embedding_dimension": 1024,
+      "native_context_length": 32768
+    },
+    {
+      "name": "qwen3:4b-instruct",
+      "digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+      "capabilities": [
+        "tools",
+        "thinking",
+        "completion"
+      ],
+      "architecture": "qwen3",
+      "native_embedding_dimension": 2560,
+      "native_context_length": 262144,
+      "parameters": "temperature                    0.7\ntop_k                          20\ntop_p                          0.8\nrepeat_penalty                 1\nstop                           \"<|im_start|>\"\nstop                           \"<|im_end|>\""
+    }
+  ],
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  },
+  "matching": {
+    "embedding_runtime": true,
+    "embedding_digest": true,
+    "embedding_dimension": true,
+    "generator_runtime": true,
+    "generator_digest": true
+  },
+  "counts": [
+    {
+      "id": "3d6cedac-0e86-40c8-909b-d3ff6e8ab741",
+      "current": true,
+      "versions": 12,
+      "chunks": 12,
+      "vectors_1024": 12
+    },
+    {
+      "id": "5834fc47-57c5-498b-98fc-4190330155e4",
+      "current": false,
+      "versions": 2,
+      "chunks": 2,
+      "vectors_1024": 2
+    },
+    {
+      "id": "fb8538af-3280-4a1b-889c-a27564381996",
+      "current": false,
+      "versions": 10,
+      "chunks": 10,
+      "vectors_1024": 10
+    }
+  ],
+  "activity": {
+    "connections": 2,
+    "idle_in_transaction": 0,
+    "waiting_locks": 0
+  },
+  "privileges": {
+    "direct_chunk_select": false,
+    "retrieval_execute": true
+  },
+  "source_database_accessed": false,
+  "embedding_or_generation_executed": false
+}

@@ -1,0 +1,85 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B/503 diagnosis",
+  "started_at": "2026-10-23T17:50:31.577Z",
+  "mode": "ccd_local",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "sql_read_only": true,
+  "http_message_posts": 0,
+  "provider": [
+    {
+      "path": "/api/version",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/show",
+      "status": 200
+    },
+    {
+      "path": "/api/embed",
+      "status": 200
+    },
+    {
+      "path": "/api/version",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/show",
+      "status": 200
+    },
+    {
+      "path": "/api/version",
+      "status": 200
+    },
+    {
+      "path": "/api/tags",
+      "status": 200
+    },
+    {
+      "path": "/api/show",
+      "status": 200
+    },
+    {
+      "path": "/api/chat",
+      "status": 400,
+      "error_sha256": "ecf812b4843bf3dd8ff7f3ca035b8f601d25ac558f96f18b010d4c51a1f722e5",
+      "controlled_signals": {
+        "context": true,
+        "capacity": true,
+        "exceeded": true
+      },
+      "error_category": "context_capacity_exceeded",
+      "token_counts": [
+        6411,
+        4096
+      ],
+      "same_error_as_http_reproduction": true
+    }
+  ],
+  "prompt_utf8_bytes": 20661,
+  "prompt_sha256": "707b3db8ff6178f49d2374ccfe40abbe35f0c4b4bc7541be4d8982db9f75014d",
+  "evidence_fragments": 10,
+  "rag": "rejected",
+  "reason": "invalid_generator_response",
+  "loaded_models": [
+    {
+      "model": "qwen3:4b-instruct",
+      "digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+      "context_length": 4096
+    },
+    {
+      "model": "qwen3-embedding:0.6b",
+      "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+      "context_length": 4096
+    }
+  ],
+  "same_prompt_as_http_reproduction": true,
+  "finished_at": "2026-10-23T17:50:32.097Z"
+}

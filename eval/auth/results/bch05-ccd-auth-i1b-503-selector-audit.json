@@ -1,0 +1,32 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B/503 diagnosis",
+  "at": "2026-10-23T17:52:52.950Z",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "metadata_rows": 12,
+  "cases": [
+    {
+      "case": "short_title_control",
+      "selected_count": 1,
+      "only_target_syllabus": true
+    },
+    {
+      "case": "long_title_reproduction",
+      "selected_count": 10,
+      "only_target_syllabus": false
+    },
+    {
+      "case": "operator_reported_wording_pure_check_only",
+      "selected_count": 10,
+      "only_target_syllabus": false
+    }
+  ],
+  "sql_read_only": true,
+  "model_calls": 0,
+  "corpus_unchanged": true,
+  "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "fixture_counts": {
+    "unrevoked_fixture_sessions": 0,
+    "fixture_messages": 2
+  },
+  "operator_wording_not_sent_over_http": true
+}
