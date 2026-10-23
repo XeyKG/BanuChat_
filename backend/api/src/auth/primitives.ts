@@ -32,7 +32,7 @@ export function exactObject(input: unknown, keys: readonly string[]): Record<str
   return value;
 }
 export function uid(value: unknown): string {
-  if (typeof value!=="string" || value.length!==13 || !/^BCH-DEMO-[0-9]{4}$/u.test(value)) throw new AuthError("INVALID_ARGUMENT");
+  if (typeof value!=="string" || ![9,13].includes(value.length) || !/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/u.test(value)) throw new AuthError("INVALID_ARGUMENT");
   return value;
 }
 export function password(value: unknown, minimum=1): string {

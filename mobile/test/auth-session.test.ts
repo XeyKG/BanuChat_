@@ -13,7 +13,7 @@ import {getDocumentArtifact} from '../src/api/documents';
 
 const id='11111111-1111-4111-8111-111111111111',base='http://127.0.0.1:3002/api/v2';
 const access='A'.repeat(43),refresh='B'.repeat(42)+'A',next='C'.repeat(42)+'A';
-const me={principal_id:id,synthetic_uid:'BCH-DEMO-4101',session_id:id,release_id:id,session_expires_at:'2035-01-01T00:00:00Z',profile:{profile_key:'shared_fixture',alias:'Perfil ficticio compartido'},capabilities:['chat','history','progress','calendar','announcements','documents']};
+const me={principal_id:id,synthetic_uid:'BCH-DEMO-4101',session_id:id,release_id:id,evidence_mode:'synthetic',session_expires_at:'2035-01-01T00:00:00Z',profile:{profile_key:'shared_fixture',alias:'Perfil ficticio compartido'},capabilities:['chat','history','progress','calendar','announcements','documents']};
 const tokens={access_token:access,refresh_token:refresh,token_type:'Bearer',expires_in:900,session_expires_at:me.session_expires_at};
 function store(initial:string|null=null){let value=initial;return {available:async()=>true,get:async()=>value,set:async(v:string)=>{value=v;},clear:async()=>{value=null;},inspect:()=>value} satisfies RefreshStore&{inspect():string|null};}
 type Fetch=typeof fetch;

@@ -5,6 +5,7 @@ import {PgSqlClient} from './data/pg-client.js';
 import {loadGeneratorRuntimeConfig} from './generation/generator-client.js';
 import {OllamaGeneratorClient} from './generation/ollama-generator-client.js';
 import {OllamaQueryEmbeddingClient} from './retrieval/ollama-query-embedding-client.js';
+import {knowledgeMode} from './auth/knowledge-mode.js';
 
 /** Local v2 process only: no v1, recovery composition, mail provider or public bind. */
 export async function startAuthenticatedApi(){
@@ -12,15 +13,20 @@ export async function startAuthenticatedApi(){
  try{
   const requireValue=(name:string)=>{const v=process.env[name];if(!v)throw new Error();return v;};
   const database=requireValue('BANUCHAT_AUTH_DATABASE'),deploymentId=requireValue('BANUCHAT_AUTH_DEPLOYMENT'),key=requireValue('BANUCHAT_AUTH_RATE_KEY');
+  const mode=knowledgeMode(process.env.BANUCHAT_AUTH_EVIDENCE_MODE);
   const dbPort=Number(requireValue('BANUCHAT_AUTH_DB_PORT')),port=Number(process.env.BANUCHAT_AUTH_API_PORT??'3002');
-  if(!/^[a-f0-9]{64}$/iu.test(key)||/ccd/iu.test(database)||![dbPort,port].every(v=>Number.isInteger(v)&&v>=1024&&v<=65535)||[5432,55433].includes(dbPort))throw new Error();
+  if(!/^[a-f0-9]{64}$/iu.test(key)||(mode==='synthetic'?/ccd/iu.test(database):database!=='banuchat_ccd_auth_i1b_test')||![dbPort,port].every(v=>Number.isInteger(v)&&v>=1024&&v<=65535)||[5432,55433].includes(dbPort))throw new Error();
   pool=new Pool({host:'127.0.0.1',port:dbPort,database,user:requireValue('BANUCHAT_AUTH_RUNTIME_USER'),password:requireValue('BANUCHAT_AUTH_RUNTIME_PASSWORD'),connectionTimeoutMillis:5000,statement_timeout:15000});
   pool.on('error',()=>console.error('BanuChat: dependencia de persistencia no disponible.'));
   const runtime=loadGeneratorRuntimeConfig(),sql=new PgSqlClient(pool);
   const generator=new OllamaGeneratorClient(runtime.base_url),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
-  const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),
-   document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator}),
-   artifacts:{root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))}});
+  const artifacts=mode==='ccd_local'?{root:fileURLToPath(new URL('../../../data/ccd/local/m01-m12/',import.meta.url)),version_roots:{
+   'bch03-m01-m12-local-1':fileURLToPath(new URL('../../../data/ccd/local/m01-m12/',import.meta.url)),
+   'bch03-ccd-local-2':fileURLToPath(new URL('../../../data/ccd/local/expanded-v2/',import.meta.url)),
+   'bch03-ccd-local-3':fileURLToPath(new URL('../../../data/ccd/local/guidance-v3/',import.meta.url))}}:
+   {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
+  const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,
+   document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator},mode),artifacts});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
   let stopping=false;const stop=async()=>{if(stopping)return;stopping=true;server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool?.end();};
   process.once('SIGINT',()=>void stop());process.once('SIGTERM',()=>void stop());

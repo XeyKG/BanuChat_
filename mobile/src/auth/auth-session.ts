@@ -1,6 +1,7 @@
+import {isCcdAuthenticated} from '../config/demo-mode';
 export interface CurrentSession {
  principal_id:string;synthetic_uid:string;session_id:string;session_expires_at:string;release_id:string;
- profile:{profile_key:string;alias:string};capabilities:string[];
+ evidence_mode:'synthetic'|'ccd_local';profile:{profile_key:string;alias:string};capabilities:string[];
 }
 interface Pair {access_token:string;refresh_token:string;token_type:'Bearer';expires_in:number;session_expires_at:string;}
 export interface RefreshStore {available():Promise<boolean>;get():Promise<string|null>;set(token:string):Promise<void>;clear():Promise<void>;}
@@ -14,9 +15,12 @@ function pair(v:unknown):Pair {
   typeof p.access_token!=='string'||typeof p.refresh_token!=='string'||!tokenPattern.test(p.access_token)||!tokenPattern.test(p.refresh_token)||p.token_type!=='Bearer'||!Number.isInteger(p.expires_in)||p.expires_in<1||p.expires_in>900||typeof p.session_expires_at!=='string'||!Number.isFinite(Date.parse(p.session_expires_at)))throw new SessionError();return p;
 }
 function current(v:unknown):CurrentSession {
- const m=v as CurrentSession;if(!m||Object.keys(m).sort().join()!==['principal_id','synthetic_uid','session_id','session_expires_at','release_id','profile','capabilities'].sort().join()||
-  typeof m.principal_id!=='string'||typeof m.session_id!=='string'||typeof m.release_id!=='string'||typeof m.synthetic_uid!=='string'||!uuid.test(m.principal_id)||!uuid.test(m.session_id)||!uuid.test(m.release_id)||!/^BCH-DEMO-[0-9]{4}$/.test(m.synthetic_uid)||typeof m.session_expires_at!=='string'||!Number.isFinite(Date.parse(m.session_expires_at))||
-  !m.profile||Object.keys(m.profile).sort().join()!=='alias,profile_key'||typeof m.profile.profile_key!=='string'||typeof m.profile.alias!=='string'||JSON.stringify(m.capabilities)!==JSON.stringify(capabilities))throw new SessionError();return m;
+ const ccd=isCcdAuthenticated(),expected=ccd?['chat','history','documents']:capabilities;
+ const m=v as CurrentSession;if(!m||Object.keys(m).sort().join()!==['principal_id','synthetic_uid','session_id','session_expires_at','release_id','profile','capabilities','evidence_mode'].sort().join()||
+  m.evidence_mode!==(ccd?'ccd_local':'synthetic')||
+  typeof m.principal_id!=='string'||typeof m.session_id!=='string'||typeof m.release_id!=='string'||typeof m.synthetic_uid!=='string'||![9,13].includes(m.synthetic_uid.length)||!uuid.test(m.principal_id)||!uuid.test(m.session_id)||!uuid.test(m.release_id)||!/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(m.synthetic_uid)||typeof m.session_expires_at!=='string'||!Number.isFinite(Date.parse(m.session_expires_at))||
+  !m.profile||Object.keys(m.profile).sort().join()!=='alias,profile_key'||typeof m.profile.profile_key!=='string'||typeof m.profile.alias!=='string'||
+  (ccd&&(m.profile.profile_key!=='ccd-local-demo'||m.profile.alias!=='Demostración CCD local — sin identidad institucional'))||JSON.stringify(m.capabilities)!==JSON.stringify(expected))throw new SessionError();return m;
 }
 /** Tokens never enter React state, AsyncStorage or public configuration. No retry of HTTP operations. */
 export class AuthSession {
@@ -38,7 +42,7 @@ export class AuthSession {
  private async invalidate(){this.epoch++;this.access=null;this.expires=0;this.publish('signed_out');try{await this.storage(()=>this.store.clear());}catch{this.publish('unavailable');}}
  private async discard(access:string){try{await this.raw('/auth/logout','POST',undefined,access);}catch{/* No retry and no assertion of remote revocation. */}}
  async login(selectedUid:string,password:string):Promise<void>{
-  if(this.signingIn||this.snapshot.phase==='authenticated'||!/^BCH-DEMO-[0-9]{4}$/.test(selectedUid)||!password||[...password].length>128||/[\uD800-\uDFFF]/u.test(password))throw new SessionError();
+  if(this.signingIn||this.snapshot.phase==='authenticated'||![9,13].includes(selectedUid.length)||!/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(selectedUid)||!password||[...password].length>128||/[\uD800-\uDFFF]/u.test(password))throw new SessionError();
   this.signingIn=true;this.logoutRemoteConfirmed=null;
   await this.invalidate();const epoch=this.epoch;let issued:Pair|undefined;
   try{

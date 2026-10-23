@@ -1,0 +1,46 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:16:51.207Z",
+  "checks": [
+    {
+      "name": "011 is exactly the reviewed derivative; historical turn CTE unchanged",
+      "passed": true
+    },
+    {
+      "name": "shared account, credential, session, limiter and recovery tables are equivalent in PostgreSQL",
+      "passed": true
+    },
+    {
+      "name": "runtime requires explicit CCD scope and rejects synthetic mode; no chunk SELECT, UPDATE or executor membership",
+      "passed": true
+    },
+    {
+      "name": "CCD retrieval is equivalent and release/dimension/top-k scopes cannot be bypassed",
+      "passed": true
+    },
+    {
+      "name": "009 preserved legacy UID, principal and login; new UID also authenticates without renaming",
+      "passed": true
+    },
+    {
+      "name": "two new CCD accounts use the technical context, Argon2id and no verified contact",
+      "passed": true
+    },
+    {
+      "name": "original snapshot, releases, hashes, vectors and synthetic corpus remain unchanged",
+      "passed": true
+    }
+  ],
+  "privileges": {
+    "chunk_select": false,
+    "dataset_update": false,
+    "release_update": false,
+    "conversation_update": false,
+    "executor_member": false,
+    "ddl": false
+  },
+  "ccd_corpus_before": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "ccd_corpus_after": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "uid_corpus_before": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "uid_corpus_after": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e"
+}

@@ -1,0 +1,140 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:45:51.491Z",
+  "reviewer": "Codex, qualitative inspection; not institutional academic approval",
+  "current_report": "full-1792769823958.json",
+  "current_sha256": "73dcbae6ba92aec7fb0fb412d8f0bb29c3934b71bcbc7dc784c77afb06bfbdd2",
+  "baseline_sha256": "f1845ff6c4e2a88c95f6073de076b61679fb760750601b2371ff44031955823a",
+  "same_generator_recipe_and_digest": true,
+  "same_questions": 43,
+  "text_equal": 34,
+  "citation_locators_equal": 42,
+  "selection_equal": 31,
+  "selection_comparable": 31,
+  "selection_note": "Current selection is observed at generator input only; the 12 turns without generation are not comparable with the historic selector instrumentation.",
+  "insufficiency_equal": 42,
+  "calls": {
+    "embedding": 39,
+    "retrieval": 39,
+    "generation": 31
+  },
+  "http_503": 0,
+  "classes": [
+    {
+      "scenario": "T01",
+      "baseline_class": "B",
+      "current_class": "C",
+      "review": "Regresión de utilidad: los tres turnos se abstienen genéricamente; 5.3/2 describía el alcance de TEST_ORIENTATION. No inventa procedimiento, pero esa orientación parcial ya no se observa."
+    },
+    {
+      "scenario": "T02",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "U03 pertinente y consecuencia histórica; no demuestra repetición gratuita. La respuesta 3 inicia con No, no se acredita: conservar el texto para revisión académica, sin convertir falta de respaldo en imposibilidad universal."
+    },
+    {
+      "scenario": "T03",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "U04 exige verificar plan/códigos/registro; no concede primera prueba gratuita actual. Procedimiento pendiente."
+    },
+    {
+      "scenario": "T04",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "No concede beneficio por cohorte 202510; reconocimiento/eligibilidad requieren verificación."
+    },
+    {
+      "scenario": "T05",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Word/PowerPoint no resuelven automáticamente pilar 2, AND/OR o pago; orientación parcial."
+    },
+    {
+      "scenario": "T06",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Excel no demuestra aprobación de IA ni expediente personal; requiere comprobación del programa/CCD."
+    },
+    {
+      "scenario": "T07",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Abstención pertinente sin citas U03/U04 ni equiparar inasistencia a reprobación. No orienta un procedimiento de admisión tardía."
+    },
+    {
+      "scenario": "T08",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Reconoce corrección de prueba a curso y no concede exención; recuperación de curso pendiente."
+    },
+    {
+      "scenario": "T09",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "No equipara UNAB Tec y profesional presencial; diferencias por modalidad/cohorte requieren adaptación."
+    },
+    {
+      "scenario": "T10a",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Aclaración aislada antes de embedding/generación, sin antecedentes ajenos ni atribución documental."
+    },
+    {
+      "scenario": "T10b",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Aclaración aislada antes de embedding/generación, sin antecedentes ajenos ni atribución documental."
+    },
+    {
+      "scenario": "T11",
+      "baseline_class": "C",
+      "current_class": "C",
+      "review": "Pendiente académico: primeros dos turnos genéricos, sin explicar los casos ni distinguir hipótesis de procedimiento y derecho universal; U03 pertinente en el tercero no resuelve el escenario."
+    },
+    {
+      "scenario": "T12",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Contacto histórico M12 con vigencia no ratificada; publicación de notas, inmediatez y umbral 70 sin respaldo suficiente."
+    },
+    {
+      "scenario": "REG",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Catálogo y syllabus IA; continuidad y corrección a Marca Personal; duración histórica y contacto pertinentes con límites de vigencia. No acredita oferta actual."
+    },
+    {
+      "scenario": "AMB",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Catálogo seguido de referencia singular pide cuál curso antes de recuperación/generación, sin citas."
+    },
+    {
+      "scenario": "AMB_FRESH",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Referencia sin antecedente solicita contexto; sin SQL documental, embedding o generación."
+    }
+  ],
+  "regression": "T01/2 lost useful bounded orientation and its citation; cause not established. No prompt/model/corpus/parameter adjustment or rerun to hide it.",
+  "controls_comparison": {
+    "baseline": {
+      "planned": 329,
+      "passed": 329,
+      "failed": 0,
+      "not_evaluable": 0
+    },
+    "current": {
+      "planned": 216,
+      "passed": 216,
+      "failed": 0,
+      "not_evaluable": 0
+    },
+    "note": "Different accounting: 216 focused per-turn/history controls plus SQL/auth/artifact assertions; not equivalent to the historic 329 controls."
+  },
+  "academic_pending": [
+    "T11"
+  ],
+  "android": "not executed by agent"
+}

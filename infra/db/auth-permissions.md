@@ -1,5 +1,46 @@
 # AUTH-P0 — Persistencia y autorización de BanuChat
 
+## Delta vigente BCH-D37 / CCD-AUTH-I1B
+
+La descripción AUTH-P0 siguiente se conserva como antecedente. I1B autoriza solo
+dos destinos nuevos: `banuchat_ccd_auth_i1b_test` en loopback 55443 y la copia
+sintética `banuchat_auth_i1b_uid_test` en 55444, con redes/volúmenes exclusivos.
+La rama CCD aplica únicamente [011](011_ccd_authenticated_bootstrap.sql) sobre el
+snapshot de 001–005, sin historiales/identidades heredados. La copia sintética
+aplica 006/007/008, [009](009_demo_uid_convention.sql) y 010. Nunca aplicar 010
+directamente a CCD: su guarda sintética permanece intacta y se comprobó su rechazo.
+
+011 deriva objetos compartidos de 006/007/008/010; conserva doce tablas comunes
+por columnas/defaults/constraints verificados en PostgreSQL y la CTE de persistencia
+literal de 007. Deltas: UID legado o U+8; bindings limitados a `ccd-local-demo`
+con FK hacia `ccd_demo_contexts`; grants `ccd_local`; scope con modo/nombre CCD;
+resource_context/retrieval con dataset CCD y synthetic=false. Las cuatro tablas
+de recuperación de 008 conservan compatibilidad estructural, sin contactos o
+composición de correo. No se cambian 001–008/010, FKs de negocio ni owners anteriores.
+
+Las tres funciones `resource_context`, `persist_turn` y `retrieve_document_chunks`
+son SECURITY DEFINER con propietario executor NOLOGIN, search_path seguro,
+referencias calificadas y EXECUTE sin PUBLIC. Runtime no pertenece al executor,
+no obtiene DDL, SELECT por tabla/columna de chunks o UPDATE de corpus/conversations.
+El rol técnico conserva las capacidades internas de auth revisadas, por lo que
+no constituye una frontera frente a compromiso del propio proceso API.
+El provisioner limitado no lee/escribe verificadores de contraseña; en CCD añade
+solo lectura de contextos/scope al bloque de privilegios reutilizado de I1A.
+
+El modo de conocimiento se valida desde configuración confiable y scope, no HTTP.
+Un principal con grant/binding usa contexto técnico compartido; solo owner habilita
+detalle/envío/borrado de su conversación. Persiste un turno completo únicamente
+después de revalidar sesión/grant/owner bajo los locks aprobados; revocación durante
+Ollama devolvió 401 sin mensajes parciales. Artefactos históricos/current requieren
+permiso del mismo corpus y raíz/hash exactos; una conversación histórica sin owner
+sigue dando 404. No hay backfill por contexto ni fallback sintético.
+
+009 admite ambos formatos sin UPDATE de cuentas/UUID. Solo se provisionan cuentas
+nuevas U+8; los logins legados se comprobaron en la copia nueva. Contraseñas
+individuales Argon2id; dos credenciales CCD bajo DPAPI/ACL del operador fuera de Git.
+Bootstrap, equivalencia, ACL, controles HTTP/Ollama, integridad y limitaciones:
+[checkpoint I1B](../../docs/transition/bch05-ccd-auth-i1b-checkpoint.md).
+
 Base revisada: `705fb555b6ee050df4c5d07b68724251963a83f9`. Candidato final: [006_synthetic_auth.sql](006_synthetic_auth.sql), **sin aplicar**. Contrato independiente: [REST v2](../../backend/api/api-contract-v2.md) y [OpenAPI](../../backend/api/openapi-v2.yaml). No se crean roles, cuentas, permisos de clúster ni servicios en AUTH-P0.
 
 ## 1. Destino y fronteras de la migración

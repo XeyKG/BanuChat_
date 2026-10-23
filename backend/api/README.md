@@ -1,12 +1,26 @@
 # API REST — contrato y estado implementado
 
-BCH-05/CCD-AUTH-I1A corrige el retrieval del proceso autenticado mediante
+BCH-D37 / **CCD-AUTH-I1B** integra el corpus CCD seleccionado en una composición
+v2 autenticada exclusiva de `banuchat_ccd_auth_i1b_test`, loopback 55443. Usa el
+bootstrap [011](../../infra/db/011_ccd_authenticated_bootstrap.sql), no la serie
+sintética 006–010. REST v2 revisión 4.0.0 conserva las quince operaciones y añade
+`me.evidence_mode`; CCD declara solo chat/historial/documentos, con owners por
+principal y contexto técnico, y deniega recursos académicos personales con 403.
+El modo se fija internamente; no hay selector HTTP ni fallback a la demo.
+Nuevas cuentas ficticias U+8, legado BCH-DEMO-#### conservado; 009 se aplicó solo
+a otra copia sintética nueva. Correo suspendido, sin v1 anónimo o registro público.
+Resultados reales, regresión T01/2, límite T11 y archivos modificados en el
+[checkpoint I1B](../../docs/transition/bch05-ccd-auth-i1b-checkpoint.md).
+Operación local y Android pendiente en el
+[runbook I1B](../../docs/operations/ccd-auth-i1b-android.md).
+
+Antecedente: BCH-05/CCD-AUTH-I1A corrigió el retrieval del proceso autenticado mediante
 `banuchat_auth.retrieve_document_chunks`, migración aditiva
 [010](../../infra/db/010_authenticated_document_reads.sql). La composición de
 producto exige esa función al arrancar y mantiene el runtime sin SELECT directo
 de `document_chunks`. Usa el mismo RAG, validación y ordenamiento; v1 conserva
-su lectura histórica. No se modifica REST, UID, correo ni Mobile, y **CCD no está
-integrado en v2**. 010 se validó solo en una instancia sintética nueva; no aplicarla
+su lectura histórica. I1A no modificó REST, UID, correo ni Mobile y no integró CCD
+en v2. 010 se validó solo en una instancia sintética nueva; no aplicarla
 ni reiniciar los entornos históricos con la nueva composición sin autorizar su
 actualización. Véase el [checkpoint I1A](../../docs/transition/bch05-ccd-auth-i1a-checkpoint.md).
 

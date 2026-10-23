@@ -32,7 +32,8 @@ test("AUTH bounds hash concurrency without an unbounded waiting queue",async()=>
 });
 test("AUTH validates exact fields, synthetic UID, Unicode and local password policy",()=>{
   assert.equal(uid("BCH-DEMO-0001"),"BCH-DEMO-0001");
-  for(const value of ["BCH-DEMO-0001\n","bch-demo-0001",null,"BCH-DEMO-000１"])assert.throws(()=>uid(value),AuthError);
+  assert.equal(uid("U08000001"),"U08000001");
+  for(const value of ["U08000001\n","U0800000１","u08000001","U080000001","BCH-DEMO-0001\n","bch-demo-0001",null,"BCH-DEMO-000１"])assert.throws(()=>uid(value),AuthError);
   assert.equal([...newPassword("😀a".repeat(64))].length,128);
   for(const value of ["a".repeat(15),"passwordpassword","short","x".repeat(129),"\ud800"+"valid fictitious phrase"])assert.throws(()=>newPassword(value),AuthError);
   assert.equal(password("x"),"x");assert.throws(()=>exactObject({profile_key:"other"},[]),AuthError);

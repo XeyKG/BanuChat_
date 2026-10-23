@@ -2,9 +2,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { SessionProvider,useSession } from '@/session/session-context';
-import { isCcdLocal } from '@/config/demo-mode';
+import { isCcdLocal,isCcdAuthenticated,CCD_AUTH_NOTICE } from '@/config/demo-mode';
 import {AuthProvider,useAuth} from '@/auth/auth-provider';
-import {ActivityIndicator,View} from 'react-native';
+import {ActivityIndicator,View,Text} from 'react-native';
 
 export default function RootLayout() {
   return <AuthProvider><SessionProvider><Navigation /></SessionProvider></AuthProvider>;
@@ -15,8 +15,9 @@ function Navigation(){
   if(!ccd&&snapshot.phase==='restoring')return <View style={{flex:1,justifyContent:'center'}}><ActivityIndicator accessibilityLabel="Validando sesión" /></View>;
   const authenticated=ccd?activeProfile!==null:snapshot.phase==='authenticated';
   return (
-    <>
+    <View style={{flex:1}}>
       <StatusBar style="dark" />
+      {isCcdAuthenticated()&&<Text accessibilityRole="text" style={{padding:12,backgroundColor:'#eef3ff',color:'#243654',fontSize:12}}>{CCD_AUTH_NOTICE}</Text>}
       <Stack key={ccd?'ccd':String(snapshot.epoch)} initialRouteName={ccd?'profiles':authenticated?'home':snapshot.epoch>0?'login':'index'} screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="index" />
         <Stack.Protected guard={!ccd&&!authenticated}><Stack.Screen name="login" /></Stack.Protected>
@@ -24,12 +25,12 @@ function Navigation(){
         <Stack.Protected guard={authenticated}>
           <Stack.Screen name="home" /><Stack.Screen name="chat" /><Stack.Screen name="history" /><Stack.Screen name="document" />
         </Stack.Protected>
-        <Stack.Protected guard={!ccd&&authenticated}>
+        <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
           <Stack.Screen name="calendar" />
           <Stack.Screen name="progress" />
           <Stack.Screen name="announcements" />
         </Stack.Protected>
       </Stack>
-    </>
+    </View>
   );
 }

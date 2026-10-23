@@ -1,0 +1,41 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:52:14.435Z",
+  "api": {
+    "typecheck": true,
+    "build": true,
+    "auth_tests": {
+      "passed": 27,
+      "failed": 0
+    },
+    "retrieval_and_detail_tests": {
+      "passed": 26,
+      "failed": 0
+    }
+  },
+  "mobile": {
+    "typecheck": true,
+    "lint": true,
+    "local_tests": {
+      "passed": 20,
+      "failed": 0
+    },
+    "android": "not executed by agent"
+  },
+  "sql": {
+    "subtests": 7,
+    "including_parent": 8,
+    "failed": 0
+  },
+  "http": {
+    "focal_turns": 18,
+    "focal_controls": 91,
+    "full_turns": 43,
+    "full_controls": 216
+  },
+  "git_diff_check": true,
+  "untracked_whitespace_check": true,
+  "scope_files": 58,
+  "commit": false,
+  "push": false
+}

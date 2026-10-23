@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import { isCcdLocal } from '@/config/demo-mode';
+import { isCcdLocal,isCcdAuthenticated } from '@/config/demo-mode';
 import {useAuth} from '@/auth/auth-provider';
 import {
   Pressable,
@@ -68,13 +68,18 @@ function SlideGlyph({ slide }: { slide: OnboardingSlide }) {
 }
 
 export default function OnboardingScreen() {
+  const slides=isCcdAuthenticated()?SLIDES.map((slide,index)=>({...slide,...[
+    {eyebrow:'Chat CCD',title:'Pregunta sobre los documentos seleccionados.',body:'Cursos, temas y orientación general con límites explícitos. Cuenta BanuChat ficticia, sin identidad universitaria acreditada.'},
+    {eyebrow:'Historial propio',title:'Tus conversaciones, en tu cuenta.',body:'El historial está asociado a tu sesión individual; compartir el contexto documental no comparte conversaciones.'},
+    {eyebrow:'Fuentes verificables',title:'Abre la fuente y revisa sus límites.',body:'Material CCD seleccionado de desarrollo local, sin aval institucional ni actualidad ratificada. No incluye progreso, calendario o anuncios personales.'},
+  ][index]})):SLIDES;
   const {snapshot}=useAuth();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
 
-  const isLastSlide = activeIndex === SLIDES.length - 1;
+  const isLastSlide = activeIndex === slides.length - 1;
   if (isCcdLocal()) return <Redirect href="/profiles" />;
   if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
 
@@ -85,7 +90,7 @@ export default function OnboardingScreen() {
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
     if (viewportWidth <= 0) return;
     const index = Math.round(event.nativeEvent.contentOffset.x / viewportWidth);
-    if (index !== activeIndex && index >= 0 && index < SLIDES.length) {
+    if (index !== activeIndex && index >= 0 && index < slides.length) {
       setActiveIndex(index);
     }
   }
@@ -129,7 +134,7 @@ export default function OnboardingScreen() {
             scrollEventThrottle={16}
             showsHorizontalScrollIndicator={false}
             style={styles.pager}>
-            {SLIDES.map((slide) => (
+            {slides.map((slide) => (
               <View key={slide.key} style={[styles.slide, { width: viewportWidth }]}>
                 <View style={styles.slideContent}>
                   <FadeIn delay={80}>
@@ -149,8 +154,8 @@ export default function OnboardingScreen() {
         )}
 
         <View style={styles.footer}>
-          <View accessibilityLabel={`Paso ${activeIndex + 1} de ${SLIDES.length}`} style={styles.dots}>
-            {SLIDES.map((slide, index) => (
+          <View accessibilityLabel={`Paso ${activeIndex + 1} de ${slides.length}`} style={styles.dots}>
+            {slides.map((slide, index) => (
               <View
                 key={slide.key}
                 style={[

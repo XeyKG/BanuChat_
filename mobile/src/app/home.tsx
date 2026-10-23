@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
-import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
+import { CCD_NOTICE, isCcdLocal,isCcdKnowledge,CCD_AUTH_NOTICE } from '@/config/demo-mode';
 import { useSession } from '@/session/session-context';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
@@ -112,7 +112,7 @@ export default function HomeScreen() {
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
               <Text style={styles.greeting}>{isCcdLocal() ? 'Demostración CCD local' : `Cuenta ${snapshot.me?.synthetic_uid??''}`}</Text>
-              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : `Perfil académico: ${activeProfile.alias}`}</Text>
+              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : isCcdKnowledge()?CCD_AUTH_NOTICE:`Perfil académico ficticio: ${activeProfile.alias}`}</Text>
             </View>
           </FadeIn>
 
@@ -134,7 +134,7 @@ export default function HomeScreen() {
                 <Text style={styles.heroBody}>
                   {isStartingChat
                     ? (isCcdLocal() ? 'Creando una conversación de demostración...' : 'Creando una conversación segura...')
-                    : (isCcdLocal() ? 'Consulta los documentos CCD, pregunta de nuevo y abre las fuentes de las respuestas.' : 'Progreso, eventos, anuncios y material del programa, con citas verificables.')}
+                    : (isCcdKnowledge() ? 'Consulta los documentos CCD, pregunta de nuevo y abre las fuentes de las respuestas.' : 'Progreso, eventos, anuncios y material del programa, con citas verificables.')}
                 </Text>
                 <View style={styles.heroCtaRow}>
                   {isStartingChat && <ActivityIndicator color={colors.white} size="small" />}
@@ -155,7 +155,7 @@ export default function HomeScreen() {
             <FadeIn delay={230}>
               <Text style={styles.sectionLabel}>Accesos directos</Text>
             </FadeIn>
-            {!isCcdLocal() && <><QuickAction
+            {!isCcdLocal() && snapshot.me?.capabilities.includes('progress') && <><QuickAction
               title="Calendario"
               description="Actividades de los próximos 30 días."
               tint={colors.violet}

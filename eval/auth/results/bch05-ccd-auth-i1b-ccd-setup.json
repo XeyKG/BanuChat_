@@ -1,0 +1,49 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:14:03.374Z",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "port": 55443,
+  "container": "banuchat-ccd-auth-i1b-test",
+  "container_id": "ab46191b3e79253562b0010aacc5855005429d3a4f5734037f50a83a2342db0f",
+  "network": "banuchat-ccd-auth-i1b-test-isolated",
+  "volume": "banuchat-ccd-auth-i1b-test-data",
+  "deployment": "445bbb27-b96a-4e28-8f7a-1ffc7f94e209",
+  "migrations": [
+    "011"
+  ],
+  "source_before": {
+    "corpus": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "history": "08ebd57b650cf8a3f3e87e33c45c630781312afa2a04e852d05df128869732ee"
+  },
+  "source_after": {
+    "corpus": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "history": "08ebd57b650cf8a3f3e87e33c45c630781312afa2a04e852d05df128869732ee"
+  },
+  "copy_corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "counts": [
+    {
+      "id": "3d6cedac-0e86-40c8-909b-d3ff6e8ab741",
+      "current": true,
+      "documents": 12,
+      "chunks": 12,
+      "embeddings": 12
+    },
+    {
+      "id": "5834fc47-57c5-498b-98fc-4190330155e4",
+      "current": false,
+      "documents": 2,
+      "chunks": 2,
+      "embeddings": 2
+    },
+    {
+      "id": "fb8538af-3280-4a1b-889c-a27564381996",
+      "current": false,
+      "documents": 10,
+      "chunks": 10,
+      "embeddings": 10
+    }
+  ],
+  "histories_copied": 0,
+  "ingestion": false,
+  "migration_sha256": "9c4edf17faf09147babd0f25eadc887629014c7d646c437ebb3837baae74efb0"
+}

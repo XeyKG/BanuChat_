@@ -88,7 +88,7 @@ function operations(): Array<{ path: string; method: string; value: ObjectValue;
 
 test("AUTH-P0 v2 declares exactly fifteen operations, six identity operations, and no selector/admin/registration bypass", () => {
   assert.equal(contract.openapi, "3.1.0");
-  assert.equal(object(contract.info).version, "3.0.0");
+  assert.equal(object(contract.info).version, "4.0.0");
   assert.deepEqual(contract.servers, [{ url: "/api/v2", description: "Base relativa; TLS obligatorio fuera del canal local aislado autorizado." }]);
   assert.deepEqual(operations().map(o => `${o.method.toUpperCase()} ${o.path}`), expected);
   assert.equal(operations().filter(o => o.path.startsWith("/auth/")).length, 6);
@@ -182,8 +182,15 @@ test("AUTH-P0 success payloads omit recovery email, credentials, hidden session 
   rejects("token_response", { ...tokens, expires_in: 901 });
   rejects("token_response", { ...tokens, expires_in: 0 });
   rejects("token_response", { ...tokens, password_hash: "not-a-hash" });
-  const me = { principal_id: uuid, synthetic_uid: "BCH-DEMO-0001", session_id: uuid, session_expires_at: date, release_id: uuid, profile, capabilities };
+  const me = { principal_id: uuid, synthetic_uid: "BCH-DEMO-0001", session_id: uuid, session_expires_at: date, release_id: uuid, evidence_mode: "synthetic", profile, capabilities };
   accepts("current_session", me);
+  accepts('login_request',{synthetic_uid:'U08000001',password:'x'});
+  const ccd={...me,synthetic_uid:'U08000001',evidence_mode:'ccd_local',profile:{profile_key:'ccd-local-demo',alias:'Demostración CCD local — sin identidad institucional'},capabilities:['chat','history','documents']};
+  accepts('current_session',ccd);
+  rejects('current_session',{...ccd,capabilities});
+  rejects('current_session',{...ccd,profile});
+  rejects('current_session',{...me,evidence_mode:'unapproved'});
+  for(const uid of ['U0800000１','u08000001','U0800001','U080000001',' U08000001','U08000001\n','BCH-DEMO-0001\n'])rejects('login_request',{synthetic_uid:uid,password:'x'});
   rejects("current_session", { ...me, recovery_email: "demo-0001@banuchat.test" });
   rejects("current_session", { ...me, auth_version: 1 });
   rejects("current_session", { ...me, capabilities: [...capabilities, "admin"] });

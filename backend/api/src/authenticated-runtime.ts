@@ -11,18 +11,20 @@ import {createAuthenticatedApiServer} from './http/api-v2-server.js';
 import type {RecoveryService} from './auth/recovery-service.js';
 import {generateDocumentRagAnswer,type DocumentRagDependencies} from './chat/document-rag.js';
 import {assertAuthenticatedDocumentReads,retrieveAuthenticatedDocumentChunks} from './application/authenticated-document-retrieval.js';
+import {knowledgeMode,type KnowledgeMode} from './auth/knowledge-mode.js';
 /** Permanent authenticated RAG composition; callers cannot select corpus or SQL through HTTP. */
-export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>):Promise<DocumentRagResponder>{
+export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>,mode:KnowledgeMode='synthetic'):Promise<DocumentRagResponder>{
+ knowledgeMode(mode);
  await assertAuthenticatedDocumentReads(input.sql);
- return query=>generateDocumentRagAnswer({...input,evidence_mode:'synthetic',retrieve_chunks:retrieveAuthenticatedDocumentChunks},query);
+ return query=>generateDocumentRagAnswer({...input,evidence_mode:mode,retrieve_chunks:retrieveAuthenticatedDocumentChunks},query);
 }
 /** Product composition, deliberately no listen/startup or v1 import. Explicit trusted config. */
 export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;
- document_rag:DocumentRagResponder;router?:IntentRouter;artifacts?:DocumentArtifactStorage;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
+ document_rag:DocumentRagResponder;evidence_mode?:KnowledgeMode;router?:IntentRouter;artifacts?:DocumentArtifactStorage;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
  const auth=await AuthService.create(input);
  const scope=(await input.pool.query('SELECT deployment_id,database_name FROM banuchat_auth.runtime_scope WHERE singleton')).rows[0] as {deployment_id:string;database_name:string}|undefined;
  if(!scope||scope.deployment_id!==input.deploymentId.toLowerCase()||scope.database_name!==input.expectedDatabase)throw new AuthError('DEPENDENCY_UNAVAILABLE');
  const router=input.router??await loadDefaultIntentRouter();if(!router.catalog_valid)throw new AuthError('DEPENDENCY_UNAVAILABLE');
- const resources=new AuthenticatedResources(input.pool,{sql:new PgSqlClient(input.pool),router,document_rag:input.document_rag},input.artifacts);
+ const resources=new AuthenticatedResources(input.pool,{sql:new PgSqlClient(input.pool),router,document_rag:input.document_rag},input.artifacts,knowledgeMode(input.evidence_mode));
  return createAuthenticatedApiServer({auth,resources,...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
 }

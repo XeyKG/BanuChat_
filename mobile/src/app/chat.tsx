@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation, getConversation } from '@/api/conversations';
-import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
+import { CCD_NOTICE, isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
 import {
   MessageRequestError,
   sendMessage,
@@ -341,7 +341,7 @@ export default function ChatScreen() {
             </View>
             <View style={styles.headerCopy}>
               <Text style={styles.headerTitle}>Banu</Text>
-              <Text style={styles.headerSubtitle}>{isCcdLocal() ? 'Demostración CCD local · sin identidad institucional' : `Asistente académico · ${activeProfile.alias}`}</Text>
+              <Text style={styles.headerSubtitle}>{isCcdLocal() ? 'Demostración CCD local · sin identidad institucional' : isCcdKnowledge() ? 'Documentación CCD seleccionada · cuenta ficticia' : `Asistente académico · ${activeProfile.alias}`}</Text>
             </View>
           </View>
           <Pressable
@@ -410,11 +410,11 @@ export default function ChatScreen() {
                       <BrandMark size={64} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
-                    <Text style={styles.emptyBody}>{isCcdLocal() ? 'Hola, soy Banu. Puedo orientarte sobre los documentos CCD seleccionados, sus cursos, pruebas y contacto. Puedes hacer preguntas de seguimiento y abrir las fuentes. No determino progreso personal ni reglas sin respaldo documental.' : CHAT_INTRODUCTION}</Text>
+                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo orientarte sobre los documentos CCD seleccionados, sus cursos, pruebas y contacto. Puedes hacer preguntas de seguimiento y abrir las fuentes. No determino progreso personal ni reglas sin respaldo documental.' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
                 <View style={styles.suggestionGrid}>
-                  {(isCcdLocal() ? ['¿Cuáles son los cursos de Competencias Digitales?', '¿Qué son las pruebas diagnósticas?', '¿Cuál es el correo de contacto del CCD?', '¿Qué puedes hacer?'] : SUGGESTIONS).map((suggestion, index) => (
+                  {(isCcdKnowledge() ? ['¿Cuáles son los cursos de Competencias Digitales?', '¿Qué son las pruebas diagnósticas?', '¿Cuál es el correo de contacto del CCD?', '¿Qué puedes hacer?'] : SUGGESTIONS).map((suggestion, index) => (
                     <FadeIn key={suggestion} delay={140 + index * 80}>
                       <Pressable
                         accessibilityRole="button"

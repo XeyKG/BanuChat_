@@ -2,9 +2,9 @@
   "openapi": "3.1.0",
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
-    "title": "BanuChat REST API v2 — cuentas sintéticas",
-    "version": "3.0.0",
-    "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido."
+    "title": "BanuChat REST API v2 — cuentas ficticias y conocimiento explícito",
+    "version": "4.0.0",
+    "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido. BCH-D37/CCD-AUTH-I1B: modo de conocimiento explícito por despliegue; contexto técnico CCD sin identidad institucional. Recuperación de correo suspendida."
   },
   "servers": [
     {
@@ -139,10 +139,10 @@
     "/auth/me": {
       "get": {
         "operationId": "get_current_session",
-        "summary": "Consultar la sesión autenticada y el perfil asignado",
+        "summary": "Consultar sesión, modo de conocimiento y perfil o contexto asignado",
         "responses": {
           "200": {
-            "description": "Datos sintéticos propios y perfil de la release actual.",
+            "description": "Cuenta ficticia propia, modo de conocimiento, capacidades y perfil/contexto técnico de la release actual.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/no_store"
@@ -375,7 +375,7 @@
       "post": {
         "operationId": "create_conversation",
         "summary": "Crear conversación propia con el perfil asignado por servidor",
-        "description": "Cuenta activa, binding aprobado y permiso de corpus sintético. Body {} sin selectores. Crear conversación y owner en una única conexión/transacción; release y perfil validados por los servicios existentes. No idempotente.",
+        "description": "Cuenta activa, binding aprobado y permiso del corpus fijado por el despliegue. Body {} sin selectores. Crear conversación y owner en una única conexión/transacción; release y perfil/contexto técnico validados por los servicios existentes. No idempotente.",
         "requestBody": {
           "required": true,
           "content": {
@@ -517,7 +517,7 @@
         "description": "Se verifica propietario en servidor antes de cargar historial, generar o borrar. Ajeno y ausente producen el mismo 404. Perfil/alias de la release de apertura, no de la vigente. Mensajes ordenados por ordinal interno ascendente; citas ordenadas por index. Historial completo del prototipo, sin truncamiento silencioso ni paginación.",
         "responses": {
           "200": {
-            "description": "Historial visible propio, perfil sintético y citas de las versiones históricas verificadas.",
+            "description": "Historial visible propio, perfil/contexto técnico y citas de las versiones históricas verificadas.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/no_store"
@@ -693,7 +693,7 @@
       "get": {
         "operationId": "list_calendar_events",
         "summary": "Consultar calendario sintético sin invocar al agente",
-        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente.",
+        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
         "parameters": [
           {
             "name": "date_from",
@@ -796,7 +796,7 @@
       "get": {
         "operationId": "list_announcements",
         "summary": "Consultar anuncios sintéticos sin invocar al agente",
-        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push.",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
         "parameters": [
           {
             "name": "query",
@@ -900,7 +900,7 @@
       "get": {
         "operationId": "get_document_artifact",
         "summary": "Descargar un artefacto documental verificado del corpus del modo local",
-        "description": "Solo UUID; no acepta rutas ni selectores de release. Resuelve versión ready de una release publicada ready, vigente o histórica, y bytes exactos de su revisión. Verifica contención real dentro de /data/synthetic, incluidos symlinks/junctions, y checksum interno antes de servir. Si no se conservan los bytes históricos exactos: 404, nunca sustituir por el archivo actual. No invoca al agente.",
+        "description": "Solo UUID; no acepta rutas ni selectores de release. Resuelve versión ready de una release publicada ready, vigente o histórica, y bytes exactos de su revisión. Verifica contención real dentro del snapshot depurado autorizado por modo y version_label, incluidos symlinks/junctions, y checksum interno antes de servir. Si no se conservan los bytes históricos exactos: 404, nunca sustituir por el archivo actual. No invoca al agente.",
         "responses": {
           "200": {
             "description": "Bytes completos de la revisión exacta autorizada y verificada. Sin redirecciones externas; Range se ignora.",
@@ -969,7 +969,7 @@
       "get": {
         "operationId": "get_profile_progress",
         "summary": "Consultar progreso ficticio del perfil asignado en servidor",
-        "description": "No acepta profile_key, UID o principal_id. Binding aprobado para release vigente y corpus permitido. Perfil ausente en current: 404; binding sin aprobación/capacidad: 403; sin cursos coincidentes: 200 vacío. Orden course_key ascendente. Sin agente ni datos reales.",
+        "description": "No acepta profile_key, UID o principal_id. Binding aprobado para release vigente y corpus permitido. Perfil ausente en current: 404; binding sin aprobación/capacidad: 403; sin cursos coincidentes: 200 vacío. Orden course_key ascendente. Sin agente ni datos reales. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
         "parameters": [
           {
             "name": "statuses",
@@ -1879,10 +1879,11 @@
       },
       "synthetic_uid": {
         "type": "string",
-        "minLength": 13,
+        "minLength": 9,
         "maxLength": 13,
-        "pattern": "^BCH-DEMO-[0-9]{4}$",
-        "description": "UID exclusivamente ficticio BanuChat; ASCII canónico, sin espacios ni normalización silenciosa."
+        "pattern": "^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$",
+        "oneOf": [{ "minLength": 9, "maxLength": 9 }, { "minLength": 13, "maxLength": 13 }],
+        "description": "Convención ficticia BanuChat: nuevas cuentas U + ocho dígitos ASCII; legado BCH-DEMO-#### sin renombrar. No acredita identidad universitaria."
       },
       "opaque_token": {
         "type": "string",
@@ -2030,37 +2031,69 @@
             "$ref": "#/components/schemas/profile"
           },
           "capabilities": {
-            "type": "array",
-            "minItems": 6,
-            "maxItems": 6,
-            "uniqueItems": true,
-            "prefixItems": [
+            "oneOf": [
               {
-                "type": "string",
-                "const": "chat"
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "uniqueItems": true,
+                "prefixItems": [
+                  {
+                    "type": "string",
+                    "const": "chat"
+                  },
+                  {
+                    "type": "string",
+                    "const": "history"
+                  },
+                  {
+                    "type": "string",
+                    "const": "progress"
+                  },
+                  {
+                    "type": "string",
+                    "const": "calendar"
+                  },
+                  {
+                    "type": "string",
+                    "const": "announcements"
+                  },
+                  {
+                    "type": "string",
+                    "const": "documents"
+                  }
+                ],
+                "items": false
               },
               {
-                "type": "string",
-                "const": "history"
-              },
-              {
-                "type": "string",
-                "const": "progress"
-              },
-              {
-                "type": "string",
-                "const": "calendar"
-              },
-              {
-                "type": "string",
-                "const": "announcements"
-              },
-              {
-                "type": "string",
-                "const": "documents"
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "uniqueItems": true,
+                "prefixItems": [
+                  {
+                    "type": "string",
+                    "const": "chat"
+                  },
+                  {
+                    "type": "string",
+                    "const": "history"
+                  },
+                  {
+                    "type": "string",
+                    "const": "documents"
+                  }
+                ],
+                "items": false
               }
-            ],
-            "items": false
+            ]
+          },
+          "evidence_mode": {
+            "type": "string",
+            "enum": [
+              "synthetic",
+              "ccd_local"
+            ]
           }
         },
         "required": [
@@ -2070,7 +2103,106 @@
           "session_expires_at",
           "release_id",
           "profile",
-          "capabilities"
+          "capabilities",
+          "evidence_mode"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "evidence_mode": {
+                  "const": "synthetic"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "capabilities": {
+                  "type": "array",
+                  "minItems": 6,
+                  "maxItems": 6,
+                  "uniqueItems": true,
+                  "prefixItems": [
+                    {
+                      "type": "string",
+                      "const": "chat"
+                    },
+                    {
+                      "type": "string",
+                      "const": "history"
+                    },
+                    {
+                      "type": "string",
+                      "const": "progress"
+                    },
+                    {
+                      "type": "string",
+                      "const": "calendar"
+                    },
+                    {
+                      "type": "string",
+                      "const": "announcements"
+                    },
+                    {
+                      "type": "string",
+                      "const": "documents"
+                    }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "evidence_mode": {
+                  "const": "ccd_local"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "capabilities": {
+                  "type": "array",
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "uniqueItems": true,
+                  "prefixItems": [
+                    {
+                      "type": "string",
+                      "const": "chat"
+                    },
+                    {
+                      "type": "string",
+                      "const": "history"
+                    },
+                    {
+                      "type": "string",
+                      "const": "documents"
+                    }
+                  ],
+                  "items": false
+                },
+                "profile": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "profile_key",
+                    "alias"
+                  ],
+                  "properties": {
+                    "profile_key": {
+                      "const": "ccd-local-demo"
+                    },
+                    "alias": {
+                      "const": "Demostración CCD local — sin identidad institucional"
+                    }
+                  }
+                }
+              }
+            }
+          }
         ]
       },
       "reset_accepted": {
@@ -2512,7 +2644,7 @@
     }
   },
   "x-auth-policy": {
-    "deployment_mode": "synthetic",
+    "deployment_mode": "fixed_per_deployment",
     "uid_authority": "banuchat",
     "public_registration": false,
     "manual_recovery_token": true,
@@ -2535,7 +2667,11 @@
     "json_duplicate_members": "reject",
     "login_or_reset_auto_login": false,
     "recovery_queue_capacity": 128,
-    "recovery_dispatch_concurrency": 1
+    "recovery_dispatch_concurrency": 1,
+    "knowledge_modes": [
+      "synthetic",
+      "ccd_local"
+    ]
   },
   "x-rate-limits": [
     {

@@ -9,7 +9,7 @@ import {
   isDocumentVersionId,
 } from '@/api/documents';
 import { AppButton } from '@/components/app-button';
-import { isCcdLocal } from '@/config/demo-mode';
+import { isCcdKnowledge } from '@/config/demo-mode';
 import { ScreenHeader } from '@/components/screen-header';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
@@ -27,7 +27,7 @@ function displayTitle(value: string | undefined): string {
 
 function errorMessage(kind: DocumentRequestError['kind'] | null): string {
   if (kind === 'not_found') {
-    return isCcdLocal() ? 'El documento no está disponible en esta revisión CCD.' : 'El documento ya no está disponible en esta revisión sintética.';
+    return isCcdKnowledge() ? 'El documento no está disponible en esta revisión CCD.' : 'El documento ya no está disponible en esta revisión sintética.';
   }
   if (kind === 'too_large') {
     return 'El documento supera el tamaño permitido por el visor.';
@@ -86,7 +86,7 @@ export default function DocumentScreen() {
       <ScreenHeader
         actionLabel="Volver"
         onAction={() => router.back()}
-        subtitle={isCcdLocal() ? 'Documento CCD seleccionado · demostración local' : 'Documento sintético de demostración'}
+        subtitle={isCcdKnowledge() ? 'Documento CCD seleccionado · demostración local' : 'Documento sintético de demostración'}
         title={title}
       />
 
@@ -119,7 +119,7 @@ export default function DocumentScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.notice}>
-            <Text style={styles.noticeText}>{isCcdLocal() ? 'Documento CCD seleccionado. Revisa su periodo, población y límites; sin aval institucional formal.' : 'Documento sintético de demostración'}</Text>
+            <Text style={styles.noticeText}>{isCcdKnowledge() ? 'Documento CCD seleccionado. Revisa su periodo, población y límites; sin aval institucional formal.' : 'Documento sintético de demostración'}</Text>
           </View>
           <View style={styles.documentCard}>
             <Text selectable style={styles.documentText}>

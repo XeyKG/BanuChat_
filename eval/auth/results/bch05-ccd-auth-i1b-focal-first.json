@@ -1,0 +1,27 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "phase": "focal",
+  "started_at": "2026-10-23T15:28:49.249Z",
+  "finished_at": "2026-10-23T15:28:51.228Z",
+  "operational_pass": false,
+  "authorization": {
+    "foreign_get": 404,
+    "foreign_post": 404,
+    "anonymous_get": 401,
+    "other_owner_list_empty": true,
+    "unsupported_resources": 403,
+    "anonymous_v1": 404,
+    "client_scope_override": 400,
+    "legacy_unowned": 404
+  },
+  "artifacts_verified": 24,
+  "citations_verified": 0,
+  "corpus_before": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "corpus_after": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "private_report_directory": "data/ccd/evidence/auth-i1b",
+  "failure": {
+    "code": "ASSERTION",
+    "reason": null
+  },
+  "revocation": null
+}

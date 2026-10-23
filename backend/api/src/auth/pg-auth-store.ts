@@ -2,6 +2,7 @@ import type { Pool } from "pg";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import { PgTransactionRunner } from "../data/transaction.js";
 import { AuthError } from "./primitives.js";
+import {knowledgeMode,type KnowledgeMode} from './knowledge-mode.js';
 
 export interface AccountRow { id:string; synthetic_uid:string; status:string; auth_version:string; password_hash:string|null; }
 export interface SessionRow {
@@ -16,7 +17,8 @@ export type AuthEvent="account_provisioned"|"login_succeeded"|"login_denied"|"re
 export class PgAuthStore {
   readonly transactions:PgTransactionRunner;
   constructor(readonly pool:Pool) { this.transactions=new PgTransactionRunner(pool); }
-  async assertRuntime(expectedDatabase:string):Promise<void> {
+  async assertRuntime(expectedDatabase:string,mode:KnowledgeMode='synthetic'):Promise<void> {
+    knowledgeMode(mode);
     const result=await this.pool.query(`SELECT current_database() AS database, r.rolsuper, r.rolcreatedb,
       r.rolcreaterole,r.rolreplication,r.rolbypassrls,
       has_database_privilege(current_database(),'CREATE') OR has_database_privilege(current_database(),'TEMP') AS db_write,
@@ -36,8 +38,23 @@ export class PgAuthStore {
         AND v.status='ready' AND v.manifest->'synthetic'='true'::jsonb) AS synthetic
       FROM pg_roles r WHERE r.rolname=current_user`);
     const r=result.rows[0] as Record<string,unknown>|undefined;
-    if(!r || !expectedDatabase || expectedDatabase.toLowerCase().includes("ccd") || r.database!==expectedDatabase || !r.synthetic ||
+    if(!r || !expectedDatabase || r.database!==expectedDatabase ||
+      (mode==='synthetic' && (expectedDatabase.toLowerCase().includes("ccd") || !r.synthetic)) ||
+      (mode==='ccd_local' && expectedDatabase!=='banuchat_ccd_auth_i1b_test') ||
       ["rolsuper","rolcreatedb","rolcreaterole","rolreplication","rolbypassrls","db_write","ddl","memberships","other_database","owns_objects","corpus_write","conversation_update"].some(k=>r[k]!==false)) throw new AuthError("DEPENDENCY_UNAVAILABLE");
+    if(mode==='ccd_local'){
+      const guard=await this.pool.query(`SELECT EXISTS(SELECT 1 FROM banuchat_auth.runtime_scope s
+        JOIN banuchat.datasets d ON d.id=1 AND d.name='banuchat-ccd-local'
+        JOIN banuchat.dataset_releases v ON v.id=d.current_release_id AND v.dataset_id=d.id
+        JOIN banuchat.ccd_demo_contexts c ON c.dataset_release_id=v.id AND c.profile_key='ccd-local-demo'
+        WHERE s.singleton AND s.database_name=current_database() AND s.evidence_mode='ccd_local'
+          AND s.dataset_name='banuchat-ccd-local' AND v.status='ready' AND v.manifest->'synthetic'='false'::jsonb
+          AND v.manifest->>'schema_version' IN ('ccd-1.0.0','ccd-1.1.0','ccd-1.2.0'))
+        AND NOT EXISTS(SELECT 1 FROM banuchat.synthetic_profiles)
+        AND (SELECT count(*) FROM banuchat.datasets)=1
+        AND NOT EXISTS(SELECT 1 FROM banuchat.dataset_releases WHERE dataset_id<>1 OR (manifest->'synthetic'='false'::jsonb) IS NOT TRUE) AS valid`);
+      if(guard.rows[0]?.valid!==true)throw new AuthError('DEPENDENCY_UNAVAILABLE');
+    }
   }
   async accountByUid(uid:string):Promise<AccountRow|undefined> {
     const r=await this.pool.query<AccountRow>(`SELECT a.id,a.synthetic_uid,a.status,a.auth_version::text,p.password_hash

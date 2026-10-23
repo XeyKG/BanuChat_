@@ -1,0 +1,17 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:46:56.504Z",
+  "a_reads_b": 404,
+  "a_posts_b": 404,
+  "a_deletes_b": 404,
+  "a_list_excludes_b": true,
+  "b_deletes_own": 204,
+  "deleted_detail": 404,
+  "anonymous_artifact": 401,
+  "unknown_artifact": 404,
+  "external_path_query": 400,
+  "v1_artifact": 404,
+  "rag_calls": 0,
+  "corpus_before": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "corpus_after": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963"
+}

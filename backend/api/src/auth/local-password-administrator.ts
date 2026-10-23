@@ -3,13 +3,14 @@ import type {Pool} from 'pg';
 import {PgTransactionRunner} from '../data/transaction.js';
 import {PgAuthStore} from './pg-auth-store.js';
 import {AuthError,Argon2idHasher,newPassword,postgresClock,safeError,uid,type PasswordHasher} from './primitives.js';
+import type {KnowledgeMode} from './knowledge-mode.js';
 
 /** Trusted local administrative composition only. Never mounted over HTTP/MCP. Uses 008 ACL unchanged. */
 export class LocalPasswordAdministrator {
  private constructor(private readonly pool:Pool,private readonly deployment:string,private readonly hasher:PasswordHasher){}
- static async create(input:{pool:Pool;database:string;deployment:string;hasher?:PasswordHasher}){
+ static async create(input:{pool:Pool;database:string;deployment:string;hasher?:PasswordHasher;evidence_mode?:KnowledgeMode}){
   try{
-   await new PgAuthStore(input.pool).assertRuntime(input.database);
+   await new PgAuthStore(input.pool).assertRuntime(input.database,input.evidence_mode);
    const scope=(await input.pool.query('SELECT database_name,deployment_id FROM banuchat_auth.runtime_scope WHERE singleton')).rows[0];
    if(scope?.database_name!==input.database||scope.deployment_id!==input.deployment.toLowerCase())throw new AuthError('DEPENDENCY_UNAVAILABLE');
    await input.pool.query('SELECT synthetic_display_name FROM banuchat_auth.accounts LIMIT 0');

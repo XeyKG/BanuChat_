@@ -1,0 +1,46 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B",
+  "at": "2026-10-23T15:14:07.745Z",
+  "database": "banuchat_auth_i1b_uid_test",
+  "port": 55444,
+  "container": "banuchat-auth-i1b-uid-test",
+  "container_id": "a43254674c3700dc0b47694089056d56547b994753dd4a802181dd67aac2c3c4",
+  "network": "banuchat-auth-i1b-uid-test-isolated",
+  "volume": "banuchat-auth-i1b-uid-test-data",
+  "deployment": "4c0b548b-d3fd-4afe-89d3-6a553ddbf65f",
+  "migrations": [
+    "006",
+    "007",
+    "008",
+    "009",
+    "010"
+  ],
+  "source_before": {
+    "corpus": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "history": "f195f7488c745edc74b2a3bec372c7f36257a799dd86b63ba2cedc849cc79fb2"
+  },
+  "source_after": {
+    "corpus": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "history": "f195f7488c745edc74b2a3bec372c7f36257a799dd86b63ba2cedc849cc79fb2"
+  },
+  "copy_corpus_sha256": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "counts": [
+    {
+      "id": "5b307391-f475-4120-b8de-30df8f9a7d63",
+      "current": false,
+      "documents": 12,
+      "chunks": 60,
+      "embeddings": 60
+    },
+    {
+      "id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+      "current": true,
+      "documents": 12,
+      "chunks": 60,
+      "embeddings": 60
+    }
+  ],
+  "histories_copied": 0,
+  "ingestion": false,
+  "migration_sha256": "82916c856513fc8e108f064c328d5e8d1d15388142a249baaf308402d7be55af"
+}

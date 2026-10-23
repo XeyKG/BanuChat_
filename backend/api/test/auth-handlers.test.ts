@@ -6,7 +6,7 @@ import {AuthError,exactObject,password,uid} from "../src/auth/primitives.js";
 import type {AuthService,CurrentSession} from "../src/auth/auth-service.js";
 const token="A".repeat(43);const id="11111111-1111-4111-8111-111111111111";
 const pair={access_token:token,refresh_token:token,token_type:"Bearer" as const,expires_in:900,session_expires_at:"2030-01-08T00:00:00Z"};
-const me:CurrentSession={principal_id:id,synthetic_uid:"BCH-DEMO-0001",session_id:id,session_expires_at:pair.session_expires_at,release_id:id,
+const me:CurrentSession={principal_id:id,synthetic_uid:"BCH-DEMO-0001",session_id:id,session_expires_at:pair.session_expires_at,release_id:id,evidence_mode:'synthetic',
   profile:{profile_key:"auth_fixture",alias:"Perfil ficticio"},capabilities:["chat","history","progress","calendar","announcements","documents"]};
 function fake():Pick<AuthService,"login"|"refresh"|"authenticate"|"currentSession"|"logout"> {
   return {login:async input=>{const body=exactObject(input,["synthetic_uid","password"]);uid(body.synthetic_uid);password(body.password);return pair;},

@@ -3,13 +3,14 @@ import type { Pool } from "pg";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import { PgAuthStore, type AccountRow, type SessionRow, type TokenPair } from "./pg-auth-store.js";
 import { PersistentAuthLimiter, type AuthRequestContext } from "./rate-limiter.js";
+import {knowledgeMode,knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
 import { Argon2idHasher, AuthError, digestToken, exactObject, issueToken, password, postgresClock, safeError, uid,
   type AuthClock, type PasswordHasher } from "./primitives.js";
 
 export interface AuthPrincipal { readonly principalId:string;readonly sessionId:string;readonly syntheticUid:string;readonly authVersion:string;readonly deploymentId:string; }
 export interface CurrentSession {
   principal_id:string;synthetic_uid:string;session_id:string;session_expires_at:string;release_id:string;
-  profile:{profile_key:string;alias:string};capabilities:["chat","history","progress","calendar","announcements","documents"];
+  evidence_mode:KnowledgeMode;profile:{profile_key:string;alias:string};capabilities:readonly string[];
 }
 type Outcome<T>={value:T}|{error:AuthError};
 function unwrap<T>(outcome:Outcome<T>):T {if("error" in outcome)throw outcome.error;return outcome.value;}
@@ -26,14 +27,14 @@ async function guarded<T>(work:()=>Promise<T>):Promise<T>{try{return await work(
 export class AuthService {
   private constructor(private readonly store:PgAuthStore,private readonly deployment:string,
     private readonly hasher:PasswordHasher,private readonly dummyHash:string,private readonly clock:AuthClock,
-    private readonly limiter:PersistentAuthLimiter) {}
-  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock}):Promise<AuthService> {
+    private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode) {}
+  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode}):Promise<AuthService> {
     return guarded(async()=>{
       if(input.deploymentId.length!==36 || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/u.test(input.deploymentId))throw new AuthError("DEPENDENCY_UNAVAILABLE");
-      const store=new PgAuthStore(input.pool);await store.assertRuntime(input.expectedDatabase);
+      const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);await store.assertRuntime(input.expectedDatabase,mode);
       const hasher=input.hasher??new Argon2idHasher();const clock=input.clock??postgresClock;
       const dummy=await hasher.hash(randomBytes(32).toString("base64url"));
-      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock));
+      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode);
     });
   }
   login(input:unknown,context:AuthRequestContext):Promise<TokenPair> {
@@ -105,17 +106,18 @@ export class AuthService {
   }
   currentSession(token:string):Promise<CurrentSession> {
     return guarded(()=>this.access<CurrentSession>(token,async(c,a,s)=>{
+      const definition=knowledgeDefinition(this.evidenceMode);
       const current=await c.query<{id:string}>(`SELECT r.id FROM banuchat.datasets d JOIN banuchat.dataset_releases r ON r.id=d.current_release_id AND r.dataset_id=d.id
-        WHERE d.id=1 AND d.name='banuchat-synthetic' AND r.status='ready' AND r.manifest->'synthetic'='true'::jsonb`);
+        WHERE d.id=1 AND d.name=$1 AND r.status='ready' AND r.manifest->'synthetic'=$2::jsonb`,[definition.name,JSON.stringify(definition.synthetic)]);
       const release=current.rows[0]?.id;if(!release)throw new AuthError("NOT_FOUND");
       const binding=await c.query<{profile_key:string;alias:string}>(`SELECT p.profile_key,p.alias FROM banuchat_auth.profile_bindings b
         JOIN banuchat_auth.profile_binding_versions v ON v.principal_id=b.principal_id AND v.dataset_id=b.dataset_id AND v.profile_key=b.profile_key
-        JOIN banuchat.synthetic_profiles p ON p.dataset_release_id=v.dataset_release_id AND p.profile_key=v.profile_key
+        JOIN ${definition.relation} p ON p.dataset_release_id=v.dataset_release_id AND p.profile_key=v.profile_key
         JOIN banuchat_auth.corpus_grants g ON g.principal_id=b.principal_id AND g.dataset_id=b.dataset_id
-        WHERE b.principal_id=$1 AND v.dataset_release_id=$2 AND g.revoked_at IS NULL AND g.mode='synthetic' AND g.permission='read'`,[a.id,release]);
+        WHERE b.principal_id=$1 AND v.dataset_release_id=$2 AND g.revoked_at IS NULL AND g.mode=$3 AND g.permission='read'`,[a.id,release,this.evidenceMode]);
       const profile=binding.rows[0];if(!profile)throw new AuthError("FORBIDDEN");
       return {principal_id:a.id,synthetic_uid:a.synthetic_uid,session_id:s.id,session_expires_at:s.absolute_expires_at.toISOString(),release_id:release,
-        profile:{profile_key:profile.profile_key,alias:profile.alias},capabilities:["chat","history","progress","calendar","announcements","documents"]};
+        evidence_mode:this.evidenceMode,profile:{profile_key:profile.profile_key,alias:profile.alias},capabilities:definition.capabilities};
     },true));
   }
   logout(token:string,context:AuthRequestContext):Promise<void> {

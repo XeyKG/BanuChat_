@@ -1,6 +1,30 @@
 # BanuChat Mobile
 
-## Estado vigente AUTH-P4-L0
+## Estado vigente CCD-AUTH-I1B
+
+`EXPO_PUBLIC_DEMO_MODE=ccd_authenticated` añade CCD autenticado con REST v2 y
+SecureStore; es distinto de `ccd_local`/v1 y del modo `synthetic` predeterminado.
+Valida `me.evidence_mode=ccd_local`, contexto técnico y las tres capacidades
+chat/historial/documentos. No permite seleccionar perfil/release, compartir
+historial por contexto o usar v1 como bypass. Home y navegación ocultan progreso,
+calendario y anuncios personales. El aviso visible identifica cuentas ficticias,
+material seleccionado local y ausencia de aval/actualidad institucional.
+
+Se conservan diseño y onboarding, adaptando su texto a las capacidades CCD.
+Solo refresh se persiste en SecureStore, en una clave CCD separada por URL;
+access permanece en memoria. Login acepta U+8 y legado BCH-DEMO-####.
+Sesiones/recursos usan los servicios v2 existentes, con refresh/logout y sin retry
+de POST incierto. El modo sintético conserva sus seis capacidades/corpus.
+
+Arranque público sin secretos: `scripts/start-ccd-auth.ps1`. Las contraseñas
+individuales se consultan personalmente desde DPAPI; no están en archivos
+versionables. Procedimiento y guion en el
+[runbook Android I1B](../docs/operations/ccd-auth-i1b-android.md).
+**Android no fue ejecutado ni aprobado por el agente**; typecheck, lint y pruebas
+de servicios no sustituyen esa validación personal. Resultados/límites en el
+[checkpoint I1B](../docs/transition/bch05-ccd-auth-i1b-checkpoint.md).
+
+## Antecedente AUTH-P4-L0
 
 El modo synthetic usa ahora login propio por UID/contraseña y RESTv2 protegido;
 seleccionar un perfil ya no autentica. La documentación v1/sesión por perfiles más
