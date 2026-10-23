@@ -1,0 +1,459 @@
+{
+  "checkpoint": "BCH-04/AUTH-P4-L1",
+  "baseCommit": "1f208162418e6e73e0c498d356a873bdb78366ba",
+  "observedAt": "2026-10-23T07:26:13.573Z",
+  "device": {
+    "physical": true,
+    "authorized": true,
+    "android": "14",
+    "apiLevel": 34,
+    "adb": "1.0.41",
+    "platformTools": "37.0.0",
+    "expoGo": "57.0.9",
+    "serialOmitted": true,
+    "usbReversePorts": [
+      3002,
+      8081
+    ]
+  },
+  "deployment": {
+    "database": "banuchat_auth_p4l1_demo",
+    "host": "127.0.0.1",
+    "postgresPort": 55440,
+    "apiPort": 3002,
+    "metroPort": 8081,
+    "isolatedContainer": "banuchat-auth-p4l1-demo",
+    "network": "banuchat-auth-p4l1-demo-isolated",
+    "volume": "banuchat-auth-p4l1-demo-data",
+    "scope": "b177ab53-e9a9-42f5-a854-0fdd05b26357",
+    "configurationIgnored": true,
+    "newIndependentCredentials": true,
+    "passwordsOrTokensIncluded": false
+  },
+  "checks": {
+    "apiTypecheck": "PASS",
+    "apiAuth": {
+      "pass": 27,
+      "fail": 0
+    },
+    "mobileTypecheck": "PASS",
+    "mobileLint": "PASS",
+    "mobileLocal": {
+      "pass": 15,
+      "fail": 0
+    },
+    "apiLint": "NOT_CONFIGURED",
+    "fullApiSuite": "NOT_RERUN",
+    "nativeStoreFaultInjection": "NOT_EXECUTED",
+    "nativeFullExpiry": "NOT_EXECUTED",
+    "ios": "NOT_EXECUTED",
+    "adminCliSuccessfulActivation": "NOT_EXECUTED",
+    "automaticProvisioningUsingExistingServices": "PASS",
+    "nativeLoginResourcesChatHistory": "OPERATOR_CONFIRMED_AND_SQL_ACTIVITY",
+    "nativeForeignUuid": "OPERATOR_CONFIRMED_DENIED",
+    "nativeDocumentOpening": "OPERATOR_CONFIRMED",
+    "nativeRestoreAfterForceStop": "OPERATOR_CONFIRMED_AND_SQL_REFRESH",
+    "nativeWrongPassword": "OPERATOR_CONFIRMED_ONLY_AT_REPORT_CUTOFF",
+    "nativeNoSignupRecovery": "OPERATOR_CONFIRMED",
+    "ragGenerationTrace": "NOT_CAPTURED",
+    "newRagBenchmark": "NOT_EXECUTED",
+    "gitDiffCheck": "PASS",
+    "newFileWhitespaceChecks": "PASS_3_FILES"
+  },
+  "httpChecks": [
+    {
+      "path": "/api/v2/auth/me",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "path": "/api/v2/conversations",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "path": "/api/v2/me/progress",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "path": "/api/v2/calendar/events",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "path": "/api/v2/announcements",
+      "status": 401,
+      "noStore": true
+    },
+    {
+      "path": "/api/v1/profiles",
+      "status": 404,
+      "noStore": true
+    },
+    {
+      "path": "/api/v2/auth/register",
+      "status": 404,
+      "noStore": true
+    }
+  ],
+  "serverRestart": {
+    "scopeUnchanged": true,
+    "rateKeyFingerprintUnchanged": true
+  },
+  "administrativeNegativeChecks": {
+    "results": [
+      {
+        "name": "privileged_role",
+        "rejected": true
+      },
+      {
+        "name": "wrong_database",
+        "rejected": true
+      },
+      {
+        "name": "wrong_deployment",
+        "rejected": true
+      },
+      {
+        "name": "active_account_without_replace_flag",
+        "rejected": true
+      }
+    ],
+    "counts": {
+      "accounts": 2,
+      "credentials": 2,
+      "contacts": 0,
+      "challenges": 0,
+      "citations": 15
+    }
+  },
+  "finalObservation": {
+    "observedAt": "2026-10-23T07:26:12.909Z",
+    "runtimeGuard": "PASS",
+    "scopeMatches": true,
+    "rateKeySha256": "c02c290dd71c4a3be3f93809ca33c8e1aab8974f21cedc748efa7cc2e9661e97",
+    "accounts": [
+      {
+        "synthetic_uid": "BCH-DEMO-9101",
+        "synthetic_display_name": "Alba Ficticia",
+        "status": "active",
+        "auth_version": "2",
+        "argon2id": true,
+        "sessions": 1,
+        "revoked_sessions": 1
+      },
+      {
+        "synthetic_uid": "BCH-DEMO-9102",
+        "synthetic_display_name": "Bruno Ficticio",
+        "status": "active",
+        "auth_version": "2",
+        "argon2id": true,
+        "sessions": 1,
+        "revoked_sessions": 0
+      }
+    ],
+    "events": [
+      {
+        "event_type": "account_provisioned",
+        "outcome": "success",
+        "count": 2
+      },
+      {
+        "event_type": "login_succeeded",
+        "outcome": "success",
+        "count": 2
+      },
+      {
+        "event_type": "logout_succeeded",
+        "outcome": "success",
+        "count": 1
+      },
+      {
+        "event_type": "password_set",
+        "outcome": "success",
+        "count": 2
+      },
+      {
+        "event_type": "refresh_succeeded",
+        "outcome": "success",
+        "count": 1
+      }
+    ],
+    "history": [
+      {
+        "synthetic_uid": "BCH-DEMO-9101",
+        "conversations": 1,
+        "messages": 4
+      },
+      {
+        "synthetic_uid": "BCH-DEMO-9102",
+        "conversations": 3,
+        "messages": 8
+      }
+    ]
+  },
+  "corpusIntegrity": {
+    "at": "2026-10-23T07:26:13.383Z",
+    "sourceSha256": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "copySha256": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "sourceAndCopyUnchanged": true,
+    "privateTechnicalSecretsOrCredentialPatternsInTaskLogs": false
+  },
+  "protectedFiles": {
+    "unchanged": true,
+    "count": 60,
+    "hashes": [
+      {
+        "path": "backend/api/api-contract-v2.md",
+        "sha256": "69b57d4c9c9022d227b519ef71903d0f36b7ffb0795fdf1b8c14f056f9c7c66c"
+      },
+      {
+        "path": "backend/api/api-contract.md",
+        "sha256": "7d2979e24cd9a7764ba2473baab082da2238271c9f9ab3ae401bd1860056c5ab"
+      },
+      {
+        "path": "backend/api/openapi-v2.yaml",
+        "sha256": "af5cb037a047c1a830bfaa259005cc4d3fe59e7027b6ce2271309011b2832f17"
+      },
+      {
+        "path": "backend/api/openapi.yaml",
+        "sha256": "2d0cb46659a11cd77d6dc40c7308df85187536d14927d16e54784357f118d251"
+      },
+      {
+        "path": "backend/mcp-server/tools-contract.md",
+        "sha256": "4260b05d30d3bd7c0d6283338055e5f89918a2e15109c9dfe9745764aa9a759d"
+      },
+      {
+        "path": "backend/mcp-server/tools.contract.json",
+        "sha256": "b431a85a20e3964709aec21240e7be286b1c2c6885590a9527795b34403f7bdd"
+      },
+      {
+        "path": "data/ccd/.gitignore",
+        "sha256": "1a08f73526f2010fceb9d9ac2ea9b31e381086a0603fbadd281319ac0cc74e94"
+      },
+      {
+        "path": "data/ccd/README.md",
+        "sha256": "8b59ddf64d38322cddc6c977df22beaa8f598580271bff4cef284deb9ffbcee7"
+      },
+      {
+        "path": "data/ccd/schemas/corpus-1.1.schema.json",
+        "sha256": "8bacfb6854308629ba3f313488c67c53aaa17c9d075a5288ce2fe79eed687d14"
+      },
+      {
+        "path": "data/ccd/schemas/corpus-1.2.schema.json",
+        "sha256": "f045c24b6ba356f940516ab3d4263943b445dde789bd4f1ea43399327b6fd855"
+      },
+      {
+        "path": "data/ccd/schemas/corpus.schema.json",
+        "sha256": "7ace84e45d1871cd952232ca33d073d44c4bdc89596ca04e3f54543dd629f5aa"
+      },
+      {
+        "path": "data/synthetic/.gitattributes",
+        "sha256": "e152e5470932ce847b72035d4d0482ec8899e0ee163e459f5bee353e3e1dfe47"
+      },
+      {
+        "path": "data/synthetic/.gitignore",
+        "sha256": "1f098535793be6995e8665939add9cf76d35f77978f275f8eb8b91500b0348db"
+      },
+      {
+        "path": "data/synthetic/HUMAN_REVIEW.md",
+        "sha256": "7f3f368960ec5156a005afb75ca6c0231ac3e5e9ead4d76a6ebce916832fd6e8"
+      },
+      {
+        "path": "data/synthetic/README.md",
+        "sha256": "e481ed2abe43e43bbe62948331e0c4bf2a7ace36e6b928eb88b393a3de53ddbe"
+      },
+      {
+        "path": "data/synthetic/announcements/README.md",
+        "sha256": "23dc7bc7674cc856528a9fff7fd2018ad2fee722c25672124f0dd63831fe7bdf"
+      },
+      {
+        "path": "data/synthetic/announcements/announcements.json",
+        "sha256": "cf58482194ccf2cf000f89b567d1f4c0280991043c01c9bd6bd1ceaf6cfacf8f"
+      },
+      {
+        "path": "data/synthetic/calendars/README.md",
+        "sha256": "2a0f644bc0972f1ec464d38a7e90710445067775622baa26d61f954d4353cab4"
+      },
+      {
+        "path": "data/synthetic/calendars/events.json",
+        "sha256": "52eb7482124ee17d0609bab32f0ecd76559af95b1ea49aba5ac923f0f5703742"
+      },
+      {
+        "path": "data/synthetic/courses/README.md",
+        "sha256": "bf34f4273bc2844d48842e03001e1fe4564048e93b7d38842671c90c757a0d7a"
+      },
+      {
+        "path": "data/synthetic/courses/courses.json",
+        "sha256": "798638227313c67542814f18bf80891cba22e61cab0279d7f9c94c0578c4156b"
+      },
+      {
+        "path": "data/synthetic/documents/README.md",
+        "sha256": "3ced8eab670d9cecd2a190b1234786e44f299ff303b0ed9602cae971543e729f"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-001.md",
+        "sha256": "ec5030d080fa8ce23ba58f3ca0c832929e9ac74ee8c017ebbdc3a6abeedc06a0"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-002.md",
+        "sha256": "5e99dcca0223d113c30d2b20237d5f0b31d64e43b09f85e5715b07f3a8648b4a"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-003.md",
+        "sha256": "d48fb0315809aa97b4bb0c37865f0c955c49a60c5cb9036814c96c395be32b5d"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-004.md",
+        "sha256": "c03cc3ada42d4c20f72b8ac2a8bad5718d1a7517c3c0696d2dc9ac7c9b62d730"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-005.md",
+        "sha256": "c206374789a0ff4ea8fa502c81c41d6473764b7a1d47e5757f175a654816391d"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-006.md",
+        "sha256": "ecdc6905470606358d4ef2722e5552afa01d9eb51ebb8dc50cd4d0a6bb087f7e"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-007.md",
+        "sha256": "ef23ac2888a5770e04423189a0116f41d469c80912c86d53609204a4f88afea0"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-008.md",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-009.md",
+        "sha256": "0b80b50e83b590f54e4c070c628229be566f68533b88b92971416acf87f87a94"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-010.md",
+        "sha256": "3f7886ed84e41584a6126d86c617e0cb086ef71bd27261cd4b1044cce5ab7390"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-011.md",
+        "sha256": "df12056ba8d9c8c1bb3eb7cbdc610c3e325c0aa3b96670f351cc838cb85d3e08"
+      },
+      {
+        "path": "data/synthetic/documents/artifacts/doc-012.md",
+        "sha256": "70c681f937c26b576e8430f6badbd30f299cf9a911e588c7a0d26cc453851241"
+      },
+      {
+        "path": "data/synthetic/documents/documents.json",
+        "sha256": "62bb4bf5c650aae378d3f1df88c267b2dc97f44d559789b20c842b89cc5d8524"
+      },
+      {
+        "path": "data/synthetic/manifest.json",
+        "sha256": "39e8f2c94afbddca6cbc4f634b6bb9477eb479b44fc8f52b411fcd439fd5abda"
+      },
+      {
+        "path": "data/synthetic/profiles/README.md",
+        "sha256": "0d03f02e9477d5cee8f6acae5888e267eee3142964d1b594c71bc048d463db3b"
+      },
+      {
+        "path": "data/synthetic/profiles/profiles.json",
+        "sha256": "4569f7ec2cb7c7a62871a8550552fa381359531564a8eb57275f964576dae152"
+      },
+      {
+        "path": "data/synthetic/profiles/progress.json",
+        "sha256": "685465c606d78701d2b6e8cbbc054008cf99317a99fdd2320c3de543f80588e7"
+      },
+      {
+        "path": "data/synthetic/schemas/README.md",
+        "sha256": "a92e6025cd44b2d5f9c06c500de08db14fe8670bccf283c7147b2f0246508abe"
+      },
+      {
+        "path": "data/synthetic/schemas/announcements.schema.json",
+        "sha256": "ffcc0e2d14d237e440ab2e798c6f33a3cf522cbf0b0f454bb67b8520b88bc9b6"
+      },
+      {
+        "path": "data/synthetic/schemas/calendar-events.schema.json",
+        "sha256": "dc9ff46697103483af14ff45d2d97675f9c4aa3802cd3286079b126ef7f2e742"
+      },
+      {
+        "path": "data/synthetic/schemas/courses.schema.json",
+        "sha256": "6f1e0ff92f4429c45985a7acead90d1753965b280beb81b8aad4c4bf38e395b5"
+      },
+      {
+        "path": "data/synthetic/schemas/documents.schema.json",
+        "sha256": "8b32626603c2c74362d1c647303a451fd50d9a5e8726086a0f3d0ad16265b3f6"
+      },
+      {
+        "path": "data/synthetic/schemas/manifest.schema.json",
+        "sha256": "3aef1f02fb119bf325226512bd7972319399e369ea80c44becf5300c9ef6aeed"
+      },
+      {
+        "path": "data/synthetic/schemas/profile-progress.schema.json",
+        "sha256": "835d245dcd0af2a35b44d14aa5dd4b62c706f171942ea151f834ec6cc8eb63c5"
+      },
+      {
+        "path": "data/synthetic/schemas/profiles.schema.json",
+        "sha256": "8adcd7afd5223db5e29bec8ae72683f8b0e908281dddc4d05bdc4b942a86e474"
+      },
+      {
+        "path": "infra/db/001_initial_schema.sql",
+        "sha256": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3"
+      },
+      {
+        "path": "infra/db/002_ccd_local_manifest.sql",
+        "sha256": "7d11af66598a1df144d4c8975eecec3559850af92b445c2f291902ec5171a39c"
+      },
+      {
+        "path": "infra/db/003_ccd_chat_demo.sql",
+        "sha256": "2501581050314183ebbbf23b595f13abe9d5cb8b9f61a3dac2afc00d82c4076c"
+      },
+      {
+        "path": "infra/db/004_ccd_expanded_manifest.sql",
+        "sha256": "d9c4feb8e7c583da824e4be08de37e898200679b0ab3797b1fdf697a27fe6660"
+      },
+      {
+        "path": "infra/db/005_ccd_guidance_manifest.sql",
+        "sha256": "02cf39aeb6b9a037fbad2849e006ba7b3a7323d6b2f6b1ed970b7863eeeca46e"
+      },
+      {
+        "path": "infra/db/006_synthetic_auth.sql",
+        "sha256": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85"
+      },
+      {
+        "path": "infra/db/007_authenticated_resources.sql",
+        "sha256": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47"
+      },
+      {
+        "path": "infra/db/008_verified_recovery_email.sql",
+        "sha256": "757e5caebac9815070940efd3f4830014c8e13b280b0954a59296566fb940a77"
+      },
+      {
+        "path": "infra/db/README.md",
+        "sha256": "26fc30c53b84b2aae15d552b86281441cb15a72e02efab89685edceb37131c95"
+      },
+      {
+        "path": "infra/db/auth-permissions.md",
+        "sha256": "a1a36d8eff5ff0565b37dac214d697a4d26cd75789505803e6d95500998b3576"
+      },
+      {
+        "path": "infra/db/ccd-local-development.md",
+        "sha256": "3e5ceff473f442c37762a8c0ed8bcd749f2c56cb4f5facd8dff739e749009ab0"
+      },
+      {
+        "path": "infra/db/tests/001_schema_integration.sql",
+        "sha256": "c79011749d81b59874b21e69af335d5f2866e976767ea1e51cf096ea8fadf6af"
+      },
+      {
+        "path": "infra/db/tests/README.md",
+        "sha256": "f0ad121264307bf7d928494a60273434ad9b96cecc005b3f08dc1d235e60c789"
+      }
+    ]
+  },
+  "reportedLimitations": [
+    "Final admin CLI successful no-echo confirmation still pending; automatic path differs",
+    "No native storage fault injection, complete expiry or iOS",
+    "UID/password/email requested delta documented, not applied",
+    "Private technical configuration uses ACL, not an encrypted vault",
+    "Processes and isolated volume retained locally for review; no automatic cleanup"
+  ],
+  "mail": "SUSPENDED",
+  "authP4": "PARTIAL_NATIVE_VALIDATION_NOT_COMPLETE",
+  "commitOrPush": false
+}
