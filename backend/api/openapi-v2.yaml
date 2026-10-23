@@ -1,0 +1,2572 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "info": {
+    "title": "BanuChat REST API v2 — cuentas sintéticas",
+    "version": "2.0.0",
+    "description": "Contrato AUTH-P0 candidato final, sin endpoints activos. Autenticación propia BanuChat con UID y contraseña permanentemente sintéticos; no valida credenciales UNAB. Recuperación con token de entrada manual y buzón local controlado. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido."
+  },
+  "servers": [
+    {
+      "url": "/api/v2",
+      "description": "Base relativa; TLS obligatorio fuera del canal local aislado autorizado."
+    }
+  ],
+  "security": [
+    {
+      "banu_bearer": []
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Iniciar sesión propia con UID y contraseña sintéticos",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/login_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sesión nueva, sin ID/token elegido por cliente.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/token_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "refresh_session",
+        "summary": "Rotar refresh de una sesión BanuChat",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/refresh_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pareja nueva; refresh previo consumido y access anterior invalidado.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/token_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "get_current_session",
+        "summary": "Consultar la sesión autenticada y el perfil asignado",
+        "responses": {
+          "200": {
+            "description": "Datos sintéticos propios y perfil de la release actual.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/current_session"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Revocar la sesión autenticada actual",
+        "responses": {
+          "204": {
+            "description": "Revocación confirmada; cuerpo vacío.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-empty-request-body": true,
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/auth/password/reset-requests": {
+      "post": {
+        "operationId": "request_password_reset",
+        "summary": "Solicitar token manual en buzón sintético local",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/reset_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Respuesta genérica; no acredita cuenta ni entrega.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reset_accepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "operationId": "confirm_password_reset",
+        "summary": "Consumir token manual y establecer contraseña propia",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/reset_confirmation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Cambio/establecimiento e invalidación de sesiones confirmados; sin login automático.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            }
+          },
+          "400": {
+            "description": "INVALID_ARGUMENT si schema/política de contraseña son inválidos (se validan antes del token); INVALID_RESET para un token no utilizable.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/error_response"
+                    },
+                    {
+                      "properties": {
+                        "error": {
+                          "properties": {
+                            "code": {
+                              "enum": [
+                                "INVALID_ARGUMENT",
+                                "INVALID_RESET"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/conversations": {
+      "post": {
+        "operationId": "create_conversation",
+        "summary": "Crear conversación propia con el perfil asignado por servidor",
+        "description": "Cuenta activa, binding aprobado y permiso de corpus sintético. Body {} sin selectores. Crear conversación y owner en una única conexión/transacción; release y perfil validados por los servicios existentes. No idempotente.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_conversation_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Conversación creada y confirmada.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Location": {
+                "description": "Ruta REST relativa de la conversación creada.",
+                "schema": {
+                  "type": "string",
+                  "pattern": "^/api/v2/conversations/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/created_conversation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      },
+      "get": {
+        "operationId": "list_conversations",
+        "summary": "Listar exclusivamente conversaciones propias",
+        "description": "Filtrar por principal y owner antes de agregación, orden y limit. Incluye sus releases históricas; sin backfill o auto-claim. Orden started_at DESC, conversation_id DESC. Perfil compartido no comparte chats.",
+        "responses": {
+          "200": {
+            "description": "Conversaciones, hasta el límite indicado.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversations_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/conversations/{conversation_id}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/conversation_id"
+        }
+      ],
+      "get": {
+        "operationId": "get_conversation",
+        "summary": "Obtener conversación y mensajes visibles",
+        "description": "Se verifica propietario en servidor antes de cargar historial, generar o borrar. Ajeno y ausente producen el mismo 404. Perfil/alias de la release de apertura, no de la vigente. Mensajes ordenados por ordinal interno ascendente; citas ordenadas por index. Historial completo del prototipo, sin truncamiento silencioso ni paginación.",
+        "responses": {
+          "200": {
+            "description": "Historial visible propio, perfil sintético y citas de las versiones históricas verificadas.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/conversation_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      },
+      "delete": {
+        "operationId": "delete_conversation",
+        "summary": "Eliminar exclusivamente historial conversacional",
+        "description": "Solo propietario autenticado; cuenta, sesión y owner revalidados bajo lock. 404 indistinguible para UUID ajeno o ausente, incluido segundo borrado. 204 al borrar el propio. Mantener 409 de actividad y cascada exclusivamente a mensajes/citas/owner, sin tocar corpus.",
+        "responses": {
+          "204": {
+            "description": "Conversación propia borrada; 404 para ausente o ajena, incluido un segundo borrado. Cascada limitada a historial.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/conversations/{conversation_id}/messages": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/conversation_id"
+        }
+      ],
+      "post": {
+        "operationId": "send_message",
+        "summary": "Enviar mensaje y recibir respuesta del agente",
+        "description": "Solo content de 1–4000 puntos de código no blancos; principal de sesión y owner antes de cargar contexto/generar. Perfil de conversación compatible con binding autorizado en current. Router/fast path o Document RAG fuera de transacción. Antes de commit bloquear cuenta/sesión, revalidar versión/revocación/permiso/owner y mantener la sentencia atómica actual con gates de release y ordinal, user+assistant+citas. 201 después de commit; 401 si revocación gana. Conflicto de release/ordinal/actividad: 409. Sin Idempotency-Key ni retry ciego tras resultado incierto; reconciliar con historial.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/send_message_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Turno completado; mensajes persistidos y citas verificadas.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/send_message_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "409": {
+            "$ref": "#/components/responses/error_409"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject"
+      }
+    },
+    "/calendar/events": {
+      "get": {
+        "operationId": "list_calendar_events",
+        "summary": "Consultar calendario sintético sin invocar al agente",
+        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente.",
+        "parameters": [
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": true,
+            "description": "Primer día civil incluido en America/Bogota.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": true,
+            "description": "Último día civil incluido en America/Bogota; máximo 366 días contando ambos extremos.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "event_types",
+            "in": "query",
+            "required": false,
+            "description": "Parámetro repetido por valor. Omitido: todos; vacío, duplicados o valores desconocidos: 400.",
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "course_session",
+                  "announcement_deadline",
+                  "general"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Eventos estructurados; array vacío es éxito.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/calendar_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/announcements": {
+      "get": {
+        "operationId": "list_announcements",
+        "summary": "Consultar anuncios sintéticos sin invocar al agente",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "description": "Texto literal, no expresión ni SQL.",
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 500,
+              "pattern": "\\S"
+            }
+          },
+          {
+            "name": "temporal_status",
+            "in": "query",
+            "required": false,
+            "description": "Estado temporal derivado; all no es un estado de salida.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "upcoming",
+                "expired",
+                "all"
+              ],
+              "default": "active"
+            }
+          },
+          {
+            "name": "reference_time",
+            "in": "query",
+            "required": false,
+            "description": "Instante con zona horaria. Omitido: instante actual del servidor.",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anuncios y referencia temporal efectiva.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/announcements_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/documents/{document_version_id}/artifact": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/document_version_id"
+        }
+      ],
+      "get": {
+        "operationId": "get_document_artifact",
+        "summary": "Descargar un artefacto documental verificado del corpus del modo local",
+        "description": "Solo UUID; no acepta rutas ni selectores de release. Resuelve versión ready de una release publicada ready, vigente o histórica, y bytes exactos de su revisión. Verifica contención real dentro de /data/synthetic, incluidos symlinks/junctions, y checksum interno antes de servir. Si no se conservan los bytes históricos exactos: 404, nunca sustituir por el archivo actual. No invoca al agente.",
+        "responses": {
+          "200": {
+            "description": "Bytes completos de la revisión exacta autorizada y verificada. Sin redirecciones externas; Range se ignora.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Content-Disposition": {
+                "description": "attachment; filename generado con el UUID, sin rutas ni texto libre.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Content-Type-Options": {
+                "schema": {
+                  "type": "string",
+                  "const": "nosniff"
+                }
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    },
+    "/me/progress": {
+      "get": {
+        "operationId": "get_profile_progress",
+        "summary": "Consultar progreso ficticio del perfil asignado en servidor",
+        "description": "No acepta profile_key, UID o principal_id. Binding aprobado para release vigente y corpus permitido. Perfil ausente en current: 404; binding sin aprobación/capacidad: 403; sin cursos coincidentes: 200 vacío. Orden course_key ascendente. Sin agente ni datos reales.",
+        "parameters": [
+          {
+            "name": "statuses",
+            "in": "query",
+            "required": false,
+            "description": "Parámetro repetido por valor. Omitido: todos; vacío, duplicados o valores desconocidos: 400.",
+            "schema": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "enrolled",
+                  "in_progress",
+                  "completed"
+                ]
+              }
+            },
+            "style": "form",
+            "explode": true
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Perfil y progreso sintéticos, sin procedencia interna.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/progress_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "uuid": {
+        "type": "string",
+        "format": "uuid",
+        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+      },
+      "stable_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+      },
+      "nonblank": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      },
+      "date_time": {
+        "type": "string",
+        "format": "date-time",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+      },
+      "source_kind": {
+        "type": "string",
+        "enum": [
+          "document",
+          "course",
+          "calendar_event",
+          "announcement",
+          "profile",
+          "profile_course"
+        ]
+      },
+      "event_type": {
+        "type": "string",
+        "enum": [
+          "course_session",
+          "announcement_deadline",
+          "general"
+        ]
+      },
+      "progress_status": {
+        "type": "string",
+        "enum": [
+          "enrolled",
+          "in_progress",
+          "completed"
+        ]
+      },
+      "profile": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "alias": {
+            "$ref": "#/components/schemas/nonblank"
+          }
+        },
+        "required": [
+          "profile_key",
+          "alias"
+        ]
+      },
+      "create_conversation_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {},
+        "required": []
+      },
+      "created_conversation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "profile_alias": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "profile_key",
+          "profile_alias",
+          "created_at"
+        ]
+      },
+      "conversation_summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "started_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "message_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "conversation_id",
+          "profile_key",
+          "started_at",
+          "last_message_at",
+          "message_count"
+        ]
+      },
+      "conversations_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/conversation_summary"
+            }
+          }
+        },
+        "required": [
+          "conversations"
+        ]
+      },
+      "citation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "source_kind": {
+            "$ref": "#/components/schemas/source_kind"
+          },
+          "label": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "document_version_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "artifact_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^/api/v2/documents/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/artifact$",
+            "maxLength": 63
+          }
+        },
+        "required": [
+          "index",
+          "source_kind",
+          "label",
+          "locator",
+          "release_id",
+          "document_version_id",
+          "artifact_url"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "source_kind": {
+                  "const": "document"
+                }
+              },
+              "required": [
+                "source_kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "document_version_id": {
+                  "$ref": "#/components/schemas/uuid"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "document_version_id": {
+                  "type": "null"
+                },
+                "artifact_url": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "user_message": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "role": {
+            "type": "string",
+            "const": "user"
+          },
+          "content": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          }
+        },
+        "required": [
+          "message_id",
+          "role",
+          "content",
+          "created_at"
+        ]
+      },
+      "assistant_message": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "role": {
+            "type": "string",
+            "const": "assistant"
+          },
+          "content": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "insufficient_evidence": {
+            "type": "boolean"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/citation"
+            }
+          }
+        },
+        "required": [
+          "message_id",
+          "role",
+          "content",
+          "created_at",
+          "insufficient_evidence",
+          "citations"
+        ]
+      },
+      "visible_message": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/user_message"
+          },
+          {
+            "$ref": "#/components/schemas/assistant_message"
+          }
+        ]
+      },
+      "conversation_detail": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "started_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/profile"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/visible_message"
+            }
+          }
+        },
+        "required": [
+          "conversation_id",
+          "started_at",
+          "profile",
+          "messages"
+        ]
+      },
+      "send_message_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000,
+            "pattern": "\\S"
+          }
+        },
+        "required": [
+          "content"
+        ]
+      },
+      "send_message_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "conversation_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "user_message": {
+            "$ref": "#/components/schemas/user_message"
+          },
+          "assistant_message": {
+            "$ref": "#/components/schemas/assistant_message"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "user_message",
+          "assistant_message"
+        ]
+      },
+      "calendar_event": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "event_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "title": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "description": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/event_type"
+          },
+          "starts_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "ends_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "course_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+          },
+          "announcement_key": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,127}$"
+          }
+        },
+        "required": [
+          "event_key",
+          "title",
+          "description",
+          "event_type",
+          "starts_at",
+          "ends_at",
+          "course_key",
+          "announcement_key"
+        ]
+      },
+      "calendar_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "events": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/calendar_event"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "events"
+        ]
+      },
+      "course_progress": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "course_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "course_name": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "status": {
+            "$ref": "#/components/schemas/progress_status"
+          },
+          "progress_percent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "course_key",
+          "course_name",
+          "status",
+          "progress_percent",
+          "started_at",
+          "completed_at"
+        ]
+      },
+      "progress_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/profile"
+          },
+          "courses": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/course_progress"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "profile",
+          "courses"
+        ]
+      },
+      "announcement": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "announcement_key": {
+            "$ref": "#/components/schemas/stable_key"
+          },
+          "title": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "description": {
+            "$ref": "#/components/schemas/nonblank"
+          },
+          "valid_from": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "valid_until": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "temporal_status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "upcoming",
+              "expired"
+            ]
+          }
+        },
+        "required": [
+          "announcement_key",
+          "title",
+          "description",
+          "valid_from",
+          "valid_until",
+          "temporal_status"
+        ]
+      },
+      "announcements_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "reference_time": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "announcements": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/announcement"
+            }
+          }
+        },
+        "required": [
+          "release_id",
+          "reference_time",
+          "announcements"
+        ]
+      },
+      "error_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "INVALID_ARGUMENT",
+                  "UNAUTHENTICATED",
+                  "FORBIDDEN",
+                  "NOT_FOUND",
+                  "CONFLICT",
+                  "INVALID_RESET",
+                  "RATE_LIMITED",
+                  "PAYLOAD_TOO_LARGE",
+                  "METHOD_NOT_ALLOWED",
+                  "DEPENDENCY_UNAVAILABLE",
+                  "INTERNAL_ERROR"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "enum": [
+                  "La solicitud no cumple el contrato esperado.",
+                  "No se pudo autenticar la solicitud.",
+                  "La operación no está permitida.",
+                  "El recurso solicitado no está disponible.",
+                  "El contexto cambió durante la operación.",
+                  "No se pudo restablecer la contraseña.",
+                  "Se alcanzó el límite temporal de solicitudes.",
+                  "La solicitud excede el tamaño permitido.",
+                  "El método no está permitido.",
+                  "Una dependencia temporalmente no está disponible.",
+                  "Ocurrió un error interno."
+                ]
+              },
+              "request_id": {
+                "$ref": "#/components/schemas/uuid"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "request_id"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "INVALID_ARGUMENT"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "La solicitud no cumple el contrato esperado."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "UNAUTHENTICATED"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "No se pudo autenticar la solicitud."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "FORBIDDEN"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "La operación no está permitida."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "NOT_FOUND"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "El recurso solicitado no está disponible."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "CONFLICT"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "El contexto cambió durante la operación."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "INVALID_RESET"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "No se pudo restablecer la contraseña."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "RATE_LIMITED"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "Se alcanzó el límite temporal de solicitudes."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "PAYLOAD_TOO_LARGE"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "La solicitud excede el tamaño permitido."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "METHOD_NOT_ALLOWED"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "El método no está permitido."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "DEPENDENCY_UNAVAILABLE"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "Una dependencia temporalmente no está disponible."
+                    }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": {
+                    "code": {
+                      "const": "INTERNAL_ERROR"
+                    }
+                  },
+                  "required": [
+                    "code"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "message": {
+                      "const": "Ocurrió un error interno."
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "synthetic_uid": {
+        "type": "string",
+        "minLength": 13,
+        "maxLength": 13,
+        "pattern": "^BCH-DEMO-[0-9]{4}$",
+        "description": "UID exclusivamente ficticio BanuChat; ASCII canónico, sin espacios ni normalización silenciosa."
+      },
+      "opaque_token": {
+        "type": "string",
+        "minLength": 43,
+        "maxLength": 43,
+        "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$",
+        "writeOnly": true,
+        "description": "32 bytes CSPRNG en base64url canónico sin padding; entrada manual para reset. Nunca en URLs/logs."
+      },
+      "issued_token": {
+        "type": "string",
+        "minLength": 43,
+        "maxLength": 43,
+        "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$",
+        "writeOnly": false,
+        "description": "Secreto de sesión entregado solo al cliente autenticado; no registrar ni cachear."
+      },
+      "login_password": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[^\\uD800-\\uDFFF]*$",
+        "writeOnly": true,
+        "description": "Contraseña BanuChat, no UNAB. Longitud en puntos de código Unicode bien formados; no recortar/normalizar."
+      },
+      "new_password": {
+        "type": "string",
+        "minLength": 15,
+        "maxLength": 128,
+        "pattern": "^[^\\uD800-\\uDFFF]*$",
+        "writeOnly": true,
+        "description": "15–128 puntos de código Unicode bien formados; espacios/pegado permitidos; lista local de contraseñas comunes, sin composición o consulta externa."
+      },
+      "login_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "synthetic_uid": {
+            "$ref": "#/components/schemas/synthetic_uid"
+          },
+          "password": {
+            "$ref": "#/components/schemas/login_password"
+          }
+        },
+        "required": [
+          "synthetic_uid",
+          "password"
+        ]
+      },
+      "refresh_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "refresh_token": {
+            "$ref": "#/components/schemas/opaque_token"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ]
+      },
+      "reset_request": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "synthetic_uid": {
+            "$ref": "#/components/schemas/synthetic_uid"
+          }
+        },
+        "required": [
+          "synthetic_uid"
+        ]
+      },
+      "reset_confirmation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "$ref": "#/components/schemas/opaque_token"
+          },
+          "new_password": {
+            "$ref": "#/components/schemas/new_password"
+          }
+        },
+        "required": [
+          "token",
+          "new_password"
+        ]
+      },
+      "token_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "$ref": "#/components/schemas/issued_token"
+          },
+          "refresh_token": {
+            "$ref": "#/components/schemas/issued_token"
+          },
+          "token_type": {
+            "type": "string",
+            "const": "Bearer"
+          },
+          "expires_in": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 900
+          },
+          "session_expires_at": {
+            "$ref": "#/components/schemas/date_time"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "token_type",
+          "expires_in",
+          "session_expires_at"
+        ]
+      },
+      "current_session": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "principal_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "synthetic_uid": {
+            "$ref": "#/components/schemas/synthetic_uid"
+          },
+          "session_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "session_expires_at": {
+            "$ref": "#/components/schemas/date_time"
+          },
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/profile"
+          },
+          "capabilities": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "uniqueItems": true,
+            "prefixItems": [
+              {
+                "type": "string",
+                "const": "chat"
+              },
+              {
+                "type": "string",
+                "const": "history"
+              },
+              {
+                "type": "string",
+                "const": "progress"
+              },
+              {
+                "type": "string",
+                "const": "calendar"
+              },
+              {
+                "type": "string",
+                "const": "announcements"
+              },
+              {
+                "type": "string",
+                "const": "documents"
+              }
+            ],
+            "items": false
+          }
+        },
+        "required": [
+          "principal_id",
+          "synthetic_uid",
+          "session_id",
+          "session_expires_at",
+          "release_id",
+          "profile",
+          "capabilities"
+        ]
+      },
+      "reset_accepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "message": {
+            "type": "string",
+            "const": "Si la cuenta puede recuperar el acceso, recibirás instrucciones en su buzón asociado."
+          }
+        },
+        "required": [
+          "message"
+        ]
+      }
+    },
+    "parameters": {
+      "conversation_id": {
+        "name": "conversation_id",
+        "in": "path",
+        "required": true,
+        "description": "UUID de la conversación; no representa autorización.",
+        "schema": {
+          "$ref": "#/components/schemas/uuid"
+        }
+      },
+      "document_version_id": {
+        "name": "document_version_id",
+        "in": "path",
+        "required": true,
+        "description": "UUID de versión documental publicada.",
+        "schema": {
+          "$ref": "#/components/schemas/uuid"
+        }
+      },
+      "limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "Máximo de elementos; no indica el total disponible.",
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 20
+        }
+      }
+    },
+    "headers": {
+      "no_store": {
+        "description": "Obligatoria en toda respuesta v2, incluidos errores y 204.",
+        "schema": {
+          "type": "string",
+          "const": "no-store"
+        }
+      },
+      "vary_authorization": {
+        "description": "Evita mezclar representaciones; no habilita caching.",
+        "schema": {
+          "type": "string",
+          "const": "Authorization"
+        }
+      },
+      "bearer_challenge": {
+        "description": "Sin detalles sobre cuenta, expiración o token.",
+        "schema": {
+          "type": "string",
+          "const": "Bearer realm=\"banuchat-synthetic\""
+        }
+      },
+      "retry_after": {
+        "description": "Segundos enteros hasta el final de la ventana pública limitante; sin revelar cuotas privadas de UID.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]{0,3}$"
+        }
+      }
+    },
+    "responses": {
+      "error_400": {
+        "description": "INVALID_ARGUMENT: La solicitud no cumple el contrato esperado.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "INVALID_ARGUMENT"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_401": {
+        "description": "UNAUTHENTICATED: No se pudo autenticar la solicitud.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          },
+          "WWW-Authenticate": {
+            "$ref": "#/components/headers/bearer_challenge"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "UNAUTHENTICATED"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_403": {
+        "description": "FORBIDDEN: La operación no está permitida.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "FORBIDDEN"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_404": {
+        "description": "NOT_FOUND: El recurso solicitado no está disponible.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "NOT_FOUND"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_405": {
+        "description": "METHOD_NOT_ALLOWED: El método no está permitido.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          },
+          "Allow": {
+            "description": "Lista de métodos declarados para la ruta.",
+            "schema": {
+              "type": "string",
+              "minLength": 3
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "METHOD_NOT_ALLOWED"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_409": {
+        "description": "CONFLICT: El contexto cambió durante la operación.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "CONFLICT"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_413": {
+        "description": "PAYLOAD_TOO_LARGE: La solicitud excede el tamaño permitido.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "PAYLOAD_TOO_LARGE"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_429": {
+        "description": "RATE_LIMITED: Se alcanzó el límite temporal de solicitudes.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          },
+          "Retry-After": {
+            "$ref": "#/components/headers/retry_after"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "RATE_LIMITED"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_500": {
+        "description": "INTERNAL_ERROR: Ocurrió un error interno.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "INTERNAL_ERROR"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "error_503": {
+        "description": "DEPENDENCY_UNAVAILABLE: Una dependencia temporalmente no está disponible.",
+        "headers": {
+          "Cache-Control": {
+            "$ref": "#/components/headers/no_store"
+          },
+          "Vary": {
+            "$ref": "#/components/headers/vary_authorization"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/error_response"
+                },
+                {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "const": "DEPENDENCY_UNAVAILABLE"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "banu_bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "opaque-base64url-32-bytes",
+        "description": "Access opaco BanuChat; SHA-256 de bytes decodificados en servidor. No JWT, UID, profile_key o session_id. Solo Authorization, nunca query/cookie."
+      }
+    }
+  },
+  "x-auth-policy": {
+    "deployment_mode": "synthetic",
+    "uid_authority": "banuchat",
+    "public_registration": false,
+    "manual_recovery_token": true,
+    "recovery_domain": "banuchat.test",
+    "request_body_max_bytes": 16384,
+    "request_target_max_bytes": 8192,
+    "request_headers_max_bytes": 16384,
+    "access_ttl_seconds": 900,
+    "session_idle_seconds": 86400,
+    "session_absolute_seconds": 604800,
+    "reset_ttl_seconds": 1200,
+    "max_pending_reset_tokens": 3,
+    "password_argon2id_min": {
+      "memory_kib": 19456,
+      "iterations": 2,
+      "parallelism": 1
+    },
+    "unknown_query_parameters": "reject",
+    "scalar_query_duplicates": "reject",
+    "json_duplicate_members": "reject",
+    "login_or_reset_auto_login": false,
+    "recovery_queue_capacity": 128,
+    "recovery_dispatch_concurrency": 1
+  },
+  "x-rate-limits": [
+    {
+      "action": "login_uid",
+      "window_seconds": 900,
+      "limit": 5,
+      "response_status": 429
+    },
+    {
+      "action": "login_origin",
+      "window_seconds": 900,
+      "limit": 30,
+      "response_status": 429
+    },
+    {
+      "action": "reset_uid",
+      "window_seconds": 3600,
+      "limit": 3,
+      "response_status": 202
+    },
+    {
+      "action": "reset_origin",
+      "window_seconds": 900,
+      "limit": 10,
+      "response_status": 429
+    },
+    {
+      "action": "confirm_origin",
+      "window_seconds": 900,
+      "limit": 10,
+      "response_status": 429
+    },
+    {
+      "action": "refresh_origin",
+      "window_seconds": 900,
+      "limit": 60,
+      "response_status": 429
+    },
+    {
+      "action": "hash_work",
+      "window_seconds": 60,
+      "limit": 20,
+      "response_status": 429
+    }
+  ]
+}
