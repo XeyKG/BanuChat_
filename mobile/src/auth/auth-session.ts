@@ -1,4 +1,5 @@
 import {isCcdAuthenticated} from '../config/demo-mode';
+import {startMessageHttpDiagnostic,recordRejectedMessageHttp} from '../api/message-http-diagnostic';
 export interface CurrentSession {
  principal_id:string;synthetic_uid:string;session_id:string;session_expires_at:string;release_id:string;
  evidence_mode:'synthetic'|'ccd_local';profile:{profile_key:string;alias:string};capabilities:string[];
@@ -79,7 +80,10 @@ export class AuthSession {
   if(this.snapshot.phase!=='authenticated')throw new SessionError();const epoch=this.epoch,base=this.base();
   if(!url.startsWith(base+'/')||!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(url.slice(base.length)))throw new SessionError();
   const access=await this.token();this.check(epoch);const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+access);
+  const messagePost=options.method?.toUpperCase()==='POST'&&/^\/conversations\/[^/?#]+\/messages$/u.test(url.slice(base.length));
+  const diagnosticStart=messagePost?startMessageHttpDiagnostic():undefined;
   let response:Response;try{response=await this.request(url,{...options,headers,redirect:'error',cache:'no-store'});}catch{throw new SessionError();}this.check(epoch);
+  if(messagePost)recordRejectedMessageHttp(response,diagnosticStart);
   if(response.status===401){await this.invalidate();throw new SessionError();}
   const json=response.json.bind(response),text=response.text.bind(response);
   response.json=async()=>{const result:unknown=await json();this.check(epoch);return result;};
