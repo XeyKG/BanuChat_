@@ -1,0 +1,59 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-R0",
+  "observed_at": "2026-10-23T13:29:41.372Z",
+  "read_only": true,
+  "original_external_access": false,
+  "releases": [
+    {
+      "id": "3d6cedac-0e86-40c8-909b-d3ff6e8ab741",
+      "status": "ready",
+      "current": true,
+      "dataset_schema_version": "ccd-1.2.0",
+      "manifest_sha256": "ed288f6e79bc099b55cdbb16cae3ea3daa970f67b3c8074cf382c52bdd64d61a",
+      "pipeline_sha256": "3d6d8c51357a6f325d66efebaf910457f998917b294292e3397e6ddf52402b1d",
+      "synthetic": "false",
+      "documents": 12,
+      "chunks": 12,
+      "embeddings": 12,
+      "model": "qwen3-embedding:0.6b",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "config_sha256": "e1441a0aad0547d9db657f20708d585209a7d863c27f1b2b1e05aa42e6546771"
+    },
+    {
+      "id": "5834fc47-57c5-498b-98fc-4190330155e4",
+      "status": "ready",
+      "current": false,
+      "dataset_schema_version": "ccd-1.0.0",
+      "manifest_sha256": "27391f96ab9fd830c34e4aeed4c45699ccd20bd2d5a03d2c0fb1de54ee0b02be",
+      "pipeline_sha256": "6fc5eeefe186802a84d355221d92c5f92a158ac509a290617459bbf65a76afc4",
+      "synthetic": "false",
+      "documents": 2,
+      "chunks": 2,
+      "embeddings": 2,
+      "model": "qwen3-embedding:0.6b",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "config_sha256": "e1441a0aad0547d9db657f20708d585209a7d863c27f1b2b1e05aa42e6546771"
+    },
+    {
+      "id": "fb8538af-3280-4a1b-889c-a27564381996",
+      "status": "ready",
+      "current": false,
+      "dataset_schema_version": "ccd-1.1.0",
+      "manifest_sha256": "93632fb12d6eecc05c28e6bfea7f3331480408e6b70e40f3e59fb2a8f7008f3e",
+      "pipeline_sha256": "cd037b66708e735763c7eb73721a4d54f616b4687db450c049dc6473991b2b35",
+      "synthetic": "false",
+      "documents": 10,
+      "chunks": 10,
+      "embeddings": 10,
+      "model": "qwen3-embedding:0.6b",
+      "dimension": 1024,
+      "distance_metric": "cosine",
+      "config_sha256": "e1441a0aad0547d9db657f20708d585209a7d863c27f1b2b1e05aa42e6546771"
+    }
+  ],
+  "baseline_citations_verified": 41,
+  "derived_artifact_versions_verified": 24,
+  "new_http_or_generation": false
+}

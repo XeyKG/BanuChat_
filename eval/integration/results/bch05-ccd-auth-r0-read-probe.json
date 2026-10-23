@@ -1,0 +1,41 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-R0",
+  "observed_at": "2026-10-23T13:25:46.094Z",
+  "evidence": "real PostgreSQL; BEGIN READ ONLY; service versus granted function; artificial nonzero query vector, no embedding quality measurement",
+  "checks": [
+    {
+      "database": "banuchat_auth_p4l1_demo",
+      "chunks_select": false,
+      "search_execute": true,
+      "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+      "synthetic": "true",
+      "service_query_sqlstate": "42501",
+      "denied": "permission denied for table document_chunks",
+      "existing_function_query_succeeded": true,
+      "returned_rows": 1
+    },
+    {
+      "database": "banuchat_auth_p4l1_demo",
+      "all_table_sha256_before": "d8d41386b10c54aa50ac5391d103a2800c6961578804e6c222616b5143bdac86",
+      "all_table_sha256_after": "d8d41386b10c54aa50ac5391d103a2800c6961578804e6c222616b5143bdac86",
+      "unchanged": true
+    },
+    {
+      "database": "banuchat_auth_r0_replay",
+      "chunks_select": false,
+      "search_execute": true,
+      "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+      "synthetic": "true",
+      "service_query_sqlstate": "42501",
+      "denied": "permission denied for table document_chunks",
+      "existing_function_query_succeeded": true,
+      "returned_rows": 1
+    },
+    {
+      "database": "banuchat_auth_r0_replay",
+      "all_table_sha256_before": "2238bb72c753d3e160fa1f00f61d5fa86aa0d0a43e6d766d35787097a376d401",
+      "all_table_sha256_after": "2238bb72c753d3e160fa1f00f61d5fa86aa0d0a43e6d766d35787097a376d401",
+      "unchanged": true
+    }
+  ]
+}
