@@ -1,0 +1,346 @@
+{
+  "checkpoint": "BCH-04/AUTH-P3.1",
+  "baseCommit": "e161a4fc6619226bc7a2352d34acc40998c8f70c",
+  "result": "PASS",
+  "contract": {
+    "version": "3.0.0",
+    "prefix": "/api/v2",
+    "operations": 15,
+    "otherOperationsUnchanged": 13,
+    "unchangedPathItems": 11,
+    "sessionShapeUnchanged": true,
+    "currentSessionUnchanged": true
+  },
+  "database": {
+    "name": "banuchat_auth_p31_test",
+    "host": "127.0.0.1",
+    "port": 55438,
+    "authTables": [
+      {
+        "tablename": "accounts"
+      },
+      {
+        "tablename": "auth_rate_limits"
+      },
+      {
+        "tablename": "conversation_owners"
+      },
+      {
+        "tablename": "corpus_grants"
+      },
+      {
+        "tablename": "password_credentials"
+      },
+      {
+        "tablename": "password_reset_tokens"
+      },
+      {
+        "tablename": "profile_binding_versions"
+      },
+      {
+        "tablename": "profile_bindings"
+      },
+      {
+        "tablename": "recovery_challenges"
+      },
+      {
+        "tablename": "recovery_contacts"
+      },
+      {
+        "tablename": "recovery_mail_dispatches"
+      },
+      {
+        "tablename": "recovery_uid_limits"
+      },
+      {
+        "tablename": "refresh_tokens"
+      },
+      {
+        "tablename": "runtime_scope"
+      },
+      {
+        "tablename": "security_events"
+      },
+      {
+        "tablename": "sessions"
+      }
+    ],
+    "constraints": [
+      {
+        "contype": "c",
+        "count": 35,
+        "validated": true
+      },
+      {
+        "contype": "f",
+        "count": 5,
+        "validated": true
+      },
+      {
+        "contype": "p",
+        "count": 4,
+        "validated": true
+      },
+      {
+        "contype": "u",
+        "count": 3,
+        "validated": true
+      }
+    ],
+    "indexes": [
+      {
+        "indexname": "recovery_challenges_one_active"
+      },
+      {
+        "indexname": "recovery_challenges_pkey"
+      },
+      {
+        "indexname": "recovery_challenges_recent"
+      },
+      {
+        "indexname": "recovery_contacts_email_lookup_hmac_key"
+      },
+      {
+        "indexname": "recovery_contacts_pkey"
+      },
+      {
+        "indexname": "recovery_contacts_principal_id_id_key"
+      },
+      {
+        "indexname": "recovery_contacts_principal_id_key"
+      },
+      {
+        "indexname": "recovery_mail_dispatches_pkey"
+      },
+      {
+        "indexname": "recovery_uid_limits_pkey"
+      }
+    ],
+    "privileges": [
+      {
+        "table": "accounts",
+        "select": true,
+        "insert": false,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "auth_version",
+          "status",
+          "synthetic_display_name",
+          "updated_at"
+        ]
+      },
+      {
+        "table": "password_credentials",
+        "select": true,
+        "insert": true,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "changed_at",
+          "password_hash"
+        ]
+      },
+      {
+        "table": "recovery_contacts",
+        "select": true,
+        "insert": true,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "consent_reference",
+          "consented_at",
+          "email_ciphertext",
+          "email_lookup_hmac",
+          "encryption_key_id",
+          "lookup_key_id",
+          "nonce",
+          "revision",
+          "status",
+          "tag",
+          "updated_at",
+          "verification_channel",
+          "verification_reference",
+          "verified_at"
+        ]
+      },
+      {
+        "table": "recovery_challenges",
+        "select": true,
+        "insert": true,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "consumed_at",
+          "failed_attempts",
+          "invalidated_at",
+          "invalidation_reason"
+        ]
+      },
+      {
+        "table": "recovery_uid_limits",
+        "select": true,
+        "insert": true,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "attempts"
+        ]
+      },
+      {
+        "table": "recovery_mail_dispatches",
+        "select": true,
+        "insert": true,
+        "delete": false,
+        "truncate": false,
+        "update": [
+          "finished_at",
+          "provider_reference",
+          "state"
+        ]
+      }
+    ],
+    "names": {
+      "accounts": 17,
+      "legacy_unnamed": 1,
+      "named": 16
+    },
+    "channels": [
+      {
+        "verification_channel": "local_test",
+        "status": "suspended",
+        "count": 1
+      },
+      {
+        "verification_channel": "local_test",
+        "status": "verified",
+        "count": 12
+      },
+      {
+        "verification_channel": null,
+        "status": "pending_verification",
+        "count": 2
+      }
+    ],
+    "dispatches": [
+      {
+        "state": "accepted",
+        "count": 38
+      },
+      {
+        "state": "rejected",
+        "count": 1
+      },
+      {
+        "state": "unknown",
+        "count": 1
+      }
+    ],
+    "corpusUnchanged": true
+  },
+  "verification": {
+    "typecheck": {
+      "exitCode": 0
+    },
+    "unitTests": {
+      "exitCode": 0,
+      "pass": 549,
+      "fail": 0
+    },
+    "build": {
+      "exitCode": 0
+    },
+    "integration": {
+      "checks": 15,
+      "nodeTestCount": 16,
+      "pass": 16,
+      "fail": 0
+    },
+    "firstRun": {
+      "result": "FAIL",
+      "sqlState": "42804",
+      "correction": "Explicit timestamptz cast in failed-attempt invalidation CASE; corrected and retested from empty instance."
+    }
+  },
+  "protectedHashes": [
+    {
+      "path": "infra/db/001_initial_schema.sql",
+      "sha256": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/006_synthetic_auth.sql",
+      "sha256": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/007_authenticated_resources.sql",
+      "sha256": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/openapi.yaml",
+      "sha256": "2d0cb46659a11cd77d6dc40c7308df85187536d14927d16e54784357f118d251",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/api-contract.md",
+      "sha256": "7d2979e24cd9a7764ba2473baab082da2238271c9f9ab3ae401bd1860056c5ab",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools.contract.json",
+      "sha256": "b431a85a20e3964709aec21240e7be286b1c2c6885590a9527795b34403f7bdd",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools-contract.md",
+      "sha256": "4260b05d30d3bd7c0d6283338055e5f89918a2e15109c9dfe9745764aa9a759d",
+      "unchanged": true
+    }
+  ],
+  "protectedTreesUnchanged": [
+    "data/synthetic",
+    "data/ccd",
+    "mobile",
+    "backend/mcp-server",
+    "backend/rag",
+    "backend/api/src/application"
+  ],
+  "external": {
+    "providerConfigured": false,
+    "sent": false,
+    "received": false,
+    "consumed": false,
+    "localCaptureOnly": true
+  },
+  "cleanup": {
+    "status": "REMOVED_VERIFIED_TASK_RESOURCES_AND_GENERATED_CREDENTIALS",
+    "containerId": "01583198ca3c7b423ba379cb4bd81fa365057f3379b4da6073a3910360ec440b",
+    "networkId": "77d512cf22e72b2a393687e1b06823a801f9d19f33edb582b75d01c40511faad",
+    "volume": "banuchat-auth-p31-20261022-data",
+    "originalContainers": [
+      "banuchat-ccd-dev-postgres-ccd-1",
+      "banuchat-n8n",
+      "banuchat-postgres"
+    ],
+    "remainingVolumeCount": 8,
+    "remainingNetworkCount": 9,
+    "credentialsRemoved": true
+  },
+  "authP3": "NOT_CLOSED_EXTERNAL_DELIVERY_PENDING",
+  "finalReview": {
+    "diffCheck": "PASS",
+    "newFileWhitespaceCheck": "PASS",
+    "localArtifactLinksChecked": 21,
+    "changedFiles": 29,
+    "newFiles": 16,
+    "protectedScopeDiffEmpty": true,
+    "focusedContractCryptoRetest": {
+      "pass": 11,
+      "fail": 0
+    },
+    "noCommitOrPush": true,
+    "stoppedForControlRoom": true
+  }
+}

@@ -3,8 +3,8 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "BanuChat REST API v2 — cuentas sintéticas",
-    "version": "2.0.0",
-    "description": "Contrato AUTH-P0 candidato final, sin endpoints activos. Autenticación propia BanuChat con UID y contraseña permanentemente sintéticos; no valida credenciales UNAB. Recuperación con token de entrada manual y buzón local controlado. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido."
+    "version": "3.0.0",
+    "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido."
   },
   "servers": [
     {
@@ -236,7 +236,7 @@
     "/auth/password/reset-requests": {
       "post": {
         "operationId": "request_password_reset",
-        "summary": "Solicitar token manual en buzón sintético local",
+        "summary": "Solicitar código al contacto verificado, sin revelar cuenta ni entrega",
         "security": [],
         "requestBody": {
           "required": true,
@@ -292,7 +292,7 @@
     "/auth/password/reset": {
       "post": {
         "operationId": "confirm_password_reset",
-        "summary": "Consumir token manual y establecer contraseña propia",
+        "summary": "Consumir código de ocho dígitos, establecer contraseña y revocar sesiones",
         "security": [],
         "requestBody": {
           "required": true,
@@ -317,7 +317,7 @@
             }
           },
           "400": {
-            "description": "INVALID_ARGUMENT si schema/política de contraseña son inválidos (se validan antes del token); INVALID_RESET para un token no utilizable.",
+            "description": "INVALID_ARGUMENT para schema/política antes de lookup; INVALID_RESET genérico para código no utilizable o presupuesto privado agotado.",
             "headers": {
               "Cache-Control": {
                 "$ref": "#/components/headers/no_store"
@@ -1890,7 +1890,7 @@
         "maxLength": 43,
         "pattern": "^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$",
         "writeOnly": true,
-        "description": "32 bytes CSPRNG en base64url canónico sin padding; entrada manual para reset. Nunca en URLs/logs."
+        "description": "32 bytes CSPRNG base64url canónico sin padding, solo sesiones. Nunca en URLs/logs."
       },
       "issued_token": {
         "type": "string",
@@ -1960,15 +1960,19 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "token": {
-            "$ref": "#/components/schemas/opaque_token"
+          "synthetic_uid": {
+            "$ref": "#/components/schemas/synthetic_uid"
+          },
+          "verification_code": {
+            "$ref": "#/components/schemas/recovery_code"
           },
           "new_password": {
             "$ref": "#/components/schemas/new_password"
           }
         },
         "required": [
-          "token",
+          "synthetic_uid",
+          "verification_code",
           "new_password"
         ]
       },
@@ -2081,6 +2085,14 @@
         "required": [
           "message"
         ]
+      },
+      "recovery_code": {
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 8,
+        "pattern": "^[0-9]{8}$",
+        "writeOnly": true,
+        "description": "Código CSPRNG ASCII de recuperación; 300 segundos, cinco intentos, ligado al UID y propósito. No es token de sesión."
       }
     },
     "parameters": {

@@ -80,7 +80,8 @@ test('AUTH-P2.1 phase E: real HTTP loopback and PostgreSQL with A/B isolation',a
  });
  await run('GET/POST/DELETE require session before UUID/filter validation; no v1 bypass',async()=>{
   const calls=generationCalls;for(const [method,path,body] of [['GET','/api/v2/conversations/bad',undefined],['POST',`/api/v2/conversations/${chat}/messages`,{content:'consulta'}],['DELETE','/api/v2/conversations/'+chat,undefined]] as const)error(await req(method,path,undefined,body),401);
-  for(const path of ['/api/v1/profiles','/api/v1/conversations','/api/v1/conversations/'+chat,'/api/v2/profiles','/api/v2/auth/password/reset','/api/v2/auth/signup'])error(await req('GET',path,ta),404);
+  for(const path of ['/api/v1/profiles','/api/v1/conversations','/api/v1/conversations/'+chat,'/api/v2/profiles','/api/v2/auth/signup'])error(await req('GET',path,ta),404);
+  error(await req('GET','/api/v2/auth/password/reset',ta),405); // AUTH-P3.1 mounts this POST route.
   assert.equal(generationCalls,calls);
  });
  await run('closed JSON, escaped duplicate members, invalid Unicode/types/content/query/UUID rejected',async()=>{

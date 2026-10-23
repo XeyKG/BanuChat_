@@ -4,6 +4,7 @@ import type {AuthService} from '../auth/auth-service.js';
 import {AuthenticatedResources,resourceError} from '../auth/resources.js';
 import {AuthError,errors,exactObject} from '../auth/primitives.js';
 import {handleDetachedAuth,parseBody} from './auth-handlers.js';
+import {RESET_ACCEPTED,type RecoveryService} from '../auth/recovery-service.js';
 import type {CalendarEventType} from '../application/calendar-events.js';
 import type {ProfileProgressStatus} from '../application/profile-progress.js';
 import type {AnnouncementTemporalStatus} from '../application/announcements.js';
@@ -33,7 +34,7 @@ function v2Links<T>(value:T):T {
  if(value!==null && typeof value==='object'){const result:Record<string,unknown>={};for(const [key,v]of Object.entries(value))result[key]=key==='artifact_url' && typeof v==='string'?v.replace(/^\/api\/v1\/documents\//u,'/api/v2/documents/'):v2Links(v);return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
-export function createAuthenticatedApiServer(input:{auth:AuthService;resources:AuthenticatedResources;now?:()=>string}){
+export function createAuthenticatedApiServer(input:{auth:AuthService;resources:AuthenticatedResources;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
  async function handle(request:IncomingMessage,response:ServerResponse){
  let allow:string|undefined;
  try{
@@ -47,6 +48,15 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:A
   });const path=target.split('?')[0]??'';
   // Raw origin-form matching deliberately avoids path normalization/aliases to protected resources.
   if(!target.startsWith('/') || /[\r\n#]/u.test(target))throw new AuthError('NOT_FOUND');
+  if(path==='/api/v2/auth/password/reset-requests'||path==='/api/v2/auth/password/reset'){
+   allow='POST';if(request.method!=='POST')throw new AuthError('METHOD_NOT_ALLOWED');
+   if(target.includes('?')||request.rawTrailers.length)throw new AuthError('INVALID_ARGUMENT');
+   const types=headers.filter(([k])=>k.toLowerCase()==='content-type'),enc=headers.filter(([k])=>k.toLowerCase()==='content-encoding');
+   if(types.length!==1||!/^application\/json(?:\s*;\s*charset\s*=\s*(?:utf-8|"utf-8"))?\s*$/iu.test(types[0]![1])||enc.length>1||(enc.length===1&&enc[0]![1].toLowerCase()!=='identity'))throw new AuthError('INVALID_ARGUMENT');
+   const data=parseBody(body);if(!input.recovery)throw new AuthError('DEPENDENCY_UNAVAILABLE');
+   const context={origin:request.socket.remoteAddress??'local',requestId:randomUUID()};
+   if(path.endsWith('/reset-requests')){await input.recovery.request(data,context);reply(response,202,RESET_ACCEPTED);}else{await input.recovery.confirm(data,context);reply(response,204);}return;
+  }
   const authRoutes=['/api/v2/auth/login','/api/v2/auth/refresh','/api/v2/auth/me','/api/v2/auth/logout'];
   if(authRoutes.includes(path)){
    const r=await handleDetachedAuth({method:request.method??'',target,headers,body,origin:request.socket.remoteAddress??'local'},input.auth);

@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import { PgTransactionRunner } from "../data/transaction.js";
 import { AuthError, exactObject, safeError, uid } from "./primitives.js";
+import { syntheticName } from "./recovery-crypto.js";
 
 /** Trusted local/admin composition only. No HTTP route or credential establishment. */
 export class SyntheticAccountProvisioner {
@@ -9,7 +10,9 @@ export class SyntheticAccountProvisioner {
   constructor(private readonly pool:Pool,private readonly expectedDatabase:string) {this.transactions=new PgTransactionRunner(pool);}
   async provision(input:unknown,requestId:string):Promise<{principal_id:string;synthetic_uid:string;status:"pending_password"}> {
     try {
-      const body=exactObject(input,["synthetic_uid","recovery_email","profile_key"]);const selectedUid=uid(body.synthetic_uid);
+      const withName=input!==null && typeof input==="object" && Object.hasOwn(input,"synthetic_display_name");
+      const body=exactObject(input,withName?["synthetic_uid","recovery_email","profile_key","synthetic_display_name"]:["synthetic_uid","recovery_email","profile_key"]);const selectedUid=uid(body.synthetic_uid);
+      const name=syntheticName(withName?body.synthetic_display_name:"Cuenta ficticia "+selectedUid.slice(-4));
       const mail=body.recovery_email;const profile=body.profile_key;
       if(typeof mail!=="string" || !mail.endsWith("@banuchat.test") || !/^[a-z0-9]([a-z0-9._-]{0,62}[a-z0-9])?@banuchat[.]test$/u.test(mail) || mail.includes("..") ||
         typeof profile!=="string" || profile.length>128 || !/^[a-z0-9][a-z0-9_-]{0,127}$/u.test(profile) || !/^[0-9a-fA-F-]{36}$/u.test(requestId))throw new AuthError("INVALID_ARGUMENT");
@@ -28,7 +31,7 @@ export class SyntheticAccountProvisioner {
           WHERE d.id=1 AND d.name='banuchat-synthetic' AND r.status='ready' AND r.manifest->'synthetic'='true'::jsonb`,[profile]);
         const release=version.rows[0]?.id;if(!release)throw new AuthError("INVALID_ARGUMENT");
         const principal=randomUUID();
-        await c.query("INSERT INTO banuchat_auth.accounts(id,synthetic_uid,recovery_email) VALUES($1,$2,$3)",[principal,selectedUid,mail]);
+        await c.query("INSERT INTO banuchat_auth.accounts(id,synthetic_uid,recovery_email,synthetic_display_name) VALUES($1,$2,$3,$4)",[principal,selectedUid,mail,name]);
         await c.query("INSERT INTO banuchat_auth.profile_bindings(principal_id,dataset_id,profile_key) VALUES($1,1,$2)",[principal,profile]);
         await c.query("INSERT INTO banuchat_auth.profile_binding_versions(principal_id,dataset_id,dataset_release_id,profile_key) VALUES($1,1,$2,$3)",[principal,release,profile]);
         await c.query("INSERT INTO banuchat_auth.corpus_grants(principal_id,dataset_id) VALUES($1,1)",[principal]);

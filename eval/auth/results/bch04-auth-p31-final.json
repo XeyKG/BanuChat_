@@ -1,0 +1,71 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "008 additive constraints/keys/ACL and legacy name NULL without backfill",
+      "result": "PASS"
+    },
+    {
+      "name": "UID/name/contact/hash remain distinct from shared academic profile; no secret or own name in me",
+      "result": "PASS"
+    },
+    {
+      "name": "HTTP initial set, local code reception with leading zeros and no automatic session",
+      "result": "PASS"
+    },
+    {
+      "name": "HTTP recovery revokes every old session, rejects old password and replay",
+      "result": "PASS"
+    },
+    {
+      "name": "five failed attempts commit and exhaust the challenge across service instances",
+      "result": "PASS"
+    },
+    {
+      "name": "two simultaneous confirmations yield one credential commit, no partial rows",
+      "result": "PASS"
+    },
+    {
+      "name": "expired and foreign purpose/account codes reject; unverified/suspended contacts never recover",
+      "result": "PASS"
+    },
+    {
+      "name": "replacement invalidates codes and sessions, returns contact to pending and keeps ownership",
+      "result": "PASS"
+    },
+    {
+      "name": "generic 202 and persistent UID/origin suppression, no client-supplied recipient",
+      "result": "PASS"
+    },
+    {
+      "name": "rejected/unknown transport invalidates code; local capture is not external proof",
+      "result": "PASS"
+    },
+    {
+      "name": "no locks during hashing or mail; rollback if credential write fails",
+      "result": "PASS"
+    },
+    {
+      "name": "PostgreSQL task-container outage returns generic 503, then recovers without POST retries",
+      "result": "PASS"
+    },
+    {
+      "name": "new schemas refuse old token, number and unknown selectors; v1/admin remain absent",
+      "result": "PASS"
+    },
+    {
+      "name": "thirteen previous operations remain functional with protected shared profile",
+      "result": "PASS"
+    },
+    {
+      "name": "corpus/releases/embeddings unchanged; association invariants and private verifiers preserved",
+      "result": "PASS"
+    }
+  ],
+  "localDeliveryOnly": true,
+  "externalSent": false,
+  "externalReceived": false,
+  "corpusBefore": "2df9f7b2dea0602b343a9b8faf990800a929bf1efde6c5aa184d9d53a499259c",
+  "corpusAfter": "2df9f7b2dea0602b343a9b8faf990800a929bf1efde6c5aa184d9d53a499259c",
+  "contractVersion": "3.0.0"
+}

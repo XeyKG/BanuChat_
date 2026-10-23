@@ -2,9 +2,10 @@ import { createHash, createHmac, randomBytes } from "node:crypto";
 import * as argon2 from "argon2";
 import type { SqlQueryClient } from "../data/sql-client.js";
 
-export type AuthCode = "CONFLICT" | "INVALID_ARGUMENT" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" |
+export type AuthCode = "INVALID_RESET" | "CONFLICT" | "INVALID_ARGUMENT" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "METHOD_NOT_ALLOWED" |
   "PAYLOAD_TOO_LARGE" | "RATE_LIMITED" | "DEPENDENCY_UNAVAILABLE" | "INTERNAL_ERROR";
 export const errors: Readonly<Record<AuthCode, { status: number; message: string }>> = {
+  INVALID_RESET: {status:400,message:"No se pudo restablecer la contraseña."},
   CONFLICT: {status:409,message:"El contexto cambió durante la operación."},
   INVALID_ARGUMENT: {status:400,message:"La solicitud no cumple el contrato esperado."},
   UNAUTHENTICATED: {status:401,message:"No se pudo autenticar la solicitud."},

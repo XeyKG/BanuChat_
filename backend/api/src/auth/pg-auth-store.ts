@@ -10,7 +10,7 @@ export interface SessionRow {
 }
 export interface RefreshRow { id:string;session_id:string;expires_at:Date;consumed_at:Date|null; }
 export interface TokenPair {access_token:string;refresh_token:string;token_type:"Bearer";expires_in:number;session_expires_at:string;}
-export type AuthEvent="account_provisioned"|"login_succeeded"|"login_denied"|"refresh_succeeded"|"refresh_reuse_detected"|"logout_succeeded"|"access_denied"|"rate_limited";
+export type AuthEvent="account_provisioned"|"login_succeeded"|"login_denied"|"refresh_succeeded"|"refresh_reuse_detected"|"logout_succeeded"|"access_denied"|"rate_limited"|"reset_requested"|"reset_delivery_failed"|"password_set"|"password_reset";
 
 /** SQL for auth only; never mutates corpus, history or the frozen v1 services. */
 export class PgAuthStore {

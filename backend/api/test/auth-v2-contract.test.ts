@@ -88,7 +88,7 @@ function operations(): Array<{ path: string; method: string; value: ObjectValue;
 
 test("AUTH-P0 v2 declares exactly fifteen operations, six identity operations, and no selector/admin/registration bypass", () => {
   assert.equal(contract.openapi, "3.1.0");
-  assert.equal(object(contract.info).version, "2.0.0");
+  assert.equal(object(contract.info).version, "3.0.0");
   assert.deepEqual(contract.servers, [{ url: "/api/v2", description: "Base relativa; TLS obligatorio fuera del canal local aislado autorizado." }]);
   assert.deepEqual(operations().map(o => `${o.method.toUpperCase()} ${o.path}`), expected);
   assert.equal(operations().filter(o => o.path.startsWith("/auth/")).length, 6);
@@ -147,7 +147,12 @@ test("AUTH-P0 request schemas reject extra identity selectors, wrong types, nonc
   accepts("create_conversation_request", {});
   rejects("create_conversation_request", null);
   accepts("refresh_request", { refresh_token: token });
-  accepts("reset_confirmation", { token, new_password: newPassword });
+  accepts("reset_confirmation", { synthetic_uid: "BCH-DEMO-0001", verification_code: "00001234", new_password: newPassword });
+  for (const bad of [12345678, null, "1234567", "123456789", "１２３４５６７８", "1234567\n", " 0001234", "abcdefgh"]) {
+    rejects("reset_confirmation", { synthetic_uid: "BCH-DEMO-0001", verification_code: bad, new_password: newPassword });
+  }
+  rejects("reset_confirmation", { token, new_password: newPassword });
+  rejects("reset_confirmation", { synthetic_uid: "BCH-DEMO-0001", verification_code: "00001234", new_password: newPassword, token });
   for (const bad of ["A".repeat(42), "A".repeat(44), "A".repeat(42) + "B", "A".repeat(42) + "=", uuid, 123, null]) {
     rejects("refresh_request", { refresh_token: bad });
     rejects("reset_confirmation", { token: bad, new_password: newPassword });

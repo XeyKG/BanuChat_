@@ -1,5 +1,12 @@
 # API REST — contrato y estado implementado
 
+AUTH-P3.1 completa las dos operaciones de recuperación en la composición protegida
+v2, con PostgreSQL aislado y entrega local de pruebas. Véanse el
+[núcleo de recuperación](recovery-core.md) y el
+[checkpoint AUTH-P3.1](../../docs/transition/bch04-auth-p31-checkpoint.md).
+El listener histórico v1 de este README conserva su comportamiento; no se inicia
+ni se monta dentro de la composición v2. La entrega externa sigue pendiente.
+
 BCH-03 incremento 5 añade orientación histórica U03 (pilar no validado en 202660)
 y U04 (transición desde Informática). CCD recupera las doce unidades de la release
 antes de seleccionar por tema; la distancia vectorial no acredita soporte. El

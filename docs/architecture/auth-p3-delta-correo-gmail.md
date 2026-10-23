@@ -1,6 +1,12 @@
 # BanuChat — AUTH-P3: delta de recuperación con correo real y código
 
-Estado: **propuesta para aprobación de Sala de Control; no aplicada**.
+Estado histórico: propuesta presentada para aprobación. BCH-D31 autoriza su
+implementación local AUTH-P3.1, recogida en el
+[checkpoint vigente](../transition/bch04-auth-p31-checkpoint.md).
+El complemento autorizado admite también contactos académicos reales consentidos;
+Gmail no es una restricción permanente ni una inferencia de proveedor o identidad.
+Este texto conserva las alternativas y el estado de su entrega original. Para el
+delta aplicado y sus límites, usar el checkpoint y el contrato v2 revisión 3.0.0.
 Base inspeccionada: `28fbc68d1e8715ebc8ba0d645469af445989f586`.
 
 La corrección expresa de Sala de Control sustituye, para AUTH-P3, el destino

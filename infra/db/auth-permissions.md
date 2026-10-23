@@ -178,6 +178,38 @@ contexto histórico sin exigir un binding current.
 
 Referencia primaria: [seguridad de SECURITY DEFINER, PostgreSQL 16](https://www.postgresql.org/docs/16/sql-createfunction.html#SQL-CREATEFUNCTION-SECURITY).
 
+## 5.1. Delta autorizado AUTH-P3.1 — 008
+
+[008_verified_recovery_email.sql](008_verified_recovery_email.sql) añade cuatro
+tablas privadas y `accounts.synthetic_display_name` nullable para legado. Solo se
+aplicó en PostgreSQL nuevo desechable; 001/006/007 permanecen idénticas. Exige target
+exacto, ámbito 007 y current ready sintética, y rechaza marcadores CCD. No añade
+cuentas, contactos, backfills ni funciones SECURITY DEFINER.
+
+| Identidad | Delta efectivo |
+| --- | --- |
+| Runtime confiable | SELECT/INSERT en contactos cifrados, retos, presupuesto UID y despachos; UPDATE limitado a columnas de sus estados; INSERT/UPDATE(hash,fecha) en credenciales; UPDATE(status,auth_version,updated_at,nombre) en accounts |
+| Aprovisionador separado | Mantiene INSERT de cuenta/binding/grant/evento y lecturas sintéticas; no recibe SELECT/INSERT/UPDATE de hashes ni acceso a contactos |
+| Cliente/modelo | Solo UID en solicitud y UID/código/contraseña en confirmación; sin ruta administrativa, destinatario, principal o propósito seleccionable |
+
+Las operaciones internas de registrar/verificar/suspender/reemplazar contacto y
+asignar explícitamente nombre legado se componen con el runtime confiable. No hay
+un rol SQL administrativo adicional ni una CLI pública en esta entrega. La barrera
+es la superficie de aplicación, no aislamiento frente a compromiso de ese rol.
+PUBLIC no recibe acceso a las tablas nuevas. Runtime no obtiene DELETE/TRUNCATE,
+DDL, membresías, UPDATE de corpus o cambios de propietarios de conversaciones.
+Los cambios PUBLIC del harness se limitan al clúster nuevo, nunca a los existentes.
+
+El contacto se cifra con AES-256-GCM; claves MAC/cifrado/lookup externas de 32 bytes
+independientes, distintas de la clave de cuotas. El hash Argon2id conserva AUTH-P1.
+El legado `accounts.recovery_email` y `password_reset_tokens` no se reescriben ni
+se usan como fallback de entrega/códigos. La política actual sustituye la propuesta
+histórica de buzón local final: `local_test` acredita únicamente el doble; solo
+`external_email` puede acreditar el canal externo. No se han hecho envíos externos.
+La asociación cuenta/contacto real sería dato personal privado aunque los datos
+académicos permanezcan sintéticos. Runbook y límites:
+[recovery-core.md](../../backend/api/recovery-core.md).
+
 ## 6. Retención y limpieza propuesta para implementación
 
 No se ejecuta limpieza ni se introduce scheduler en AUTH-P0. Política contractual: conservar digests refresh consumidos hasta el vencimiento absoluto de la familia. Después, una tarea autorizada puede eliminar cadenas desde hojas hacia predecesores por la self-FK, y por último la sesión; no DELETE masivo que ignore referencias. Auditoría conserva evento y pone session_id a NULL al borrar la sesión. Reset consumido/invalidado/vencido puede limpiarse tras expirar su vigencia; ventanas al expirar; eventos a los treinta días, propuesta heredada del diseño sujeta a política de custodia antes del piloto. No borrar cuentas, owners, conversaciones, mensajes o citas por retención de tokens.
