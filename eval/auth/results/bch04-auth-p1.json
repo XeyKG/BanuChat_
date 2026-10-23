@@ -1,0 +1,252 @@
+{
+  "checkpoint": "BCH-04/AUTH-P1",
+  "baseline": "afaa5fe0ed86642dee98afadeec1b0b74e4603e7",
+  "environment": {
+    "postgres": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "pgvector": "0.8.6",
+    "node": "v24.19.0",
+    "platform": "win32",
+    "container": "banuchat-auth-p1-20261022",
+    "containerId": "1b8780cca454025c70a3d268de28d1c395d61c4e84633f0f5a60fe3d5324d25f",
+    "image": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "network": "banuchat-auth-p1-20261022-isolated",
+    "hostPort": "127.0.0.1:55435",
+    "tmpfsMiB": 256,
+    "hostVolumes": 0,
+    "cleanup": "verified task container/network and generated credentials removed; original eight-volume inventory unchanged"
+  },
+  "phaseA": {
+    "phase": "AUTH-P1/A",
+    "result": "PASS",
+    "deploymentId": "0ecf858c-ad40-4259-a9e0-e064f8074aa2",
+    "database": "banuchat_auth_p1_test",
+    "version": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "pgvector": "0.8.6",
+    "tableCount": 11,
+    "foreignKeyCount": 16,
+    "indexes": [
+      "accounts_pkey",
+      "accounts_recovery_email_key",
+      "accounts_synthetic_uid_key",
+      "auth_rate_limits_expiry_idx",
+      "auth_rate_limits_pkey",
+      "conversation_owners_pkey",
+      "conversation_owners_principal_idx",
+      "corpus_grants_pkey",
+      "password_credentials_pkey",
+      "password_reset_tokens_expiry_idx",
+      "password_reset_tokens_pending_idx",
+      "password_reset_tokens_pkey",
+      "password_reset_tokens_token_digest_key",
+      "profile_binding_versions_pkey",
+      "profile_binding_versions_release_idx",
+      "profile_bindings_pkey",
+      "profile_bindings_principal_id_dataset_id_profile_key_key",
+      "refresh_tokens_expiry_idx",
+      "refresh_tokens_pkey",
+      "refresh_tokens_replaced_by_key",
+      "refresh_tokens_session_id_id_key",
+      "refresh_tokens_token_digest_key",
+      "security_events_pkey",
+      "security_events_principal_idx",
+      "security_events_session_idx",
+      "security_events_time_idx",
+      "sessions_access_token_digest_key",
+      "sessions_expiry_idx",
+      "sessions_pkey",
+      "sessions_principal_idx"
+    ],
+    "evidence": [
+      {
+        "name": "missing target rolls back",
+        "result": "PASS",
+        "sqlstate": "P0001"
+      },
+      {
+        "name": "wrong target rolls back",
+        "result": "PASS",
+        "sqlstate": "P0001"
+      },
+      {
+        "name": "006 applied in same connection with exact target",
+        "result": "PASS"
+      },
+      {
+        "name": "11 tables, 16 validated FKs, indexes and finite-time/digest domains",
+        "result": "PASS"
+      },
+      {
+        "name": "UID shape",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "reserved recipient only",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "unique UID",
+        "result": "PASS",
+        "sqlstate": "23505"
+      },
+      {
+        "name": "no plaintext credential",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "credential account FK",
+        "result": "PASS",
+        "sqlstate": "23503"
+      },
+      {
+        "name": "disabled state consistency",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "finite timestamps",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "binding composite FK",
+        "result": "PASS",
+        "sqlstate": "23503"
+      },
+      {
+        "name": "second owner rejected",
+        "result": "PASS",
+        "sqlstate": "23505"
+      },
+      {
+        "name": "account deletion cannot erase history",
+        "result": "PASS",
+        "sqlstate": "23503"
+      },
+      {
+        "name": "reset expiry ceiling",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "rate window check",
+        "result": "PASS",
+        "sqlstate": "23514"
+      },
+      {
+        "name": "fixture transaction rolled back, auth empty; corpus has one profile and zero embeddings/history",
+        "result": "PASS"
+      }
+    ],
+    "ddlChanged": false
+  },
+  "roles": {
+    "database": "banuchat_auth_p1_test",
+    "runtime": "auth_p1_runtime",
+    "provisioner": "auth_p1_provisioner",
+    "superuser": false,
+    "forbiddenOperations": "42501",
+    "sharedClusterTouched": false
+  },
+  "phaseBCD": {
+    "phase": "AUTH-P1/B-C-D",
+    "result": "PASS",
+    "checks": 13,
+    "evidence": [
+      {
+        "name": "limited roles reject admin runtime and shared/CCD destination settings",
+        "result": "PASS"
+      },
+      {
+        "name": "provision pending account atomically; no password/registration or implicit activation",
+        "result": "PASS"
+      },
+      {
+        "name": "real login, access, me and logout store only digests and revoke server-side",
+        "result": "PASS"
+      },
+      {
+        "name": "wrong, absent, disabled and pending credentials share generic failure",
+        "result": "PASS"
+      },
+      {
+        "name": "refresh rotation invalidates old access; replay revocation survives the 401",
+        "result": "PASS"
+      },
+      {
+        "name": "two concurrent refresh requests serialize: one succeeds and replay revokes family",
+        "result": "PASS"
+      },
+      {
+        "name": "login hash computation holds no row lock and cannot beat credential/version replacement",
+        "result": "PASS"
+      },
+      {
+        "name": "failed session transaction rolls back both session and refresh records",
+        "result": "PASS"
+      },
+      {
+        "name": "auth_version and disabled account invalidate already issued access/refresh",
+        "result": "PASS"
+      },
+      {
+        "name": "controlled clock exercises access, inactivity and absolute expiry with real PostgreSQL rows",
+        "result": "PASS"
+      },
+      {
+        "name": "persistent UID/origin buckets survive a new core instance and also limit absent accounts",
+        "result": "PASS"
+      },
+      {
+        "name": "wrong deployment, tampered token and missing grants fail without exposing account data",
+        "result": "PASS"
+      },
+      {
+        "name": "detached login/me/refresh/logout satisfy real v2 schemas without listening",
+        "result": "PASS"
+      }
+    ],
+    "counts": {
+      "accounts": 11,
+      "sessions": 10,
+      "refresh": 14,
+      "conversations": 0,
+      "chunks": 0
+    },
+    "runtimeRole": "auth_p1_runtime",
+    "publicEndpoints": false,
+    "mail": false,
+    "mobile": false
+  },
+  "verification": {
+    "authTests": {
+      "passed": 27,
+      "failed": 0
+    },
+    "focusedRegressions": {
+      "passed": 177,
+      "failed": 0
+    },
+    "typecheck": "PASS",
+    "build": "PASS"
+  },
+  "protectedFileSha256": {
+    "infra/db/001_initial_schema.sql": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3",
+    "infra/db/006_synthetic_auth.sql": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85",
+    "backend/api/api-contract-v2.md": "8d9f913967b79658ce2d0e989e0d4101223279d6789e8463a9fc15494b003cce",
+    "backend/api/openapi-v2.yaml": "c2247a6d50d52240c03179dc46d1a5e3822b2e48ade50a41297ecde3c4d89f3a"
+  },
+  "limitations": [
+    "No public HTTP auth server",
+    "No Mobile or recovery delivery",
+    "No conversation/resource authorization integration",
+    "No original database connections; file freeze checked separately"
+  ],
+  "finalDockerInventory": [
+    "banuchat-ccd-dev-postgres-ccd-1|pgvector/pgvector:pg16|Up 10 hours|127.0.0.1:55433->5432/tcp",
+    "banuchat-n8n|n8nio/n8n:2.40.5|Exited (0) 18 hours ago|",
+    "banuchat-postgres|pgvector/pgvector:pg16|Up 10 hours|127.0.0.1:5432->5432/tcp"
+  ]
+}

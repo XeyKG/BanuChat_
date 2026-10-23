@@ -3,17 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "test": "node --import tsx --test test/*.test.ts",
+    "test:auth": "node --import tsx --test test/auth-primitives.test.ts test/auth-handlers.test.ts test/auth-v2-contract.test.ts test/auth-schema.test.ts",
+    "test:auth:sql": "node --import tsx test/auth-p1-phase-a.mts",
+    "test:auth:roles": "node --import tsx test/auth-p1-roles.mts",
+    "test:auth:db": "node --import tsx --test test/auth-p1-db.mts",
     "start": "node dist/main.js",
     "start:local": "node --env-file=../../.env dist/main.js",
     "start:ccd": "node --env-file=../../infra/.env.ccd dist/main.js",
     "test:ccd:http": "node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-chat-http.mts"
   },
   "dependencies": {
+    "argon2": "0.45.0",
     "pg": "^8.16.0"
   },
   "devDependencies": {
