@@ -9,6 +9,13 @@ import type {DocumentRagResponder} from './application/messages.js';
 import type {DocumentArtifactStorage} from './application/document-artifact.js';
 import {createAuthenticatedApiServer} from './http/api-v2-server.js';
 import type {RecoveryService} from './auth/recovery-service.js';
+import {generateDocumentRagAnswer,type DocumentRagDependencies} from './chat/document-rag.js';
+import {assertAuthenticatedDocumentReads,retrieveAuthenticatedDocumentChunks} from './application/authenticated-document-retrieval.js';
+/** Permanent authenticated RAG composition; callers cannot select corpus or SQL through HTTP. */
+export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>):Promise<DocumentRagResponder>{
+ await assertAuthenticatedDocumentReads(input.sql);
+ return query=>generateDocumentRagAnswer({...input,evidence_mode:'synthetic',retrieve_chunks:retrieveAuthenticatedDocumentChunks},query);
+}
 /** Product composition, deliberately no listen/startup or v1 import. Explicit trusted config. */
 export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;
  document_rag:DocumentRagResponder;router?:IntentRouter;artifacts?:DocumentArtifactStorage;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){

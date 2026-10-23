@@ -1,0 +1,79 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1A",
+  "at": "2026-10-23T14:24:05.433Z",
+  "checks": [
+    {
+      "name": "prior direct SELECT remains denied; existing search and new retrieval work",
+      "passed": true
+    },
+    {
+      "name": "effective runtime privileges exclude chunk SELECT, corpus UPDATE, executor membership and DDL",
+      "passed": true
+    },
+    {
+      "name": "NOLOGIN owner, STABLE, safe search_path, PUBLIC and outsider denied effectively",
+      "passed": true
+    },
+    {
+      "name": "exact normalized columns, hashes, locators, distances and ordering for top-k 1/5/20",
+      "passed": true
+    },
+    {
+      "name": "invalid vector, nulls and top-k rejected; pgvector rejects NaN and infinity",
+      "passed": true
+    },
+    {
+      "name": "unknown release rejected; second dataset blocked by the frozen schema",
+      "passed": true
+    },
+    {
+      "name": "wrong fixed database scope rejected and rolled back",
+      "passed": true
+    },
+    {
+      "name": "underlying SQL failure becomes fixed P0500 with no private detail; rollback restores ACL",
+      "passed": true
+    },
+    {
+      "name": "controlled ties across versions and ordinals at top-k boundary; historical rejection; full_document exclusion",
+      "passed": true
+    },
+    {
+      "name": "010 missing target, wrong target or deployment aborts without partial DDL",
+      "passed": true
+    },
+    {
+      "name": "corpus, vectors, releases and runtime_scope unchanged after all SQL tests",
+      "passed": true
+    }
+  ],
+  "privileges": {
+    "runtime": "auth_i1a_runtime",
+    "chunk_select": false,
+    "conversation_update": false,
+    "dataset_update": false,
+    "release_update": false,
+    "executor_member": false,
+    "auth_ddl": false,
+    "scope_update": false
+  },
+  "definition": {
+    "prosecdef": true,
+    "provolatile": "s",
+    "proconfig": [
+      "search_path=pg_catalog, banuchat_auth, pg_temp"
+    ],
+    "rolname": "banuchat_auth_executor",
+    "rolcanlogin": false,
+    "rolsuper": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "rolreplication": false,
+    "rolbypassrls": false,
+    "owner_ddl": false,
+    "public_execute": false
+  },
+  "corpus_before": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "corpus_after": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "fixture": "controlled tie vectors in a single rolled-back transaction; not runtime embeddings"
+}

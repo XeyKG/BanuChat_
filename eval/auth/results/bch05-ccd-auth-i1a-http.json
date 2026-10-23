@@ -1,0 +1,314 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1A",
+  "started_at": "2026-10-23T14:26:28.101Z",
+  "database": "banuchat_auth_i1a_test",
+  "ccd_queried": false,
+  "corpus_before": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  },
+  "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+  "functional": {
+    "question": "¿Qué información debe incluir una descripción útil de una incidencia técnica?",
+    "http": 201,
+    "body": {
+      "conversation_id": "3b768499-ce84-4575-83e5-4f2e9286fb2c",
+      "user_message": {
+        "message_id": "1d104350-e386-4264-8e4c-be788d526059",
+        "role": "user",
+        "content": "¿Qué información debe incluir una descripción útil de una incidencia técnica?",
+        "created_at": "2026-10-23T14:26:40.198Z"
+      },
+      "assistant_message": {
+        "message_id": "12a13ea0-a5dc-4009-8df7-c1b9d7ccdf66",
+        "role": "assistant",
+        "content": "Una descripción útil debe indicar qué se intentaba hacer, qué ocurrió y qué se esperaba. Debe usar títulos o claves del escenario, distinguir observación de interpretación, y evitar información personal o sensible. Si falta un detalle, se señala como desconocido. No debe incluir información que no sea necesaria para comprender la práctica.",
+        "created_at": "2026-10-23T14:26:40.198Z",
+        "insufficient_evidence": false,
+        "citations": [
+          {
+            "index": 0,
+            "source_kind": "document",
+            "label": "Documento: Soporte y reporte de incidencias",
+            "locator": "section:1:2. Describir lo observado",
+            "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+            "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "artifact_url": "/api/v2/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          },
+          {
+            "index": 1,
+            "source_kind": "document",
+            "label": "Documento: Soporte y reporte de incidencias",
+            "locator": "section:3:4. Información que no debe compartirse",
+            "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+            "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "artifact_url": "/api/v2/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          },
+          {
+            "index": 2,
+            "source_kind": "document",
+            "label": "Documento: Soporte y reporte de incidencias",
+            "locator": "section:4:5. Revisión de una incidencia",
+            "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+            "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "artifact_url": "/api/v2/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          },
+          {
+            "index": 3,
+            "source_kind": "document",
+            "label": "Documento: Soporte y reporte de incidencias",
+            "locator": "section:0:1. Alcance de la ayuda",
+            "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+            "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "artifact_url": "/api/v2/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          },
+          {
+            "index": 4,
+            "source_kind": "document",
+            "label": "Documento: Soporte y reporte de incidencias",
+            "locator": "section:5:6. Continuación segura",
+            "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+            "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+            "artifact_url": "/api/v2/documents/7c1b3379-1198-4c65-a9ad-8058f23b4844/artifact"
+          }
+        ]
+      }
+    },
+    "trace": {
+      "embedding_calls": 1,
+      "retrieval_calls": 1,
+      "retrieved_rows": 5,
+      "generator_calls": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "route": "agent_fallback",
+      "generator_result": {
+        "done_reason": "stop",
+        "prompt_eval_count": 1617,
+        "eval_count": 80,
+        "total_duration_ms": 7918.264
+      }
+    },
+    "no_store": true
+  },
+  "persisted": {
+    "history_exact": true,
+    "citations": [
+      {
+        "index": 0,
+        "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+        "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+        "chunk_id": "079c3d4c-f668-4f47-850d-f4cf25516662",
+        "locator": "section:1:2. Describir lo observado",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+        "hash_matches": true,
+        "locator_matches": true,
+        "release_matches": true
+      },
+      {
+        "index": 1,
+        "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+        "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+        "chunk_id": "283aff75-23e2-4b68-bf63-35bc2aa9cf3b",
+        "locator": "section:3:4. Información que no debe compartirse",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+        "hash_matches": true,
+        "locator_matches": true,
+        "release_matches": true
+      },
+      {
+        "index": 2,
+        "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+        "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+        "chunk_id": "6c6cbb82-7792-4520-ac54-bd4563701fa2",
+        "locator": "section:4:5. Revisión de una incidencia",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+        "hash_matches": true,
+        "locator_matches": true,
+        "release_matches": true
+      },
+      {
+        "index": 3,
+        "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+        "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+        "chunk_id": "aeab109c-87f2-49b3-982f-633a2c575350",
+        "locator": "section:0:1. Alcance de la ayuda",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+        "hash_matches": true,
+        "locator_matches": true,
+        "release_matches": true
+      },
+      {
+        "index": 4,
+        "release_id": "6a770ce7-13b7-4b0b-95ae-0c193fa0d655",
+        "document_version_id": "7c1b3379-1198-4c65-a9ad-8058f23b4844",
+        "chunk_id": "f59fe25a-55c1-4941-ab31-7f8cddee32f2",
+        "locator": "section:5:6. Continuación segura",
+        "sha256": "25073fb0cd4ec2ac3c85c5cf4f282d56d1cf08a12246fcdecce9374905049225",
+        "hash_matches": true,
+        "locator_matches": true,
+        "release_matches": true
+      }
+    ],
+    "artifacts_verified": 5
+  },
+  "isolation": {
+    "same_profile": true,
+    "foreign_get": 404,
+    "foreign_post": 404,
+    "anonymous_get": 401,
+    "other_owner_list_empty": true
+  },
+  "invalid_citation": {
+    "sqlstate": "P0500",
+    "partial_messages": 0
+  },
+  "revocation": {
+    "http": 401,
+    "real_generation_completed_before_commit": true,
+    "no_account_lock_during_generation": true,
+    "partial_messages": 0,
+    "trace": {
+      "embedding_calls": 1,
+      "retrieval_calls": 1,
+      "retrieved_rows": 5,
+      "generator_calls": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "route": "agent_fallback",
+      "generator_result": {
+        "done_reason": "stop",
+        "prompt_eval_count": 1617,
+        "eval_count": 80,
+        "total_duration_ms": 2690.7002
+      }
+    }
+  },
+  "corpus_after": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "result": "PASS",
+  "finished_at": "2026-10-23T14:26:46.447Z"
+}

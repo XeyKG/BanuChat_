@@ -1,0 +1,275 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1A",
+  "at": "2026-10-23T14:34:10.420Z",
+  "runtime_guard": true,
+  "application_execute": [
+    "current_retrieval_context",
+    "persist_turn",
+    "resource_context",
+    "retrieve_document_chunks",
+    "search_chunks_cosine"
+  ],
+  "function_acl": [
+    {
+      "rolname": "auth_i1a_runtime",
+      "privilege_type": "EXECUTE"
+    },
+    {
+      "rolname": "banuchat_auth_executor",
+      "privilege_type": "EXECUTE"
+    }
+  ],
+  "source_now": {
+    "corpus": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "history": "f195f7488c745edc74b2a3bec372c7f36257a799dd86b63ba2cedc849cc79fb2"
+  },
+  "source_unchanged": true,
+  "copy_corpus_sha256": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "protected_files": [
+    {
+      "path": "backend/api/api-contract-v2.md",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/api-contract.md",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/openapi-v2.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/openapi.yaml",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools-contract.md",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools.contract.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/ccd/.gitignore",
+      "unchanged": true
+    },
+    {
+      "path": "data/ccd/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/ccd/schemas/corpus-1.1.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/ccd/schemas/corpus-1.2.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/ccd/schemas/corpus.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/.gitattributes",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/.gitignore",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/HUMAN_REVIEW.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/announcements/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/announcements/announcements.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/calendars/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/calendars/events.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/courses/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/courses/courses.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-001.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-002.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-003.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-004.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-005.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-006.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-007.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-008.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-009.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-010.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-011.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/artifacts/doc-012.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/documents/documents.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/manifest.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/profiles/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/profiles/profiles.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/profiles/progress.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/announcements.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/calendar-events.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/courses.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/documents.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/manifest.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/profile-progress.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "data/synthetic/schemas/profiles.schema.json",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/001_initial_schema.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/002_ccd_local_manifest.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/003_ccd_chat_demo.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/004_ccd_expanded_manifest.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/005_ccd_guidance_manifest.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/006_synthetic_auth.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/007_authenticated_resources.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/008_verified_recovery_email.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/README.md",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/ccd-local-development.md",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/tests/001_schema_integration.sql",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/tests/README.md",
+      "unchanged": true
+    }
+  ],
+  "private_technical_values_in_versionable_files": false,
+  "counts": {
+    "accounts": 2,
+    "credentials": 2,
+    "contacts": 0,
+    "conversations": 3,
+    "messages": 2,
+    "citations": 5
+  }
+}

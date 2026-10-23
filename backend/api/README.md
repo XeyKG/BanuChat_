@@ -1,5 +1,15 @@
 # API REST — contrato y estado implementado
 
+BCH-05/CCD-AUTH-I1A corrige el retrieval del proceso autenticado mediante
+`banuchat_auth.retrieve_document_chunks`, migración aditiva
+[010](../../infra/db/010_authenticated_document_reads.sql). La composición de
+producto exige esa función al arrancar y mantiene el runtime sin SELECT directo
+de `document_chunks`. Usa el mismo RAG, validación y ordenamiento; v1 conserva
+su lectura histórica. No se modifica REST, UID, correo ni Mobile, y **CCD no está
+integrado en v2**. 010 se validó solo en una instancia sintética nueva; no aplicarla
+ni reiniciar los entornos históricos con la nueva composición sin autorizar su
+actualización. Véase el [checkpoint I1A](../../docs/transition/bch05-ccd-auth-i1a-checkpoint.md).
+
 AUTH-P4-L0 añade consola administrativa local para primera contraseña sin correo y
 `npm run start:authenticated`, composición v2 independiente, solo loopback, sin v1
 ni recuperación funcional. Correo **SUSPENDIDO** por BCH-D33. No cambia contratos o

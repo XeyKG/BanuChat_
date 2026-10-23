@@ -1,0 +1,46 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1A",
+  "at": "2026-10-23T14:18:40.377Z",
+  "database": "banuchat_auth_i1a_test",
+  "port": 55442,
+  "container": "banuchat-auth-i1a-test",
+  "container_id": "9ad9605680e1ac28194a81be95e782b60f5cb8fb4c631cd30e124606e317c151",
+  "network": "banuchat-auth-i1a-test-isolated",
+  "volume": "banuchat-auth-i1a-test-data",
+  "deployment": "07fbbbc9-ecff-4c47-84fb-0eefa2eba0ea",
+  "migrations": [
+    "006",
+    "007",
+    "008",
+    "010"
+  ],
+  "business_schema": "read-only snapshot of installed 001 + published synthetic corpus; no source history",
+  "before_sqlstate": "42501",
+  "after_rows": 5,
+  "scope_unchanged": true,
+  "source_before": {
+    "corpus": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "history": "f195f7488c745edc74b2a3bec372c7f36257a799dd86b63ba2cedc849cc79fb2"
+  },
+  "source_after": {
+    "corpus": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+    "history": "f195f7488c745edc74b2a3bec372c7f36257a799dd86b63ba2cedc849cc79fb2"
+  },
+  "copy_corpus_sha256": "c6659b9546c42012d49af565fec32f6cd2ea39b521aa2531d2b154b4085b991e",
+  "migration_sha256": "ba3939de91ddb1f2d2e0f16921d7eba9adbed27db769aa17364d292a392b03ed",
+  "corpus_tables": [
+    "datasets",
+    "dataset_releases",
+    "embedding_configs",
+    "documents",
+    "document_versions",
+    "document_chunks",
+    "synthetic_profiles",
+    "profile_courses",
+    "courses",
+    "calendar_events",
+    "announcements",
+    "ingestion_runs",
+    "ingestion_items"
+  ]
+}

@@ -127,7 +127,7 @@ function vectorLiteral(value: unknown): string {
   return `[${components.join(",")}]`;
 }
 
-function validateInput(input: DocumentRetrievalInput): {
+export function validateDocumentRetrievalInput(input: DocumentRetrievalInput): {
   releaseId: string;
   queryVector: string;
   topK: number;
@@ -150,7 +150,7 @@ function validateInput(input: DocumentRetrievalInput): {
   };
 }
 
-function normalizeRow(
+export function normalizeDocumentRetrievalRow(
   row: unknown,
   requestedReleaseId: string,
 ): RetrievedDocumentChunk {
@@ -210,7 +210,7 @@ export async function retrieveDocumentChunks(
   client: SqlQueryClient,
   input: DocumentRetrievalInput,
 ): Promise<RetrievedDocumentChunk[]> {
-  const validated = validateInput(input);
+  const validated = validateDocumentRetrievalInput(input);
   const availability = await client.query<ReleaseAvailableRow>(
     RELEASE_AVAILABLE_QUERY,
     [validated.releaseId],
@@ -234,5 +234,7 @@ export async function retrieveDocumentChunks(
     validated.queryVector,
     validated.topK,
   ]);
-  return result.rows.map((row) => normalizeRow(row, validated.releaseId));
+  return result.rows.map((row) => normalizeDocumentRetrievalRow(row, validated.releaseId));
 }
+
+export type DocumentChunkRetriever = typeof retrieveDocumentChunks;

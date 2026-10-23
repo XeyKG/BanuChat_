@@ -1,8 +1,7 @@
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {Pool} from 'pg';
-import {createAuthenticatedRuntimeServer} from './authenticated-runtime.js';
+import {createAuthenticatedRuntimeServer,createAuthenticatedDocumentRag} from './authenticated-runtime.js';
 import {PgSqlClient} from './data/pg-client.js';
-import {generateDocumentRagAnswer} from './chat/document-rag.js';
 import {loadGeneratorRuntimeConfig} from './generation/generator-client.js';
 import {OllamaGeneratorClient} from './generation/ollama-generator-client.js';
 import {OllamaQueryEmbeddingClient} from './retrieval/ollama-query-embedding-client.js';
@@ -20,7 +19,7 @@ export async function startAuthenticatedApi(){
   const runtime=loadGeneratorRuntimeConfig(),sql=new PgSqlClient(pool);
   const generator=new OllamaGeneratorClient(runtime.base_url),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),
-   document_rag:input=>generateDocumentRagAnswer({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator,evidence_mode:'synthetic'},input),
+   document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator}),
    artifacts:{root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))}});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
   let stopping=false;const stop=async()=>{if(stopping)return;stopping=true;server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool?.end();};

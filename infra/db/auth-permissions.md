@@ -210,6 +210,52 @@ La asociación cuenta/contacto real sería dato personal privado aunque los dato
 académicos permanezcan sintéticos. Runbook y límites:
 [recovery-core.md](../../backend/api/recovery-core.md).
 
+## BCH-D36 / CCD-AUTH-I1A — lectura documental autenticada, migración 010
+
+[010_authenticated_document_reads.sql](010_authenticated_document_reads.sql)
+concilia el SELECT directo de `application/document-retrieval.ts` con la política
+EXECUTE del runtime. Se aplicó únicamente a `banuchat_auth_i1a_test`, instancia
+nueva en loopback 55442. No se modificaron 001–008 ni entornos históricos.
+
+No requiere columnas, UPDATE o flags nuevos en runtime_scope: se conserva su fila
+de base/deployment. Migración y función admiten exclusivamente dataset 1 llamado
+banuchat-synthetic, current ready, manifiestos synthetic=true y ausencia de otro
+dataset. Las guardas de instalación rechazan marcadores CCD, target/deployment
+incorrectos, ejecución repetida y roles incompatibles. CCD sigue sin autorización
+conversacional v2; el cambio no habilita otra base mediante un flag.
+
+La función `banuchat_auth.retrieve_document_chunks(uuid,public.vector,integer)` es
+STABLE SECURITY DEFINER y devuelve las mismas quince columnas, filtros/joins y
+orden distancia → document_version_id → ordinal antes de LIMIT. Comprueba release
+current, vector 1024/no nulo/norma positiva y top_k 1–20; pgvector rechaza valores
+no finitos al construir el vector. Excluye full_document y no escribe corpus.
+search_path=pg_catalog,banuchat_auth,pg_temp; referencias calificadas y operador
+OPERATOR(public.<=>). No recibe identidad libre, modo de evidencia ni SQL.
+
+Propietario: el executor NOLOGIN ya existente de 007, con sus SELECT autorizados;
+010 no añade roles, SELECT/UPDATE de corpus o membresías. Conserva los permisos
+anteriores del executor requeridos por locks/persistencia de 007; la función de
+lectura nueva no añade capacidades de escritura a sus argumentos. CREATE temporal
+para transferir propiedad se revoca antes de COMMIT. EXECUTE se revoca a PUBLIC
+en la creación y se concede al runtime explícitamente revisado, además del derecho
+inherente del propietario. Ningún cambio del clúster compartido está autorizado.
+
+Runtime continúa sin SELECT (incluido por columna) de document_chunks ni UPDATE
+de conversations/datasets/dataset_releases, sin acceso al rol executor o a
+publicación/ingesta. Lista de funciones de aplicación ejecutables: las dos de
+retrieval históricas, resource_context, persist_turn y la nueva función de 010.
+Gates de sesión/grant/binding/owner y revalidación antes del commit no cambian.
+El token nunca llega al RAG. P0400/P0403/P0409/P0500 conservan mensajes fijos;
+el adaptador mapea cambio de release a la política 409 existente y valida las filas
+con el normalizador histórico. Sin retries ni logs de parámetros.
+
+Se verificaron privilegios efectivos, outsider/PUBLIC, equivalencia por columnas y
+empates top-k, rollback de fixtures y ensayo HTTP/PostgreSQL/Ollama con citas y
+revocación ganadora. Evidencia y límites en el
+[checkpoint I1A](../../docs/transition/bch05-ccd-auth-i1a-checkpoint.md). La validación
+no protege frente a compromiso del rol técnico API o del administrador, ni acredita
+identidad institucional, integración CCD o funcionamiento Android.
+
 ## 6. Retención y limpieza propuesta para implementación
 
 No se ejecuta limpieza ni se introduce scheduler en AUTH-P0. Política contractual: conservar digests refresh consumidos hasta el vencimiento absoluto de la familia. Después, una tarea autorizada puede eliminar cadenas desde hojas hacia predecesores por la self-FK, y por último la sesión; no DELETE masivo que ignore referencias. Auditoría conserva evento y pone session_id a NULL al borrar la sesión. Reset consumido/invalidado/vencido puede limpiarse tras expirar su vigencia; ventanas al expirar; eventos a los treinta días, propuesta heredada del diseño sujeta a política de custodia antes del piloto. No borrar cuentas, owners, conversaciones, mensajes o citas por retención de tokens.

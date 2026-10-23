@@ -8,6 +8,7 @@ import {
 import {
   retrieveDocumentChunks,
   type RetrievedDocumentChunk,
+  type DocumentChunkRetriever,
 } from "./document-retrieval.js";
 import { DocumentRetrievalError } from "./document-retrieval-errors.js";
 import {
@@ -38,6 +39,7 @@ WHERE dr.id = $1
 export interface DocumentQueryRetrievalDependencies {
   sql: SqlQueryClient;
   query_embedding_client: QueryEmbeddingClient;
+  retrieve_chunks?: DocumentChunkRetriever;
 }
 
 export interface DocumentQueryRetrievalInput {
@@ -158,7 +160,7 @@ export async function retrieveDocumentChunksForQuery(
   }
 
   try {
-    return await retrieveDocumentChunks(dependencies.sql, {
+    return await (dependencies.retrieve_chunks ?? retrieveDocumentChunks)(dependencies.sql, {
       release_id: validated.release_id,
       query_embedding: vector,
       top_k: validated.top_k,

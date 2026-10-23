@@ -2,6 +2,7 @@ import {
   retrieveDocumentChunksForQuery,
 } from "../application/document-query-retrieval.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
+import type { DocumentChunkRetriever } from '../application/document-retrieval.js';
 import type {
   GeneratorClient,
   GeneratorConfig,
@@ -47,6 +48,7 @@ export interface DocumentRagDependencies {
   generator_client: GeneratorClient;
   generator_config: GeneratorConfig;
   evidence_mode?: 'synthetic' | 'ccd_local';
+  retrieve_chunks?: DocumentChunkRetriever;
 }
 
 export interface DocumentRagInput {
@@ -161,6 +163,7 @@ export async function generateDocumentRagAnswer(
     {
       sql: dependencies.sql,
       query_embedding_client: dependencies.query_embedding_client,
+      ...(dependencies.retrieve_chunks ? { retrieve_chunks: dependencies.retrieve_chunks } : {}),
     },
     retrievalInput,
   );
