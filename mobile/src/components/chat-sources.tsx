@@ -55,7 +55,7 @@ function hasOpenableDocument(citation: Citation): citation is Citation & {
     citation.source_kind === 'document' &&
     citation.document_version_id !== null &&
     citation.artifact_url ===
-      `/api/v1/documents/${citation.document_version_id}/artifact`
+      `/api/${isCcdLocal()?'v1':'v2'}/documents/${citation.document_version_id}/artifact`
   );
 }
 

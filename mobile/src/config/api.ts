@@ -26,5 +26,12 @@ export function getApiBaseUrl(): string {
     parsedUrl.username || parsedUrl.password || parsedUrl.search || parsedUrl.hash)) {
     throw new Error('CCD_REQUIRES_LOCAL_API');
   }
+  if (!isCcdLocal()) {
+    if(parsedUrl.pathname!=='/api/v2'||parsedUrl.username||parsedUrl.password||parsedUrl.search||parsedUrl.hash||!['127.0.0.1','localhost','10.0.2.2'].includes(parsedUrl.hostname))throw new Error('AUTH_REQUIRES_PROTECTED_LOCAL_V2');
+    if(parsedUrl.protocol==='http:'){
+      const channel=process.env.EXPO_PUBLIC_AUTH_LOCAL_CHANNEL;
+      if(!((channel==='adb_reverse'&&['127.0.0.1','localhost'].includes(parsedUrl.hostname))||(channel==='android_emulator'&&parsedUrl.hostname==='10.0.2.2')))throw new Error('AUTH_LOCAL_CHANNEL_REQUIRED');
+    }
+  }
   return normalizedValue;
 }

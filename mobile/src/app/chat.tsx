@@ -98,7 +98,7 @@ export default function ChatScreen() {
   }, []);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/profiles');
+    if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
   }, [activeProfile, router]);
 
   const conversationId = singleParam(params.conversation_id);
@@ -128,7 +128,7 @@ export default function ChatScreen() {
     void getConversation(conversationId)
       .then((detail) => {
         if (!isMounted) return;
-        if (detail.profile.profile_key !== activeProfileKey) {
+        if (isCcdLocal() && detail.profile.profile_key !== activeProfileKey) {
           setMessages([]);
           setConversationLoadResult({
             requestKey: conversationRequestKey,
@@ -272,7 +272,7 @@ export default function ChatScreen() {
         );
       if (
         detail.conversation_id !== activeConversationId ||
-        detail.profile.profile_key !== activeProfileKey ||
+        (isCcdLocal() && detail.profile.profile_key !== activeProfileKey) ||
         !prefixMatches
       ) {
         setReconciliationState('changed');
@@ -386,7 +386,7 @@ export default function ChatScreen() {
             {conversationState === 'profile_mismatch' && (
               <View accessibilityRole="alert" style={styles.conversationStateCard}>
                 <Text style={styles.conversationStateTitle}>
-                  {isCcdLocal() ? 'Conversación no disponible en esta apertura local' : 'Esta conversación pertenece a otro perfil de demostración'}
+                  {isCcdLocal() ? 'Conversación no disponible en esta apertura local' : 'La conversación no está disponible para la asignación actual'}
                 </Text>
                 <Text style={styles.conversationStateText}>
                   Selecciona la conversación desde el historial del perfil activo.

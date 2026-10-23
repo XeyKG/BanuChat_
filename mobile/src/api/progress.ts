@@ -1,4 +1,6 @@
 import { getApiBaseUrl } from '@/config/api';
+import {resourceFetch as fetch} from '@/auth/runtime';
+import {isCcdLocal} from '@/config/demo-mode';
 
 export type ProgressStatus = 'enrolled' | 'in_progress' | 'completed';
 
@@ -111,7 +113,8 @@ export async function getProfileProgress(
   const query = new URLSearchParams();
   input.statuses?.forEach((status) => query.append('statuses', status));
   const suffix = query.toString();
-  const url = `${getApiBaseUrl()}/profiles/${encodeURIComponent(input.profileKey)}/progress${suffix ? `?${suffix}` : ''}`;
+  const path=isCcdLocal()?`/profiles/${encodeURIComponent(input.profileKey)}/progress`:'/me/progress';
+  const url = `${getApiBaseUrl()}${path}${suffix ? `?${suffix}` : ''}`;
 
   const response = await fetch(url, { method: 'GET' });
   if (response.status !== 200) {

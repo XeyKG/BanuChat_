@@ -74,7 +74,7 @@ export default function HistoryScreen() {
   }, [activeProfile]);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/profiles');
+    if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
   }, [activeProfile, router]);
 
   useFocusEffect(loadConversations);

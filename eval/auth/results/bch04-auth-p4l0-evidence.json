@@ -1,0 +1,296 @@
+{
+  "checkpoint": "BCH-04/AUTH-P4-L0",
+  "dateLocal": "2026-10-23",
+  "baseCommit": "074d6d49c3767d7b0d06d27ee0d78e53cbead72e",
+  "status": "IMPLEMENTED_LOCAL_PHYSICAL_VALIDATION_PENDING",
+  "mail": "SUSPENDED",
+  "database": {
+    "name": "banuchat_auth_p4l0_test",
+    "host": "127.0.0.1",
+    "port": 55439,
+    "role": {
+      "db": "banuchat_auth_p4l0_test",
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolreplication": false,
+      "rolbypassrls": false
+    },
+    "accounts": [
+      {
+        "status": "active",
+        "count": 2
+      },
+      {
+        "status": "disabled",
+        "count": 1
+      },
+      {
+        "status": "pending_password",
+        "count": 1
+      }
+    ],
+    "recoveryContacts": 0,
+    "recoveryDispatches": 0,
+    "events": [
+      {
+        "event_type": "account_provisioned",
+        "count": 3
+      },
+      {
+        "event_type": "password_reset",
+        "count": 1
+      },
+      {
+        "event_type": "password_set",
+        "count": 3
+      }
+    ],
+    "existing008PrivilegesUsed": true,
+    "additionalPrivilegeDelta": false,
+    "corpusUnchanged": true,
+    "corpusFingerprint": "9331f977456041d1975afae77e56874199841d33a78afce3ee3c78e3da64be0b"
+  },
+  "validation": {
+    "api": {
+      "typecheck": "PASS",
+      "build": "PASS",
+      "tests": {
+        "pass": 556,
+        "fail": 0
+      },
+      "lint": "NOT_CONFIGURED"
+    },
+    "mobile": {
+      "typecheck": "PASS",
+      "lint": "PASS",
+      "tests": {
+        "pass": 15,
+        "fail": 0
+      }
+    },
+    "integration": {
+      "checks": 9,
+      "nodeTestCount": 10,
+      "pass": 10,
+      "fail": 0,
+      "secureStore": "DOUBLE",
+      "http": "REAL_LOOPBACK",
+      "postgres": "REAL_ISOLATED",
+      "generator": "CONTROLLED_BASIC_SOCIAL"
+    },
+    "nonTtyAdmin": "REFUSED_BEFORE_DB_ACCESS",
+    "ttyPrivateInputManual": "PENDING",
+    "androidExport": {
+      "status": "PASS_COMPILATION_ONLY",
+      "bundle": "mobile/.expo/auth-p4l0-android/_expo/static/js/android/entry-0703bc8ed56607cf45177809e564eb28.hbc",
+      "bytes": 3791291,
+      "sha256": "2704fafb85719058344eca98ebf67a99f6f050da60a067805f3150f40827298f"
+    },
+    "device": {
+      "android": "NOT_TESTED",
+      "ios": "NOT_TESTED",
+      "nativeSecureStore": "NOT_TESTED",
+      "reason": "ADB_NOT_FOUND_IN_PATH_OR_DEFAULT_SDK_LOCATION_NO_SAFE_DEVICE_CHANNEL_ACCREDITED"
+    },
+    "initialFailures": {
+      "sqlFixture": "disabled_at/updated_at missing in disabled-account fixture; corrected without DDL change and rerun from empty instance",
+      "mobileRace": "Expired access logout skipped when pending refresh has removed predecessor; returned late access revoked once",
+      "nativeExport": "Hermes sandbox temporary write denied; passed using authorized workspace temporary directory"
+    }
+  },
+  "protectedHashes": [
+    {
+      "path": "infra/db/001_initial_schema.sql",
+      "sha256": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/002_ccd_local_manifest.sql",
+      "sha256": "7d11af66598a1df144d4c8975eecec3559850af92b445c2f291902ec5171a39c",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/003_ccd_chat_demo.sql",
+      "sha256": "2501581050314183ebbbf23b595f13abe9d5cb8b9f61a3dac2afc00d82c4076c",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/004_ccd_expanded_manifest.sql",
+      "sha256": "d9c4feb8e7c583da824e4be08de37e898200679b0ab3797b1fdf697a27fe6660",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/005_ccd_guidance_manifest.sql",
+      "sha256": "02cf39aeb6b9a037fbad2849e006ba7b3a7323d6b2f6b1ed970b7863eeeca46e",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/006_synthetic_auth.sql",
+      "sha256": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/007_authenticated_resources.sql",
+      "sha256": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/008_verified_recovery_email.sql",
+      "sha256": "757e5caebac9815070940efd3f4830014c8e13b280b0954a59296566fb940a77",
+      "unchanged": true
+    },
+    {
+      "path": "infra/db/tests/001_schema_integration.sql",
+      "sha256": "c79011749d81b59874b21e69af335d5f2866e976767ea1e51cf096ea8fadf6af",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/api-contract.md",
+      "sha256": "7d2979e24cd9a7764ba2473baab082da2238271c9f9ab3ae401bd1860056c5ab",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/api-contract-v2.md",
+      "sha256": "69b57d4c9c9022d227b519ef71903d0f36b7ffb0795fdf1b8c14f056f9c7c66c",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/openapi.yaml",
+      "sha256": "2d0cb46659a11cd77d6dc40c7308df85187536d14927d16e54784357f118d251",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/openapi-v2.yaml",
+      "sha256": "af5cb037a047c1a830bfaa259005cc4d3fe59e7027b6ce2271309011b2832f17",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools-contract.md",
+      "sha256": "4260b05d30d3bd7c0d6283338055e5f89918a2e15109c9dfe9745764aa9a759d",
+      "unchanged": true
+    },
+    {
+      "path": "backend/mcp-server/tools.contract.json",
+      "sha256": "b431a85a20e3964709aec21240e7be286b1c2c6885590a9527795b34403f7bdd",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/authenticated-runtime.ts",
+      "sha256": "226ca975e227adaa0352e0013318752aa569f239cb80e2473d000860110cd703",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/auth-service.ts",
+      "sha256": "9159c7652db7cee39b919ab9f090f764e9fa0778722235ad7c38ea758e267acb",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/pg-auth-store.ts",
+      "sha256": "8ef32e324633c14758589b623439ab0f8d8ff7dc61b452ffcc3c44bb5b907f97",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/provision-account.ts",
+      "sha256": "9a7bbc0b7febd82f1025ff441b8c8007c7a4f54e3ef7ff3c7b8cc432535a68bd",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/recovery-service.ts",
+      "sha256": "9c0bfcfd7cb4a975ab5cceeee691a07a421bb554851e64c7bf918ac8964f8346",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/recovery-crypto.ts",
+      "sha256": "b26aa1eb69e6f3b075646371556c254b504d9e9b8f2dac9d2e794d0d3890921e",
+      "unchanged": true
+    },
+    {
+      "path": "backend/api/src/auth/mail-delivery.ts",
+      "sha256": "f9675b2541aff6bcc513381c2ba67c9129f4f1a56649b559ba6f782952814403",
+      "unchanged": true
+    }
+  ],
+  "protectedTreesUnchanged": [
+    "infra/db",
+    "data",
+    "backend/rag",
+    "backend/mcp-server",
+    "backend/api/src/application",
+    "backend/api/src/http"
+  ],
+  "changedFiles": [
+    "backend/api/package.json",
+    "backend/api/README.md",
+    "backend/api/src/admin-local-account.ts",
+    "backend/api/src/auth/local-password-administrator.ts",
+    "backend/api/src/auth/private-password.ts",
+    "backend/api/src/authenticated-main.ts",
+    "backend/api/test/auth-p4l0-integration.mts",
+    "backend/api/test/auth-p4l0-setup.mts",
+    "backend/api/test/auth-p4l0/environment.ts",
+    "docs/operations/auth-p4l0-login-local.md",
+    "docs/transition/bch04-auth-p4l0-checkpoint.md",
+    "eval/auth/results/bch04-auth-p4l0-evidence.json",
+    "eval/auth/results/bch04-auth-p4l0-final.json",
+    "eval/auth/results/bch04-auth-p4l0-first.json",
+    "infra/auth-p4l0-test-environment.ps1",
+    "mobile/.env.example",
+    "mobile/app.json",
+    "mobile/package-lock.json",
+    "mobile/package.json",
+    "mobile/README.md",
+    "mobile/src/api/announcements.ts",
+    "mobile/src/api/calendar.ts",
+    "mobile/src/api/conversations.ts",
+    "mobile/src/api/documents.ts",
+    "mobile/src/api/messages.ts",
+    "mobile/src/api/profiles.ts",
+    "mobile/src/api/progress.ts",
+    "mobile/src/app/_layout.tsx",
+    "mobile/src/app/calendar.tsx",
+    "mobile/src/app/chat.tsx",
+    "mobile/src/app/history.tsx",
+    "mobile/src/app/home.tsx",
+    "mobile/src/app/index.tsx",
+    "mobile/src/app/login.tsx",
+    "mobile/src/app/progress.tsx",
+    "mobile/src/auth/auth-provider.tsx",
+    "mobile/src/auth/auth-session.ts",
+    "mobile/src/auth/native-store.ts",
+    "mobile/src/auth/runtime.ts",
+    "mobile/src/components/chat-sources.tsx",
+    "mobile/src/config/api.ts",
+    "mobile/src/session/session-context.tsx",
+    "mobile/test/auth-session.test.ts",
+    "mobile/test/ccd-local.test.ts"
+  ],
+  "externalMailSent": false,
+  "realPersonalContactsRead": false,
+  "originalDatabasesConnected": false,
+  "nativeProjectsGenerated": false,
+  "noCommitOrPush": true,
+  "cleanup": {
+    "status": "REMOVED_VERIFIED_TASK_RESOURCES_AND_GENERATED_CREDENTIALS",
+    "containerId": "4b01babbbb228967a8761e3024453d4faa5215ce9428d40ea55864e88a60b1af",
+    "networkId": "2efc396ee06f138de6a6793e911282ecef74c0beff6b660a8195c323da9ae714",
+    "volume": "banuchat-auth-p4l0-20261023-data",
+    "originalContainers": [
+      "banuchat-ccd-dev-postgres-ccd-1",
+      "banuchat-n8n",
+      "banuchat-postgres"
+    ],
+    "remainingVolumeCount": 8,
+    "remainingNetworkCount": 9
+  },
+  "finalReview": {
+    "diffCheck": "PASS",
+    "newFileWhitespaceCheck": "PASS",
+    "localArtifactLinksChecked": 30,
+    "privacyAddedLinesAndNewFiles": "PASS_RESERVED_FIXTURES_ONLY",
+    "nativeProjectsGenerated": false,
+    "modifiedFileCount": 25,
+    "newFileCount": 19,
+    "stoppedForControlRoom": true
+  }
+}

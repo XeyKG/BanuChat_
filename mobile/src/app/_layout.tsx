@@ -1,20 +1,35 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
-import { SessionProvider } from '@/session/session-context';
+import { SessionProvider,useSession } from '@/session/session-context';
 import { isCcdLocal } from '@/config/demo-mode';
+import {AuthProvider,useAuth} from '@/auth/auth-provider';
+import {ActivityIndicator,View} from 'react-native';
 
 export default function RootLayout() {
+  return <AuthProvider><SessionProvider><Navigation /></SessionProvider></AuthProvider>;
+}
+
+function Navigation(){
+  const {snapshot}=useAuth();const {activeProfile}=useSession();const ccd=isCcdLocal();
+  if(!ccd&&snapshot.phase==='restoring')return <View style={{flex:1,justifyContent:'center'}}><ActivityIndicator accessibilityLabel="Validando sesión" /></View>;
+  const authenticated=ccd?activeProfile!==null:snapshot.phase==='authenticated';
   return (
-    <SessionProvider>
+    <>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
-        <Stack.Protected guard={!isCcdLocal()}>
+      <Stack key={ccd?'ccd':String(snapshot.epoch)} initialRouteName={ccd?'profiles':authenticated?'home':snapshot.epoch>0?'login':'index'} screenOptions={{ headerShown: false, animation: 'fade' }}>
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={!ccd&&!authenticated}><Stack.Screen name="login" /></Stack.Protected>
+        <Stack.Protected guard={ccd}><Stack.Screen name="profiles" /></Stack.Protected>
+        <Stack.Protected guard={authenticated}>
+          <Stack.Screen name="home" /><Stack.Screen name="chat" /><Stack.Screen name="history" /><Stack.Screen name="document" />
+        </Stack.Protected>
+        <Stack.Protected guard={!ccd&&authenticated}>
           <Stack.Screen name="calendar" />
           <Stack.Screen name="progress" />
           <Stack.Screen name="announcements" />
         </Stack.Protected>
       </Stack>
-    </SessionProvider>
+    </>
   );
 }

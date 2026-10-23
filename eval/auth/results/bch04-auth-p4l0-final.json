@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "008 existing permissions suffice; admin rejects privileged role, wrong deployment and CCD/incorrect DB",
+      "result": "PASS"
+    },
+    {
+      "name": "real UID/password login and me; wrong password and disabled account fail generically",
+      "result": "PASS"
+    },
+    {
+      "name": "own chat, turn and shared-profile history isolation; bearer applied to all protected resources",
+      "result": "PASS"
+    },
+    {
+      "name": "restart restores with rotated refresh and me, serializes concurrent renewal with real backend",
+      "result": "PASS"
+    },
+    {
+      "name": "real access expiry causes 401 and clears Mobile memory/vault without replay",
+      "result": "PASS"
+    },
+    {
+      "name": "failed credential constraint rolls back account version and every session revocation",
+      "result": "PASS"
+    },
+    {
+      "name": "administrative replacement preserves owners/bindings, increments version, revokes all sessions atomically",
+      "result": "PASS"
+    },
+    {
+      "name": "logout revokes server session and account switch exposes only the new owner",
+      "result": "PASS"
+    },
+    {
+      "name": "recovery remains unconfigured, no anonymous v1/registration and no corpus/history changes",
+      "result": "PASS"
+    }
+  ],
+  "corpusBefore": "9331f977456041d1975afae77e56874199841d33a78afce3ee3c78e3da64be0b",
+  "corpusAfter": "9331f977456041d1975afae77e56874199841d33a78afce3ee3c78e3da64be0b",
+  "secureStore": "DOUBLE_ONLY",
+  "physicalDevice": "NOT_TESTED",
+  "mail": "SUSPENDED",
+  "externalSent": false
+}

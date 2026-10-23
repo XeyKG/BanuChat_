@@ -1,5 +1,19 @@
 # BanuChat Mobile
 
+## Estado vigente AUTH-P4-L0
+
+El modo synthetic usa ahora login propio por UID/contraseña y RESTv2 protegido;
+seleccionar un perfil ya no autentica. La documentación v1/sesión por perfiles más
+abajo se conserva como antecedente. CCD local mantiene su modo histórico separado.
+Recuperación por correo **SUSPENDIDA**, sin registro público. No usar la configuración
+LAN HTTP histórica para contraseñas o tokens. Configuración/canal seguro,
+aprovisionamiento y límites en el [runbook](../docs/operations/auth-p4l0-login-local.md)
+y [checkpoint](../docs/transition/bch04-auth-p4l0-checkpoint.md).
+
+Implementación y pruebas locales no equivalen a validación completa en dispositivo.
+Solo refresh se guarda en expo-secure-store57.0.4; access queda en memoria y no se
+guarda contraseña. Web falla cerrado para autenticación; no reemplaza Android/iOS.
+
 Aplicación móvil en Expo + React Native + TypeScript, inicializada con Expo SDK
 57 y Expo Router. El dispositivo principal para desarrollo es un teléfono Android
 real con Expo Go.

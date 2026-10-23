@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
+import {resourceFetch as fetch} from '@/auth/runtime';
 import { isCcdLocal } from '@/config/demo-mode';
 import { assertConversationAllowed, operatorConversationIds, rememberConversation } from '@/session/operator-conversations';
 import { isCitation, type Citation } from '@/api/messages';
@@ -165,7 +166,7 @@ export async function createConversation(profileKey: string): Promise<CreatedCon
     response = await fetch(`${getApiBaseUrl()}/conversations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profile_key: profileKey }),
+      body: JSON.stringify(isCcdLocal()?{ profile_key: profileKey }:{}),
     });
   } catch {
     throw new Error('CREATE_CONVERSATION_REQUEST_FAILED');
@@ -197,7 +198,7 @@ export async function listConversations(profileKey: string): Promise<Conversatio
       last_message_at: detail.messages.at(-1)?.created_at ?? null,
     })).reverse();
   }
-  const query = new URLSearchParams({ profile_key: profileKey, limit: '50' });
+  const query = new URLSearchParams({ limit: '50' });
   let response: Response;
   try {
     response = await fetch(`${getApiBaseUrl()}/conversations?${query.toString()}`, {

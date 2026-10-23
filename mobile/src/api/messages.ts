@@ -1,4 +1,6 @@
 import { getApiBaseUrl } from '@/config/api';
+import {resourceFetch as fetch} from '@/auth/runtime';
+import {isCcdLocal} from '@/config/demo-mode';
 import { assertConversationAllowed } from '@/session/operator-conversations';
 
 export const MESSAGE_TIMEOUT_MS = 90_000;
@@ -101,7 +103,7 @@ export function isCitation(value: unknown): value is Citation {
       typeof value.document_version_id === 'string' &&
       UUID_PATTERN.test(value.document_version_id) &&
       (value.artifact_url === null ||
-        value.artifact_url === `/api/v1/documents/${value.document_version_id}/artifact`)
+        value.artifact_url === `/api/${isCcdLocal()?'v1':'v2'}/documents/${value.document_version_id}/artifact`)
     );
   }
 

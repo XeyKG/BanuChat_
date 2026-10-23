@@ -40,6 +40,7 @@ function parseProfilesResponse(value: unknown): ProfilesResponse {
 }
 
 export async function getProfiles(): Promise<ProfilesResponse> {
+  if(!isCcdLocal())throw new Error('PROFILE_SELECTION_IS_NOT_AUTHENTICATION');
   let response: Response;
   try {
     response = await fetch(`${getApiBaseUrl()}/profiles`, { method: 'GET' });

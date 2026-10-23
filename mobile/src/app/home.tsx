@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { createConversation } from '@/api/conversations';
 import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useSession } from '@/session/session-context';
+import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
 import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, DocGlyph, SparkGlyph } from '@/ui/icons';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
@@ -51,12 +52,13 @@ function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabl
 export default function HomeScreen() {
   const router = useRouter();
   const { activeProfile, clearSession } = useSession();
+  const {snapshot}=useAuth();
   const isMountedRef = useRef(true);
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [startChatError, setStartChatError] = useState(false);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/profiles');
+    if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
   }, [activeProfile, router]);
 
   useEffect(() => {
@@ -90,7 +92,7 @@ export default function HomeScreen() {
   function endSession() {
     if (isStartingChat) return;
     clearSession();
-    router.replace('/profiles');
+    router.replace(isCcdLocal()?'/profiles':'/login');
   }
 
   return (
@@ -109,8 +111,8 @@ export default function HomeScreen() {
 
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
-              <Text style={styles.greeting}>{isCcdLocal() ? 'Demostración CCD local' : `Hola, ${activeProfile.alias}`}</Text>
-              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : '¿Qué quieres consultar hoy?'}</Text>
+              <Text style={styles.greeting}>{isCcdLocal() ? 'Demostración CCD local' : `Cuenta ${snapshot.me?.synthetic_uid??''}`}</Text>
+              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : `Perfil académico: ${activeProfile.alias}`}</Text>
             </View>
           </FadeIn>
 
@@ -198,7 +200,7 @@ export default function HomeScreen() {
 
           <FadeIn delay={520}>
             <View style={styles.sessionSection}>
-              <Text style={styles.sessionTitle}>{isCcdLocal() ? 'Operador local · memoria temporal' : 'Sesión de demostración'}</Text>
+              <Text style={styles.sessionTitle}>{isCcdLocal() ? 'Operador local · memoria temporal' : 'Sesión BanuChat'}</Text>
               <View style={styles.sessionActions}>
                 {!isCcdLocal() && <Pressable
                   accessibilityRole="button"
@@ -206,7 +208,7 @@ export default function HomeScreen() {
                   disabled={isStartingChat}
                   onPress={endSession}
                   style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
-                  <Text style={styles.changeProfileLabel}>Cambiar perfil</Text>
+                  <Text style={styles.changeProfileLabel}>Cambiar de cuenta</Text>
                 </Pressable>}
                 <Pressable
                   accessibilityRole="button"
@@ -214,7 +216,7 @@ export default function HomeScreen() {
                   disabled={isStartingChat}
                   onPress={endSession}
                   style={({ pressed }) => [styles.textButton, pressed && styles.pressed]}>
-                  <Text style={styles.closeSessionLabel}>{isCcdLocal() ? 'Finalizar apertura local' : 'Cerrar sesión demo'}</Text>
+                  <Text style={styles.closeSessionLabel}>{isCcdLocal() ? 'Finalizar apertura local' : 'Cerrar sesión'}</Text>
                 </Pressable>
               </View>
             </View>

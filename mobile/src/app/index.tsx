@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
 import { isCcdLocal } from '@/config/demo-mode';
+import {useAuth} from '@/auth/auth-provider';
 import {
   Pressable,
   ScrollView,
@@ -67,6 +68,7 @@ function SlideGlyph({ slide }: { slide: OnboardingSlide }) {
 }
 
 export default function OnboardingScreen() {
+  const {snapshot}=useAuth();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -74,9 +76,10 @@ export default function OnboardingScreen() {
 
   const isLastSlide = activeIndex === SLIDES.length - 1;
   if (isCcdLocal()) return <Redirect href="/profiles" />;
+  if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
 
   function goToProfiles() {
-    router.replace('/profiles');
+    router.replace('/login');
   }
 
   function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {

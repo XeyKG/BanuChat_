@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
+import {resourceFetch as fetch} from '@/auth/runtime';
 
 export const DOCUMENT_TIMEOUT_MS = 15_000;
 export const MAX_DOCUMENT_CHARACTERS = 1_000_000;

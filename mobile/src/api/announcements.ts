@@ -1,4 +1,5 @@
 import { getApiBaseUrl } from '@/config/api';
+import {resourceFetch as fetch} from '@/auth/runtime';
 
 export type AnnouncementStatus = 'active' | 'upcoming' | 'expired';
 export type AnnouncementFilter = AnnouncementStatus | 'all';

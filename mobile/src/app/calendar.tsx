@@ -11,6 +11,7 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
+import {isCcdLocal} from '@/config/demo-mode';
 import { FadeIn } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
@@ -83,7 +84,7 @@ export default function CalendarScreen() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
 
   useEffect(() => {
-    if (activeProfile === null) router.replace('/profiles');
+    if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
   }, [activeProfile, router]);
 
   useEffect(() => {

@@ -1,5 +1,12 @@
 # API REST — contrato y estado implementado
 
+AUTH-P4-L0 añade consola administrativa local para primera contraseña sin correo y
+`npm run start:authenticated`, composición v2 independiente, solo loopback, sin v1
+ni recuperación funcional. Correo **SUSPENDIDO** por BCH-D33. No cambia contratos o
+migraciones ni activa contactos de forma ficticia. Véanse
+[operación](../../docs/operations/auth-p4l0-login-local.md) y
+[checkpoint](../../docs/transition/bch04-auth-p4l0-checkpoint.md).
+
 AUTH-P3.1 completa las dos operaciones de recuperación en la composición protegida
 v2, con PostgreSQL aislado y entrega local de pruebas. Véanse el
 [núcleo de recuperación](recovery-core.md) y el

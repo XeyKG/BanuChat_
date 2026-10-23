@@ -71,15 +71,15 @@ test('CCD and synthetic profile lists cannot be silently interchanged', async ()
   globalThis.fetch = async () => Response.json({ release_id: id, profiles: [{ profile_key: 'student_001', alias: 'Sintético' }] });
   await assert.rejects(getProfiles());
   process.env.EXPO_PUBLIC_DEMO_MODE = 'synthetic';
-  assert.equal((await getProfiles()).profiles[0].profile_key, 'student_001');
+  await assert.rejects(getProfiles());
   process.env.EXPO_PUBLIC_API_BASE_URL = 'http://192.168.1.2:3000/api/v1';
-  assert.equal(getApiBaseUrl(), process.env.EXPO_PUBLIC_API_BASE_URL);
+  assert.throws(getApiBaseUrl);
 });
 
-test('synthetic history keeps the original profile query without a volatile CCD allowlist', async () => {
+test('synthetic history cannot use anonymous v1 or a profile as authentication', async () => {
   process.env.EXPO_PUBLIC_DEMO_MODE = 'synthetic';
   let requested = '';
   globalThis.fetch = async url => { requested = String(url); return Response.json({ conversations: [] }); };
-  assert.deepEqual(await listConversations('student_001'), []);
-  assert.match(requested, /profile_key=student_001/);
+  await assert.rejects(listConversations('student_001'));
+  assert.equal(requested,'');
 });
