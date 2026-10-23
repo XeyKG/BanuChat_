@@ -6,11 +6,16 @@ function normalize(text: string): string {
     .replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
+/** Only the documented CCD course alias; never infer a course from generic AI mentions. */
+function normalizeCcdSubject(subject: string): string {
+  return normalize(subject).replace(/\binteligencia artificial generativa\b/gu, 'ia generativa');
+}
+
 /** A conversational antecedent, not eligibility or institutional evidence. */
 export function ccdGuidanceTopic(query: string, history: readonly ConversationMessage[]): 'U03' | 'U04' | undefined {
   const subjects = [query, ...history.filter(m => m.role === 'user').map(m => m.content).reverse()];
   for (const subject of subjects) {
-    const text = normalize(subject);
+    const text = normalizeCcdSubject(subject);
     if (/\b(?:contacto|correo|email)\b/u.test(text) || /\b(?:duracion|cuanto duran?|estructura|proposito|resultados?|inmediata|plataforma)\b/u.test(text)) return undefined;
     if (/\b(?:informatica|transicion|antigu\p{L}*|homolog\p{L}*|equivalen\p{L}*|reconoc\p{L}*|word|powerpoint|excel)\b/u.test(text)) return 'U04';
     if (/\b(?:corrijo|correccion|fue)\b.*\bcurso\b/u.test(text)) return 'U03';
@@ -46,7 +51,7 @@ export function selectCcdEvidence(
     return chunks.filter(chunk => chunk.chunk_locator === `unit:${guidance}` || chunk.chunk_locator === 'unit:M12');
   }
   for (const subject of subjects) {
-    const text = ` ${normalize(subject)} `;
+    const text = ` ${normalizeCcdSubject(subject)} `;
     if (/\b(?:contacto|correo|email)\b/u.test(text)) return chunks.filter(chunk => chunk.chunk_locator === "unit:M12");
     if (/\bpruebas?\b/u.test(text)) return chunks.filter(chunk => chunk.chunk_locator === "unit:TEST_ORIENTATION");
     const courses = chunks.filter(chunk => {

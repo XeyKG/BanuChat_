@@ -1,0 +1,84 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-503-F1",
+  "at": "2026-10-23T18:25:32.220Z",
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  },
+  "counts": {
+    "fixture_accounts": 2,
+    "unrevoked_fixture_sessions": 0
+  },
+  "protected_files": [
+    {
+      "path": "backend/api/src/chat/document-rag.ts",
+      "sha256": "463eb1a92cbb1dc9da32f01515107e1b2b5a9185f1e7d46a75f9126aacf11551"
+    },
+    {
+      "path": "backend/api/src/chat/conversation-context.ts",
+      "sha256": "8e42fa58b8f4409793d3d5a06553c62a874447caee97cf9fe5078a717b54d4e0"
+    },
+    {
+      "path": "backend/api/src/generation/generator-client.ts",
+      "sha256": "b9449a2e709f1cec1897c09c45f9a9eaf7b5d005e139c183d13df32d39dbec72"
+    },
+    {
+      "path": "backend/api/src/generation/ollama-generator-client.ts",
+      "sha256": "26c8044ad6a7db101183c62cc3c3f190fbbcc3eb6b543eb0abbe07eae5acf02c"
+    },
+    {
+      "path": "backend/api/src/retrieval/ollama-query-embedding-client.ts",
+      "sha256": "dbb56fc5153a14612e2342cce2af4b549d9d8a5a5cae969d8c7441b71822153f"
+    },
+    {
+      "path": "infra/db/001_initial_schema.sql",
+      "sha256": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3"
+    },
+    {
+      "path": "infra/db/002_ccd_local_manifest.sql",
+      "sha256": "7d11af66598a1df144d4c8975eecec3559850af92b445c2f291902ec5171a39c"
+    },
+    {
+      "path": "infra/db/003_ccd_chat_demo.sql",
+      "sha256": "2501581050314183ebbbf23b595f13abe9d5cb8b9f61a3dac2afc00d82c4076c"
+    },
+    {
+      "path": "infra/db/004_ccd_expanded_manifest.sql",
+      "sha256": "d9c4feb8e7c583da824e4be08de37e898200679b0ab3797b1fdf697a27fe6660"
+    },
+    {
+      "path": "infra/db/005_ccd_guidance_manifest.sql",
+      "sha256": "02cf39aeb6b9a037fbad2849e006ba7b3a7323d6b2f6b1ed970b7863eeeca46e"
+    },
+    {
+      "path": "infra/db/006_synthetic_auth.sql",
+      "sha256": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85"
+    },
+    {
+      "path": "infra/db/007_authenticated_resources.sql",
+      "sha256": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47"
+    },
+    {
+      "path": "infra/db/008_verified_recovery_email.sql",
+      "sha256": "757e5caebac9815070940efd3f4830014c8e13b280b0954a59296566fb940a77"
+    },
+    {
+      "path": "infra/db/009_demo_uid_convention.sql",
+      "sha256": "82916c856513fc8e108f064c328d5e8d1d15388142a249baaf308402d7be55af"
+    },
+    {
+      "path": "infra/db/010_authenticated_document_reads.sql",
+      "sha256": "ba3939de91ddb1f2d2e0f16921d7eba9adbed27db769aa17364d292a392b03ed"
+    },
+    {
+      "path": "infra/db/011_ccd_authenticated_bootstrap.sql",
+      "sha256": "9c4edf17faf09147babd0f25eadc887629014c7d646c437ebb3837baae74efb0"
+    }
+  ],
+  "versionable_files_scanned": 14,
+  "secrets_found": false,
+  "original_databases_accessed": false,
+  "operator_accounts_changed": false,
+  "android_executed": false
+}

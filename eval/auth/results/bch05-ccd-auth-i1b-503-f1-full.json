@@ -1,0 +1,44 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-503-F1",
+  "phase": "full",
+  "started_at": "2026-10-23T18:18:28.394Z",
+  "finished_at": "2026-10-23T18:20:33.585Z",
+  "operational_pass": true,
+  "automatic_controls_pass": true,
+  "turn_metrics": {
+    "planned": 43,
+    "attempted": 43,
+    "completed": 43,
+    "failed": 0,
+    "not_evaluable": 0
+  },
+  "check_metrics": {
+    "planned": 216,
+    "passed": 216,
+    "failed": 0,
+    "not_evaluable": 0
+  },
+  "authorization": {
+    "foreign_get": 404,
+    "foreign_post": 404,
+    "anonymous_get": 401,
+    "other_owner_list_empty": true,
+    "unsupported_resources": 403,
+    "anonymous_v1": 404,
+    "client_scope_override": 400,
+    "legacy_unowned": 404
+  },
+  "artifacts_verified": 24,
+  "citations_verified": 40,
+  "corpus_before": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "corpus_after": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+  "private_report_directory": "data/ccd/evidence/auth-i1b",
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  },
+  "semantic_note": "Technical controls do not grant semantic A/B/C. BCH-03/5.3 rubrics unchanged; T11 remains pending academic evaluation, including generic abstentions.",
+  "failure": null,
+  "revocation": null
+}

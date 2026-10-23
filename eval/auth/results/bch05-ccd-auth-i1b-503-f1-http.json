@@ -1,0 +1,373 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-503-F1",
+  "started_at": "2026-10-23T18:16:26.323Z",
+  "turns": [
+    {
+      "case": 0,
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": false,
+      "citations": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6974,
+      "generated": {
+        "done_reason": "stop",
+        "prompt_eval_count": 1883,
+        "eval_count": 78
+      }
+    },
+    {
+      "case": 1,
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": false,
+      "citations": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6989,
+      "generated": {
+        "done_reason": "stop",
+        "prompt_eval_count": 1886,
+        "eval_count": 83
+      }
+    },
+    {
+      "case": 1,
+      "turn": 2,
+      "status": 201,
+      "persisted_messages": 4,
+      "insufficient_evidence": false,
+      "citations": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7616,
+      "generated": {
+        "done_reason": "stop",
+        "prompt_eval_count": 2045,
+        "eval_count": 83
+      }
+    },
+    {
+      "case": 2,
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": false,
+      "citations": 1,
+      "provider": [
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/embed",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        },
+        {
+          "path": "/api/chat",
+          "status": 200
+        },
+        {
+          "path": "/api/version",
+          "status": 200
+        },
+        {
+          "path": "/api/tags",
+          "status": 200
+        },
+        {
+          "path": "/api/show",
+          "status": 200
+        }
+      ],
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7006,
+      "generated": {
+        "done_reason": "stop",
+        "prompt_eval_count": 1891,
+        "eval_count": 76
+      }
+    }
+  ],
+  "integrity_before": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  },
+  "database": "banuchat_ccd_auth_i1b_test",
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  },
+  "selection_before": [
+    {
+      "case": "short_title_control",
+      "selected_count": 1,
+      "only_target_syllabus": true
+    },
+    {
+      "case": "long_title_reproduction",
+      "selected_count": 10,
+      "only_target_syllabus": false
+    },
+    {
+      "case": "operator_reported_wording_pure_check_only",
+      "selected_count": 10,
+      "only_target_syllabus": false
+    }
+  ],
+  "selection_after": [
+    {
+      "selected": [
+        "unit:M02:DOC-101"
+      ]
+    },
+    {
+      "selected": [
+        "unit:M02:DOC-101"
+      ]
+    },
+    {
+      "selected": [
+        "unit:M02:DOC-101"
+      ]
+    }
+  ],
+  "isolation": {
+    "a_to_b": 404,
+    "b_to_a_get": 404,
+    "b_to_a_post": 404
+  },
+  "passed": true,
+  "integrity_after": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  },
+  "finished_at": "2026-10-23T18:16:56.640Z"
+}

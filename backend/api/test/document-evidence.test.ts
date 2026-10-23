@@ -12,6 +12,44 @@ const chunks = [brand, contact, tests, ia];
 const failure = { title: 'Historical failure', chunk_locator: 'unit:U03' } as RetrievedDocumentChunk;
 const transition = { title: 'Transition', chunk_locator: 'unit:U04' } as RetrievedDocumentChunk;
 
+test('CCD full course alias and canonical title select only the existing IA syllabus', () => {
+  const all = [...chunks, failure, transition];
+  for (const query of ['IA Generativa', 'Inteligencia Artificial Generativa',
+    '¿Qué temas se estudian en el curso de Inteligencia Artificial Generativa?',
+    '¿QUÉ TEMAS SE ESTUDIAN EN EL CURSO DE INTELIGENCIA ARTIFICIAL GENERATIVA?',
+    'Explica INTELIGÉNCIA ARTIFICIÁL GENERATÍVA.', '¿Qué temas tiene ia GENERATIVA?']) {
+    assert.deepEqual(selectCcdEvidence(all, query, []), [ia]);
+  }
+  // No new evidence when the syllabus is absent, and no generic AI expansion.
+  assert.deepEqual(selectCcdEvidence([brand, tests], 'Inteligencia Artificial Generativa', []),
+    selectCcdEvidence([brand, tests], 'IA Generativa', []));
+  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial', []), [brand, contact, tests, ia]);
+  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial general', []), [brand, contact, tests, ia]);
+});
+
+test('CCD alias preserves all other admitted course titles and selects no accidental syllabus', () => {
+  const others = [brand, ...[
+    ['Interacción Digital','102'], ['Creación de Contenidos Digitales','099'],
+    ['Cuidado y bienestar digital','100'], ['Marco Legal Digital','104'], ['Habilidades en Analítica Digital','098'],
+  ].map(([title,code]) => ({title,chunk_locator:`unit:M02:DOC-${code}`} as RetrievedDocumentChunk))];
+  const all = [...others, contact, tests, ia];
+  for (const course of others) assert.deepEqual(selectCcdEvidence(all, `Describe ${course.title}`, []), [course]);
+  assert.deepEqual(selectCcdEvidence(all, 'Describe Marca Personal', [{role:'user',content:'Inteligencia Artificial Generativa'}]), [brand]);
+});
+
+test('CCD alias preserves follow-up, corrections and fresh topic priority over old guidance', () => {
+  const all = [...chunks, failure, transition];
+  const history = [{role:'user' as const,content:'Inteligencia Artificial Generativa'}];
+  assert.deepEqual(selectCcdEvidence(all, '¿Y qué temas tiene?', history), [ia]);
+  const correction = {role:'user' as const,content:'Corrijo: me refiero a Marca Personal, ¿qué temas aborda?'};
+  assert.deepEqual(selectCcdEvidence(all, correction.content, history), [brand]);
+  assert.deepEqual(selectCcdEvidence(all, '¿Y qué temas tiene?', [...history, correction]), [brand]);
+  const old = [{role:'user' as const,content:'Tengo Excel aprobado del plan anterior'}];
+  assert.equal(ccdGuidanceTopic('Inteligencia Artificial Generativa', old), undefined);
+  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia Artificial Generativa', old), [ia]);
+  assert.deepEqual(selectCcdEvidence(all, '¿Y qué temas tiene?', []), []);
+});
+
 test('admitted guidance explains bounded situations without using vector rank or old assistant rules', () => {
   const all = [...chunks, failure, transition];
   assert.deepEqual(selectCcdEvidence(all, 'No aprobé una prueba nueva de 202660', []), [contact, failure]);

@@ -628,6 +628,29 @@ test('catalog-only themes ask which course before SQL, embedding or generation',
   assert.equal(fake.sql_calls.length,0);assert.equal(fake.embedding_calls.length,0);assert.equal(fake.generator_calls.length,0);
 });
 
+test('CCD aliases select and cite only DOC-101; synthetic mode keeps its unfiltered evidence', async () => {
+  for (const query of ['IA Generativa', 'Inteligencia Artificial Generativa',
+    '¿Qué temas se estudian en el curso de Inteligencia Artificial Generativa?']) {
+    for (const mode of ['ccd_local', 'synthetic'] as const) {
+      const fake=fakeDependencies([
+        chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103',content:'OTHER_COURSE_FIXTURE'}),
+        chunk({chunk_id:OTHER_CHUNK_ID,title:'IA Generativa',chunk_locator:'unit:M02:DOC-101',content:'IA_SYLLABUS_FIXTURE'}),
+      ],mode==='ccd_local'?'Contenido respaldado.\nFUENTES: [1]':'Respuesta sintética.');
+      const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:mode},{release_id:RELEASE_ID,query});
+      assert.deepEqual(answer.citations.map(c=>c.locator),mode==='ccd_local'?['unit:M02:DOC-101']:['unit:M02:DOC-103','unit:M02:DOC-101']);
+      assert.match(fake.generator_calls[0]!.input.user_prompt,/IA_SYLLABUS_FIXTURE/u);
+      assert.equal(fake.generator_calls[0]!.input.user_prompt.includes('OTHER_COURSE_FIXTURE'),mode==='synthetic');
+    }
+  }
+});
+
+test('ambiguous course reference never acquires the new alias without an antecedent', async () => {
+  const fake=fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'})]);
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'¿Y ese curso, qué temas tiene?'});
+  assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);
+  assert.equal(fake.embedding_calls.length,0);assert.equal(fake.generator_calls.length,0);
+});
+
 test('themes without history clarify without embedding; a named course after a catalog keeps DOC-101', async () => {
   const empty=fakeDependencies([chunk()]);
   const unknown=await generateDocumentRagAnswer({...empty.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'¿Y qué temas tiene?'});
