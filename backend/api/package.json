@@ -20,6 +20,7 @@
     "test:auth:p31:setup": "node --import tsx test/auth-p31-setup.mts",
     "test:auth:p31:integration": "node --import tsx --test test/auth-p31-integration.mts",
     "test:auth:p31:evidence": "node --import tsx test/auth-p31-evidence.mts",
+    "auth:p32:preflight": "node --import tsx test/auth-p32-preflight.mts",
     "start": "node dist/main.js",
     "start:local": "node --env-file=../../.env dist/main.js",
     "start:ccd": "node --env-file=../../infra/.env.ccd dist/main.js",

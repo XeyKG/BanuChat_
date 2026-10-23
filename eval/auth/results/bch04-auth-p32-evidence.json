@@ -1,0 +1,224 @@
+{
+  "teamConfirmedMissing": [
+    "approved_provider",
+    "verified_domain_and_sender",
+    "sending_credential"
+  ],
+  "baseCommit": "aa3d44dbc9fb8ccfe7104c1356b8aaee396b580b",
+  "noCommitOrPush": true,
+  "resources": {
+    "databaseConnections": 0,
+    "dockerModified": false,
+    "rolesModified": false,
+    "sqlApplied": false
+  },
+  "localTests": {
+    "build": "PASS",
+    "providerNetwork": "NOT_CALLED",
+    "typecheck": "PASS",
+    "keyRestore": "SAME_PERSISTED_FIXTURE_IN_TWO_FRESH_PROCESSES",
+    "unitTests": {
+      "fail": 0,
+      "pass": 556
+    },
+    "focusedInitial": {
+      "fail": 0,
+      "pass": 18
+    },
+    "newTests": 7,
+    "deadline": "10_SECOND_ABORT_INJECTED_NO_NETWORK",
+    "sqlIntegration": "NOT_RERUN"
+  },
+  "protectedFiles": [
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/auth-service.ts",
+      "sha256": "9159c7652db7cee39b919ab9f090f764e9fa0778722235ad7c38ea758e267acb"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/mail-delivery.ts",
+      "sha256": "f9675b2541aff6bcc513381c2ba67c9129f4f1a56649b559ba6f782952814403"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/pg-auth-store.ts",
+      "sha256": "8ef32e324633c14758589b623439ab0f8d8ff7dc61b452ffcc3c44bb5b907f97"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/primitives.ts",
+      "sha256": "7998cc22022479563dff819eef8c2f893931f8da6948627b2104212c84a943f6"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/provision-account.ts",
+      "sha256": "9a7bbc0b7febd82f1025ff441b8c8007c7a4f54e3ef7ff3c7b8cc432535a68bd"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/rate-limiter.ts",
+      "sha256": "be2d3612ae26812d84c5fe462de09f4438d5afb6a66d629e2d3df9d88d16001e"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/recovery-crypto.ts",
+      "sha256": "b26aa1eb69e6f3b075646371556c254b504d9e9b8f2dac9d2e794d0d3890921e"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/recovery-limiter.ts",
+      "sha256": "b3c47e17d46982deda3a6e20d0c72469914821bdee7c069bca84bea0e75eb147"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/recovery-service.ts",
+      "sha256": "9c0bfcfd7cb4a975ab5cceeee691a07a421bb554851e64c7bf918ac8964f8346"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/auth/resources.ts",
+      "sha256": "0bb7442093a2cda1343665d41d40bfb8f5aee83b1c9a4574e3340458d86dde54"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/001_initial_schema.sql",
+      "sha256": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/002_ccd_local_manifest.sql",
+      "sha256": "7d11af66598a1df144d4c8975eecec3559850af92b445c2f291902ec5171a39c"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/003_ccd_chat_demo.sql",
+      "sha256": "2501581050314183ebbbf23b595f13abe9d5cb8b9f61a3dac2afc00d82c4076c"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/004_ccd_expanded_manifest.sql",
+      "sha256": "d9c4feb8e7c583da824e4be08de37e898200679b0ab3797b1fdf697a27fe6660"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/005_ccd_guidance_manifest.sql",
+      "sha256": "02cf39aeb6b9a037fbad2849e006ba7b3a7323d6b2f6b1ed970b7863eeeca46e"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/006_synthetic_auth.sql",
+      "sha256": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/007_authenticated_resources.sql",
+      "sha256": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/008_verified_recovery_email.sql",
+      "sha256": "757e5caebac9815070940efd3f4830014c8e13b280b0954a59296566fb940a77"
+    },
+    {
+      "unchanged": true,
+      "path": "infra/db/tests/001_schema_integration.sql",
+      "sha256": "c79011749d81b59874b21e69af335d5f2866e976767ea1e51cf096ea8fadf6af"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/api-contract.md",
+      "sha256": "7d2979e24cd9a7764ba2473baab082da2238271c9f9ab3ae401bd1860056c5ab"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/api-contract-v2.md",
+      "sha256": "69b57d4c9c9022d227b519ef71903d0f36b7ffb0795fdf1b8c14f056f9c7c66c"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/openapi.yaml",
+      "sha256": "2d0cb46659a11cd77d6dc40c7308df85187536d14927d16e54784357f118d251"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/openapi-v2.yaml",
+      "sha256": "af5cb037a047c1a830bfaa259005cc4d3fe59e7027b6ce2271309011b2832f17"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/mcp-server/tools-contract.md",
+      "sha256": "4260b05d30d3bd7c0d6283338055e5f89918a2e15109c9dfe9745764aa9a759d"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/mcp-server/tools.contract.json",
+      "sha256": "b431a85a20e3964709aec21240e7be286b1c2c6885590a9527795b34403f7bdd"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/authenticated-runtime.ts",
+      "sha256": "226ca975e227adaa0352e0013318752aa569f239cb80e2473d000860110cd703"
+    },
+    {
+      "unchanged": true,
+      "path": "backend/api/src/http/api-v2-server.ts",
+      "sha256": "41402b93ee92d7ec6aa4bea9ba161bdf8cf84f8e46aff4c8bcd503f7335b3986"
+    }
+  ],
+  "configuration": {
+    "template": "infra/auth-p32-config.example.json",
+    "enabled": false,
+    "privateManifestIgnored": true,
+    "preflight": "BLOCKED_EXPECTED_NATIVE_EXIT_2",
+    "encryptedStore": "NOT_CONFIGURED",
+    "actualPrivateValues": 0,
+    "sendCaps": "PROPOSED_NOT_ENFORCED",
+    "operationalComposition": "NOT_CONNECTED",
+    "operationalKeyRestore": "NOT_PROVEN"
+  },
+  "decision": "KEEP_AUTH_P3_OPEN_AUTH_P31_ACCEPTED_LOCAL",
+  "external": {
+    "reset": "NOT_EXECUTED",
+    "externalMessagesSent": 0,
+    "provider": "NOT_APPROVED",
+    "holderReceived": "NOT_OBSERVED",
+    "mailboxAccessed": false,
+    "externalCodeConsumed": "NOT_EXECUTED",
+    "initialSet": "NOT_EXECUTED",
+    "deliveryReported": "NOT_ACQUIRED",
+    "accepted": "NOT_EXECUTED",
+    "contact": "NOT_CONFIGURED_OR_VERIFIED"
+  },
+  "dateLocal": "2026-10-23",
+  "status": "BLOCKED_EXTERNAL_PREREQUISITES",
+  "checkpoint": "BCH-04/AUTH-P3.2",
+  "privacy": {
+    "actualCredentialsRead": false,
+    "privatePayloadsInEvidence": false,
+    "onlyReservedFixtureAddresses": true,
+    "testLogContainsOnlyTestResults": true,
+    "changedFilesScanned": true,
+    "actualAddressesRead": false
+  },
+  "protectedTrees": [
+    "data",
+    "mobile",
+    "backend/mcp-server",
+    "backend/rag",
+    "backend/api/src/application",
+    "infra/db",
+    "infra/n8n"
+  ],
+  "finalReview": {
+    "diffCheck": "PASS",
+    "newFileWhitespace": "PASS",
+    "artifactLinksChecked": 4,
+    "changedFiles": 8,
+    "existingFilesModified": [
+      "backend/api/package.json"
+    ],
+    "externalTestStopped": true,
+    "controlRoomReviewRequired": true
+  }
+}

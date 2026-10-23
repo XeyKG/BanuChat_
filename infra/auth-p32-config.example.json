@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "external_send_enabled": false,
+  "provider": null,
+  "approval_reference": null,
+  "sender": {
+    "address": null,
+    "domain_verified": false,
+    "evidence_reference": null
+  },
+  "recipient": {
+    "address": null,
+    "consent_reference": null,
+    "holder_available": false
+  },
+  "private_material": {
+    "encrypted_file": null,
+    "protection": null,
+    "keyset_reference": null,
+    "restore_tested": false
+  },
+  "database": {
+    "name": null,
+    "deployment_id": null,
+    "target_authorized": false
+  },
+  "delivery_limits": {
+    "max_messages_per_run": 6,
+    "min_interval_ms": 1000,
+    "timeout_ms": 10000,
+    "provider_quotas_confirmed": false
+  }
+}
