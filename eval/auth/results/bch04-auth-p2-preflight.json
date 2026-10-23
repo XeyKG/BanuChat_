@@ -1,0 +1,91 @@
+{
+  "result": "CONFIRMED_BLOCKER",
+  "implementation": "NOT_STARTED",
+  "database": "banuchat_auth_p2_test",
+  "serverVersion": "160015",
+  "fixture": "unchanged AUTH-P1 synthetic fixture in new AUTH-P2 database",
+  "runtimeSuperuser": false,
+  "locks": "unchanged existing persistence",
+  "corpusFingerprintBefore": "f80434a83174c0b9467c04d42a70d983c3487df823068ff2101573dd55bef89e",
+  "corpusFingerprintAfter": "f80434a83174c0b9467c04d42a70d983c3487df823068ff2101573dd55bef89e",
+  "checks": [
+    {
+      "name": "001 and 006 applied unchanged in exclusively new PostgreSQL 16",
+      "result": "PASS"
+    },
+    {
+      "name": "runtime has no administrative flags, corpus writes or UPDATE on conversations",
+      "result": "PASS"
+    },
+    {
+      "name": "existing createConversation service works with INSERT and SELECT only",
+      "result": "PASS"
+    },
+    {
+      "name": "conversation FOR UPDATE rejected by approved no-UPDATE policy",
+      "result": "PASS",
+      "sqlstate": "42501"
+    },
+    {
+      "name": "dataset FOR SHARE rejected by approved no-corpus-DML policy",
+      "result": "PASS",
+      "sqlstate": "42501"
+    },
+    {
+      "name": "release FOR SHARE rejected by approved no-corpus-DML policy",
+      "result": "PASS",
+      "sqlstate": "42501"
+    },
+    {
+      "name": "actual sendMessage reaches controlled generator then fails 42501 at unchanged persistence",
+      "result": "PASS",
+      "sqlstate": "42501"
+    },
+    {
+      "name": "failed turn leaves zero messages and citations; corpus fingerprint unchanged",
+      "result": "PASS"
+    }
+  ],
+  "hashes": {
+    "infra/db/001_initial_schema.sql": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3",
+    "infra/db/006_synthetic_auth.sql": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85",
+    "infra/db/auth-permissions.md": "66d2b7a944395cd4e702896744aa9913b14a71a1f33df81babaca58002ff9074",
+    "backend/api/api-contract-v2.md": "8d9f913967b79658ce2d0e989e0d4101223279d6789e8463a9fc15494b003cce",
+    "backend/api/openapi-v2.yaml": "c2247a6d50d52240c03179dc46d1a5e3822b2e48ade50a41297ecde3c4d89f3a",
+    "backend/api/src/application/messages.ts": "b2bff587a37de1de7e39470a950f336c9f934ad55f4348fdb3f71c8252e43b8f"
+  },
+  "notExecuted": [
+    "protected HTTP v2",
+    "A/B isolation",
+    "revocation during generation",
+    "Ollama",
+    "original databases"
+  ],
+  "baselineCommit": "f88048eaa38e0ab6ed86e03a310f4501f7bc2528",
+  "resources": {
+    "port": "127.0.0.1:55436",
+    "volume": "banuchat-auth-p2-preflight-20261022-data",
+    "image": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "network": "banuchat-auth-p2-preflight-20261022-isolated",
+    "cleanup": "REMOVED_VERIFIED_CONTAINER_NETWORK_VOLUME_AND_CREDENTIALS",
+    "containerId": "55f061a4e6b91b2562bbcf40fe543c30e788b7cbb2b9fcbcab64fda29c76593c",
+    "container": "banuchat-auth-p2-preflight-20261022",
+    "networkId": "d52b26e16b8e5b60038eb5614ddc7152728d017c9e1d48e0b58537b248dcd88d"
+  },
+  "validation": {
+    "nodeTestTotalIncludingParent": 9,
+    "finalTypecheck": "PASS",
+    "retriesOfAdverseSqlTests": 0,
+    "firstTypecheck": "FAIL TS7060: generic arrow in .mts requires trailing comma",
+    "preflightCommand": "node --import tsx --test test/auth-p2-preflight.mts",
+    "passedAssertions": 8,
+    "correction": "Added trailing comma to test-only generic parameter; no runtime changes"
+  },
+  "finalInventory": {
+    "originalContainers": 3,
+    "originalNetworks": 9,
+    "originalVolumes": 8,
+    "protectedTrackedFilesChanged": 0,
+    "originalDatabaseConnections": 0
+  }
+}
