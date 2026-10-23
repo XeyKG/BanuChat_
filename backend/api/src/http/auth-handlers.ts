@@ -10,7 +10,7 @@ export interface DetachedAuthRequest {
 export interface DetachedAuthResponse { status:number;headers:Record<string,string>;body?:unknown; }
 type AuthOperations=Pick<AuthService,"login"|"refresh"|"authenticate"|"currentSession"|"logout">;
 /** Strict JSON syntax + duplicate-member validation, including escaped key aliases. */
-function parseBody(bytes:Buffer):unknown {
+export function parseBody(bytes:Buffer):unknown {
   let text:string;let value:unknown;
   try {text=new TextDecoder("utf-8",{fatal:true}).decode(bytes);value=JSON.parse(text);}catch{throw new AuthError("INVALID_ARGUMENT");}
   const stack:Array<{object:boolean;key:boolean;seen:Set<string>}>=[];

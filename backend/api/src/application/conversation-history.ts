@@ -10,7 +10,7 @@ const UUID_PATTERN =
 const RFC3339_PATTERN =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-const LIST_CONVERSATIONS_QUERY = `
+const LIST_CONVERSATIONS_QUERY = (owned: boolean) => `
 SELECT
   c.id AS conversation_id,
   c.profile_key,
@@ -18,9 +18,10 @@ SELECT
   MAX(m.created_at) AS last_message_at,
   COUNT(m.id)::integer AS message_count
 FROM banuchat.conversations c
+${owned ? "JOIN banuchat_auth.conversation_owners owner ON owner.conversation_id = c.id" : ""}
 LEFT JOIN banuchat.messages m
   ON m.conversation_id = c.id
-WHERE c.profile_key = $1
+WHERE ${owned ? "owner.principal_id = $1" : "c.profile_key = $1"}
 GROUP BY c.id, c.profile_key, c.started_at
 ORDER BY c.started_at DESC, c.id DESC
 LIMIT $2
@@ -75,13 +76,15 @@ function toRfc3339(value: unknown): string | undefined {
 
 export async function listConversations(
   client: SqlQueryClient,
-  input: ListConversationsInput,
+  input: ListConversationsInput | { limit?: number },
+  ownerPrincipal?: string,
 ): Promise<ConversationHistoryResult> {
   const limit = input?.limit ?? DEFAULT_LIMIT;
+  const profileKey = input !== null && typeof input === "object" && "profile_key" in input ? input.profile_key : undefined;
   if (
     input === null ||
     typeof input !== "object" ||
-    !isStableKey(input.profile_key) ||
+    (ownerPrincipal === undefined ? !isStableKey(profileKey) : !isUuid(ownerPrincipal)) ||
     !Number.isInteger(limit) ||
     limit < MIN_LIMIT ||
     limit > MAX_LIMIT
@@ -90,8 +93,8 @@ export async function listConversations(
   }
 
   const result = await client.query<ConversationHistoryRow>(
-    LIST_CONVERSATIONS_QUERY,
-    [input.profile_key, limit],
+    LIST_CONVERSATIONS_QUERY(ownerPrincipal !== undefined),
+    [ownerPrincipal ?? profileKey, limit],
   );
 
   const conversations = result.rows.map((row) => {
@@ -103,7 +106,7 @@ export async function listConversations(
     if (
       !isUuid(row.conversation_id) ||
       !isStableKey(row.profile_key) ||
-      row.profile_key !== input.profile_key ||
+      (ownerPrincipal === undefined && row.profile_key !== profileKey) ||
       startedAt === undefined ||
       lastMessageAt === undefined ||
       !Number.isInteger(row.message_count) ||

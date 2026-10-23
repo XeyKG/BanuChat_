@@ -1,5 +1,10 @@
 # AUTH-P1 — Núcleo interno de autenticación
 
+Actualización AUTH-P2.1: el núcleo se reutiliza en una composición exclusiva v2
+con nueve operaciones protegidas. Véase [resources](src/auth/resources.ts),
+[composición](src/authenticated-runtime.ts) y [checkpoint AUTH-P2.1](../../docs/transition/bch04-auth-p21-checkpoint.md).
+Los apartados AUTH-P1 siguientes conservan el alcance histórico de ese incremento.
+
 Implementación para cuentas **permanentemente sintéticas**, UID ficticio y contraseña propia BanuChat. Contrato: [REST v2](api-contract-v2.md) y [OpenAPI](openapi-v2.yaml), sin modificaciones. No valida contraseñas/identidades UNAB. AUTH-P1 no monta rutas, modifica `main.ts`, conecta Mobile ni activa recursos protegidos/parcialmente protegidos.
 
 ## Composición y comportamiento
@@ -67,3 +72,57 @@ Remove comprueba IDs/labels, ausencia de mounts y miembros exclusivos de red ant
 ## Límite de integración
 
 Pruebas de unidad/contrato, SQL real e invocación directa de handlers son evidencias diferentes. Falta el adaptador HTTP con lectura acotada del stream y manejo de errores del parser/transporte, TLS, propiedad de recursos, integración Mobile y recuperación con buzón local. No activar una instancia v2 parcial ni montar v1 anónima como alternativa. AUTH-P2/P3/P4 requieren tareas autorizadas independientes; AUTH-P1 no declara login listo para usuarios finales.
+
+## AUTH-P2.1 — Composición protegida y reproducción local
+
+`createAuthenticatedRuntimeServer` recibe Pool limitado, base esperada, deployment
+UUID fijo, clave HMAC y el responder Document RAG existente. Valida privilegios
+efectivos, incluidos UPDATE por columna, y la coincidencia con runtime_scope de
+007. Carga el mismo Intent Router y crea exclusivamente el servidor v2. No escucha
+por su cuenta, cambia main.ts, carga .env ni admite modo CCD o bypass de auth.
+
+`AuthenticatedResources` deriva el principal del token validado en SQL. Las
+transacciones cortas abarcan los gates y servicios de lectura/escritura; crear
+incluye owner en el mismo commit. El listado usa owners antes de límite/orden,
+y detalle/borrado no leen contenido ajeno. Los servicios de progreso, calendario,
+anuncios y artefactos conservan sus reglas. Solo la proyección artifact_url cambia
+a v2; no se reescribe texto del usuario o la respuesta. La descarga verifica
+dataset/release antes de leer y reutiliza contención real y hash histórico.
+
+En mensajes se reutiliza sendMessage: callbacks internos para lectura/commit y
+un adaptador de persistencia a la función SQL. El contexto se libera antes de
+router/RAG. La función revalida acceso, versión, grant, binding y owner antes de
+ejecutar la CTE existente. No se reintenta un POST tras resultado incierto. La
+actividad HTTP por proceso conserva 409 y no sustituye los locks SQL entre procesos.
+
+La excepción de privilegios está en [auth-permissions §5.1](../../infra/db/auth-permissions.md).
+Los tokens solo atraviesan autenticación y parámetros SQL enlazados, no el router,
+RAG, citas o logs de aplicación. No habilitar logs de parámetros en PostgreSQL.
+La amenaza de credenciales técnicas/administrador comprometidas queda fuera del
+aislamiento HTTP entre cuentas. No se expone una pasarela SQL.
+
+Reproducción **exclusivamente con autorización para otra instancia desechable**:
+
+```powershell
+# raíz: recursos propios, nunca bases existentes
+./infra/auth-p21-test-environment.ps1 -Action Create
+./infra/auth-p21-test-environment.ps1 -Action Inspect
+# backend/api: una base vacía; ejecutar secuencialmente, detenerse ante fallo
+npm run test:auth:p21:setup
+npm run test:auth:p21:sql
+# solo después de PASS de fase C para ese deployment/base/release
+npm run test:auth:p21:http
+# raíz: elimina solo IDs/etiquetas/montajes verificados
+./infra/auth-p21-test-environment.ps1 -Action Remove
+```
+
+El fixture crea dos releases ficticias con seis clases de fuente y un documento
+full_document, sin chunks/embeddings/Ollama y sin tocar data/synthetic. Los artefactos
+y secretos locales quedan en infra/local/auth-p21, ignorado. HTTP escucha solamente
+en puerto efímero 127.0.0.1 durante las pruebas y cierra al terminar. Los reportes
+phase-c/phase-e se depuran antes de conservar evidencia versionada.
+
+AUTH-P2.1 implementa y prueba localmente las nueve operaciones de recursos y los
+cuatro handlers AUTH-P1; recuperación AUTH-P3 permanece sin montar. No hay Mobile,
+TLS de piloto, usuarios reales, infraestructura institucional o exposición LAN.
+No equivale a un despliegue aprobado ni a login listo para estudiantes.

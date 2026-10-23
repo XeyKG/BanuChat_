@@ -203,7 +203,12 @@ export interface SendMessageDependencies {
   sql: SqlQueryClient;
   router: IntentRouter;
   document_rag: DocumentRagResponder;
+  read_context?: MessageTransaction;
+  commit_turn?: MessageTransaction;
+  persist?: (client: SqlQueryClient, values: readonly unknown[]) => Promise<{ rows: PersistedTurnRow[] }>;
 }
+
+export type MessageTransaction = <T>(operation: (client: SqlQueryClient) => Promise<T>) => Promise<T>;
 
 export type DocumentRagResponder = (
   input: DocumentRagInput,
@@ -246,7 +251,7 @@ interface ConversationContextRow {
   expected_next_ordinal: unknown;
 }
 
-interface PersistedTurnRow {
+export interface PersistedTurnRow {
   status: unknown;
   user_message_id: unknown;
   user_ordinal: unknown;
@@ -441,10 +446,11 @@ export async function sendMessage(
     reject("invalid_argument");
   }
 
-  const contextResult = await dependencies.sql.query<ConversationContextRow>(
+  const read: MessageTransaction = dependencies.read_context ?? (operation => operation(dependencies.sql));
+  const contextResult = await read(client => client.query<ConversationContextRow>(
     CONVERSATION_CONTEXT_QUERY,
     [input.conversation_id, DATASET_ID],
-  );
+  ));
   if (contextResult.rows.length === 0) {
     reject("conversation_not_found");
   }
@@ -553,10 +559,12 @@ export async function sendMessage(
   validateAnswer(answer);
 
   const expectedOrdinal = context.expected_next_ordinal as number;
+  const commit: MessageTransaction = dependencies.commit_turn ?? (operation => operation(dependencies.sql));
+  return commit(async client => {
   let persistenceResult;
   try {
-    persistenceResult = await dependencies.sql.query<PersistedTurnRow>(
-      PERSIST_TURN_QUERY,
+    const persist = dependencies.persist ?? ((sql: SqlQueryClient, values: readonly unknown[]) => sql.query<PersistedTurnRow>(PERSIST_TURN_QUERY, values));
+    persistenceResult = await persist(client,
       [
         input.conversation_id,
         context.dataset_release_id,
@@ -625,4 +633,5 @@ export async function sendMessage(
       citations: answer.citations,
     },
   };
+  });
 }

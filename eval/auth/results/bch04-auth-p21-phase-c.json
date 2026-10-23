@@ -1,0 +1,58 @@
+{
+  "result": "PASS",
+  "deploymentId": "3371dc68-cafc-4d53-b3a5-0a593b8a4cb0",
+  "database": "banuchat_auth_p21_test",
+  "release": "dc051f2c-af36-443d-aa4d-49d256c3c2d5",
+  "checks": [
+    {
+      "name": "NOLOGIN owner, safe search_path, PUBLIC denied, exact approved EXECUTE list",
+      "result": "PASS"
+    },
+    {
+      "name": "runtime direct UPDATE, direct message INSERT, unapproved function and SET ROLE denied",
+      "result": "PASS"
+    },
+    {
+      "name": "A/B same profile, foreign and manipulated UUID reject before writing",
+      "result": "PASS"
+    },
+    {
+      "name": "raw access possession required: unknown, stored digest, UUID and wrong deployment rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "SQL enforces Unicode/nonblank/length limits and closed indexed citation records",
+      "result": "PASS"
+    },
+    {
+      "name": "all three protected row locks are held until transaction commit",
+      "result": "PASS"
+    },
+    {
+      "name": "invalid provenance rolls back both messages and citations",
+      "result": "PASS"
+    },
+    {
+      "name": "two simultaneous sends preserve ordinals and only one succeeds",
+      "result": "PASS"
+    },
+    {
+      "name": "winning revocation under account lock rejects a waiting commit",
+      "result": "PASS"
+    },
+    {
+      "name": "winning publication preserves original current_release_changed policy",
+      "result": "PASS"
+    },
+    {
+      "name": "auth_version, grant and expiry revalidated by SQL independently of API",
+      "result": "PASS"
+    },
+    {
+      "name": "historical CTE exact parameter-only equivalence; corpus unchanged",
+      "result": "PASS"
+    }
+  ],
+  "corpusBefore": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8",
+  "corpusAfter": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8"
+}

@@ -116,6 +116,68 @@ La tabla muestra máximos por responsabilidad, no un script GRANT ejecutado. Ges
 
 006 revoca PUBLIC solamente sobre los **objetos nuevos** de banuchat_auth y configura defaults del creador en ese schema. No revoca CONNECT/TEMPORARY de bases, ni permisos de objetos existentes, ni repara PUBLIC en el clúster compartido. Aprobar un entorno que pueda cumplir la matriz es un gate externo, sin reutilizar el superusuario actual como runtime.
 
+### 5.1 Excepción aprobada AUTH-P2.1 — migración 007
+
+Sala de Control autoriza [007_authenticated_resources.sql](007_authenticated_resources.sql)
+después del bloqueo 42501 documentado en AUTH-P2. Esta excepción complementa la
+matriz anterior: **runtime conserva cero UPDATE sobre conversations, datasets y
+dataset_releases**, incluidos privilegios por columna. No se modifican 001/006.
+La aplicación se ha validado solamente en una instancia nueva desechable; no
+autoriza aplicar 007 ni cambiar PUBLIC en los clústeres existentes.
+
+La migración exige `banuchat_auth.target_database`, `banuchat_auth.runtime_role`
+y `banuchat_auth.deployment_id` en la conexión migradora; valida destino sintético,
+ausencia de CCD y rol runtime sin poderes administrativos. No es idempotente.
+Guarda el ámbito fijo en `banuchat_auth.runtime_scope`, legible pero no modificable
+por runtime; no deriva el ámbito de un GUC que el cliente pueda cambiar al llamar.
+
+| Identidad/superficie | Privilegios y límites efectivos |
+| --- | --- |
+| API runtime | SELECT de negocio permitido y auth según AUTH-P1; INSERT conversations/owners para creación transaccional; DELETE conversations; sin INSERT directo de messages/citations, sin UPDATE/DELETE de owners; sin UPDATE de corpus/conversations; sin membresía del executor |
+| `banuchat_auth_executor` | NOLOGIN, NOINHERIT, sin administración ni DDL al finalizar; SELECT de las tablas necesarias; de credenciales solo principal_id, sin hashes; UPDATE(id) en las tres tablas exclusivamente para locks; UPDATE(updated_at) en accounts para lock, UPDATE(last_seen_at) en sessions; INSERT messages/citations |
+| `resource_context(text,uuid,boolean,boolean)` | SECURITY DEFINER: recibe posesión del access **en claro como parámetro enlazado**, comprueba codificación canónica y calcula digest; descubre cuenta/sesión y revalida bajo locks cuenta → sesión → conversación; grant, binding cuando corresponda, owner explícito y ámbito fijo; actualiza actividad aceptada |
+| `persist_turn(text,uuid,uuid,integer,text,text,boolean,jsonb)` | SECURITY DEFINER: llama siempre al gate con binding y turno; valida entradas internas; ejecuta la CTE histórica atómica con los mismos locks de conversación/current, ordinales, roles y citas; no acepta SQL, tablas, propietario, perfil o session_id como autoridad |
+
+EXECUTE de ambas funciones se revoca a PUBLIC **en la transacción de creación**
+y se concede únicamente al runtime configurado, además del derecho inherente
+del propietario. `search_path=pg_catalog,banuchat_auth,pg_temp`; tablas, tipos y
+llamadas de aplicación calificados. No hay SQL dinámico en los cuerpos ejecutables;
+el único formato dinámico es DDL de GRANT para el rol revisado durante migración.
+La concesión CREATE temporal al propietario para transferir funciones se retira
+antes de COMMIT. Runtime no puede SET ROLE al executor.
+
+EXECUTE de negocio runtime sigue limitado a `current_retrieval_context` y
+`search_chunks_cosine`. Solo el executor recibe EXECUTE de `release_records`,
+necesario para el trigger histórico de procedencia; no recibe publicación/ingesta.
+El executor puede leer document_chunks para la validación de locator del trigger,
+sin conceder ese SELECT directamente al runtime ni crear embeddings.
+
+No es una garantía automática de SECURITY DEFINER: las credenciales técnicas y
+el propietario/migrador siguen dentro del perímetro confiable. La API no expone
+SQL. La prueba acredita rechazo de UUID, digest almacenado, token inválido,
+revocación y acceso cruzado; no acredita protección ante compromiso del rol API,
+que ya puede crear sesiones para implementar AUTH-P1, ni ante un administrador.
+No registrar parámetros enlazados con tokens ni habilitar logs de sus valores.
+Los errores SQL de esta superficie son códigos fijos P0400/P0401/P0403/P0404/P0409
+y P0500; HTTP traduce al envelope contractual, sin stack, SQL ni parámetros.
+
+Existe una duplicación deliberada de la CTE de `messages.ts` dentro de 007:
+solo se sustituyen los siete parámetros posicionales por nombres. La prueba
+`test/auth-p21-sql.mts` compara su texto normalizado y ejercita concurrencia,
+proveniencia y rollback con PostgreSQL real. Los dominios de retorno SQL se
+conservan exactamente (`banuchat.nonblank` y `banuchat.finite_time`). Cambios
+futuros de persistencia requieren revisar ambas copias y esta equivalencia.
+
+Detalle/listado/borrado siguen usando servicios existentes, dentro del gate
+transaccional; sendMessage admite callbacks internos de lectura/commit y un
+adaptador de persistencia, sin cambiar el camino v1. Router/RAG se ejecutan
+después de liberar el contexto y antes de abrir la transacción de commit.
+Crear/progreso bloquean current durante su unidad corta para que el binding
+aprobado no cambie entre autorización y consulta. Historial propio conserva su
+contexto histórico sin exigir un binding current.
+
+Referencia primaria: [seguridad de SECURITY DEFINER, PostgreSQL 16](https://www.postgresql.org/docs/16/sql-createfunction.html#SQL-CREATEFUNCTION-SECURITY).
+
 ## 6. Retención y limpieza propuesta para implementación
 
 No se ejecuta limpieza ni se introduce scheduler en AUTH-P0. Política contractual: conservar digests refresh consumidos hasta el vencimiento absoluto de la familia. Después, una tarea autorizada puede eliminar cadenas desde hojas hacia predecesores por la self-FK, y por último la sesión; no DELETE masivo que ignore referencias. Auditoría conserva evento y pone session_id a NULL al borrar la sesión. Reset consumido/invalidado/vencido puede limpiarse tras expirar su vigencia; ventanas al expirar; eventos a los treinta días, propuesta heredada del diseño sujeta a política de custodia antes del piloto. No borrar cuentas, owners, conversaciones, mensajes o citas por retención de tokens.

@@ -99,6 +99,10 @@ export class AuthService {
   authenticate(token:string):Promise<AuthPrincipal> {
     return guarded(()=>this.access(token,async(_c,a,s)=>Object.freeze({principalId:a.id,sessionId:s.id,syntheticUid:a.synthetic_uid,authVersion:a.auth_version,deploymentId:this.deployment}),true));
   }
+  /** Validate before HTTP-specific input parsing, without accepting activity yet. */
+  verifyAccess(token:string):Promise<AuthPrincipal> {
+    return guarded(()=>this.access(token,async(_c,a,s)=>Object.freeze({principalId:a.id,sessionId:s.id,syntheticUid:a.synthetic_uid,authVersion:a.auth_version,deploymentId:this.deployment}),false));
+  }
   currentSession(token:string):Promise<CurrentSession> {
     return guarded(()=>this.access<CurrentSession>(token,async(c,a,s)=>{
       const current=await c.query<{id:string}>(`SELECT r.id FROM banuchat.datasets d JOIN banuchat.dataset_releases r ON r.id=d.current_release_id AND r.dataset_id=d.id

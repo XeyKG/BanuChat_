@@ -1,0 +1,51 @@
+{
+  "result": "FAIL",
+  "checks": [
+    {
+      "name": "NOLOGIN owner, safe search_path, PUBLIC denied, exact approved EXECUTE list",
+      "result": "PASS"
+    },
+    {
+      "name": "runtime direct UPDATE, direct message INSERT, unapproved function and SET ROLE denied",
+      "result": "PASS"
+    },
+    {
+      "name": "A/B same profile, foreign and manipulated UUID reject before writing",
+      "result": "PASS"
+    },
+    {
+      "name": "raw access possession required: unknown, stored digest, UUID and wrong deployment rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "all three protected row locks are held until transaction commit",
+      "result": "FAIL"
+    },
+    {
+      "name": "invalid provenance rolls back both messages and citations",
+      "result": "FAIL"
+    },
+    {
+      "name": "two simultaneous sends preserve ordinals and only one succeeds",
+      "result": "FAIL"
+    },
+    {
+      "name": "winning revocation under account lock rejects a waiting commit",
+      "result": "PASS"
+    },
+    {
+      "name": "winning publication preserves original current_release_changed policy",
+      "result": "FAIL"
+    },
+    {
+      "name": "auth_version, grant and expiry revalidated by SQL independently of API",
+      "result": "FAIL"
+    },
+    {
+      "name": "historical CTE exact parameter-only equivalence; corpus unchanged",
+      "result": "FAIL"
+    }
+  ],
+  "corpusBefore": "c2d1aaa69b29a04ce1b435b70d2656984bdcaa81a35401ba6b01c924131172a4",
+  "corpusAfter": "45a1495eddcb5a967372feec19d337ea16f20763e51147633b46e3dfe69faed5"
+}

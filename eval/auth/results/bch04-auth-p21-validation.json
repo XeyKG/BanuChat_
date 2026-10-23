@@ -1,0 +1,516 @@
+{
+  "baselineCommit": "8f69a71e2fbd085e7e34e0b0b8b5b5e7d5bd4e5d",
+  "result": "PASS_LOCAL_AUTH_P2",
+  "operationsImplemented": 9,
+  "phaseC": {
+    "result": "PASS",
+    "deploymentId": "3371dc68-cafc-4d53-b3a5-0a593b8a4cb0",
+    "database": "banuchat_auth_p21_test",
+    "release": "dc051f2c-af36-443d-aa4d-49d256c3c2d5",
+    "checks": [
+      {
+        "name": "NOLOGIN owner, safe search_path, PUBLIC denied, exact approved EXECUTE list",
+        "result": "PASS"
+      },
+      {
+        "name": "runtime direct UPDATE, direct message INSERT, unapproved function and SET ROLE denied",
+        "result": "PASS"
+      },
+      {
+        "name": "A/B same profile, foreign and manipulated UUID reject before writing",
+        "result": "PASS"
+      },
+      {
+        "name": "raw access possession required: unknown, stored digest, UUID and wrong deployment rejected",
+        "result": "PASS"
+      },
+      {
+        "name": "SQL enforces Unicode/nonblank/length limits and closed indexed citation records",
+        "result": "PASS"
+      },
+      {
+        "name": "all three protected row locks are held until transaction commit",
+        "result": "PASS"
+      },
+      {
+        "name": "invalid provenance rolls back both messages and citations",
+        "result": "PASS"
+      },
+      {
+        "name": "two simultaneous sends preserve ordinals and only one succeeds",
+        "result": "PASS"
+      },
+      {
+        "name": "winning revocation under account lock rejects a waiting commit",
+        "result": "PASS"
+      },
+      {
+        "name": "winning publication preserves original current_release_changed policy",
+        "result": "PASS"
+      },
+      {
+        "name": "auth_version, grant and expiry revalidated by SQL independently of API",
+        "result": "PASS"
+      },
+      {
+        "name": "historical CTE exact parameter-only equivalence; corpus unchanged",
+        "result": "PASS"
+      }
+    ],
+    "corpusBefore": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8",
+    "corpusAfter": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8"
+  },
+  "phaseE": {
+    "result": "PASS",
+    "checks": [
+      {
+        "name": "real login/me; separate synthetic principals share only the academic profile",
+        "result": "PASS"
+      },
+      {
+        "name": "create conversation atomically with owner, closed request and exact Location",
+        "result": "PASS"
+      },
+      {
+        "name": "A can send and read coherent historical document citations with v2 artifact links",
+        "result": "PASS"
+      },
+      {
+        "name": "B cannot list/read/send/delete A chat; unknown UUID indistinguishable; legacy remains unowned",
+        "result": "PASS"
+      },
+      {
+        "name": "progress binding, calendar and announcements reuse real services and v2 schemas",
+        "result": "PASS"
+      },
+      {
+        "name": "common document authorization, historical exact bytes, Range ignored, no public link",
+        "result": "PASS"
+      },
+      {
+        "name": "GET/POST/DELETE require session before UUID/filter validation; no v1 bypass",
+        "result": "PASS"
+      },
+      {
+        "name": "closed JSON, escaped duplicate members, invalid Unicode/types/content/query/UUID rejected",
+        "result": "PASS"
+      },
+      {
+        "name": "body/target/header limits and duplicate Authorization sane HTTP errors",
+        "result": "PASS"
+      },
+      {
+        "name": "grant revoked is 403; foreign UUID is not revealed without corpus permission",
+        "result": "PASS"
+      },
+      {
+        "name": "user switch and revoked/altered/expired tokens retain no previous permissions",
+        "result": "PASS"
+      },
+      {
+        "name": "revocation wins during controlled generation: no locks held, no partial turn",
+        "result": "PASS"
+      },
+      {
+        "name": "create rollback on failed owner insert",
+        "result": "PASS"
+      },
+      {
+        "name": "publication during generation returns 409; historical detail remains coherent",
+        "result": "PASS"
+      },
+      {
+        "name": "missing current binding approval denies new/progress access, retains owned history",
+        "result": "PASS"
+      },
+      {
+        "name": "composition rejects mismatched deployment and effective column UPDATE privilege",
+        "result": "PASS"
+      },
+      {
+        "name": "own deletion cascades messages/citations/owner; repeat 404, common corpus unchanged",
+        "result": "PASS"
+      }
+    ],
+    "operations": 9,
+    "realHttp": true,
+    "realPostgres": true,
+    "ollama": false,
+    "corpusBefore": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8",
+    "corpusAfter": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8"
+  },
+  "regression": {
+    "command": "npm test",
+    "passed": 546,
+    "failed": 0
+  },
+  "typecheck": "PASS",
+  "build": "PASS",
+  "version": {
+    "server_version": "16.15 (Debian 16.15-1.pgdg12+2)"
+  },
+  "roles": [
+    {
+      "rolname": "auth_p21_runtime",
+      "rolcanlogin": true,
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolreplication": false,
+      "rolbypassrls": false,
+      "member_of_other_role": false
+    },
+    {
+      "rolname": "banuchat_auth_executor",
+      "rolcanlogin": false,
+      "rolsuper": false,
+      "rolcreatedb": false,
+      "rolcreaterole": false,
+      "rolreplication": false,
+      "rolbypassrls": false,
+      "member_of_other_role": false
+    }
+  ],
+  "functions": [
+    {
+      "proname": "persist_turn",
+      "owner": "banuchat_auth_executor",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog, banuchat_auth, pg_temp"
+      ],
+      "runtime_execute": true,
+      "public_execute": false
+    },
+    {
+      "proname": "resource_context",
+      "owner": "banuchat_auth_executor",
+      "prosecdef": true,
+      "proconfig": [
+        "search_path=pg_catalog, banuchat_auth, pg_temp"
+      ],
+      "runtime_execute": true,
+      "public_execute": false
+    }
+  ],
+  "privileges": [
+    {
+      "relname": "accounts",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": true,
+      "truncate": false
+    },
+    {
+      "relname": "announcements",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "auth_rate_limits",
+      "select_all": true,
+      "insert_all": true,
+      "delete_all": false,
+      "any_column_update": true,
+      "truncate": false
+    },
+    {
+      "relname": "calendar_events",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "conversation_owners",
+      "select_all": true,
+      "insert_all": true,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "conversations",
+      "select_all": true,
+      "insert_all": true,
+      "delete_all": true,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "corpus_grants",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "courses",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "dataset_releases",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "datasets",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "document_chunks",
+      "select_all": false,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "document_versions",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "documents",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "embedding_configs",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "ingestion_items",
+      "select_all": false,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "ingestion_runs",
+      "select_all": false,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "message_citations",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "messages",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "password_credentials",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "password_reset_tokens",
+      "select_all": false,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "profile_binding_versions",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "profile_bindings",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "profile_courses",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "refresh_tokens",
+      "select_all": true,
+      "insert_all": true,
+      "delete_all": false,
+      "any_column_update": true,
+      "truncate": false
+    },
+    {
+      "relname": "runtime_scope",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "security_events",
+      "select_all": false,
+      "insert_all": true,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    },
+    {
+      "relname": "sessions",
+      "select_all": true,
+      "insert_all": true,
+      "delete_all": false,
+      "any_column_update": true,
+      "truncate": false
+    },
+    {
+      "relname": "synthetic_profiles",
+      "select_all": true,
+      "insert_all": false,
+      "delete_all": false,
+      "any_column_update": false,
+      "truncate": false
+    }
+  ],
+  "logging": [
+    {
+      "name": "log_parameter_max_length",
+      "setting": "-1"
+    },
+    {
+      "name": "log_parameter_max_length_on_error",
+      "setting": "0"
+    },
+    {
+      "name": "log_statement",
+      "setting": "none"
+    }
+  ],
+  "hashes": {
+    "infra/db/001_initial_schema.sql": "a9c6c2cf6389fd9bbf05ed3bb74741bea0b65b1637eb9545001b418dc58bc7c3",
+    "infra/db/006_synthetic_auth.sql": "d5fa9e6975f156ddb6506def46b3d1c39453589fc5216b8f0a059bbd6e2a6c85",
+    "infra/db/007_authenticated_resources.sql": "a1d399142fb9bacb9d6d132ca30e5499281a8ceb8b3af99f759c096e76b28e47",
+    "backend/api/api-contract.md": "7d2979e24cd9a7764ba2473baab082da2238271c9f9ab3ae401bd1860056c5ab",
+    "backend/api/openapi.yaml": "2d0cb46659a11cd77d6dc40c7308df85187536d14927d16e54784357f118d251",
+    "backend/api/api-contract-v2.md": "8d9f913967b79658ce2d0e989e0d4101223279d6789e8463a9fc15494b003cce",
+    "backend/api/openapi-v2.yaml": "c2247a6d50d52240c03179dc46d1a5e3822b2e48ade50a41297ecde3c4d89f3a",
+    "backend/mcp-server/tools.contract.json": "b431a85a20e3964709aec21240e7be286b1c2c6885590a9527795b34403f7bdd",
+    "backend/mcp-server/tools-contract.md": "4260b05d30d3bd7c0d6283338055e5f89918a2e15109c9dfe9745764aa9a759d"
+  },
+  "resources": {
+    "container": "banuchat-auth-p21-20261022",
+    "containerId": "d1b6f2b87c877c31c7f603f769796aba301780bc1392c978889357cdde2850f4",
+    "network": "banuchat-auth-p21-20261022-isolated",
+    "networkId": "f8915a8f248568c624933d0d9cc483cc7d7e74a3a0607edf08bd3aea90e427b3",
+    "volume": "banuchat-auth-p21-20261022-data",
+    "image": "sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b",
+    "postgres": "127.0.0.1:55437",
+    "http": "127.0.0.1 ephemeral, closed",
+    "cleanup": "REMOVED_VERIFIED_CONTAINER_NETWORK_VOLUME_AND_CREDENTIALS"
+  },
+  "initialFailures": [
+    {
+      "stage": "environment",
+      "result": "FAIL",
+      "cause": "duplicated p21 suffix; rejected before SQL",
+      "correction": "removed verified task resources; fixed name"
+    },
+    {
+      "stage": "fixture manifest",
+      "result": "FAIL P0001",
+      "cause": "missing full_document retrieval_mode",
+      "correction": "fixed fixture, unchanged SQL guards"
+    },
+    {
+      "stage": "fixture provenance",
+      "result": "FAIL 23505",
+      "cause": "two identical release identities",
+      "correction": "explicitly distinct fixture pipeline provenance"
+    },
+    {
+      "stage": "first phase C",
+      "result": "5 PASS / 7 FAIL including parent",
+      "cause": "42804 SQL return domains; invalid expiry fixture; dependent failures and pointer not restored after failed assertion",
+      "correction": "exact nonblank/finite_time return domains, valid exclusive expiry, fresh isolated fixture; retained first report"
+    },
+    {
+      "stage": "first HTTP harness",
+      "result": "FAIL before listener",
+      "cause": "invalid URN in test schema registration",
+      "correction": "valid urn:banuchat namespace"
+    }
+  ],
+  "notExecuted": [
+    "Ollama",
+    "original databases",
+    "university infrastructure",
+    "Mobile",
+    "AUTH-P3",
+    "AUTH-P4",
+    "M02",
+    "A01"
+  ],
+  "commit": false,
+  "push": false,
+  "finalIntegrity": {
+    "originalNetworks": 9,
+    "originalContainers": 3,
+    "temporaryAuthHttpListeners": 0,
+    "originalVolumes": 8,
+    "protectedFilesChanged": 0,
+    "originalDatabaseConnections": 0
+  },
+  "finalFocusedRegression": {
+    "command": "node --import tsx --test test/conversation-history.test.ts",
+    "failed": 0,
+    "reason": "Defensive input guard preserves application validation for malformed primitive input",
+    "passed": 17
+  }
+}

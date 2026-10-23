@@ -1,0 +1,79 @@
+{
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "real login/me; separate synthetic principals share only the academic profile",
+      "result": "PASS"
+    },
+    {
+      "name": "create conversation atomically with owner, closed request and exact Location",
+      "result": "PASS"
+    },
+    {
+      "name": "A can send and read coherent historical document citations with v2 artifact links",
+      "result": "PASS"
+    },
+    {
+      "name": "B cannot list/read/send/delete A chat; unknown UUID indistinguishable; legacy remains unowned",
+      "result": "PASS"
+    },
+    {
+      "name": "progress binding, calendar and announcements reuse real services and v2 schemas",
+      "result": "PASS"
+    },
+    {
+      "name": "common document authorization, historical exact bytes, Range ignored, no public link",
+      "result": "PASS"
+    },
+    {
+      "name": "GET/POST/DELETE require session before UUID/filter validation; no v1 bypass",
+      "result": "PASS"
+    },
+    {
+      "name": "closed JSON, escaped duplicate members, invalid Unicode/types/content/query/UUID rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "body/target/header limits and duplicate Authorization sane HTTP errors",
+      "result": "PASS"
+    },
+    {
+      "name": "grant revoked is 403; foreign UUID is not revealed without corpus permission",
+      "result": "PASS"
+    },
+    {
+      "name": "user switch and revoked/altered/expired tokens retain no previous permissions",
+      "result": "PASS"
+    },
+    {
+      "name": "revocation wins during controlled generation: no locks held, no partial turn",
+      "result": "PASS"
+    },
+    {
+      "name": "create rollback on failed owner insert",
+      "result": "PASS"
+    },
+    {
+      "name": "publication during generation returns 409; historical detail remains coherent",
+      "result": "PASS"
+    },
+    {
+      "name": "missing current binding approval denies new/progress access, retains owned history",
+      "result": "PASS"
+    },
+    {
+      "name": "composition rejects mismatched deployment and effective column UPDATE privilege",
+      "result": "PASS"
+    },
+    {
+      "name": "own deletion cascades messages/citations/owner; repeat 404, common corpus unchanged",
+      "result": "PASS"
+    }
+  ],
+  "operations": 9,
+  "realHttp": true,
+  "realPostgres": true,
+  "ollama": false,
+  "corpusBefore": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8",
+  "corpusAfter": "cbcdefe7d2ea2e59fdea583abc69d47cc17fcba2570ee98a7f8e7299925f58d8"
+}

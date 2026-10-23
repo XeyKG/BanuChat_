@@ -28,14 +28,16 @@ export class PgAuthStore {
         AND c.relowner=r.oid) AS owns_objects,
       EXISTS(SELECT 1 FROM pg_class c WHERE c.relnamespace='banuchat'::regnamespace AND c.relkind='r'
         AND c.relname NOT IN ('conversations','messages','message_citations')
-        AND has_table_privilege(c.oid,'INSERT,UPDATE,DELETE,TRUNCATE')) AS corpus_write,
+        AND (has_table_privilege(c.oid,'INSERT,UPDATE,DELETE,TRUNCATE')
+          OR has_any_column_privilege(c.oid,'INSERT,UPDATE'))) AS corpus_write,
+      has_any_column_privilege('banuchat.conversations','UPDATE') AS conversation_update,
       EXISTS(SELECT 1 FROM banuchat.datasets d JOIN banuchat.dataset_releases v
         ON v.dataset_id=d.id AND v.id=d.current_release_id WHERE d.id=1 AND d.name='banuchat-synthetic'
         AND v.status='ready' AND v.manifest->'synthetic'='true'::jsonb) AS synthetic
       FROM pg_roles r WHERE r.rolname=current_user`);
     const r=result.rows[0] as Record<string,unknown>|undefined;
     if(!r || !expectedDatabase || expectedDatabase.toLowerCase().includes("ccd") || r.database!==expectedDatabase || !r.synthetic ||
-      ["rolsuper","rolcreatedb","rolcreaterole","rolreplication","rolbypassrls","db_write","ddl","memberships","other_database","owns_objects","corpus_write"].some(k=>r[k]!==false)) throw new AuthError("DEPENDENCY_UNAVAILABLE");
+      ["rolsuper","rolcreatedb","rolcreaterole","rolreplication","rolbypassrls","db_write","ddl","memberships","other_database","owns_objects","corpus_write","conversation_update"].some(k=>r[k]!==false)) throw new AuthError("DEPENDENCY_UNAVAILABLE");
   }
   async accountByUid(uid:string):Promise<AccountRow|undefined> {
     const r=await this.pool.query<AccountRow>(`SELECT a.id,a.synthetic_uid,a.status,a.auth_version::text,p.password_hash
