@@ -1,0 +1,101 @@
+# Candidato de organización local. No ejecutar antes de la promoción autorizada.
+# No aplica migraciones, no restaura respaldos y no monta CCD_DOCUMENTACION.
+name: banuchat-dev
+
+services:
+  postgres-ccd-auth:
+    profiles: ["ccd-auth"]
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CCD_AUTH_POSTGRES_DB:?Define el nombre físico vigente de la base CCD autenticada}
+      POSTGRES_USER: ${CCD_AUTH_POSTGRES_USER:?Define el rol administrador local CCD}
+      POSTGRES_PASSWORD: ${CCD_AUTH_POSTGRES_PASSWORD:?Define una clave local no versionada}
+    ports:
+      - "127.0.0.1:${CCD_AUTH_POSTGRES_PORT:-55443}:5432"
+    volumes:
+      - ccd_auth_data:/var/lib/postgresql/data
+    networks:
+      - ccd_auth
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.role: ccd-auth-database
+      com.banuchat.knowledge: ccd-selected-local
+      com.banuchat.identity: synthetic
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  postgres-synthetic:
+    profiles: ["synthetic"]
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SYNTHETIC_POSTGRES_DB:?Define el nombre físico vigente de la base sintética}
+      POSTGRES_USER: ${SYNTHETIC_POSTGRES_USER:?Define el rol administrador local sintético}
+      POSTGRES_PASSWORD: ${SYNTHETIC_POSTGRES_PASSWORD:?Define una clave local no versionada}
+    ports:
+      - "127.0.0.1:${SYNTHETIC_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - synthetic_data:/var/lib/postgresql/data
+    networks:
+      - synthetic
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.role: synthetic-database
+      com.banuchat.knowledge: synthetic-frozen-v1
+      com.banuchat.identity: synthetic
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  n8n:
+    profiles: ["automation"]
+    image: n8nio/n8n:2.40.5
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${N8N_PORT:-5678}:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Define la clave local vigente de N8N}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - automation
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.role: asynchronous-ingestion-orchestrator
+      com.banuchat.data: local-n8n-state
+
+volumes:
+  ccd_auth_data:
+    name: ${CCD_AUTH_POSTGRES_VOLUME:-banuchat-dev-ccd-auth-data}
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.data: ccd-auth
+  synthetic_data:
+    name: ${SYNTHETIC_POSTGRES_VOLUME:-banuchat-dev-synthetic-data}
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.data: synthetic
+  n8n_data:
+    name: ${N8N_VOLUME:-banuchat-dev-n8n-data}
+    labels:
+      com.banuchat.environment: development
+      com.banuchat.data: n8n-state
+
+networks:
+  ccd_auth:
+    name: ${CCD_AUTH_NETWORK:-banuchat-dev-ccd-auth}
+  synthetic:
+    name: ${SYNTHETIC_NETWORK:-banuchat-dev-synthetic}
+  automation:
+    name: ${N8N_NETWORK:-banuchat-dev-automation}

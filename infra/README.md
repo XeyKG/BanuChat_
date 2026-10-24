@@ -4,6 +4,15 @@ Configuración para desarrollo y demostraciones locales, usada en N0/N3. El Comp
 una instancia PostgreSQL que incluye pgvector y un servicio N8N separado. No incluye
 backend ni app móvil, y no monta ni ejecuta migraciones.
 
+La organización Docker O1 añadió un candidato no activado en
+[`docker-compose.dev.yml`](docker-compose.dev.yml). Conserva los Compose históricos,
+separa CCD autenticado, demo sintética y N8N mediante perfiles y no sustituye el
+laboratorio `banuchat-ccd-auth-i1b-test` hasta una promoción expresamente autorizada.
+La decisión, el arranque vigente y la recuperación se documentan en el
+[runbook Docker](../docs/operations/docker-local-organization.md); el inventario y
+la verificación están en el
+[checkpoint O1](../docs/transition/docker-organization-o1-checkpoint.md).
+
 ## Variables y seguridad
 
 `/.env.example` documenta las variables. Usuario, contraseña y clave de cifrado se
