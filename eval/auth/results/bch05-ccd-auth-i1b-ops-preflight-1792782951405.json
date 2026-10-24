@@ -1,0 +1,125 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-OPS",
+  "at": "2026-10-23T19:15:51.404Z",
+  "head": "1583457cf818d8f7c359671c51093ab7832587df",
+  "dirty_entries": 15,
+  "read_only": true,
+  "checks": [
+    {
+      "check": "repository_root",
+      "status": "PASS",
+      "reason": "EXPECTED_REPOSITORY_ROOT"
+    },
+    {
+      "check": "repository_revision",
+      "status": "PASS",
+      "reason": "VALID_GIT_REVISION"
+    },
+    {
+      "check": "working_tree",
+      "status": "FAIL",
+      "reason": "DIRTY_TREE_REQUIRES_REVIEW_BEFORE_DEMONSTRATION"
+    },
+    {
+      "check": "local_dependencies",
+      "status": "PASS",
+      "reason": "EXISTING_LOCAL_PACKAGES_PRESENT"
+    },
+    {
+      "check": "expo_sdk",
+      "status": "PASS",
+      "reason": "EXPO_57_REQUIRED"
+    },
+    {
+      "check": "mobile_shell_configuration",
+      "status": "NOT_EVALUABLE",
+      "reason": "VARIABLES_NOT_PRESENT_IN_THIS_PROCESS"
+    },
+    {
+      "check": "mobile_launcher",
+      "status": "PASS",
+      "reason": "EXISTING_LAUNCHER_CONFIGURES_CCD_LOOPBACK"
+    },
+    {
+      "check": "metro_effective_environment",
+      "status": "NOT_EVALUABLE",
+      "reason": "RUNNING_METRO_ENVIRONMENT_NOT_ATTESTED_BY_SHELL_OR_SCRIPT"
+    },
+    {
+      "check": "metro",
+      "status": "PASS",
+      "reason": "METRO_8084_STATUS_REQUIRED"
+    },
+    {
+      "check": "api_v2_anonymous",
+      "status": "PASS",
+      "reason": "EXPECTED_V2_AUTHENTICATION_REQUIRED"
+    },
+    {
+      "check": "api_running_revision",
+      "status": "NOT_EVALUABLE",
+      "reason": "HTTP_AUTH_CHALLENGE_DOES_NOT_IDENTIFY_LOADED_CODE_OR_CCD_MODE"
+    },
+    {
+      "check": "api_loopback_binding",
+      "status": "PASS",
+      "reason": "NO_WILDCARD_OR_LAN_BINDING"
+    },
+    {
+      "check": "postgres_container",
+      "status": "PASS",
+      "reason": "EXACT_I1B_LOOPBACK_VOLUME_NETWORK_REQUIRED"
+    },
+    {
+      "check": "postgres_scope",
+      "status": "PASS",
+      "reason": "EXACT_I1B_DEPLOYMENT_AND_CCD_SCOPE"
+    },
+    {
+      "check": "release_embedding_configuration",
+      "status": "PASS",
+      "reason": "READY_RELEASE_VALIDATED_1024_COSINE"
+    },
+    {
+      "check": "ollama_version",
+      "status": "PASS",
+      "reason": "PINNED_OLLAMA_RUNTIME_REQUIRED"
+    },
+    {
+      "check": "generator_model",
+      "status": "PASS",
+      "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+    },
+    {
+      "check": "embedding_model",
+      "status": "PASS",
+      "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+    },
+    {
+      "check": "embedding_runtime",
+      "status": "PASS",
+      "reason": "RELEASE_RUNTIME_REQUIRED"
+    },
+    {
+      "check": "adb_device_1",
+      "status": "FAIL",
+      "reason": "MISSING_BOTH_REVERSE_ROUTES"
+    },
+    {
+      "check": "android_physical_isolation",
+      "status": "NOT_EXECUTED",
+      "reason": "ADB_CONNECTIVITY_IS_NOT_EXPO_GO_OR_SECURESTORE_VALIDATION"
+    },
+    {
+      "check": "diagnostic_network_destinations",
+      "status": "PASS",
+      "reason": "ONLY_FIXED_LOOPBACK_NO_INSTITUTIONAL_API_REQUESTS"
+    }
+  ],
+  "counts": {
+    "PASS": 16,
+    "FAIL": 2,
+    "NOT_EVALUABLE": 3,
+    "NOT_EXECUTED": 1
+  }
+}

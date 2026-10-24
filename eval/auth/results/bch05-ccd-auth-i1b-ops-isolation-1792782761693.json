@@ -1,0 +1,59 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-OPS",
+  "at": "2026-10-23T19:12:39.943Z",
+  "head": "1583457cf818d8f7c359671c51093ab7832587df",
+  "test_type": "HTTP/PostgreSQL; generator forbidden",
+  "checks": [
+    {
+      "check": "foreign_get_0",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "foreign_delete_0",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "foreign_post_0",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "foreign_get_1",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "foreign_delete_1",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "foreign_post_1",
+      "status": "PASS",
+      "http": 404
+    },
+    {
+      "check": "refresh_owner_preserved_and_old_access_rejected",
+      "status": "PASS"
+    },
+    {
+      "check": "logout_a_does_not_grant_or_revoke_b",
+      "status": "PASS"
+    },
+    {
+      "check": "artifact_requires_live_session_shared_document_scope",
+      "status": "PASS"
+    }
+  ],
+  "passed": true,
+  "new_empty_conversations": 2,
+  "generator_calls": 0,
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  },
+  "unrevoked_fixture_sessions": 0
+}

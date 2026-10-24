@@ -1,0 +1,106 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-OPS",
+  "at": "2026-10-23T19:21:15.222Z",
+  "head": "1583457cf818d8f7c359671c51093ab7832587df",
+  "protected_runtime_and_historical_paths_unchanged": true,
+  "protected_paths": [
+    "backend/api/src/chat",
+    "backend/api/src/application",
+    "backend/api/src/auth",
+    "backend/api/src/generation",
+    "backend/api/src/retrieval",
+    "backend/api/src/http",
+    "backend/api/api-contract-v2.md",
+    "backend/api/openapi-v2.yaml",
+    "infra/db",
+    "data",
+    "mobile/src",
+    "mobile/package.json",
+    "mobile/package-lock.json",
+    "backend/api/package-lock.json",
+    "eval/integration",
+    "docs/academic"
+  ],
+  "scanned_files": [
+    {
+      "path": "backend/api/package.json",
+      "sha256": "f20625fc7acbfd99a05d96a089b6243d7be8c53bb01c113814b4388653bc264b"
+    },
+    {
+      "path": "backend/api/src/operations/ccd-preflight.ts",
+      "sha256": "f5522a87f7cae5935d51470f61831770b549717cc8782a442b4fcac1ea8bd046"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2-adversarial.mts",
+      "sha256": "9cb64d2aaecab4ce66671817746976eb88cbaa6d3a44e9c602f6dc305e8d4ed5"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2/cases.ts",
+      "sha256": "ec3aec420c0522eade1c003435572f17b7f8d1863f0d85edbfb089fbff15eb79"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-ops-audit.mts",
+      "sha256": "0f41c84615978da6163852fda7c7c15e09155e3a3efc8f0b09a7d9a1bcc017e3"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-ops-isolation.mts",
+      "sha256": "0b38e89f43b9e08ff9d442dce89974166119f1624318456f3357aee62edd00a4"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-ops-preflight.mts",
+      "sha256": "0fe4bbb48bda9bf78f2ad60d697fea9b7f7beb79a52e7a52fccfaccbcb20e9f6"
+    },
+    {
+      "path": "backend/api/test/ccd-context-adversarial.test.ts",
+      "sha256": "d1c43a816939baace36fff30c7fd1109ac2d05cc5f27140df6433b7e123dd318"
+    },
+    {
+      "path": "backend/api/test/ccd-preflight.test.ts",
+      "sha256": "6cdd5adb03a009a76e8eff115d928070af55acd84e91f53b19c439c7c7a967c6"
+    },
+    {
+      "path": "docs/operations/ccd-auth-i1b-ops.md",
+      "sha256": "df49b4db87b8b5e8fc9f5d279e1bd42dd9367250ca8b33f525f72ddee4589db0"
+    },
+    {
+      "path": "docs/transition/bch05-ccd-auth-i1b-f2-checkpoint.md",
+      "sha256": "8861645b63a81f53c157cfd9a0bfcb1ac1de3ace1ce7fd93baccb3c7c46f5bb0"
+    },
+    {
+      "path": "docs/transition/bch05-ccd-auth-i1b-mission-checkpoint.md",
+      "sha256": "0130889c2c56bb9314b908f1c8df65bc12b8120381a9da88e440499c13d26900"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-capture-1792782378649.json",
+      "sha256": "f9db1de46470674db8f70e5d09cc294d9e2e2c8d410c04db14d69295f2139c00"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-probe-1792782408521.json",
+      "sha256": "6dffdea7eef88ae1a306e5732e97bd94603c70000259236ce0fdc1e7a107707b"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-ops-isolation-1792782761693.json",
+      "sha256": "8811eac11bb9e6bbd55433dbfe591b0a6b48f99c95b8cfdb25b041e0cdec5d85"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-ops-preflight-1792782571106.json",
+      "sha256": "ef3abbf781f7cd3c7361785bd52aa35c7913adf3d4cd2d82c728e068140d558b"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-ops-preflight-1792782669837.json",
+      "sha256": "1c23bb0197181134c3d756b55c743c12da4fa60366f5241ab5f55ef19c4cbc3d"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-ops-preflight-1792782951405.json",
+      "sha256": "6e9c1a2688bdfd56962014ddaeffa454a3c76ee860581fcbc4394a12f1a7aea9"
+    },
+    {
+      "path": "mobile/test/ccd-session-ownership.test.ts",
+      "sha256": "102826a54d012c4be70b680ee9191ee20a7ecac8fa67fcad7e1d5518833980c6"
+    }
+  ],
+  "secrets_found": false,
+  "secret_scan_scope": "Exact private I1B credentials/rate key and existing F1 fixture passwords; code review for other sensitive output",
+  "git_diff_check": "PASS",
+  "no_commit_or_push": true
+}

@@ -1,0 +1,127 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2",
+  "phase": "probe",
+  "at": "2026-10-23T19:06:29.212Z",
+  "head": "1583457cf818d8f7c359671c51093ab7832587df",
+  "sql_read_only": true,
+  "http_message_posts": 0,
+  "production_changed": false,
+  "cases": [
+    {
+      "id": "canonical",
+      "intent": "identified",
+      "query_chars": 43,
+      "generation": "REAL_OLLAMA",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6974,
+      "prompt_sha256": "97f03fc3a1acdd2da324529ddff82c3945dc18eaa347b5e723eb597717f73510",
+      "provider_status": 200,
+      "prompt_eval_count": 1883,
+      "done_reason": "stop",
+      "outcome": "completed",
+      "citations": [
+        "unit:M02:DOC-101"
+      ],
+      "insufficient_evidence": false,
+      "selection_matches_expected": true
+    },
+    {
+      "id": "paraphrase",
+      "intent": "ambiguous",
+      "query_chars": 91,
+      "generation": "NOT_STARTED",
+      "selected": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-099",
+        "unit:M02:DOC-102",
+        "unit:M02:DOC-098",
+        "unit:M02:DOC-103",
+        "unit:M01",
+        "unit:M02:DOC-104",
+        "unit:TEST_ORIENTATION",
+        "unit:M02:DOC-100",
+        "unit:M12"
+      ],
+      "prompt_utf8_bytes": 20695,
+      "prompt_sha256": "0a783a2f6d30385c940f6f389eea0ead82ed89922978776f808d13a52760efaa",
+      "provider_status": 400,
+      "provider_category": "context_capacity_exceeded",
+      "provider_reported_tokens": [
+        6420,
+        4096
+      ],
+      "outcome": "rejected",
+      "reason": "invalid_generator_response"
+    },
+    {
+      "id": "two_courses",
+      "intent": "multiple",
+      "query_chars": 60,
+      "generation": "REAL_OLLAMA",
+      "selected": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-103"
+      ],
+      "prompt_utf8_bytes": 8498,
+      "prompt_sha256": "a5afe32ced16270e0f04cd3752dd29ad1eacce944d97e85f6c8adc9fe0d32b35",
+      "provider_status": 200,
+      "prompt_eval_count": 2370,
+      "done_reason": "stop",
+      "outcome": "completed",
+      "citations": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-103"
+      ],
+      "insufficient_evidence": false,
+      "selection_matches_expected": true
+    },
+    {
+      "id": "near_query_limit",
+      "intent": "identified",
+      "query_chars": 3999,
+      "generation": "REAL_OLLAMA",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 10930,
+      "prompt_sha256": "fe6c07173045ebaf865a2bc1e01c1619264712dcc70aa49aba229e4949900a0c",
+      "provider_status": 200,
+      "prompt_eval_count": 2964,
+      "done_reason": "stop",
+      "outcome": "completed",
+      "citations": [
+        "unit:M02:DOC-101"
+      ],
+      "insufficient_evidence": false,
+      "selection_matches_expected": true
+    }
+  ],
+  "limitations": [
+    "Development bank, not reserved or independent academic evaluation",
+    "Bytes are NOT token counts",
+    "Capture does not generate answers"
+  ],
+  "loaded_generator_context": 4096,
+  "integrity": {
+    "corpus_unchanged": true,
+    "history_unchanged": true,
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963"
+  },
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  }
+}
