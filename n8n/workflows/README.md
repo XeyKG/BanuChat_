@@ -79,3 +79,13 @@ duraciones y resultados por intento. No incluir estos valores variables en recet
 N3 cubrió el camino manual exitoso asociado a I01 y el no-op I02, no todos los
 escenarios del [plan](../../eval/ingestion/plan.md). Duración observada sin umbral
 nuevo; retry/recover/scheduled y actualización académica de OE4 siguen pendientes.
+
+## OE2 — flujos locales con fixtures
+
+`oe2-academic-offer-fixture-v1.json`, `oe2-calls-fixture-v1.json` y
+`oe2-news-fixture-v1.json` preparan schedules de seis horas, inactivos por defecto.
+Coordinan la API interna OE2 y no duplican extracción, validación, estado o detección
+de cambios en nodos Code. Solo aceptan fixtures locales y nunca publican en CCD.
+
+No constituyen tres scrapers institucionales operativos ni evidencia de ejecución
+autónoma. Véase [runbook OE2](oe2-fixtures-v1-runbook.md).

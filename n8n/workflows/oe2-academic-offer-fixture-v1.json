@@ -1,0 +1,61 @@
+{
+  "name": "BanuChat OE2 - Academic offer fixture v1",
+  "id": "BanuChatOe2OfferFixture1",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] } },
+      "id": "1a7f0f8a-2f2e-4a62-9e74-2e0dc7b3f101",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": { "assignments": { "assignments": [
+        { "id": "4c773298-7930-466d-8f3e-efde4c184101", "name": "base_url", "value": "__BANUCHAT_OE2_BASE_URL__", "type": "string" },
+        { "id": "c130a25a-d6ed-4ca4-8e0f-a8ef67c42101", "name": "category", "value": "academic_offer", "type": "string" },
+        { "id": "8cfec830-08f1-41cc-adc9-c93b42d21101", "name": "source_id", "value": "fixture-academic-offer-v1", "type": "string" }
+      ] }, "options": {} },
+      "id": "4f64a71f-8e0b-42b1-a4ac-f14a62125101",
+      "name": "Fixture Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST", "url": "={{ $json.base_url + '/internal/oe2/status' }}",
+        "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
+        "sendBody": true, "contentType": "raw", "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ category: $json.category }) }}", "options": { "timeout": 30000 }
+      },
+      "id": "6e8cfa55-af08-4c97-a355-fd51964f7101", "name": "Check Last Valid State",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [700, 300],
+      "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE2 Service" } },
+      "retryOnFail": false, "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST", "url": "={{ $('Fixture Configuration').first().json.base_url + '/internal/oe2/run' }}",
+        "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
+        "sendBody": true, "contentType": "raw", "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ category: $('Fixture Configuration').first().json.category, source_id: $('Fixture Configuration').first().json.source_id }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "8a15111f-4cd9-40fc-81fd-e98a81318101", "name": "Run Fixture Flow Once",
+      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [960, 260],
+      "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE2 Service" } },
+      "retryOnFail": false, "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Every 6 Hours": { "main": [[{ "node": "Fixture Configuration", "type": "main", "index": 0 }]] },
+    "Fixture Configuration": { "main": [[{ "node": "Check Last Valid State", "type": "main", "index": 0 }]] },
+    "Check Last Valid State": { "main": [[{ "node": "Run Fixture Flow Once", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "4f20bf7d-bebc-4c36-a45d-723918db1101",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}

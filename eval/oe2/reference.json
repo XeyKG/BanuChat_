@@ -1,0 +1,12 @@
+{
+  "schema_version": "oe2-reference-1",
+  "review_status": "repository_fixture_reference",
+  "records": [
+    { "category": "academic_offer", "source_record_id": "OFF-001", "title": "Interacción digital — grupo demostrativo", "published_at": "2026-10-01T08:00:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "period": "DEMO-2026-10", "course_code": "DEMO-CCD-01", "mode": "virtual", "start_date": "2026-11-03", "end_date": "2026-11-28" } },
+    { "category": "academic_offer", "source_record_id": "OFF-002", "title": "Analítica digital — grupo demostrativo", "published_at": "2026-10-01T08:00:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "period": "DEMO-2026-10", "course_code": "DEMO-CCD-02", "mode": "teleclase", "start_date": "2026-11-03", "end_date": "2026-11-28" } },
+    { "category": "calls", "source_record_id": "CALL-001", "title": "Inscripción a prueba demostrativa", "published_at": "2026-10-02T09:15:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "audience": "estudiantes de demostración", "opens_at": "2026-10-02T09:15:00-05:00", "closes_at": "2026-10-09T17:00:00-05:00" } },
+    { "category": "calls", "source_record_id": "CALL-002", "title": "Registro a taller demostrativo", "published_at": "2026-10-04T10:00:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "audience": "comunidad sintética", "opens_at": "2026-10-04T10:00:00-05:00", "closes_at": "2026-10-12T17:00:00-05:00" } },
+    { "category": "news", "source_record_id": "NEWS-001", "title": "Nueva guía demostrativa disponible", "published_at": "2026-10-05T11:30:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "summary": "Contenido sintético para validar extracción y detección de cambios." } },
+    { "category": "news", "source_record_id": "NEWS-002", "title": "Actividad demostrativa del mes", "published_at": "2026-10-07T14:00:00-05:00", "source_version": "fixture-2026-10-a", "fields": { "summary": "Novedad representativa sin afirmaciones institucionales." } }
+  ]
+}

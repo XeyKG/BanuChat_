@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node dist/main.js",
     "start:local": "node --env-file=../../.env dist/main.js",
+    "start:oe2": "node dist/oe2/main.js",
     "typecheck": "tsc --noEmit",
     "build": "tsc -p tsconfig.build.json",
     "test": "node --import tsx --test test/*.test.ts",
@@ -16,7 +17,8 @@
     "validate:dataset": "tsx src/cli.ts",
     "prepare:ccd": "tsx src/ccd/cli.ts",
     "ccd:local": "node --env-file=../../infra/.env.ccd --import tsx src/ccd/load-local.ts",
-    "ccd:verify": "node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-local-check.mts"
+    "ccd:verify": "node --env-file=../../infra/.env.ccd --import tsx ../../eval/integration/ccd-local-check.mts",
+    "evaluate:oe2": "node --import tsx ../../eval/oe2/run-evaluation.mts"
   },
   "dependencies": {
     "ajv": "^8.17.1",

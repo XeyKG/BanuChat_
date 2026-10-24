@@ -1,0 +1,28 @@
+{
+  "schema_version": "oe2-fixture-1",
+  "category": "academic_offer",
+  "records": [
+    {
+      "id": "OFF-001",
+      "title": "Interacción digital — grupo demostrativo",
+      "published_at": "2026-10-01T08:00:00-05:00",
+      "source_version": "fixture-2026-10-a",
+      "period": "DEMO-2026-10",
+      "course_code": "DEMO-CCD-01",
+      "mode": "virtual",
+      "start_date": "2026-11-03",
+      "end_date": "2026-11-28"
+    },
+    {
+      "id": "OFF-002",
+      "title": "Analítica digital — grupo demostrativo",
+      "published_at": "2026-10-01T08:00:00-05:00",
+      "source_version": "fixture-2026-10-a",
+      "period": "DEMO-2026-10",
+      "course_code": "DEMO-CCD-02",
+      "mode": "teleclase",
+      "start_date": "2026-11-03",
+      "end_date": "2026-11-28"
+    }
+  ]
+}

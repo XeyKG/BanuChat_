@@ -55,6 +55,14 @@ persistencia. Agent/ReAct y MCP ejecutable siguen pendientes. N8N no participa
 en esa ruta síncrona; sus workflows retry/recover/scheduled siguen pendientes,
 aunque retry y recover explícitos del core/HTTP ya existen.
 
+OE2 añade una frontera local de preparación y evaluación para oferta académica,
+convocatorias y novedades en `src/oe2`. Reutiliza `SafeReader`, JSON estricto y
+SHA-256; valida campos, detecta duplicados y cambios y conserva atómicamente el último
+snapshot válido. Su servicio HTTP separado (`npm run start:oe2`) acepta únicamente
+fuentes `fixture_only`, escucha en loopback y nunca publica en PostgreSQL/CCD. Los
+workflows periódicos asociados permanecen inactivos. Esto es infraestructura reusable,
+no scraping institucional acreditado. Evaluación: `npm run evaluate:oe2`.
+
 Como antecedente de la etapa 5I, este README registró **176 PASS / 0 FAIL / 0 SKIP**
 unitarios y **38 PASS / 0 FAIL / 0 SKIP** PostgreSQL, en corridas separadas sobre
 PostgreSQL 16.15 y pgvector 0.8.6. La E2E real histórica de Implementación 3 fue otra

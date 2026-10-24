@@ -1,0 +1,72 @@
+{
+  "schema_version": "oe2-source-inventory-1",
+  "verified_at": "2026-10-24",
+  "note": "Descubrimiento documental y por índice público; no se ejecutó extracción contra estas fuentes.",
+  "sources": [
+    {
+      "source_id": "unab-students-index",
+      "categories": ["academic_offer", "calls", "news"],
+      "url": "https://unab.edu.co/estudiantes/",
+      "apparent_owner": "Universidad Autónoma de Bucaramanga",
+      "content": "Índice público de publicaciones para estudiantes",
+      "format": "HTML",
+      "technical_extraction": "Listado HTML y páginas de detalle; selector y paginación requieren verificación",
+      "access_restrictions": "Términos, robots, autoridad y permiso de automatización no verificados",
+      "publication_date": "Visible en resultados indexados",
+      "observed_frequency": "Irregular; no medida por BanuChat",
+      "authorization_status": "pending_verification"
+    },
+    {
+      "source_id": "unab-ccd-offer-article",
+      "categories": ["academic_offer", "news"],
+      "url": "https://unab.edu.co/asi-funciona-la-formacion-en-competencias-digitales-de-la-unab/",
+      "apparent_owner": "Universidad Autónoma de Bucaramanga / Centro de Competencias Digitales",
+      "content": "Descripción pública de rutas y cursos CCD",
+      "format": "HTML",
+      "technical_extraction": "Página de detalle HTML; estructura y datos canónicos requieren confirmación",
+      "access_restrictions": "Términos, robots y permiso de automatización no verificados",
+      "publication_date": "Visible en el resultado público",
+      "observed_frequency": "Publicación puntual; no medida por BanuChat",
+      "authorization_status": "pending_verification"
+    },
+    {
+      "source_id": "unab-ccd-calls-article",
+      "categories": ["calls"],
+      "url": "https://unab.edu.co/inscripcion-a-las-pruebas-de-competencias-digitales-estudiantes-desde-sexto-semestre/",
+      "apparent_owner": "Universidad Autónoma de Bucaramanga / Centro de Competencias Digitales",
+      "content": "Convocatoria pública de inscripción a pruebas CCD",
+      "format": "HTML con enlace de formulario",
+      "technical_extraction": "Página HTML; no seguir ni automatizar el formulario",
+      "access_restrictions": "Permiso de automatización no verificado; formulario fuera de alcance",
+      "publication_date": "Visible en el resultado público",
+      "observed_frequency": "Por convocatoria; no medida por BanuChat",
+      "authorization_status": "pending_verification"
+    },
+    {
+      "source_id": "ccd-internal-programming-files",
+      "categories": ["academic_offer"],
+      "url": "local-read-only://CCD_DOCUMENTACION/PROGRAMACION 202710/",
+      "apparent_owner": "CCD, por nombre y ubicación documental; autoridad por dato pendiente",
+      "content": "Dos libros XLSX de programación 202710",
+      "format": "XLSX",
+      "technical_extraction": "Lectura tabular local con contrato de columnas aún no aprobado",
+      "access_restrictions": "Fuente externa de solo lectura; no copiar originales ni extraer datos reales sin autorización específica",
+      "publication_date": "No verificada",
+      "observed_frequency": "No medida",
+      "authorization_status": "pending_verification"
+    },
+    {
+      "source_id": "ccd-internal-communications",
+      "categories": ["news", "academic_offer"],
+      "url": "local-read-only://CCD_DOCUMENTACION/COMUNICACIONES/",
+      "apparent_owner": "CCD/Comunicaciones, por ubicación documental; autoridad pendiente",
+      "content": "DOCX, PPTX, PDF e imágenes de comunicaciones y oferta",
+      "format": "Archivos heterogéneos",
+      "technical_extraction": "Selección y parser por formato después de admisión explícita",
+      "access_restrictions": "Solo lectura; no incorporar originales internos íntegros ni datos personales",
+      "publication_date": "Mixta o ausente",
+      "observed_frequency": "No medida",
+      "authorization_status": "pending_verification"
+    }
+  ]
+}

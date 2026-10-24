@@ -1,0 +1,20 @@
+{
+  "schema_version": "oe2-fixture-1",
+  "category": "news",
+  "records": [
+    {
+      "id": "NEWS-001",
+      "title": "Nueva guía demostrativa disponible",
+      "published_at": "2026-10-05T11:30:00-05:00",
+      "source_version": "fixture-2026-10-a",
+      "summary": "Contenido sintético para validar extracción y detección de cambios."
+    },
+    {
+      "id": "NEWS-002",
+      "title": "Actividad demostrativa del mes",
+      "published_at": "2026-10-07T14:00:00-05:00",
+      "source_version": "fixture-2026-10-a",
+      "summary": "Novedad representativa sin afirmaciones institucionales."
+    }
+  ]
+}

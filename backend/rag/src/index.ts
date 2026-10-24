@@ -77,3 +77,9 @@ export { InternalRuntimeConfigError } from './internal-http/runtime-config-error
 export type { InternalRuntimeConfigReason } from './internal-http/runtime-config-errors.js';
 export { parseInternalIngestionEnvironment } from './internal-http/runtime-config.js';
 export type { InternalIngestionRuntimeConfig } from './internal-http/runtime-config.js';
+export { OE2_SOURCES, resolveOe2Source } from './oe2/registry.js';
+export { extractOe2Fixture, compareOe2Snapshots, runOe2FixtureFlow,
+  FileOe2StateStore } from './oe2/flow.js';
+export { createOe2HttpServer } from './oe2/server.js';
+export type { Oe2Category, Oe2SourceContract, Oe2Record, Oe2Snapshot,
+  Oe2ChangeCounts, Oe2RunResult, Oe2ExecutionRecord, Oe2StateStore } from './oe2/types.js';
