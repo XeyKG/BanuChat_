@@ -151,14 +151,15 @@ sobre I1B.
 
 No ejecutar habitualmente los laboratorios `banuchat-auth-p4l1-demo`,
 `banuchat-auth-r0-replay`, `banuchat-auth-i1a-test`,
-`banuchat-auth-i1b-uid-test` o `banuchat-o1-restore-verify`. Sus scripts, contratos,
-checkpoints y resultados versionados se conservan. Sus recursos Docker se clasifican
-en el [checkpoint O5](../transition/docker-organization-o5-checkpoint.md).
+`banuchat-auth-i1b-uid-test`. Sus scripts, contratos, checkpoints y resultados
+versionados se conservan. El verificador temporal O1 y sus recursos fueron retirados
+en la limpieza autorizada; puede reconstruirse desde los respaldos O1.
 
 Los Compose `docker-compose.yml` y `docker-compose.ccd.yml` se conservan porque
 siguen describiendo pruebas sintéticas/N8N y edición CCD. `docker-compose.dev.yml`
 es la configuración canónica por perfiles; activar un perfil no inicia los demás.
 
-Ningún recurso se elimina hasta aprobar la lista exacta O5. La limpieza aprobada
-debe ejecutarse como una sola operación, con inventario anterior y posterior y sin
-usar `prune` global.
+O5 eliminó exclusivamente los trece recursos autorizados y conservó inventarios
+anterior/posterior. Los recursos clasificados ARCHIVAR no se eliminaron. Véase el
+[checkpoint O5 final](../transition/docker-organization-o5-checkpoint.md). No usar
+`prune` global para mantenimiento posterior.
