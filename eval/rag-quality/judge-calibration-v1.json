@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "judge_calibration_synthetic",
+  "language": "es",
+  "contains_ccd_data": false,
+  "label_origin": "technical_expectations_not_human_validated",
+  "diagnostic_threshold": 0.5,
+  "notes": "Etiquetas humanas binarias para calibración técnica; el umbral 0.5 no es un target académico de OE1.",
+  "cases": [
+    {
+      "id": "CAL-01", "category": "correctamente_fundamentado",
+      "expected_labels": {"faithfulness":"high","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Cuándo abre la biblioteca ficticia?","response":"La biblioteca abre a las 8:00.","reference":"La biblioteca abre a las 8:00.","retrieved_contexts":["La biblioteca ficticia abre a las 8:00 y cierra a las 18:00."],"reference_contexts":["La biblioteca ficticia abre a las 8:00 y cierra a las 18:00."]}
+    },
+    {
+      "id": "CAL-02", "category": "correctamente_fundamentado",
+      "expected_labels": {"faithfulness":"high","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Qué materiales acepta el taller ficticio?","response":"Acepta papel y cartón.","reference":"Acepta papel y cartón.","retrieved_contexts":["El taller ficticio acepta papel y cartón para sus prácticas."],"reference_contexts":["El taller ficticio acepta papel y cartón para sus prácticas."]}
+    },
+    {
+      "id": "CAL-03", "category": "parcialmente_fundamentado",
+      "expected_labels": {"faithfulness":"high","context_precision":"high","context_recall":"low","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Qué exige y cuánto dura el laboratorio ficticio?","response":"Exige gafas de seguridad.","reference":"Exige gafas de seguridad y dura dos horas.","retrieved_contexts":["Para entrar al laboratorio ficticio se exigen gafas de seguridad."],"reference_contexts":["Para entrar al laboratorio ficticio se exigen gafas de seguridad.","La sesión del laboratorio ficticio dura dos horas."]}
+    },
+    {
+      "id": "CAL-04", "category": "parcialmente_fundamentado",
+      "expected_labels": {"faithfulness":"low","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Qué incluye el kit ficticio?","response":"Incluye una libreta y un lápiz azul.","reference":"Incluye una libreta.","retrieved_contexts":["El kit ficticio incluye una libreta."],"reference_contexts":["El kit ficticio incluye una libreta."]}
+    },
+    {
+      "id": "CAL-05", "category": "contradictorio",
+      "expected_labels": {"faithfulness":"low","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Se permite comida en la sala ficticia?","response":"Sí, se permite comida.","reference":"No se permite comida.","retrieved_contexts":["En la sala ficticia no se permite consumir comida."],"reference_contexts":["En la sala ficticia no se permite consumir comida."]}
+    },
+    {
+      "id": "CAL-06", "category": "contradictorio",
+      "expected_labels": {"faithfulness":"low","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Cuál es el color del pase ficticio?","response":"El pase es rojo.","reference":"El pase es verde.","retrieved_contexts":["El pase de acceso ficticio es de color verde."],"reference_contexts":["El pase de acceso ficticio es de color verde."]}
+    },
+    {
+      "id": "CAL-07", "category": "irrelevante",
+      "expected_labels": {"faithfulness":"low","context_precision":"high","context_recall":"high","answer_relevancy":"low"},
+      "ragas_input": {"user_input":"¿Dónde queda el aula ficticia?","response":"Los árboles producen oxígeno.","reference":"Queda en el edificio norte.","retrieved_contexts":["El aula ficticia queda en el edificio norte."],"reference_contexts":["El aula ficticia queda en el edificio norte."]}
+    },
+    {
+      "id": "CAL-08", "category": "irrelevante",
+      "expected_labels": {"faithfulness":"high","context_precision":"low","context_recall":"low","answer_relevancy":"low"},
+      "ragas_input": {"user_input":"¿Qué día se reúne el club ficticio?","response":"La receta usa dos manzanas.","reference":"Se reúne los martes.","retrieved_contexts":["Una receta de ejemplo usa dos manzanas."],"reference_contexts":["El club ficticio se reúne los martes."]}
+    },
+    {
+      "id": "CAL-09", "category": "error_temporal",
+      "expected_labels": {"faithfulness":"low","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Cuál es el horario actual del museo ficticio?","response":"Actualmente abre de 9:00 a 17:00.","reference":"La fuente solo documenta el horario de 2022 y no confirma el actual.","retrieved_contexts":["Durante 2022, el museo ficticio abrió de 9:00 a 17:00. La vigencia posterior no está confirmada."],"reference_contexts":["Durante 2022, el museo ficticio abrió de 9:00 a 17:00. La vigencia posterior no está confirmada."]}
+    },
+    {
+      "id": "CAL-10", "category": "error_temporal",
+      "expected_labels": {"faithfulness":"high","context_precision":"high","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Sigue vigente hoy la tarifa ficticia de 2021?","response":"La fuente registra una tarifa para 2021, pero no confirma su vigencia actual.","reference":"Solo está documentada para 2021; la vigencia actual no está confirmada.","retrieved_contexts":["La tarifa ficticia fue de diez unidades en 2021. No hay confirmación para periodos posteriores."],"reference_contexts":["La tarifa ficticia fue de diez unidades en 2021. No hay confirmación para periodos posteriores."]}
+    },
+    {
+      "id": "CAL-11", "category": "contexto_ruidoso",
+      "expected_labels": {"faithfulness":"high","context_precision":"low","context_recall":"high","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Qué idioma usa el manual ficticio?","response":"Usa español.","reference":"El manual está escrito en español.","retrieved_contexts":["El jardín ficticio tiene flores amarillas.","El manual ficticio está escrito en español."],"reference_contexts":["El manual ficticio está escrito en español."]}
+    },
+    {
+      "id": "CAL-12", "category": "contexto_incompleto",
+      "expected_labels": {"faithfulness":"high","context_precision":"high","context_recall":"low","answer_relevancy":"high"},
+      "ragas_input": {"user_input":"¿Cuáles son las dos etapas del proceso ficticio?","response":"La primera etapa es registro.","reference":"Las etapas son registro y verificación.","retrieved_contexts":["La primera etapa del proceso ficticio es el registro."],"reference_contexts":["La primera etapa del proceso ficticio es el registro.","La segunda etapa del proceso ficticio es la verificación."]}
+    }
+  ]
+}

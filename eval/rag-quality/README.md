@@ -4,6 +4,9 @@ Estado: **pool de candidatas en revisión**. [benchmark-v1.json](benchmark-v1.js
 contiene 63 candidatas `draft`; el benchmark aún no está completo ni congelado, RAGAS
 no se ha ejecutado y no existen resultados M9.
 
+El flujo CCD separado de OE1-D3 se documenta en [OE1-D3.md](OE1-D3.md). Su
+calibración sintética del evaluador no es un resultado M9 ni un baseline CCD.
+
 ## A. Propósito
 
 M9 evaluará la calidad del Document RAG de BanuChat sobre el corpus sintético
