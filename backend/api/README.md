@@ -170,8 +170,9 @@ rótulos/perfil demo, capacidades disponibles y acceso de red antes de probar CC
 un dispositivo físico. No se acreditó una prueba móvil ni se abrió LAN en este cambio.
 
 Contrato REST v1 documentado para la app React Native, con base `/api/v1`.
-Este directorio implementa servidor y handlers REST; Agent/ReAct no está implementado.
-El fallback conversacional actual es Document RAG directo.
+Este directorio implementa servidor, handlers REST y el agente MCP acotado de OE3.
+En modo sintético, `agent_fallback` usa el servidor MCP interno; en `ccd_local`
+conserva Document RAG directo porque no existe una autorización MCP CCD.
 
 El cliente Ollama de query usa `options.num_ctx` de la receta de la release
 consultada. Comprueba que el contexto nativo anunciado por `/api/show` sea al
@@ -192,9 +193,10 @@ Los mensajes pasan por Intent Router. Cinco fast paths respaldados por datos,
 `basic_social`, `capabilities_help` y
 `known_out_of_scope` usan renderers estáticos deterministas, sin SQL de dominio,
 embeddings ni generación. `document_lookup` resuelve títulos canónicos por metadata
-exacta en la release vigente, sin consultar chunks. `agent_fallback` va a Document
-RAG directo para preguntas sobre el contenido.
-Agent/ReAct y MCP permanecen pendientes dentro de la arquitectura objetivo.
+exacta en la release vigente, sin consultar chunks. `agent_fallback` va al agente
+MCP sintético, que ejecuta como máximo dos selecciones de las seis tools autorizadas,
+observa cada resultado, exige una sola release y responde o se abstiene. La política
+es determinista y trazable; no añade red abierta, tools de sistema ni escrituras.
 La clasificación no usa LLM, embeddings ni N8N; el fast path no llama a MCP.
 El catálogo del router y el `$id` del schema son `1.2.0-draft`.
 M3.1 añadió `lexical_patterns` de score 90:
@@ -217,12 +219,20 @@ M8.2 añade `document_lookup`: descubre tanto documentos `chunked` como
 `full_document`, persiste la versión documental con `chunk_id` nulo y expone la ruta
 relativa verificada del artifact. Las citas documentales de RAG conservan su UUID de
 chunk y también pueden abrir el documento original.
-Las consultas REST directas usan los mismos servicios de aplicación y su futura
-reutilización por MCP sigue pendiente. La app consume únicamente REST, nunca MCP ni
+Las consultas REST directas y las tools MCP reutilizan los mismos servicios de
+aplicación. La app consume únicamente REST, nunca MCP ni
 N8N. El servidor implementa además historial, artefactos documentales y lecturas HTTP
 directas de calendario, progreso y anuncios; revisar `src/http/api-server.ts`.
 Solo se emplean perfiles y datos sintéticos de demostración.
 No se incluye autenticación institucional ni catálogo REST de cursos en v1.
+
+El proceso MCP requiere `MCP_POSTGRES_DB`, `MCP_POSTGRES_USER` y
+`MCP_POSTGRES_PASSWORD`, distintos de la cuenta propietaria; host/puerto opcionales
+siguen las restricciones del servidor MCP. La API puede arrancar sin esas variables,
+pero un fallback sintético devolverá dependencia no disponible hasta configurar una
+identidad válida. Cada turno abre una sesión stdio con el perfil sintético controlado,
+valida catálogo/input/output contra `tools.contract.json`, limita cada llamada a 15 s,
+el ciclo completo a 30 s y 32 KiB por observación, y cierra proceso y conexión.
 
 ### Configuración del listener
 

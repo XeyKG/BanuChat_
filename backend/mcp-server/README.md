@@ -1,8 +1,10 @@
 # MCP Server
 
-Servidor interno de lectura sintética, ejecutable por stdio. En la arquitectura
-objetivo, Agent/ReAct será cliente MCP; ese agente no está implementado aquí.
-La app consume REST y su fallback continúa usando Document RAG directo sin MCP.
+Servidor interno de lectura sintética, ejecutable por stdio. El fallback sintético
+de la API REST lo consume mediante el cliente MCP acotado de
+`backend/api/src/agent`; los fast paths no pasan por MCP. La app continúa
+consumiendo únicamente REST. `ccd_local` conserva Document RAG directo y nunca
+abre este servidor sintético.
 
 ## Contrato de interfaces 2.0.0-draft
 
@@ -103,5 +105,8 @@ embeddings **dobles en memoria**, además de pruebas de lectura/seguridad.
 `test/stdio-fixture.ts` es un arnés de pruebas separado del arranque productivo;
 no constituye conexión PostgreSQL/Ollama. No configurar ese arnés para uso funcional.
 
-La aceptación final de M01 está condicionada a la verificación real de lectura con
-privilegios mínimos. M02 (CCD) y A01 (agente) permanecen fuera de este incremento.
+La integración cliente-servidor y la política multietapa están verificadas con el
+SDK y el transporte stdio reales, usando SQL/embedding dobles explícitos. La
+verificación PostgreSQL/Ollama real continúa condicionada a una credencial MCP de
+lectura con privilegios mínimos; no se reutiliza la cuenta propietaria. MCP para CCD
+permanece fuera del alcance autorizado.

@@ -15,6 +15,7 @@ import {
 import {
   sendMessage,
   type DocumentRagResponder,
+  type McpAgentResponder,
 } from "../application/messages.js";
 import { listProfiles } from "../application/profiles.js";
 import type { DemoMode } from "../application/demo-mode.js";
@@ -61,6 +62,7 @@ export interface ApiServerDependencies {
   sql: SqlQueryClient;
   router: IntentRouter;
   document_rag: DocumentRagResponder;
+  agent_fallback?: McpAgentResponder;
   now?: () => string;
   document_artifact?: DocumentArtifactStorage;
 }
@@ -455,6 +457,9 @@ async function handleRequest(
               sql: dependencies.sql,
               router: dependencies.router,
               document_rag: dependencies.document_rag,
+              ...(dependencies.agent_fallback === undefined
+                ? {}
+                : { agent_fallback: dependencies.agent_fallback }),
               demo_mode: dependencies.demo_mode ?? "synthetic",
             },
             {

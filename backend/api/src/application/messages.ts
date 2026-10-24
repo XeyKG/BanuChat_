@@ -21,6 +21,7 @@ import { ProfileProgressError } from "./profile-progress-errors.js";
 import { DocumentLookupError } from "./document-lookup-errors.js";
 import type { DemoMode } from "./demo-mode.js";
 import { boundConversationContext, type ConversationMessage } from "../chat/conversation-context.js";
+import { McpAgentError, type McpAgentInput } from "../agent/bounded-mcp-agent.js";
 
 const DATASET_ID = 1;
 const UUID_PATTERN =
@@ -203,6 +204,7 @@ export interface SendMessageDependencies {
   sql: SqlQueryClient;
   router: IntentRouter;
   document_rag: DocumentRagResponder;
+  agent_fallback?: McpAgentResponder;
   read_context?: MessageTransaction;
   commit_turn?: MessageTransaction;
   persist?: (client: SqlQueryClient, values: readonly unknown[]) => Promise<{ rows: PersistedTurnRow[] }>;
@@ -212,6 +214,10 @@ export type MessageTransaction = <T>(operation: (client: SqlQueryClient) => Prom
 
 export type DocumentRagResponder = (
   input: DocumentRagInput,
+) => Promise<DocumentRagAnswer>;
+
+export type McpAgentResponder = (
+  input: McpAgentInput,
 ) => Promise<DocumentRagAnswer>;
 
 export interface SendMessageInput {
@@ -525,12 +531,25 @@ export async function sendMessage(
     answer = dispatched;
   } else {
     try {
-      answer = await dependencies.document_rag({
-        release_id: context.dataset_release_id,
-        query: input.content,
-        ...(history.length === 0 ? {} : { history }),
-      });
+      answer = dependencies.demo_mode !== "ccd_local" && dependencies.agent_fallback !== undefined
+        ? await dependencies.agent_fallback({
+            release_id: context.dataset_release_id,
+            profile_key: context.profile_key,
+            query: input.content,
+            now: input.now,
+            ...(history.length === 0 ? {} : { history }),
+          })
+        : await dependencies.document_rag({
+            release_id: context.dataset_release_id,
+            query: input.content,
+            ...(history.length === 0 ? {} : { history }),
+          });
     } catch (error) {
+      if (error instanceof McpAgentError) {
+        if (error.reason === "release_changed") reject("current_release_changed");
+        if (error.reason === "dependency_unavailable") reject("rag_dependency_unavailable");
+        reject("invalid_database_result");
+      }
       if (error instanceof GeneratorClientError) {
         reject("rag_dependency_unavailable");
       }

@@ -3,6 +3,8 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 import { Pool } from "pg";
 
 import type { DocumentRagResponder } from "./application/messages.js";
+import { runBoundedMcpAgent } from "./agent/bounded-mcp-agent.js";
+import { StdioMcpClientFactory } from "./agent/mcp-client.js";
 import { generateDocumentRagAnswer } from "./chat/document-rag.js";
 import { PgSqlClient } from "./data/pg-client.js";
 import type { SqlQueryClient } from "./data/sql-client.js";
@@ -19,7 +21,7 @@ export async function createRuntimeApiServer(
   sql: SqlQueryClient,
   documentRag: DocumentRagResponder,
   loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
-  options: Pick<ApiServerDependencies, "demo_mode" | "document_artifact"> = {},
+  options: Pick<ApiServerDependencies, "demo_mode" | "document_artifact" | "agent_fallback"> = {},
 ): Promise<ReturnType<typeof createApiServer>> {
   const router = await loadRouter();
   if (router.catalog_valid !== true) {
@@ -79,9 +81,21 @@ export async function startApi(): Promise<void> {
         },
         input,
       );
+    const mcpSessions = new StdioMcpClientFactory({
+      environment: {
+        ...(process.env.MCP_POSTGRES_DB === undefined ? {} : { MCP_POSTGRES_DB: process.env.MCP_POSTGRES_DB }),
+        ...(process.env.MCP_POSTGRES_USER === undefined ? {} : { MCP_POSTGRES_USER: process.env.MCP_POSTGRES_USER }),
+        ...(process.env.MCP_POSTGRES_PASSWORD === undefined ? {} : { MCP_POSTGRES_PASSWORD: process.env.MCP_POSTGRES_PASSWORD }),
+        ...(process.env.MCP_POSTGRES_HOST === undefined ? {} : { MCP_POSTGRES_HOST: process.env.MCP_POSTGRES_HOST }),
+        ...(process.env.MCP_POSTGRES_PORT === undefined ? {} : { MCP_POSTGRES_PORT: process.env.MCP_POSTGRES_PORT }),
+      },
+    });
+    const agentFallback = (input: Parameters<typeof runBoundedMcpAgent>[1]) =>
+      runBoundedMcpAgent({ sessions: mcpSessions }, input);
 
     server = await createRuntimeApiServer(sql, documentRag, loadDefaultIntentRouter, {
       demo_mode: config.demo_mode,
+      ...(config.demo_mode === "synthetic" ? { agent_fallback: agentFallback } : {}),
       ...(config.demo_mode === "ccd_local" ? { document_artifact: {
         root: fileURLToPath(new URL("../../../data/ccd/local/m01-m12/", import.meta.url)),
         version_roots: {

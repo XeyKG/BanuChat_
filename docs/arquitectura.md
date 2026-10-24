@@ -37,10 +37,10 @@ La excepción CCD usa únicamente archivos externos seleccionados, sin scraping 
 | --- | --- | --- |
 | Mobile App | Expo SDK 57, React Native + TypeScript; consume únicamente la API REST pública. MVP de demostración M1–M5 validado manualmente en Android físico. | `mobile/` |
 | REST Backend API | Entrada síncrona; fija contexto, evalúa Intent Router y persiste respuesta/citas de la misma release. | `backend/api/` |
-| Intent Router | Catálogo determinista: fast path seguro o fallback Document RAG directo actual; Agent/RAG permanece como objetivo. Clasifica sin LLM, embeddings ni N8N. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
-| Application Services | Lógica compartida con acceso consistente a PostgreSQL; implementada para los fast paths actuales y pendiente de reutilización por tools MCP. | `backend/api/` |
-| Agent/RAG objetivo | Ciclo ReAct, recuperación de contexto y selección controlada de herramientas; pendiente de integración en el fallback. | `backend/`, `backend/rag/` |
-| MCP Server interno objetivo | Contrato de seis tools; servidor ejecutable e integración con Agent/ReAct pendientes. | `backend/mcp-server/` |
+| Intent Router | Catálogo determinista: fast path seguro o fallback. El fallback sintético usa Agent/MCP; CCD conserva Document RAG directo. Clasifica sin LLM, embeddings ni N8N. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
+| Application Services | Lógica compartida con acceso consistente a PostgreSQL, reutilizada por fast paths y las seis tools MCP. | `backend/api/` |
+| Agent/RAG | Política sintética acotada de selección, ejecución, observación y decisión; máximo dos tools. CCD conserva RAG directo. | `backend/api/src/agent/` |
+| MCP Server interno | Servidor sintético stdio de seis tools de solo lectura, consumido por el fallback de la API. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
 | N8N | Workflow manual local validado en N3; orquesta ingesta asíncrona. Retry/recover/scheduled pendientes. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
@@ -69,15 +69,15 @@ flowchart LR
 ```
 
 N8N queda fuera del camino síncrono. La app no consume MCP, N8N ni PostgreSQL
-directamente. Agent/ReAct y MCP continúan siendo parte de esta arquitectura objetivo;
-no están integrados en el fallback implementado actualmente. Embeddings usa Ollama
+directamente. Agent/MCP está integrado únicamente en el fallback sintético; CCD
+continúa con Document RAG directo y sin servidor MCP autorizado. Embeddings usa Ollama
 local con `qwen3-embedding:0.6b`, 1024 dimensiones y coseno
 ([ADR 0003](adr/0003-embedding-local-qwen3.md)).
 
 El [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md) introduce el router.
 El fast path no llama a MCP ni al LLM generador; usa servicios compartidos y renderers.
-En este diseño objetivo, las decisiones de fallback se derivarán a Agent/ReAct;
-en el runtime actual se derivan a Document RAG directo.
+El fallback sintético se deriva a la política Agent/MCP; el fallback CCD sigue en
+Document RAG directo para preservar su aislamiento y autorizaciones.
 El diagrama muestra dependencias lógicas y retornos, no nuevos contenedores ni código.
 Las consultas REST directas siguen pudiendo utilizar servicios sin router ni agente.
 
@@ -100,11 +100,15 @@ flowchart LR
     api --> router["Intent Router determinista"]
     router -->|"Fast path"| fast["Catálogo, progreso, calendario, anuncios o documentos"]
     router -->|"Social, ayuda o fuera de alcance"| static["Renderer estático"]
-    router -->|"Fallback documental"| rag["Document RAG directo"]
+    router -->|"Fallback sintético"| agent["Agente MCP acotado"]
+    router -->|"Fallback CCD"| rag["Document RAG directo"]
+    agent --> mcp["MCP stdio sintético"]
+    mcp --> db
     fast --> db[("PostgreSQL + pgvector")]
     rag --> db
     rag --> ollama["Ollama local"]
     fast --> reply["Persistencia y respuesta REST"]
+    agent --> reply
     rag --> reply
     static --> reply
 ```
@@ -132,7 +136,9 @@ persistencia/relectura de citas por HTTP; la prueba operacional local queda pend
 M8.2 implementa `document_lookup` por coincidencia exacta del título canónico en la
 release vigente. No usa embeddings ni generación, permite descubrir documentos
 `full_document` sin chunks y deriva el artifact documental para abrirlo desde Mobile.
-Document RAG permanece como fallback para preguntas sobre contenido.
+En sintético, las preguntas que alcanzan `agent_fallback` pasan por Agent/MCP;
+`search_knowledge` conserva el retrieval documental existente. CCD mantiene
+Document RAG directo.
 
 Document RAG genera el embedding de la pregunta con `qwen3-embedding:0.6b` mediante
 Ollama, recupera hasta cinco fragmentos con búsqueda exacta por coseno en
@@ -143,8 +149,9 @@ Si no hay fragmentos o el generador declara evidencia insuficiente, devuelve una
 respuesta de insuficiencia sin citas. La procedencia facilita verificación y no
 demuestra por sí sola faithfulness o exactitud. El E2E real obtuvo HTTP 201.
 
-Este estado no incluye un ciclo Agent/ReAct ni llamadas MCP desde el fallback.
-Ambos siguen pendientes en la arquitectura objetivo.
+OE3 incorpora un ciclo acotado y trazable de hasta dos tools MCP en el fallback
+sintético. La validación PostgreSQL/Ollama real del cliente sigue pendiente de una
+identidad sintética de lectura con privilegios mínimos.
 El cliente móvil M1–M5 está implementado y fue validado manualmente en Android
 físico. Historial y anuncios también están implementados; el estado de las etapas
 móviles posteriores y sus validaciones está en [Mobile](../mobile/README.md).
@@ -207,7 +214,10 @@ flowchart TB
     M["App móvil Expo"] -->|"REST"| B["Backend API e Intent Router"]
     subgraph LOCAL["Equipo local; Compose solo PostgreSQL y N8N"]
         B -->|"Fast paths"| S["Servicios de aplicación"]
-        B -->|"Fallback actual"| R["Document RAG directo"]
+        B -->|"Fallback sintético"| A["Agente + MCP stdio"]
+        B -->|"Fallback CCD"| R["Document RAG directo"]
+        A --> P
+        A --> O
         R --> P
         R --> O
         S --> P[("Única instancia PostgreSQL + pgvector")]
@@ -318,11 +328,11 @@ se conserva hasta disponer de implementación validada.
   progreso, calendario, anuncios y localización documental, renderers
   social/ayuda/fuera de alcance, M3.1/M3.2,
   los endpoints REST descritos arriba, retrieval exacto,
-  Document RAG directo con generación Ollama, citas y persistencia; vertical slice
-  RAG E2E real con HTTP 201.
-- Consulta pendiente: Agent/ReAct real, servidor MCP ejecutable e
-  integración productiva del MCP interno al fallback. J1 cubre una ruta operacional
-  concreta, no todas las variantes o condiciones de concurrencia REST.
+  Document RAG, citas y persistencia; Agent/MCP sintético acotado y servidor stdio
+  ejecutable. El vertical slice RAG previo obtuvo HTTP 201. La integración OE3 tiene
+  cobertura SDK/stdio con dobles declarados; PostgreSQL/Ollama real del cliente MCP
+  queda pendiente de credencial mínima. J1 cubre una ruta operacional concreta, no
+  todas las variantes o condiciones de concurrencia REST.
 - Producto/evaluación: autenticación de usuario final, RAGAS completa, SUS formal,
   pruebas formales con usuarios y notificaciones push reales. El MVP móvil de
   demostración M1–M5 ya existe; no hay despliegue institucional acreditado.
