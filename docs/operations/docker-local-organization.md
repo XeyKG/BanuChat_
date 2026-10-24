@@ -1,8 +1,9 @@
 # BanuChat — organización y recuperación Docker local
 
-Estado: **propuesta preparada, no promovida**. El entorno funcional
-`banuchat-ccd-auth-i1b-test` continúa siendo la referencia operativa. El archivo
-`infra/docker-compose.dev.yml` no se ha usado para crear servicios.
+Estado: **candidato reconstruido y validado funcionalmente, no promovido**. El
+entorno `banuchat-ccd-auth-i1b-test` continúa siendo la referencia operativa.
+O2 usó `infra/docker-compose.dev.yml` para crear exclusivamente
+`banuchat-dev-postgres-ccd-auth-1` en 55453; O3 probó la API v2 contra esa copia.
 
 ## Fronteras de datos
 
@@ -62,8 +63,9 @@ docker compose `
   config
 ```
 
-La validación de configuración no acredita que un volumen contenga datos. No usar
-`up` hasta que la promoción y el volumen restaurado hayan sido aprobados.
+La validación de configuración por sí sola no acredita que un volumen contenga
+datos. O2 restauró y verificó el volumen autorizado `banuchat-dev-ccd-auth-data`;
+no volver a crear el servicio ni ejecutar `up` como parte de O3.
 
 ## Arranque vigente antes de la promoción
 
@@ -88,8 +90,8 @@ Mobile conserva Expo SDK 57 y su launcher desde la raíz:
 .\mobile\scripts\start-ccd-auth.ps1
 ```
 
-No ejecutar el Compose candidato para complementar este laboratorio. Eso crearía
-un segundo entorno en vez de recuperar el vigente.
+No ejecutar de nuevo el Compose candidato para complementar este laboratorio. El
+candidato O2 ya existe en 55453 y continúa separado del entorno vigente.
 
 ## Respaldo
 
@@ -139,6 +141,31 @@ o los dumps. Pueden contener hashes de credenciales y datos conversacionales.
    volúmenes permanecen intactos. La eliminación de recursos exige una
    autorización posterior.
 
+## Validación funcional O3
+
+O3 no ejecuta operaciones Compose. El entrypoint específico valida primero el
+nombre, proyecto, servicio, puerto, volumen, red y salud del candidato, y después
+inicia la API temporal en loopback:3013:
+
+```powershell
+cd .\backend\api
+$env:BANUCHAT_O3_API_PORT = '3013'
+node --import tsx test/ccd-candidate-o3-operator.mts
+```
+
+En otra terminal, la selección funcional se ejecuta con:
+
+```powershell
+$env:BANUCHAT_O3_API_PORT = '3013'
+node --import tsx test/ccd-candidate-o3-http.mts
+```
+
+La prueba usa las cuentas ficticias locales ya existentes, crea dos conversaciones
+controladas solo en el candidato y conserva ese historial para acreditar
+persistencia. No imprime credenciales ni respuestas. Al terminar, cerrar únicamente
+el proceso de API; no detener PostgreSQL. El resultado O3 está en
+[`banuchat-o3-candidate-http.json`](../../eval/auth/results/banuchat-o3-candidate-http.json).
+
 ## Promoción pendiente
 
 La promoción requiere una ventana separada y autorización explícita. Debe definir
@@ -150,4 +177,5 @@ la misma operación de promoción.
 
 La reconstrucción paralela O2 y la regla para inicializar el clúster con el mismo
 administrador están en [docker-ccd-auth-o2.md](docker-ccd-auth-o2.md). El candidato
-continúa en 55453 y no constituye una promoción.
+continúa en 55453 y no constituye una promoción. O3 acreditó la integración de API,
+pero no autoriza cambiar clientes, puertos ni retirar I1B.

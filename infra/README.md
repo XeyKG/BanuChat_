@@ -4,7 +4,7 @@ Configuración para desarrollo y demostraciones locales, usada en N0/N3. El Comp
 una instancia PostgreSQL que incluye pgvector y un servicio N8N separado. No incluye
 backend ni app móvil, y no monta ni ejecuta migraciones.
 
-La organización Docker O1 añadió un candidato no activado en
+La organización Docker O1 añadió un candidato inicialmente no activado en
 [`docker-compose.dev.yml`](docker-compose.dev.yml). Conserva los Compose históricos,
 separa CCD autenticado, demo sintética y N8N mediante perfiles y no sustituye el
 laboratorio `banuchat-ccd-auth-i1b-test` hasta una promoción expresamente autorizada.
@@ -18,6 +18,11 @@ La reconstrucción paralela O2 se documenta en el
 [checkpoint](../docs/transition/docker-organization-o2-checkpoint.md). El candidato
 permanece en 55453 y no sustituye I1B.
 
+O3 ejecutó la API v2 en loopback:3013 contra ese candidato y validó autenticación,
+aislamiento, historial, RAG CCD, citas, artefactos y abstención. La API temporal se
+cerró al terminar; no se cambió Mobile ni se promovió 55453. Véase el
+[checkpoint O3](../docs/transition/docker-organization-o3-checkpoint.md).
+
 ## Variables y seguridad
 
 `/.env.example` documenta las variables. Usuario, contraseña y clave de cifrado se
@@ -26,9 +31,10 @@ Compose exige los valores sensibles y solo publica puertos en `127.0.0.1`.
 La ejecución desde la raíz debe cargar explícitamente `.env` mediante
 `docker compose --env-file .env -f infra/docker-compose.yml up -d`.
 
-La autenticación de usuario final sigue pendiente. El HTTP interno de ingesta ya
-usa un Bearer token de servicio; no autentica usuarios de la app. La clave de
-cifrado de N8N protege su configuración y no sustituye esas credenciales.
+La API v2 ya autentica cuentas locales sintéticas en el entorno CCD; autenticación
+institucional real sigue pendiente. El HTTP interno de ingesta usa un Bearer token
+de servicio independiente. La clave de cifrado de N8N protege su configuración y
+no sustituye las credenciales de usuario.
 
 ## Imágenes y persistencia
 

@@ -1,0 +1,38 @@
+{
+  "checkpoint": "BANUCHAT-O3",
+  "at": "2026-10-24T07:21:28.036Z",
+  "head": "990531e5a13f172457540812b2fa976af469e9ca",
+  "configuration": {
+    "api_port": 3013,
+    "database_port": 55453,
+    "database": "banuchat_ccd_auth_i1b_test",
+    "container": "banuchat-dev-postgres-ccd-auth-1",
+    "ollama": "local-existing"
+  },
+  "checks": {
+    "unauthorized_rejected": true,
+    "authentication_and_session": true,
+    "account_isolation": true,
+    "f2_grounded_rag_history_citations_document": true,
+    "ownership": true,
+    "error_and_abstention": true,
+    "corpus_unchanged": true,
+    "previous_candidate_history_unchanged": true,
+    "i1b_history_and_runtime_unchanged": true,
+    "candidate_identity": {
+      "started_at": "2026-10-24T07:03:25.160266083Z",
+      "volume": [
+        "banuchat-dev-ccd-auth-data"
+      ],
+      "network": [
+        "banuchat-dev-ccd-auth"
+      ]
+    }
+  },
+  "created": {
+    "conversations": 2,
+    "messages": 6,
+    "citations": 1
+  },
+  "result": "PASS"
+}
