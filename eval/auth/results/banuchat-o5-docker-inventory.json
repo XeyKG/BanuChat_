@@ -1,0 +1,116 @@
+{
+  "checkpoint": "BANUCHAT-O5-INVENTORY",
+  "at": "2026-10-24",
+  "head": "a93a19e17f9d66016b48eda10d0951297c56fd15",
+  "counts": {
+    "containers": 10,
+    "volumes": 15,
+    "networks_including_docker_defaults": 16,
+    "images": 7
+  },
+  "containers": {
+    "CONSERVAR": [
+      "banuchat-dev-postgres-ccd-auth-1",
+      "banuchat-ccd-auth-i1b-test"
+    ],
+    "CONSERVAR PARA PRUEBAS": [
+      "banuchat-postgres",
+      "banuchat-n8n",
+      "banuchat-ccd-dev-postgres-ccd-1"
+    ],
+    "ARCHIVAR": [
+      "banuchat-auth-p4l1-demo",
+      "banuchat-auth-r0-replay",
+      "banuchat-auth-i1a-test",
+      "banuchat-auth-i1b-uid-test"
+    ],
+    "ELIMINAR": [
+      "banuchat-o1-restore-verify"
+    ]
+  },
+  "volumes": {
+    "CONSERVAR": [
+      "banuchat-dev-ccd-auth-data",
+      "banuchat-ccd-auth-i1b-test-data"
+    ],
+    "CONSERVAR PARA PRUEBAS": [
+      "banuchat-schema-test_pgvector_data",
+      "banuchat-schema-test_n8n_data",
+      "banuchat-ccd-dev_ccd_pgvector_data"
+    ],
+    "ARCHIVAR": [
+      "banuchat-auth-p4l1-demo-data",
+      "banuchat-auth-r0-replay-data",
+      "banuchat-auth-i1a-test-data",
+      "banuchat-auth-i1b-uid-test-data",
+      "banuchat_postgres_data",
+      "banuchat_n8n_data",
+      "banuchatv2_postgres_data",
+      "banuchatv2_n8n_data"
+    ],
+    "ELIMINAR": [
+      "banuchat-o1-restore-verify-data",
+      "infra_pgvector_data"
+    ]
+  },
+  "networks": {
+    "CONSERVAR": [
+      "banuchat-dev-ccd-auth",
+      "banuchat-ccd-auth-i1b-test-isolated",
+      "bridge",
+      "host",
+      "none"
+    ],
+    "CONSERVAR PARA PRUEBAS": [
+      "banuchat-schema-test_default",
+      "banuchat-ccd-dev_default"
+    ],
+    "ARCHIVAR": [
+      "banuchat-auth-p4l1-demo-isolated",
+      "banuchat-auth-r0-replay-isolated",
+      "banuchat-auth-i1a-test-isolated",
+      "banuchat-auth-i1b-uid-test-isolated"
+    ],
+    "ELIMINAR": [
+      "banuchat-o1-restore-isolated",
+      "banuchat_default",
+      "banuchat_egress",
+      "banuchat_internal",
+      "infra_default"
+    ]
+  },
+  "images": {
+    "CONSERVAR": [
+      "pgvector/pgvector:pg16"
+    ],
+    "CONSERVAR PARA PRUEBAS": [
+      "n8nio/n8n:2.40.5"
+    ],
+    "ARCHIVAR": [],
+    "ELIMINAR": [
+      "banuchat-api:latest",
+      "banuchat-mcp:latest",
+      "banuchat-migrate:latest",
+      "docker.n8n.io/n8nio/n8n:stable",
+      "pgvector/pgvector:0.8.6-pg17-trixie"
+    ]
+  },
+  "checks": {
+    "canonical_api_running_on_3003": true,
+    "canonical_database_healthy_on_55453": true,
+    "i1b_running_unchanged_on_55443": true,
+    "candidate_removal_networks_have_active_consumers": false,
+    "candidate_removal_images_have_containers": false,
+    "compose_dev_valid": true,
+    "compose_synthetic_n8n_valid": true,
+    "compose_ccd_editorial_valid": true,
+    "o1_manifest_files_checked": 32,
+    "o1_manifest_mismatches": 0,
+    "o1_database_restore_previously_verified": true,
+    "o1_n8n_copy_and_sqlite_previously_verified": true,
+    "o4_backup_hash_matches": true,
+    "o4_backup_catalog_previously_verified": true,
+    "o4_backup_isolated_restore_completed": false
+  },
+  "destructive_actions_executed": false
+}

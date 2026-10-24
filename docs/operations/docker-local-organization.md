@@ -1,190 +1,164 @@
-# BanuChat — organización y recuperación Docker local
+# BanuChat — operación Docker local
 
-Estado: **entorno `banuchat-dev` promovido como referencia operativa de desarrollo**.
-O2 creó `banuchat-dev-postgres-ccd-auth-1` en 55453, O3 validó la integración y O4
-conmutó la única API habitual de 3003 a ese entorno. I1B permanece intacto en
-55443 como recurso histórico; no es el arranque principal.
+Estado: **`banuchat-dev` es el entorno CCD autenticado principal de desarrollo**.
+PostgreSQL escucha en `127.0.0.1:55453` y la única API habitual en
+`127.0.0.1:3003`. I1B continúa provisionalmente en 55443 y no se usa en el
+arranque diario.
 
-## Fronteras de datos
+## Mapa de recursos vigentes
 
-- CCD autenticado combina el corpus CCD seleccionado con identidades y cuentas
-  exclusivamente sintéticas. Conserva el nombre físico vigente
-  `banuchat_ccd_auth_i1b_test`, sus roles y sus schemas durante la migración.
-- La demo histórica conserva su base y volumen propios. `data/synthetic` sigue
-  siendo su fuente de verdad y nunca funciona como fallback institucional.
-- N8N conserva estado propio y solo orquesta ingesta asíncrona. No participa en
-  el camino síncrono del chat.
-- `CCD_DOCUMENTACION` es una fuente externa de solo lectura. No se monta en los
-  servicios de ejecución. Una ingesta futura solo podrá leer un subconjunto
-  autorizado y no forma parte de este procedimiento.
-- API, Ollama y Mobile continúan ejecutándose en el host. El Compose candidato no
-  crea imágenes ni servicios para esos componentes.
+| Necesidad | Recurso | Cuándo iniciarlo |
+| --- | --- | --- |
+| Chat CCD autenticado | `banuchat-dev-postgres-ccd-auth-1` | Desarrollo habitual de API/Mobile |
+| Demo y regresión sintética | `banuchat-postgres` | Solo pruebas que exigen PostgreSQL sintético |
+| Automatización asíncrona | `banuchat-n8n` | Solo importación/ejecución manual de workflows N8N |
+| Preparación editorial CCD | `banuchat-ccd-dev-postgres-ccd-1` | Solo al preparar o verificar una publicación autorizada |
+| Reversión histórica | `banuchat-ccd-auth-i1b-test` | No iniciar como API habitual; conservar hasta cumplir las condiciones de retirada |
 
-## Decisión sobre los archivos Compose
+`data/synthetic` sigue siendo la fuente de verdad de la demo. El corpus CCD, la
+demo sintética, N8N y el entorno editorial mantienen volúmenes separados.
+`CCD_DOCUMENTACION` no se monta en Docker.
 
-`infra/docker-compose.yml` y `infra/docker-compose.ccd.yml` se mantienen sin
-cambios porque describen los laboratorios sintético/N8N y CCD editorial ya
-existentes. Fusionarlos ahora alteraría la identidad de proyectos y volúmenes sin
-mejorar la recuperación.
+## Arranque diario
 
-`infra/docker-compose.dev.yml` es el candidato para la operación futura. Agrupa
-los recursos bajo el proyecto `banuchat-dev`, pero los separa por perfiles, redes
-y volúmenes:
-
-| Perfil | Servicio | Puerto local predeterminado | Persistencia | Alcance |
-| --- | --- | --- | --- | --- |
-| `ccd-auth` | `postgres-ccd-auth` | `127.0.0.1:55443` en plantilla; `55453` canónico privado | `ccd_auth_data` | Corpus CCD seleccionado y autenticación sintética |
-| `synthetic` | `postgres-synthetic` | `127.0.0.1:5432` | `synthetic_data` | Demo histórica congelada |
-| `automation` | `n8n` | `127.0.0.1:5678` | `n8n_data` | Estado de orquestación asíncrona |
-
-Los perfiles impiden que un `up` sin perfil cree los tres grupos. No hay
-`container_name`, migraciones, ingestas, restauraciones ni mounts de corpus en el
-Compose. Los nombres físicos de las bases se reciben por variables y la plantilla
-conserva los vigentes. Los puertos solo se publican en loopback.
-
-## Configuración privada y validación
-
-Desde la raíz del repositorio:
+Comprobar primero que el contenedor canónico ya existe:
 
 ```powershell
-Copy-Item .\infra\docker-dev.env.example .\infra\local\docker-dev.env
+docker inspect banuchat-dev-postgres-ccd-auth-1 --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}'
 ```
 
-Completar todos los valores privados vacíos. No copiar a informes sus valores.
-Validar la expansión sin crear recursos:
-
-```powershell
-docker compose `
-  --env-file .\infra\local\docker-dev.env `
-  -f .\infra\docker-compose.dev.yml `
-  --profile ccd-auth `
-  --profile synthetic `
-  --profile automation `
-  config
-```
-
-La validación de configuración por sí sola no acredita que un volumen contenga
-datos. O2 restauró y verificó el volumen autorizado `banuchat-dev-ccd-auth-data`;
-no volver a crear el servicio para el arranque habitual.
-
-## Arranque operativo habitual
-
-El arranque se documenta también en
-[CCD autenticado Android](ccd-auth-i1b-android.md). Si la base canónica está detenida, el
-operador puede iniciar exclusivamente el contenedor ya existente:
+Si está detenido, iniciar ese mismo contenedor sin recrearlo:
 
 ```powershell
 docker start banuchat-dev-postgres-ccd-auth-1
 ```
 
-La API autenticada usa el launcher operativo desde `backend/api`:
+Iniciar la API desde `backend/api`:
 
 ```powershell
 npm run start:ccd-auth
 ```
 
-El launcher carga `infra/local/banuchat-dev/ccd-auth-api.json`, valida la identidad
-Docker completa y después reutiliza `src/authenticated-main.ts`. Escucha solo en
-`127.0.0.1:3003`. No iniciar simultáneamente el launcher histórico I1B.
+El launcher carga la configuración privada ignorada por Git en
+`infra/local/banuchat-dev/ccd-auth-api.json`. Antes de escuchar valida exactamente:
 
-Mobile conserva Expo SDK 57 y su launcher desde la raíz:
+- proyecto `banuchat-dev` y servicio `postgres-ccd-auth`;
+- contenedor `banuchat-dev-postgres-ccd-auth-1` healthy;
+- base física `banuchat_ccd_auth_i1b_test` en 55453;
+- volumen `banuchat-dev-ccd-auth-data`;
+- red `banuchat-dev-ccd-auth`;
+- modo `ccd_local`, rol runtime y deployment esperados.
+
+Un fallo de identidad impide iniciar la API. El ejemplo público sin secretos es
+[`infra/ccd-auth-api.config.example.json`](../../infra/ccd-auth-api.config.example.json).
+No iniciar a la vez `auth-i1b-operator.mts api`.
+
+Mobile conserva su launcher y REST v2:
 
 ```powershell
 .\mobile\scripts\start-ccd-auth.ps1
 ```
 
-El contenedor canónico ya existe en 55453; no ejecutar perfiles `synthetic` o
-`automation` para arrancar el chat.
+Para Android USB, seguir el
+[runbook CCD autenticado](ccd-auth-i1b-android.md). La validación física continúa
+pendiente; las pruebas locales no la sustituyen.
+
+## Servicios opcionales
+
+La demo sintética y N8N comparten el Compose histórico, pero son servicios
+independientes. Desde la raíz:
+
+```powershell
+# PostgreSQL sintético
+docker compose --env-file .env -p banuchat-schema-test `
+  -f infra/docker-compose.yml up -d --no-deps postgres
+
+# N8N, solo para ingesta asíncrona autorizada
+docker compose --env-file .env -p banuchat-schema-test `
+  -f infra/docker-compose.yml up -d --no-deps n8n
+```
+
+N8N no participa en consultas de chat. Su volumen vigente es
+`banuchat-schema-test_n8n_data` y su imagen es `n8nio/n8n:2.40.5`.
+
+El entorno editorial CCD se inicia únicamente para preparar publicaciones:
+
+```powershell
+docker compose --env-file infra/.env.ccd `
+  -f infra/docker-compose.ccd.yml up -d postgres-ccd
+```
+
+No ejecutar ingestas o migraciones por el solo hecho de iniciar PostgreSQL.
+
+## Verificación rápida
+
+```powershell
+docker inspect banuchat-dev-postgres-ccd-auth-1 --format `
+  'status={{.State.Status}} health={{.State.Health.Status}} port={{(index (index .NetworkSettings.Ports "5432/tcp") 0).HostPort}} volume={{(index .Mounts 0).Name}}'
+Get-NetTCPConnection -State Listen -LocalPort 3003,55453
+```
+
+El resultado esperado es API solo en loopback:3003, PostgreSQL en 55453, volumen
+`banuchat-dev-ccd-auth-data` y estado healthy. El launcher vuelve a validar estos
+valores y el runtime scope antes de aceptar tráfico.
 
 ## Respaldo
 
-Los respaldos O1 se guardan en
-`infra/local/docker-organization/<fecha>-o1`, fuera de Git. El directorio debe
-mantener herencia ACL deshabilitada y acceso exclusivo del usuario Windows que lo
-custodia. Contiene:
+Los respaldos O1 verificados están en
+`infra/local/docker-organization/2026-10-24-o1`, con ACL restringida. Incluyen
+CCD autenticado, CCD editorial, demo sintética, globals y estado N8N. Los 32 hashes
+continúan coincidiendo; los tres dumps fueron restaurados en O1 y la copia N8N pasó
+hashes e integridad SQLite.
 
-- dumps PostgreSQL en formato custom;
-- globals de cada clúster para conservar roles y atributos;
-- copia completa del estado `.n8n`;
-- configuración privada necesaria para recuperación;
-- hashes SHA-256, inventario y resultados de verificación.
+El respaldo posterior a la promoción está en
+`infra/local/banuchat-dev/o4-post-promotion.dump`. Su hash coincide y su catálogo
+es legible, pero todavía no se ha restaurado en un destino aislado. Crear un dump
+actualizado antes de cualquier rollback o mantenimiento que pueda separar
+escrituras. Los dumps pueden contener conversaciones y nunca se versionan.
 
-No abrir ni publicar los SQL de globals, la configuración privada, SQLite de N8N
-o los dumps. Pueden contener hashes de credenciales y datos conversacionales.
-
-## Recuperación aislada
-
-1. Confirmar que el entorno funcional sigue activo y registrar estado, puertos,
-   mounts y hashes de los respaldos. No reutilizar su volumen como destino.
-2. Definir antes de crear recursos el nombre del contenedor, puerto de loopback o
-   ausencia de puerto, red, volumen, dependencias y reversión. Obtener autorización
-   para cualquier contenedor que prepare O2.
-3. Crear un PostgreSQL `pgvector/pgvector:pg16` en una red y volumen nuevos. No
-   publicar puerto durante la verificación si todo se ejecuta con `docker exec`.
-4. Validar el catálogo de cada dump con `pg_restore --list`. Para una prueba de
-   contenido sin roles originales, restaurar en el clúster aislado con:
-
-   ```text
-   pg_restore -d postgres -C --no-owner --no-privileges --exit-on-error <dump>
-   ```
-
-5. Comparar inventario de tablas y conteos exactos entre fuente y copia. Validar
-   las funciones y schemas de autenticación sin consultar valores privados.
-6. Validar los globals con `psql -v ON_ERROR_STOP=1` dentro de una transacción que
-   termine en `ROLLBACK`. En una recuperación definitiva sobre un clúster vacío,
-   restaurar primero los globals y luego el dump completo para conservar owners y
-   ACL; revisar conflictos de roles antes de ejecutar.
-7. Restaurar N8N en un directorio o volumen vacío, comparar todos los hashes y
-   ejecutar `PRAGMA integrity_check` sobre `database.sqlite` en modo de solo
-   lectura. El primer arranque de N8N debe usar la misma clave privada y versión
-   `2.40.5`; probarlo sin exponer workflows o credenciales.
-8. Ejecutar comprobaciones de aplicación contra el destino aislado. No cambiar
-   todavía 55443, la API ni Mobile.
-9. Si falla, detener solo los recursos nuevos. El entorno anterior y sus
-   volúmenes permanecen intactos. La eliminación de recursos exige una
-   autorización posterior.
-
-## Validación funcional O3
-
-O3 no ejecuta operaciones Compose. El entrypoint específico valida primero el
-nombre, proyecto, servicio, puerto, volumen, red y salud del candidato, y después
-inicia la API temporal en loopback:3013:
+Procedimiento de captura desde la raíz, usando un nombre fechado dentro de
+`infra/local/banuchat-dev`:
 
 ```powershell
-cd .\backend\api
-$env:BANUCHAT_O3_API_PORT = '3013'
-node --import tsx test/ccd-candidate-o3-operator.mts
+docker exec banuchat-dev-postgres-ccd-auth-1 `
+  pg_dump -U auth_i1b_admin -d banuchat_ccd_auth_i1b_test -Fc `
+  -f /tmp/banuchat-ccd-auth.dump
+docker cp banuchat-dev-postgres-ccd-auth-1:/tmp/banuchat-ccd-auth.dump `
+  infra/local/banuchat-dev/<fecha>-ccd-auth.dump
+docker exec banuchat-dev-postgres-ccd-auth-1 rm -f /tmp/banuchat-ccd-auth.dump
+Get-FileHash -Algorithm SHA256 infra/local/banuchat-dev/<fecha>-ccd-auth.dump
 ```
 
-En otra terminal, la selección funcional se ejecuta con:
+Restringir la ACL del archivo y validar su catálogo antes de considerarlo respaldo.
 
-```powershell
-$env:BANUCHAT_O3_API_PORT = '3013'
-node --import tsx test/ccd-candidate-o3-http.mts
-```
+## Recuperación
 
-La prueba usa las cuentas ficticias locales ya existentes, crea dos conversaciones
-controladas solo en el candidato y conserva ese historial para acreditar
-persistencia. No imprime credenciales ni respuestas. Al terminar, cerrar únicamente
-el proceso de API; no detener PostgreSQL. El resultado O3 está en
-[`banuchat-o3-candidate-http.json`](../../eval/auth/results/banuchat-o3-candidate-http.json).
+1. No sobrescribir el volumen canónico ni I1B.
+2. Verificar hashes del dump y de los globals correspondientes.
+3. Restaurar primero en un volumen y red aislados con PostgreSQL/pgvector 16.
+4. Comparar roles, owners, ACL, tablas, conteos, publicaciones y fingerprints.
+5. Ejecutar la API en un puerto alterno y comprobar autenticación, RAG, historial,
+   citas y documentos.
+6. Promover solo mediante una autorización explícita.
 
-## Reversión después de O4
+Para un fallo de API, preferir corregir hacia delante conservando 55453. Volver a
+I1B ocultaría las escrituras creadas desde O3. Antes de esa conmutación se debe
+cerrar solo la API, crear un dump actualizado y aceptar formalmente historial
+dividido o autorizar una conciliación. No copiar tablas manualmente ni restaurar
+sobre I1B.
 
-No apuntar directamente la API a I1B mientras existan escrituras nuevas en 55453.
-El rollback operativo seguro comienza deteniendo solo la API de 3003, conservando
-ambos PostgreSQL y generando un dump actualizado del candidato. El respaldo O4
-inicial está en `infra/local/banuchat-dev/o4-post-promotion.dump`, fuera de Git.
+## Recursos históricos
 
-El launcher I1B puede volver a ocupar 3003 después de cerrar la API canónica, pero
-las conversaciones creadas desde O3 permanecerían únicamente en el candidato y no
-serían visibles. Esa conmutación es una degradación temporal, no una conciliación.
-Antes de recomendarla se debe elegir explícitamente una de estas rutas:
+No ejecutar habitualmente los laboratorios `banuchat-auth-p4l1-demo`,
+`banuchat-auth-r0-replay`, `banuchat-auth-i1a-test`,
+`banuchat-auth-i1b-uid-test` o `banuchat-o1-restore-verify`. Sus scripts, contratos,
+checkpoints y resultados versionados se conservan. Sus recursos Docker se clasifican
+en el [checkpoint O5](../transition/docker-organization-o5-checkpoint.md).
 
-1. corregir hacia delante y mantener 55453 como autoridad;
-2. conservar el dump/volumen candidato y aceptar temporalmente historial dividido;
-3. autorizar una conciliación verificada de escrituras antes de volver a 55443.
+Los Compose `docker-compose.yml` y `docker-compose.ccd.yml` se conservan porque
+siguen describiendo pruebas sintéticas/N8N y edición CCD. `docker-compose.dev.yml`
+es la configuración canónica por perfiles; activar un perfil no inicia los demás.
 
-No copiar tablas de autenticación o conversación manualmente ni restaurar el dump
-sobre I1B sin un procedimiento específico. La retirada o archivo de I1B continúa
-pendiente de autorización posterior.
+Ningún recurso se elimina hasta aprobar la lista exacta O5. La limpieza aprobada
+debe ejecutarse como una sola operación, con inventario anterior y posterior y sin
+usar `prune` global.

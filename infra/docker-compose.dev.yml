@@ -1,4 +1,4 @@
-# Candidato de organización local. No ejecutar antes de la promoción autorizada.
+# Entorno canónico de desarrollo local. Activar únicamente el perfil necesario.
 # No aplica migraciones, no restaura respaldos y no monta CCD_DOCUMENTACION.
 name: banuchat-dev
 
@@ -12,7 +12,7 @@ services:
       POSTGRES_USER: ${CCD_AUTH_POSTGRES_USER:?Define el rol administrador local CCD}
       POSTGRES_PASSWORD: ${CCD_AUTH_POSTGRES_PASSWORD:?Define una clave local no versionada}
     ports:
-      - "127.0.0.1:${CCD_AUTH_POSTGRES_PORT:-55443}:5432"
+      - "127.0.0.1:${CCD_AUTH_POSTGRES_PORT:-55453}:5432"
     volumes:
       - ccd_auth_data:/var/lib/postgresql/data
     networks:

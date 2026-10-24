@@ -4,10 +4,11 @@ Configuración para desarrollo y demostraciones locales, usada en N0/N3. El Comp
 una instancia PostgreSQL que incluye pgvector y un servicio N8N separado. No incluye
 backend ni app móvil, y no monta ni ejecuta migraciones.
 
-La organización Docker O1 añadió un candidato inicialmente no activado en
+La organización Docker O1 añadió el entorno que posteriormente fue promovido en
 [`docker-compose.dev.yml`](docker-compose.dev.yml). Conserva los Compose históricos,
-separa CCD autenticado, demo sintética y N8N mediante perfiles y no sustituye el
-laboratorio `banuchat-ccd-auth-i1b-test` hasta una promoción expresamente autorizada.
+separa CCD autenticado, demo sintética y N8N mediante perfiles. Durante O1 no
+sustituyó el laboratorio `banuchat-ccd-auth-i1b-test`; O4 realizó la promoción
+expresamente autorizada y O5 conserva I1B como reversión provisional.
 La decisión, el arranque vigente y la recuperación se documentan en el
 [runbook Docker](../docs/operations/docker-local-organization.md); el inventario y
 la verificación están en el
@@ -15,8 +16,8 @@ la verificación están en el
 
 La reconstrucción paralela O2 se documenta en el
 [runbook CCD O2](../docs/operations/docker-ccd-auth-o2.md) y su
-[checkpoint](../docs/transition/docker-organization-o2-checkpoint.md). El candidato
-permanece en 55453 y no sustituye I1B.
+[checkpoint](../docs/transition/docker-organization-o2-checkpoint.md). El entorno
+promovido permanece en 55453; I1B se conserva provisionalmente en 55443.
 
 O3 ejecutó la API v2 en loopback:3013 contra ese candidato y validó autenticación,
 aislamiento, historial, RAG CCD, citas, artefactos y abstención. La API temporal se
