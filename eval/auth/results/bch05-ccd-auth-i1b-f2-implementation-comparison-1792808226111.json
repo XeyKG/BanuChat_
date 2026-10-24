@@ -1,0 +1,480 @@
+{
+  "late_course_failure_scope_change_affects_measured_prompts": false,
+  "late_catalog_detail_guard_affects_measured_bank": false,
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "at": "2026-10-24T02:17:06.133Z",
+  "baseline_report": "503-f1-full-1792779633613.json",
+  "current_report": "f2-implementation-full-1792807283995-1792807191623.json",
+  "baseline_sha256": "9748c10fc0d690b7f0de38d3145096f3207e1fd0337025b7f15ecdee3e36a8ea",
+  "current_sha256": "ad4d0cf95796fa607200b9b771ee13d9057136866912414f3868014b1e648a28",
+  "same_generator_recipe_and_digest": true,
+  "same_questions": 43,
+  "text_equal": 43,
+  "citation_identity_equal": 43,
+  "selection_equal": 43,
+  "insufficiency_equal": 43,
+  "review_method": "Exact text, source locator/version/release, selection and call-count equality against the previously reviewed I1B outputs; no new automatic semantic judgment or institutional approval.",
+  "classes": [
+    {
+      "scenario": "T01",
+      "baseline_class": "C",
+      "current_class": "C",
+      "review": "Regresión de utilidad: los tres turnos se abstienen genéricamente; 5.3/2 describía el alcance de TEST_ORIENTATION. No inventa procedimiento, pero esa orientación parcial ya no se observa."
+    },
+    {
+      "scenario": "T02",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "U03 pertinente y consecuencia histórica; no demuestra repetición gratuita. La respuesta 3 inicia con No, no se acredita: conservar el texto para revisión académica, sin convertir falta de respaldo en imposibilidad universal."
+    },
+    {
+      "scenario": "T03",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "U04 exige verificar plan/códigos/registro; no concede primera prueba gratuita actual. Procedimiento pendiente."
+    },
+    {
+      "scenario": "T04",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "No concede beneficio por cohorte 202510; reconocimiento/eligibilidad requieren verificación."
+    },
+    {
+      "scenario": "T05",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Word/PowerPoint no resuelven automáticamente pilar 2, AND/OR o pago; orientación parcial."
+    },
+    {
+      "scenario": "T06",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Excel no demuestra aprobación de IA ni expediente personal; requiere comprobación del programa/CCD."
+    },
+    {
+      "scenario": "T07",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Abstención pertinente sin citas U03/U04 ni equiparar inasistencia a reprobación. No orienta un procedimiento de admisión tardía."
+    },
+    {
+      "scenario": "T08",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Reconoce corrección de prueba a curso y no concede exención; recuperación de curso pendiente."
+    },
+    {
+      "scenario": "T09",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "No equipara UNAB Tec y profesional presencial; diferencias por modalidad/cohorte requieren adaptación."
+    },
+    {
+      "scenario": "T10a",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Aclaración aislada antes de embedding/generación, sin antecedentes ajenos ni atribución documental."
+    },
+    {
+      "scenario": "T10b",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Aclaración aislada antes de embedding/generación, sin antecedentes ajenos ni atribución documental."
+    },
+    {
+      "scenario": "T11",
+      "baseline_class": "C",
+      "current_class": "C",
+      "review": "Pendiente académico: primeros dos turnos genéricos, sin explicar los casos ni distinguir hipótesis de procedimiento y derecho universal; U03 pertinente en el tercero no resuelve el escenario."
+    },
+    {
+      "scenario": "T12",
+      "baseline_class": "B",
+      "current_class": "B",
+      "review": "Contacto histórico M12 con vigencia no ratificada; publicación de notas, inmediatez y umbral 70 sin respaldo suficiente."
+    },
+    {
+      "scenario": "REG",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Catálogo y syllabus IA; continuidad y corrección a Marca Personal; duración histórica y contacto pertinentes con límites de vigencia. No acredita oferta actual."
+    },
+    {
+      "scenario": "AMB",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Catálogo seguido de referencia singular pide cuál curso antes de recuperación/generación, sin citas."
+    },
+    {
+      "scenario": "AMB_FRESH",
+      "baseline_class": "A",
+      "current_class": "A",
+      "review": "Referencia sin antecedente solicita contexto; sin SQL documental, embedding o generación."
+    }
+  ],
+  "unresolved": [
+    "T01/2: prior loss of bounded orientation persists",
+    "T11: academic scenario remains pending"
+  ],
+  "controls": {
+    "baseline": {
+      "planned": 216,
+      "passed": 216,
+      "failed": 0,
+      "not_evaluable": 0
+    },
+    "current": {
+      "planned": 216,
+      "passed": 216,
+      "failed": 0,
+      "not_evaluable": 0
+    }
+  },
+  "comparisons": [
+    {
+      "scenario": "T01",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T01",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T01",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T02",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T02",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T02",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T03",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T03",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T03",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T04",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T04",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T05",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T05",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T05",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T06",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T06",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T06",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T07",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T07",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T07",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T08",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T08",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T08",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T09",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T09",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T10a",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T10b",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T11",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T11",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T11",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T12",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T12",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T12",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "T12",
+      "turn": 4,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 3,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 4,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 5,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "REG",
+      "turn": 6,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "AMB",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "AMB",
+      "turn": 2,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    },
+    {
+      "scenario": "AMB_FRESH",
+      "turn": 1,
+      "text_equal": true,
+      "citation_identity_equal": true,
+      "selection_equal": true,
+      "insufficiency_equal": true
+    }
+  ],
+  "android": "not executed by agent"
+}

@@ -649,6 +649,7 @@ test("errores de generación se convierten en rag_dependency_unavailable", async
   for (const reason of [
     "generator_runtime_mismatch",
     "generator_unavailable",
+    "generator_context_capacity_exceeded",
     "invalid_generator_response",
     "generator_response_incomplete",
   ] as const) {

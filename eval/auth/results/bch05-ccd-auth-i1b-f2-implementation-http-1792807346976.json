@@ -1,0 +1,106 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "at": "2026-10-24T02:02:28.064Z",
+  "turns": [
+    {
+      "case": "f2_then_identified",
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": true,
+      "citations": [],
+      "generation_calls": 0,
+      "selected": [],
+      "generator": "NOT_EXECUTED"
+    },
+    {
+      "case": "f2_then_identified",
+      "turn": 2,
+      "status": 201,
+      "persisted_messages": 4,
+      "insufficient_evidence": false,
+      "citations": [
+        "unit:M02:DOC-101"
+      ],
+      "generation_calls": 1,
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "generator": "REAL_OLLAMA",
+      "done_reason": "stop",
+      "prompt_eval_count": 1877
+    },
+    {
+      "case": "f1_exact",
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": false,
+      "citations": [
+        "unit:M02:DOC-101"
+      ],
+      "generation_calls": 1,
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "generator": "REAL_OLLAMA",
+      "done_reason": "stop",
+      "prompt_eval_count": 1891
+    },
+    {
+      "case": "two_courses",
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": false,
+      "citations": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-103"
+      ],
+      "generation_calls": 1,
+      "selected": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-103"
+      ],
+      "generator": "REAL_OLLAMA",
+      "done_reason": "stop",
+      "prompt_eval_count": 2370
+    },
+    {
+      "case": "broad_topics",
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": true,
+      "citations": [],
+      "generation_calls": 0,
+      "selected": [],
+      "generator": "NOT_EXECUTED"
+    },
+    {
+      "case": "outside",
+      "turn": 1,
+      "status": 201,
+      "persisted_messages": 2,
+      "insufficient_evidence": true,
+      "citations": [],
+      "generation_calls": 0,
+      "selected": [],
+      "generator": "NOT_EXECUTED"
+    }
+  ],
+  "capacity_atomicity": {
+    "http": 503,
+    "code": "DEPENDENCY_UNAVAILABLE",
+    "internal_reason": "generator_context_capacity_exceeded",
+    "generator": "INJECTED_TYPED_FAILURE_NOT_REAL_OLLAMA",
+    "partial_messages": 0
+  },
+  "passed": true,
+  "fixture_logout": 204,
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  }
+}

@@ -10,7 +10,7 @@ import type {
 import type { QueryEmbeddingClient } from "../retrieval/query-embedding-client.js";
 import { buildDocumentCitations } from "./document-citations.js";
 import { isCcdCourseCatalogQuery, isCourseTopicsFollowUp, resolveConversationQuery, type ConversationMessage } from "./conversation-context.js";
-import { asksUnsupportedTestRule, ccdGuidanceTopic, CCD_GUIDANCE_INSTRUCTION, GROUNDED_ANSWER_INSTRUCTION, hasUnbackedGuidanceClaim, isCourseFailureContext, parseGroundedAnswer, selectCcdEvidence } from "./document-evidence.js";
+import { asksUnsupportedTestRule, ccdGuidanceTopic, CCD_GUIDANCE_INSTRUCTION, GROUNDED_ANSWER_INSTRUCTION, hasUnbackedGuidanceClaim, isCourseFailureContext, parseGroundedAnswer, decideCcdEvidence, isCcdCourseDetailQuery } from "./document-evidence.js";
 import type {
   PersistenceCitation,
   PresentationCitation,
@@ -151,7 +151,7 @@ export async function generateDocumentRagAnswer(
       content: resolved.clarification_kind === 'course' ? '¿De cuál curso quieres conocer los temas?'
         : "¿A qué curso, prueba o tema te refieres? Necesito ese contexto para buscar evidencia y orientarte." };
   }
-  const broadCcdCourses = dependencies.evidence_mode === "ccd_local" && isCcdCourseCatalogQuery(input.query);
+  const broadCcdCourses = dependencies.evidence_mode === "ccd_local" && isCcdCourseCatalogQuery(input.query) && !isCcdCourseDetailQuery(input.query);
   const retrievalInput = {
     release_id: input.release_id,
     query: resolved.retrieval_query,
@@ -171,10 +171,17 @@ export async function generateDocumentRagAnswer(
   if (retrieved.some((chunk) => chunk.release_id !== retrievalInput.release_id)) {
     throw new DocumentRagInvariantError();
   }
+  const decision = dependencies.evidence_mode === 'ccd_local' && !broadCcdCourses
+    ? decideCcdEvidence(retrieved,input.query,resolved.history) : undefined;
+  if (decision?.kind === 'clarify_course' || decision?.kind === 'clarify_scope') {
+    return {...insufficientEvidenceAnswer(input.release_id),content:decision.kind === 'clarify_scope'
+      ? 'Para explicar los temarios sin omitir cursos, necesito delimitar la consulta. ¿Qué curso o cursos quieres consultar? Puedes empezar por el catálogo de Competencias Digitales.'
+      : '¿Qué curso o tema de Competencias Digitales quieres consultar? Indica su nombre; la descripción por sí sola no me permite identificarlo con seguridad.'};
+  }
   const chunks = broadCcdCourses
     ? retrieved.filter(chunk => chunk.chunk_locator.startsWith("unit:M02:"))
-    : dependencies.evidence_mode === "ccd_local"
-      ? selectCcdEvidence(retrieved, input.query, resolved.history)
+    : decision
+      ? decision.chunks
       : retrieved;
 
   if (chunks.length === 0) {
@@ -212,11 +219,12 @@ export async function generateDocumentRagAnswer(
         + '\n\nRespeta el periodo específico de cada fuente. Los lineamientos corresponden a 202660; los syllabus son ediciones entregadas cuyo periodo y vigencia no están confirmados: no les atribuyas 202660 ni oferta actual. En respuestas de contacto indica 202660 y que la vigencia actual no está ratificada. Describe solo contenido respaldado; no concedas cupos, horarios, gratuidad, elegibilidad, equivalencias, reconocimiento ni exenciones personales.'
         + `\n\n${GROUNDED_ANSWER_INSTRUCTION}\n\n${CCD_GUIDANCE_INSTRUCTION}`
         + (explicitContact ? '\nPara esta consulta el único fragmento es [1], de contacto. Si das el canal documentado, termina exactamente con la línea FUENTES: [1].' : '')
-        + (isCourseFailureContext(input.query, resolved.history) ? '\nANTECEDENTE CORREGIDO: el usuario habla de un CURSO reprobado, no una prueba nueva. Solo puedes explicar la distinción y la necesidad de comprobar la recuperación del curso; no indiques que debe cursarlo o matricularlo otra vez ni presentar una prueba sustitutiva.' : '')
+        + (guidanceTopic === 'U03' && isCourseFailureContext(input.query, resolved.history) ? '\nANTECEDENTE CORREGIDO: el usuario habla de un CURSO reprobado, no una prueba nueva. Solo puedes explicar la distinción y la necesidad de comprobar la recuperación del curso; no indiques que debe cursarlo o matricularlo otra vez ni presentar una prueba sustitutiva.' : '')
         : DOCUMENT_RAG_SYSTEM_PROMPT,
       // For scoped guidance, previous generated conclusions cannot become the
       // basis of a new rule. User antecedents still preserve the scenario.
       user_prompt: buildUserPrompt(chunks, input.query, explicitContact ? [] : guidanceEvidence ? resolved.history.filter(m => m.role === 'user') : resolved.history),
+      ...(dependencies.evidence_mode === 'ccd_local' ? {classify_context_capacity:true as const} : {}),
     },
     dependencies.generator_config,
   );
@@ -237,6 +245,10 @@ export async function generateDocumentRagAnswer(
     content = grounded.content;
     content = content.replace(/\b(?:recorte|unidad) U0[34]\b/gu, 'documento citado');
     supportingChunks = grounded.source_indexes.map(index => chunks[index]!);
+    const requestedCourses = new Set(chunks.filter(chunk => chunk.chunk_locator.startsWith('unit:M02:')).map(chunk => chunk.chunk_locator));
+    if (requestedCourses.size > 1 && [...requestedCourses].some(locator => !supportingChunks.some(chunk => chunk.chunk_locator === locator))) {
+      return {...insufficientEvidenceAnswer(input.release_id),content:'No puedo respaldar una respuesta completa sobre todos los cursos solicitados con esta respuesta. Puedes consultar sus temarios por separado.'};
+    }
     if (!/contacto|correo|e-?mail|@/iu.test(`${input.query} ${content}`)) {
       supportingChunks = supportingChunks.filter(chunk => chunk.chunk_locator !== 'unit:M12');
     }

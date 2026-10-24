@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {contextCases} from './auth-i1b-f2/cases.js';
-import {selectCcdEvidence} from '../src/chat/document-evidence.js';
+import {selectCcdEvidence,decideCcdEvidence} from '../src/chat/document-evidence.js';
 import {resolveConversationQuery,isCcdCourseCatalogQuery} from '../src/chat/conversation-context.js';
 import type {RetrievedDocumentChunk} from '../src/application/document-retrieval.js';
 import {GeneratorClientError,type GeneratorConfig} from '../src/generation/generator-client.js';
@@ -20,12 +20,27 @@ for(const c of contextCases.filter(c=>c.expected))test('F2 deterministic '+c.id,
  assert.ok(resolved.history.length<=8);
  assert.ok(resolved.history.reduce((n,m)=>n+Array.from(m.content).length,0)<=6000);
 });
-test('F2 characterizes unresolved fallback; ten fragments are NOT proof of relevance',()=>{
- for(const id of ['paraphrase','broad_topics','unknown']){
+test('F2 replaces the historical ten-fragment fallback with justified decisions',()=>{
+ for(const [id,kind] of [['paraphrase','clarify_course'],['broad_topics','clarify_scope'],['unknown','unsupported']]){
   const c=contextCases.find(c=>c.id===id)!;
-  assert.equal(selectCcdEvidence(chunks,c.query,[]).length,10);
+  assert.deepEqual(decideCcdEvidence(chunks,c.query,[]),{kind,chunks:[]});
  }
  assert.equal(isCcdCourseCatalogQuery(contextCases.find(c=>c.id==='catalog')!.query),true);
+});
+test('F2 capacity diagnostics require a demonstrated oversized context and stay internal/CCD-only',async()=>{
+ const config:GeneratorConfig={provider:'ollama',model:'qwen3:4b-instruct',model_revision:'a'.repeat(64),runtime_version:'0.35.0',recipe:{think:false,stream:false,options:{temperature:0,num_predict:256},keep_alive:'5m'}};
+ const errors=[['input length (6420 tokens) exceeds context length (4096 tokens)','generator_context_capacity_exceeded'],
+  ['input length (100 tokens) exceeds context length (4096 tokens)','invalid_generator_response'],['invalid model input','invalid_generator_response'],
+  ['context unavailable','invalid_generator_response'],['SENSITIVE_SENTINEL'.repeat(900),'invalid_generator_response']];
+ for(const [message,expected] of errors)for(const ccd of [true,false]){
+  let attempts=0;const transport:typeof fetch=async(input,init)=>{
+   const path=new URL(String(input)).pathname;if(path==='/api/chat'){attempts++;const sent=JSON.parse(String(init?.body));assert.equal(sent.classify_context_capacity,undefined);return Response.json({error:message},{status:400});}
+   return Response.json(path==='/api/version'?{version:'0.35.0'}:path==='/api/tags'?{models:[{name:config.model,digest:config.model_revision}]}:{capabilities:['completion']});
+  };
+  await assert.rejects(new OllamaGeneratorClient('http://127.0.0.1:11434',30000,transport).generate({system_prompt:'fixture',user_prompt:'fixture',...(ccd?{classify_context_capacity:true as const}:{})},config),(e:unknown)=>{
+   assert.ok(e instanceof GeneratorClientError);assert.equal(e.reason,ccd?expected:'invalid_generator_response');assert.equal(e.message,'Generator request rejected.');assert.ok(!JSON.stringify(e).includes('SENSITIVE_SENTINEL'));return true;
+  });assert.equal(attempts,1);
+ }
 });
 test('F2 mocks distinguish no exact token counting and retained provider rejection mapping',async()=>{
  const config:GeneratorConfig={provider:'ollama',model:'qwen3:4b-instruct',model_revision:'a'.repeat(64),runtime_version:'0.35.0',recipe:{think:false,stream:false,options:{temperature:0,num_predict:256},keep_alive:'5m'}};

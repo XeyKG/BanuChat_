@@ -23,8 +23,8 @@ test('CCD full course alias and canonical title select only the existing IA syll
   // No new evidence when the syllabus is absent, and no generic AI expansion.
   assert.deepEqual(selectCcdEvidence([brand, tests], 'Inteligencia Artificial Generativa', []),
     selectCcdEvidence([brand, tests], 'IA Generativa', []));
-  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial', []), [brand, contact, tests, ia]);
-  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial general', []), [brand, contact, tests, ia]);
+  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial', []), []);
+  assert.deepEqual(selectCcdEvidence(all, 'Inteligencia artificial general', []), []);
 });
 
 test('CCD alias preserves all other admitted course titles and selects no accidental syllabus', () => {
@@ -43,6 +43,7 @@ test('CCD alias preserves follow-up, corrections and fresh topic priority over o
   assert.deepEqual(selectCcdEvidence(all, '¿Y qué temas tiene?', history), [ia]);
   const correction = {role:'user' as const,content:'Corrijo: me refiero a Marca Personal, ¿qué temas aborda?'};
   assert.deepEqual(selectCcdEvidence(all, correction.content, history), [brand]);
+  assert.deepEqual(selectCcdEvidence(all, 'Corrijo: me refiero al curso de Marca Personal.', history), [brand]);
   assert.deepEqual(selectCcdEvidence(all, '¿Y qué temas tiene?', [...history, correction]), [brand]);
   const old = [{role:'user' as const,content:'Tengo Excel aprobado del plan anterior'}];
   assert.equal(ccdGuidanceTopic('Inteligencia Artificial Generativa', old), undefined);
@@ -93,12 +94,12 @@ test('unsupported absence, cost or eligibility alone never establish a transitio
 
 test('generic retrieval cannot reintroduce either guidance unit without a pertinent topic', () => {
   assert.deepEqual(selectCcdEvidence([failure, transition], 'Necesito un procedimiento no especificado', []), []);
-  assert.deepEqual(selectCcdEvidence([failure, contact, transition], 'Necesito un procedimiento no especificado', []), [contact]);
+  assert.deepEqual(selectCcdEvidence([failure, contact, transition], 'Necesito un procedimiento no especificado', []), []);
 });
 
 test('an unrecognized singular themes reference cannot fall back to the full evidence pool',()=>{
   assert.deepEqual(selectCcdEvidence(chunks,'¿Y qué temas tiene?',[{role:'user',content:'Quiero información general'}]),[]);
-  assert.deepEqual(selectCcdEvidence(chunks,'Consulta general autónoma',[]),chunks);
+  assert.deepEqual(selectCcdEvidence(chunks,'Consulta general autónoma',[]),[]);
 });
 
 test("course source is selected by title even when it is ranked last", () => {

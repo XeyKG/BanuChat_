@@ -1,0 +1,28 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "at": "2026-10-24T02:09:39.543Z",
+  "turns": [],
+  "capacity_atomicity": {
+    "http": 503,
+    "code": "DEPENDENCY_UNAVAILABLE",
+    "internal_reason": "generator_context_capacity_exceeded",
+    "generator": "REAL_OLLAMA",
+    "selected": [
+      "unit:M02:DOC-103",
+      "unit:M02:DOC-104",
+      "unit:M02:DOC-101",
+      "unit:M02:DOC-099",
+      "unit:M02:DOC-102",
+      "unit:M02:DOC-098",
+      "unit:M02:DOC-100"
+    ],
+    "partial_messages": 0
+  },
+  "passed": true,
+  "fixture_logout": 204,
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "previous_history_unchanged": true
+  }
+}

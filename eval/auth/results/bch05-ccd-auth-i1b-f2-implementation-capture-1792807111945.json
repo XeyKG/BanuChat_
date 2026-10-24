@@ -1,0 +1,326 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "phase": "capture",
+  "at": "2026-10-24T01:58:25.801Z",
+  "head": "bbfcd9d54350cc51c16b9a6d2bcb30a6c057f52d",
+  "sql_read_only": true,
+  "http_message_posts": 0,
+  "production_changed": true,
+  "cases": [
+    {
+      "id": "canonical",
+      "intent": "identified",
+      "query_chars": 43,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6974,
+      "prompt_sha256": "97f03fc3a1acdd2da324529ddff82c3945dc18eaa347b5e723eb597717f73510",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "expanded",
+      "intent": "identified",
+      "query_chars": 73,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7006,
+      "prompt_sha256": "5e9a4266e4d1aeef1b74647253ad7ee3cdb77b764ca4325f35b12ed16048ac50",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "normalized",
+      "intent": "identified",
+      "query_chars": 52,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6988,
+      "prompt_sha256": "697890bc8f29a9671efb77f22fa1b80c5086820c63293e6fc2c5b80fde9a2c6e",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "brand",
+      "intent": "identified",
+      "query_chars": 45,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-103"
+      ],
+      "prompt_utf8_bytes": 7032,
+      "prompt_sha256": "3dc63ee7c73df2b3116547327740f7292b2407da0a0c3b2bd9d5a44d0e784f8c",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "interaction",
+      "intent": "identified",
+      "query_chars": 42,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-102"
+      ],
+      "prompt_utf8_bytes": 6996,
+      "prompt_sha256": "cfe62c9197608237ace59a831c2a3dd278ab4a2b1458697a0e58a4c0d69994b9",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "content",
+      "intent": "identified",
+      "query_chars": 55,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-099"
+      ],
+      "prompt_utf8_bytes": 6965,
+      "prompt_sha256": "994e0a53962ef89f681f2f53e0e19af224d038ef6ae64f4d7e059034a7da2eb4",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "wellbeing",
+      "intent": "identified",
+      "query_chars": 50,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-100"
+      ],
+      "prompt_utf8_bytes": 7178,
+      "prompt_sha256": "f611e7226e37638d741975a89eaee9889c81b84134ea992e03321a2394815271",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "law",
+      "intent": "identified",
+      "query_chars": 42,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-104"
+      ],
+      "prompt_utf8_bytes": 7064,
+      "prompt_sha256": "a0edb36f68c5275ea406f8bc4f351488e0456eff2103ea1b0bf1a21df8d909d4",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "analytics",
+      "intent": "identified",
+      "query_chars": 55,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-098"
+      ],
+      "prompt_utf8_bytes": 7023,
+      "prompt_sha256": "ae84d59f692d02d9dc282f1bfd089e10a95d38c7b9700a6bbff10d578030e4b9",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "paraphrase",
+      "intent": "ambiguous",
+      "query_chars": 91,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "catalog",
+      "intent": "catalog",
+      "query_chars": 49,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [
+        "unit:M02:DOC-102",
+        "unit:M02:DOC-103",
+        "unit:M02:DOC-099",
+        "unit:M02:DOC-100",
+        "unit:M02:DOC-104",
+        "unit:M02:DOC-098",
+        "unit:M02:DOC-101"
+      ],
+      "insufficient_evidence": false
+    },
+    {
+      "id": "broad_topics",
+      "intent": "multiple",
+      "query_chars": 55,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "two_courses",
+      "intent": "multiple",
+      "query_chars": 60,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101",
+        "unit:M02:DOC-103"
+      ],
+      "prompt_utf8_bytes": 8498,
+      "prompt_sha256": "a5afe32ced16270e0f04cd3752dd29ad1eacce944d97e85f6c8adc9fe0d32b35",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "unknown",
+      "intent": "unknown",
+      "query_chars": 50,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "ambiguous_fresh",
+      "intent": "ambiguous",
+      "query_chars": 30,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "implicit",
+      "intent": "identified",
+      "query_chars": 19,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7105,
+      "prompt_sha256": "f5a480880f4d3a4d46c6006d23c35545e56acd1a76bf6075bf020a87dbad476c",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "catalog_reference",
+      "intent": "ambiguous",
+      "query_chars": 19,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "corrections",
+      "intent": "identified",
+      "query_chars": 19,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7117,
+      "prompt_sha256": "2378880d4f56b7457548bef607126dbd6f53626075b7b7c5b44e67250cf43d4c",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "fresh_after_guidance",
+      "intent": "identified",
+      "query_chars": 44,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 6975,
+      "prompt_sha256": "c85fd3f5725ace311ae02e51113d3765af7fd686d2fef9382258d85965cd5148",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "long_history",
+      "intent": "identified",
+      "query_chars": 19,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 13097,
+      "prompt_sha256": "23103f5d58ab42758542a9aa9fab06c7d6012ab6cfcee4b836574b9387cb83fd",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "history_subject_evicted",
+      "intent": "ambiguous",
+      "query_chars": 19,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "near_query_limit",
+      "intent": "identified",
+      "query_chars": 3999,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 10930,
+      "prompt_sha256": "fe6c07173045ebaf865a2bc1e01c1619264712dcc70aa49aba229e4949900a0c",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    },
+    {
+      "id": "unverified_claim",
+      "intent": "unverified_claim",
+      "query_chars": 94,
+      "generation": "NOT_EXECUTED",
+      "outcome": "completed",
+      "citations": [],
+      "insufficient_evidence": true
+    },
+    {
+      "id": "unsupported",
+      "intent": "identified",
+      "query_chars": 68,
+      "generation": "DOUBLE_CAPTURE_ONLY",
+      "selected": [
+        "unit:M02:DOC-101"
+      ],
+      "prompt_utf8_bytes": 7002,
+      "prompt_sha256": "2d69ec690e0ad58908d458777f60a92e2ebcf59ed56c610c98ea4bf70b52d5cc",
+      "outcome": "prompt_captured",
+      "selection_matches_expected": true
+    }
+  ],
+  "limitations": [
+    "Development bank, not reserved or independent academic evaluation",
+    "Bytes are NOT token counts",
+    "Capture does not generate answers"
+  ],
+  "loaded_generator_context": null,
+  "integrity": {
+    "corpus_unchanged": true,
+    "history_unchanged": true,
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963"
+  },
+  "generator": {
+    "provider": "ollama",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime_version": "0.35.0",
+    "recipe": {
+      "think": false,
+      "stream": false,
+      "options": {
+        "temperature": 0,
+        "num_predict": 256
+      },
+      "keep_alive": "5m"
+    }
+  }
+}

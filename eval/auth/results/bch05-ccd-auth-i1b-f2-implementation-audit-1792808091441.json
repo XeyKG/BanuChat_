@@ -1,0 +1,120 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "at": "2026-10-24T02:14:51.440Z",
+  "head": "bbfcd9d54350cc51c16b9a6d2bcb30a6c057f52d",
+  "integrity": {
+    "corpus_sha256": "db29ad53062ee400a367fb4a16b4c5cc2f9c178cb1333e29dab29fe12a449963",
+    "corpus_unchanged": true,
+    "unrevoked_fixture_sessions": 0,
+    "sql_read_only": true
+  },
+  "files": [
+    {
+      "path": "backend/api/src/chat/document-evidence.ts",
+      "sha256": "d5781920e78832ff02c6f57322791b86d842bd9fb5274275a36fd76a65a8ebbd"
+    },
+    {
+      "path": "backend/api/src/chat/document-rag.ts",
+      "sha256": "a84dd804b588c1b3844df4ec7038d62d02c1142149227dd03a9eb4f3d034d6b5"
+    },
+    {
+      "path": "backend/api/src/generation/generator-client.ts",
+      "sha256": "11d6d19683af3786c85b3c6f2f7acfe61f122aa33f2e8d744ef0b6fdb3dbed42"
+    },
+    {
+      "path": "backend/api/src/generation/ollama-generator-client.ts",
+      "sha256": "a6448b57de6d837e8d0628d8520bded05cbcc0ec4431c8eba5409609a2179d6e"
+    },
+    {
+      "path": "backend/api/test/ccd-context-adversarial.test.ts",
+      "sha256": "494210efbaa79d093942df1bf0b19392e8dfa855020a75a7d6c0f75040c59025"
+    },
+    {
+      "path": "backend/api/test/document-evidence.test.ts",
+      "sha256": "ee7ec7443a3861122b524d72a097d5f82ae9f9ffbd94216edc451549430f56e0"
+    },
+    {
+      "path": "backend/api/test/document-rag.test.ts",
+      "sha256": "dd5f453d1ad796b443ae970202f952efbb50fefbae79eb3b2162562a3586fcb5"
+    },
+    {
+      "path": "backend/api/test/messages.test.ts",
+      "sha256": "e9915341af31271104bfdc3271d7d8c9abaa2ac43a432c6dd45c00bf8e032bb5"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2-implementation-adversarial.mts",
+      "sha256": "4001df51637441e8e565a2e97f8a4c52dba76ff1dbaf381574d7f398a29dcb08"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2-implementation-audit.mts",
+      "sha256": "45effebd8b5d972f766ed529f4b70f614aa4c3f310f9512abe48505c9218e76e"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2-implementation-http.mts",
+      "sha256": "69e692327b81123c4bcdcb2437bc131b274f1539279459232f976e6e73d40061"
+    },
+    {
+      "path": "backend/api/test/auth-i1b-f2-implementation/environment.ts",
+      "sha256": "8a32dcd2428e8d9a3baeebbe619d17706ebcf2ce1cf9366a0f66bd1e46b8968a"
+    },
+    {
+      "path": "docs/transition/bch05-ccd-auth-i1b-f2-implementation-checkpoint.md",
+      "sha256": "252eb0e592af3df8f4b67bf29456dbba87f18b0f659fa0a93e1cf6653cd017cf"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-capture-1792807111945.json",
+      "sha256": "9cfe3a7063e07f67067774b58bce20be3f4a7d71f33b94f539053c8bcd0c0ae4"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-comparison-1792807334273.json",
+      "sha256": "38c1ba877c6793c9260fa1186f689bb668d41dbeceaf657f15842dceaa0929ec"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-comparison-1792807711768.json",
+      "sha256": "da72acb37999e3d86293cc30721684b3e476b202f062ab60170209653833a05d"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-comparison-1792807815616.json",
+      "sha256": "8e70e119b9dd3417a1975175afd2feaaca10a6034abcc2a42bbb7d1ed38e1132"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-focal-1792807127076.json",
+      "sha256": "442856487b404bb2b218944dd88fc9d98a360372ac1dd181095a3ec9967941ba"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-full-1792807191623.json",
+      "sha256": "8db73194fa80118b1b0a69e969c9ee7fdfa8044cdf68be5bfaf6cfb62715cb85"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-http-1792807346976.json",
+      "sha256": "7ba444aafb2452c00b7a7eaa4e82f4a2624a8b391e80187173d81df2f5aed954"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-http-capacity-1792807778622.json",
+      "sha256": "577b522e57e52c55ba1d6fedcecde2df93bcffc9253b9f20d8ab7da02f7e562b"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-probe-1792807337904.json",
+      "sha256": "67c0de80fddb37ec72c39c1787ad114c8399987d32192cf8fed59b6e59a945a0"
+    },
+    {
+      "path": "eval/auth/results/bch05-ccd-auth-i1b-f2-implementation-selection-comparison-1792807815616.json",
+      "sha256": "97b7d17921f1bb6cc7fe829a84c48a612789c5bf9c905100a2bdf67c4d26466d"
+    },
+    {
+      "path": "eval/integration/ccd-auth-i1b-f2-implementation-review.mts",
+      "sha256": "7aa1f265bc5c4812c0ddcd2d8dc9bcf5c864dbb5ee2c0c0b753fb68a41959dd2"
+    },
+    {
+      "path": "eval/integration/ccd-auth-i1b-f2-implementation.mts",
+      "sha256": "4d758a51abd4b05d198d443f071267378c28eb68a8ec7abeade90cf4c1f52c97"
+    }
+  ],
+  "private_values_found": false,
+  "secret_scan_scope": "Exact private I1B passwords/rate key and F1 fixture passwords; manual review of output fields",
+  "contracts_sql_auth_mobile_ops_unchanged": true,
+  "generator_configuration_unchanged": true,
+  "git_diff_check": "PASS",
+  "android_executed_by_agent": false,
+  "no_commit_or_push": true
+}

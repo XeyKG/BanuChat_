@@ -18,11 +18,11 @@ export function ccdGuidanceTopic(query: string, history: readonly ConversationMe
     const text = normalizeCcdSubject(subject);
     if (/\b(?:contacto|correo|email)\b/u.test(text) || /\b(?:duracion|cuanto duran?|estructura|proposito|resultados?|inmediata|plataforma)\b/u.test(text)) return undefined;
     if (/\b(?:informatica|transicion|antigu\p{L}*|homolog\p{L}*|equivalen\p{L}*|reconoc\p{L}*|word|powerpoint|excel)\b/u.test(text)) return 'U04';
-    if (/\b(?:corrijo|correccion|fue)\b.*\bcurso\b/u.test(text)) return 'U03';
     if (/\b(?:reprob\p{L}*|reprueb\p{L}*|pierdo|pierda|perdi|perder|perdido|perdida)\b|\bno (?:\p{L}+ ){0,3}(?:aprob\p{L}*|valid\p{L}*|super\p{L}*)\b/u.test(text)) return 'U03';
     // A fresh, named syllabus must not inherit an earlier test consequence.
     if (/\b(?:ia generativa|marca personal|interaccion digital|analitica digital|contenidos digitales|marco legal|bienestar digital)\b/u.test(text)
       && !/\b(?:eso|equivale|significa|quiere decir)\b/u.test(text)) return undefined;
+    if (/\b(?:corrijo|correccion|fue)\b.*\bcurso\b/u.test(text)) return 'U03';
     if (/\bpruebas?\b/u.test(text) && !asksUnsupportedTestRule(subject)) return undefined;
   }
   return undefined;
@@ -38,33 +38,54 @@ export function isCourseFailureContext(query: string, history: readonly Conversa
   return false;
 }
 
-/** Scope by the latest explicit student subject, never by vector rank or old assistant claims. */
-export function selectCcdEvidence(
+export interface CcdEvidenceDecision {
+  kind: 'identified' | 'clarify_course' | 'clarify_scope' | 'unsupported';
+  chunks: RetrievedDocumentChunk[];
+}
+
+/** Asking for course contents is not the metadata-only catalog operation. */
+export function isCcdCourseDetailQuery(query: string): boolean {
+  return /\b(?:temas?|temarios?|contenidos?|explica\p{L}*|describ\p{L}*|compar\p{L}*)\b/u.test(normalize(query));
+}
+
+/** Scope by explicit subjects, never by vector rank or previous generated claims. */
+export function decideCcdEvidence(
   chunks: readonly RetrievedDocumentChunk[], query: string, history: readonly ConversationMessage[],
-): RetrievedDocumentChunk[] {
+): CcdEvidenceDecision {
+  const identified = (selected: RetrievedDocumentChunk[]): CcdEvidenceDecision => ({kind:'identified',chunks:selected});
   const subjects = [query, ...history.filter(message => message.role === "user").map(message => message.content).reverse()];
+  // A catalog lists metadata; explaining every syllabus is a different scope.
+  if (/\b(?:todos? (?:los )?(?:cursos|syllabus|temarios)|cada (?:uno de los )?cursos?)\b/u.test(normalize(query))) {
+    return {kind:'clarify_scope',chunks:[]};
+  }
   if (/\b(?:puntos|puntaje|umbral|porcentaje)\b/u.test(normalize(query))) {
-    return chunks.filter(chunk => chunk.chunk_locator === 'unit:TEST_ORIENTATION');
+    return identified(chunks.filter(chunk => chunk.chunk_locator === 'unit:TEST_ORIENTATION'));
   }
   const guidance = ccdGuidanceTopic(query, history);
   if (guidance && chunks.some(chunk => chunk.chunk_locator === `unit:${guidance}`)) {
-    return chunks.filter(chunk => chunk.chunk_locator === `unit:${guidance}` || chunk.chunk_locator === 'unit:M12');
+    return identified(chunks.filter(chunk => chunk.chunk_locator === `unit:${guidance}` || chunk.chunk_locator === 'unit:M12'));
   }
   for (const subject of subjects) {
     const text = ` ${normalizeCcdSubject(subject)} `;
-    if (/\b(?:contacto|correo|email)\b/u.test(text)) return chunks.filter(chunk => chunk.chunk_locator === "unit:M12");
-    if (/\bpruebas?\b/u.test(text)) return chunks.filter(chunk => chunk.chunk_locator === "unit:TEST_ORIENTATION");
+    if (/\b(?:contacto|correo|email)\b/u.test(text)) return identified(chunks.filter(chunk => chunk.chunk_locator === "unit:M12"));
+    if (/\bpruebas?\b/u.test(text)) return identified(chunks.filter(chunk => chunk.chunk_locator === "unit:TEST_ORIENTATION"));
     const courses = chunks.filter(chunk => {
       if (!chunk.chunk_locator.startsWith("unit:M02:")) return false;
       const title = normalize(chunk.title);
       const shortTitle = title.replace(/ digital(?:es)?$/u, "");
       return text.includes(` ${title} `) || (shortTitle.split(" ").length >= 2 && text.includes(` ${shortTitle} `));
     });
-    if (courses.length > 0) return courses;
+    if (courses.length > 0) return identified(courses);
   }
-  // Unrecognized topics must not acquire guidance merely because it was retrieved.
-  if (isCourseTopicsFollowUp(query)) return [];
-  return chunks.filter(chunk => !['unit:U03', 'unit:U04'].includes(chunk.chunk_locator));
+  // A description is not a verified course identity; do not invent an alias.
+  const courseReference = subjects.some(subject => /\b(?:curso|cursos|asignatura|materia|syllabus|temario|temas|ccd|competencias digitales)\b/u.test(normalize(subject)));
+  return {kind:courseReference || isCourseTopicsFollowUp(query) ? 'clarify_course' : 'unsupported',chunks:[]};
+}
+
+export function selectCcdEvidence(
+  chunks: readonly RetrievedDocumentChunk[], query: string, history: readonly ConversationMessage[],
+): RetrievedDocumentChunk[] {
+  return decideCcdEvidence(chunks,query,history).chunks;
 }
 
 /** Reject positive authorizations; mentioning a blocked situation or its uncertainty is allowed. */

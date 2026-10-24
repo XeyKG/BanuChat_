@@ -92,7 +92,7 @@ export class OllamaGeneratorClient implements GeneratorClient {
     this.baseUrl = parsed;
   }
 
-  private async request(path: string, body?: unknown): Promise<unknown> {
+  private async request(path: string, body?: unknown, classifyCapacity = false): Promise<unknown> {
     let response: Response;
     try {
       response = await this.fetchImplementation(new URL(path, this.baseUrl), {
@@ -110,6 +110,22 @@ export class OllamaGeneratorClient implements GeneratorClient {
       return reject("generator_unavailable");
     }
     if (!response.ok) {
+      if (classifyCapacity && path === '/api/chat' && response.status === 400) {
+        // Read only a bounded diagnostic envelope; never attach it to the error.
+        try {
+          const reader=response.body?.getReader();let size=0;const parts:Uint8Array[]=[];
+          if(reader) {
+            while(true){const next=await reader.read();if(next.done)break;size+=next.value.byteLength;if(size>8192){await reader.cancel();break;}parts.push(next.value);}
+            if(size<=8192){
+              const value:unknown=JSON.parse(Buffer.concat(parts).toString('utf8'));
+              const message=isRecord(value)&&typeof value.error==='string'?value.error:'';
+              const counts=[...message.matchAll(/\b([0-9]{1,8})\s+tokens?\b/giu)].map(m=>Number(m[1]));
+              if(/\bcontext\b/iu.test(message)&&/exceed|larger than|too (?:long|large)/iu.test(message)
+                && counts.length===2 && counts[0]!>counts[1]! && counts[1]!>0) reject('generator_context_capacity_exceeded');
+            }
+          }
+        } catch(error) { if(error instanceof GeneratorClientError)throw error; }
+      }
       return reject(
         response.status >= 500
           ? "generator_unavailable"
@@ -195,7 +211,7 @@ export class OllamaGeneratorClient implements GeneratorClient {
           { role: "system", content: input.system_prompt },
           { role: "user", content: input.user_prompt },
         ],
-      }),
+      }, input.classify_context_capacity === true),
       "invalid_generator_response",
     );
 

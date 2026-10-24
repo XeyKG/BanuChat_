@@ -1,6 +1,8 @@
 export interface GeneratorInput {
   system_prompt: string;
   user_prompt: string;
+  /** CCD internal diagnostics only; never sent as an Ollama option or prompt. */
+  classify_context_capacity?: true;
 }
 
 export interface GeneratorRecipe {
@@ -37,6 +39,7 @@ export interface GeneratorClient {
 }
 
 export type GeneratorClientErrorReason =
+  | "generator_context_capacity_exceeded"
   | "generator_runtime_mismatch"
   | "generator_unavailable"
   | "invalid_generator_response"

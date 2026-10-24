@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {contextCases} from './auth-i1b-f2/cases.js';
 
 import {
   DocumentQueryRetrievalError,
@@ -216,10 +217,10 @@ PREGUNTA:
   );
 });
 
-test("CCD mode changes only the evidence label and preserves insufficient evidence handling", async () => {
-  const fake = fakeDependencies([chunk()], "EVIDENCIA_INSUFICIENTE");
+test("CCD identified evidence preserves its label and generator insufficiency handling", async () => {
+  const fake = fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'})], "EVIDENCIA_INSUFICIENTE");
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
-    release_id: RELEASE_ID, query: "Regla sin respaldo",
+    release_id: RELEASE_ID, query: "Describe IA Generativa",
   });
   assert.match(fake.generator_calls[0]!.input.system_prompt, /evidencia CCD seleccionada/);
   assert.match(fake.generator_calls[0]!.input.system_prompt, /sin aval institucional formal/);
@@ -477,10 +478,10 @@ test("CCD course evidence excludes secondary sources from generation, citations 
 });
 
 test("CCD only persists declared valid sources, with contiguous public indexes", async () => {
-  const fake = fakeDependencies([chunk({ chunk_locator: "unit:M01" }),
-    chunk({ chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M02:DOC-101" })], "Respuesta.\nFUENTES: [2]");
+  const fake = fakeDependencies([chunk({ title:'IA Generativa',chunk_locator: "unit:M02:DOC-101" }),
+    chunk({ title:'IA Generativa',chunk_id: OTHER_CHUNK_ID, chunk_locator: "unit:M02:DOC-101" })], "Respuesta.\nFUENTES: [2]");
   const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
-    release_id: RELEASE_ID, query: "Consulta general",
+    release_id: RELEASE_ID, query: "Describe IA Generativa",
   });
   assert.deepEqual(answer.citation_records.map(c => [c.citation_index, c.chunk_id]), [[0, OTHER_CHUNK_ID]]);
   assert.doesNotMatch(answer.content, /202660/);
@@ -488,9 +489,9 @@ test("CCD only persists declared valid sources, with contiguous public indexes",
 
 test("CCD malformed references abstain without exposing protocol or persisting citations", async () => {
   for (const output of ["Respuesta.\nFUENTES: [2]", "Respuesta sin fuentes", "Respuesta.\nFUENTES: [1], [1]"]) {
-    const fake = fakeDependencies([chunk()], output);
+    const fake = fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'})], output);
     const answer = await generateDocumentRagAnswer({ ...fake.dependencies, evidence_mode: "ccd_local" }, {
-      release_id: RELEASE_ID, query: "Consulta general",
+      release_id: RELEASE_ID, query: "Describe IA Generativa",
     });
     assert.equal(answer.insufficient_evidence, true);
     assert.deepEqual(answer.citation_records, []);
@@ -603,15 +604,14 @@ test('an unrecognized topic cannot activate literal guidance even when both guid
   assert.equal(fake.generator_calls.length,0);
 });
 
-test('generator insufficiency for an unrecognized topic remains insufficient after generic retrieval filtering', async () => {
+test('unrecognized topic abstains before generation instead of treating generic retrieval as pertinent', async () => {
   const fake=fakeDependencies([
     chunk({chunk_locator:'unit:U04',content:'# Transición\n\nLa transición de Informática contempla reconocer cursos.'}),
     chunk({chunk_locator:'unit:U03',content:'# Prueba\n\nLos lineamientos de 202660 describen un pilar.'}),
     chunk({chunk_locator:'unit:TEST_ORIENTATION'}),
   ],'EVIDENCIA_INSUFICIENTE');
   const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Necesito un procedimiento no especificado'});
-  assert.equal(fake.generator_calls.length,1);
-  assert.doesNotMatch(fake.generator_calls[0]!.input.user_prompt,/Localizador: unit:U0[34]/u);
+  assert.equal(fake.generator_calls.length,0);
   assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);assert.deepEqual(answer.citation_records,[]);
   assert.doesNotMatch(answer.content,/transición|202660|vigencia/iu);
 });
@@ -641,6 +641,56 @@ test('CCD aliases select and cite only DOC-101; synthetic mode keeps its unfilte
       assert.match(fake.generator_calls[0]!.input.user_prompt,/IA_SYLLABUS_FIXTURE/u);
       assert.equal(fake.generator_calls[0]!.input.user_prompt.includes('OTHER_COURSE_FIXTURE'),mode==='synthetic');
     }
+  }
+});
+
+test('F2 reuses all 24 development cases at the RAG boundary without treating doubles as real generation',async()=>{
+  const metadata=[['IA Generativa','M02:DOC-101'],['Marca Personal Digital','M02:DOC-103'],['Interacción Digital','M02:DOC-102'],
+    ['Creación de Contenidos Digitales','M02:DOC-099'],['Cuidado y bienestar digital','M02:DOC-100'],['Marco Legal Digital','M02:DOC-104'],
+    ['Habilidades en Analítica Digital','M02:DOC-098'],['','M01'],['','M12'],['','TEST_ORIENTATION'],['','U03'],['','U04']];
+  for(const c of contextCases){
+    const fake=fakeDependencies(metadata.map(([title,locator],i)=>chunk({title:title||'Unidad de prueba',chunk_locator:'unit:'+locator,chunk_id:'44444444-4444-4444-8444-'+String(i+1).padStart(12,'0')})),
+      c.id==='unsupported'?'EVIDENCIA_INSUFICIENTE':c.id==='two_courses'?'Comparación respaldada.\nFUENTES: [1], [2]':'Temas respaldados.\nFUENTES: [1]');
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:c.query,history:c.history});
+    if(['paraphrase','broad_topics','unknown'].includes(c.id)){
+      assert.equal(fake.generator_calls.length,0,c.id);assert.equal(answer.insufficient_evidence,true);assert.deepEqual(answer.citations,[]);assert.deepEqual(answer.citation_records,[]);
+      assert.match(answer.content,c.id==='paraphrase'?/nombre|identificar/u:c.id==='broad_topics'?/delimitar/u:/evidencia suficiente/u);
+    }else if(c.id==='catalog'){assert.equal(fake.generator_calls.length,0);assert.equal(answer.citations.length,7);}
+    else if(c.expected?.length&&c.id!=='unsupported'){
+      assert.equal(fake.generator_calls.length,1,c.id);assert.deepEqual(answer.citations.map(x=>x.locator).sort(),[...c.expected].sort(),c.id);
+      assert.equal(fake.generator_calls[0]!.input.classify_context_capacity,true);
+    }else{assert.equal(answer.insufficient_evidence,true,c.id);assert.deepEqual(answer.citations,[]);}
+  }
+});
+
+test('F2 distinguishes all-course contents from an all-course metadata catalog',async()=>{
+  const sources=[chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'}),chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103',chunk_id:OTHER_CHUNK_ID})];
+  for(const query of ['¿Qué temas se estudian en todos los cursos de Competencias Digitales?','Explica todos los temarios de los cursos de Competencias Digitales.']){
+    const fake=fakeDependencies(sources);const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query});
+    assert.equal(fake.generator_calls.length,0);assert.equal(answer.insufficient_evidence,true);assert.match(answer.content,/delimitar/u);assert.deepEqual(answer.citations,[]);
+  }
+  const catalog=fakeDependencies(sources);const answer=await generateDocumentRagAnswer({...catalog.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Lista todos los cursos de Competencias Digitales'});
+  assert.equal(catalog.generator_calls.length,0);assert.equal(answer.insufficient_evidence,false);assert.equal(answer.citations.length,2);
+});
+
+test('F2 named topic corrections do not turn a syllabus question into course-failure guidance',async()=>{
+  const fake=fakeDependencies([chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'}),chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103',chunk_id:OTHER_CHUNK_ID}),chunk({title:'Consecuencia',chunk_locator:'unit:U03'})],'Temas de Marca Personal.\nFUENTES: [1]');
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Corrijo: me refiero al curso de Marca Personal, ¿qué temas aborda?',history:[{role:'user',content:'No aprobé una prueba nueva de 202660'}]});
+  assert.equal(answer.insufficient_evidence,false);assert.deepEqual(answer.citations.map(c=>c.locator),['unit:M02:DOC-103']);assert.doesNotMatch(fake.generator_calls[0]!.input.system_prompt,/ANTECEDENTE CORREGIDO:/u);
+});
+
+test('F2 never presents a one-source answer as a complete two-course response',async()=>{
+  const sources=[chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'}),chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103',chunk_id:OTHER_CHUNK_ID})];
+  const fake=fakeDependencies(sources,'Solo temas de IA.\nFUENTES: [1]');
+  const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:'Compara IA Generativa y Marca Personal Digital'});
+  assert.equal(fake.generator_calls.length,1);assert.equal(answer.insufficient_evidence,true);assert.match(answer.content,/respuesta completa/u);assert.deepEqual(answer.citations,[]);assert.deepEqual(answer.citation_records,[]);
+});
+
+test('F2 unrecognized CCD queries do not change synthetic generation or its diagnostic input',async()=>{
+  for(const id of ['paraphrase','broad_topics','unknown']){
+    const c=contextCases.find(c=>c.id===id)!,fake=fakeDependencies([chunk()]);
+    await generateDocumentRagAnswer(fake.dependencies,{release_id:RELEASE_ID,query:c.query});
+    assert.equal(fake.generator_calls.length,1);assert.equal(fake.generator_calls[0]!.input.classify_context_capacity,undefined);
   }
 });
 
@@ -675,7 +725,7 @@ test('catalog corrections, independent questions and changes to tests or contact
   ]){
     const fake=fakeDependencies([
       chunk({title:'IA Generativa',chunk_locator:'unit:M02:DOC-101'}),
-      chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103'}),
+      chunk({title:'Marca Personal Digital',chunk_locator:'unit:M02:DOC-103',chunk_id:OTHER_CHUNK_ID}),
       chunk({chunk_locator:'unit:TEST_ORIENTATION'}),chunk({chunk_locator:'unit:M12'}),
     ],scenario.text+'\nFUENTES: [1]');
     const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'},{release_id:RELEASE_ID,query:scenario.q,history:scenario.history});

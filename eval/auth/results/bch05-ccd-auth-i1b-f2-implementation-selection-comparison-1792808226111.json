@@ -1,0 +1,201 @@
+{
+  "checkpoint": "BCH-05/CCD-AUTH-I1B-F2 implementation",
+  "at": "2026-10-24T02:17:06.140Z",
+  "sourceCounts": [
+    {
+      "id": "canonical",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "expanded",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "normalized",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "brand",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "interaction",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "content",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "wellbeing",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "law",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "analytics",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "paraphrase",
+      "before_sources": 10,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "catalog",
+      "before_sources": 7,
+      "after_sources": 7,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "broad_topics",
+      "before_sources": 10,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "two_courses",
+      "before_sources": 2,
+      "after_sources": 2,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "unknown",
+      "before_sources": 10,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "ambiguous_fresh",
+      "before_sources": 0,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "implicit",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "catalog_reference",
+      "before_sources": 0,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "corrections",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "fresh_after_guidance",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "long_history",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "history_subject_evicted",
+      "before_sources": 0,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "near_query_limit",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    },
+    {
+      "id": "unverified_claim",
+      "before_sources": 0,
+      "after_sources": 0,
+      "prompt_equal": null,
+      "generation_after": "NOT_EXECUTED"
+    },
+    {
+      "id": "unsupported",
+      "before_sources": 1,
+      "after_sources": 1,
+      "prompt_equal": true,
+      "generation_after": "DOUBLE_CAPTURE_ONLY"
+    }
+  ],
+  "retained_prompts_identical": 16,
+  "capacity_residual": {
+    "id": "explicit_multi_capacity",
+    "intent": "multiple",
+    "query_chars": 186,
+    "generation": "REAL_OLLAMA_ATTEMPTED",
+    "selected": [
+      "unit:M02:DOC-103",
+      "unit:M02:DOC-104",
+      "unit:M02:DOC-101",
+      "unit:M02:DOC-099",
+      "unit:M02:DOC-102",
+      "unit:M02:DOC-098",
+      "unit:M02:DOC-100"
+    ],
+    "prompt_utf8_bytes": 16206,
+    "prompt_sha256": "c6a78fd861304ffdd4ff31ec997bdaed224082bc4b935aeeb90b32a90039d036",
+    "provider_status": 400,
+    "provider_category": "context_capacity_exceeded",
+    "provider_reported_tokens": [
+      4903,
+      4096
+    ],
+    "outcome": "rejected",
+    "reason": "generator_context_capacity_exceeded"
+  },
+  "semantic_note": "Development evidence, not an independent academic evaluation"
+}
