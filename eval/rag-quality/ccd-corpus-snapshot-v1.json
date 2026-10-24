@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "snapshot_id": "banuchat-oe1-ccd-corpus-v1",
+  "captured_at": "2026-10-24T11:45:03.5683776-05:00",
+  "capture_kind": "read_only_canonical_database",
+  "environment": "banuchat-dev",
+  "dataset": {
+    "name": "banuchat-ccd-local",
+    "current_release_id": "3d6cedac-0e86-40c8-909b-d3ff6e8ab741",
+    "release_status": "ready",
+    "dataset_schema_version": "ccd-1.2.0",
+    "git_revision": "add22325752c61da66f32ead877d580e29fa5e08",
+    "manifest_sha256": "ed288f6e79bc099b55cdbb16cae3ea3daa970f67b3c8074cf382c52bdd64d61a",
+    "pipeline_sha256": "3d6d8c51357a6f325d66efebaf910457f998917b294292e3397e6ddf52402b1d",
+    "document_count": 12,
+    "chunk_count": 12,
+    "embedding_count": 12
+  },
+  "embedding": {
+    "provider": "ollama",
+    "model": "qwen3-embedding:0.6b",
+    "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+    "dimension": 1024,
+    "distance_metric": "cosine",
+    "config_sha256": "e1441a0aad0547d9db657f20708d585209a7d863c27f1b2b1e05aa42e6546771"
+  },
+  "institutional_ratification": false,
+  "documents": [
+    {"document_key":"ccd-m01","title":"Estructura general de la Ruta de Competencias Digitales","ordinal":0,"locator":"unit:M01","source_sha256":"dd9e65c9c8ce691b12b6e41ee430231a1df9629371b2c5c2cbaa9c849efdbb9a","review_state":"team_validated_local_candidate","source_refs":["DOC-110","BCH01-CIERRE"],"temporal_scope":"202660","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-098","title":"Habilidades en Analítica Digital","ordinal":0,"locator":"unit:M02:DOC-098","source_sha256":"1efdae73c8d3f0b38556c6d0699b54a201c8942fb950d4616264a31301c2b135","review_state":"source_checked_local_candidate","source_refs":["DOC-098","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-099","title":"Creación de Contenidos Digitales","ordinal":0,"locator":"unit:M02:DOC-099","source_sha256":"bf0b2068d119a298cc3fc774be0befb2fddbea3eed64a60fe96d1ecb267b1f52","review_state":"source_checked_local_candidate","source_refs":["DOC-099","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-100","title":"Cuidado y bienestar digital","ordinal":0,"locator":"unit:M02:DOC-100","source_sha256":"a2d110f2f8e33234b4b88cebb127d6d6c17fea6ea674cefcdecd24ccfd7fccd3","review_state":"source_checked_local_candidate","source_refs":["DOC-100","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-101","title":"IA Generativa","ordinal":0,"locator":"unit:M02:DOC-101","source_sha256":"1d3a1c38246b1c4afafb870e3399cfdcdb33229e78f4297d697d5c18e66f6042","review_state":"source_checked_local_candidate","source_refs":["DOC-101","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-102","title":"Interacción Digital","ordinal":0,"locator":"unit:M02:DOC-102","source_sha256":"b5aa9a3b918074e670c4cef8e671e18255fe52aff4ff6803e45dab75121e5968","review_state":"source_checked_local_candidate","source_refs":["DOC-102","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-103","title":"Marca Personal Digital","ordinal":0,"locator":"unit:M02:DOC-103","source_sha256":"f0da1c330fdd2f80e6c08969e36324f1a501a6ca31e18830a51e7f64c324f18c","review_state":"source_checked_local_candidate","source_refs":["DOC-103","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m02-doc-104","title":"Marco Legal Digital","ordinal":0,"locator":"unit:M02:DOC-104","source_sha256":"3c8327e529f20a17c96ef71c19d8bfb59c4d48d8a6a9da28d721ab3b66c94025","review_state":"source_checked_local_candidate","source_refs":["DOC-104","BCH01-CIERRE"],"temporal_scope":"edicion_entregada_periodo_no_confirmado","current_applicability_confirmed":false},
+    {"document_key":"ccd-m12","title":"Contacto documentado para orientación del CCD","ordinal":0,"locator":"unit:M12","source_sha256":"b23e52d819072ff5baaa5ed2bd8a77be51c32d8b3eaec9c394747072e3037e8e","review_state":"team_validated_local_candidate","source_refs":["DOC-110","BCH01-CIERRE"],"temporal_scope":"202660","current_applicability_confirmed":false},
+    {"document_key":"ccd-tests-overview","title":"Propósito y funcionamiento general de la prueba diagnóstica en 202660","ordinal":0,"locator":"unit:TEST_ORIENTATION","source_sha256":"a98efda9c6a46a511c62dcff7b747dfa94f46a3d340ecc63844fbb4890eba0db","review_state":"source_checked_local_candidate","source_refs":["DOC-110","BCH01-CIERRE"],"temporal_scope":"202660","current_applicability_confirmed":false},
+    {"document_key":"ccd-u03","title":"Orientación histórica: pilar no validado en prueba diagnóstica 202660","ordinal":0,"locator":"unit:U03","source_sha256":"f0340b13b8afe10f820f8fbb4edb793acaa42af1c6af47b18b09038f1c4e9ab5","review_state":"source_checked_local_candidate","source_refs":["DOC-110","BCH01-CIERRE"],"temporal_scope":"202660","current_applicability_confirmed":false},
+    {"document_key":"ccd-u04","title":"Transición desde Informática: avance aprobado y reconocimientos por comprobar","ordinal":0,"locator":"unit:U04","source_sha256":"d1b1804b9122b567287dd59e342325c45713b72f47422dc8a1f127d8f93d44c8","review_state":"source_checked_local_candidate","source_refs":["DOC-116","DOC-076","BCH01-CIERRE"],"temporal_scope":"202560-202610","current_applicability_confirmed":false}
+  ],
+  "limitations": [
+    "Local review is not formal CCD ratification.",
+    "All twelve documents have one vector chunk, so multi_context_same_document is unavailable.",
+    "Current offering, individual applicability and institutional validity are not confirmed."
+  ]
+}
