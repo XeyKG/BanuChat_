@@ -1,0 +1,19 @@
+{
+  "container": "banuchat-dev-postgres-ccd-auth-1",
+  "project": "banuchat-dev",
+  "service": "postgres-ccd-auth",
+  "database": "banuchat_ccd_auth_i1b_test",
+  "database_port": 55453,
+  "volume": "banuchat-dev-ccd-auth-data",
+  "network": "banuchat-dev-ccd-auth",
+  "api_port": 3003,
+  "deployment": "",
+  "runtime_user": "",
+  "runtime_password": "",
+  "rate_key": "",
+  "evidence_mode": "ccd_local",
+  "ollama_base_url": "http://127.0.0.1:11434",
+  "generator_model": "qwen3:4b-instruct",
+  "generator_model_revision": "",
+  "generator_runtime_version": "0.35.0"
+}

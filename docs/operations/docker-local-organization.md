@@ -1,9 +1,9 @@
 # BanuChat — organización y recuperación Docker local
 
-Estado: **candidato reconstruido y validado funcionalmente, no promovido**. El
-entorno `banuchat-ccd-auth-i1b-test` continúa siendo la referencia operativa.
-O2 usó `infra/docker-compose.dev.yml` para crear exclusivamente
-`banuchat-dev-postgres-ccd-auth-1` en 55453; O3 probó la API v2 contra esa copia.
+Estado: **entorno `banuchat-dev` promovido como referencia operativa de desarrollo**.
+O2 creó `banuchat-dev-postgres-ccd-auth-1` en 55453, O3 validó la integración y O4
+conmutó la única API habitual de 3003 a ese entorno. I1B permanece intacto en
+55443 como recurso histórico; no es el arranque principal.
 
 ## Fronteras de datos
 
@@ -33,7 +33,7 @@ y volúmenes:
 
 | Perfil | Servicio | Puerto local predeterminado | Persistencia | Alcance |
 | --- | --- | --- | --- | --- |
-| `ccd-auth` | `postgres-ccd-auth` | `127.0.0.1:55443` | `ccd_auth_data` | Corpus CCD seleccionado y autenticación sintética |
+| `ccd-auth` | `postgres-ccd-auth` | `127.0.0.1:55443` en plantilla; `55453` canónico privado | `ccd_auth_data` | Corpus CCD seleccionado y autenticación sintética |
 | `synthetic` | `postgres-synthetic` | `127.0.0.1:5432` | `synthetic_data` | Demo histórica congelada |
 | `automation` | `n8n` | `127.0.0.1:5678` | `n8n_data` | Estado de orquestación asíncrona |
 
@@ -65,24 +65,27 @@ docker compose `
 
 La validación de configuración por sí sola no acredita que un volumen contenga
 datos. O2 restauró y verificó el volumen autorizado `banuchat-dev-ccd-auth-data`;
-no volver a crear el servicio ni ejecutar `up` como parte de O3.
+no volver a crear el servicio para el arranque habitual.
 
-## Arranque vigente antes de la promoción
+## Arranque operativo habitual
 
-El arranque operativo continúa documentado en
-[CCD-AUTH-I1B Android](ccd-auth-i1b-android.md) y
-[CCD-AUTH-I1B OPS](ccd-auth-i1b-ops.md). Si la base vigente está detenida, el
+El arranque se documenta también en
+[CCD autenticado Android](ccd-auth-i1b-android.md). Si la base canónica está detenida, el
 operador puede iniciar exclusivamente el contenedor ya existente:
 
 ```powershell
-docker start banuchat-ccd-auth-i1b-test
+docker start banuchat-dev-postgres-ccd-auth-1
 ```
 
-La API autenticada usa el entrypoint privado existente desde `backend/api`:
+La API autenticada usa el launcher operativo desde `backend/api`:
 
 ```powershell
-node --import tsx test/auth-i1b-operator.mts api
+npm run start:ccd-auth
 ```
+
+El launcher carga `infra/local/banuchat-dev/ccd-auth-api.json`, valida la identidad
+Docker completa y después reutiliza `src/authenticated-main.ts`. Escucha solo en
+`127.0.0.1:3003`. No iniciar simultáneamente el launcher histórico I1B.
 
 Mobile conserva Expo SDK 57 y su launcher desde la raíz:
 
@@ -90,8 +93,8 @@ Mobile conserva Expo SDK 57 y su launcher desde la raíz:
 .\mobile\scripts\start-ccd-auth.ps1
 ```
 
-No ejecutar de nuevo el Compose candidato para complementar este laboratorio. El
-candidato O2 ya existe en 55453 y continúa separado del entorno vigente.
+El contenedor canónico ya existe en 55453; no ejecutar perfiles `synthetic` o
+`automation` para arrancar el chat.
 
 ## Respaldo
 
@@ -166,16 +169,22 @@ persistencia. No imprime credenciales ni respuestas. Al terminar, cerrar únicam
 el proceso de API; no detener PostgreSQL. El resultado O3 está en
 [`banuchat-o3-candidate-http.json`](../../eval/auth/results/banuchat-o3-candidate-http.json).
 
-## Promoción pendiente
+## Reversión después de O4
 
-La promoción requiere una ventana separada y autorización explícita. Debe definir
-el volumen restaurado que usará `ccd_auth_data`, comprobar owners/ACL, levantar el
-candidato en un puerto alterno, validar API y Mobile, detener el cambio ante
-cualquier diferencia y finalmente decidir el intercambio de 55443. La retirada
-del entorno I1B solo puede evaluarse después de una validación completa y nunca en
-la misma operación de promoción.
+No apuntar directamente la API a I1B mientras existan escrituras nuevas en 55453.
+El rollback operativo seguro comienza deteniendo solo la API de 3003, conservando
+ambos PostgreSQL y generando un dump actualizado del candidato. El respaldo O4
+inicial está en `infra/local/banuchat-dev/o4-post-promotion.dump`, fuera de Git.
 
-La reconstrucción paralela O2 y la regla para inicializar el clúster con el mismo
-administrador están en [docker-ccd-auth-o2.md](docker-ccd-auth-o2.md). El candidato
-continúa en 55453 y no constituye una promoción. O3 acreditó la integración de API,
-pero no autoriza cambiar clientes, puertos ni retirar I1B.
+El launcher I1B puede volver a ocupar 3003 después de cerrar la API canónica, pero
+las conversaciones creadas desde O3 permanecerían únicamente en el candidato y no
+serían visibles. Esa conmutación es una degradación temporal, no una conciliación.
+Antes de recomendarla se debe elegir explícitamente una de estas rutas:
+
+1. corregir hacia delante y mantener 55453 como autoridad;
+2. conservar el dump/volumen candidato y aceptar temporalmente historial dividido;
+3. autorizar una conciliación verificada de escrituras antes de volver a 55443.
+
+No copiar tablas de autenticación o conversación manualmente ni restaurar el dump
+sobre I1B sin un procedimiento específico. La retirada o archivo de I1B continúa
+pendiente de autorización posterior.

@@ -1,0 +1,38 @@
+{
+  "checkpoint": "BANUCHAT-O4-RUNTIME",
+  "at": "2026-10-24",
+  "api": {
+    "entrypoint": "scripts/start-ccd-auth.mts",
+    "address": "127.0.0.1:3003",
+    "single_listener": true,
+    "stderr_empty": true
+  },
+  "candidate": {
+    "container": "banuchat-dev-postgres-ccd-auth-1",
+    "status": "healthy",
+    "address": "127.0.0.1:55453",
+    "volume": "banuchat-dev-ccd-auth-data",
+    "network": "banuchat-dev-ccd-auth"
+  },
+  "i1b": {
+    "container": "banuchat-ccd-auth-i1b-test",
+    "status": "running",
+    "address": "127.0.0.1:55443",
+    "volume": "banuchat-ccd-auth-i1b-test-data",
+    "network": "banuchat-ccd-auth-i1b-test-isolated",
+    "modified_by_o4": false
+  },
+  "backup": {
+    "private_path": "infra/local/banuchat-dev/o4-post-promotion.dump",
+    "bytes": 435119,
+    "sha256": "069b8abff81a94ab8b90895c37ad06c79f69fb8fb284446ad26b74ef87007fef",
+    "catalog_readable": true,
+    "acl_restricted": true
+  },
+  "android": {
+    "physical_device_available": false,
+    "avd_available": false,
+    "manual_validation": "pending"
+  },
+  "result": "PROMOTED_AND_VALIDATED"
+}

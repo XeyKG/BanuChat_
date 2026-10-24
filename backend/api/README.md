@@ -1,7 +1,32 @@
 # API REST — contrato y estado implementado
 
-BCH-D37 / **CCD-AUTH-I1B** integra el corpus CCD seleccionado en una composición
-v2 autenticada exclusiva de `banuchat_ccd_auth_i1b_test`, loopback 55443. Usa el
+## Entorno operativo CCD autenticado
+
+O4 promovió `banuchat-dev-postgres-ccd-auth-1` como PostgreSQL principal de
+desarrollo CCD autenticado, conservando la base física
+`banuchat_ccd_auth_i1b_test` en `127.0.0.1:55453`. La API v2 continúa en
+`127.0.0.1:3003`; no se intercambiaron puertos PostgreSQL.
+
+La configuración privada está en `infra/local/banuchat-dev/ccd-auth-api.json`,
+fuera de Git y con ACL restringida. El launcher valida contenedor, proyecto
+Compose, servicio, puerto, volumen, red y salud antes de reutilizar el entrypoint
+`src/authenticated-main.ts`:
+
+```powershell
+cd backend/api
+npm run start:ccd-auth
+```
+
+El ejemplo versionable sin secretos es
+[`infra/ccd-auth-api.config.example.json`](../../infra/ccd-auth-api.config.example.json).
+I1B permanece intacto en 55443 como recurso histórico de reversión; su launcher no
+es el arranque habitual. Véanse el
+[runbook operativo](../../docs/operations/ccd-auth-i1b-android.md) y el
+[checkpoint O4](../../docs/transition/docker-organization-o4-checkpoint.md).
+
+BCH-D37 / **CCD-AUTH-I1B** integró originalmente el corpus CCD seleccionado en una
+composición v2 autenticada exclusiva de `banuchat_ccd_auth_i1b_test`, entonces en
+loopback 55443. Usa el
 bootstrap [011](../../infra/db/011_ccd_authenticated_bootstrap.sql), no la serie
 sintética 006–010. REST v2 revisión 4.0.0 conserva las quince operaciones y añade
 `me.evidence_mode`; CCD declara solo chat/historial/documentos, con owners por

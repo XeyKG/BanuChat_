@@ -1,0 +1,125 @@
+{
+  "checkpoint": "BANUCHAT-O4-PREFLIGHT",
+  "at": "2026-10-24T07:36:12.605Z",
+  "head": "9ad07f44db5dee77d6918dc998821c3d76681b6a",
+  "source": {
+    "container": "banuchat-ccd-auth-i1b-test",
+    "port": 55443,
+    "volume": "banuchat-ccd-auth-i1b-test-data",
+    "network": "banuchat-ccd-auth-i1b-test-isolated"
+  },
+  "candidate": {
+    "container": "banuchat-dev-postgres-ccd-auth-1",
+    "port": 55453,
+    "volume": "banuchat-dev-ccd-auth-data",
+    "network": "banuchat-dev-ccd-auth"
+  },
+  "tables": {
+    "banuchat.conversations": {
+      "source": 115,
+      "candidate": 117,
+      "only_source": 0,
+      "only_candidate": 2,
+      "changed_common": 0,
+      "source_sha256": "a2553851f92a129cca87924321cae7e3f52502cd186e6dd9e17c6e014329b662",
+      "candidate_sha256": "3741936d2733d8bf6506e25aaa855192bb1605d11b4c95f0e582c46a37df8f0b"
+    },
+    "banuchat.messages": {
+      "source": 462,
+      "candidate": 468,
+      "only_source": 0,
+      "only_candidate": 6,
+      "changed_common": 0,
+      "source_sha256": "ca75ce5eaef978c090b0c45155bca0f61e6113934c043019b214a5633322cd3d",
+      "candidate_sha256": "3c8d908ce084299a8cd78b91d2a887c78cd9dd5f505d1c7f9aac683762a6c897"
+    },
+    "banuchat.message_citations": {
+      "source": 247,
+      "candidate": 248,
+      "only_source": 0,
+      "only_candidate": 1,
+      "changed_common": 0,
+      "source_sha256": "c9ecff6b857a5812ef22e636c7c10642c3e4669fa56939c295787a18c7d03f2a",
+      "candidate_sha256": "128f0eae380658d075bb77af3952398c92bdd7ebdc27185580e7440b0d6343c4"
+    },
+    "banuchat_auth.accounts": {
+      "source": 5,
+      "candidate": 5,
+      "only_source": 0,
+      "only_candidate": 0,
+      "changed_common": 0,
+      "source_sha256": "d04843e846966c6f42557e18985fea375b492d7fc2da2dd8a37258d4d93fd026",
+      "candidate_sha256": "d04843e846966c6f42557e18985fea375b492d7fc2da2dd8a37258d4d93fd026"
+    },
+    "banuchat_auth.password_credentials": {
+      "source": 5,
+      "candidate": 5,
+      "only_source": 0,
+      "only_candidate": 0,
+      "changed_common": 0,
+      "source_sha256": "db7b6993630231521e208ca24587d112227592235621f93d4d9d4acb2be82922",
+      "candidate_sha256": "db7b6993630231521e208ca24587d112227592235621f93d4d9d4acb2be82922"
+    },
+    "banuchat_auth.profile_bindings": {
+      "source": 5,
+      "candidate": 5,
+      "only_source": 0,
+      "only_candidate": 0,
+      "changed_common": 0,
+      "source_sha256": "d40472c9ff0d3a641c60f831814e40f9c14a35db26dc63ea8f6747401ec7c46e",
+      "candidate_sha256": "d40472c9ff0d3a641c60f831814e40f9c14a35db26dc63ea8f6747401ec7c46e"
+    },
+    "banuchat_auth.corpus_grants": {
+      "source": 5,
+      "candidate": 5,
+      "only_source": 0,
+      "only_candidate": 0,
+      "changed_common": 0,
+      "source_sha256": "85d6c88e4764b9cf8cfed86e1cc7ff9b9bf0b7ba5882a25469600cf60b9a3799",
+      "candidate_sha256": "85d6c88e4764b9cf8cfed86e1cc7ff9b9bf0b7ba5882a25469600cf60b9a3799"
+    },
+    "banuchat_auth.sessions": {
+      "source": 33,
+      "candidate": 35,
+      "only_source": 0,
+      "only_candidate": 2,
+      "changed_common": 0,
+      "source_sha256": "082770c3e0d345d9b7fc6c1d192efced205313cde3526162537ceefc3e09e9f8",
+      "candidate_sha256": "f974978badda3a1646be8a580d5997ddcc7e39f9211ee2dcca2e7a6ac6d1b4f1"
+    },
+    "banuchat_auth.refresh_tokens": {
+      "source": 46,
+      "candidate": 48,
+      "only_source": 0,
+      "only_candidate": 2,
+      "changed_common": 0,
+      "source_sha256": "7dd767f16b54bb62ae349c7752e7136ea695231605ac86eca88b6cd000f3d375",
+      "candidate_sha256": "b8c80ab5a14311268275877ecbb89a55a46b436640aaa55123a09cd7c7cfc660"
+    },
+    "banuchat_auth.security_events": {
+      "source": 84,
+      "candidate": 88,
+      "only_source": 0,
+      "only_candidate": 4,
+      "changed_common": 0,
+      "source_sha256": "d2dbb612ab4dbe7781d20518b5042b759c2b7b1c59d6c04404b75978a6091e81",
+      "candidate_sha256": "71b9e3929b16b383ac77963d50d57836732e87887b8da079f292a55bb5bbafb1"
+    },
+    "banuchat_auth.auth_rate_limits": {
+      "source": 63,
+      "candidate": 67,
+      "only_source": 0,
+      "only_candidate": 4,
+      "changed_common": 0,
+      "source_sha256": "c74561428d12ec78852300c76417ee7377521c36c01a3774cbd08214c3c1593d",
+      "candidate_sha256": "e4714c0d9c71899d1a4d7e4a437034e9f37a984f374c007cebbc1d4459f16f45"
+    }
+  },
+  "classification": {
+    "controlled_o3_candidate_writes": true,
+    "possible_operator_history_on_i1b": false,
+    "possible_operator_auth_on_i1b": false,
+    "account_state_equal": true
+  },
+  "safe_to_promote_without_reconciliation": true
+}

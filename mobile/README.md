@@ -1,6 +1,6 @@
 # BanuChat Mobile
 
-## Estado vigente CCD-AUTH-I1B
+## Estado vigente CCD autenticado
 
 `EXPO_PUBLIC_DEMO_MODE=ccd_authenticated` añade CCD autenticado con REST v2 y
 SecureStore; es distinto de `ccd_local`/v1 y del modo `synthetic` predeterminado.
@@ -19,10 +19,12 @@ de POST incierto. El modo sintético conserva sus seis capacidades/corpus.
 Arranque público sin secretos: `scripts/start-ccd-auth.ps1`. Las contraseñas
 individuales se consultan personalmente desde DPAPI; no están en archivos
 versionables. Procedimiento y guion en el
-[runbook Android I1B](../docs/operations/ccd-auth-i1b-android.md).
+[runbook Android CCD](../docs/operations/ccd-auth-i1b-android.md). Desde O4, la API
+canónica de 3003 apunta a `banuchat-dev` en 55453; Mobile no cambió su URL ni sus
+contratos.
 **Android no fue ejecutado ni aprobado por el agente**; typecheck, lint y pruebas
 de servicios no sustituyen esa validación personal. Resultados/límites en el
-[checkpoint I1B](../docs/transition/bch05-ccd-auth-i1b-checkpoint.md).
+[checkpoint O4](../docs/transition/docker-organization-o4-checkpoint.md).
 
 ## Antecedente AUTH-P4-L0
 

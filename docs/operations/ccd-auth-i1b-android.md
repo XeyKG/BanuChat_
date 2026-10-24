@@ -1,10 +1,19 @@
-# BanuChat — operación local CCD-AUTH-I1B en Android
+# BanuChat — operación local CCD autenticada en Android
 
-Preparación BCH-D37, 2026-10-23. **Android pendiente de validación personal por el operador.** Este documento no acredita una ejecución en dispositivo. Usar una terminal privada del mismo usuario Windows que preparó el laboratorio. No activar transcripción de consola, grabar contraseñas o copiarlas al chat/informe.
+Actualizado en O4, 2026-10-24. La ruta del archivo se conserva para no romper la
+evidencia histórica I1B. **Android continúa pendiente de validación personal por el
+operador.** Este documento no acredita una ejecución en dispositivo. Usar una
+terminal privada del mismo usuario Windows que preparó el entorno. No grabar
+contraseñas ni copiarlas al informe.
 
 ## Laboratorio y cuentas
 
-Base nueva `banuchat_ccd_auth_i1b_test`, contenedor `banuchat-ccd-auth-i1b-test`, PostgreSQL exclusivamente `127.0.0.1:55443`, volumen/red exclusivos. Configuración privada ignorada por Git: `infra/local/auth-i1b/ccd-deployment.json`. No apuntar a CCD original, AUTH-P4-L1, R0 o I1A ni ejecutar migraciones de nuevo. No se requiere ingesta, embeddings nuevos o publicación.
+La base física sigue siendo `banuchat_ccd_auth_i1b_test`. El entorno principal es
+`banuchat-dev-postgres-ccd-auth-1`, PostgreSQL `127.0.0.1:55453`, volumen
+`banuchat-dev-ccd-auth-data` y red `banuchat-dev-ccd-auth`. La configuración privada
+de API es `infra/local/banuchat-dev/ccd-auth-api.json`. I1B continúa intacto en
+55443 y no debe iniciarse como API habitual. No ejecutar migraciones, ingestas,
+embeddings o publicaciones.
 
 Dos cuentas ficticias ya aprovisionadas: `U08000001` (Alba Ficticia CCD) y `U08000002` (Bruno Ficticio CCD). Cada una tiene contraseña aleatoria independiente de 40 caracteres, verificador Argon2id y vínculo al contexto técnico `ccd-local-demo`. Ninguna representa identidad UNAB ni correo verificado. Recuperación por correo suspendida, sin registro público.
 
@@ -18,15 +27,21 @@ Este comando muestra secretos deliberadamente al operador. No incluir su salida 
 
 ## Arranque con USB y loopback
 
-Desde la raíz del repositorio, comprobar personalmente Docker/Ollama y que 3003/8084 estén libres. Preservar procesos existentes; no terminar otros servidores para liberar puertos. El script Mobile rechaza un 8084 ocupado y la API rechaza un bind ocupado. Si el contenedor I1B está detenido, arrancar solamente `docker start banuchat-ccd-auth-i1b-test`; no recrearlo ni eliminar su volumen. No es necesario el laboratorio UID de 55444.
+Desde la raíz del repositorio, comprobar Docker/Ollama y que 3003/8084 estén libres.
+Preservar procesos existentes; no terminarlos para liberar puertos. Si el contenedor
+canónico está detenido, ejecutar únicamente
+`docker start banuchat-dev-postgres-ccd-auth-1`; no recrearlo ni eliminar su volumen.
 
 Terminal API, desde `backend/api`:
 
 ```powershell
-node --import tsx test/auth-i1b-operator.mts api
+npm run start:ccd-auth
 ```
 
-Carga las credenciales locales sin imprimirlas, fija CCD desde configuración interna y usa la receta/digest de generación acreditada en I1A. Si Ollama/modelo no coincide, detener y registrar el fallo; no ajustar parámetros para mejorar respuestas. API escucha solo `127.0.0.1:3003`, sin rutas v1 ni recuperación funcional. PostgreSQL permanece en loopback 55443. No iniciar el servidor v1 de 3001 para este ensayo.
+Carga la configuración privada sin imprimirla y valida contenedor, proyecto,
+servicio, puerto 55453, volumen, red y salud antes de iniciar el entrypoint v2.
+La API escucha solo en `127.0.0.1:3003`, sin rutas v1 ni recuperación funcional.
+Si Ollama/modelo no coincide, detener y registrar el fallo; no ajustar parámetros.
 
 Terminal USB, con **un dispositivo propio autorizado** y Expo Go compatible con SDK 57:
 

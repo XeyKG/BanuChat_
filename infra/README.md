@@ -20,8 +20,10 @@ permanece en 55453 y no sustituye I1B.
 
 O3 ejecutó la API v2 en loopback:3013 contra ese candidato y validó autenticación,
 aislamiento, historial, RAG CCD, citas, artefactos y abstención. La API temporal se
-cerró al terminar; no se cambió Mobile ni se promovió 55453. Véase el
-[checkpoint O3](../docs/transition/docker-organization-o3-checkpoint.md).
+cerró al terminar. O4 promovió después `banuchat-dev` manteniendo PostgreSQL en
+55453 y la API habitual en 3003, sin modificar Mobile ni retirar I1B. Véanse los
+checkpoints [O3](../docs/transition/docker-organization-o3-checkpoint.md) y
+[O4](../docs/transition/docker-organization-o4-checkpoint.md).
 
 ## Variables y seguridad
 
@@ -30,6 +32,12 @@ dejan vacíos y deben definirse privadamente para cada ejecución local.
 Compose exige los valores sensibles y solo publica puertos en `127.0.0.1`.
 La ejecución desde la raíz debe cargar explícitamente `.env` mediante
 `docker compose --env-file .env -f infra/docker-compose.yml up -d`.
+
+La API CCD canónica usa el ejemplo
+[`ccd-auth-api.config.example.json`](ccd-auth-api.config.example.json) y una copia
+privada en `infra/local/banuchat-dev/ccd-auth-api.json`. El arranque habitual es
+`npm run start:ccd-auth` desde `backend/api`; valida la identidad de 55453 antes de
+abrir `127.0.0.1:3003`.
 
 La API v2 ya autentica cuentas locales sintéticas en el entorno CCD; autenticación
 institucional real sigue pendiente. El HTTP interno de ingesta usa un Bearer token
