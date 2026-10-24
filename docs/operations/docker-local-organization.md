@@ -147,3 +147,7 @@ candidato en un puerto alterno, validar API y Mobile, detener el cambio ante
 cualquier diferencia y finalmente decidir el intercambio de 55443. La retirada
 del entorno I1B solo puede evaluarse después de una validación completa y nunca en
 la misma operación de promoción.
+
+La reconstrucción paralela O2 y la regla para inicializar el clúster con el mismo
+administrador están en [docker-ccd-auth-o2.md](docker-ccd-auth-o2.md). El candidato
+continúa en 55453 y no constituye una promoción.

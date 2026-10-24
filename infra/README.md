@@ -13,6 +13,11 @@ La decisión, el arranque vigente y la recuperación se documentan en el
 la verificación están en el
 [checkpoint O1](../docs/transition/docker-organization-o1-checkpoint.md).
 
+La reconstrucción paralela O2 se documenta en el
+[runbook CCD O2](../docs/operations/docker-ccd-auth-o2.md) y su
+[checkpoint](../docs/transition/docker-organization-o2-checkpoint.md). El candidato
+permanece en 55453 y no sustituye I1B.
+
 ## Variables y seguridad
 
 `/.env.example` documenta las variables. Usuario, contraseña y clave de cifrado se
