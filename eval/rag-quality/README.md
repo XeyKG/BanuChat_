@@ -6,6 +6,8 @@ no se ha ejecutado y no existen resultados M9.
 
 El flujo CCD separado de OE1-D3 se documenta en [OE1-D3.md](OE1-D3.md). Su
 calibración sintética del evaluador no es un resultado M9 ni un baseline CCD.
+El cierre de dependencias previo al baseline está en
+[CHECKPOINT-OE1-PREPARACION.md](CHECKPOINT-OE1-PREPARACION.md).
 
 ## A. Propósito
 

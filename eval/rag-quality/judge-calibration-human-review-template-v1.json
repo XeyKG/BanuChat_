@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "calibration_input_sha256": "6b6cb19bd6a446e2ed0304c5e36545d0cd1e8a67a8aea19a7771928763cf1e85",
+  "status": "pending",
+  "reviewer": null,
+  "reviewed_at": null,
+  "instructions": [
+    "Revisar los 12 casos sin observar primero los scores del juez.",
+    "Asignar high o low según la definición propia de cada métrica, no según corrección global de la respuesta.",
+    "Faithfulness evalúa respaldo en contextos; answer_relevancy evalúa si la respuesta atiende la pregunta.",
+    "Cambiar status a reviewed y registrar reviewer/reviewed_at reales solo al finalizar."
+  ],
+  "cases": [
+    {"id":"CAL-01","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-02","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-03","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-04","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-05","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-06","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-07","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-08","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-09","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-10","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-11","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""},
+    {"id":"CAL-12","labels":{"faithfulness":null,"context_precision":null,"context_recall":null,"answer_relevancy":null},"notes":""}
+  ]
+}

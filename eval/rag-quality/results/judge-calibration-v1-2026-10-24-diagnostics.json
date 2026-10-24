@@ -1,0 +1,1035 @@
+{
+  "schema_version": "1.0.0",
+  "evaluation_kind": "judge_calibration_synthetic",
+  "generated_at": "2026-10-24T20:38:14.102412+00:00",
+  "input_sha256": "6b6cb19bd6a446e2ed0304c5e36545d0cd1e8a67a8aea19a7771928763cf1e85",
+  "ragas": {
+    "version": "0.4.3",
+    "api": "ragas.metrics.collections",
+    "dependencies": {
+      "openai": "1.109.1",
+      "instructor": "1.3.2",
+      "langchain-community": "0.3.31"
+    }
+  },
+  "ollama": {
+    "version": "0.35.0",
+    "endpoint": "loopback"
+  },
+  "judge": {
+    "provider": "ollama_openai_compatible_local",
+    "model": "qwen3:4b-instruct",
+    "model_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "base_url": "loopback",
+    "temperature": 0,
+    "automatic_retries": 0
+  },
+  "embeddings": {
+    "provider": "ollama_openai_compatible_local",
+    "model": "qwen3-embedding:0.6b",
+    "model_revision": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d"
+  },
+  "parameters": {
+    "timeout_seconds": 120.0,
+    "seed": 20261026,
+    "case_limit": null
+  },
+  "aggregate": {
+    "faithfulness": {
+      "planned": 12,
+      "completed": 12,
+      "errors": 0,
+      "timeouts": 0,
+      "mean": 0.5416666666666666,
+      "bootstrap_95_percentile": [
+        0.2916666666666667,
+        0.7916666666666666
+      ],
+      "bootstrap_iterations": 2000
+    },
+    "context_precision": {
+      "planned": 12,
+      "completed": 12,
+      "errors": 0,
+      "timeouts": 0,
+      "mean": 0.7083333332624999,
+      "bootstrap_95_percentile": [
+        0.4583333332875,
+        0.916666666575
+      ],
+      "bootstrap_iterations": 2000
+    },
+    "context_recall": {
+      "planned": 12,
+      "completed": 12,
+      "errors": 0,
+      "timeouts": 0,
+      "mean": 0.75,
+      "bootstrap_95_percentile": [
+        0.5,
+        1.0
+      ],
+      "bootstrap_iterations": 2000
+    },
+    "answer_relevancy": {
+      "planned": 12,
+      "completed": 12,
+      "errors": 0,
+      "timeouts": 0,
+      "mean": 0.31458522824467544,
+      "bootstrap_95_percentile": [
+        0.1427969746686629,
+        0.47948020752230375
+      ],
+      "bootstrap_iterations": 2000
+    }
+  },
+  "calibration": {
+    "diagnostic_threshold": 0.5,
+    "label_origin": "technical_expectations_not_human_validated",
+    "threshold_is_not_an_oe1_acceptance_target": true,
+    "comparisons": 48,
+    "matches": 40,
+    "agreement": 0.8333333333333334,
+    "details": [
+      {
+        "id": "CAL-01",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-01",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-01",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-01",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.7111068602946019,
+        "match": true
+      },
+      {
+        "id": "CAL-02",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-02",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-02",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-02",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-03",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-03",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-03",
+        "metric": "context_recall",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-03",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-04",
+        "metric": "faithfulness",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-04",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-04",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-04",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.6412721956409525,
+        "match": true
+      },
+      {
+        "id": "CAL-05",
+        "metric": "faithfulness",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-05",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-05",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-05",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.6660509216154648,
+        "match": true
+      },
+      {
+        "id": "CAL-06",
+        "metric": "faithfulness",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-06",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-06",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-06",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-07",
+        "metric": "faithfulness",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-07",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-07",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-07",
+        "metric": "answer_relevancy",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.2526887588953848,
+        "match": true
+      },
+      {
+        "id": "CAL-08",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-08",
+        "metric": "context_precision",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-08",
+        "metric": "context_recall",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-08",
+        "metric": "answer_relevancy",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.33061127560015485,
+        "match": true
+      },
+      {
+        "id": "CAL-09",
+        "metric": "faithfulness",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-09",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-09",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-09",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.671845560129198,
+        "match": true
+      },
+      {
+        "id": "CAL-10",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.5,
+        "match": false
+      },
+      {
+        "id": "CAL-10",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.9999999999,
+        "match": true
+      },
+      {
+        "id": "CAL-10",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-10",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-11",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-11",
+        "metric": "context_precision",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.49999999995,
+        "match": true
+      },
+      {
+        "id": "CAL-11",
+        "metric": "context_recall",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-11",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-12",
+        "metric": "faithfulness",
+        "expected": "high",
+        "judge": "high",
+        "score": 1.0,
+        "match": true
+      },
+      {
+        "id": "CAL-12",
+        "metric": "context_precision",
+        "expected": "high",
+        "judge": "low",
+        "score": 0.0,
+        "match": false
+      },
+      {
+        "id": "CAL-12",
+        "metric": "context_recall",
+        "expected": "low",
+        "judge": "low",
+        "score": 0.0,
+        "match": true
+      },
+      {
+        "id": "CAL-12",
+        "metric": "answer_relevancy",
+        "expected": "high",
+        "judge": "high",
+        "score": 0.5014471667603483,
+        "match": true
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "CAL-01",
+      "category": "correctamente_fundamentado",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.7111068602946019,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What time does the library open?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What time does the library open?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What time does the library open?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-02",
+      "category": "correctamente_fundamentado",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What does \"Acepta papel y cartón\" mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does \"Acepta papel y cartón\" mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does \"Acepta papel y cartón\" mean?",
+              "noncommittal": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-03",
+      "category": "parcialmente_fundamentado",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "high",
+        "context_recall": "low",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What does \"Exige gafas de seguridad\" mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does \"Exige gafas de seguridad\" mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does \"Exige gafas de seguridad\" mean?",
+              "noncommittal": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-04",
+      "category": "parcialmente_fundamentado",
+      "expected_labels": {
+        "faithfulness": "low",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.6412721956409525,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What does it include?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What does it include?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What does it include?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-05",
+      "category": "contradictorio",
+      "expected_labels": {
+        "faithfulness": "low",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.6660509216154648,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "Is food allowed?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "Is food allowed?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "Is food allowed?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-06",
+      "category": "contradictorio",
+      "expected_labels": {
+        "faithfulness": "low",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What is the pass color?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What is the pass color?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What is the pass color?",
+              "noncommittal": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-07",
+      "category": "irrelevante",
+      "expected_labels": {
+        "faithfulness": "low",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "low"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.2526887588953848,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What do trees produce?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What do trees produce?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What do trees produce?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-08",
+      "category": "irrelevante",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "low",
+        "context_recall": "low",
+        "answer_relevancy": "low"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.33061127560015485,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What does the recipe use?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What does the recipe use?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What does the recipe use?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-09",
+      "category": "error_temporal",
+      "expected_labels": {
+        "faithfulness": "low",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.671845560129198,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What are the current operating hours?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What are the current operating hours?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What are the current operating hours?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-10",
+      "category": "error_temporal",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "high",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 0.5,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.9999999999,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What is the current validity status of the fee registered by La fuente for 2021?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What is the current validity status of the fee registered by La fuente for 2021?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What is the current validity status of the fee registered by La fuente for 2021?",
+              "noncommittal": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-11",
+      "category": "contexto_ruidoso",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "low",
+        "context_recall": "high",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.49999999995,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What does USA español mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does USA español mean?",
+              "noncommittal": 1
+            },
+            {
+              "generated_question": "What does USA español mean?",
+              "noncommittal": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "CAL-12",
+      "category": "contexto_incompleto",
+      "expected_labels": {
+        "faithfulness": "high",
+        "context_precision": "high",
+        "context_recall": "low",
+        "answer_relevancy": "high"
+      },
+      "metrics": {
+        "faithfulness": {
+          "status": "completed",
+          "value": 1.0,
+          "reason": null
+        },
+        "context_precision": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "context_recall": {
+          "status": "completed",
+          "value": 0.0,
+          "reason": null
+        },
+        "answer_relevancy": {
+          "status": "completed",
+          "value": 0.5014471667603483,
+          "reason": null,
+          "diagnostics": [
+            {
+              "generated_question": "What is the first stage?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What is the first stage?",
+              "noncommittal": 0
+            },
+            {
+              "generated_question": "What is the first stage?",
+              "noncommittal": 0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

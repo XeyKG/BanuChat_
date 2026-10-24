@@ -21,6 +21,16 @@ Resumen y señales de posible repetición:
 node eval/rag-quality/review-bank.mjs summary
 ```
 
+Preparar el paquete privado, agrupado por documento primario y tipo de consulta:
+
+```powershell
+node eval/rag-quality/review-bank.mjs packet `
+  --corpus-root data/ccd/local/guidance-v3
+```
+
+El paquete contiene exactamente las 50 candidatas, verifica los 12 artefactos y se
+escribe en `data/ccd/local/oe1-evaluation/review-packet-v1.md`. No registra decisiones.
+
 Inspección de una candidata y del artefacto privado cuyo SHA-256 se verifica:
 
 ```powershell
@@ -53,24 +63,23 @@ node eval/rag-quality/review-bank.mjs export
 El export solo queda `approved` cuando hay 50 casos aceptados/corregidos. Con menos,
 queda `incomplete`, registra la brecha y retorna código 2; no crea preguntas de relleno.
 
-## 3. Captura de respuestas
+## 3. Captura de respuestas y evidencia
 
-El runner acepta opcionalmente `--responses` con un JSON privado:
+Para el baseline se debe usar `--capture-responses`. El runner ejecuta
+`generateDocumentRagAnswer` sin modificarlo y observa, dentro del proceso evaluativo:
 
-```json
-{
-  "schema_version": "1.0.0",
-  "benchmark_sha256": "sha256 del banco aprobado",
-  "cases": [
-    {"id": "OE1-CCD-C-001", "status": "completed", "response": "..."},
-    {"id": "OE1-CCD-C-002", "status": "abstention"},
-    {"id": "OE1-CCD-C-003", "status": "timeout"}
-  ]
-}
-```
+1. el retrieval productivo previo a filtros;
+2. los contextos exactos incluidos en el prompt del generador, o usados por el
+   renderer determinista;
+3. los `chunk_id` finalmente citados al usuario.
 
-Los estados permitidos son `completed`, `error`, `timeout` y `abstention`. Solo los
-casos `completed` con retrieval válido generan `ragas_input`.
+Los hashes de prompts y contenidos quedan en el resultado privado. RAGAS recibe
+exclusivamente `generation_contexts`, no una nueva ejecución de retrieval. El ranking
+top-5 independiente se conserva en `cases[].retrieved` para MRR/Precision/Recall/Hit.
+
+`--responses` permanece disponible para importar capturas privadas ya existentes,
+pero exige contenido, SHA-256, contextos usados y citas. Ese modo solo acredita
+validación estructural; la garantía fuerte corresponde a `--capture-responses`.
 
 ## 4. Retrieval real
 
@@ -78,10 +87,14 @@ Compilar `backend/api` si `dist` no está actualizado y definir las credenciales
 del PostgreSQL CCD mediante `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` y,
 opcionalmente, `POSTGRES_PORT`. Luego:
 
+Para `--capture-responses` también deben estar presentes
+`BANUCHAT_GENERATOR_MODEL`, `BANUCHAT_GENERATOR_MODEL_REVISION` y
+`BANUCHAT_GENERATOR_RUNTIME_VERSION`, con los valores canónicos del entorno local.
+
 ```powershell
 node eval/rag-quality/run-oe1-evaluation.mjs `
   --benchmark data/ccd/local/oe1-evaluation/approved-benchmark-v1.json `
-  --responses data/ccd/local/oe1-evaluation/response-capture-v1.json `
+  --capture-responses `
   --output data/ccd/local/oe1-evaluation/results/baseline-v1.json
 ```
 
@@ -129,3 +142,9 @@ casos sintéticos separados del banco CCD y de cualquier reserva. Su frontera bi
 0,5 compara el juez con expectativas técnicas preparadas, todavía **no ratificadas por
 una persona revisora**; no reemplaza la comparación humana solicitada ni los targets
 académicos de OE1.
+
+La revisión humana de la calibración se prepara copiando
+[judge-calibration-human-review-template-v1.json](judge-calibration-human-review-template-v1.json)
+y completando `high`/`low`, responsable y fecha reales sin consultar primero los
+scores. El adaptador acepta después `--human-labels <archivo-revisado>` y verifica que
+el SHA-256 corresponda al fixture antes de calcular la comparación.

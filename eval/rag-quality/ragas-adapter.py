@@ -100,15 +100,33 @@ async def score_sample(sample: dict[str, Any], scorers: dict[str, Any], timeout:
     }
     results: dict[str, Any] = {}
     for name in METRICS:
+        answer_relevancy_trace: list[dict[str, Any]] = []
+        original_generate = None
+        if name == "answer_relevancy":
+            original_generate = scorers[name].llm.agenerate
+
+            async def traced_generate(prompt: str, response_model: Any) -> Any:
+                generated = await original_generate(prompt, response_model)
+                answer_relevancy_trace.append({
+                    "generated_question": getattr(generated, "question", None),
+                    "noncommittal": getattr(generated, "noncommittal", None),
+                })
+                return generated
+
+            scorers[name].llm.agenerate = traced_generate
         try:
             raw = await asyncio.wait_for(scorers[name].ascore(**arguments[name]), timeout=timeout)
             value, reason = score_value(raw)
-            results[name] = {"status": "completed", "value": value, "reason": reason}
+            results[name] = {"status": "completed", "value": value, "reason": reason,
+                             **({"diagnostics": answer_relevancy_trace} if name == "answer_relevancy" else {})}
         except asyncio.TimeoutError:
             results[name] = {"status": "timeout", "error": "Tiempo máximo del juez agotado."}
         except Exception as error:  # RAGAS/provider errors are evidence, not hidden.
             print(f"{sample['id']}/{name}: {type(error).__name__}: {str(error)[:500]}", file=sys.stderr, flush=True)
             results[name] = {"status": "error", "error_type": type(error).__name__, "error": "El juez local no pudo puntuar el caso."}
+        finally:
+            if original_generate is not None:
+                scorers[name].llm.agenerate = original_generate
     return {"id": sample["id"], "category": sample.get("category"), "expected_labels": sample.get("expected_labels"), "metrics": results}
 
 
@@ -166,6 +184,30 @@ def calibration_agreement(results: list[dict[str, Any]], threshold: float) -> di
     }
 
 
+def human_calibration_agreement(results: list[dict[str, Any]], payload: dict[str, Any], input_sha256: str, threshold: float) -> dict[str, Any]:
+    if payload.get("schema_version") != "1.0.0" or payload.get("calibration_input_sha256") != input_sha256 or payload.get("status") != "reviewed":
+        raise ValueError("Las etiquetas humanas no están revisadas o pertenecen a otro fixture.")
+    if not isinstance(payload.get("reviewer"), str) or not payload["reviewer"].strip() or not isinstance(payload.get("reviewed_at"), str):
+        raise ValueError("Faltan reviewer/reviewed_at reales en etiquetas humanas.")
+    labels_by_id = {item.get("id"): item.get("labels") for item in payload.get("cases", []) if isinstance(item, dict)}
+    comparisons = []
+    for item in results:
+        labels = labels_by_id.get(item["id"])
+        if not isinstance(labels, dict):
+            raise ValueError(f"Faltan etiquetas humanas para {item['id']}.")
+        for name in METRICS:
+            expected = labels.get(name)
+            observed = item["metrics"][name]
+            if expected not in ("high", "low"):
+                raise ValueError(f"Etiqueta humana inválida para {item['id']}/{name}.")
+            if observed["status"] != "completed":
+                continue
+            judge = "high" if observed["value"] > threshold else "low"
+            comparisons.append({"id": item["id"], "metric": name, "human": expected, "judge": judge, "score": observed["value"], "match": expected == judge})
+    matches = sum(item["match"] for item in comparisons)
+    return {"reviewer": payload["reviewer"], "reviewed_at": payload["reviewed_at"], "comparisons": len(comparisons), "matches": matches, "agreement": matches / len(comparisons), "details": comparisons}
+
+
 async def run(arguments: argparse.Namespace) -> dict[str, Any]:
     version = importlib.metadata.version("ragas")
     if version != EXPECTED_RAGAS_VERSION:
@@ -197,7 +239,7 @@ async def run(arguments: argparse.Namespace) -> dict[str, Any]:
     for sample in samples:
         results.append(await score_sample(sample, scorers, arguments.timeout))
         print(f"{sample['id']}: RAGAS procesado", flush=True)
-    return {
+    result = {
         "schema_version": "1.0.0",
         "evaluation_kind": payload.get("kind", "oe1_ragas"),
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -215,6 +257,14 @@ async def run(arguments: argparse.Namespace) -> dict[str, Any]:
         "calibration": calibration_agreement(results, arguments.calibration_threshold),
         "cases": results,
     }
+    if arguments.human_labels is not None:
+        human_payload, _ = load_json(arguments.human_labels)
+        if not isinstance(human_payload, dict):
+            raise ValueError("--human-labels debe contener un objeto JSON.")
+        result["human_calibration"] = human_calibration_agreement(results, human_payload, result["input_sha256"], arguments.calibration_threshold)
+    else:
+        result["human_calibration"] = {"status": "pending_human_review"}
+    return result
 
 
 def main() -> None:
@@ -228,6 +278,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=20261024)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--calibration-threshold", type=float, default=0.5)
+    parser.add_argument("--human-labels", type=Path)
     arguments = parser.parse_args()
     if not (0.0 < arguments.calibration_threshold < 1.0):
         parser.error("--calibration-threshold debe estar entre 0 y 1")

@@ -20,7 +20,6 @@ import { aggregateRetrievalOutcomes, calculateCaseMetrics } from "./oe1-metrics.
 const execFileAsync = promisify(execFile);
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../..");
-const privateRoot = join(root, "data/ccd/local");
 const apiPackage = join(root, "backend/api/package.json");
 const apiDist = join(root, "backend/api/dist/index.js");
 const DEFAULT_OLLAMA = "http://127.0.0.1:11434";
@@ -131,6 +130,81 @@ function safeError(error) {
   return { code: reason.replace(/[^a-z0-9_-]/gi, "_").slice(0, 80), message: "Falló retrieval; revise el log local del runtime." };
 }
 
+function capturedContext(row) {
+  return {
+    chunk_id: row.chunk_id,
+    document_key: row.document_key,
+    document_version_id: row.document_version_id,
+    ordinal: row.ordinal,
+    locator: row.chunk_locator,
+    source_sha256: row.source_sha256,
+    content_sha256: sha256(Buffer.from(row.content, "utf8")),
+    content: row.content,
+  };
+}
+
+function promptContexts(userPrompt, rows) {
+  const positioned = rows.flatMap((row) => {
+    const marker = `Título: ${row.title}\nLocalizador: ${row.chunk_locator}\nContenido:\n${row.content}`;
+    const position = userPrompt.indexOf(marker);
+    return position === -1 ? [] : [{ position, row }];
+  }).sort((left, right) => left.position - right.position);
+  const evidenceBlocks = [...userPrompt.matchAll(/^\[[0-9]+\]$/gmu)].length;
+  if (evidenceBlocks !== positioned.length) fail("Captura: no fue posible resolver todos los contextos del prompt a chunk_id.");
+  return positioned.map(({ row }) => row);
+}
+
+export async function captureProductionAnswer({ backend, sql, queryEmbeddingClient, generatorClient, generatorConfig, releaseId, question }) {
+  let productionRows = [];
+  let generatorInput;
+  const observingGenerator = {
+    async generate(input, config) {
+      generatorInput = input;
+      return generatorClient.generate(input, config);
+    },
+  };
+  const answer = await backend.generateDocumentRagAnswer({
+    sql,
+    query_embedding_client: queryEmbeddingClient,
+    generator_client: observingGenerator,
+    generator_config: generatorConfig,
+    evidence_mode: "ccd_local",
+    retrieve_chunks: async (client, input) => {
+      productionRows = await backend.retrieveDocumentChunks(client, input);
+      return productionRows;
+    },
+  }, { release_id: releaseId, query: question });
+  const citedIds = answer.citation_records.flatMap((citation) => citation.source_kind === "document" && citation.chunk_id ? [citation.chunk_id] : []);
+  const byId = new Map(productionRows.map((row) => [row.chunk_id, row]));
+  for (const chunkId of citedIds) if (!byId.has(chunkId)) fail("Captura: una cita no pertenece al retrieval productivo observado.");
+  const usedRows = generatorInput
+    ? promptContexts(generatorInput.user_prompt, productionRows)
+    : citedIds.map((chunkId) => byId.get(chunkId));
+  const usedIds = new Set(usedRows.map(({ chunk_id }) => chunk_id));
+  for (const chunkId of citedIds) if (!usedIds.has(chunkId)) fail("Captura: una cita no pertenece a los contextos usados para responder.");
+  if (!answer.insufficient_evidence && usedRows.length === 0) fail("Captura: respuesta factual sin contexto de generación o renderizado.");
+  return {
+    status: answer.insufficient_evidence ? "abstention" : "completed",
+    response: answer.content,
+    insufficient_evidence: answer.insufficient_evidence,
+    capture: {
+      method: generatorInput ? "production_prompt_observer" : citedIds.length > 0 ? "production_deterministic_renderer" : "production_no_context_response",
+      production_retrieval: productionRows.map((row, index) => ({ rank: index + 1, ...capturedContext(row) })),
+      generation_contexts: usedRows.map((row, index) => ({ prompt_rank: index + 1, ...capturedContext(row) })),
+      cited_context_ids: citedIds,
+      presentation_citations: answer.citations,
+      system_prompt_sha256: generatorInput ? sha256(Buffer.from(generatorInput.system_prompt, "utf8")) : null,
+      user_prompt_sha256: generatorInput ? sha256(Buffer.from(generatorInput.user_prompt, "utf8")) : null,
+    },
+  };
+}
+
+function validateCapturedContext(context, caseId) {
+  if (!context || typeof context.chunk_id !== "string" || typeof context.document_key !== "string" || !Number.isSafeInteger(context.ordinal) || typeof context.locator !== "string" || !/^[0-9a-f]{64}$/.test(context.source_sha256 ?? "") || typeof context.content !== "string" || context.content.length === 0 || context.content_sha256 !== sha256(Buffer.from(context.content, "utf8"))) {
+    fail(`${caseId}: contexto capturado inválido.`);
+  }
+}
+
 function validateResponses(value, benchmarkSha, validIds) {
   if (!value || value.schema_version !== "1.0.0" || value.benchmark_sha256 !== benchmarkSha || !Array.isArray(value.cases)) {
     fail("Archivo de respuestas inválido o vinculado a otro benchmark.");
@@ -141,12 +215,20 @@ function validateResponses(value, benchmarkSha, validIds) {
     if (!validIds.has(item.id)) fail(`Respuesta para ID ajeno al benchmark: ${item.id}.`);
     if (item.status === "completed" && (typeof item.response !== "string" || item.response.trim() === "")) fail(`${item.id}: response vacío.`);
     if (["error", "timeout"].includes(item.status) && item.error_code !== undefined && (typeof item.error_code !== "string" || !/^[a-z0-9_-]{1,80}$/i.test(item.error_code))) fail(`${item.id}: error_code inválido.`);
+    if (["completed", "abstention"].includes(item.status)) {
+      if (!item.capture || !Array.isArray(item.capture.production_retrieval) || !Array.isArray(item.capture.generation_contexts) || !Array.isArray(item.capture.cited_context_ids)) fail(`${item.id}: falta captura de correspondencia.`);
+      item.capture.production_retrieval.forEach((context) => validateCapturedContext(context, item.id));
+      item.capture.generation_contexts.forEach((context) => validateCapturedContext(context, item.id));
+      const usedIds = new Set(item.capture.generation_contexts.map(({ chunk_id }) => chunk_id));
+      if (item.capture.cited_context_ids.some((chunkId) => !usedIds.has(chunkId))) fail(`${item.id}: cita fuera de contextos usados.`);
+      if (item.status === "completed" && item.capture.generation_contexts.length === 0) fail(`${item.id}: respuesta sin contextos usados.`);
+    }
     result.set(item.id, item);
   }
   return result;
 }
 
-export async function evaluateCases({ benchmark, benchmarkSha, contexts, retrieve, timeoutMs, responses }) {
+export async function evaluateCases({ benchmark, benchmarkSha, contexts, retrieve, timeoutMs, responses, captureResponse }) {
   const outcomes = [];
   for (const testCase of benchmark.cases) {
     const gold = testCase.relevant_contexts.map((context) => contexts.get(contextKey(context)).chunk_id);
@@ -155,14 +237,22 @@ export async function evaluateCases({ benchmark, benchmarkSha, contexts, retriev
       const rows = await withTimeout(retrieve(testCase.question), timeoutMs);
       if (!Array.isArray(rows) || rows.length !== benchmark.top_k) fail(`${testCase.id}: retrieval no devolvió top_k=${benchmark.top_k}.`);
       const metrics = calculateCaseMetrics(gold, rows.map(({ chunk_id }) => chunk_id));
-      const response = responses?.get(testCase.id);
+      let response = responses?.get(testCase.id);
+      if (captureResponse) {
+        try { response = await withTimeout(captureResponse(testCase.question), timeoutMs); }
+        catch (error) {
+          const detail = safeError(error);
+          response = { status: detail.code === "timeout" ? "timeout" : "error", error_code: detail.code };
+        }
+      }
       const responseStatus = response?.status ?? "not_provided";
-      const ragasEvaluable = responseStatus === "completed";
+      const ragasEvaluable = responseStatus === "completed" && response.capture?.generation_contexts?.length > 0;
       outcomes.push({
         id: testCase.id,
         status: "completed",
         response_status: responseStatus,
         response_outcome: { status: responseStatus, ...(response?.error_code ? { error_code: response.error_code } : {}) },
+        ...(response?.capture ? { response_evidence: response.capture } : {}),
         latency_ms: performance.now() - started,
         relevant_count: gold.length,
         relevant_chunk_ids: gold,
@@ -181,9 +271,9 @@ export async function evaluateCases({ benchmark, benchmarkSha, contexts, retriev
           user_input: testCase.question,
           response: response.response,
           reference: testCase.reference_answer,
-          retrieved_contexts: rows.map(({ content }) => content),
+          retrieved_contexts: response.capture.generation_contexts.map(({ content }) => content),
           reference_contexts: testCase.relevant_contexts.map((context) => contexts.get(contextKey(context)).content),
-          retrieved_context_ids: rows.map(({ chunk_id }) => chunk_id),
+          retrieved_context_ids: response.capture.generation_contexts.map(({ chunk_id }) => chunk_id),
           reference_context_ids: gold,
         } } : {}),
       });
@@ -204,6 +294,7 @@ async function main() {
   const validation = validateApprovedBenchmark(benchmark);
   if (!validation.valid) fail(`Benchmark no aprobado:\n- ${validation.errors.join("\n- ")}`);
   const benchmarkSha = sha256(bytes);
+  if (options.responses && options.capture_responses) fail("Use --responses o --capture-responses, no ambos.");
   let responses;
   if (options.responses) {
     const responsePath = resolve(options.responses);
@@ -211,7 +302,7 @@ async function main() {
     responses = validateResponses((await readJson(responsePath)).value, benchmarkSha, new Set(benchmark.cases.map(({ id }) => id)));
   }
   const backend = await import(pathToFileURL(apiDist).href);
-  for (const name of ["PgSqlClient", "OllamaQueryEmbeddingClient", "retrieveDocumentChunksForQuery"]) {
+  for (const name of ["PgSqlClient", "OllamaQueryEmbeddingClient", "retrieveDocumentChunksForQuery", "retrieveDocumentChunks", "generateDocumentRagAnswer", "loadGeneratorRuntimeConfig", "OllamaGeneratorClient"]) {
     if (typeof backend[name] !== "function") fail(`backend/api/dist no expone ${name}; compile backend/api.`);
   }
   const requireFromApi = createRequire(apiPackage);
@@ -223,12 +314,28 @@ async function main() {
     const queryClient = new backend.OllamaQueryEmbeddingClient(process.env.BANUCHAT_EVAL_OLLAMA_BASE_URL ?? DEFAULT_OLLAMA);
     const timeoutMs = Number(options.timeout_ms ?? 120000);
     if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1000) fail("--timeout-ms inválido.");
+    let captureResponse;
+    if (options.capture_responses) {
+      const generatorRuntime = backend.loadGeneratorRuntimeConfig(process.env);
+      const productionQueryClient = new backend.OllamaQueryEmbeddingClient(generatorRuntime.base_url);
+      const generatorClient = new backend.OllamaGeneratorClient(generatorRuntime.base_url, Math.min(timeoutMs, 300000));
+      captureResponse = (question) => captureProductionAnswer({
+        backend,
+        sql,
+        queryEmbeddingClient: productionQueryClient,
+        generatorClient,
+        generatorConfig: generatorRuntime.generator,
+        releaseId: benchmark.corpus.release_id,
+        question,
+      });
+    }
     const executed = options.preflight_only ? { benchmark_sha256: benchmarkSha, outcomes: [] } : await evaluateCases({
       benchmark,
       benchmarkSha,
       contexts: checked.contexts,
       timeoutMs,
       responses,
+      captureResponse,
       retrieve: (question) => backend.retrieveDocumentChunksForQuery({ sql, query_embedding_client: queryClient }, { release_id: benchmark.corpus.release_id, query: question, top_k: benchmark.top_k }),
     });
     const result = {
@@ -237,10 +344,17 @@ async function main() {
       evaluation_scope: options.preflight_only ? "preflight_only" : "retrieval_and_ragas_preparation",
       generated_at: new Date().toISOString(),
       implementation: await gitState(),
-      inputs: { benchmark_path: "private_local_ignored", benchmark_sha256: benchmarkSha, response_capture_supplied: Boolean(responses) },
+      inputs: { benchmark_path: "private_local_ignored", benchmark_sha256: benchmarkSha, response_capture: options.capture_responses ? "in_process_production_observer" : responses ? "validated_private_capture" : "none" },
       parameters: { top_k: benchmark.top_k, timeout_ms: timeoutMs, automatic_retries: 0 },
       runtime: checked.release,
       embedding: checked.embedding,
+      evidence_correspondence: {
+        status: options.capture_responses ? "guaranteed_in_process" : responses ? "structurally_validated_external_capture" : "not_available",
+        deterministic_retrieval: "cases[].retrieved (independent top-5)",
+        contexts_used_to_answer: "cases[].response_evidence.generation_contexts",
+        contexts_cited_to_user: "cases[].response_evidence.cited_context_ids",
+        ragas_context_source: "cases[].ragas_input.retrieved_contexts copied from generation_contexts",
+      },
       retrieval: executed.outcomes.length ? aggregateRetrievalOutcomes(executed.outcomes) : null,
       ragas: {
         version: "0.4.3",
@@ -248,6 +362,9 @@ async function main() {
         judge_kind: "local_llm",
         prepared_cases: executed.outcomes.filter((item) => item.ragas_input).length,
         excluded_abstentions: executed.outcomes.filter((item) => item.response_status === "abstention").length,
+        context_source: "response_evidence.generation_contexts",
+        retrieval_metrics_source: "independent_top_5_retrieval",
+        citations_source: "response_evidence.cited_context_ids",
         response_outcomes: Object.fromEntries([...executed.outcomes.reduce((map, item) => map.set(item.response_status, (map.get(item.response_status) ?? 0) + 1), new Map())].sort()),
         note: "Las métricas RAGAS se ejecutan con ragas-adapter.py sobre este artefacto privado.",
       },

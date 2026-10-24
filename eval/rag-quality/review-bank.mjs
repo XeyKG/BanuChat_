@@ -21,6 +21,7 @@ const privateRoot = join(root, "data/ccd/local");
 const defaultBank = join(privateRoot, "oe1-evaluation/benchmark-candidates-v0.1.json");
 const defaultLedger = join(privateRoot, "oe1-evaluation/review-ledger-v1.json");
 const defaultOutput = join(privateRoot, "oe1-evaluation/approved-benchmark-v1.json");
+const defaultPacket = join(privateRoot, "oe1-evaluation/review-packet-v1.md");
 const schemaPath = join(here, "ccd-benchmark-candidates.schema.json");
 const requireFromRag = createRequire(join(root, "backend/rag/package.json"));
 
@@ -62,6 +63,51 @@ export function reviewSummary(bank, ledger) {
     by_proposed_split: counts(bank.cases.map((testCase) => testCase.proposed_split)),
     duplicate_hints: duplicateHints(bank.cases),
   };
+}
+
+function markdownText(value) {
+  return String(value).replaceAll("|", "\\|").replaceAll("\r", "").trim();
+}
+
+export async function buildReviewPacket(bank, ledger, corpusRoot) {
+  const corpus = (await readJson(join(corpusRoot, "corpus.json"))).value;
+  const units = new Map(corpus.units.map((unit) => [unit.id, unit]));
+  const latest = new Map(ledger.decisions.map((entry) => [entry.case_id, entry]));
+  const artifacts = new Map();
+  for (const context of bank.cases.flatMap((testCase) => testCase.relevant_contexts)) {
+    if (artifacts.has(context.document_key)) continue;
+    const artifactPath = join(corpusRoot, "documents/artifacts", `${context.document_key}.md`);
+    const bytes = await readFile(artifactPath);
+    if (sha256(bytes) !== context.source_sha256) fail(`${context.document_key}: hash del artefacto no coincide con las candidatas.`);
+    artifacts.set(context.document_key, { artifactPath, digest: sha256(bytes) });
+  }
+  const byDocument = new Map();
+  for (const testCase of bank.cases) {
+    const primaryDocument = testCase.relevant_contexts[0].document_key;
+    if (!byDocument.has(primaryDocument)) byDocument.set(primaryDocument, []);
+    byDocument.get(primaryDocument).push(testCase);
+  }
+  const sections = [];
+  for (const documentKey of [...byDocument.keys()].sort()) {
+    const unit = units.get(documentKey);
+    if (!unit) fail(`${documentKey}: no existe en corpus.json.`);
+    const { artifactPath, digest } = artifacts.get(documentKey);
+    const casesByTopic = new Map();
+    for (const testCase of byDocument.get(documentKey)) {
+      if (!casesByTopic.has(testCase.query_type)) casesByTopic.set(testCase.query_type, []);
+      casesByTopic.get(testCase.query_type).push(testCase);
+    }
+    const topicSections = [];
+    for (const topic of [...casesByTopic.keys()].sort()) {
+      const rows = casesByTopic.get(topic).sort((a, b) => a.id.localeCompare(b.id)).map((testCase) => {
+        const decision = latest.get(testCase.id);
+        return `### ${testCase.id} — ${topic}\n\n- Estado: **${decision?.decision ?? "pending"}**${decision ? `; revisor: ${markdownText(decision.reviewer)}; fecha: ${decision.reviewed_at}` : ""}\n- Partición propuesta: \`${testCase.proposed_split}\`; tipo: \`${testCase.question_type}\`; evidencia: \`${testCase.evidence_class}\`\n- Pregunta: ${markdownText(testCase.question)}\n- Respuesta de referencia: ${markdownText(testCase.reference_answer)}\n- Restricciones: ${testCase.restrictions.map(markdownText).join(" / ")}\n- Nota de revisión: ${markdownText(testCase.review_notes)}\n- Contextos: ${testCase.relevant_contexts.map((context) => `\`${context.document_key}#${context.ordinal} ${context.locator}\``).join(", ")}\n- Decisión a registrar: \`approved\` / \`corrected\` / \`rejected\`; motivo obligatorio.\n`;
+      });
+      topicSections.push(`## Tema: ${topic}\n\n${rows.join("\n")}`);
+    }
+    sections.push(`# Documento primario: ${documentKey} — ${markdownText(unit.title)}\n\n- Periodo: ${markdownText(unit.period)}\n- Aplicabilidad: \`${unit.applicability_status}\`\n- Artefacto privado verificado: \`${artifactPath}\`\n- SHA-256: \`${digest}\`\n- Límites documentales: ${unit.limits.map(markdownText).join(" / ")}\n\n${topicSections.join("\n")}`);
+  }
+  return `# BanuChat — paquete privado de revisión humana OE1\n\nGenerado: ${new Date().toISOString()}\n\nEste archivo contiene datos CCD locales protegidos. Debe permanecer fuera de Git. Revisar sin observar rankings ni respuestas de BanuChat. Contrastar cada afirmación con el artefacto indicado y registrar la decisión mediante \`review-bank.mjs decide\`. No aprobar por lote.\n\n${sections.join("\n\n---\n\n")}\n`;
 }
 
 async function loadBankAndLedger(bankPath, ledgerPath) {
@@ -179,6 +225,15 @@ async function main() {
   if (command === "summary") console.log(JSON.stringify(reviewSummary(bank, ledger), null, 2));
   else if (command === "show") await showCase(bank, requireOption(options, "case"), options.corpus_root ? resolve(options.corpus_root) : undefined);
   else if (command === "decide") await decide(bank, ledger, ledgerPath, options);
+  else if (command === "packet") {
+    const corpusRoot = resolve(requireOption(options, "corpus_root"));
+    const output = resolve(options.output || defaultPacket);
+    await assertGitIgnored(output, root);
+    const packet = await buildReviewPacket(bank, ledger, corpusRoot);
+    await mkdir(dirname(output), { recursive: true });
+    await writeFile(output, packet, "utf8");
+    console.log(`${basename(output)}: paquete privado preparado; no contiene aprobaciones automáticas.`);
+  }
   else if (command === "export") {
     const output = resolve(options.output || defaultOutput);
     await assertGitIgnored(output, root);
@@ -188,7 +243,7 @@ async function main() {
     console.log(`${basename(output)}: ${benchmark.status}; brecha=${benchmark.review_summary.gap}.`);
     if (benchmark.status !== "approved") process.exitCode = 2;
   } else {
-    console.log("Uso: node review-bank.mjs summary|show|decide|export [opciones]. Consulte README.md.");
+    console.log("Uso: node review-bank.mjs summary|show|decide|packet|export [opciones]. Consulte README.md.");
   }
 }
 
