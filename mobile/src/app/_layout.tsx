@@ -4,10 +4,11 @@ import { StatusBar } from 'expo-status-bar';
 import { SessionProvider,useSession } from '@/session/session-context';
 import { isCcdLocal,isCcdAuthenticated,CCD_AUTH_NOTICE } from '@/config/demo-mode';
 import {AuthProvider,useAuth} from '@/auth/auth-provider';
+import {NotificationProvider} from '@/notifications/notification-provider';
 import {ActivityIndicator,View,Text} from 'react-native';
 
 export default function RootLayout() {
-  return <AuthProvider><SessionProvider><Navigation /></SessionProvider></AuthProvider>;
+  return <AuthProvider><NotificationProvider><SessionProvider><Navigation /></SessionProvider></NotificationProvider></AuthProvider>;
 }
 
 function Navigation(){
@@ -29,6 +30,7 @@ function Navigation(){
           <Stack.Screen name="calendar" />
           <Stack.Screen name="progress" />
           <Stack.Screen name="announcements" />
+          <Stack.Screen name="notifications" />
         </Stack.Protected>
       </Stack>
     </View>

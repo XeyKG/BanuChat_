@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter, type Href } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,7 +16,7 @@ interface QuickActionProps {
   description: string;
   tint: string;
   tintSoft: string;
-  icon: 'calendar' | 'chart' | 'clock' | 'doc';
+  icon: 'calendar' | 'chart' | 'clock' | 'doc' | 'notification';
   onPress: () => void;
   disabled: boolean;
   delay: number;
@@ -37,6 +37,7 @@ function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabl
             {icon === 'chart' && <ChartGlyph color={tint} size={22} />}
             {icon === 'clock' && <ClockGlyph color={tint} size={22} />}
             {icon === 'doc' && <DocGlyph color={tint} size={22} />}
+            {icon === 'notification' && <SparkGlyph color={tint} size={22} />}
           </View>
           <View style={styles.quickCopy}>
             <Text style={styles.quickTitle}>{title}</Text>
@@ -184,6 +185,16 @@ export default function HomeScreen() {
               onPress={() => router.push('/announcements')}
               disabled={isStartingChat}
               delay={400}
+            />
+            <QuickAction
+              title="Notificaciones"
+              description="Permisos y recordatorios de la demo sintética."
+              tint={colors.amber}
+              tintSoft={colors.amberSoft}
+              icon="notification"
+              onPress={() => router.push('/notifications' as Href)}
+              disabled={isStartingChat}
+              delay={430}
             />
             </>}
             <QuickAction

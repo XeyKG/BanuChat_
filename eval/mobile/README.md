@@ -16,3 +16,12 @@ autenticación institucional, producción o despliegue final.
 Los antecedentes de integración y el
 [checkpoint histórico J3](../integration/results/j3-checkpoint-2026-10-03.md)
 permanecen separados y no se atribuyen a M7.4.
+
+El [protocolo OE5](oe5-student-validation-protocol.md) prepara, sin ejecutar, el
+estudio posterior con cinco tareas y SUS. Conserva los umbrales académicos, exige
+datos sintéticos y diferencia resultados humanos, bloqueos técnicos y push remoto.
+No modifica ni recalifica retrospectivamente el plan M7.4 congelado.
+
+El [plan de dispositivo OE5](oe5-device-validation-plan.md) actualiza el instrumento
+para autenticación v2, separación CCD, release OE4 y notificaciones, también sin
+atribuir resultados mientras no exista una ejecución física registrada.

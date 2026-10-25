@@ -173,7 +173,11 @@ export default function OnboardingScreen() {
             onPress={advance}
             style={styles.nextButton}
           />
-          <Text style={styles.demoNote}>Demostración académica · datos completamente sintéticos</Text>
+          <Text style={styles.demoNote}>
+            {isCcdAuthenticated()
+              ? 'Demostración CCD local · cuenta ficticia · sin aval institucional'
+              : 'Demostración académica · datos completamente sintéticos'}
+          </Text>
         </View>
       </View>
     </SafeAreaView>

@@ -139,6 +139,33 @@ temporalmente en `0.0.0.0`, y el celular y el PC deben estar conectados a la mis
 red privada. El teléfono debe conectarse a la IP privada del PC, no a `0.0.0.0`.
 No expongas el API a Internet.
 
+## Notificaciones OE5
+
+La pantalla **Notificaciones** está disponible únicamente en el modo sintético
+autenticado. Solicita el permiso de la plataforma, crea el canal Android
+`banuchat-reminders`, programa hasta 12 recordatorios locales a partir del calendario
+y los anuncios de la release actual, y ofrece una prueba local explícita a cinco
+segundos. Los recordatorios se deduplican por release/recurso, se guardan por
+`principal_id` en SecureStore y se cancelan al desactivar, cerrar sesión o cambiar
+de cuenta. Al abrirlos, la app vuelve a validar cuenta/capacidad antes de navegar a
+Calendario o Anuncios. No programa contenido CCD.
+
+La prueba local **no es push remoto**. `expo-notifications` y su config plugin están
+instalados para SDK 57, junto con `expo-dev-client`, pero el repositorio no contiene
+credenciales FCM/APNs, `projectId` EAS ni un endpoint REST autorizado de registro y
+revocación de dispositivos. Por ello Mobile no obtiene, persiste, muestra ni envía
+tokens a un servidor. Una integración remota deberá vincular el token al principal
+autenticado server-side, actualizarlo cuando rote, invalidarlo al recibir
+`DeviceNotRegistered` y revocarlo al cerrar sesión; requiere contrato y revisión de
+seguridad separados.
+
+En SDK 57 el push remoto no puede validarse con Expo Go en Android: requiere un
+development build y dispositivo físico. Las notificaciones locales sí sirven para
+comprobar permiso, recepción, apertura, aislamiento y payload sin datos personales.
+La configuración nativa del icono/canal solo toma efecto tras recompilar el binario.
+Véanse la [configuración oficial de Expo](https://docs.expo.dev/push-notifications/push-notifications-setup/)
+y su [FAQ](https://docs.expo.dev/push-notifications/faq/).
+
 ## Desarrollo
 
 ```bash
@@ -151,11 +178,13 @@ Abre el proyecto con Expo Go en el teléfono Android.
 ## Estado del MVP móvil de demostración
 
 Implementado: Expo SDK 57, React Native + TypeScript, Expo Router, URL base de API
-configurable, sesión local para perfiles sintéticos, Home, navegación protegida,
+configurable, autenticación BanuChat v2 y recuperación segura de sesión, Home, navegación protegida,
 creación de conversación al abrir Chat, chat con citas, estados de carga y error,
 presentación local de Banu al iniciar el chat, calendario, progreso de cursos,
 historial conversacional visible, consulta directa de anuncios sintéticos y apertura
 interna de fuentes documentales desde respuestas nuevas o conversaciones reabiertas.
+OE5 añade recordatorios locales sintéticos, manejo de permisos, recepción/apertura y
+limpieza por cuenta; el push remoto conserva los bloqueos indicados arriba.
 El [checkpoint histórico J3](../eval/integration/results/j3-checkpoint-2026-10-03.md)
 documenta las validaciones manuales M1–M5 con Expo Go en Android físico; no cubre
 historial y anuncios posteriores. Este README registra además las validaciones
@@ -163,11 +192,10 @@ manuales de M6.1, M6.1.1 y M6.1.2, sin atribuirlas a J3.
 M6.2 aplica consistencia y pulido visual al flujo existente sin ampliar su
 alcance funcional; todavía requiere validación manual en el dispositivo físico.
 
-La aplicación implementa un flujo local de sesión para perfiles sintéticos de
-demostración. Este mecanismo permite seleccionar, utilizar y cerrar una sesión
-asociada a un perfil, pero no constituye autenticación institucional ni valida
-credenciales reales. La sesión se conserva únicamente en memoria y puede perderse
-al reiniciar completamente la aplicación.
+Las cuentas y perfiles siguen siendo ficticios y no constituyen autenticación
+institucional. El access token permanece en memoria y solo el refresh token se guarda
+en SecureStore; cerrar sesión limpia el dispositivo aunque no pueda confirmar la
+revocación remota. El modo CCD autenticado conserva su vault y capacidades separados.
 
 Si el envío de un mensaje termina con timeout o fallo de red, la app no repite el
 POST automáticamente. El usuario puede comprobar manualmente el historial para
@@ -187,5 +215,8 @@ no hay despliegue, identidad ni integración institucional previstos en el alcan
 vigente. El backend actual usa Intent Router y Document RAG directo; Agent/ReAct
 y MCP siguen pendientes como arquitectura objetivo.
 
-Siguen pendientes la autenticación y autorización de usuario final, las
-notificaciones push y la distribución/operación en producción.
+Siguen pendientes la identidad institucional de usuario final, el registro backend y
+envío de push remoto, las credenciales/plataformas de distribución y la operación en
+producción. Las pruebas humanas se rigen por el
+[protocolo OE5](../eval/mobile/oe5-student-validation-protocol.md) y no se consideran
+ejecutadas por la preparación técnica.

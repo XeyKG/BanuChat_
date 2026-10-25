@@ -82,6 +82,7 @@ export default function CalendarScreen() {
   const [retryCount, setRetryCount] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [releaseId, setReleaseId] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
@@ -99,6 +100,7 @@ export default function CalendarScreen() {
       .then((result) => {
         if (!isMounted) return;
         setEvents(result.events);
+        setReleaseId(result.release_id);
         setLoadState('success');
       })
       .catch(() => {
@@ -179,6 +181,11 @@ export default function CalendarScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
+          {loadState === 'success' && releaseId !== null && (
+            <Text accessibilityLabel={`Release sintética ${releaseId}`} style={styles.releaseText}>
+              Release sintética: {releaseId.slice(0, 8)}
+            </Text>
+          )}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator
@@ -309,6 +316,7 @@ const styles = StyleSheet.create({
   errorCard: { borderColor: '#F3C2BE', backgroundColor: colors.errorSoft },
   stateTitle: { color: colors.ink, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
   stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
+  releaseText: { color: colors.muted, fontSize: typography.caption, fontWeight: '700' },
   retryButton: { minWidth: 144 },
   dayGroup: { gap: spacing.sm },
   dayHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

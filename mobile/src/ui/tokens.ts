@@ -13,7 +13,7 @@ export const colors = {
   ink: '#101223',
   text: '#101223',
   textSecondary: '#4B5062',
-  muted: '#82889A',
+  muted: '#646B7D',
   disabled: '#B7BBC9',
 
   // Marca y acento
@@ -28,9 +28,9 @@ export const colors = {
   accentSoftStrong: '#DFE4FD',
 
   // Estado
-  success: '#0E9F6E',
+  success: '#087A55',
   successSoft: '#E7F7F0',
-  warning: '#9A6A06',
+  warning: '#875A00',
   warningSoft: '#FFF8E6',
   error: '#C4322B',
   errorSoft: '#FEF1F0',
@@ -38,7 +38,7 @@ export const colors = {
   // Acentos secundarios
   violet: '#6D4AC8',
   violetSoft: '#F1ECFC',
-  amber: '#C77F0A',
+  amber: '#9A6100',
   amberSoft: '#FCF3E2',
 
   white: '#FFFFFF',
