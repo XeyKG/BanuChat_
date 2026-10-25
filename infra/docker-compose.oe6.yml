@@ -1,0 +1,229 @@
+# Despliegue local/on-premise de transferencia técnica para Linux.
+# Usa red host deliberadamente para conservar las guardas loopback de API, MCP y RAG.
+# No ejecutar a la vez que otro PostgreSQL/N8N/Ollama en los mismos puertos.
+name: banuchat-oe6-local
+
+x-backend-image: &backend-image
+  build:
+    context: ..
+    dockerfile: infra/docker/backend.Dockerfile
+  image: banuchat/backend:${BANUCHAT_IMAGE_TAG:-oe6-local}
+  network_mode: host
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp:size=128m,noexec,nosuid
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  postgres-synthetic:
+    image: pgvector/pgvector@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    network_mode: host
+    restart: unless-stopped
+    command: ["postgres", "-c", "listen_addresses=127.0.0.1", "-c", "port=${POSTGRES_PORT:-5432}"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Define la base sintética existente}
+      POSTGRES_USER: ${POSTGRES_USER:?Define el rol propietario local}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define una clave privada}
+    volumes:
+      - synthetic_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p $${POSTGRES_PORT:-5432} -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  postgres-ccd-auth:
+    profiles: ["ccd-auth"]
+    image: pgvector/pgvector@sha256:ccc6e83d6e35e931dc7c5def2022729d5a6c370318d099181995567ff1fb4d6b
+    network_mode: host
+    restart: unless-stopped
+    command: ["postgres", "-c", "listen_addresses=127.0.0.1", "-c", "port=${CCD_AUTH_POSTGRES_PORT:-55453}"]
+    environment:
+      POSTGRES_DB: ${CCD_AUTH_POSTGRES_DB:-banuchat_ccd_auth_i1b_test}
+      POSTGRES_USER: ${CCD_AUTH_POSTGRES_USER:-}
+      POSTGRES_PASSWORD: ${CCD_AUTH_POSTGRES_PASSWORD:-}
+    volumes:
+      - ccd_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p $${CCD_AUTH_POSTGRES_PORT:-55453} -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  n8n:
+    image: n8nio/n8n@sha256:9f693fd5565539efd5e75ad168526c8041a6af516d9e50bc4d9cb1c9c5031523
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      N8N_LISTEN_ADDRESS: 127.0.0.1
+      N8N_HOST: localhost
+      N8N_PORT: ${N8N_PORT:-5678}
+      N8N_PROTOCOL: http
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Define la clave privada vigente de N8N}
+      N8N_UNVERIFIED_PACKAGES_ENABLED: "false"
+      # 2.40.5 todavía usa runner interno; migrar a launcher externo requiere una
+      # validación separada y no se finge añadiendo un modo sin su servicio.
+      N8N_RUNNERS_MODE: internal
+      N8N_RUNNERS_TASK_TIMEOUT: "60"
+      N8N_COMPRESSION_NODE_MAX_DECOMPRESSED_SIZE_BYTES: "268435456"
+      N8N_COMPRESSION_NODE_MAX_ZIP_ENTRIES: "1000"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:5678/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+  ollama:
+    profiles: ["ollama-container"]
+    image: ollama/ollama@sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    <<: *backend-image
+    depends_on:
+      postgres-synthetic:
+        condition: service_healthy
+      n8n:
+        condition: service_healthy
+    environment:
+      BANUCHAT_DEMO_MODE: synthetic
+      BANUCHAT_API_HOST: 127.0.0.1
+      BANUCHAT_API_PORT: ${BANUCHAT_API_PORT:-3000}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      BANUCHAT_OLLAMA_BASE_URL: http://127.0.0.1:11434
+      BANUCHAT_GENERATOR_MODEL: qwen3:4b-instruct
+      BANUCHAT_GENERATOR_MODEL_REVISION: ${BANUCHAT_GENERATOR_MODEL_REVISION:?Define la revisión observada}
+      BANUCHAT_GENERATOR_RUNTIME_VERSION: ${BANUCHAT_GENERATOR_RUNTIME_VERSION:-ollama-0.35.0}
+      MCP_POSTGRES_DB: ${POSTGRES_DB}
+      MCP_POSTGRES_USER: ${MCP_POSTGRES_USER:?Define la identidad mínima MCP}
+      MCP_POSTGRES_PASSWORD: ${MCP_POSTGRES_PASSWORD:?Define la clave privada MCP}
+      MCP_POSTGRES_HOST: 127.0.0.1
+      MCP_POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      BANUCHAT_N8N_CONVERSATION_URL: http://127.0.0.1:5678/webhook/banuchat/internal/oe4/conversation
+      BANUCHAT_N8N_SERVICE_TOKEN: ${BANUCHAT_N8N_SERVICE_TOKEN:?Define el token privado N8N}
+      BANUCHAT_N8N_CONVERSATION_TIMEOUT_MS: ${BANUCHAT_N8N_CONVERSATION_TIMEOUT_MS:-4000}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/v1/profiles').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api-ccd-auth:
+    <<: *backend-image
+    profiles: ["ccd-auth"]
+    command: ["node", "--import", "tsx", "src/authenticated-main.ts"]
+    depends_on:
+      postgres-ccd-auth:
+        condition: service_healthy
+    environment:
+      BANUCHAT_AUTH_DATABASE: ${CCD_AUTH_POSTGRES_DB:-banuchat_ccd_auth_i1b_test}
+      BANUCHAT_AUTH_DEPLOYMENT: ${CCD_AUTH_DEPLOYMENT:-}
+      BANUCHAT_AUTH_RATE_KEY: ${CCD_AUTH_RATE_KEY:-}
+      BANUCHAT_AUTH_EVIDENCE_MODE: ccd_local
+      BANUCHAT_AUTH_DB_PORT: ${CCD_AUTH_POSTGRES_PORT:-55453}
+      BANUCHAT_AUTH_API_PORT: ${CCD_AUTH_API_PORT:-3003}
+      BANUCHAT_AUTH_RUNTIME_USER: ${CCD_AUTH_RUNTIME_USER:-}
+      BANUCHAT_AUTH_RUNTIME_PASSWORD: ${CCD_AUTH_RUNTIME_PASSWORD:-}
+      BANUCHAT_OLLAMA_BASE_URL: http://127.0.0.1:11434
+      BANUCHAT_GENERATOR_MODEL: qwen3:4b-instruct
+      BANUCHAT_GENERATOR_MODEL_REVISION: ${BANUCHAT_GENERATOR_MODEL_REVISION:?Define la revisión observada}
+      BANUCHAT_GENERATOR_RUNTIME_VERSION: ${BANUCHAT_GENERATOR_RUNTIME_VERSION:-ollama-0.35.0}
+    volumes:
+      - type: bind
+        source: ${CCD_LOCAL_DATA_ROOT:-../data/ccd/local}
+        target: /app/data/ccd/local
+        read_only: true
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3003/api/v2/auth/me').then(r=>{if(r.status!==401)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  rag-ingestion:
+    <<: *backend-image
+    profiles: ["operations"]
+    working_dir: /app/backend/rag
+    command: ["node", "--import", "tsx", "src/main.ts"]
+    depends_on:
+      postgres-synthetic:
+        condition: service_healthy
+    environment:
+      BANUCHAT_INGESTION_APPROVAL_REGISTRY_PATH: /workspace/runtime/infra/local/approval-registry.json
+      BANUCHAT_INGESTION_RUNTIME_CHECKOUT_ROOT: /workspace/runtime
+      BANUCHAT_INGESTION_SOURCE_CHECKOUT_ROOT: /workspace/source
+      BANUCHAT_INGESTION_WORKFLOW_REF: n8n/workflows/ingestion-manual-v1.json
+      BANUCHAT_INGESTION_DATABASE_URL: ${BANUCHAT_INGESTION_DATABASE_URL:-}
+      BANUCHAT_INGESTION_OLLAMA_BASE_URL: http://127.0.0.1:11434
+      BANUCHAT_INGESTION_SERVICE_TOKEN: ${BANUCHAT_INGESTION_SERVICE_TOKEN:-}
+    volumes:
+      - ..:/workspace/runtime:ro
+      - ..:/workspace/source:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3010/internal/ingestion/status',{method:'POST',headers:{authorization:'Bearer '+process.env.BANUCHAT_INGESTION_SERVICE_TOKEN,'content-type':'application/json'},body:'{}'}).then(r=>{if(r.status>=500)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  rag-calendar:
+    <<: *backend-image
+    profiles: ["operations"]
+    working_dir: /app/backend/rag
+    command: ["node", "--import", "tsx", "src/oe4/main.ts"]
+    depends_on:
+      postgres-synthetic:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      BANUCHAT_OE4_SERVICE_TOKEN: ${BANUCHAT_OE4_SERVICE_TOKEN:-}
+      BANUCHAT_OE4_INTERNAL_HOST: 127.0.0.1
+      BANUCHAT_OE4_INTERNAL_PORT: 3012
+      BANUCHAT_OE4_CALENDAR_WORKFLOW_REF: n8n/workflows/oe4-calendar-sync-fixture-v1.json
+
+volumes:
+  synthetic_data:
+    external: true
+    name: ${SYNTHETIC_POSTGRES_VOLUME:?Define el volumen sintético existente y verificado}
+  n8n_data:
+    external: true
+    name: ${N8N_VOLUME:?Define el volumen N8N existente y verificado}
+  ollama_data:
+    external: true
+    name: ${OLLAMA_VOLUME:-banuchat-oe6-ollama-data}
+  ccd_auth_data:
+    external: true
+    name: ${CCD_AUTH_POSTGRES_VOLUME:-banuchat-dev-ccd-auth-data}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "banuchat-oe6-stability-1",
+  "started_at": "2026-10-25T12:41:05.481Z",
+  "completed_at": "2026-10-25T12:41:22.308Z",
+  "environment": "local synthetic; PostgreSQL and Ollama kept available",
+  "fault": "real temporary stop of the local N8N container",
+  "result": {
+    "failure_http_status": 503,
+    "failure_detection_ms": 12,
+    "messages_persisted_during_failure": 0,
+    "recovery_ms": 10174,
+    "post_recovery_http_status": 201,
+    "post_recovery_request_ms": 2577,
+    "messages_after_recovery": 2,
+    "duplicate_turn_detected": false,
+    "recovery_within_five_minutes": true
+  },
+  "ollama_fault": {
+    "injection": "isolated API pointed at a closed loopback port",
+    "http_status": 503,
+    "detection_ms": 1292,
+    "messages_persisted_during_failure": 0,
+    "outcome": "PASS"
+  },
+  "status": "PASS",
+  "limitations": [
+    "This is a planned fault injection, not evidence of continuous availability.",
+    "PostgreSQL was not stopped because the canonical database is protected.",
+    "Ollama unavailability used an isolated API with a closed loopback endpoint; the shared daemon was not killed."
+  ]
+}

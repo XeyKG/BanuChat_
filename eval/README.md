@@ -17,14 +17,15 @@ Esta auditoría documental no vuelve a ejecutar sus pruebas ni acredita nuevos P
 | Integración y mobile | [J1/J2/J3](integration/README.md): smoke con servicios reales, HTTP con SQL controlado/RAG simulado y checkpoint histórico de validaciones móviles. Las etapas posteriores y sus límites están en [Mobile](../mobile/README.md). J3 no sustituye el estado vigente ni valida Agent/MCP. |
 | Mobile M7.4 | [Plan funcional congelado antes de la ejecución](mobile/m7-4-validation-plan.md), preparado en M7.4-A para Android físico + Expo Go; la regla de congelación se aplica al commitear. Resultados todavía pendientes. No es SUS ni evaluación formal con usuarios. |
 | Calidad RAG M9 | [Protocolo en preparación](rag-quality/README.md): contrato primario y compromiso de reserva endurecidos, sin preguntas reales, benchmark congelado, RAGAS ejecutada ni resultados. Todavía no acredita OE1. |
+| OE6 integrado | [Runners y evidencia](oe6/README.md): MCP/PostgreSQL/Ollama real, rendimiento por rama, caída/recuperación y restauración aislada. No equivale a despliegue institucional ni validación humana. |
 
 ## Pendiente
 
 RAGAS completa (faithfulness, context precision/recall y answer relevancy), SUS
 formal y pruebas formales con usuarios no tienen resultados ejecutados versionados
-que las acrediten. También quedan evaluaciones de Agent/ReAct y selección de tools
-MCP cuando se implementen, escenarios avanzados de ingesta/concurrencia/permisos
-y mediciones más amplias de rendimiento. K2 mide Precision@5 sobre su gold; no es
+que las acrediten. OE6 ya ejecutó la selección MCP determinista con dependencias
+reales; sigue pendiente ReAct dirigido por LLM, escenarios avanzados de
+ingesta/concurrencia/permisos y mediciones más amplias. K2 mide Precision@5 sobre su gold; no es
 la métrica context precision de RAGAS ni prueba integral de OE1.
 
 Los umbrales académicos son objetivos, no resultados. No se combinan estadísticamente

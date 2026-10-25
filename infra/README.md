@@ -77,3 +77,14 @@ N3 usó Windows + Docker Desktop y `host.docker.internal`; no acredita una topol
 portable. Retry/recover/scheduled N8N y permisos/roles mínimos siguen pendientes.
 Backend, ingesta y mobile no están containerizados por este Compose; Ollama también
 se ejecuta por separado. No hay Google Sheets, integración o despliegue institucional.
+
+## Paquete OE6
+
+[`docker-compose.oe6.yml`](docker-compose.oe6.yml) y
+[`docker/backend.Dockerfile`](docker/backend.Dockerfile) forman un paquete separado
+de transferencia técnica. No reemplazan ni recrean `banuchat-dev`: reutilizan
+volúmenes externos explícitos, fijan imágenes por digest, añaden health checks y
+permiten API, N8N, PostgreSQL, Ollama opcional, servicios RAG y CCD autenticado por
+perfiles. El procedimiento, la topología, backups y reversión están en el
+[manual OE6](../docs/operations/oe6-deployment.md). Sigue siendo despliegue local
+pendiente de servidor, DNS, TLS y autorización universitaria.

@@ -5,6 +5,7 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
+    "provision:local-reader": "node --env-file-if-exists=../../.env --import tsx scripts/provision-local-reader.mts",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.ts",
     "start": "node --import tsx src/main.ts"

@@ -1,0 +1,28 @@
+{
+  "schema_version": "banuchat-oe6-backup-restore-1",
+  "started_at": "2026-10-25T12:41:52.939Z",
+  "completed_at": "2026-10-25T12:42:04.270Z",
+  "source": {
+    "container": "banuchat-postgres",
+    "database": "banuchat_schema_test",
+    "synthetic_only": true
+  },
+  "backup": {
+    "path": "infra/local/oe6/backups/synthetic-2026-10-25.dump",
+    "bytes": 1120214,
+    "sha256": "826d9b1212f9a6a3ef455084f049fe3b42f3c396195a0419deb54aff98dfccef",
+    "duration_ms": 760
+  },
+  "restore": {
+    "destination": "isolated disposable container with tmpfs and no network",
+    "duration_ms": 6289,
+    "table_fingerprints_compared": 16,
+    "fingerprints_match": true,
+    "persistent_volume_created": false
+  },
+  "status": "PASS",
+  "limitations": [
+    "The restore target was ephemeral and is not a university server.",
+    "The backup contains only synthetic local data and remains excluded from Git."
+  ]
+}

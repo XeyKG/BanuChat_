@@ -1,0 +1,58 @@
+{
+  "schema_version": "banuchat-oe6-real-mcp-1",
+  "started_at": "2026-10-25T12:37:32.823Z",
+  "completed_at": "2026-10-25T12:37:44.671Z",
+  "profile_key": "profile-001",
+  "transport": "MCP stdio",
+  "dependencies": [
+    "PostgreSQL/pgvector real",
+    "Ollama real"
+  ],
+  "fixtures_or_mocks": false,
+  "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+  "results": [
+    {
+      "tool": "get_courses",
+      "duration_ms": 79,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 3,
+      "outcome": "PASS"
+    },
+    {
+      "tool": "get_calendar_events",
+      "duration_ms": 17,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 3,
+      "outcome": "PASS"
+    },
+    {
+      "tool": "get_announcements",
+      "duration_ms": 12,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 3,
+      "outcome": "PASS"
+    },
+    {
+      "tool": "get_profile_progress",
+      "duration_ms": 14,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 3,
+      "outcome": "PASS"
+    },
+    {
+      "tool": "find_documents",
+      "duration_ms": 15,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 1,
+      "outcome": "PASS"
+    },
+    {
+      "tool": "search_knowledge",
+      "duration_ms": 7876,
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "records": 3,
+      "outcome": "PASS"
+    }
+  ],
+  "status": "PASS"
+}

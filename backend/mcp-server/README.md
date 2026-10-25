@@ -61,6 +61,14 @@ La credencial local inspeccionada durante M01.1 era superusuario/propietaria;
 **no se usó para ejecutar tools**. El camino real PostgreSQL/Ollama sigue pendiente
 de credencial adecuada. Véase el [checkpoint M01.1](../../docs/transition/bch04-m01-1-checkpoint.md).
 
+OE6 cerró ese bloqueo en la base sintética local mediante
+`npm run provision:local-reader`: crea/rota `banuchat_mcp_reader`, valida destino y
+privilegios efectivos, prueba que una escritura sea denegada y guarda la credencial
+en `infra/local/oe6/mcp-reader.env`, fuera de Git. Las seis tools pasaron con
+PostgreSQL/pgvector y Ollama reales; evidencia y límites en el
+[checkpoint OE6](../../docs/transition/banuchat-oe6-checkpoint.md). Esto no autoriza
+el rol en CCD ni lo convierte en identidad institucional.
+
 ## Protocolo y arquitectura interna
 
 SDK oficial `@modelcontextprotocol/server` **2.3.1** fijado y cliente de pruebas

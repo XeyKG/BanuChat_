@@ -35,18 +35,15 @@ APIs ni integración real de UNAB/CCD, despliegue o autenticación institucional
 
 ## Arquitectura actual y objetivo
 
-Actual: **Mobile → REST → Intent Router → servicios/renderers deterministas o
-Document RAG directo → persistencia → respuesta REST**.
+Actual: **Mobile → REST → Intent Router → fast path o Document RAG directo**. En la
+demo sintética, los fallbacks que requieren dos fuentes pasan por el webhook N8N y
+el agente acotado OE3, que consume MCP por stdio. CCD autenticado conserva Document
+RAG directo y nunca usa las tools sintéticas.
 
-Objetivo: **Mobile → REST → Intent Router**, con fast paths sobre servicios de
-aplicación, o **Agent/ReAct → MCP interno cuando corresponda → tools / servicios
-de aplicación → PostgreSQL + pgvector**.
-
-Agent/ReAct y el servidor MCP ejecutable siguen pendientes de implementación e
-integración; forman parte del objetivo. También quedan pendientes los workflows
-N8N retry/recover/scheduled, topología portable, roles mínimos, autenticación de
-usuario final, push, RAGAS completa, SUS y pruebas formales con usuarios. El MVP
-académico completo no está terminado.
+El ciclo implementado de agente es determinista y limitado; no acredita ReAct dirigido
+por LLM. Continúan pendientes fuentes institucionales, Sheets real, push, RAGAS humana,
+SUS/dispositivos y despliegue universitario. El paquete local, las mediciones y los
+límites actuales están en el [checkpoint OE6](docs/transition/banuchat-oe6-checkpoint.md).
 
 ## Evidencia versionada
 
@@ -69,6 +66,8 @@ en [eval](eval/README.md).
   [ingesta/RAG](backend/rag/README.md) y [MCP](backend/mcp-server/README.md).
 - [N8N](n8n/README.md), [Mobile](mobile/README.md) e [infraestructura](infra/README.md).
 
-El Compose local solo incluye PostgreSQL/pgvector y N8N; no aplica SQL ni levanta
-backend/mobile automáticamente. Embeddings usa 1024 dimensiones y distancia
-coseno, sin HNSW/IVFFlat; `full_document` no se fragmenta ni vectoriza.
+El Compose histórico conserva PostgreSQL/pgvector y N8N. OE6 añade un Compose de
+transferencia separado con imagen backend, health checks, volúmenes externos y
+perfiles de operación/CCD; tampoco aplica SQL automáticamente. Embeddings usa 1024
+dimensiones y distancia coseno, sin HNSW/IVFFlat; `full_document` no se fragmenta
+ni vectoriza.

@@ -1,0 +1,300 @@
+{
+  "schema_version": "banuchat-oe6-performance-1",
+  "started_at": "2026-10-25T12:38:42.396Z",
+  "completed_at": "2026-10-25T12:39:40.567Z",
+  "environment": {
+    "platform": "win32",
+    "os_release": "10.0.26200",
+    "architecture": "x64",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-13420H",
+    "logical_processors": 12,
+    "memory_bytes": 16869351424,
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU (observed by OE6 inventory)",
+    "node": "v24.19.0",
+    "api_base_url": "http://127.0.0.1:3000/api/v1",
+    "local_hardware_not_university_server": true
+  },
+  "configuration": {
+    "sample_size_per_branch": 10,
+    "concurrency": 1,
+    "timeout_ms": 120000,
+    "target_mean_ms": 5000,
+    "retries": 0,
+    "errors_included_in_primary_statistics": true
+  },
+  "fixtures_or_mocks": false,
+  "results": [
+    {
+      "branch": "fast_path",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 27.2,
+        "median_ms": 27,
+        "p95_ms": 34,
+        "max_ms": 34,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 0,
+        "target_mean_le_5s": true
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 34,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 21,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 29,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 26,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 27,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 25,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 26,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 30,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 27,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 27,
+          "model_state_before": []
+        }
+      ]
+    },
+    {
+      "branch": "document_rag",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 3031.4,
+        "median_ms": 2797,
+        "p95_ms": 5340,
+        "max_ms": 5340,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 1,
+        "target_mean_le_5s": true
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 5340,
+          "model_state_before": []
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 2797,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 2664,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 2619,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 2601,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 2806,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 2916,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 2797,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 2763,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 3011,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "n8n_mcp",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 2635.5,
+        "median_ms": 2547,
+        "p95_ms": 2869,
+        "max_ms": 2869,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 0,
+        "target_mean_le_5s": true
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 2841,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 2555,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 2508,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 2726,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 2869,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 2525,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 2546,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 2707,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 2547,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 2531,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        }
+      ]
+    }
+  ]
+}
