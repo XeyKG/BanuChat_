@@ -12,7 +12,7 @@ const access = 'A'.repeat(43), refresh = 'B'.repeat(42) + 'A';
 const password = 'PRIVATE_PASSWORD_FIXTURE_ONLY', question = 'PRIVATE_QUESTION_FIXTURE_ONLY';
 const document = 'PRIVATE_DOCUMENT_FIXTURE_ONLY', cookie = 'PRIVATE_COOKIE_FIXTURE_ONLY';
 const me = {principal_id:id, synthetic_uid:'U08000001', session_id:id, session_expires_at:'2035-01-01T00:00:00Z', release_id:id,
-  evidence_mode:'ccd_local', profile:{profile_key:'ccd-local-demo', alias:'Demostración CCD local — sin identidad institucional'}, capabilities:['chat','history','documents']};
+  evidence_mode:'ccd_local', profile:{profile_key:'account-001', alias:'Usuario'}, capabilities:['chat','history','progress','calendar','announcements','documents']};
 const pair = {access_token:access, refresh_token:refresh, token_type:'Bearer', expires_in:900, session_expires_at:me.session_expires_at};
 const globals = globalThis as typeof globalThis & {__DEV__?: boolean};
 const names = ['EXPO_PUBLIC_DEMO_MODE', 'EXPO_PUBLIC_API_BASE_URL', 'EXPO_PUBLIC_AUTH_LOCAL_CHANNEL', 'EXPO_PUBLIC_BANUCHAT_DIAGNOSTIC_HTTP'];

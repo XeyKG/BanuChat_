@@ -4,6 +4,7 @@ import type { SqlQueryClient } from "../data/sql-client.js";
 import { PgAuthStore, type AccountRow, type SessionRow, type TokenPair } from "./pg-auth-store.js";
 import { PersistentAuthLimiter, type AuthRequestContext } from "./rate-limiter.js";
 import {knowledgeMode,knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
+import {auxiliaryContext} from './unified-product.js';
 import { Argon2idHasher, AuthError, digestToken, exactObject, issueToken, password, postgresClock, safeError, uid,
   type AuthClock, type PasswordHasher } from "./primitives.js";
 
@@ -27,14 +28,14 @@ async function guarded<T>(work:()=>Promise<T>):Promise<T>{try{return await work(
 export class AuthService {
   private constructor(private readonly store:PgAuthStore,private readonly deployment:string,
     private readonly hasher:PasswordHasher,private readonly dummyHash:string,private readonly clock:AuthClock,
-    private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode) {}
-  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode}):Promise<AuthService> {
+    private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode,private readonly unified=false) {}
+  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode;unified?:boolean}):Promise<AuthService> {
     return guarded(async()=>{
       if(input.deploymentId.length!==36 || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/u.test(input.deploymentId))throw new AuthError("DEPENDENCY_UNAVAILABLE");
-      const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);await store.assertRuntime(input.expectedDatabase,mode);
+      const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);await store.assertRuntime(input.expectedDatabase,mode,input.unified);
       const hasher=input.hasher??new Argon2idHasher();const clock=input.clock??postgresClock;
       const dummy=await hasher.hash(randomBytes(32).toString("base64url"));
-      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode);
+      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode,input.unified);
     });
   }
   login(input:unknown,context:AuthRequestContext):Promise<TokenPair> {
@@ -115,9 +116,10 @@ export class AuthService {
         JOIN ${definition.relation} p ON p.dataset_release_id=v.dataset_release_id AND p.profile_key=v.profile_key
         JOIN banuchat_auth.corpus_grants g ON g.principal_id=b.principal_id AND g.dataset_id=b.dataset_id
         WHERE b.principal_id=$1 AND v.dataset_release_id=$2 AND g.revoked_at IS NULL AND g.mode=$3 AND g.permission='read'`,[a.id,release,this.evidenceMode]);
-      const profile=binding.rows[0];if(!profile)throw new AuthError("FORBIDDEN");
+      let profile=binding.rows[0];if(!profile)throw new AuthError("FORBIDDEN");
+      if(this.unified){const aux=await auxiliaryContext(c,a.id);profile={profile_key:aux.profile_key,alias:aux.alias};}
       return {principal_id:a.id,synthetic_uid:a.synthetic_uid,session_id:s.id,session_expires_at:s.absolute_expires_at.toISOString(),release_id:release,
-        evidence_mode:this.evidenceMode,profile:{profile_key:profile.profile_key,alias:profile.alias},capabilities:definition.capabilities};
+        evidence_mode:this.evidenceMode,profile:{profile_key:profile.profile_key,alias:profile.alias},capabilities:this.unified?knowledgeDefinition('synthetic').capabilities:definition.capabilities};
     },true));
   }
   logout(token:string,context:AuthRequestContext):Promise<void> {

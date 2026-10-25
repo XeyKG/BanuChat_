@@ -28,7 +28,7 @@
         "conditions": {
           "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
           "conditions": [
-            { "id": "b75a93d7-c25d-4dbb-88f0-a7f1935a0101", "leftValue": "={{ $json.body.demo_mode }}", "rightValue": "synthetic", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "b75a93d7-c25d-4dbb-88f0-a7f1935a0101", "leftValue": "={{ ['synthetic', 'ccd_local'].includes($json.body.demo_mode) }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } },
             { "id": "5bd0ea18-47c3-4caa-b152-08c825b10101", "leftValue": "={{ $json.body.route }}", "rightValue": "agent_fallback", "operator": { "type": "string", "operation": "equals" } },
             { "id": "37cc6093-8dba-4f08-82ac-5d2fa67a0101", "leftValue": "={{ $json.body.requested_capability }}", "rightValue": "bounded_mcp_agent", "operator": { "type": "string", "operation": "equals" } },
             { "id": "619d6ed7-02e6-493f-99be-6edfb8140101", "leftValue": "={{ $json.body.operation_id }}", "rightValue": "", "operator": { "type": "string", "operation": "notEmpty", "singleValue": true } },

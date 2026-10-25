@@ -4,7 +4,7 @@ if (Get-NetTCPConnection -State Listen -LocalPort 8084 -ErrorAction SilentlyCont
     throw 'Port 8084 already in use; preserve its process and resolve explicitly.'
 }
 $env:EXPO_PUBLIC_DEMO_MODE = 'ccd_authenticated'
-$env:EXPO_PUBLIC_API_BASE_URL = 'http://127.0.0.1:3003/api/v2'
+$env:EXPO_PUBLIC_API_BASE_URL = 'http://127.0.0.1:3004/api/v2'
 $env:EXPO_PUBLIC_AUTH_LOCAL_CHANNEL = 'adb_reverse'
 $env:EXPO_NO_TELEMETRY = '1'
 Push-Location (Split-Path -Parent $PSScriptRoot)

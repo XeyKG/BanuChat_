@@ -105,7 +105,7 @@ export function buildReminderCandidates(input: {
     if (fireAt === null) continue;
     const dedupeKey = `announcement:${input.releaseId}:${announcement.announcement_key}:24h`;
     candidates.push({
-      title: 'Nuevo anuncio de demostración',
+      title: 'Nueva noticia o convocatoria',
       body: announcement.title,
       fireAt,
       data: {

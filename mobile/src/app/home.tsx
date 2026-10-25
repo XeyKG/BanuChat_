@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
-import { CCD_NOTICE, isCcdLocal,isCcdKnowledge,CCD_AUTH_NOTICE } from '@/config/demo-mode';
+import { isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
 import { useSession } from '@/session/session-context';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
@@ -112,8 +112,8 @@ export default function HomeScreen() {
 
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
-              <Text style={styles.greeting}>{isCcdLocal() ? 'Demostración CCD local' : `Cuenta ${snapshot.me?.synthetic_uid??''}`}</Text>
-              <Text style={styles.greetingSub}>{isCcdLocal() ? CCD_NOTICE : isCcdKnowledge()?CCD_AUTH_NOTICE:`Perfil académico ficticio: ${activeProfile.alias}`}</Text>
+              <Text style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
+              <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
             </View>
           </FadeIn>
 
@@ -167,7 +167,7 @@ export default function HomeScreen() {
               delay={280}
             />
             <QuickAction
-              title="Progreso"
+              title="Mi progreso"
               description="Avance registrado para este perfil."
               tint={colors.success}
               tintSoft={colors.successSoft}
@@ -177,8 +177,8 @@ export default function HomeScreen() {
               delay={340}
             />
             <QuickAction
-              title="Anuncios"
-              description="Novedades de la release sintética actual."
+              title="Noticias y novedades"
+              description="Consulta noticias y convocatorias."
               tint={colors.amber}
               tintSoft={colors.amberSoft}
               icon="doc"
@@ -188,7 +188,7 @@ export default function HomeScreen() {
             />
             <QuickAction
               title="Notificaciones"
-              description="Permisos y recordatorios de la demo sintética."
+              description="Configura tus permisos y recordatorios."
               tint={colors.amber}
               tintSoft={colors.amberSoft}
               icon="notification"

@@ -2,10 +2,10 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { SessionProvider,useSession } from '@/session/session-context';
-import { isCcdLocal,isCcdAuthenticated,CCD_AUTH_NOTICE } from '@/config/demo-mode';
+import { isCcdLocal } from '@/config/demo-mode';
 import {AuthProvider,useAuth} from '@/auth/auth-provider';
 import {NotificationProvider} from '@/notifications/notification-provider';
-import {ActivityIndicator,View,Text} from 'react-native';
+import {ActivityIndicator,View} from 'react-native';
 
 export default function RootLayout() {
   return <AuthProvider><NotificationProvider><SessionProvider><Navigation /></SessionProvider></NotificationProvider></AuthProvider>;
@@ -18,7 +18,6 @@ function Navigation(){
   return (
     <View style={{flex:1}}>
       <StatusBar style="dark" />
-      {isCcdAuthenticated()&&<Text accessibilityRole="text" style={{padding:12,backgroundColor:'#eef3ff',color:'#243654',fontSize:12}}>{CCD_AUTH_NOTICE}</Text>}
       <Stack key={ccd?'ccd':String(snapshot.epoch)} initialRouteName={ccd?'profiles':authenticated?'home':snapshot.epoch>0?'login':'index'} screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="index" />
         <Stack.Protected guard={!ccd&&!authenticated}><Stack.Screen name="login" /></Stack.Protected>

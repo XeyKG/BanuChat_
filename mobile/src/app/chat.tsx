@@ -341,7 +341,7 @@ export default function ChatScreen() {
             </View>
             <View style={styles.headerCopy}>
               <Text style={styles.headerTitle}>Banu</Text>
-              <Text style={styles.headerSubtitle}>{isCcdLocal() ? 'Demostración CCD local · sin identidad institucional' : isCcdKnowledge() ? 'Documentación CCD seleccionada · cuenta ficticia' : `Asistente académico · ${activeProfile.alias}`}</Text>
+              <Text style={styles.headerSubtitle}>Tu asistente BanuChat</Text>
             </View>
           </View>
           <Pressable
@@ -410,7 +410,7 @@ export default function ChatScreen() {
                       <BrandMark size={64} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
-                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo orientarte sobre los documentos CCD seleccionados, sus cursos, pruebas y contacto. Puedes hacer preguntas de seguimiento y abrir las fuentes. No determino progreso personal ni reglas sin respaldo documental.' : CHAT_INTRODUCTION}</Text>
+                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Consulta documentos CCD, tu progreso, calendario y novedades. Puedes hacer preguntas de seguimiento y abrir las fuentes de cada respuesta.' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
                 <View style={styles.suggestionGrid}>

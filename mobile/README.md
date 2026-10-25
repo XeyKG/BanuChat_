@@ -1,5 +1,21 @@
 # BanuChat Mobile
 
+## Aplicación unificada vigente
+
+El producto usa una sola experiencia autenticada en `http://127.0.0.1:3004/api/v2`:
+chat/documentos CCD, historial propio, progreso/cursos auxiliares, calendario, noticias,
+convocatorias y recordatorios locales. El nombre interno `ccd_authenticated` se conserva
+por compatibilidad; no hay selector visible de corpus o modalidad.
+
+Desde `backend/api`: `npm start`. Desde `mobile`: `npm start -- --localhost`.
+Para Android USB, comprobar dispositivo y configurar `adb reverse tcp:3004 tcp:3004`
+y el puerto Metro elegido (8081 por defecto; el script local existente usa 8084).
+Las credenciales BanuChat existentes se entregan privadamente por el procedimiento
+del operador; nunca se incluyen en `EXPO_PUBLIC_*`.
+
+Servicios y pruebas: [checkpoint unificado](../docs/transition/banuchat-unified-application-checkpoint.md).
+Las secciones posteriores son antecedentes; la aplicación final usa las seis capacidades.
+
 ## Estado vigente CCD autenticado
 
 `EXPO_PUBLIC_DEMO_MODE=ccd_authenticated` añade CCD autenticado con REST v2 y

@@ -33,7 +33,7 @@ const EMPTY_MESSAGES: Record<AnnouncementFilter, string> = {
   active: 'No hay anuncios vigentes en este momento.',
   upcoming: 'No hay anuncios próximos en este momento.',
   expired: 'No hay anuncios vencidos para mostrar.',
-  all: 'No hay anuncios disponibles en esta release sintética.',
+  all: 'No hay novedades disponibles.',
 };
 
 const bogotaDateTimeFormatter = new Intl.DateTimeFormat('es-CO', {
@@ -92,8 +92,8 @@ export default function AnnouncementsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle="Contenido de demostración · hora de Bogotá"
-        title="Anuncios"
+        subtitle="Noticias y convocatorias · hora de Bogotá"
+        title="Noticias y novedades"
       />
 
       <View style={styles.filterBar}>

@@ -184,7 +184,9 @@ export async function createConversation(profileKey: string): Promise<CreatedCon
   }
 
   const result = parseCreatedConversation(payload);
-  if (result.profile_key !== profileKey) throw new Error('CREATE_CONVERSATION_INVALID_RESPONSE');
+  // Authenticated v2 authorizes ownership server-side; its documentary context is
+  // independent of the account's auxiliary progress profile.
+  if (isCcdLocal() && result.profile_key !== profileKey) throw new Error('CREATE_CONVERSATION_INVALID_RESPONSE');
   rememberConversation(result.conversation_id);
   return result;
 }

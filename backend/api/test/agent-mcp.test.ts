@@ -123,6 +123,18 @@ test("la política evita una selección estructurada incorrecta para contenido d
   assert.deepEqual(fake.calls, ["search_knowledge"]);
 });
 
+test('unified agent keeps documentary and auxiliary releases independent in citations',async()=>{
+ const structured=fakeFactory({release:()=>OTHER_RELEASE});
+ const answer=await runBoundedMcpAgent({sessions:structured.factory,source_releases:{documents:RELEASE,structured:OTHER_RELEASE}},
+  agentInput('Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?'));
+ assert.equal(answer.release_id,RELEASE);assert.ok(answer.citations.every(c=>c.release_id===OTHER_RELEASE));
+ const documentary=fakeFactory();
+ const doc=await runBoundedMcpAgent({sessions:documentary.factory,source_releases:{documents:RELEASE,structured:OTHER_RELEASE}},agentInput('¿Qué requisito explica la política de pruebas?'));
+ assert.equal(doc.citations[0]?.release_id,RELEASE);
+ const wrong=fakeFactory();
+ await assert.rejects(runBoundedMcpAgent({sessions:wrong.factory,source_releases:{documents:RELEASE,structured:OTHER_RELEASE}},agentInput('Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?')),McpAgentError);
+});
+
 test("una pregunta relacionada reutiliza solo el antecedente de usuario para seleccionar tool", async () => {
   const fake = fakeFactory();
   await runBoundedMcpAgent({ sessions: fake.factory }, {

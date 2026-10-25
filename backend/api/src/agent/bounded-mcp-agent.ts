@@ -11,7 +11,7 @@ import {
 } from "./mcp-client.js";
 
 const INSUFFICIENT =
-  "No encontré evidencia suficiente en las fuentes sintéticas disponibles para responder esa consulta.";
+  "No encontré evidencia suficiente en las fuentes disponibles para responder esa consulta.";
 const CLARIFY_LIMIT =
   "La consulta reúne más fuentes de las que puedo verificar en un solo turno. ¿Puedes dividirla en dos preguntas más concretas?";
 
@@ -53,6 +53,8 @@ export interface McpAgentInput {
 
 export interface McpAgentDependencies {
   sessions: McpToolSessionFactory;
+  /** Independent pinned source releases in the authenticated product. */
+  source_releases?: {documents:string;structured:string};
   trace?: (trace: McpAgentTrace) => void;
   limits?: Partial<{
     max_steps: number;
@@ -428,7 +430,11 @@ export async function runBoundedMcpAgent(
         finish("tool_error");
         throw new McpAgentError("invalid_result");
       }
-      if (output.release_id !== input.release_id) {
+      const expectedRelease = dependencies.source_releases
+        ? (plan.tool === 'search_knowledge' || plan.tool === 'find_documents'
+          ? dependencies.source_releases.documents : dependencies.source_releases.structured)
+        : input.release_id;
+      if (output.release_id !== expectedRelease) {
         finish("release_changed");
         throw new McpAgentError("release_changed");
       }
@@ -449,7 +455,7 @@ export async function runBoundedMcpAgent(
     const rendered: RenderedObservation[] = [];
     let citationIndex = 0;
     for (const observation of observations) {
-      const part = renderObservation(observation.plan.tool, observation.output, input.release_id, citationIndex);
+      const part = renderObservation(observation.plan.tool, observation.output, String(observation.output.release_id), citationIndex);
       citationIndex += part.citations.length;
       rendered.push(part);
     }

@@ -13,7 +13,6 @@ import {
 import { Platform } from 'react-native';
 
 import { useAuth } from '@/auth/auth-provider';
-import { isCcdKnowledge } from '@/config/demo-mode';
 import { destinationForAccount, parseNotificationData } from './model';
 import {
   configureForegroundNotifications,
@@ -60,7 +59,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const handledResponsesRef = useRef(new Set<string>());
   const handledDedupeKeysRef = useRef(new Set<string>());
   const me = snapshot.phase === 'authenticated' ? snapshot.me : null;
-  const principalId = !isCcdKnowledge() ? (me?.principal_id ?? null) : null;
+  const principalId = me?.principal_id ?? null;
   const eligible =
     principalId !== null &&
     me?.capabilities.includes('calendar') === true &&

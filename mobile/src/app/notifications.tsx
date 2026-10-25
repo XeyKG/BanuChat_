@@ -34,7 +34,7 @@ export default function NotificationsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle="Solo datos sintéticos · configuración por cuenta"
+        subtitle="Tus permisos y recordatorios"
         title="Notificaciones"
       />
       <ScrollView contentContainerStyle={styles.container}>
@@ -85,7 +85,7 @@ export default function NotificationsScreen() {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Qué se programa</Text>
             <Text style={styles.cardText}>
-              BanuChat usa eventos de calendario y anuncios de la release sintética vigente. Los
+              BanuChat usa tus eventos de calendario y novedades. Los
               recordatorios futuros se programan 24 horas antes y se reemplazan por clave estable
               para evitar duplicados.
             </Text>

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "contractVersion": "2.0.0-draft",
+  "contractVersion": "2.1.0",
   "mcpProtocolRevision": "2026-07-28",
   "serverName": "banuchat-mcp-server",
   "executionErrorSchema": {

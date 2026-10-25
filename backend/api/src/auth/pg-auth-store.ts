@@ -17,7 +17,7 @@ export type AuthEvent="account_provisioned"|"login_succeeded"|"login_denied"|"re
 export class PgAuthStore {
   readonly transactions:PgTransactionRunner;
   constructor(readonly pool:Pool) { this.transactions=new PgTransactionRunner(pool); }
-  async assertRuntime(expectedDatabase:string,mode:KnowledgeMode='synthetic'):Promise<void> {
+  async assertRuntime(expectedDatabase:string,mode:KnowledgeMode='synthetic',unified=false):Promise<void> {
     knowledgeMode(mode);
     const result=await this.pool.query(`SELECT current_database() AS database, r.rolsuper, r.rolcreatedb,
       r.rolcreaterole,r.rolreplication,r.rolbypassrls,
@@ -40,9 +40,10 @@ export class PgAuthStore {
     const r=result.rows[0] as Record<string,unknown>|undefined;
     if(!r || !expectedDatabase || r.database!==expectedDatabase ||
       (mode==='synthetic' && (expectedDatabase.toLowerCase().includes("ccd") || !r.synthetic)) ||
-      (mode==='ccd_local' && expectedDatabase!=='banuchat_ccd_auth_i1b_test') ||
+      (mode==='ccd_local' && expectedDatabase!==(unified?'banuchat_unified':'banuchat_ccd_auth_i1b_test')) ||
       ["rolsuper","rolcreatedb","rolcreaterole","rolreplication","rolbypassrls","db_write","ddl","memberships","other_database","owns_objects","corpus_write","conversation_update"].some(k=>r[k]!==false)) throw new AuthError("DEPENDENCY_UNAVAILABLE");
     if(mode==='ccd_local'){
+      if(unified){const marker=await this.pool.query('SELECT version FROM banuchat_aux.product_config WHERE singleton');if(marker.rows[0]?.version!==1)throw new AuthError('DEPENDENCY_UNAVAILABLE');}
       const guard=await this.pool.query(`SELECT EXISTS(SELECT 1 FROM banuchat_auth.runtime_scope s
         JOIN banuchat.datasets d ON d.id=1 AND d.name='banuchat-ccd-local'
         JOIN banuchat.dataset_releases v ON v.id=d.current_release_id AND v.dataset_id=d.id

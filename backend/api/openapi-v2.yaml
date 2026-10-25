@@ -3,7 +3,7 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "BanuChat REST API v2 — cuentas ficticias y conocimiento explícito",
-    "version": "4.0.0",
+    "version": "5.0.0",
     "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido. BCH-D37/CCD-AUTH-I1B: modo de conocimiento explícito por despliegue; contexto técnico CCD sin identidad institucional. Recuperación de correo suspendida."
   },
   "servers": [
@@ -693,7 +693,7 @@
       "get": {
         "operationId": "list_calendar_events",
         "summary": "Consultar calendario sintético sin invocar al agente",
-        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
+        "description": "Días civiles inclusivos en America/Bogota, zona canónica técnica del prototipo, no afirmación institucional: date_to >= date_from, diferencia + 1 <= 366 días. El backend transforma 00:00 de date_from y 00:00 del día posterior a date_to en esa zona a instantes con zona y filtra starts_at con inicio incluido y fin excluido, no solapamiento. Timestamps de salida RFC 3339 con offset. REST y MCP comparten esta misma semántica civil en America/Bogota; una futura capa compartida recibirá límites normalizados. Orden starts_at y event_key ascendentes. Solo release vigente. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
         "parameters": [
           {
             "name": "date_from",
@@ -796,7 +796,7 @@
       "get": {
         "operationId": "list_announcements",
         "summary": "Consultar anuncios sintéticos sin invocar al agente",
-        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
         "parameters": [
           {
             "name": "query",
@@ -969,7 +969,7 @@
       "get": {
         "operationId": "get_profile_progress",
         "summary": "Consultar progreso ficticio del perfil asignado en servidor",
-        "description": "No acepta profile_key, UID o principal_id. Binding aprobado para release vigente y corpus permitido. Perfil ausente en current: 404; binding sin aprobación/capacidad: 403; sin cursos coincidentes: 200 vacío. Orden course_key ascendente. Sin agente ni datos reales. En conocimiento ccd_local devuelve 403: no hay datos personales respaldados y no se usa fallback sintético.",
+        "description": "No acepta profile_key, UID o principal_id. Binding aprobado para release vigente y corpus permitido. Perfil ausente en current: 404; binding sin aprobación/capacidad: 403; sin cursos coincidentes: 200 vacío. Orden course_key ascendente. Sin agente ni datos reales. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
         "parameters": [
           {
             "name": "statuses",
@@ -2162,45 +2162,89 @@
               }
             },
             "then": {
-              "properties": {
-                "capabilities": {
-                  "type": "array",
-                  "minItems": 3,
-                  "maxItems": 3,
-                  "uniqueItems": true,
-                  "prefixItems": [
-                    {
-                      "type": "string",
-                      "const": "chat"
-                    },
-                    {
-                      "type": "string",
-                      "const": "history"
-                    },
-                    {
-                      "type": "string",
-                      "const": "documents"
-                    }
-                  ],
-                  "items": false
-                },
-                "profile": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": [
-                    "profile_key",
-                    "alias"
-                  ],
+              "anyOf": [
+                {
                   "properties": {
-                    "profile_key": {
-                      "const": "ccd-local-demo"
+                    "capabilities": {
+                      "type": "array",
+                      "minItems": 3,
+                      "maxItems": 3,
+                      "uniqueItems": true,
+                      "prefixItems": [
+                        {
+                          "type": "string",
+                          "const": "chat"
+                        },
+                        {
+                          "type": "string",
+                          "const": "history"
+                        },
+                        {
+                          "type": "string",
+                          "const": "documents"
+                        }
+                      ],
+                      "items": false
                     },
-                    "alias": {
-                      "const": "Demostración CCD local — sin identidad institucional"
+                    "profile": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "profile_key",
+                        "alias"
+                      ],
+                      "properties": {
+                        "profile_key": {
+                          "const": "ccd-local-demo"
+                        },
+                        "alias": {
+                          "const": "Demostración CCD local — sin identidad institucional"
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "capabilities": {
+                      "type": "array",
+                      "minItems": 6,
+                      "maxItems": 6,
+                      "uniqueItems": true,
+                      "prefixItems": [
+                        {
+                          "type": "string",
+                          "const": "chat"
+                        },
+                        {
+                          "type": "string",
+                          "const": "history"
+                        },
+                        {
+                          "type": "string",
+                          "const": "progress"
+                        },
+                        {
+                          "type": "string",
+                          "const": "calendar"
+                        },
+                        {
+                          "type": "string",
+                          "const": "announcements"
+                        },
+                        {
+                          "type": "string",
+                          "const": "documents"
+                        }
+                      ],
+                      "items": false
+                    },
+                    "profile": {
+                      "$ref": "#/components/schemas/profile"
                     }
                   }
                 }
-              }
+              ]
             }
           }
         ]

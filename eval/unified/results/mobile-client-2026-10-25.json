@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "checks": {
+    "chat_document_citation": true,
+    "independent_structured_release": true,
+    "structured_sources_and_restored_history": true
+  },
+  "boundary": "Actual Mobile service adapters and AuthSession over real HTTP; native UI and SecureStore not exercised"
+}

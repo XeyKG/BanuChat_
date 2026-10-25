@@ -1,5 +1,22 @@
 # Contrato de herramientas MCP de BanuChat
 
+## Revisión 2.1.0 — composición autenticada unificada
+
+El catálogo de seis tools y sus schemas de entrada/salida se conservan. En el proceso
+`src/unified-main.ts`, `search_knowledge` y `find_documents` leen exclusivamente CCD;
+las otras cuatro tools leen `banuchat_aux`, con release independiente. Cada salida
+`release_id` identifica su fuente, no una publicación global compartida.
+
+`get_profile_progress` deriva su perfil de la identidad autenticada transmitida por
+el proceso API; no acepta principal/perfil por argumentos MCP. El agente fija ambas
+releases al abrir la sesión y rechaza cambios entre pasos. El usuario no controla
+variables de entorno, credenciales, SQL, tools adicionales o rutas de sistema.
+
+El rol lector no posee DML/DDL y el proceso usa transacciones read-only. No publica
+listeners HTTP ni consume Internet. El agente sigue siendo determinista y acotado.
+El proceso sintético anterior se conserva para regresión; la app final usa solo el
+proceso unificado. Las secciones históricas siguientes describen ese antecedente.
+
 ## Estado y alcance
 
 Versión: `2.0.0-draft`. Catálogo, nombres y schemas congelados para la siguiente

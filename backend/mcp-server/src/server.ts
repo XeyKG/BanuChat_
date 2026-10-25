@@ -26,6 +26,8 @@ const errorValidator=ajv.compile(contract.executionErrorSchema);
 
 export interface Dependencies {
   sql:SqlQueryClient;embedding:QueryEmbeddingClient;profileKey?:string;
+  /** Trusted account-bound product adapter, reusing this protocol/validation surface. */
+  read?:(name:string,args:Record<string,unknown>)=>Promise<unknown>;
   log?:(entry:{tool:string;request_id:string;outcome:string;duration_ms:number})=>void;
 }
 function invalid():never {throw new ProtocolError(ProtocolErrorCode.InvalidParams,"Argumentos MCP inválidos.");}
@@ -73,7 +75,8 @@ export function createServer(deps:Dependencies):Server {
     let outcome="success";
     try {
       let data:unknown;
-      switch(name) {
+      if(deps.read) data=await deps.read(name,args);
+      else switch(name) {
         case "search_knowledge":data=await searchSyntheticKnowledge(deps.sql,deps.embedding,args as {query:string;top_k?:number});break;
         case "find_documents":data=await findSyntheticDocuments(deps.sql,args as {query:string;retrieval_mode?:string;limit?:number});break;
         case "get_courses":data=await getSyntheticCourses(deps.sql,args);break;

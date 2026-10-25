@@ -189,8 +189,7 @@ export async function syncSyntheticReminders(input: {
     getAnnouncements({ temporalStatus: 'upcoming' }),
   ]);
   if (
-    calendar.release_id !== input.releaseId ||
-    announcements.release_id !== input.releaseId
+    calendar.release_id !== announcements.release_id
   ) {
     throw new Error('NOTIFICATION_RELEASE_MISMATCH');
   }
@@ -199,7 +198,7 @@ export async function syncSyntheticReminders(input: {
     calendarEvents: calendar.events,
     now: Date.now(),
     principalId: input.principalId,
-    releaseId: input.releaseId,
+    releaseId: calendar.release_id,
   });
 
   await cancelRecords(previous.scheduled.filter((record) => record.kind === 'reminder'));

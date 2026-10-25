@@ -1,5 +1,18 @@
 # API REST — contrato y estado implementado
 
+## Producto unificado vigente
+
+`npm start` inicia exclusivamente REST v2 autenticado de BanuChat en loopback 3004,
+con configuración privada `infra/local/unified/application.json`. La base aislada
+`banuchat_unified` en 55463 conserva CCD en `banuchat` y datos auxiliares ficticios
+en `banuchat_aux`, con publicaciones y permisos separados. MCP usa un rol lector;
+N8N participa en consultas multifuente sobre un webhook correlacionado en 15679.
+
+El contrato vigente es [REST v2 5.0.0](api-contract-v2.md). Los entrypoints históricos
+v1/CCD anteriores se conservan como regresión y no alimentan la aplicación final.
+Arranque, evidencia y limitaciones: [checkpoint unificado](../../docs/transition/banuchat-unified-application-checkpoint.md).
+Las secciones posteriores registran antecedentes.
+
 ## Entorno operativo CCD autenticado
 
 O4 promovió `banuchat-dev-postgres-ccd-auth-1` como PostgreSQL principal de

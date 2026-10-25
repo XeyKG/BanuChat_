@@ -16,12 +16,12 @@ function pair(v:unknown):Pair {
   typeof p.access_token!=='string'||typeof p.refresh_token!=='string'||!tokenPattern.test(p.access_token)||!tokenPattern.test(p.refresh_token)||p.token_type!=='Bearer'||!Number.isInteger(p.expires_in)||p.expires_in<1||p.expires_in>900||typeof p.session_expires_at!=='string'||!Number.isFinite(Date.parse(p.session_expires_at)))throw new SessionError();return p;
 }
 function current(v:unknown):CurrentSession {
- const ccd=isCcdAuthenticated(),expected=ccd?['chat','history','documents']:capabilities;
+ const ccd=isCcdAuthenticated(),expected=capabilities;
  const m=v as CurrentSession;if(!m||Object.keys(m).sort().join()!==['principal_id','synthetic_uid','session_id','session_expires_at','release_id','profile','capabilities','evidence_mode'].sort().join()||
   m.evidence_mode!==(ccd?'ccd_local':'synthetic')||
   typeof m.principal_id!=='string'||typeof m.session_id!=='string'||typeof m.release_id!=='string'||typeof m.synthetic_uid!=='string'||![9,13].includes(m.synthetic_uid.length)||!uuid.test(m.principal_id)||!uuid.test(m.session_id)||!uuid.test(m.release_id)||!/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(m.synthetic_uid)||typeof m.session_expires_at!=='string'||!Number.isFinite(Date.parse(m.session_expires_at))||
   !m.profile||Object.keys(m.profile).sort().join()!=='alias,profile_key'||typeof m.profile.profile_key!=='string'||typeof m.profile.alias!=='string'||
-  (ccd&&(m.profile.profile_key!=='ccd-local-demo'||m.profile.alias!=='Demostración CCD local — sin identidad institucional'))||JSON.stringify(m.capabilities)!==JSON.stringify(expected))throw new SessionError();return m;
+  !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(m.profile.profile_key)||!m.profile.alias.trim()||JSON.stringify(m.capabilities)!==JSON.stringify(expected))throw new SessionError();return m;
 }
 /** Tokens never enter React state, AsyncStorage or public configuration. No retry of HTTP operations. */
 export class AuthSession {

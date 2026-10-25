@@ -1,6 +1,31 @@
-# Contrato REST v2 — BanuChat con cuentas ficticias
+# Contrato REST v2 — BanuChat
 
-Versión **4.0.0**, revisión BCH-D37 / CCD-AUTH-I1B: modo de conocimiento obligatorio en `me`, capacidades CCD y compatibilidad de UID U+8/legado. Conserva las quince operaciones y la recuperación de la revisión BCH-D31; su composición local mantiene el correo suspendido. Base relativa `/api/v2`. Fuente de schemas, parámetros y respuestas: [openapi-v2.yaml](openapi-v2.yaml), OpenAPI 3.1.0 serializado como JSON y JSON Schema 2020-12. Este documento fija las reglas semánticas que un schema no puede expresar. Las referencias AUTH-P0/P3.1 describen sus incrementos históricos.
+## Revisión 5.0.0 — aplicación unificada
+
+La decisión del propietario autoriza una sola composición autenticada: documentos CCD
+seleccionados y datos auxiliares ficticios. Se conservan las quince operaciones y sus
+formas de request/response. `evidence_mode=ccd_local` identifica el corpus documental;
+en el producto unificado `capabilities` contiene las seis capacidades y `profile` es
+el perfil auxiliar asignado a esa cuenta. La variante histórica de tres capacidades
+permanece aceptada por el schema para reproducir sus evidencias, sin selector visible
+en el producto.
+
+`me.release_id` y la apertura del chat identifican la release CCD. Progreso/calendario/
+anuncios devuelven su propia release auxiliar; no se comparan con la documental. Cada
+cita conserva el identificador de su fuente. El cliente no envía principal, perfil,
+release ni tools para elegir otro ámbito. La creación de conversación puede devolver
+el contexto documental interno, distinto del perfil auxiliar de `me`; la propiedad
+se establece por `conversation_owners`, nunca por igualdad de perfiles.
+
+La persistencia valida CCD y auxiliares por separado en una sola transacción. Revalida
+sesión/owner y ambas publicaciones antes de guardar. N8N precede al agente únicamente
+en consultas multifuente; un fallo evita persistir el turno. MCP usa un lector sin DML,
+identidad del proceso fijada por el servidor y límites existentes. No hay ReAct LLM.
+
+Documentación sintética v1 no es una fuente activa de esta composición. Los históricos
+v1/CCD sin auxiliares quedan para regresión; no se conectan a la aplicación final.
+
+Antecedente **4.0.0**, revisión BCH-D37 / CCD-AUTH-I1B: modo de conocimiento obligatorio en `me`, capacidades CCD y compatibilidad de UID U+8/legado. Conservó las quince operaciones y la recuperación de la revisión BCH-D31; la composición local mantiene el correo suspendido. Base relativa `/api/v2`. Fuente vigente de schemas, parámetros y respuestas: [openapi-v2.yaml](openapi-v2.yaml), revisión 5.0.0. Este documento fija las reglas semánticas que un schema no puede expresar. Las referencias AUTH-P0/P3.1 describen sus incrementos históricos.
 
 Derivado del [diseño aceptado X01-AUTH.1](../../docs/architecture/autenticacion-identidad-banuchat.md), commit `705fb555b6ee050df4c5d07b68724251963a83f9`. Se conserva REST v1/MCP sin modificaciones. Cambios de este contrato requieren revisión explícita; AUTH-P1 no queda autorizado por publicarlo.
 

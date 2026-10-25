@@ -1,5 +1,5 @@
 export function mobileMode(): 'synthetic'|'ccd_local'|'ccd_authenticated' {
-  const mode = process.env.EXPO_PUBLIC_DEMO_MODE ?? 'synthetic';
+  const mode = process.env.EXPO_PUBLIC_DEMO_MODE ?? 'ccd_authenticated';
   if (mode !== 'synthetic' && mode !== 'ccd_local' && mode !== 'ccd_authenticated') throw new Error('INVALID_DEMO_MODE');
   return mode;
 }

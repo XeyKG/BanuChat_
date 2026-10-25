@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { CCD_NOTICE, isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
+import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -143,7 +143,7 @@ export default function HistoryScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle={isCcdLocal() ? 'Solo conversaciones de esta apertura local' : isCcdKnowledge()?'Tus conversaciones CCD · cuenta ficticia':`Perfil: ${activeProfile.alias}`}
+        subtitle="Tus conversaciones y fuentes"
         title={isCcdLocal() ? 'Historial de demostración' : 'Historial'}
       />
       <ScrollView contentContainerStyle={styles.container}>

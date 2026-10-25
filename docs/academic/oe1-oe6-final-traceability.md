@@ -1,5 +1,26 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+## Actualización — aplicación unificada
+
+Decisión funcional del propietario sobre la línea base
+`555c5e71c1a7506ccd01958c871dc18bb2b87c37`. La composición final integra las
+funcionalidades existentes en una sola app autenticada. Las secciones posteriores
+conservan el corte histórico del cierre OE6; no describen la composición vigente.
+
+| OE | Integración vigente y fuentes | Evidencia nueva | Pendiente original conservado |
+| --- | --- | --- | --- |
+| OE1 | RAG solo sobre documentos CCD seleccionados; cero publicaciones documentales sintéticas en el producto | T02/T03/T08/T12 reales, cita/artefacto/historial y abstención ante documentación antigua | Autoridad CCD, banco y evaluación humana/RAGAS; no aval institucional inventado |
+| OE2 | Ingesta CCD existente conservada; cuentas, cursos, progreso, eventos y novedades ficticios en schema auxiliar sin vectores | Snapshot CCD sin nueva release; migración aislada y prueba de ausencia de documentos sintéticos | Scraping institucional, permisos, tres flujos y métricas de frescura/extracción |
+| OE3 | Seis tools MCP reales; conocimiento CCD y servicios estructurados auxiliares, perfil derivado de cuenta y releases independientes | T09 y seguridad stdio real: seis tools, denegación de perfil ajeno y escrituras | ReAct dirigido por LLM y su evaluación; planificador actual determinista |
+| OE4 | N8N real precede solo al agente multifuente autenticado; metadatos CCD y correlación; calendario ficticio separado | T10/T14: webhook real y 503 sin persistir turno cuando N8N falla | Google Sheets real, BPM/directrices institucionales y sincronización ≤30 min |
+| OE5 | Onboarding/login/Home/chat/fuentes/historial/progreso/completados/calendario/noticias/notificaciones en la misma app | 38 pruebas Mobile; adaptadores Mobile contra HTTP real; export Android/iOS/Web; planificación de recordatorios | Dispositivos físicos, recepción local, accesibilidad/SUS y push remoto autorizado |
+| OE6 | API v2, PostgreSQL aislado, Ollama, MCP y N8N integrados; reinicio recupera sesión e historial | T01–T14 con T07 físico pendiente; corpus/historial canónicos sin cambios | Servidor UNAB, TLS, estabilidad institucional y validación con usuarios |
+
+Los estados académicos globales se conservan: OE1 **IMPLEMENTADO, VALIDACIÓN PENDIENTE**;
+OE2–OE6 **PARCIAL**. La decisión funcional permite construir el producto; no modifica
+silenciosamente los objetivos formales. Resultados y alcance ejecutado en el
+[checkpoint de aplicación unificada](../transition/banuchat-unified-application-checkpoint.md).
+
 ## Regla de lectura
 
 Línea base técnica: `39b6b6221d61bd7aef2ce236dd124c3b11488345`. Esta matriz

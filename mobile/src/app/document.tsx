@@ -86,7 +86,7 @@ export default function DocumentScreen() {
       <ScreenHeader
         actionLabel="Volver"
         onAction={() => router.back()}
-        subtitle={isCcdKnowledge() ? 'Documento CCD seleccionado · demostración local' : 'Documento sintético de demostración'}
+        subtitle="Fuente documental CCD"
         title={title}
       />
 
@@ -119,7 +119,7 @@ export default function DocumentScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.notice}>
-            <Text style={styles.noticeText}>{isCcdKnowledge() ? 'Documento CCD seleccionado. Revisa su periodo, población y límites; sin aval institucional formal.' : 'Documento sintético de demostración'}</Text>
+            <Text style={styles.noticeText}>Revisa la fecha, el periodo y el alcance indicados en la fuente.</Text>
           </View>
           <View style={styles.documentCard}>
             <Text selectable style={styles.documentText}>

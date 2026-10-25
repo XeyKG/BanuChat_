@@ -1,0 +1,66 @@
+{
+  "baseline": "555c5e71c1a7506ccd01958c871dc18bb2b87c37",
+  "at": "2026-10-25T18:41:52.030Z",
+  "environment": "REST v2 + isolated PostgreSQL + real Ollama + real stdio MCP + real N8N; AuthSession storage adapter is in-memory, not native SecureStore",
+  "tests": {
+    "isolated_rate_limit_preparation": true,
+    "T01": {
+      "status": "PASS"
+    },
+    "T02": {
+      "status": "PASS"
+    },
+    "T03": {
+      "status": "PASS"
+    },
+    "T04": {
+      "status": "PASS",
+      "independent_source_release": true
+    },
+    "T05": {
+      "status": "PASS"
+    },
+    "T06": {
+      "status": "PASS"
+    },
+    "T07": {
+      "status": "INTEGRATED_REMINDER_PLAN_PASS",
+      "candidates": 9,
+      "native_scheduling": "NOT_EXECUTED_device_required"
+    },
+    "T08": {
+      "status": "PASS"
+    },
+    "T09": {
+      "status": "PASS",
+      "transport": "real MCP stdio"
+    },
+    "T10": {
+      "status": "PASS",
+      "correlated_webhook_completions": 1,
+      "trace_event": "unified_n8n"
+    },
+    "T13": {
+      "status": "PASS",
+      "postgres_and_api_restarted": true,
+      "refresh_rotation_and_history": true
+    },
+    "T11": {
+      "status": "PASS"
+    },
+    "T12": {
+      "status": "PASS",
+      "synthetic_document_releases": 0
+    },
+    "T14": {
+      "status": "PASS",
+      "invalid_argument": 400,
+      "document_release_change": 403,
+      "concurrent_message": 409,
+      "n8n_down": 503,
+      "failed_turn_messages": 0
+    },
+    "canonical_unchanged": true
+  },
+  "result": "PASS_WITH_EXPLICIT_PENDING"
+}

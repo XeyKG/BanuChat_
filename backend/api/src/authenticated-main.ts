@@ -6,6 +6,7 @@ import {loadGeneratorRuntimeConfig} from './generation/generator-client.js';
 import {OllamaGeneratorClient} from './generation/ollama-generator-client.js';
 import {OllamaQueryEmbeddingClient} from './retrieval/ollama-query-embedding-client.js';
 import {knowledgeMode} from './auth/knowledge-mode.js';
+import {loadN8nConversationRuntimeConfig,N8nConversationOrchestrator} from './orchestration/n8n-conversation.js';
 
 /** Local v2 process only: no v1, recovery composition, mail provider or public bind. */
 export async function startAuthenticatedApi(){
@@ -14,8 +15,9 @@ export async function startAuthenticatedApi(){
   const requireValue=(name:string)=>{const v=process.env[name];if(!v)throw new Error();return v;};
   const database=requireValue('BANUCHAT_AUTH_DATABASE'),deploymentId=requireValue('BANUCHAT_AUTH_DEPLOYMENT'),key=requireValue('BANUCHAT_AUTH_RATE_KEY');
   const mode=knowledgeMode(process.env.BANUCHAT_AUTH_EVIDENCE_MODE);
+  const unified=process.env.BANUCHAT_AUTH_PRODUCT==='unified';
   const dbPort=Number(requireValue('BANUCHAT_AUTH_DB_PORT')),port=Number(process.env.BANUCHAT_AUTH_API_PORT??'3002');
-  if(!/^[a-f0-9]{64}$/iu.test(key)||(mode==='synthetic'?/ccd/iu.test(database):database!=='banuchat_ccd_auth_i1b_test')||![dbPort,port].every(v=>Number.isInteger(v)&&v>=1024&&v<=65535)||[5432,55433].includes(dbPort))throw new Error();
+  if(!/^[a-f0-9]{64}$/iu.test(key)||(mode==='synthetic'?/ccd/iu.test(database):database!==(unified?'banuchat_unified':'banuchat_ccd_auth_i1b_test'))||![dbPort,port].every(v=>Number.isInteger(v)&&v>=1024&&v<=65535)||[5432,55433].includes(dbPort))throw new Error();
   pool=new Pool({host:'127.0.0.1',port:dbPort,database,user:requireValue('BANUCHAT_AUTH_RUNTIME_USER'),password:requireValue('BANUCHAT_AUTH_RUNTIME_PASSWORD'),connectionTimeoutMillis:5000,statement_timeout:15000});
   pool.on('error',()=>console.error('BanuChat: dependencia de persistencia no disponible.'));
   const runtime=loadGeneratorRuntimeConfig(),sql=new PgSqlClient(pool);
@@ -25,7 +27,10 @@ export async function startAuthenticatedApi(){
    'bch03-ccd-local-2':fileURLToPath(new URL('../../../data/ccd/local/expanded-v2/',import.meta.url)),
    'bch03-ccd-local-3':fileURLToPath(new URL('../../../data/ccd/local/guidance-v3/',import.meta.url))}}:
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
-  const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,
+  const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
+  const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;
+  const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,
+   ...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow}))})}:{}),
    document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator},mode),artifacts});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
   let stopping=false;const stop=async()=>{if(stopping)return;stopping=true;server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool?.end();};

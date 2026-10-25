@@ -16,8 +16,8 @@ export default function Login(){
  async function signIn(){if(!valid||busy)return;setBusy(true);setError(false);try{await client.login(uid,password);setPassword('');router.replace('/home');}catch{setPassword('');setError(true);}finally{setBusy(false);}}
  return <SafeAreaView style={styles.safe}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}><View style={styles.card}>
   <BrandMark size={48}/><Text style={styles.title}>Inicia sesión en BanuChat</Text>
-  <Text style={styles.copy}>Usa tu UID sintético y tu contraseña propia de BanuChat.</Text>
-  <Text style={styles.label}>UID sintético</Text><TextInput accessibilityLabel="UID sintético" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" style={styles.input}/>
+  <Text style={styles.copy}>Ingresa con tu usuario y contraseña de BanuChat.</Text>
+  <Text style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" style={styles.input}/>
   <Text style={styles.label}>Contraseña</Text><TextInput accessibilityLabel="Contraseña" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" editable={!busy&&!unavailable} style={styles.input} onSubmitEditing={()=>void signIn()}/>
   {unavailable&&<Text accessibilityRole="alert" style={styles.error}>El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.</Text>}
   {error&&<Text accessibilityRole="alert" style={styles.error}>No se pudo iniciar sesión. Revisa tus datos y la conexión autorizada.</Text>}

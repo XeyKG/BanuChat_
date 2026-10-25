@@ -182,8 +182,8 @@ export default function CalendarScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
           {loadState === 'success' && releaseId !== null && (
-            <Text accessibilityLabel={`Release sintética ${releaseId}`} style={styles.releaseText}>
-              Release sintética: {releaseId.slice(0, 8)}
+            <Text accessibilityLabel={`Versión del calendario ${releaseId}`} style={styles.releaseText}>
+              Calendario: {releaseId.slice(0, 8)}
             </Text>
           )}
           {loadState === 'loading' && (

@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "checks": {
+    "ccd_vector_tool": true,
+    "ccd_document_tool": true,
+    "six_real_tools": true,
+    "no_arbitrary_profile_argument": true,
+    "mcp_role_no_write": true,
+    "mcp_role_no_password_access": true,
+    "forged_foreign_progress_rejected_before_persist": true
+  }
+}

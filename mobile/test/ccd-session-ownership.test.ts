@@ -18,7 +18,7 @@ test('CCD account switch and restored session use only the current owner token/h
   if(path==='/auth/login'||path==='/auth/refresh')return Response.json({access_token:access[index],refresh_token:refresh[index],token_type:'Bearer',expires_in:900,session_expires_at:'2035-01-01T00:00:00Z'});
   if(index<0||revoked.has(token!))return Response.json({}, {status:401});
   if(path==='/auth/logout'){revoked.add(token!);return new Response(null,{status:204});}
-  if(path==='/auth/me')return Response.json({principal_id:ids[index],synthetic_uid:index===0?'U08000001':'U08000002',session_id:ids[index],release_id:ids[0],session_expires_at:'2035-01-01T00:00:00Z',evidence_mode:'ccd_local',profile:{profile_key:'ccd-local-demo',alias:'Demostración CCD local — sin identidad institucional'},capabilities:['chat','history','documents']});
+  if(path==='/auth/me')return Response.json({principal_id:ids[index],synthetic_uid:index===0?'U08000001':'U08000002',session_id:ids[index],release_id:ids[0],session_expires_at:'2035-01-01T00:00:00Z',evidence_mode:'ccd_local',profile:{profile_key:'account-'+index,alias:'Usuario'},capabilities:['chat','history','progress','calendar','announcements','documents']});
   assert.equal(path,'/conversations');return Response.json({owner:ids[index],conversations:[{conversation_id:ids[index]}]});
  };
  const first=new AuthSession(vault,()=>base,transport);

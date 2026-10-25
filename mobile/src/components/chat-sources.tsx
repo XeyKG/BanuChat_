@@ -75,7 +75,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
         <View style={styles.toggleLeft}>
           <DocGlyph color={colors.accent} size={15} />
           <Text style={styles.toggleText}>
-            {isCcdLocal() ? (sourceCount === 1 ? '1 fuente documental' : `${sourceCount} fuentes documentales`) : (sourceCount === 1 ? '1 fuente verificada' : `${sourceCount} fuentes verificadas`)}
+            {sourceCount === 1 ? '1 fuente' : `${sourceCount} fuentes`}
           </Text>
         </View>
         <Text aria-hidden style={styles.toggleSymbol}>

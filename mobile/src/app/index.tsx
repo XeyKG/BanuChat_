@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import { isCcdLocal,isCcdAuthenticated } from '@/config/demo-mode';
+import { isCcdLocal } from '@/config/demo-mode';
 import {useAuth} from '@/auth/auth-provider';
 import {
   Pressable,
@@ -68,11 +68,7 @@ function SlideGlyph({ slide }: { slide: OnboardingSlide }) {
 }
 
 export default function OnboardingScreen() {
-  const slides=isCcdAuthenticated()?SLIDES.map((slide,index)=>({...slide,...[
-    {eyebrow:'Chat CCD',title:'Pregunta sobre los documentos seleccionados.',body:'Cursos, temas y orientación general con límites explícitos. Cuenta BanuChat ficticia, sin identidad universitaria acreditada.'},
-    {eyebrow:'Historial propio',title:'Tus conversaciones, en tu cuenta.',body:'El historial está asociado a tu sesión individual; compartir el contexto documental no comparte conversaciones.'},
-    {eyebrow:'Fuentes verificables',title:'Abre la fuente y revisa sus límites.',body:'Material CCD seleccionado de desarrollo local, sin aval institucional ni actualidad ratificada. No incluye progreso, calendario o anuncios personales.'},
-  ][index]})):SLIDES;
+  const slides=SLIDES;
   const {snapshot}=useAuth();
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
@@ -174,9 +170,7 @@ export default function OnboardingScreen() {
             style={styles.nextButton}
           />
           <Text style={styles.demoNote}>
-            {isCcdAuthenticated()
-              ? 'Demostración CCD local · cuenta ficticia · sin aval institucional'
-              : 'Demostración académica · datos completamente sintéticos'}
+            BanuChat
           </Text>
         </View>
       </View>

@@ -216,6 +216,9 @@ export interface SendMessageDependencies {
   document_rag: DocumentRagResponder;
   agent_fallback?: McpAgentResponder;
   conversation_orchestrator?: ConversationOrchestrator;
+  /** Trusted authenticated composition; never selected through request input. */
+  answer_responder?: McpAgentResponder;
+  structured_release_id?: string;
   read_context?: MessageTransaction;
   commit_turn?: MessageTransaction;
   persist?: (client: SqlQueryClient, values: readonly unknown[]) => Promise<{ rows: PersistedTurnRow[] }>;
@@ -329,13 +332,14 @@ function validateCitationPair(
   record: PersistenceCitation,
   index: number,
   releaseId: string,
+  structuredReleaseId?: string,
 ): boolean {
   if (
     citation.index !== index ||
     record.citation_index !== index ||
     citation.source_kind !== record.source_kind ||
-    citation.release_id !== releaseId ||
-    record.dataset_release_id !== releaseId ||
+    citation.release_id !== (citation.source_kind === 'document' ? releaseId : structuredReleaseId ?? releaseId) ||
+    record.dataset_release_id !== citation.release_id ||
     !isNonblank(citation.label) ||
     !isNonblank(citation.locator) ||
     citation.locator !== record.source_locator ||
@@ -421,7 +425,7 @@ interface PersistableAnswer {
   citation_records: PersistenceCitation[];
 }
 
-function validateAnswer(answer: PersistableAnswer): void {
+function validateAnswer(answer: PersistableAnswer, structuredReleaseId?:string): void {
   if (
     !isUuid(answer.release_id) ||
     !isNonblank(answer.content) ||
@@ -439,7 +443,7 @@ function validateAnswer(answer: PersistableAnswer): void {
     if (
       citation === undefined ||
       record === undefined ||
-      !validateCitationPair(citation, record, index, answer.release_id)
+      !validateCitationPair(citation, record, index, answer.release_id, structuredReleaseId)
     ) {
       reject("invalid_database_result");
     }
@@ -502,7 +506,7 @@ export async function sendMessage(
 
   let dispatched;
   try {
-    dispatched = await dispatchChatQuery(
+    dispatched = dependencies.answer_responder ? {kind:'agent_fallback' as const} : await dispatchChatQuery(
       { sql: dependencies.sql, router: dependencies.router, demo_mode: dependencies.demo_mode ?? "synthetic" },
       {
         content: input.content,
@@ -563,7 +567,8 @@ export async function sendMessage(
           requested_capability: "bounded_mcp_agent",
         });
       }
-      answer = dependencies.demo_mode !== "ccd_local" && dependencies.agent_fallback !== undefined
+      answer = dependencies.answer_responder !== undefined ? await dependencies.answer_responder(agentInput)
+        : dependencies.demo_mode !== "ccd_local" && dependencies.agent_fallback !== undefined
         ? await dependencies.agent_fallback(agentInput)
         : await dependencies.document_rag({
             release_id: context.dataset_release_id,
@@ -604,7 +609,7 @@ export async function sendMessage(
   if (answer.release_id !== context.dataset_release_id) {
     reject("current_release_changed");
   }
-  validateAnswer(answer);
+  validateAnswer(answer,dependencies.structured_release_id);
 
   const expectedOrdinal = context.expected_next_ordinal as number;
   const commit: MessageTransaction = dependencies.commit_turn ?? (operation => operation(dependencies.sql));

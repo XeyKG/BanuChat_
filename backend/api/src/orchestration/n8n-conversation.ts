@@ -3,7 +3,7 @@ export type ConversationOrchestrationDirective = "invoke_bounded_mcp_agent";
 export interface ConversationOrchestrationInput {
   operation_id: string;
   release_id: string;
-  demo_mode: "synthetic";
+  demo_mode: "synthetic" | "ccd_local";
   route: "agent_fallback";
   requested_capability: "bounded_mcp_agent";
 }
