@@ -1,0 +1,87 @@
+{
+  "schema_version": "banuchat-oe6-docker-rag-1",
+  "observed_date": "2026-10-25",
+  "baseline_revision": "39b6b6221d61bd7aef2ce236dd124c3b11488345",
+  "environment": {
+    "kind": "Docker Desktop local laptop",
+    "not_university_infrastructure": true,
+    "compose_profile": "ollama-container",
+    "network_mode": "host inside the Docker Desktop Linux VM",
+    "ollama_version": "0.35.0",
+    "ollama_image_digest": "sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01",
+    "ollama_image_size_bytes": 3750498170,
+    "ollama_volume": {
+      "name": "banuchat-closure-ollama-models",
+      "labels": {
+        "com.banuchat.scope": "closure-validation",
+        "com.banuchat.content": "ollama-models"
+      },
+      "dedicated_to_this_closure": true,
+      "windows_ollama_storage_mounted": false
+    },
+    "gpu": {
+      "name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+      "requested_by_compose": true,
+      "ollama_library": "CUDA",
+      "embedding_processor_observed": "100% GPU"
+    },
+    "models": [
+      {
+        "name": "qwen3-embedding:0.6b",
+        "digest": "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d",
+        "size_bytes": 639150858
+      },
+      {
+        "name": "qwen3:4b-instruct",
+        "digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+        "size_bytes": 2497293803
+      }
+    ]
+  },
+  "cold_start": {
+    "runner": "eval/integration/run-j1-smoke.mjs inside banuchat/backend:oe6-local",
+    "outcome": "EXPECTED_SAFE_FAILURE",
+    "document_rag_http_status": 503,
+    "ollama_embed_http_status": 499,
+    "ollama_embed_elapsed_ms": 19143.83798,
+    "mcp_tool_call_timeout_ms": 15000,
+    "diagnosis": "The first GPU load of the embedding model exceeded the bounded MCP tool call timeout; the API failed closed and the runner confirmed conversation cleanup.",
+    "cleanup_confirmed": true
+  },
+  "warmup": {
+    "endpoint": "POST /api/embed on the container-local Ollama endpoint",
+    "http_status": 200,
+    "elapsed_ms": 31061.546714,
+    "ollama_model_server_start_ms": 22910,
+    "operational_requirement": "Warm the embedding model before accepting demo traffic."
+  },
+  "warm_vertical_smoke": {
+    "runner": "eval/integration/run-j1-smoke.mjs inside banuchat/backend:oe6-local",
+    "outcome": "PASS",
+    "implemented_synthetic_route": "bounded deterministic MCP agent using search_knowledge",
+    "llm_react_or_direct_generator_exercised": false,
+    "steps": {
+      "profiles_ms": 49,
+      "calendar_ms": 11,
+      "progress_ms": 10,
+      "create_conversation_ms": 11,
+      "fast_path_ms": 22,
+      "document_rag_ms": 16049,
+      "conversation_history_ms": 13,
+      "cleanup_ms": 9
+    },
+    "document_citation_asserted": true,
+    "four_messages_and_citation_persisted_before_cleanup": true,
+    "cleanup_confirmed": true
+  },
+  "isolation_checks": {
+    "ccd_auth_container_status_after_test": "running/healthy",
+    "ccd_auth_volume": "banuchat-dev-ccd-auth-data",
+    "ccd_volume_mounted_by_oe6": false,
+    "windows_ollama_model_list_unchanged": true,
+    "latest_remaining_synthetic_conversation_started_at": "2026-10-14T03:56:15.071514Z",
+    "latest_remaining_synthetic_message_created_at": "2026-10-14T03:58:05.848450Z",
+    "test_residue_observed": false
+  },
+  "claim_limit": "This proves the implemented synthetic documentary path through vector retrieval and cited response on local Docker Desktop. It does not prove direct LLM generation in that branch, ReAct, UNAB deployment, sustained availability, institutional data authority, or a cold-start SLA."
+}

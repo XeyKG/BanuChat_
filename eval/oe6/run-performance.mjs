@@ -3,6 +3,7 @@
 import { cpus, totalmem, platform, release, arch } from "node:os";
 import { mkdir, writeFile } from "node:fs/promises";
 import { performance } from "node:perf_hooks";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const base = process.env.BANUCHAT_OE6_API_BASE_URL ?? "http://127.0.0.1:3000/api/v1";
@@ -10,7 +11,9 @@ const profileKey = process.env.BANUCHAT_OE6_PROFILE_KEY ?? "profile-001";
 const sampleSize = Number(process.env.BANUCHAT_OE6_SAMPLE_SIZE ?? "10");
 const concurrency = Number(process.env.BANUCHAT_OE6_CONCURRENCY ?? "1");
 const timeoutMs = Number(process.env.BANUCHAT_OE6_TIMEOUT_MS ?? "120000");
-const output = fileURLToPath(new URL("./results/oe6-performance-2026-10-25.json", import.meta.url));
+const outputName = process.env.BANUCHAT_OE6_OUTPUT_FILE ?? "oe6-performance-2026-10-25.json";
+const resultsDirectory = fileURLToPath(new URL("./results/", import.meta.url));
+const output = join(resultsDirectory, outputName);
 const branches = [
   { name: "fast_path", prompt: "mi progreso", expected: "profile_course" },
   { name: "document_rag", prompt: "¿Qué información debo incluir al reportar una incidencia?", expected: "document" },
@@ -19,7 +22,8 @@ const branches = [
 
 if (!Number.isInteger(sampleSize) || sampleSize < 1 || sampleSize > 100 ||
     !Number.isInteger(concurrency) || concurrency < 1 || concurrency > 10 ||
-    !Number.isInteger(timeoutMs) || timeoutMs < 1_000 || timeoutMs > 300_000) {
+    !Number.isInteger(timeoutMs) || timeoutMs < 1_000 || timeoutMs > 300_000 ||
+    !/^[a-z0-9][a-z0-9._-]*\.json$/i.test(outputName)) {
   throw new Error("invalid_benchmark_configuration");
 }
 
@@ -90,7 +94,8 @@ async function attempt(branch, ordinal) {
   }
 }
 
-function stats(attempts) {
+function descriptiveStats(attempts) {
+  if (attempts.length === 0) return null;
   const values = attempts.map(item => item.duration_ms).sort((a, b) => a - b);
   const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
   const percentile = p => values[Math.max(0, Math.ceil(values.length * p) - 1)];
@@ -108,6 +113,19 @@ function stats(attempts) {
   };
 }
 
+function stats(branch, attempts) {
+  const all = descriptiveStats(attempts);
+  if (branch.name !== "document_rag") return all;
+  const isWarm = item => item.model_state_before.some(name => name.startsWith("qwen3-embedding:0.6b"));
+  const cold = attempts.filter(item => !isWarm(item));
+  const warm = attempts.filter(isWarm);
+  return {
+    ...all,
+    cold_start: descriptiveStats(cold),
+    warm: descriptiveStats(warm),
+  };
+}
+
 const startedAt = new Date().toISOString();
 const results = [];
 for (const branch of branches) {
@@ -118,7 +136,7 @@ for (const branch of branches) {
     attempts.push(...await Promise.all(batch));
   }
   results.push({ branch: branch.name, measurement_boundary: "HTTP POST /messages start to parsed JSON response",
-    statistics: stats(attempts), attempts });
+    statistics: stats(branch, attempts), attempts });
   process.stdout.write(`${branch.name}: ${JSON.stringify(results.at(-1).statistics)}\n`);
 }
 
@@ -137,8 +155,8 @@ const report = {
   fixtures_or_mocks: false,
   results,
 };
-await mkdir(fileURLToPath(new URL("./results/", import.meta.url)), { recursive: true });
+await mkdir(resultsDirectory, { recursive: true });
 await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({ status: results.every(item => item.statistics.errors === 0) ? "PASS" : "FAIL",
-  output: "eval/oe6/results/oe6-performance-2026-10-25.json" }));
+  output: `eval/oe6/results/${outputName}` }));
 if (results.some(item => item.statistics.errors > 0)) process.exitCode = 1;

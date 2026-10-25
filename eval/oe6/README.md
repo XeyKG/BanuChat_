@@ -19,7 +19,21 @@ No acredita despliegue institucional ni sustituye pruebas en dispositivos o con 
 
    Variables opcionales: `BANUCHAT_OE6_SAMPLE_SIZE` (10),
    `BANUCHAT_OE6_CONCURRENCY` (1), `BANUCHAT_OE6_TIMEOUT_MS` (120000),
-   `BANUCHAT_OE6_API_BASE_URL` y `BANUCHAT_OE6_PROFILE_KEY`.
+   `BANUCHAT_OE6_API_BASE_URL`, `BANUCHAT_OE6_PROFILE_KEY` y
+   `BANUCHAT_OE6_OUTPUT_FILE` (nombre JSON dentro de `results/`). El reporte separa
+   las muestras Document RAG con el embedding descargado pero aún no cargado (`cold_start`)
+   de aquellas con el modelo de embedding ya residente (`warm`).
+
+   El cierre Docker conserva archivos separados para concurrencias 1, 2 y 5. Para
+   validar sus configuraciones, calcular SHA-256 y generar la comparación consolidada:
+
+   ```powershell
+   node eval/oe6/summarize-performance.mjs
+   ```
+
+   El resumen no mezcla el arranque frío: ese caso está en
+   `results/oe6-docker-rag-2026-10-25.json`, porque el timeout MCP produjo un 503
+   seguro antes del warm-up.
 
 3. Estabilidad: detiene temporalmente el contenedor N8N local, comprueba 503 sin
    persistencia, lo inicia y verifica recuperación. La indisponibilidad de Ollama se

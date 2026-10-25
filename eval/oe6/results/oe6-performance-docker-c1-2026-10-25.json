@@ -1,0 +1,335 @@
+{
+  "schema_version": "banuchat-oe6-performance-1",
+  "started_at": "2026-10-25T13:29:06.003Z",
+  "completed_at": "2026-10-25T13:29:44.553Z",
+  "environment": {
+    "platform": "linux",
+    "os_release": "6.18.33.2-microsoft-standard-WSL2",
+    "architecture": "x64",
+    "cpu": "13th Gen Intel(R) Core(TM) i5-13420H",
+    "logical_processors": 12,
+    "memory_bytes": 8171175936,
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU (observed by OE6 inventory)",
+    "node": "v24.19.0",
+    "api_base_url": "http://127.0.0.1:3000/api/v1",
+    "local_hardware_not_university_server": true
+  },
+  "configuration": {
+    "sample_size_per_branch": 10,
+    "concurrency": 1,
+    "timeout_ms": 120000,
+    "target_mean_ms": 5000,
+    "retries": 0,
+    "errors_included_in_primary_statistics": true
+  },
+  "fixtures_or_mocks": false,
+  "results": [
+    {
+      "branch": "fast_path",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 14.7,
+        "median_ms": 15,
+        "p95_ms": 18,
+        "max_ms": 18,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 0,
+        "target_mean_le_5s": true
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 18,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 18,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 14,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 15,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 17,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 12,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 13,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 15,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 15,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 10,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "document_rag",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 1840.4,
+        "median_ms": 1809,
+        "p95_ms": 2053,
+        "max_ms": 2053,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 0,
+        "target_mean_le_5s": true,
+        "cold_start": null,
+        "warm": {
+          "samples": 10,
+          "concurrency": 1,
+          "mean_ms": 1840.4,
+          "median_ms": 1809,
+          "p95_ms": 2053,
+          "max_ms": 2053,
+          "errors": 0,
+          "timeouts": 0,
+          "over_target_5s": 0,
+          "target_mean_le_5s": true
+        }
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 1830,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 1759,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 1852,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 1809,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 1755,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 1862,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 1767,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 1676,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 2053,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 2041,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        }
+      ]
+    },
+    {
+      "branch": "n8n_mcp",
+      "measurement_boundary": "HTTP POST /messages start to parsed JSON response",
+      "statistics": {
+        "samples": 10,
+        "concurrency": 1,
+        "mean_ms": 1950.2,
+        "median_ms": 1868,
+        "p95_ms": 2497,
+        "max_ms": 2497,
+        "errors": 0,
+        "timeouts": 0,
+        "over_target_5s": 0,
+        "target_mean_le_5s": true
+      },
+      "attempts": [
+        {
+          "ordinal": 1,
+          "outcome": "PASS",
+          "duration_ms": 2497,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 2,
+          "outcome": "PASS",
+          "duration_ms": 1874,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 3,
+          "outcome": "PASS",
+          "duration_ms": 1849,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 4,
+          "outcome": "PASS",
+          "duration_ms": 1848,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 5,
+          "outcome": "PASS",
+          "duration_ms": 1868,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 6,
+          "outcome": "PASS",
+          "duration_ms": 2101,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 7,
+          "outcome": "PASS",
+          "duration_ms": 1952,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 8,
+          "outcome": "PASS",
+          "duration_ms": 1803,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 9,
+          "outcome": "PASS",
+          "duration_ms": 1873,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        },
+        {
+          "ordinal": 10,
+          "outcome": "PASS",
+          "duration_ms": 1837,
+          "model_state_before": [
+            "qwen3-embedding:0.6b"
+          ]
+        }
+      ]
+    }
+  ]
+}

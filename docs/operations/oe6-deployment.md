@@ -15,10 +15,12 @@ Esta elección debe validarse en el servidor receptor y no es equivalente al Com
 de desarrollo de Docker Desktop.
 
 En la comprobación Windows/Docker Desktop, API/PostgreSQL/N8N/MCP compartieron la red
-Linux y funcionaron, pero el daemon Ollama instalado en Windows no fue visible en ese
-loopback; Document RAG respondió 503. En Docker Desktop debe usarse el perfil
-`ollama-container` y precargar ambos modelos. El camino con Ollama host se reserva al
-servidor Linux, donde `network_mode: host` comparte el namespace del host.
+Linux. El daemon Ollama instalado en Windows no fue visible en ese loopback, pero el
+perfil `ollama-container` con volumen dedicado cerró el recorrido local completo el
+25 de octubre de 2026. Su primer embedding tardó 31,06 s y excedió el timeout MCP
+acotado de 15 s; el API respondió 503 sin fingir éxito. Tras el warm-up explícito, J1
+pasó con cita e historial. El camino con Ollama host se reserva al servidor Linux,
+donde `network_mode: host` comparte el namespace del host.
 
 ```text
 Mobile --HTTPS/TLS pendiente--> reverse proxy institucional pendiente
@@ -54,16 +56,18 @@ otra base, volumen, puerto y artefactos privados; nunca usa la demo como fallbac
 ## Capacidad inicial
 
 La prueba local usó i5-13420H (8 núcleos/12 hilos), 16 GB RAM y RTX 3050 Laptop
-6 GB. Concurrencia 1, 10 muestras por rama: RAG medio 3,03 s y p95 5,34 s. Esto
+6 GB. La nueva corrida Docker caliente, con 10 muestras por rama y concurrencias
+1/2/5, obtuvo RAG medio 1,84/2,35/4,00 s y p95 2,05/2,77/4,09 s; no hubo errores,
+timeouts ni muestras >5 s. Esto
 justifica como **mínimo de piloto**, no como capacidad institucional: 8 vCPU, 16 GB
 RAM, GPU NVIDIA con 6 GB VRAM y 40 GB libres para imágenes/modelos/datos/backups.
 Recomendado para margen y evaluación concurrente: 12 vCPU, 32 GB RAM, GPU 8–12 GB
-VRAM y 100 GB en almacenamiento redundante. CPU-only, concurrencia mayor que 1 y
+VRAM y 100 GB en almacenamiento redundante. CPU-only, concurrencia >5, soak y
 crecimiento real no se midieron; deben medirse antes de fijar capacidad final.
 
-Tamaños observados: imagen backend 156 MB; modelos Ollama usados ≈3,1 GB; imágenes
-locales activas ≈3,0 GB. El almacenamiento recomendado incluye holgura y copias, no
-es una proyección de crecimiento institucional.
+Tamaños observados: imagen backend comprimida 156 MB; imagen Ollama GPU 3,75 GB y
+modelos Ollama usados 3.136.444.661 bytes. El almacenamiento recomendado incluye
+holgura y copias, no es una proyección de crecimiento institucional.
 
 ## Preparación e instalación
 
@@ -93,20 +97,40 @@ es una proyección de crecimiento institucional.
    ```
 
 7. Asegurar Ollama 0.35.0 y los modelos `qwen3-embedding:0.6b` y
-   `qwen3:4b-instruct`. Puede usarse el daemon host o el perfil `ollama-container`;
-   no ejecutar ambos en 11434.
+   `qwen3:4b-instruct`. En Docker Desktop usar el perfil `ollama-container`, GPU y
+   un volumen externo identificado; no montar almacenamiento Ollama de Windows ni
+   reutilizar un volumen sin verificarlo. Descargar solo modelos ausentes:
+
+   ```powershell
+   docker volume create --label com.banuchat.scope=closure-validation --label com.banuchat.content=ollama-models banuchat-closure-ollama-models
+   docker compose --profile ollama-container --env-file infra/local/oe6/oe6.env -f infra/docker-compose.oe6.yml up -d ollama
+   docker exec banuchat-oe6-local-ollama-1 ollama list
+   docker exec banuchat-oe6-local-ollama-1 ollama pull qwen3-embedding:0.6b
+   docker exec banuchat-oe6-local-ollama-1 ollama pull qwen3:4b-instruct
+   ```
+
+   Si el volumen ya existe, inspeccionarlo y omitir `volume create`; si los modelos
+   ya aparecen con los digests documentados, omitir los `pull`.
 8. Arrancar core. Si los volúmenes están usados por el Compose histórico, detener
    solo sus contenedores primero; no eliminarlos ni recrearlos:
 
    ```powershell
-   docker compose --env-file infra/local/oe6/oe6.env -f infra/docker-compose.oe6.yml up -d postgres-synthetic n8n api
+   docker compose --profile ollama-container --env-file infra/local/oe6/oe6.env -f infra/docker-compose.oe6.yml up -d postgres-synthetic n8n ollama api
    ```
 
-9. En N8N importar/revincular workflows y credenciales privadas. Para el entorno
+9. Antes de aceptar tráfico RAG, calentar el embedding por el mismo loopback Linux.
+   La primera carga fría local puede exceder 15 s y devolver 503; no ampliar límites
+   ni reintentar mensajes para ocultarlo:
+
+   ```powershell
+   docker exec banuchat-oe6-local-api-1 node -e "fetch('http://127.0.0.1:11434/api/embed',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:'qwen3-embedding:0.6b',input:'BanuChat warmup'})}).then(r=>{if(!r.ok)process.exit(1)})"
+   ```
+
+10. En N8N importar/revincular workflows y credenciales privadas. Para el entorno
    local existente, `node infra/scripts/provision-oe6-n8n.mjs` rota únicamente la
    credencial conversacional y publica ese workflow. Definir
    `BANUCHAT_N8N_CONTAINER` si el nombre difiere.
-10. Activar `operations` solo durante ingesta/calendario autorizados; activar
+11. Activar `operations` solo durante ingesta/calendario autorizados; activar
     `ccd-auth` solo con volumen, roles y artefactos CCD verificados. Nunca apuntar
     esos perfiles a la base contraria.
 

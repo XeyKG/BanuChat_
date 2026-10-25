@@ -1,0 +1,166 @@
+{
+  "schema_version": "banuchat-oe6-concurrency-summary-1",
+  "generated_at": "2026-10-25T17:45:49.058Z",
+  "baseline_revision": "39b6b6221d61bd7aef2ce236dd124c3b11488345",
+  "environment": {
+    "deployment": "Docker Desktop Compose profile ollama-container",
+    "ollama_volume": "banuchat-closure-ollama-models",
+    "hardware_class": "local laptop; not UNAB infrastructure",
+    "state": "embedding explicitly warmed before each bounded run"
+  },
+  "method": {
+    "concurrency_levels": [
+      1,
+      2,
+      5
+    ],
+    "samples_per_branch_per_level": 10,
+    "branches": [
+      "fast_path",
+      "document_rag",
+      "n8n_mcp"
+    ],
+    "retries": 0,
+    "target_ms": 5000,
+    "measurement_boundary": "HTTP POST /messages start to parsed JSON response"
+  },
+  "sources": [
+    {
+      "path": "eval/oe6/results/oe6-performance-docker-c1-2026-10-25.json",
+      "sha256": "ca939f76602a1b49413f4bd104a387cf97247ef97299253b093ad7772f747e14"
+    },
+    {
+      "path": "eval/oe6/results/oe6-performance-docker-c2-2026-10-25.json",
+      "sha256": "dfd63761461e3efea5116f117b4cc83d78a667cc4bf3612cd9500b33311f71ab"
+    },
+    {
+      "path": "eval/oe6/results/oe6-performance-docker-c5-2026-10-25.json",
+      "sha256": "a03864e5ae6cfd6af9f26e0ed0fe8b0a47b1523182af02aa2b324072528295ab"
+    }
+  ],
+  "comparison": [
+    {
+      "concurrency": 1,
+      "branch": "fast_path",
+      "samples": 10,
+      "mean_ms": 14.7,
+      "median_ms": 15,
+      "p95_ms": 18,
+      "max_ms": 18,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    },
+    {
+      "concurrency": 1,
+      "branch": "document_rag",
+      "samples": 10,
+      "mean_ms": 1840.4,
+      "median_ms": 1809,
+      "p95_ms": 2053,
+      "max_ms": 2053,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0,
+      "cold_start_samples": 0,
+      "warm_samples": 10
+    },
+    {
+      "concurrency": 1,
+      "branch": "n8n_mcp",
+      "samples": 10,
+      "mean_ms": 1950.2,
+      "median_ms": 1868,
+      "p95_ms": 2497,
+      "max_ms": 2497,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    },
+    {
+      "concurrency": 2,
+      "branch": "fast_path",
+      "samples": 10,
+      "mean_ms": 22.6,
+      "median_ms": 22,
+      "p95_ms": 33,
+      "max_ms": 33,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    },
+    {
+      "concurrency": 2,
+      "branch": "document_rag",
+      "samples": 10,
+      "mean_ms": 2349.3,
+      "median_ms": 2208,
+      "p95_ms": 2768,
+      "max_ms": 2768,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0,
+      "cold_start_samples": 0,
+      "warm_samples": 10
+    },
+    {
+      "concurrency": 2,
+      "branch": "n8n_mcp",
+      "samples": 10,
+      "mean_ms": 2244.4,
+      "median_ms": 2248,
+      "p95_ms": 2381,
+      "max_ms": 2381,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    },
+    {
+      "concurrency": 5,
+      "branch": "fast_path",
+      "samples": 10,
+      "mean_ms": 29.7,
+      "median_ms": 29,
+      "p95_ms": 37,
+      "max_ms": 37,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    },
+    {
+      "concurrency": 5,
+      "branch": "document_rag",
+      "samples": 10,
+      "mean_ms": 3998.4,
+      "median_ms": 4033,
+      "p95_ms": 4089,
+      "max_ms": 4089,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0,
+      "cold_start_samples": 0,
+      "warm_samples": 10
+    },
+    {
+      "concurrency": 5,
+      "branch": "n8n_mcp",
+      "samples": 10,
+      "mean_ms": 3675.7,
+      "median_ms": 3680,
+      "p95_ms": 3905,
+      "max_ms": 3905,
+      "errors": 0,
+      "timeouts": 0,
+      "over_target_5s": 0
+    }
+  ],
+  "aggregate": {
+    "samples": 90,
+    "errors": 0,
+    "timeouts": 0,
+    "over_target_5s": 0,
+    "highest_bounded_concurrency": 5,
+    "saturation_observed_through_highest_level": false,
+    "higher_concurrency_tested": false
+  }
+}

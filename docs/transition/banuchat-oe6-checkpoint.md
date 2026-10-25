@@ -31,6 +31,11 @@ su p95 fue 5,34 s. No se extrapola el portátil a un servidor universitario.
 | Mobile nativo | hardware | NO EJECUTADO: no existen `adb`, Android SDK/AVD ni dispositivo visible |
 | Compose OE6 en Docker Desktop | contenedores reales | PostgreSQL/N8N/API healthy; fast paths y N8N→MCP PASS dentro de la red host. Document RAG devolvió 503 porque el Ollama Windows externo no comparte el loopback Linux de Docker Desktop |
 
+Seguimiento del 25 de octubre: el perfil `ollama-container`, con volumen dedicado y
+warm-up, cerró Document RAG Docker y la carga concurrente 1/2/5. Véase el
+[checkpoint de cierre técnico](banuchat-technical-closure-checkpoint.md). El fallo frío
+se conserva como evidencia; no se reescribe este resultado histórico.
+
 La publicación de ingesta N8N y calendario no se volvió a ejecutar: la evidencia real
 vigente de OE2/OE4 ya acredita publicación/`unchanged`, y una nueva revisión Git no
 se publica sin aprobación registrada. OE6 reutilizó esa evidencia y comprobó la
@@ -91,7 +96,8 @@ acredita disponibilidad continua.
 
 ## Esfuerzo restante estimado
 
-Estimación técnica, dependiente de accesos y aprobaciones: 20–36 jornadas-persona y
+Corrección aritmética: las actividades enumeradas suman **23–41 jornadas-persona**,
+no 20–36. La estimación sigue dependiendo de accesos y aprobaciones; el rango histórico de
 4–7 semanas calendario. Desglose: recepción/TLS/secretos/monitoreo 3–5 jornadas;
 fuentes y Sheets institucionales 5–10; carga/soak/hardening 3–5; Android+iOS+push
 5–8; revisión RAGAS y banco 2–4; sesiones SUS y consolidación 3–5; cierre académico
