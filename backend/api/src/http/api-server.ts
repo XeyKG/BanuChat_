@@ -29,6 +29,7 @@ import { getProfileProgress, type ProfileProgressStatus } from "../application/p
 import { getAnnouncements, type AnnouncementTemporalStatus } from "../application/announcements.js";
 import type { SqlQueryClient } from "../data/sql-client.js";
 import type { IntentRouter } from "../routing/intent-router-types.js";
+import type { ConversationOrchestrator } from "../orchestration/n8n-conversation.js";
 import {
   ConversationActivityConflictError,
   ConversationActivityCoordinator,
@@ -63,6 +64,7 @@ export interface ApiServerDependencies {
   router: IntentRouter;
   document_rag: DocumentRagResponder;
   agent_fallback?: McpAgentResponder;
+  conversation_orchestrator?: ConversationOrchestrator;
   now?: () => string;
   document_artifact?: DocumentArtifactStorage;
 }
@@ -460,6 +462,9 @@ async function handleRequest(
               ...(dependencies.agent_fallback === undefined
                 ? {}
                 : { agent_fallback: dependencies.agent_fallback }),
+              ...(dependencies.conversation_orchestrator === undefined
+                ? {}
+                : { conversation_orchestrator: dependencies.conversation_orchestrator }),
               demo_mode: dependencies.demo_mode ?? "synthetic",
             },
             {

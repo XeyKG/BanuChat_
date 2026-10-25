@@ -1,5 +1,29 @@
 # RAG e ingesta — estado implementado
 
+## OE4 — sincronización de calendario sintético
+
+`src/oe4` implementa un adaptador de fixture local representativo de Google Sheets y
+un servicio HTTP interno autenticado. El contrato incluye identidad estable,
+`modified_at`, zona `America/Bogota`, título, descripción, tipo y estados
+`active/cancelled/deleted`. La fuente autorizada está cerrada a
+`fixture-calendar-sheet-v1`; N8N no puede enviar paths ni SQL.
+
+Una ejecución con cambios clona la release sintética vigente dentro de una transacción,
+copia documentos, chunks/embeddings y datos estructurados, aplica el calendario,
+registra items de ingesta, ejecuta las validaciones SQL existentes y publica. No
+modifica `/data/synthetic`, no crea otro almacenamiento y conserva la release previa
+si cualquier paso falla. El mismo hash devuelve `unchanged` sin otra publicación.
+
+Arranque compilado: `npm run start:oe4-calendar`. Requiere las variables PostgreSQL
+sintéticas existentes, `BANUCHAT_OE4_SERVICE_TOKEN` (mínimo 32 caracteres) y acepta
+`BANUCHAT_OE4_INTERNAL_HOST=127.0.0.1|0.0.0.0` y puerto opcional 3012. El bind
+`0.0.0.0` se limita a la prueba local Docker y no autoriza exposición externa.
+
+No hay conector ni credencial real de Google Sheets. `publication_lag_ms` del fixture
+es comportamiento técnico no verificable, indicado por
+`publication_lag_verifiable=false`; el schedule de 30 minutos no acredita el objetivo
+de latencia de la fuente original.
+
 BCH-03 incremento 5 añade contrato CCD `ccd-1.2.0` y receta explícita
 `ccd_guidance_v1`: doce documentos/chunks, conservando los diez anteriores y
 añadiendo solo U03/U04. Usa el lease y finalizador existentes, verifica los hashes
@@ -436,8 +460,11 @@ con generador `qwen3:4b-instruct` y la app móvil; su estado específico está e
 [API](../api/README.md) y [Mobile](../../mobile/README.md). Embeddings usa Ollama
 local + `qwen3-embedding:0.6b`, 1024 dimensiones y coseno, sin HNSW/IVFFlat.
 
-Agent/ReAct y el servidor MCP ejecutable siguen pendientes, al igual que workflows
-N8N retry/recover/scheduled, topología portable y permisos mínimos. Hay evaluación
+El servidor MCP ejecutable y el agente determinista acotado de OE3 están integrados
+en el fallback sintético; un ciclo ReAct dirigido por LLM y la credencial PostgreSQL
+MCP mínima siguen pendientes. También siguen pendientes workflows N8N
+retry/recover de ingesta y topología portable; OE4 añade únicamente el schedule de
+calendario descrito arriba. Hay evaluación
 retrieval [K2](../../eval/retrieval/results/k2-v1-2026-10-01.md) con MRR@5 y mediciones
 de generación/latencia [indexadas en eval](../../eval/README.md); no equivalen a
 RAGAS completa ni prueban todos los objetivos OE1/OE2/OE4/OE6. SUS y evaluación

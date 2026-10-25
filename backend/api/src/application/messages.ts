@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { dispatchChatQuery } from "../chat/chat-dispatcher.js";
 import {
   DocumentRagInvariantError,
@@ -21,7 +23,15 @@ import { ProfileProgressError } from "./profile-progress-errors.js";
 import { DocumentLookupError } from "./document-lookup-errors.js";
 import type { DemoMode } from "./demo-mode.js";
 import { boundConversationContext, type ConversationMessage } from "../chat/conversation-context.js";
-import { McpAgentError, type McpAgentInput } from "../agent/bounded-mcp-agent.js";
+import {
+  McpAgentError,
+  requiresConversationalOrchestration,
+  type McpAgentInput,
+} from "../agent/bounded-mcp-agent.js";
+import {
+  ConversationOrchestrationError,
+  type ConversationOrchestrator,
+} from "../orchestration/n8n-conversation.js";
 
 const DATASET_ID = 1;
 const UUID_PATTERN =
@@ -205,6 +215,7 @@ export interface SendMessageDependencies {
   router: IntentRouter;
   document_rag: DocumentRagResponder;
   agent_fallback?: McpAgentResponder;
+  conversation_orchestrator?: ConversationOrchestrator;
   read_context?: MessageTransaction;
   commit_turn?: MessageTransaction;
   persist?: (client: SqlQueryClient, values: readonly unknown[]) => Promise<{ rows: PersistedTurnRow[] }>;
@@ -531,20 +542,38 @@ export async function sendMessage(
     answer = dispatched;
   } else {
     try {
+      const agentInput: McpAgentInput = {
+        release_id: context.dataset_release_id,
+        profile_key: context.profile_key,
+        query: input.content,
+        now: input.now,
+        ...(history.length === 0 ? {} : { history }),
+      };
+      if (
+        dependencies.demo_mode !== "ccd_local" &&
+        dependencies.agent_fallback !== undefined &&
+        dependencies.conversation_orchestrator !== undefined &&
+        requiresConversationalOrchestration(agentInput)
+      ) {
+        await dependencies.conversation_orchestrator.orchestrate({
+          operation_id: randomUUID(),
+          release_id: context.dataset_release_id,
+          demo_mode: "synthetic",
+          route: "agent_fallback",
+          requested_capability: "bounded_mcp_agent",
+        });
+      }
       answer = dependencies.demo_mode !== "ccd_local" && dependencies.agent_fallback !== undefined
-        ? await dependencies.agent_fallback({
-            release_id: context.dataset_release_id,
-            profile_key: context.profile_key,
-            query: input.content,
-            now: input.now,
-            ...(history.length === 0 ? {} : { history }),
-          })
+        ? await dependencies.agent_fallback(agentInput)
         : await dependencies.document_rag({
             release_id: context.dataset_release_id,
             query: input.content,
             ...(history.length === 0 ? {} : { history }),
           });
     } catch (error) {
+      if (error instanceof ConversationOrchestrationError) {
+        reject("rag_dependency_unavailable");
+      }
       if (error instanceof McpAgentError) {
         if (error.reason === "release_changed") reject("current_release_changed");
         if (error.reason === "dependency_unavailable") reject("rag_dependency_unavailable");

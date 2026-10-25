@@ -1,0 +1,68 @@
+{
+  "schema_version": "oe4-local-evidence-1",
+  "date": "2026-10-24",
+  "base_commit": "9023cbb3d5a496200dc43e0a95fdc659879ffd1d",
+  "conversation": {
+    "n8n_version": "2.40.5",
+    "authenticated_webhook_observed": true,
+    "operation_id_correlated": true,
+    "directive": "invoke_bounded_mcp_agent",
+    "full_api_n8n_mcp_postgresql_e2e": false,
+    "blocker": "No existe credencial PostgreSQL sintética MCP de solo lectura con privilegios mínimos; no se usó la cuenta propietaria."
+  },
+  "automated_tests": {
+    "api_typecheck": "PASS",
+    "api_tests": { "passed": 620, "failed": 0 },
+    "rag_typecheck": "PASS",
+    "rag_tests": { "passed": 224, "failed": 0 },
+    "workflow_and_fixture_json": "PASS"
+  },
+  "calendar": {
+    "source_kind": "google_sheets_fixture",
+    "source_id": "fixture-calendar-sheet-v1",
+    "real_google_sheets": false,
+    "published_release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+    "first_sync": {
+      "outcome": "published",
+      "created": 1,
+      "modified": 1,
+      "cancelled": 1,
+      "deleted": 1,
+      "fixture_publication_lag_ms": 120000,
+      "publication_lag_verifiable": false
+    },
+    "second_sync": {
+      "outcome": "unchanged",
+      "duplicate_release_created": false
+    },
+    "n8n_execution": {
+      "status": "success",
+      "started_at": "2026-10-25T01:34:48.690Z",
+      "stopped_at": "2026-10-25T01:34:48.953Z",
+      "status_request_ms": 134,
+      "sync_request_ms": 111,
+      "outcome": "unchanged"
+    },
+    "api_read": {
+      "release_id": "6cf074d2-8d8a-4e21-967d-68a5c94f6946",
+      "updated_present": true,
+      "cancelled_absent": true,
+      "deleted_absent": true,
+      "created_present": true
+    },
+    "release_integrity": {
+      "calendar_events": 21,
+      "document_chunks": 60,
+      "synthetic_profiles": 4,
+      "assert_release_complete_completed_without_error": true
+    }
+  },
+  "claims_not_made": [
+    "Google Sheets institucional conectado",
+    "latencia real de sincronización menor o igual a 30 minutos",
+    "E2E productivo completo con MCP/PostgreSQL mediante credencial mínima",
+    "validación Mobile en dispositivo",
+    "BPM institucional completo",
+    "ReAct dirigido por LLM"
+  ]
+}

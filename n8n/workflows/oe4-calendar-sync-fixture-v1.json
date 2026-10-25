@@ -1,0 +1,21 @@
+{
+  "name": "BanuChat OE4 - Calendar fixture sync v1",
+  "id": "BanuChatOe4CalendarFixture1",
+  "nodes": [
+    { "parameters": { "rule": { "interval": [{ "field": "minutes", "minutesInterval": 30 }] } }, "id": "a1580926-bdf7-4fe7-b1b3-998b18610201", "name": "Every 30 Minutes", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1.2, "position": [220, 300] },
+    { "parameters": {}, "id": "21f48cba-181d-451d-b07c-48a374fb0201", "name": "Manual Verification Trigger", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [220, 420] },
+    { "parameters": { "assignments": { "assignments": [
+      { "id": "b89e1791-4586-49e3-b46b-2f591fba0201", "name": "base_url", "value": "__BANUCHAT_OE4_CALENDAR_BASE_URL__", "type": "string" },
+      { "id": "e31b2289-d111-4a2c-8ed1-e04bef860201", "name": "source_id", "value": "fixture-calendar-sheet-v1", "type": "string" },
+      { "id": "334d4a78-939d-44a6-afd1-a5aca2020201", "name": "workflow_ref", "value": "n8n/workflows/oe4-calendar-sync-fixture-v1.json", "type": "string" }
+    ] }, "options": {} }, "id": "8c4b0f88-14b4-4524-9198-818c7cc30201", "name": "Authorized Fixture Configuration", "type": "n8n-nodes-base.set", "typeVersion": 3.4, "position": [440, 300] },
+    { "parameters": { "method": "POST", "url": "={{ $json.base_url + '/internal/oe4/calendar/status' }}", "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth", "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "{}", "options": { "timeout": 30000 } }, "id": "de7e48a4-dc5d-43b4-9c5d-4d997e6d0201", "name": "Check Current Calendar State", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [680, 300], "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE4 Calendar Service" } }, "retryOnFail": false, "onError": "continueErrorOutput" },
+    { "parameters": { "method": "POST", "url": "={{ $('Authorized Fixture Configuration').first().json.base_url + '/internal/oe4/calendar/sync' }}", "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth", "sendBody": true, "contentType": "raw", "rawContentType": "application/json", "body": "={{ JSON.stringify({ source_id: $('Authorized Fixture Configuration').first().json.source_id, workflow_ref: $('Authorized Fixture Configuration').first().json.workflow_ref }) }}", "options": { "timeout": 120000 } }, "id": "6f0ca78e-1687-4e04-b1bf-d5bcae6a0201", "name": "Publish Calendar Release Once", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [940, 280], "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE4 Calendar Service" } }, "retryOnFail": false, "onError": "continueErrorOutput" }
+  ],
+  "connections": { "Every 30 Minutes": { "main": [[{ "node": "Authorized Fixture Configuration", "type": "main", "index": 0 }]] }, "Manual Verification Trigger": { "main": [[{ "node": "Authorized Fixture Configuration", "type": "main", "index": 0 }]] }, "Authorized Fixture Configuration": { "main": [[{ "node": "Check Current Calendar State", "type": "main", "index": 0 }]] }, "Check Current Calendar State": { "main": [[{ "node": "Publish Calendar Release Once", "type": "main", "index": 0 }]] } },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "4cba8937-070d-44f4-ac9c-dfa575190201",
+  "meta": { "templateCredsSetupCompleted": false },
+  "tags": []
+}

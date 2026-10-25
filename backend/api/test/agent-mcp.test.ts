@@ -16,6 +16,7 @@ import {
 import { sendMessage } from "../src/application/messages.js";
 import type { SqlQueryClient } from "../src/data/sql-client.js";
 import type { IntentRouter } from "../src/routing/intent-router-types.js";
+import { ConversationOrchestrationError } from "../src/orchestration/n8n-conversation.js";
 
 const RELEASE = "11111111-1111-4111-8111-111111111111";
 const OTHER_RELEASE = "99999999-9999-4999-8999-999999999999";
@@ -211,6 +212,48 @@ test("agent_fallback sintético atraviesa el servicio de mensajes y persiste cit
   assert.deepEqual(fake.calls, ["get_profile_progress", "get_announcements"]);
   assert.deepEqual(result.assistant_message.citations.map(citation => citation.source_kind),
     ["profile_course", "announcement"]);
+});
+
+test("consulta multifuente atraviesa N8N antes del agente y conserva correlación de release", async () => {
+  const fake = fakeFactory();
+  const operations: string[] = [];
+  const sql: SqlQueryClient = { async query<T>() { return { rows: [{ dataset_release_id: RELEASE,
+    profile_key: "demo-student", recent_messages: [], current_release_id: RELEASE,
+    current_release_is_ready: true, expected_next_ordinal: 0 }] as T[] }; } };
+  const router: IntentRouter = { catalog_valid: true, catalog_version: "test", route: () => ({
+    route: "agent_fallback", parameters: {}, response_variant: null }) };
+  await sendMessage({ sql, router, document_rag: async () => { throw new Error("must not call RAG"); },
+    conversation_orchestrator: { async orchestrate(value) {
+      operations.push("n8n"); assert.equal(value.release_id, RELEASE);
+      return { operation_id: value.operation_id, directive: "invoke_bounded_mcp_agent",
+        workflow: "oe4-conversation-v1" };
+    } },
+    agent_fallback: async value => { operations.push("agent"); return runBoundedMcpAgent({ sessions: fake.factory }, value); },
+    persist: async (_client, values) => { operations.push("persist"); return { rows: [{ status: "inserted",
+      user_message_id: "55555555-5555-4555-8555-555555555555", user_ordinal: 0, user_content: values[3],
+      user_created_at: NOW, assistant_message_id: "66666666-6666-4666-8666-666666666666",
+      assistant_ordinal: 1, assistant_content: values[4], assistant_created_at: NOW,
+      assistant_insufficient_evidence: values[5] }] }; },
+  }, { conversation_id: "77777777-7777-4777-8777-777777777777",
+    content: "Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?", now: NOW });
+  assert.deepEqual(operations, ["n8n", "agent", "persist"]);
+});
+
+test("fallo N8N evita agente y persistencia del turno", async () => {
+  let agentCalled = false; let persistCalled = false;
+  const sql: SqlQueryClient = { async query<T>() { return { rows: [{ dataset_release_id: RELEASE,
+    profile_key: "demo-student", recent_messages: [], current_release_id: RELEASE,
+    current_release_is_ready: true, expected_next_ordinal: 0 }] as T[] }; } };
+  const router: IntentRouter = { catalog_valid: true, catalog_version: "test", route: () => ({
+    route: "agent_fallback", parameters: {}, response_variant: null }) };
+  await assert.rejects(sendMessage({ sql, router, document_rag: async () => { throw new Error("must not call"); },
+    conversation_orchestrator: { async orchestrate() { throw new ConversationOrchestrationError("dependency_unavailable"); } },
+    agent_fallback: async () => { agentCalled = true; throw new Error("must not call"); },
+    persist: async () => { persistCalled = true; return { rows: [] }; },
+  }, { conversation_id: "77777777-7777-4777-8777-777777777777",
+    content: "Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?", now: NOW }),
+  (error: unknown) => error instanceof Error && "reason" in error && error.reason === "rag_dependency_unavailable");
+  assert.equal(agentCalled, false); assert.equal(persistCalled, false);
 });
 
 test("modo CCD conserva Document RAG y nunca abre el cliente MCP sintético", async () => {

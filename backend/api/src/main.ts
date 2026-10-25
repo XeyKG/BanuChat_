@@ -16,12 +16,19 @@ import { OllamaQueryEmbeddingClient } from "./retrieval/ollama-query-embedding-c
 import { loadDefaultIntentRouter } from "./routing/intent-router.js";
 import type { IntentRouter } from "./routing/intent-router-types.js";
 import { loadRuntimeConfig } from "./runtime-config.js";
+import {
+  loadN8nConversationRuntimeConfig,
+  N8nConversationOrchestrator,
+} from "./orchestration/n8n-conversation.js";
 
 export async function createRuntimeApiServer(
   sql: SqlQueryClient,
   documentRag: DocumentRagResponder,
   loadRouter: () => Promise<IntentRouter> = loadDefaultIntentRouter,
-  options: Pick<ApiServerDependencies, "demo_mode" | "document_artifact" | "agent_fallback"> = {},
+  options: Pick<
+    ApiServerDependencies,
+    "demo_mode" | "document_artifact" | "agent_fallback" | "conversation_orchestrator"
+  > = {},
 ): Promise<ReturnType<typeof createApiServer>> {
   const router = await loadRouter();
   if (router.catalog_valid !== true) {
@@ -92,10 +99,25 @@ export async function startApi(): Promise<void> {
     });
     const agentFallback = (input: Parameters<typeof runBoundedMcpAgent>[1]) =>
       runBoundedMcpAgent({ sessions: mcpSessions }, input);
+    const n8nConfig = config.demo_mode === "synthetic"
+      ? loadN8nConversationRuntimeConfig()
+      : undefined;
+    const conversationOrchestrator = n8nConfig === undefined
+      ? undefined
+      : new N8nConversationOrchestrator({
+          ...n8nConfig,
+          trace: result => console.log(JSON.stringify({
+            event: "oe4_conversation_orchestrated",
+            operation_id: result.operation_id,
+            workflow: result.workflow,
+            directive: result.directive,
+          })),
+        });
 
     server = await createRuntimeApiServer(sql, documentRag, loadDefaultIntentRouter, {
       demo_mode: config.demo_mode,
       ...(config.demo_mode === "synthetic" ? { agent_fallback: agentFallback } : {}),
+      ...(conversationOrchestrator === undefined ? {} : { conversation_orchestrator: conversationOrchestrator }),
       ...(config.demo_mode === "ccd_local" ? { document_artifact: {
         root: fileURLToPath(new URL("../../../data/ccd/local/m01-m12/", import.meta.url)),
         version_roots: {

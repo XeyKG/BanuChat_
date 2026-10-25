@@ -204,6 +204,14 @@ export type {
 } from "./routing/intent-router-types.js";
 export { dispatchChatQuery } from "./chat/chat-dispatcher.js";
 export {
+  ConversationOrchestrationError,
+  N8nConversationOrchestrator,
+  loadN8nConversationRuntimeConfig,
+  type ConversationOrchestrator,
+  type ConversationOrchestrationInput,
+  type ConversationOrchestrationResult,
+} from "./orchestration/n8n-conversation.js";
+export {
   DocumentRagInvariantError,
   generateDocumentRagAnswer,
   type DocumentRagAnswer,

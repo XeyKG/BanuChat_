@@ -89,3 +89,21 @@ de cambios en nodos Code. Solo aceptan fixtures locales y nunca publican en CCD.
 
 No constituyen tres scrapers institucionales operativos ni evidencia de ejecución
 autónoma. Véase [runbook OE2](oe2-fixtures-v1-runbook.md).
+
+## OE4 — conversación y calendario
+
+`oe4-conversation-v1.json` expone un webhook interno Header Auth. Solo acepta el
+modo `synthetic`, `agent_fallback` y la capacidad `bounded_mcp_agent`; devuelve una
+directiva cerrada con el mismo `operation_id`. No llama a REST público, MCP, SQL ni
+modelos. La API decide qué fallback es multifuente, ejecuta el agente OE3, valida y
+persiste. El export queda inactivo y requiere relink de la credencial
+`X-BanuChat-Service-Token` tras importarlo.
+
+`oe4-calendar-sync-fixture-v1.json` tiene Schedule Trigger cada 30 minutos y Manual
+Trigger de verificación. Consulta estado y ejecuta una sincronización idempotente por
+HTTP interno autenticado. La lógica, validación y publicación atómica viven en
+`backend/rag/src/oe4`; N8N no procesa filas ni escribe SQL. El export queda inactivo,
+usa un fixture local y no acredita Google Sheets ni latencia institucional ≤30 min.
+
+Runbooks, resultados y bloqueos están en
+[`docs/transition/banuchat-oe4-checkpoint.md`](../../docs/transition/banuchat-oe4-checkpoint.md).

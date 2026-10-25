@@ -42,7 +42,7 @@ La excepción CCD usa únicamente archivos externos seleccionados, sin scraping 
 | Agent/RAG | Política sintética acotada de selección, ejecución, observación y decisión; máximo dos tools. CCD conserva RAG directo. | `backend/api/src/agent/` |
 | MCP Server interno | Servidor sintético stdio de seis tools de solo lectura, consumido por el fallback de la API. | `backend/mcp-server/` |
 | PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
-| N8N | Workflow manual local validado en N3; orquesta ingesta asíncrona. Retry/recover/scheduled pendientes. | `n8n/workflows/` |
+| N8N | Ingesta asíncrona existente; en OE4 coordina una transición conversacional sintética multifuente y un sincronizador de calendario con fixture local. | `n8n/workflows/` |
 | Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
 | Docker Compose local | Entorno de desarrollo y demostraciones iniciales. | `infra/docker-compose.yml` |
 
@@ -68,9 +68,10 @@ flowchart LR
     reply -->|"Mismo contrato REST"| mobile
 ```
 
-N8N queda fuera del camino síncrono. La app no consume MCP, N8N ni PostgreSQL
-directamente. Agent/MCP está integrado únicamente en el fallback sintético; CCD
-continúa con Document RAG directo y sin servidor MCP autorizado. Embeddings usa Ollama
+N8N queda fuera de fast paths y de `ccd_local`. Desde OE4, solo el fallback sintético
+multifuente solicita una transición correlacionada a N8N antes de ejecutar el agente
+MCP acotado. La app no consume MCP, N8N ni PostgreSQL directamente. CCD continúa con
+Document RAG directo y sin servidor MCP autorizado. Embeddings usa Ollama
 local con `qwen3-embedding:0.6b`, 1024 dimensiones y coseno
 ([ADR 0003](adr/0003-embedding-local-qwen3.md)).
 
@@ -100,7 +101,9 @@ flowchart LR
     api --> router["Intent Router determinista"]
     router -->|"Fast path"| fast["Catálogo, progreso, calendario, anuncios o documentos"]
     router -->|"Social, ayuda o fuera de alcance"| static["Renderer estático"]
-    router -->|"Fallback sintético"| agent["Agente MCP acotado"]
+    router -->|"Fallback sintético simple"| agent["Agente MCP acotado"]
+    router -->|"Fallback sintético multifuente"| n8n["N8N: transición correlacionada"]
+    n8n --> agent
     router -->|"Fallback CCD"| rag["Document RAG directo"]
     agent --> mcp["MCP stdio sintético"]
     mcp --> db
@@ -192,8 +195,10 @@ que puede ser posterior. approval_ref aprueba la fuente, no automáticamente el 
 Cambiar solo implementación puede producir otra release por pipeline_sha256 sin
 alterar ni volver a aprobar el contenido. No se exige un checkout en dos revisiones.
 
-El calendario se carga como parte de una release completa desde `/data/synthetic/calendars`;
-no sincronización independiente, Google Sheets ni fuente institucional. Full_document
+El calendario base se carga desde `/data/synthetic/calendars`. OE4 añade un adaptador
+separado de fixture representativo de Google Sheets: publica otra release completa sin
+modificar v1, detecta cambios/cancelaciones y conserva `current` ante fallos. No existe
+conexión a Google Sheets ni fuente institucional acreditada. Full_document
 produce versiones sin chunks/embeddings y conserva el artefacto exacto para REST.
 Chunked v1 usa secciones H2, sin overlap: la receta produce 60 chunks, validados en
 PostgreSQL; la E2E real de Implementación 3 generó sus 60 embeddings. Estos conteos
@@ -214,14 +219,18 @@ flowchart TB
     M["App móvil Expo"] -->|"REST"| B["Backend API e Intent Router"]
     subgraph LOCAL["Equipo local; Compose solo PostgreSQL y N8N"]
         B -->|"Fast paths"| S["Servicios de aplicación"]
-        B -->|"Fallback sintético"| A["Agente + MCP stdio"]
+        B -->|"Fallback sintético simple"| A["Agente + MCP stdio"]
+        B -->|"Fallback sintético multifuente"| N
+        N -->|"Directiva correlacionada"| A
         B -->|"Fallback CCD"| R["Document RAG directo"]
         A --> P
         A --> O
         R --> P
         R --> O
         S --> P[("Única instancia PostgreSQL + pgvector")]
-        N["N8N 2.40.5; manual v1 validado E2E localmente"] -->|"HTTP privado; status/execute"| I["Componente de ingesta backend/rag"]
+        N["N8N 2.40.5; workflows acotados"] -->|"HTTP privado; status/execute"| I["Componente de ingesta backend/rag"]
+        N -->|"status/sync de calendario fixture"| C["Adaptador OE4 backend/rag"]
+        C -->|"Release completa"| P
         I -->|"Publicación completa"| P
         I -->|"Embeddings"| O["Ollama local"]
         D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
@@ -267,7 +276,7 @@ decisiones del director del Proyecto de Grado sigue pendiente.
 | OE1 | RAG sobre corpus sintético: faithfulness ≥ 0,80; context precision ≥ 0,80; context recall ≥ 0,75; answer relevancy ≥ 0,80; MRR ≥ 0,70. |
 | OE2 — propuesta técnica provisional | Ingesta de revisión sintética aprobada: objetivo <24h desde disponibilidad para ingesta y éxito >90 %, no medidos; separar espera y duración trigger→publicación del trabajo humano previo. |
 | OE3 | Selección controlada y dinámica de herramientas MCP por el agente. |
-| OE4 | Orquestación E2E: publicación atómica, trazabilidad, sin pérdida/mezcla de items y current preservada ante fallos; todos los casos críticos deben cumplir lo esperado. Duración observada sin nuevo umbral. Se descarta la sincronización independiente de 30 min; redacción académica pendiente de actualización. |
+| OE4 | Flujo conversacional N8N acotado y sincronización de calendario por release. El fixture acredita comportamiento técnico, no Google Sheets real ni el máximo de 30 min. Cobertura y límites en el checkpoint OE4. |
 | OE5 | SUS promedio > 70/100, ningún resultado < 50/100 y completación de tareas > 85 %. |
 | OE6 | Estabilidad de contenedores locales, sin caídas > 5 minutos, y respuesta promedio < 5 segundos. |
 
@@ -315,7 +324,9 @@ PostgreSQL real y embeddings TEST_ONLY; son ejecuciones separadas.
 Los contratos `backend/mcp-server/tools-contract.md` y
 `backend/mcp-server/tools.contract.json`, versión `2.0.0-draft`, están congelados para
 implementación. La eliminación de Google Sheets, identidad sintética y diseño de
-evidencia/enlaces ya están resueltos; no son pendientes de rediseño. El sufijo draft
+evidencia/enlaces fue una decisión anterior. OE4 reintroduce solo un adaptador de
+fixture compatible con una futura fuente autorizada; Google Sheets real y su métrica
+continúan pendientes. El sufijo draft
 se conserva hasta disponer de implementación validada.
 
 - SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y

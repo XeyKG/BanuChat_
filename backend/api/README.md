@@ -234,6 +234,19 @@ identidad válida. Cada turno abre una sesión stdio con el perfil sintético co
 valida catálogo/input/output contra `tools.contract.json`, limita cada llamada a 15 s,
 el ciclo completo a 30 s y 32 KiB por observación, y cierra proceso y conexión.
 
+### Orquestación N8N de OE4
+
+En modo sintético, `BANUCHAT_N8N_CONVERSATION_URL` y
+`BANUCHAT_N8N_SERVICE_TOKEN` habilitan la transición N8N solo para fallbacks que la
+política OE3 identifica como multifuente. Deben configurarse ambos o ninguno. El
+timeout opcional `BANUCHAT_N8N_CONVERSATION_TIMEOUT_MS` admite 100–30000 ms y usa
+4000 ms por defecto. El token mínimo de 32 caracteres se envía por
+`X-BanuChat-Service-Token` y nunca se registra.
+
+N8N no selecciona tools ni construye la respuesta. Una directiva inválida, timeout o
+correlación distinta termina en 503 antes de llamar al agente o persistir. Fast paths,
+fallbacks de una sola fuente y `ccd_local` no usan esta dependencia.
+
 ### Configuración del listener
 
 Por defecto, el API escucha solo en loopback con `BANUCHAT_API_HOST=127.0.0.1`.

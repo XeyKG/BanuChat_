@@ -188,6 +188,10 @@ function planCalls(input: McpAgentInput): PlannedCall[] {
   return plans;
 }
 
+export function requiresConversationalOrchestration(input: McpAgentInput): boolean {
+  return planCalls(input).length > 1;
+}
+
 function object(value: unknown): Record<string, unknown> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw new McpAgentError("invalid_result");
