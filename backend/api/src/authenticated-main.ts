@@ -25,7 +25,8 @@ export async function startAuthenticatedApi(){
   const artifacts=mode==='ccd_local'?{root:fileURLToPath(new URL('../../../data/ccd/local/m01-m12/',import.meta.url)),version_roots:{
    'bch03-m01-m12-local-1':fileURLToPath(new URL('../../../data/ccd/local/m01-m12/',import.meta.url)),
    'bch03-ccd-local-2':fileURLToPath(new URL('../../../data/ccd/local/expanded-v2/',import.meta.url)),
-   'bch03-ccd-local-3':fileURLToPath(new URL('../../../data/ccd/local/guidance-v3/',import.meta.url))}}:
+   'bch03-ccd-local-3':fileURLToPath(new URL('../../../data/ccd/local/guidance-v3/',import.meta.url)),
+   'bch-ccd-knowledge-1':fileURLToPath(new URL('../../../data/ccd/local/product-knowledge-v1/',import.meta.url))}}:
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
   const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;

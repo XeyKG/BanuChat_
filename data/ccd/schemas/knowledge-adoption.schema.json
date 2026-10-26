@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:banuchat:ccd-knowledge-adoption:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "source_registry_sha256",
+    "source_review_sha256",
+    "domain_decision_sha256",
+    "sources",
+    "claims",
+    "artifacts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ccd-knowledge-adoption-1"
+    },
+    "version": {
+      "const": "bch-ccd-knowledge-1"
+    },
+    "source_registry_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_review_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "domain_decision_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 87,
+      "maxItems": 87,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "document_key",
+          "title",
+          "statement",
+          "period",
+          "population",
+          "topics",
+          "course",
+          "reference_status",
+          "conditions",
+          "exceptions",
+          "basis",
+          "presentation_units",
+          "governance",
+          "sources",
+          "domain_metadata"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9-]+$"
+          },
+          "document_key": {
+            "type": "string",
+            "pattern": "^ccd-knowledge-[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "statement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "period": {
+            "type": "string",
+            "minLength": 1
+          },
+          "population": {
+            "type": "string",
+            "minLength": 1
+          },
+          "topics": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "course": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reference_status": {
+            "const": "adopted"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "basis": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "references"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "DOCUMENT_SOURCE",
+                    "DOMAIN_CONFIRMATION",
+                    "INFERENCE",
+                    "PENDING_CLARIFICATION"
+                  ]
+                },
+                "references": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "required": [
+                          "source",
+                          "sha256",
+                          "locator"
+                        ],
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "locator": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      {
+                        "type": "object",
+                        "required": [
+                          "operation",
+                          "scope"
+                        ],
+                        "properties": {
+                          "operation": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "scope": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    ]
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "kind": {
+                        "not": {
+                          "const": "INFERENCE"
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "references": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "source",
+                            "sha256",
+                            "locator"
+                          ],
+                          "properties": {
+                            "source": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "locator": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "additionalProperties": true
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          },
+          "presentation_units": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "aspects",
+                "text"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "aspects": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "period": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "amount_cop": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                }
+              }
+            }
+          },
+          "governance": {
+            "type": "object"
+          },
+          "sources": {
+            "type": "array"
+          },
+          "domain_metadata": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 87,
+      "maxItems": 87,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "document_key",
+          "title",
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "document_key": {
+            "type": "string",
+            "pattern": "^ccd-knowledge-[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^documents/artifacts/ccd-knowledge-[a-z0-9-]+[.]md$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

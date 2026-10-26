@@ -13,11 +13,23 @@ import {generateDocumentRagAnswer,type DocumentRagDependencies} from './chat/doc
 import {assertAuthenticatedDocumentReads,retrieveAuthenticatedDocumentChunks} from './application/authenticated-document-retrieval.js';
 import {knowledgeMode,type KnowledgeMode} from './auth/knowledge-mode.js';
 import type {ConversationOrchestrator} from './orchestration/n8n-conversation.js';
+import {generateCcdKnowledgeAnswer} from './chat/ccd-knowledge.js';
+import {ccdKnowledgeMetadata,CCD_KNOWLEDGE_SCHEMA} from './chat/ccd-knowledge-manifest.js';
+import {retrieveCcdKnowledgeChunks} from './application/ccd-knowledge-retrieval.js';
 /** Permanent authenticated RAG composition; callers cannot select corpus or SQL through HTTP. */
 export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>,mode:KnowledgeMode='synthetic'):Promise<DocumentRagResponder>{
  knowledgeMode(mode);
  await assertAuthenticatedDocumentReads(input.sql);
- return query=>generateDocumentRagAnswer({...input,evidence_mode:mode,retrieve_chunks:retrieveAuthenticatedDocumentChunks},query);
+ return async query=>{
+  if(mode==='ccd_local'){
+   const r=await input.sql.query<{manifest:unknown}>('SELECT manifest FROM banuchat.dataset_releases WHERE id=$1 AND status=\'ready\'',[query.release_id]);
+   const manifest=r.rows[0]?.manifest;
+   if(manifest&&typeof manifest==='object'&&'schema_version' in manifest&&manifest.schema_version===CCD_KNOWLEDGE_SCHEMA){
+    return generateCcdKnowledgeAnswer({...input,evidence_mode:mode,retrieve_chunks:retrieveAuthenticatedDocumentChunks,retrieve_scoped_chunks:retrieveCcdKnowledgeChunks,knowledge:{release_id:query.release_id,metadata:ccdKnowledgeMetadata(manifest)}},query);
+   }
+  }
+  return generateDocumentRagAnswer({...input,evidence_mode:mode,retrieve_chunks:retrieveAuthenticatedDocumentChunks},query);
+ };
 }
 /** Product composition, deliberately no listen/startup or v1 import. Explicit trusted config. */
 export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;

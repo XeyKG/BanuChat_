@@ -31,7 +31,10 @@ function uuid(v:string){if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0
 function v2Links<T>(value:T):T {
  // Project only the trusted service's artifact_url field; never rewrite conversational text.
  if(Array.isArray(value))return value.map(v2Links) as T;
- if(value!==null && typeof value==='object'){const result:Record<string,unknown>={};for(const [key,v]of Object.entries(value))result[key]=key==='artifact_url' && typeof v==='string'?v.replace(/^\/api\/v1\/documents\//u,'/api/v2/documents/'):v2Links(v);return result as T;}return value;
+ if(value!==null && typeof value==='object'){const result:Record<string,unknown>={};for(const [key,v]of Object.entries(value))result[key]=key==='artifact_url' && typeof v==='string'?v.replace(/^\/api\/v1\/documents\//u,'/api/v2/documents/'):v2Links(v);
+  // Persistence keeps the exact chunk locator; only the student-facing projection is natural.
+  if(result.source_kind==='document'&&typeof result.locator==='string'&&/^claim:[A-Za-z0-9-]+:part:\d+$/u.test(result.locator)&&typeof result.label==='string')result.locator=`Sección «${result.label}»`;
+  return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
 export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){

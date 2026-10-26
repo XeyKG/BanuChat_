@@ -10,6 +10,8 @@ import {requiresConversationalOrchestration,runBoundedMcpAgent} from '../agent/b
 import {StdioMcpClientFactory} from '../agent/mcp-client.js';
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
 import {randomUUID} from 'node:crypto';
+import {ccdKnowledgeQueryScope} from '../chat/ccd-knowledge.js';
+import {CCD_KNOWLEDGE_SCHEMA} from '../chat/ccd-knowledge-manifest.js';
 export interface AuxiliaryContext {release_id:string;profile_key:string;alias:string;}
 /** Only existing structured read services receive this adapter; never RAG or arbitrary HTTP SQL. */
 export function auxiliarySql(sql:SqlQueryClient):SqlQueryClient {
@@ -36,6 +38,14 @@ export function unifiedResponder(input:{sql:SqlQueryClient;router:IntentRouter;r
   const decision=input.router.route({content:query.query,context:{profile_selected:true,now:query.now}});
   const bound={...query,profile_key:input.aux.profile_key};
   if(decision.route==='capabilities_help')return {release_id:query.release_id,content:'Puedo ayudarte a consultar documentos CCD con sus fuentes, tu progreso y cursos, el calendario, noticias y convocatorias, y tus conversaciones anteriores.',insufficient_evidence:false,citations:[],citation_records:[]};
+  // Recognition rules describe the documentary route; completion wording alone
+  // must not redirect them into the unrelated synthetic progress/calendar context.
+  const recognition=ccdKnowledgeQueryScope(query.query,new Map()).topics.includes('badge');
+  const explicitAuxiliary=/\b(?:calendario|eventos|anuncios|noticias|mi progreso|mis cursos|mis notas)\b/iu.test(query.query);
+  if(recognition&&!explicitAuxiliary){
+   const release=await input.sql.query<{schema_version:string}>("SELECT manifest->>'schema_version' AS schema_version FROM banuchat.dataset_releases WHERE id=$1 AND status='ready'",[query.release_id]);
+   if(release.rows[0]?.schema_version===CCD_KNOWLEDGE_SCHEMA)return input.rag(query);
+  }
   if(requiresConversationalOrchestration(bound)){
    if(!input.orchestrator)throw new AuthError('DEPENDENCY_UNAVAILABLE');
    await input.orchestrator.orchestrate({operation_id:randomUUID(),release_id:query.release_id,demo_mode:'ccd_local',route:'agent_fallback',requested_capability:'bounded_mcp_agent'});

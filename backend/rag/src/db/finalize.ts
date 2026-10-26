@@ -5,11 +5,18 @@ import { storageCounts, type StorageRecipe } from './recipe.js';
 /** succeeded and ready/current commit together; defaults preserve the frozen v1 counts. */
 export async function finalizeAndPublish(lease: WriterLease, release: string, run: string,
   recipe: StorageRecipe = 'synthetic_v1', transition?: { expectedRelease: string }): Promise<void> {
+  return finalize(lease,release,run,recipe,true,transition);
+}
+/** Validate a normal candidate and close its run without ready/current activation. */
+export async function finalizeCandidate(lease:WriterLease,release:string,run:string,recipe:StorageRecipe,transition:{expectedRelease:string}):Promise<void>{
+  return finalize(lease,release,run,recipe,false,transition);
+}
+async function finalize(lease:WriterLease,release:string,run:string,recipe:StorageRecipe,activate:boolean,transition?:{expectedRelease:string}):Promise<void>{
   const expected = storageCounts(recipe);
   await lease.transaction(async () => {
     invariant((await lease.query('SELECT id FROM banuchat.datasets WHERE id=1 FOR UPDATE')).rowCount === 1);
     if (transition) {
-      invariant(recipe === 'ccd_expanded_v1' || recipe === 'ccd_guidance_v1');
+      invariant(recipe === 'ccd_expanded_v1' || recipe === 'ccd_guidance_v1' || recipe === 'ccd_knowledge_v1');
       const pointer = await lease.query<{ current_release_id: string }>('SELECT current_release_id FROM banuchat.datasets WHERE id=1');
       invariant(pointer.rows[0]?.current_release_id === transition.expectedRelease);
       const context = await lease.query(`INSERT INTO banuchat.ccd_demo_contexts(dataset_release_id,profile_key,alias)
@@ -39,6 +46,6 @@ export async function finalizeAndPublish(lease: WriterLease, release: string, ru
       WHERE id=$1 AND dataset_release_id=$2 AND status='running'`, [run, release]);
     invariant(updated.rowCount === 1);
     await lease.query('SELECT banuchat.assert_release_complete($1)', [release]);
-    await lease.query('SELECT banuchat.publish_release($1)', [release]);
+    if(activate)await lease.query('SELECT banuchat.publish_release($1)', [release]);
   });
 }
