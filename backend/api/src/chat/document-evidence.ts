@@ -8,7 +8,10 @@ function normalize(text: string): string {
 
 /** Only the documented CCD course alias; never infer a course from generic AI mentions. */
 function normalizeCcdSubject(subject: string): string {
-  return normalize(subject).replace(/\binteligencia artificial generativa\b/gu, 'ia generativa');
+  // Closed orthographic vocabulary, not fuzzy matching arbitrary course names.
+  return normalize(subject).replace(/\bdijital(es)?\b/gu, 'digital$1')
+    .replace(/\bprueva(s)?\b/gu, 'prueba$1').replace(/\bpilare\b/gu, 'pilares')
+    .replace(/\binteligencia artificial generativa\b/gu, 'ia generativa');
 }
 
 /** A conversational antecedent, not eligibility or institutional evidence. */
@@ -16,7 +19,10 @@ export function ccdGuidanceTopic(query: string, history: readonly ConversationMe
   const subjects = [query, ...history.filter(m => m.role === 'user').map(m => m.content).reverse()];
   for (const subject of subjects) {
     const text = normalizeCcdSubject(subject);
-    if (/\b(?:contacto|correo|email)\b/u.test(text) || /\b(?:duracion|cuanto duran?|estructura|proposito|resultados?|inmediata|plataforma)\b/u.test(text)) return undefined;
+    if (/\b(?:contact\p{L}*|correo|email)\b/u.test(text)) return undefined;
+    // A consequence/orientation request is narrower than the generic test description.
+    if (/\bpruebas?\b/u.test(text) && /\b(?:repet\p{L}*|orient\p{L}*)\b/u.test(text)) return 'U03';
+    if (/\b(?:duracion|cuanto duran?|estructura|proposito|resultados?|inmediata|plataforma)\b/u.test(text)) return undefined;
     if (/\b(?:informatica|transicion|antigu\p{L}*|homolog\p{L}*|equivalen\p{L}*|reconoc\p{L}*|word|powerpoint|excel)\b/u.test(text)) return 'U04';
     if (/\b(?:reprob\p{L}*|reprueb\p{L}*|pierdo|pierda|perdi|perder|perdido|perdida)\b|\bno (?:\p{L}+ ){0,3}(?:aprob\p{L}*|valid\p{L}*|super\p{L}*)\b/u.test(text)) return 'U03';
     // A fresh, named syllabus must not inherit an earlier test consequence.
@@ -54,20 +60,22 @@ export function decideCcdEvidence(
 ): CcdEvidenceDecision {
   const identified = (selected: RetrievedDocumentChunk[]): CcdEvidenceDecision => ({kind:'identified',chunks:selected});
   const subjects = [query, ...history.filter(message => message.role === "user").map(message => message.content).reverse()];
+  const current = normalizeCcdSubject(query);
+  // Recognition of previous courses is bounded guidance, not a request for all syllabi.
+  const guidance = ccdGuidanceTopic(query, history);
   // A catalog lists metadata; explaining every syllabus is a different scope.
-  if (/\b(?:todos? (?:los )?(?:cursos|syllabus|temarios)|cada (?:uno de los )?cursos?)\b/u.test(normalize(query))) {
+  if (!guidance && /\b(?:todos? (?:los )?(?:cursos|syllabus|temarios)|cada (?:uno de los )?cursos?)\b/u.test(current)) {
     return {kind:'clarify_scope',chunks:[]};
   }
   if (/\b(?:puntos|puntaje|umbral|porcentaje)\b/u.test(normalize(query))) {
     return identified(chunks.filter(chunk => chunk.chunk_locator === 'unit:TEST_ORIENTATION'));
   }
-  const guidance = ccdGuidanceTopic(query, history);
   if (guidance && chunks.some(chunk => chunk.chunk_locator === `unit:${guidance}`)) {
     return identified(chunks.filter(chunk => chunk.chunk_locator === `unit:${guidance}` || chunk.chunk_locator === 'unit:M12'));
   }
   for (const subject of subjects) {
     const text = ` ${normalizeCcdSubject(subject)} `;
-    if (/\b(?:contacto|correo|email)\b/u.test(text)) return identified(chunks.filter(chunk => chunk.chunk_locator === "unit:M12"));
+    if (/\b(?:contact\p{L}*|correo|email)\b/u.test(text)) return identified(chunks.filter(chunk => chunk.chunk_locator === "unit:M12"));
     if (/\bpruebas?\b/u.test(text)) return identified(chunks.filter(chunk => chunk.chunk_locator === "unit:TEST_ORIENTATION"));
     const courses = chunks.filter(chunk => {
       if (!chunk.chunk_locator.startsWith("unit:M02:")) return false;
@@ -76,6 +84,10 @@ export function decideCcdEvidence(
       return text.includes(` ${title} `) || (shortTitle.split(" ").length >= 2 && text.includes(` ${shortTitle} `));
     });
     if (courses.length > 0) return identified(courses);
+    if (/\b(?:ruta|competencias digitales)\b/u.test(text)
+      && /\b(?:estructur\p{L}*|organiz\p{L}*|divid\p{L}*|pilares)\b/u.test(text)) {
+      return identified(chunks.filter(chunk => chunk.chunk_locator === 'unit:M01'));
+    }
   }
   // A description is not a verified course identity; do not invent an alias.
   const courseReference = subjects.some(subject => /\b(?:curso|cursos|asignatura|materia|syllabus|temario|temas|ccd|competencias digitales)\b/u.test(normalize(subject)));

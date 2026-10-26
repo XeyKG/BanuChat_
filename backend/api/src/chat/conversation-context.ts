@@ -52,8 +52,18 @@ export function isContextualFollowUp(query: string): boolean {
     || /^(?:donde|cuando)\b.*\b(?:la|lo|las|los)\b/u.test(text)
     || /\b(?:ese|esa|eso|esos|esas|anterior|el primero|el segundo|el tercero|la primera|repetirla|repetirlas|presentarla|presentarlas)\b/u.test(text)
     || /^(?:tengo (?:el )?pilar|que me falta)/u.test(text)
+    || /\b(?:en mi caso|para mi caso|que (?:deben|debo|hay que) verificar)\b/u.test(text)
     || /^(?:que temas (?:tiene|incluye)|cuanto duran?|cuanto cuesta)$/u.test(text)
     || /^(?:como (?:lo|la|los|las)\b|que pasa si no (?:la|lo|las|los)\b)/u.test(text);
+}
+
+export type FollowUpKind = 'FOLLOW_UP_CLEAR_REFERENCE' | 'FOLLOW_UP_TOPIC_CHANGE' | 'FOLLOW_UP_AMBIGUOUS';
+
+/** A reference requires a student-established subject; assistant text cannot supply it. */
+export function classifyFollowUp(query: string, messages: readonly ConversationMessage[]): FollowUpKind {
+  if (!isContextualFollowUp(query)) return 'FOLLOW_UP_TOPIC_CHANGE';
+  const resolved = resolveConversationQuery(query, messages);
+  return resolved.needs_clarification ? 'FOLLOW_UP_AMBIGUOUS' : 'FOLLOW_UP_CLEAR_REFERENCE';
 }
 
 export function resolveConversationQuery(query: string, messages: readonly ConversationMessage[]): {
