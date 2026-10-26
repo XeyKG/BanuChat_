@@ -11,6 +11,59 @@ function deps(chunks=[one],output='Una afirmación acotada.\nFUENTES: [1]'):Oper
  sql:{async query<T>(){return {rows:[{provider:'ollama',model:'qwen3-embedding:0.6b',model_revision:'c'.repeat(64),dimension:1024,distance_metric:'cosine',parameters:{runtime_version:'0.12.3',query:{dimensions:1024,truncate:false,input_prefix:null,normalization:'none',options:{num_ctx:4096}}}}] as T[]};}},
  query_embedding_client:{async embedQuery(){return [1,...Array<number>(1023).fill(0)];}},retrieve_chunks:async()=>chunks,generator_config:config,
  generator_client:{async generate(){return {content:output,done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}},pilot:{release_id:release,metadata:new Map([['alpha',meta()],['beta',meta()]])}};}
+test('explicit badge intent outranks generic completion, including F-12',async()=>{
+ const d=deps([one,two]);
+ d.pilot.metadata=new Map([
+  ['alpha',{...meta(),claim_id:'OP-003',topics:['completion'],presentation_units:[{key:'completion',aspects:['completion'],text:'Los pilares pendientes se completan mediante cursos.'}]}],
+  ['beta',{...meta(),claim_id:'OP-004',topics:['completion','badge'],presentation_units:[{key:'badge',aspects:['badge'],text:'Al completar los tres pilares recibes una insignia digital. No se ha precisado la fecha de entrega.'}]}],
+ ]);
+ for(const query of ['¿Qué reconocimiento recibo al completar los tres pilares?','Si ya terminé la ruta, ¿qué insignia recibo?','¿Qué recibo al finalizar los pilares?','¿Qué certificado recibo al completar los pilares de la ruta?']){
+  const r=await generateOperationalPilotAnswer(d,{release_id:release,query});
+  assert.deepEqual(r.supporting_claim_ids,['OP-004']);assert.deepEqual(r.presentation_units,[{claim_id:'OP-004',key:'badge'}]);
+  assert.match(r.content,/insignia digital/u);assert.match(r.content,/fecha de entrega/u);assert.doesNotMatch(r.content,/pendientes se completan/u);
+ }
+});
+test('conditional completion adapts counts without asserting an institutional record',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['completion'],presentation_units:[
+  {key:'generic',aspects:['completion'],text:'Completa los pilares pendientes según sus cursos.'},
+  {key:'all',aspects:['all_completed'],text:'No. Si aprobaste las tres, no necesitas cursos para completar esos pilares.'},
+  {key:'one',aspects:['one_pending'],text:'Si aprobaste dos y perdiste una, completa solo ese pilar; conserva los otros dos.'},
+  {key:'named',aspects:['two_pending_named'],text:'Si validaste {validated_pillar}, completa los otros dos; no repitas el ya validado.'},
+ ]}]]);
+ const all=await generateOperationalPilotAnswer(d,{release_id:release,query:'Si aprobé las tres pruebas, ¿debo hacer cursos?'});assert.match(all.content,/^No\./u);
+ const onePending=await generateOperationalPilotAnswer(d,{release_id:release,query:'Aprobé dos pruebas y perdí una, ¿qué hago?'});assert.match(onePending.content,/solo ese pilar/u);
+ const named=await generateOperationalPilotAnswer(d,{release_id:release,query:'Validé Competencias Digitales Básicas, pero no los otros dos pilares. ¿Qué hago?'});assert.match(named.content,/Si validaste Competencias Digitales Básicas/u);assert.equal(named.presentation_bindings?.validated_pillar,'Competencias Digitales Básicas');
+ const denied=await generateOperationalPilotAnswer(d,{release_id:release,query:'No aprobé las tres pruebas. ¿Qué hago?'});assert.doesNotMatch(denied.content,/no necesitas cursos/u);
+});
+test('a specified extraordinary comparison omits unrelated fees and compares sourced amounts',async()=>{
+ const d=deps([one,two]);d.pilot.metadata=new Map([
+  ['alpha',{...meta(),topics:['fees'],presentation_units:[{key:'first',aspects:['first_attempt'],amount_cop:0,text:'La primera oportunidad es gratuita.'}]}],
+  ['beta',{...meta(),topics:['fees'],presentation_units:[{key:'extra',aspects:['extraordinary_fee'],amount_cop:100,text:'La extraordinaria cuesta $100 solo para planes antiguos; periodo sin indicar.'},{key:'other',aspects:['extemporaneous_fee'],amount_cop:50,period:'2026',text:'La extemporánea cuesta $50 en 2026.'}]}],
+ ]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿La primera prueba y la extraordinaria cuestan lo mismo?'});assert.match(r.content,/^No\./u);assert.match(r.content,/solo para planes antiguos/u);assert.doesNotMatch(r.content,/extemporánea|\$50/u);assert.equal(r.citation_records.length,2);
+});
+test('a question about cost-free repetition asks for entitlement, not a tariff menu',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees','diagnostic','retry_limits'],presentation_units:[{key:'menu',aspects:['additional_fee'],text:'¿Qué concepto de prueba necesitas consultar?'},{key:'limits',aspects:['retry_limits'],text:'La primera oportunidad gratuita no garantiza repeticiones gratuitas.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Está garantizado repetir la prueba sin costo?'});assert.deepEqual(r.presentation_units,[{claim_id:'example',key:'limits'}]);assert.doesNotMatch(r.content,/Qué concepto/u);
+});
+test('a transition payment follow-up is not silently treated as course tuition',async()=>{
+ const d=deps([one,two]);d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'first',topics:['fees'],presentation_units:[{key:'first',aspects:['transition_first'],text:'La primera presentación nueva aplicable es gratuita; el CCD determina cuáles pruebas corresponden.'},{key:'limits',aspects:['fee_limits'],text:'Esto no hace gratuitos todos los cursos ni repeticiones.'}]}],['beta',{...meta(),claim_id:'tuition',topics:['fees'],presentation_units:[{key:'course',aspects:['course_fee'],text:'La matrícula del curso tiene un precio.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Eso significa que no tengo que pagar nada?',history:[{role:'user',content:'Aprobé cursos antiguos de Informática. ¿Qué pasa en la transición?'}]});
+ assert.match(r.content,/primera presentación nueva/u);assert.doesNotMatch(r.content,/matrícula del curso tiene/u);
+});
+test('who teaches the next semester is a teacher-availability question',async()=>{
+ const r=await generateOperationalPilotAnswer(deps(),{release_id:release,query:'¿Quién lo dicta el próximo semestre?'});assert.equal(r.insufficient_evidence,true);assert.match(r.content,/profesores estarán asignados/u);assert.doesNotMatch(r.content,/El catálogo/u);
+});
+test('a literal historical row request does not select old-test background instead',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['transition','history'],presentation_units:[{key:'old',aspects:['old_tests'],text:'Hubo pruebas anteriores.'},{key:'row',aspects:['equivalence_two'],text:'Curso A y Curso B | Pilar 2. Tabla de cursos, no reconocimiento personal.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Cita literalmente la fila histórica de Word y PowerPoint.'});assert.match(r.content,/Curso A y Curso B \| Pilar 2/u);assert.doesNotMatch(r.content,/Hubo pruebas/u);
+});
+test('content comparisons prefer content evidence over a higher-ranked competency package',async()=>{
+ const third=chunk('alpha-content','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
+ const marked=(course:string,id:string,role:string):PilotEvidenceMetadata=>({...meta(course),claim_id:id,topics:['academic'],presentation_units:[{key:'kind',aspects:[role],text:'Reviewed academic fact.'}]});
+ d.pilot.metadata=new Map([['alpha',marked('Curso Alpha','A-competencies','academic_competencies')],['beta',marked('Curso Beta','B-content','academic_contents')],['alpha-content',marked('Curso Alpha','A-content','academic_contents')]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Compara los contenidos de Curso Alpha y Curso Beta'});assert.deepEqual(r.supporting_claim_ids,['A-content','B-content']);
+});
 test('candidate identity and retrieved release fail closed',async()=>{
  await assert.rejects(generateOperationalPilotAnswer(deps(),{release_id:'44444444-4444-4444-8444-444444444444',query:'Describe el contenido'}));
  await assert.rejects(generateOperationalPilotAnswer(deps([{...one,release_id:'44444444-4444-4444-8444-444444444444'}]),{release_id:release,query:'Describe el contenido'}));
@@ -27,13 +80,13 @@ test('student formatting keeps dates natural and rejects internal identifiers wi
  for(const value of ['OP-012','KC-001','MD-038','DOCUMENT_SOURCE','DOMAIN_CONFIRMATION','INFERENCE','a'.repeat(64),'operational-c-conversation-v1','para el piloto'])assert.equal(studentText(value),null);
  assert.equal(studentText('El curso cuesta $100 para 2026; otros periodos deben confirmarse.'),'El curso cuesta $100 para 2026; otros periodos deben confirmarse.');
 });
-test('purpose composes retrieved fact units without a fixed question answer or visible audit vocabulary',async()=>{
+test('a purpose-only question does not automatically add threshold or course rules',async()=>{
  const third=chunk('gamma','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
  d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'purpose-fact',topics:['purpose','diagnostic'],period:'202660',presentation_units:[{key:'purpose',aspects:['purpose'],text:'Identifica tus habilidades y orienta tu formación.'}]}],['beta',{...meta(),claim_id:'threshold-fact',topics:['threshold'],presentation_units:[{key:'threshold',aspects:['threshold'],text:'El mínimo es 70 % por pilar.'}]}],['gamma',{...meta(),claim_id:'completion-fact',topics:['completion'],presentation_units:[{key:'completion',aspects:['completion'],text:'Puedes completar lo pendiente aprobando el curso correspondiente.'}]}]]);
  d.generator_client={async generate(){throw new Error('Reviewed facts need no invented rewrite');}};
  const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuál es la finalidad del diagnóstico?'});
- assert.match(r.content,/Identifica tus habilidades/u);assert.match(r.content,/70 %/u);assert.match(r.content,/curso correspondiente/u);
- assert.doesNotMatch(r.content,/202660|Referencia|responsable|piloto/u);assert.equal(r.supporting_evidence?.find(e=>e.claim_id==='purpose-fact')?.period,'202660');assert.equal(r.citation_records.length,3);
+ assert.match(r.content,/Identifica tus habilidades/u);assert.doesNotMatch(r.content,/70 %|curso correspondiente/u);
+ assert.doesNotMatch(r.content,/202660|Referencia|responsable|piloto/u);assert.equal(r.supporting_evidence?.find(e=>e.claim_id==='purpose-fact')?.period,'202660');assert.equal(r.citation_records.length,1);
 });
 test('progressive fees answer first opportunity alone and a loss follow-up changes aspect',async()=>{
  const third=chunk('gamma','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
@@ -43,7 +96,7 @@ test('progressive fees answer first opportunity alone and a loss follow-up chang
  assert.match(next.content,/solo los pilares pendientes/u);assert.doesNotMatch(next.content,/tarifa|gratuita/u);assert.deepEqual(next.supporting_claim_ids,['completion']);
 });
 test('natural presentation preserves financial scope, population and period as a whole fact',async()=>{
- const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees'],presentation_units:[{key:'price',aspects:['additional_fee'],text:'La extraordinaria cuesta $100 solo para planes antiguos; no tiene periodo indicado. Confirma su aplicación con el CCD.'}]}]]);
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees'],presentation_units:[{key:'price',aspects:['extraordinary_fee'],amount_cop:100,text:'La extraordinaria cuesta $100 solo para planes antiguos; no tiene periodo indicado. Confirma su aplicación con el CCD.'}]}]]);
  const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuánto cuesta otra prueba extraordinaria?'});
  assert.match(r.content,/solo para planes antiguos/u);assert.match(r.content,/no tiene periodo indicado/u);assert.match(r.content,/Confirma/u);
 });
@@ -94,6 +147,7 @@ test('documented spelling aliases preserve subject and test duration does not se
  const metadata=new Map([['alpha',meta('Curso Digital')]]);
  assert.deepEqual(pilotQueryScope('Temas de Curso Dijital',metadata).courses,['Curso Digital']);
  const scope=pilotQueryScope('Duración de la prueva diagnóstica',metadata);assert.ok(scope.topics.includes('diagnostic'));assert.ok(!scope.topics.includes('hours'));
+ assert.ok(pilotQueryScope('cuales son los pilare de competencias dijitales',metadata).topics.includes('structure'));
 });
 test('purpose and antecedent intents do not collapse into structure',()=>{
  const metadata=new Map([['alpha',meta()]]);

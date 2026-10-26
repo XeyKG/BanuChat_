@@ -34,3 +34,8 @@ test('presentation is manifest-bound while original period and provenance remain
 test('presentation rejects audit labels, internal periods and unapproved contact detail',()=>{
  for(const text of ['Referencia documental','DOMAIN_CONFIRMATION','OP-001','Periodo 202660','person@example.invalid','300 123 4567'])assert.throws(()=>prepareIsolatedPilot('test',[{...c,presentation_units:[{key:'fact',aspects:['purpose'],text}]}]));
 });
+test('fee metadata is internal, manifest-bound and rejects invalid amounts',()=>{
+ for(const amount of [-1,NaN,Infinity,0.5])assert.throws(()=>prepareIsolatedPilot('test',[{...c,presentation_units:[{key:'fee',aspects:['course_fee'],text:'A scoped fee.',amount_cop:amount}]}]));
+ const p=prepareIsolatedPilot('test',[{...c,presentation_units:[{key:'fee',aspects:['course_fee'],text:'A scoped fee.',period:'2026',amount_cop:100}]}]);
+ assert.equal(p.documents[0]!.metadata.presentation_units![0]!.period,'2026');assert.equal(p.documents[0]!.metadata.presentation_units![0]!.amount_cop,100);
+});

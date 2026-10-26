@@ -3,7 +3,7 @@ import type {EmbeddingClient,EmbeddingConfig} from '../ollama/types.js';
 import {vectorLiteral} from '../ollama/client.js';
 
 export const PILOT_DATABASE='banuchat_p0_operational';
-export interface PilotPresentationUnit {key:string;aspects:string[];text:string}
+export interface PilotPresentationUnit {key:string;aspects:string[];text:string;period?:string;amount_cop?:number}
 export interface PilotSql {query<T=Record<string,unknown>>(text:string,values?:readonly unknown[]):Promise<{rows:T[]}>}
 export interface PilotClaim {
   claim_id:string; title:string; statement:string; period:string; population:string;
@@ -39,6 +39,8 @@ export function prepareIsolatedPilot(label:string,claims:readonly PilotClaim[],o
         invariant(c.presentation_units.length>0 && new Set(c.presentation_units.map(u=>u.key)).size===c.presentation_units.length);
         for(const u of c.presentation_units){
           invariant(/^[a-z0-9-]+$/u.test(u.key)&&u.aspects.length>0&&u.aspects.every(a=>/^[a-z_]+$/u.test(a))&&u.text.trim());
+          invariant(u.period===undefined||(typeof u.period==='string'&&u.period.trim().length>0));
+          invariant(u.amount_cop===undefined||(Number.isSafeInteger(u.amount_cop)&&u.amount_cop>=0));
           invariant(!/DOCUMENT_SOURCE|DOMAIN_CONFIRMATION|INFERENCE|PENDING_CLARIFICATION|\b(?:OP|KC|MD)-[\w-]+|\b[a-f\d]{64}\b|\b\d{4}(?:10|60)\b|referencia documental|confirmaci[oó]n del responsable|\bpiloto\b/iu.test(u.text));
           invariant(!/\b\d{3}[ -]\d{3}[ -]\d{4}\b/u.test(u.text));
           invariant([...u.text.matchAll(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/giu)].every(m=>allowedContacts.has(m[0].toLowerCase())));
