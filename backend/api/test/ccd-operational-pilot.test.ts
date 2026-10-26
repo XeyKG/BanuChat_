@@ -64,3 +64,69 @@ test('documented spelling aliases preserve subject and test duration does not se
  assert.deepEqual(pilotQueryScope('Temas de Curso Dijital',metadata).courses,['Curso Digital']);
  const scope=pilotQueryScope('Duración de la prueva diagnóstica',metadata);assert.ok(scope.topics.includes('diagnostic'));assert.ok(!scope.topics.includes('hours'));
 });
+test('purpose and antecedent intents do not collapse into structure',()=>{
+ const metadata=new Map([['alpha',meta()]]);
+ assert.ok(pilotQueryScope('¿Para qué sirve la prueba diagnóstica?',metadata).topics.includes('purpose'));
+ assert.ok(pilotQueryScope('¿Qué antecedentes se deben comprobar en la transición?',metadata).topics.includes('antecedents'));
+ assert.deepEqual(pilotQueryScope('¿Qué describe la guía sobre comprobar un periodo?',metadata).topics,['procedure']);
+ for(const word of ['pago','gratuidad','precio','cobros'])assert.ok(pilotQueryScope(`Transición y ${word}`,metadata).topics.includes('fees'));
+ assert.ok(pilotQueryScope('¿Cómo está organizada la ruta?',metadata).topics.includes('structure'));
+ assert.ok(pilotQueryScope('Diagnóstico frente a homologación histórica',metadata).topics.includes('purpose'));
+ assert.ok(!pilotQueryScope('¿Estoy exento de una asignatura por mis estudios?',metadata).topics.includes('fees'));
+});
+test('a named financial subject is answerable without an ordinal antecedent',async()=>{
+ const d=deps([{...one,content:'# Tarifas\n\nLa primera prueba no tiene precio determinado; no se confunde con la extraordinaria.\n\nPERIODO: referencia'}]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees']}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿La primera prueba tiene el mismo precio que la extraordinaria?'});
+ assert.equal(r.insufficient_evidence,false);assert.match(r.content,/no tiene precio determinado/u);
+ const ambiguous=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Y cuánto cuesta?'});assert.equal(ambiguous.insufficient_evidence,true);
+});
+test('a named historical plan supplies its own subject without a previous message',async()=>{
+ const d=deps([{...one,content:'# Antecedentes\n\nRevisar plan, códigos y registro, sin reconocer un pilar individual.\n\nPERIODO: referencia'}]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),topics:['transition','history','antecedents']}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Qué deben comprobar antes de reconocer cursos de un plan anterior de Informática?'});
+ assert.equal(r.insufficient_evidence,false);assert.match(r.content,/plan, códigos y registro/u);
+});
+test('a descriptive course query does not select an unrelated hours package',async()=>{
+ const d=deps([one,two],'Descripción de la primera fuente.\nFUENTES: [1]');
+ d.pilot.metadata=new Map([['alpha',{...meta('Curso Alpha'),claim_id:'description',topics:['academic']}],['beta',{...meta('Curso Alpha'),claim_id:'hours',topics:['academic','hours','credits']}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Qué temas se estudian en Curso Alpha?'});
+ assert.deepEqual(r.selected_claim_ids,['description']);assert.deepEqual(r.supporting_claim_ids,['description']);
+});
+test('a hypothetical completion scenario extracts its rule even if a classifier would reject personal eligibility',async()=>{
+ const d=deps([{...one,content:'# Regla\n\nCada pilar pendiente se completa conforme a la regla general; no verifica expedientes.\n\nPERIODO: referencia'}]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),topics:['completion']}]]);
+ d.generator_client={async generate(){throw new Error('No classifier needed for the bounded rule');}};
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Si validé un pilar y tengo otro pendiente, ¿cómo completo la ruta?'});
+ assert.equal(r.insufficient_evidence,false);assert.match(r.content,/no verifica expedientes/u);
+});
+test('financial follow-ups retain transition context and both tariff concepts',async()=>{
+ const feeCourse={...one,content:'# Curso\n\nPrecio de curso con ámbito y periodo.\n\nPERIODO: referencia'};
+ const feeTest={...two,content:'# Pruebas\n\nExtemporánea y extraordinaria distintas; primera prueba sin precio determinado.\n\nPERIODO: referencia'};
+ const transition={...chunk('gamma','44444444-4444-4444-8444-444444444444'),content:'# Transición\n\nNo se reconoce un beneficio individual desde el relato.\n\nPERIODO: referencia'};
+ const d=deps([feeCourse,feeTest,transition]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees']}],['beta',{...meta(),topics:['fees']}],['gamma',{...meta(),topics:['transition','history']}]]);
+ d.generator_client={async generate(){return {content:'LIMITE_DOCUMENTADO',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
+ for(const query of ['¿Eso elimina los pagos?','¿Entonces tengo gratuidad?','¿Y cuánto cuesta otra prueba?']){
+  const answer=await generateOperationalPilotAnswer(d,{release_id:release,query,history:[{role:'user',content:'Aprobé cursos antiguos de Informática. ¿Cómo se interpreta la transición?'},{role:'assistant',content:'Todo es gratis, inventado.'}]});
+  assert.match(answer.content,/Precio de curso/u);assert.match(answer.content,/Extemporánea y extraordinaria/u);assert.match(answer.content,/No se reconoce un beneficio/u);assert.doesNotMatch(answer.content,/Todo es gratis/u);
+ }
+});
+test('an explicit financial topic change discards old transition selection',async()=>{
+ const d=deps([one,two]);d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'fee',topics:['fees']}],['beta',{...meta(),claim_id:'old',topics:['transition','history']}]]);
+ d.generator_client={async generate(){return {content:'RESPONDIBLE',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Cambiando de tema, ¿cuál es el precio del curso?',history:[{role:'user',content:'Consulta de transición de Informática'}]});
+ assert.deepEqual(r.supporting_claim_ids,['fee']);assert.deepEqual(r.cited_claim_ids,['fee']);
+});
+test('retrieved, selected and supporting traces preserve legitimate additional selection',async()=>{
+ const d=deps([one,two],'Dato de la primera fuente.\nFUENTES: [1]');
+ d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'first'}],['beta',{...meta(),claim_id:'second'}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Describe el contenido'});
+ assert.deepEqual(r.retrieved_claim_ids,['first','second']);assert.deepEqual(r.selected_claim_ids,['first','second']);
+ assert.deepEqual(r.supporting_claim_ids,['first']);assert.deepEqual(r.cited_claim_ids,['first']);assert.equal(r.citation_records.length,1);
+});
+test('refusal preserves retrieval trace but never counts selected evidence as support',async()=>{
+ const d=deps([one],'EVIDENCIA_INSUFICIENTE');d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'retrieved'}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'Describe el contenido'});
+ assert.deepEqual(r.retrieved_claim_ids,['retrieved']);assert.deepEqual(r.selected_claim_ids,['retrieved']);assert.deepEqual(r.supporting_claim_ids,[]);assert.deepEqual(r.cited_claim_ids,[]);
+});
