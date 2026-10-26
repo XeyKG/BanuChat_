@@ -34,7 +34,7 @@ function v2Links<T>(value:T):T {
  if(value!==null && typeof value==='object'){const result:Record<string,unknown>={};for(const [key,v]of Object.entries(value))result[key]=key==='artifact_url' && typeof v==='string'?v.replace(/^\/api\/v1\/documents\//u,'/api/v2/documents/'):v2Links(v);return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
-export function createAuthenticatedApiServer(input:{auth:AuthService;resources:AuthenticatedResources;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
+export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
  async function handle(request:IncomingMessage,response:ServerResponse){
  let allow:string|undefined;
  try{

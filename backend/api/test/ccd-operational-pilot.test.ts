@@ -88,6 +88,29 @@ test('a purpose-only question does not automatically add threshold or course rul
  assert.match(r.content,/Identifica tus habilidades/u);assert.doesNotMatch(r.content,/70 %|curso correspondiente/u);
  assert.doesNotMatch(r.content,/202660|Referencia|responsable|piloto/u);assert.equal(r.supporting_evidence?.find(e=>e.claim_id==='purpose-fact')?.period,'202660');assert.equal(r.citation_records.length,1);
 });
+test('a guide navigation question uses steps instead of the instrument description',async()=>{
+ const d=deps([one,two]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['procedure'],presentation_units:[{key:'dimensions',aspects:['procedure_dimensions'],text:'El instrumento tiene doce preguntas y tres abiertas.'}]}],['beta',{...meta(),topics:['procedure'],presentation_units:[{key:'navigation',aspects:['procedure_navigation'],text:'Accede al portal de estudiantes, selecciona Cosmos y el perfil Soy Estudiante.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cómo empiezo el procedimiento del instructivo?'});assert.match(r.content,/Accede al portal/u);assert.doesNotMatch(r.content,/doce preguntas/u);
+});
+test('an explicit validation compound admits threshold evidence without expanding purpose-only scope',async()=>{
+ const d=deps([one,two]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['purpose'],presentation_units:[{key:'purpose',aspects:['purpose'],text:'El diagnóstico identifica competencias previas.'}]}],['beta',{...meta(),topics:['threshold'],presentation_units:[{key:'minimum',aspects:['threshold'],text:'Cada pilar requiere al menos 70 %.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Qué busca la evaluación de aprendizajes previos y cómo se validan los pilares?'});assert.match(r.content,/70 %/u);assert.equal(r.citations.length,2);
+});
+test('a declared prior-plan origin remains a subject for antecedent follow-ups',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['transition'],presentation_units:[{key:'checks',aspects:['antecedents'],text:'El CCD revisa plan, códigos y registro; no hay equivalencia personal automática.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Qué antecedentes debe verificar el CCD en mi caso?',history:[{role:'user',content:'Vengo de un plan anterior de Informática. ¿Qué implica la transición?'}]});assert.match(r.content,/plan, códigos y registro/u);assert.equal(r.insufficient_evidence,false);
+});
+test('historical-context recovery respects the existing 4000-character retrieval bound',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['transition'],presentation_units:[{key:'checks',aspects:['antecedents'],text:'El CCD revisa plan, códigos y registro.'}]}]]);
+ const query=('¿Qué antecedentes debe verificar el CCD en mi caso de transición? '+'x'.repeat(4000)).slice(0,4000);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query,history:[{role:'user',content:'Vengo de un plan anterior de Informática.'}]});assert.match(r.content,/plan, códigos y registro/u);
+});
+test('explicit period and special-fee questions preserve all requested financial aspects',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees'],presentation_units:[{key:'course',aspects:['course_fee'],text:'El curso cuesta $100.'},{key:'period',aspects:['course_fee_period'],period:'2026',text:'La tarifa del curso corresponde a 2026.'},{key:'first',aspects:['first_attempt'],text:'La primera oportunidad es gratuita.'},{key:'extemp',aspects:['extemporaneous_fee'],text:'La extemporánea cuesta $50 en 2026.'},{key:'extra',aspects:['extraordinary_fee'],text:'La extraordinaria cuesta $80 para planes antiguos; periodo sin indicar.'}]}]]);
+ const period=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuánto vale un curso y qué periodo respalda ese valor?'});assert.match(period.content,/corresponde a 2026/u);
+ const basic=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuánto cuesta un curso?'});assert.doesNotMatch(basic.content,/corresponde a 2026/u);
+ const special=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Qué valores tienen las pruebas especiales y la primera prueba?'});assert.match(special.content,/primera oportunidad/u);assert.match(special.content,/extemporánea/u);assert.match(special.content,/extraordinaria/u);
+});
 test('progressive fees answer first opportunity alone and a loss follow-up changes aspect',async()=>{
  const third=chunk('gamma','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
  d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'first',topics:['fees','diagnostic'],presentation_units:[{key:'first',aspects:['first_attempt'],text:'La primera oportunidad es gratuita.'}]}],['beta',{...meta(),claim_id:'other',topics:['fees'],presentation_units:[{key:'other',aspects:['additional_fee'],text:'La prueba especial tiene tarifa propia para la población indicada en 2026.'}]}],['gamma',{...meta(),claim_id:'completion',topics:['completion'],presentation_units:[{key:'completion',aspects:['completion'],text:'Completa solo los pilares pendientes mediante cursos; los aprobados no se repiten.'}]}]]);

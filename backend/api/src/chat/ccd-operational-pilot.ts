@@ -4,7 +4,7 @@ import {retrieveDocumentChunksForQuery} from '../application/document-query-retr
 import type {DocumentRagDependencies, DocumentRagAnswer, DocumentRagInput} from './document-rag.js';
 import {buildDocumentCitations} from './document-citations.js';
 import {parseGroundedAnswer, GROUNDED_ANSWER_INSTRUCTION} from './document-evidence.js';
-import {resolveConversationQuery} from './conversation-context.js';
+import {resolveConversationQuery,isContextualFollowUp,boundConversationContext} from './conversation-context.js';
 
 /** Explicit opt-in pilot; never installed in the habitual runtime composition. */
 export interface PilotEvidenceMetadata {
@@ -31,7 +31,7 @@ const TOPICS: ReadonlyArray<readonly [string,RegExp]> = [
   ['orientation',/\b(?:orient\p{L}*|seleccion)\b/u],
   ['catalog',/\b(?:cursos|catalogo|elegir|opciones|asignaturas)\b/u],
   ['enrollment',/\b(?:matricul\p{L}*|inscrib\p{L}*|semestre|semestres|secuencia|orden|simultaneo|simultaneamente)\b/u],
-  ['fees',/\b(?:cost\p{L}*|cuest\p{L}*|precio|tarif\p{L}*|pag\p{L}*|cobr\p{L}*|abonar|valor|gratis|gratui\p{L}*|extraordinaria|extemporanea)\b/u],
+  ['fees',/\b(?:cost\p{L}*|cuest\p{L}*|precio|tarif\p{L}*|pag\p{L}*|cobr\p{L}*|abonar|valor(?:es)?|gratis|gratui\p{L}*|extraordinaria|extemporanea)\b/u],
   ['transition',/\b(?:transicion|informatica|antigu\p{L}*|homolog\p{L}*|equivalencia|equivale|word|excel|powerpoint|vida en linea)\b/u],
   ['badge',/\b(?:insignias?|reconocimiento|que recibo)\b/u],
   ['hours',/\b(?:horas|creditos|duracion)\b/u],
@@ -45,6 +45,7 @@ export function pilotQueryScope(query:string, metadata:ReadonlyMap<string,PilotE
   const courses=[...new Set([...metadata.values()].flatMap(m=>m.course?[m.course]:[]))]
     .filter(c=>text.includes(normalized(c)) || text.includes(normalized(c).replace(/^habilidades en /u,'')));
   const topics=TOPICS.filter(([,pattern])=>pattern.test(text)).map(([topic])=>topic);
+  if(topics.includes('purpose')&&/\bcomo\b.{0,25}\bvalid\p{L}*/u.test(text))topics.push('threshold');
   if(/\bcertificad\p{L}*\b/u.test(text)&&/\b(?:pilares?|ruta|competencias digitales|complet\p{L}*|finaliz\p{L}*)\b/u.test(text)&&!/\b(?:asistencia|medico|notas)\b/u.test(text))topics.push('badge');
   if(topics.includes('transition')&&/\bdiagnostic\p{L}*\b/u.test(text)&&!topics.includes('purpose'))topics.push('purpose');
   if(topics.includes('diagnostic') && topics.includes('hours') && courses.length===0)topics.splice(topics.indexOf('hours'),1);
@@ -119,6 +120,8 @@ function conversationalEvidence(deps:OperationalPilotDependencies,chunks:Retriev
     const specials=[...(/\bextraordinaria\b/u.test(text)?['extraordinary_fee']:[]),...(/\bextemporanea\b/u.test(text)?['extemporaneous_fee']:[])];
     if(first)aspects.push(scope.topics.includes('transition')?'transition_first':'first_attempt');
     if(course)aspects.push('course_fee');
+    if(course&&/\b(?:periodo|ano|fecha)\b/u.test(text))aspects.push('course_fee_period');
+    if(/\bpruebas? especiales\b/u.test(text))aspects.push('extemporaneous_fee','extraordinary_fee');
     if(specials.length)aspects.push(...specials);
     else if(other)aspects.push(/\brepet\p{L}*\b/u.test(text)&&!/\b(?:cuanto|precio|cuesta|tarifa|valor)\b/u.test(text)?'retry_limits':'additional_fee');
     if(!first&&!course&&!other)aspects.push(scope.topics.includes('transition')?'transition_first':'first_attempt');
@@ -127,7 +130,11 @@ function conversationalEvidence(deps:OperationalPilotDependencies,chunks:Retriev
     const futureYear=datedYears.length>0&&[...text.matchAll(/\b(20\d{2})\b/gu)].some(x=>Number(x[1])>Math.max(...datedYears));
     if(futureYear||/\bfutur\p{L}*\b/u.test(text))aspects.splice(0,aspects.length,'future_fee');
     if(scope.topics.includes('schedule')&&/\b(?:dia|momento|induccion|jornada|asist\p{L}*)\b/u.test(text))aspects.push('schedule');
-  }else if(scope.topics.includes('purpose'))aspects.push('purpose');
+  }else if(scope.topics.includes('purpose')){
+    aspects.push('purpose');
+    if(/\bcomo\b.{0,25}\bvalid\p{L}*/u.test(text))aspects.push('threshold');
+    if(scope.topics.includes('transition')&&/\b(?:homolog\p{L}*|equival\p{L}*)\b/u.test(text))aspects.push('antecedents');
+  }
   else if(scope.topics.includes('badge')){aspects.push('badge');if(/\b(?:como se completa|como completo|que me falta)\b/u.test(text))aspects.push(completionAspect());}
   else if(scope.topics.includes('eligibility')&&!scope.topics.includes('schedule'))aspects.push('eligibility');
   else if(scope.topics.includes('retry_limits')){aspects.push('retry_limits');if(scope.topics.includes('schedule'))aspects.push('schedule');}
@@ -156,7 +163,7 @@ function conversationalEvidence(deps:OperationalPilotDependencies,chunks:Retriev
   else if(scope.topics.includes('completion'))aspects.push('completion');
   else if(scope.topics.includes('schedule'))aspects.push('schedule');
   else if(scope.topics.includes('structure'))aspects.push(scope.topics.includes('diagnostic')?'diagnostic_structure':'structure');
-  else if(scope.topics.includes('procedure'))aspects.push('procedure');
+  else if(scope.topics.includes('procedure'))aspects.push(/\b(?:contrasena|recuper\p{L}*|olvid\p{L}*)\b/u.test(text)?'procedure_recovery':/\b(?:empie\p{L}*|inici\p{L}*|acced\p{L}*|acceso|cosmos|naveg\p{L}*)\b/u.test(text)?'procedure_navigation':/\b(?:periodo|nivel)\b/u.test(text)?'procedure_period_level':/\b(?:termin\p{L}*|complet\p{L}*|estado)\b/u.test(text)?'procedure_completion':/\b(?:dimensiones|preguntas|instrumento)\b/u.test(text)?'procedure_dimensions':'procedure');
   else if(scope.topics.includes('history'))aspects.push('history');
   else if(scope.topics.includes('diagnostic'))aspects.push(/\b(?:duracion|horas|duran?)\b/u.test(text)?'diagnostic_duration':'purpose');
   if(/\b(?:y cuanto|y que|ademas)\b/u.test(text))for(const t of ['badge','catalog'])if(scope.topics.includes(t)){if(t==='catalog')aspects.unshift(catalogAspect);else aspects.push(t);}
@@ -187,7 +194,20 @@ export async function generateOperationalPilotAnswer(deps:OperationalPilotDepend
 }
 async function generatePilotAnswer(deps:OperationalPilotDependencies,input:DocumentRagInput,trace:(kind:'retrieved'|'selected',chunks:RetrievedDocumentChunk[])=>void):Promise<PilotAnswer>{
   if(input.release_id!==deps.pilot.release_id || !deps.retrieve_chunks)throw new Error('Isolated pilot configuration rejected.');
-  const resolved=resolveConversationQuery(input.query,input.history??[]);
+  let resolved=resolveConversationQuery(input.query,input.history??[]);
+  // A declared historical origin can contain "anterior" and still establish a
+  // subject. Recover that student anchor only when the shared resolver is ambiguous.
+  if(resolved.needs_clarification&&isContextualFollowUp(input.query)){
+    const bounded=boundConversationContext(input.history??[]);
+    let anchor=-1;
+    for(let i=bounded.length-1;i>=0;i--){const m=bounded[i]!;if(m.role==='user'&&/^(?:vengo de|curse|estudie|hice)\b/u.test(normalized(m.content))&&/\b(?:informatica|transicion|plan(?:es)? anterior\p{L}*|cursos? antigu\p{L}*)\b/u.test(normalized(m.content))){anchor=i;break;}}
+    if(anchor>=0&&!bounded.slice(anchor+1).some(m=>m.role==='user'&&!isContextualFollowUp(m.content))){
+      const history=bounded.slice(anchor),topic=history.filter(m=>m.role==='user').map(m=>m.content).join('\n');
+      const budget=Math.max(0,3900-Array.from(input.query).length);
+      const prefix=budget===0?'':Array.from(topic).slice(-budget).join('');
+      resolved={history,needs_clarification:false,retrieval_query:prefix?`${prefix}\nConsulta actual: ${input.query}`:input.query};
+    }
+  }
   const history=resolved.history.filter(m=>m.role==='user');
   const explicitPillar=/\b(?:primer|segundo|tercer) pilar\b|\bpilar (?:[123]|de competencias digitales basicas|de analitica y contenido digital|de tecnologias transformativas)\b/u.test(normalized(input.query));
   const explicitFinancialSubject=pilotQueryScope(input.query,deps.pilot.metadata).topics.includes('fees')&&/\b(?:pruebas?|cursos?|extemporanea|extraordinaria)\b/u.test(normalized(input.query));

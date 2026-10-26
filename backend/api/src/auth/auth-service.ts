@@ -5,6 +5,7 @@ import { PgAuthStore, type AccountRow, type SessionRow, type TokenPair } from ".
 import { PersistentAuthLimiter, type AuthRequestContext } from "./rate-limiter.js";
 import {knowledgeMode,knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
 import {auxiliaryContext} from './unified-product.js';
+import {assertIsolatedPilotAuthScope,type IsolatedPilotScope} from './isolated-pilot-scope.js';
 import { Argon2idHasher, AuthError, digestToken, exactObject, issueToken, password, postgresClock, safeError, uid,
   type AuthClock, type PasswordHasher } from "./primitives.js";
 
@@ -28,14 +29,16 @@ async function guarded<T>(work:()=>Promise<T>):Promise<T>{try{return await work(
 export class AuthService {
   private constructor(private readonly store:PgAuthStore,private readonly deployment:string,
     private readonly hasher:PasswordHasher,private readonly dummyHash:string,private readonly clock:AuthClock,
-    private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode,private readonly unified=false) {}
-  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode;unified?:boolean}):Promise<AuthService> {
+    private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode,private readonly unified=false,private readonly isolatedPilot?:IsolatedPilotScope) {}
+  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode;unified?:boolean;isolated_pilot?:IsolatedPilotScope}):Promise<AuthService> {
     return guarded(async()=>{
       if(input.deploymentId.length!==36 || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/u.test(input.deploymentId))throw new AuthError("DEPENDENCY_UNAVAILABLE");
-      const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);await store.assertRuntime(input.expectedDatabase,mode,input.unified);
+      const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);
+      if(input.isolated_pilot){if(mode!=='ccd_local'||input.unified)throw new AuthError('DEPENDENCY_UNAVAILABLE');await assertIsolatedPilotAuthScope(input.pool,input.expectedDatabase,input.deploymentId,input.isolated_pilot);}
+      else await store.assertRuntime(input.expectedDatabase,mode,input.unified);
       const hasher=input.hasher??new Argon2idHasher();const clock=input.clock??postgresClock;
       const dummy=await hasher.hash(randomBytes(32).toString("base64url"));
-      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode,input.unified);
+      return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode,input.unified,input.isolated_pilot?Object.freeze({...input.isolated_pilot}):undefined);
     });
   }
   login(input:unknown,context:AuthRequestContext):Promise<TokenPair> {
@@ -105,9 +108,21 @@ export class AuthService {
   verifyAccess(token:string):Promise<AuthPrincipal> {
     return guarded(()=>this.access(token,async(_c,a,s)=>Object.freeze({principalId:a.id,sessionId:s.id,syntheticUid:a.synthetic_uid,authVersion:a.auth_version,deploymentId:this.deployment}),false));
   }
+  /** Run a protected resource operation under the same account/session locks as auth. */
+  withAuthorizedAccess<T>(token:string,operation:(sql:SqlQueryClient,principal:AuthPrincipal)=>Promise<T>):Promise<T>{
+    return guarded(()=>this.access(token,(c,a,s)=>operation(c,Object.freeze({principalId:a.id,sessionId:s.id,syntheticUid:a.synthetic_uid,authVersion:a.auth_version,deploymentId:this.deployment})),true));
+  }
   currentSession(token:string):Promise<CurrentSession> {
     return guarded(()=>this.access<CurrentSession>(token,async(c,a,s)=>{
       const definition=knowledgeDefinition(this.evidenceMode);
+      if(this.isolatedPilot){
+        const r=await c.query(`SELECT s.release_id FROM banuchat_auth.pilot_scope s JOIN banuchat.dataset_releases r ON r.id=s.release_id
+          JOIN banuchat_auth.pilot_grants g ON g.principal_id=$1 AND g.revoked_at IS NULL
+          WHERE s.singleton AND s.deployment_id=$2 AND s.release_id=$3 AND s.manifest_sha256=$4 AND r.status='ready' AND r.manifest_sha256=s.manifest_sha256`,[a.id,this.deployment,this.isolatedPilot.release_id,this.isolatedPilot.manifest_sha256]);
+        if(r.rows.length!==1)throw new AuthError('FORBIDDEN');
+        return {principal_id:a.id,synthetic_uid:a.synthetic_uid,session_id:s.id,session_expires_at:s.absolute_expires_at.toISOString(),release_id:this.isolatedPilot.release_id,
+          evidence_mode:this.evidenceMode,profile:{profile_key:'ccd-local-demo',alias:'Demostración CCD local — sin identidad institucional'},capabilities:definition.capabilities};
+      }
       const current=await c.query<{id:string}>(`SELECT r.id FROM banuchat.datasets d JOIN banuchat.dataset_releases r ON r.id=d.current_release_id AND r.dataset_id=d.id
         WHERE d.id=1 AND d.name=$1 AND r.status='ready' AND r.manifest->'synthetic'=$2::jsonb`,[definition.name,JSON.stringify(definition.synthetic)]);
       const release=current.rows[0]?.id;if(!release)throw new AuthError("NOT_FOUND");
