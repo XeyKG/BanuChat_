@@ -3,6 +3,7 @@ import type {EmbeddingClient,EmbeddingConfig} from '../ollama/types.js';
 import {vectorLiteral} from '../ollama/client.js';
 
 export const PILOT_DATABASE='banuchat_p0_operational';
+export interface PilotPresentationUnit {key:string;aspects:string[];text:string}
 export interface PilotSql {query<T=Record<string,unknown>>(text:string,values?:readonly unknown[]):Promise<{rows:T[]}>}
 export interface PilotClaim {
   claim_id:string; title:string; statement:string; period:string; population:string;
@@ -10,8 +11,9 @@ export interface PilotClaim {
   basis:Array<{kind:'DOCUMENT_SOURCE'|'DOMAIN_CONFIRMATION'|'INFERENCE'|'PENDING_CLARIFICATION';references:unknown[]}>;
   review_status:string; evidence_visible_allowed:boolean; isolated_evaluation_allowed:boolean;
   conditions:string[]; exceptions:string[]; details?:string[];
+  presentation_units?:PilotPresentationUnit[];
 }
-export interface PreparedPilotDocument {key:string;claim_id:string;title:string;path:string;content:string;sha256:string;metadata:{claim_id:string;topics:string[];course:string|null;basis_kinds:PilotClaim['basis'][number]['kind'][];period:string;isolated_evaluation_allowed:true}}
+export interface PreparedPilotDocument {key:string;claim_id:string;title:string;path:string;content:string;sha256:string;metadata:{claim_id:string;topics:string[];course:string|null;basis_kinds:PilotClaim['basis'][number]['kind'][];period:string;isolated_evaluation_allowed:true;presentation_units?:PilotPresentationUnit[]}}
 export interface PreparedPilot {schema_version:'ccd-isolated-pilot-1';label:string;manifest_sha256:string;documents:PreparedPilotDocument[];provenance:Record<string,PilotClaim['basis']>}
 const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
 function invariant(ok:unknown):asserts ok{if(!ok)throw new Error('Isolated CCD pilot rejected.');}
@@ -33,7 +35,16 @@ export function prepareIsolatedPilot(label:string,claims:readonly PilotClaim[],o
       const key=`${c.claim_id.toLowerCase()}-${i+1}`;const content=header+(group.length?`\nDETALLE DOCUMENTAL:\n${group.join('\n')}\n`:'');
       invariant(!/\b\d{3}[ -]\d{3}[ -]\d{4}\b/u.test(content));
       invariant([...content.matchAll(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/giu)].every(m=>allowedContacts.has(m[0].toLowerCase())));
-      documents.push({key,claim_id:c.claim_id,title:c.title,path:`documents/pilot/${key}.md`,content,sha256:hash(content),metadata:{claim_id:c.claim_id,topics:[...c.topics],course:c.course??null,basis_kinds:[...new Set(c.basis.map(b=>b.kind))],period:c.period,isolated_evaluation_allowed:true}});
+      if(c.presentation_units){
+        invariant(c.presentation_units.length>0 && new Set(c.presentation_units.map(u=>u.key)).size===c.presentation_units.length);
+        for(const u of c.presentation_units){
+          invariant(/^[a-z0-9-]+$/u.test(u.key)&&u.aspects.length>0&&u.aspects.every(a=>/^[a-z_]+$/u.test(a))&&u.text.trim());
+          invariant(!/DOCUMENT_SOURCE|DOMAIN_CONFIRMATION|INFERENCE|PENDING_CLARIFICATION|\b(?:OP|KC|MD)-[\w-]+|\b[a-f\d]{64}\b|\b\d{4}(?:10|60)\b|referencia documental|confirmaci[oó]n del responsable|\bpiloto\b/iu.test(u.text));
+          invariant(!/\b\d{3}[ -]\d{3}[ -]\d{4}\b/u.test(u.text));
+          invariant([...u.text.matchAll(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/giu)].every(m=>allowedContacts.has(m[0].toLowerCase())));
+        }
+      }
+      documents.push({key,claim_id:c.claim_id,title:c.title,path:`documents/pilot/${key}.md`,content,sha256:hash(content),metadata:{claim_id:c.claim_id,topics:[...c.topics],course:c.course??null,basis_kinds:[...new Set(c.basis.map(b=>b.kind))],period:c.period,isolated_evaluation_allowed:true,...(c.presentation_units?{presentation_units:c.presentation_units.map(u=>({...u,aspects:[...u.aspects]}))}:{})}});
     }
   }
   const payload={schema_version:'ccd-isolated-pilot-1' as const,label,documents,provenance:Object.fromEntries(claims.map(c=>[c.claim_id,c.basis]))};

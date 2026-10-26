@@ -24,3 +24,13 @@ test('tampered prepared metadata rejected before embeddings or transaction',asyn
  const sql:PilotSql={query:async<T>()=>({rows:[{name:'banuchat_p0_operational',role:'banuchat_pilot_writer',marker:true,no_current:true}] as T[]})};
  await assert.rejects(stageIsolatedPilot(sql,{inspect:async()=>{throw Error();},embed:async()=>{embedded=true;return [];}},p,{} as never));assert.equal(embedded,false);
 });
+test('presentation is manifest-bound while original period and provenance remain internal',()=>{
+ const p=prepareIsolatedPilot('test',[{...c,period:'202660',presentation_units:[{key:'scope',aspects:['schedule'],text:'Consulta una nueva jornada programada; no se presenta cualquier día.'}]}]);
+ assert.equal(p.documents[0]!.metadata.period,'202660');assert.match(p.documents[0]!.metadata.presentation_units![0]!.text,/no se presenta cualquier día/u);
+ assert.match(p.documents[0]!.content,/202660/u);assert.deepEqual(p.provenance['TEST-001'],c.basis);
+ const q=prepareIsolatedPilot('test',[{...c,period:'202660',presentation_units:[{key:'scope',aspects:['schedule'],text:'Otra redacción revisada.'}]}]);
+ assert.equal(p.documents[0]!.sha256,q.documents[0]!.sha256);assert.notEqual(p.manifest_sha256,q.manifest_sha256);
+});
+test('presentation rejects audit labels, internal periods and unapproved contact detail',()=>{
+ for(const text of ['Referencia documental','DOMAIN_CONFIRMATION','OP-001','Periodo 202660','person@example.invalid','300 123 4567'])assert.throws(()=>prepareIsolatedPilot('test',[{...c,presentation_units:[{key:'fact',aspects:['purpose'],text}]}]));
+});

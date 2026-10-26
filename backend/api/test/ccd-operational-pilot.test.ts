@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {generateOperationalPilotAnswer,retrieveIsolatedPilotChunks,pilotQueryScope,type OperationalPilotDependencies,type PilotEvidenceMetadata} from '../src/chat/ccd-operational-pilot.js';
+import {generateOperationalPilotAnswer,retrieveIsolatedPilotChunks,pilotQueryScope,studentText,type OperationalPilotDependencies,type PilotEvidenceMetadata} from '../src/chat/ccd-operational-pilot.js';
 import type {RetrievedDocumentChunk} from '../src/application/document-retrieval.js';
 const release='11111111-1111-4111-8111-111111111111';
 const config={provider:'ollama' as const,model:'qwen3:4b-instruct' as const,model_revision:'a'.repeat(64),runtime_version:'0.12.3',recipe:{think:false as const,stream:false as const,options:{temperature:0 as const,num_predict:256 as const},keep_alive:'5m' as const}};
@@ -20,7 +20,38 @@ test('unregistered evidence never reaches generation',async()=>{
 });
 test('citations expose confirmation provenance and no invented artifact endpoint',async()=>{
  const r=await generateOperationalPilotAnswer(deps(),{release_id:release,query:'Describe el contenido'});
- assert.equal(r.insufficient_evidence,false);assert.match(r.citations[0]!.label,/confirmación del responsable/u);assert.equal(r.citations[0]!.artifact_url,null);
+ assert.equal(r.insufficient_evidence,false);assert.doesNotMatch(r.citations[0]!.label,/confirmación del responsable/u);assert.ok(r.supporting_evidence?.[0]?.basis_kinds.includes('DOMAIN_CONFIRMATION'));assert.equal(r.citations[0]!.artifact_url,null);
+});
+test('student formatting keeps dates natural and rejects internal identifiers without deleting metadata',()=>{
+ assert.equal(studentText('La convocatoria descrita es 202660.'),'La convocatoria descrita es 2026-2.');
+ for(const value of ['OP-012','KC-001','MD-038','DOCUMENT_SOURCE','DOMAIN_CONFIRMATION','INFERENCE','a'.repeat(64),'operational-c-conversation-v1','para el piloto'])assert.equal(studentText(value),null);
+ assert.equal(studentText('El curso cuesta $100 para 2026; otros periodos deben confirmarse.'),'El curso cuesta $100 para 2026; otros periodos deben confirmarse.');
+});
+test('purpose composes retrieved fact units without a fixed question answer or visible audit vocabulary',async()=>{
+ const third=chunk('gamma','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'purpose-fact',topics:['purpose','diagnostic'],period:'202660',presentation_units:[{key:'purpose',aspects:['purpose'],text:'Identifica tus habilidades y orienta tu formación.'}]}],['beta',{...meta(),claim_id:'threshold-fact',topics:['threshold'],presentation_units:[{key:'threshold',aspects:['threshold'],text:'El mínimo es 70 % por pilar.'}]}],['gamma',{...meta(),claim_id:'completion-fact',topics:['completion'],presentation_units:[{key:'completion',aspects:['completion'],text:'Puedes completar lo pendiente aprobando el curso correspondiente.'}]}]]);
+ d.generator_client={async generate(){throw new Error('Reviewed facts need no invented rewrite');}};
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuál es la finalidad del diagnóstico?'});
+ assert.match(r.content,/Identifica tus habilidades/u);assert.match(r.content,/70 %/u);assert.match(r.content,/curso correspondiente/u);
+ assert.doesNotMatch(r.content,/202660|Referencia|responsable|piloto/u);assert.equal(r.supporting_evidence?.find(e=>e.claim_id==='purpose-fact')?.period,'202660');assert.equal(r.citation_records.length,3);
+});
+test('progressive fees answer first opportunity alone and a loss follow-up changes aspect',async()=>{
+ const third=chunk('gamma','44444444-4444-4444-8444-444444444444');const d=deps([one,two,third]);
+ d.pilot.metadata=new Map([['alpha',{...meta(),claim_id:'first',topics:['fees','diagnostic'],presentation_units:[{key:'first',aspects:['first_attempt'],text:'La primera oportunidad es gratuita.'}]}],['beta',{...meta(),claim_id:'other',topics:['fees'],presentation_units:[{key:'other',aspects:['additional_fee'],text:'La prueba especial tiene tarifa propia para la población indicada en 2026.'}]}],['gamma',{...meta(),claim_id:'completion',topics:['completion'],presentation_units:[{key:'completion',aspects:['completion'],text:'Completa solo los pilares pendientes mediante cursos; los aprobados no se repiten.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿La prueba es gratis?'});assert.equal(r.content,'La primera oportunidad es gratuita.');assert.deepEqual(r.supporting_claim_ids,['first']);
+ const next=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Y si la pierdo?',history:[{role:'user',content:'¿La prueba es gratis?'},{role:'assistant',content:r.content}]});
+ assert.match(next.content,/solo los pilares pendientes/u);assert.doesNotMatch(next.content,/tarifa|gratuita/u);assert.deepEqual(next.supporting_claim_ids,['completion']);
+});
+test('natural presentation preserves financial scope, population and period as a whole fact',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['fees'],presentation_units:[{key:'price',aspects:['additional_fee'],text:'La extraordinaria cuesta $100 solo para planes antiguos; no tiene periodo indicado. Confirma su aplicación con el CCD.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Cuánto cuesta otra prueba extraordinaria?'});
+ assert.match(r.content,/solo para planes antiguos/u);assert.match(r.content,/no tiene periodo indicado/u);assert.match(r.content,/Confirma/u);
+});
+test('an old-test approval question never substitutes a course-transition fact',async()=>{
+ const d=deps([one]);d.pilot.metadata=new Map([['alpha',{...meta(),topics:['transition','history'],presentation_units:[{key:'course',aspects:['transition'],text:'Los cursos aprobados pueden ser revisados.'},{key:'test',aspects:['old_tests'],text:'Las pruebas antiguas pendientes no se validan por sí solas; debes validar los instrumentos nuevos que correspondan.'}]}]]);
+ const r=await generateOperationalPilotAnswer(d,{release_id:release,query:'¿Una prueba antigua pendiente se da por aprobada automáticamente?'});
+ assert.match(r.content,/instrumentos nuevos/u);assert.doesNotMatch(r.content,/Los cursos aprobados/u);
+ assert.equal(studentText('Autoría responsable y ética digital.'),'Autoría responsable y ética digital.');
 });
 test('hallucinated contact or unsupported citation is rejected',async()=>{
  for(const output of ['Escribe a persona@example.invalid.\nFUENTES: [1]','Afirmación.\nFUENTES: [8]'])assert.equal((await generateOperationalPilotAnswer(deps([one],output),{release_id:release,query:'Describe el contenido'})).insufficient_evidence,true);
