@@ -1,5 +1,20 @@
 # RAG e ingesta — estado implementado
 
+## Piloto CCD operativo aislado
+
+`src/ccd/isolated-pilot.ts` añade preparación pura de derivados y staging de candidatos
+exclusivamente en `banuchat_p0_operational`, con rol propio, marcador de aislamiento,
+hashes y ausencia de puntero de publicación. Es un modelo de lectura privado del
+experimento; no sustituye el schema congelado ni el escritor CCD histórico. No se
+invoca desde el arranque habitual. Las reglas y fuentes se conservan separadas de
+las confirmaciones del responsable. La consulta experimental está en
+`backend/api/src/chat/ccd-operational-pilot.ts`; las pruebas focales cubren destino,
+procedencia, alteración del manifiesto y rechazo de datos sensibles.
+
+La autorización y sus límites se describen en
+[la propuesta del piloto](../../docs/transition/ccd-operational-pilot-decision.md).
+La preparación o un candidato legible en la base aislada no autorizan una promoción.
+
 ## OE4 — sincronización de calendario sintético
 
 `src/oe4` implementa un adaptador de fixture local representativo de Google Sheets y
