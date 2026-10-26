@@ -575,6 +575,48 @@ test('empty guidance generation uses a literal retrieved passage, not a fabricat
   assert.equal(fake.generator_calls.length,1);
 });
 
+test('contact instructions require a factual body while source-only output still fails closed', async () => {
+  const fake = fakeDependencies([chunk({chunk_locator:'unit:M12'})], 'FUENTES: [1]');
+  const answer = await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {
+    release_id:RELEASE_ID,query:'canal de correo del CCD',
+  });
+  assert.match(fake.generator_calls[0]!.input.system_prompt,/Responde primero con una oración/);
+  assert.match(fake.generator_calls[0]!.input.system_prompt,/No agregues canales ausentes/);
+  assert.equal(answer.insufficient_evidence,true);
+  assert.deepEqual(answer.citations,[]);
+  assert.equal(fake.generator_calls.length,1);
+});
+
+test('documented contact cannot assert current validity or expiration, but can explain uncertainty', async () => {
+  for (const content of ['El contacto está vigente hoy.', 'El correo documentado no está vigente hoy, ya que su vigencia debe confirmarse.',
+    'Ese contacto ya no sigue vigente.', 'El correo sigue vigente.']) {
+    const fake=fakeDependencies([chunk({chunk_locator:'unit:M12'})],content+'\nFUENTES: [1]');
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {release_id:RELEASE_ID,query:'¿Cuál es el contacto documentado?'});
+    assert.equal(answer.insufficient_evidence,true,content);
+    assert.deepEqual(answer.citations,[]);
+  }
+  for (const content of ['No puedo confirmar si está vigente hoy.', 'Debe comprobarse si está vigente.', 'El contacto documentado corresponde a 202660 y su vigencia actual no está ratificada.']) {
+    const fake=fakeDependencies([chunk({chunk_locator:'unit:M12'})],content+'\nFUENTES: [1]');
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {release_id:RELEASE_ID,query:'¿Cuál es el contacto documentado?'});
+    assert.equal(answer.insufficient_evidence,false,content);
+    assert.deepEqual(answer.citations.map(c=>c.locator),['unit:M12']);
+  }
+});
+
+test('literal guidance preserves the responsible actor as well as the consequence', async () => {
+  const source = '# Historical scope\n\nEl pilar no validado se cursa según los lineamientos de 202660. El centro orienta la selección y el estudiante gestiona la matrícula. No se determina la vigencia actual.\n';
+  for (const output of ['EVIDENCIA_INSUFICIENTE','No se otorga otra oportunidad.\nFUENTES: [1]']) {
+    const fake = fakeDependencies([chunk({chunk_locator:'unit:U03',content:source})],output);
+    const answer=await generateDocumentRagAnswer({...fake.dependencies,evidence_mode:'ccd_local'}, {
+      release_id:RELEASE_ID,query:'No aprobé una prueba nueva, ¿quién orienta la selección?',
+    });
+    assert.equal(answer.insufficient_evidence,false);
+    assert.match(answer.content,/El centro orienta la selección y el estudiante gestiona la matrícula/);
+    assert.deepEqual(answer.citations.map(c=>c.locator),['unit:U03']);
+    assert.equal(fake.generator_calls.length,1);
+  }
+});
+
 test('T07 cannot replace generator insufficiency with unrelated U03/U04 passages or caveats', async () => {
   const retrieved = [
     chunk({chunk_locator:'unit:U04',content:'# Transición\n\nLa transición de Informática reconoce avance aprobado. Para decidir reconocimientos debe verificarse el plan.'}),

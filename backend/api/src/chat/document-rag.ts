@@ -90,6 +90,19 @@ function containsInsufficientEvidenceMarker(content: string): boolean {
   return markerPattern.test(content);
 }
 
+/** M12 documents a channel, never its current validity or its expiration. */
+function assertsContactValidity(content: string): boolean {
+  const text = content.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+  return text.split(/[.!?;\n]/u).some(sentence => {
+    for (const match of sentence.matchAll(/\b(?:(?:ya )?no )?(?:esta|es|sigue|continua) vigente\b/gu)) {
+      const prefix = sentence.slice(0, match.index);
+      const uncertain = /\bno\b.*\b(?:confirmar|confirmamos|determinar|sabemos|sabe)\b|\b(?:confirmar|comprobar|verificar|determinar)(?:se)? si\b/u.test(prefix);
+      if (!uncertain) return true;
+    }
+    return false;
+  });
+}
+
 /** Literal scoped evidence, not a generated entitlement or a static FAQ answer.
  * Used only when a generator cannot explain an admitted boundary. */
 function guidanceExcerpt(chunk: { chunk_locator: string; content: string }, query: string, courseFailure: boolean): string | undefined {
@@ -98,7 +111,9 @@ function guidanceExcerpt(chunk: { chunk_locator: string; content: string }, quer
   if (!body) return undefined;
   const sentences = body.split(/(?<=[.!?])\s+/u);
   if (chunk.chunk_locator === 'unit:U03') {
-    if (!courseFailure) return sentences[0];
+    // Preserve both the consequence and the responsible actor/process. A lone
+    // first sentence can omit the very orientation requested by the student.
+    if (!courseFailure) return sentences.slice(0, 2).join(' ');
     return chunk.content.split('\n').find(line => line.startsWith('- Las reglas particulares de recuperación'))?.slice(2).split(/(?<=[.!?])\s+/u)[0];
   }
   if (/grat|gratis|costo|derecho|oportunidad|solicitud|autoriz/iu.test(query)) {
@@ -218,7 +233,7 @@ export async function generateDocumentRagAnswer(
           'Solo si ningún fragmento permite siquiera explicar orientación histórica o límites pertinentes, responde exactamente:')
         + '\n\nRespeta el periodo específico de cada fuente. Los lineamientos corresponden a 202660; los syllabus son ediciones entregadas cuyo periodo y vigencia no están confirmados: no les atribuyas 202660 ni oferta actual. En respuestas de contacto indica 202660 y que la vigencia actual no está ratificada. Describe solo contenido respaldado; no concedas cupos, horarios, gratuidad, elegibilidad, equivalencias, reconocimiento ni exenciones personales.'
         + `\n\n${GROUNDED_ANSWER_INSTRUCTION}\n\n${CCD_GUIDANCE_INSTRUCTION}`
-        + (explicitContact ? '\nPara esta consulta el único fragmento es [1], de contacto. Si das el canal documentado, termina exactamente con la línea FUENTES: [1].' : '')
+        + (explicitContact ? '\nPara esta consulta el único fragmento es [1], de contacto. Responde primero con una oración que indique el canal documentado en ese fragmento, incluso ante una consulta breve. Una línea de fuentes sola no es una respuesta. No agregues canales ausentes. Si das el canal documentado, termina exactamente con la línea FUENTES: [1].' : '')
         + (guidanceTopic === 'U03' && isCourseFailureContext(input.query, resolved.history) ? '\nANTECEDENTE CORREGIDO: el usuario habla de un CURSO reprobado, no una prueba nueva. Solo puedes explicar la distinción y la necesidad de comprobar la recuperación del curso; no indiques que debe cursarlo o matricularlo otra vez ni presentar una prueba sustitutiva.' : '')
         : DOCUMENT_RAG_SYSTEM_PROMPT,
       // For scoped guidance, previous generated conclusions cannot become the
@@ -278,6 +293,7 @@ export async function generateDocumentRagAnswer(
     const contactSource = supportingChunks.some(chunk => chunk.chunk_locator === "unit:M12");
     const contactAnswer = contactSource || /contacto|correo|e-?mail|@/iu.test(`${input.query} ${content}`);
     if (contactAnswer && !contactSource) return insufficientEvidenceAnswer(input.release_id);
+    if (contactSource && assertsContactValidity(content)) return insufficientEvidenceAnswer(input.release_id);
     const limits: string[] = [];
     if (supportingChunks.some(chunk => ["unit:M01", "unit:TEST_ORIENTATION"].includes(chunk.chunk_locator))) {
       limits.push("La información citada de los lineamientos 202660 se limita a la población descrita en esas fuentes; su vigencia actual no está ratificada.");
