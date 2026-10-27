@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ccdKnowledgeMetadata} from '../src/chat/ccd-knowledge-manifest.js';
-import {generateCcdKnowledgeAnswer,type CcdKnowledgeDependencies} from '../src/chat/ccd-knowledge.js';
+import {asksCcdProvenance,generateCcdKnowledgeAnswer,type CcdKnowledgeDependencies} from '../src/chat/ccd-knowledge.js';
 import type {RetrievedDocumentChunk} from '../src/application/document-retrieval.js';
 const release='11111111-1111-4111-8111-111111111111',hash='b'.repeat(64);
 function fixture(n=3){
@@ -16,6 +16,7 @@ test('v2 cardinality and scope projection follow the manifest, not the candidate
 });
 function deps():CcdKnowledgeDependencies{
  const definitions=[
+  ['first_attempt','La primera oportunidad de la prueba diagnóstica de Competencias Digitales es gratuita.'],
   ['diagnostic_options_2','El Pilar 2 permite escoger una opción disponible: Narrativas Digitales y Comunicación Estratégica; Visualización y Analítica de Datos; Gestión de la Identidad Digital y Marca Personal. No son nombres de cursos.'],
   ['diagnostic_options_3','El Pilar 3 permite escoger Inteligencia Artificial y Creatividad Generativa; Legislación y Ética Digital; Cuidado y Bienestar Digital, según disponibilidad.'],
   ['diagnostic_options_1','No tengo una lista suficientemente sustentada de las opciones diagnósticas actuales del Pilar 1.'],
@@ -40,7 +41,8 @@ function deps():CcdKnowledgeDependencies{
  const m=fixture(definitions.length);
  for(const [i,[aspect,text]]of definitions.entries()){
   const c=m.ccd_knowledge.claims[i]!;c.presentation_units=[{key:'fact',aspects:[aspect!],text:text!}];
-  if(['course_fee','future_fee','extemporaneous_fee'].includes(aspect!))c.topics=['fees'];
+  if(['first_attempt','course_fee','future_fee','extemporaneous_fee'].includes(aspect!))c.topics=['fees'];
+  if(aspect==='first_attempt')c.basis[0]!.kind='DOMAIN_CONFIRMATION';
   if(aspect==='course_fee')Object.assign(c.presentation_units[0]!,{period:'2026',amount_cop:362550});
   if(aspect==='catalog_two')c.topics=['catalog'];if(aspect==='badge')c.topics=['badge'];if(aspect==='threshold')c.topics=['threshold'];
  }
@@ -76,4 +78,48 @@ test('anaphoric approved course preserves user-established context and no retest
 test('dated price follow-up retains its active course but not an unrelated earlier subject',async()=>{
  const a=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿Cuánto cuesta en 2027?',history:[{role:'user',content:'¿Cuánto cuesta un curso en 2026?'},{role:'assistant',content:'El dato es de 2026.'}]});assert.match(a.content,/No tengo tarifa/u);assert.doesNotMatch(a.content,/362[.,]?550/u);
  const ambiguous=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿Cuánto cuesta en 2027?',history:[{role:'user',content:'¿Cuánto cuesta un curso en 2026?'},{role:'assistant',content:'El dato es de 2026.'},{role:'user',content:'Ahora quiero el correo de contacto del CCD.'},{role:'assistant',content:'Consulta al CCD.'}]});assert.equal(ambiguous.insufficient_evidence,true);assert.match(ambiguous.content,/A qué curso/u);
+});
+
+test('explicit provenance is general and simple answers remain brief',async()=>{
+ for(const query of ['¿De dónde sale?','¿Cuál es la fuente?','¿Qué fuente?','¿Qué documento lo dice?','¿Está documentado?','¿En qué documento aparece?','¿Qué lo respalda?','¿Cuál es el origen?','¿Esa regla está en un documento?'])assert.equal(asksCcdProvenance(query),true,query);
+ const simple=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿La primera oportunidad es gratis?'});
+ assert.match(simple.content,/es gratuita/u);assert.doesNotMatch(simple.content,/confirmación|fuente documental/u);
+ const explicit=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿La primera oportunidad es gratis? ¿De dónde sale esa regla?'});
+ assert.match(explicit.content,/es gratuita/u);assert.match(explicit.content,/confirmación de dominio/u);assert.match(explicit.content,/no tengo una fuente documental independiente/u);
+ const follow=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿Esa regla está en un documento?',history:[{role:'user',content:'¿La primera oportunidad es gratis?'},{role:'assistant',content:simple.content}]});
+ assert.equal(follow.content,explicit.content);
+ for(const a of [simple,explicit,follow])assert.doesNotMatch(a.content,/DOMAIN_CONFIRMATION|DOCUMENT_SOURCE|INFERENCE|PENDING_CLARIFICATION|REF-\d|[a-f\d]{64}|[a-f\d]{8}-(?:[a-f\d]{4}-){3}[a-f\d]{12}|[A-Z]:[\\/]|documents\/artifacts/u);
+});
+test('provenance follows supporting claims, including mixed and inferred evidence',async()=>{
+ const d=deps();
+ // Other retrieved/available rules include domain confirmation; they must not
+ // change the source attribution of the documentary price actually selected.
+ const documentary=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Cuánto cuesta un curso en 2026 y cuál es la fuente?'});
+ assert.match(documentary.content,/362\.550/u);assert.match(documentary.content,/respaldada por la documentación citada/u);assert.doesNotMatch(documentary.content,/confirmación de dominio/u);
+ const fee=[...d.knowledge.metadata.values()].find(m=>m.presentation_units?.some(u=>u.aspects.includes('course_fee')))!;
+ fee.basis_kinds=['DOCUMENT_SOURCE','DOMAIN_CONFIRMATION'];
+ const mixed=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Cuánto cuesta un curso en 2026? ¿Qué lo respalda?'});
+ assert.match(mixed.content,/combina documentación citada y una confirmación de dominio/u);assert.match(mixed.content,/no puedo atribuir toda la afirmación a un único documento/u);
+ fee.basis_kinds=['INFERENCE'];
+ const inferred=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Cuánto cuesta un curso en 2026? ¿Cuál es el origen?'});
+ assert.match(inferred.content,/inferencia derivada/u);assert.match(inferred.content,/no una cita literal ni una regla documental/u);
+ fee.basis_kinds=['DOCUMENT_SOURCE','PENDING_CLARIFICATION'];
+ const pending=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Cuánto cuesta un curso en 2026? ¿Está documentado?'});
+ assert.match(pending.content,/pendientes de aclaración no constituyen una regla confirmada/u);
+});
+test('source follow-ups need a safe student antecedent and respect topic switches',async()=>{
+ for(const history of [[],[{role:'assistant' as const,content:'La primera oportunidad es gratis.'}],[{role:'user' as const,content:'¿La primera oportunidad es gratis?'},{role:'assistant' as const,content:'Es gratuita.'},{role:'user' as const,content:'Ahora quiero saber sobre salarios.'}]]){
+  const a=await generateCcdKnowledgeAnswer(deps(),{release_id:release,query:'¿Cuál es la fuente?',history});assert.equal(a.insufficient_evidence,true);assert.doesNotMatch(a.content,/es gratuita|confirmación de dominio/u);
+ }
+});
+
+test('generated source attribution uses only its grounded support and checks visible leakage',async()=>{
+ const d=deps();for(const m of d.knowledge.metadata.values()){m.course='Ejemplo Digital';m.topics=['academic'];}
+ let content='Una descripción del contenido.',seenPrompt='';
+ d.generator_client={async generate(input){seenPrompt=input.system_prompt;assert.match(input.user_prompt,/Alcance de procedencia:/u);return {content:content+'\nFUENTES: [2]',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
+ const question='¿Qué temas tiene Ejemplo Digital? ¿Cuál es la fuente?';
+ const a=await generateCcdKnowledgeAnswer(d,{release_id:release,query:question});
+ assert.equal(a.pilot_strategy,'grounded_synthesis');assert.ok(a.retrieved_claim_ids!.length>a.supporting_claim_ids!.length);
+ assert.match(a.content,/respaldada por la documentación citada/u);assert.doesNotMatch(a.content,/confirmación de dominio/u);assert.match(seenPrompt,/normalmente no las expliques/u);assert.match(seenPrompt,/Si se pide explícitamente/u);
+ for(const leak of ['DOMAIN_CONFIRMATION','REF-1',hash,release,'C:\\private\\file.md','documents/artifacts/private.md']){content=leak;const rejected=await generateCcdKnowledgeAnswer(d,{release_id:release,query:question});assert.equal(rejected.insufficient_evidence,true,leak);assert.doesNotMatch(rejected.content,/REF-1|DOMAIN_CONFIRMATION|private/u);}
 });

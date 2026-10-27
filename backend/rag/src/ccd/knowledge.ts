@@ -47,7 +47,15 @@ export async function prepareKnowledgeCorpus(options:{corpusRoot:string;institut
   const contentBytes=await local.read(a.path);invariant(sha256(contentBytes)===a.sha256);
   const content=new TextDecoder('utf-8',{fatal:true}).decode(contentBytes);
   invariant(content.startsWith('# '+a.title+'\n\n')&&!/DOMAIN_CONFIRMATION|DOCUMENT_SOURCE|PENDING_CLARIFICATION|responsable del proyecto|\bpiloto\b|C:[\\/]|BASES:/iu.test(content));
-  if(v2)for(const unit of c.presentation_units)invariant(unit.text.includes('{')||content.includes(unit.text));
+  if(v2)for(const unit of c.presentation_units){
+   if(!/[{}]/u.test(unit.text)){invariant(content.includes(unit.text));continue;}
+   // One reviewed presentation exception; braces never bypass source coverage.
+   invariant(unit.text.includes('{validated_pillar}')
+    &&!/[{}]/u.test(unit.text.replace('{validated_pillar}',''))
+    &&unit.aspects.includes('two_pending_named'));
+   invariant(c.presentation_units.some(general=>general.aspects.includes('two_pending')
+    &&!/[{}]/u.test(general.text)&&content.includes(general.text)));
+  }
   documents.push({document_key:a.document_key,title:a.title,retrieval_mode:'chunked',mime_type:'text/markdown',version_label:adoption.version,artifact_path:a.path});
   derivatives.push({document_key:a.document_key,retrieval_mode:'chunked',source_sha256:a.sha256,content_sha256:a.sha256,chunks:[{ordinal:0,locator:`claim:${c.claim_id}:part:1`,content,content_sha256:a.sha256,page_start:null,page_end:null}]});
   files.push({path:a.path,kind:'document_artifact',sha256:a.sha256});items.push({kind:'document',key:a.document_key,path:a.path,locator:'document',sha256:a.sha256,retrieval_mode:'chunked'});

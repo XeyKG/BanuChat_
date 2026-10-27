@@ -28,3 +28,23 @@ test('v2 rejects mismatched artifacts, duplicate identities, pending-only and co
   await assert.rejects(f.prepare(),kind);
  }
 });
+
+test('v2 permits only the reviewed named-pillar template with literal general support',async t=>{
+ for(const scenario of ['normal-outside','arbitrary','wrong-aspect','no-general','unsupported-general','valid','extra','near-name','repeated','unclosed']){
+  const f=await fixture(t,1),c=f.adoption.claims[0]!;
+  const general={key:'general',aspects:['two_pending'],text:c.statement};
+  const named={key:'named',aspects:['two_pending_named'],text:'Conservas {validated_pillar} y completas los dos pilares pendientes.'};
+  c.presentation_units=[general,named];
+  if(scenario==='normal-outside')named.text='Texto ausente del derivado.';
+  if(scenario==='arbitrary')named.text='{arbitrary_placeholder}';
+  if(scenario==='wrong-aspect')named.aspects=['completion'];
+  if(scenario==='no-general')c.presentation_units=[named];
+  if(scenario==='unsupported-general')general.text='Una regla que no está en el derivado.';
+  if(scenario==='extra')named.text+=' {course}';
+  if(scenario==='near-name')named.text='{validated_pillar_extra}';
+  if(scenario==='repeated')named.text+=' {validated_pillar}';
+  if(scenario==='unclosed')named.text='{validated_pillar';
+  if(scenario==='valid')assert.equal((await f.prepare()).documents.length,1);
+  else await assert.rejects(f.prepare(),scenario);
+ }
+});
