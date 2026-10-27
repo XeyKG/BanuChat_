@@ -107,7 +107,7 @@ function conversationalEvidence(deps:CcdKnowledgeDependencies,chunks:RetrievedDo
   if(scope.topics.includes('fees')){
     const priorSubject=[...subject.split('consulta actual')[0]!.matchAll(/\b(?:cursos?|pruebas?|instrumentos?)\b/gu)].at(-1)?.[0];
     const countablePrice=/\b(?:uno|una|cuanto cuesta|cuanto vale|precio|costo de)\b/u.test(text);
-    const course=/\bcursos?\b/u.test(text)||(!/\b(?:pruebas?|instrumentos?)\b/u.test(text)&&priorSubject?.startsWith('curso')===true&&(!scope.topics.includes('transition')||countablePrice)),other=/\b(?:otra|otro|adicional|repet\p{L}*|segunda|extraordinaria|extemporanea)\b/u.test(text),first=/\bprimer\p{L}*\b/u.test(text);
+    const course=/\bcursos?\b/u.test(text)||(!/\b(?:pruebas?|instrumentos?|diagnostic\p{L}*)\b/u.test(text)&&priorSubject?.startsWith('curso')===true&&(!scope.topics.includes('transition')||countablePrice)),other=/\b(?:otra|otro|adicional|repet\p{L}*|segunda|extraordinaria|extemporanea)\b/u.test(text),first=/\bprimer\p{L}*\b/u.test(text);
     const specials=[...(/\bextraordinaria\b/u.test(text)?['extraordinary_fee']:[]),...(/\bextemporanea\b/u.test(text)?['extemporaneous_fee']:[])];
     if(first)aspects.push(scope.topics.includes('transition')?'transition_first':'first_attempt');
     if(course)aspects.push('course_fee');
@@ -203,10 +203,13 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   const explicitPillar=/\b(?:primer|segundo|tercer) pilar\b|\bpilar (?:[123]|de competencias digitales basicas|de analitica y contenido digital|de tecnologias transformativas)\b/u.test(normalized(input.query));
   const explicitFinancialSubject=ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.includes('fees')&&/\b(?:pruebas?|cursos?|extemporanea|extraordinaria)\b/u.test(normalized(input.query));
   const explicitHistoricalSubject=/\b(?:informatica|transicion|cursos? antigu\p{L}*|pruebas? antigu\p{L}*|plan(?:es)? anterior\p{L}*)\b/u.test(normalized(input.query));
-  const explicitDiagnosticSubject=/\b(?:pruebas?|diagnostic\p{L}*|pilar)\b/u.test(normalized(input.query))&&ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.some(t=>['threshold','completion','purpose','schedule'].includes(t));
+  const explicitDiagnosticSubject=/\b(?:pruebas?|diagnostic\p{L}*|pilar)\b/u.test(normalized(input.query))&&ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.some(t=>['threshold','completion','purpose','schedule','fees'].includes(t));
   const standaloneSubject=explicitPillar||explicitFinancialSubject||explicitHistoricalSubject||explicitDiagnosticSubject;
   const query=resolved.needs_clarification&&standaloneSubject?input.query:resolved.retrieval_query;
-  if(resolved.needs_clarification&&!standaloneSubject)return refusal(input.release_id,'¿A qué curso, prueba o procedimiento te refieres? Necesito ese antecedente para orientarte.');
+  // A financial intent alone supplies no subject. An opportunity follow-up needs
+  // a diagnostic antecedent; a course price cannot establish that benefit.
+  const financialSubjectMissing=!standaloneSubject&&ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.includes('fees')&&(!history.length||(/\boportunidad\b/u.test(normalized(input.query))&&!ccdKnowledgeQueryScope(query,deps.knowledge.metadata).topics.includes('diagnostic')));
+  if((resolved.needs_clarification&&!standaloneSubject)||financialSubjectMissing)return refusal(input.release_id,'¿A qué curso, prueba o procedimiento te refieres? Necesito ese antecedente para orientarte.');
   if(/\b(?:expediente|telefono personal|celular personal|mis notas|mi nota|mi contrasena|dame (?:la|tu) contrasena)\b/u.test(normalized(input.query)))return refusal(input.release_id,'No dispongo de expedientes, notas registradas, credenciales ni contactos personales; no puedo determinar esos datos.');
   const currentText=normalized(input.query);
   if(/\b(?:nota|calificacion|resultado)\b.{0,70}\b(?:obtuvo|persona|especifica|registrad\p{L}*)\b/u.test(currentText)||(/\bcontrasena\b/u.test(currentText)&&!/\b(?:olvid\p{L}*|recuper\p{L}*|restablec\p{L}*)\b/u.test(currentText)))return refusal(input.release_id,'No puedo consultar notas personales ni proporcionar contraseñas.');

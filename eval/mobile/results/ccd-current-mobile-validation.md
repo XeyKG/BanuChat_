@@ -2,14 +2,20 @@
 
 Fecha: 26 de octubre de 2026, America/Bogota; evidencias UTC del 27 de octubre.
 Commit inicial y final: `2802ae5aa7c66eac5680c5af2f0b515d813b636f`.
-El árbol inicial estaba limpio. No se hizo commit ni push.
+El árbol inicial estaba limpio. No se hizo commit ni push durante esa etapa.
+
+Actualización del 27 de octubre de 2026: auditoría y corrección focalizada posterior
+a `4785ac4b67b23f944adc7b96dd3bf630a3e6b590`. El resumen inicial acreditó de forma
+demasiado amplia las nueve consultas: la variante aislada sobre la primera
+oportunidad diagnóstica no estaba semánticamente aprobada. Se conserva abajo la
+incidencia y su reejecución; los artefactos históricos permanecen intactos.
 
 ## Estado de entrega
 
 | Dimensión | Resultado y alcance |
 | --- | --- |
 | Backend current | `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, `ready`, `ccd-1.3.0`; sin promoción ni rollback. |
-| VALIDACIÓN TÉCNICA AUTOMATIZADA | Aprobada: typecheck, lint, 41/41 pruebas locales, cliente unificado y adaptadores Mobile contra REST v2 real. |
+| VALIDACIÓN TÉCNICA AUTOMATIZADA | Typecheck, lint, 41/41 pruebas locales y cliente unificado pasaron en la etapa Mobile. La auditoría posterior detectó la aclaración innecesaria de una consulta aislada; se corrigió y reejecutó por HTTP y adaptador Mobile el 27 de octubre. |
 | VALIDACIÓN EN DISPOSITIVO | Android físico validado por el agente para los recorridos descritos abajo, con capturas privadas y lecturas de jerarquía UI. No es una matriz completa de dispositivos. |
 | ACEPTACIÓN HUMANA | Pendiente de revisión del responsable. No participaron estudiantes ni se obtuvo aval CCD. |
 
@@ -46,7 +52,7 @@ de recursos.
 | `mobile/README.md` | Separa aplicación unificada vigente de antecedentes y documenta configuración USB, fuentes, sesión y límites actuales. |
 | Este informe | Resultado reproducible y límites de aceptación. |
 
-No se cambió package.json, SDK, lockfiles, backend, SQL, corpus, bindings,
+En la etapa Mobile original no se cambió package.json, SDK, lockfiles, backend, SQL, corpus, bindings,
 embeddings, contratos REST/MCP ni documentos originales.
 
 ## Configuración y preflight
@@ -88,13 +94,23 @@ No se instaló/desinstaló software ni se generaron carpetas nativas.
 
 Se ejecutaron literalmente en conversaciones independientes desde los adaptadores.
 En Android se introdujeron sus equivalentes mediante ADB/IME, que aplicó tildes y
-autocorrecciones. Se revisó significado y comportamiento, sin exigir texto idéntico.
+autocorrecciones. La auditoría posterior encontró una inconsistencia que el resumen
+inicial no había reflejado: en conversación vacía, «¿La primera oportunidad
+diagnóstica es gratuita?» pidió «¿A qué curso, prueba o procedimiento te refieres?
+Necesito ese antecedente para orientarte.». Durante Android, después de establecer
+el tema diagnóstico, sí respondió correctamente. Las comprobaciones instrumentales
+iniciales no protegían ese significado en el caso aislado.
+
+El 27 de octubre se reprodujo el fallo antes de modificar código, se corrigió la
+política conversacional del backend y se reejecutó literalmente la consulta en
+conversaciones nuevas por HTTP y por los adaptadores Mobile reales: ambos casos
+pasaron, sin mensaje previo. No se repitió el recorrido físico completo.
 
 | Consulta | Resultado observado |
 | --- | --- |
 | Finalidad de las pruebas | Diagnóstico/orientación de competencias y tres pilares, con cita. |
 | Exactamente 70 % | Sí alcanza el mínimo por pilar. |
-| Primera oportunidad gratuita | Confirmada con fuente documental. |
+| Primera oportunidad gratuita | Inicial aislada: aclaración innecesaria. Android con contexto diagnóstico: correcta. Tras la corrección: aislada correcta por HTTP 201 y adaptador Mobile, con la cita adoptada correspondiente. |
 | Pilar no validado | Completar mediante el curso correspondiente, sin repetir pilares ya completados. |
 | Tres pilares completos | Insignia digital; no inventa fecha de entrega. |
 | Precio actual del curso | $362.500 COP según la evidencia publicada. |
@@ -125,13 +141,38 @@ automático ni se afirmó exactly-once.
 | `npm run lint -- --no-cache`, desde mobile | Exit 0. |
 | `npm run test:local`, desde mobile | 41/41, sin fallos ni omitidas. |
 | Evaluador unificado existente, contra API 3004 | PASS: current, chat documental, artefacto, auxiliares, fuentes estructuradas, historial y limpieza/logout. |
-| Evaluación adicional con adaptadores Mobile reales | PASS: nueve preguntas, seguimiento, auth, 409, fuentes, errores y envíos inciertos, con los límites indicados. |
+| Evaluación adicional con adaptadores Mobile reales | Ejecución instrumental completa de preguntas, seguimiento, auth, 409, fuentes, errores y envíos inciertos. Su indicador inicial PASS no acreditaba la semántica del caso aislado de gratuidad; esa incidencia se detectó y corrigió posteriormente. |
 | Arranque PowerShell | Parser sin errores; ejecución real del script con Metro en IPv4 y carga en development build. |
 | Android físico | Recorrido real del agente documentado arriba. |
 | `git diff --check` | Comprobado al cierre; sin errores de whitespace. |
 
-No se repitieron las 249 pruebas del corpus ni los 87 artefactos, test:db o
-migraciones. Esa validación previa no se presenta como ejecutada en esta etapa.
+En la etapa Mobile original no se repitieron las 249 pruebas del corpus ni los
+87 artefactos, test:db o migraciones. La microcorrección posterior sí ejecutó
+las 249 consultas contra el RAG real en modo de solo lectura, además de dos
+comprobaciones HTTP/Mobile focalizadas; no constituye otra corrida HTTP de 249 casos.
+
+### Corrección focalizada posterior: diagnóstico y gratuidad
+
+La frase «la primera» activaba el resolver de seguimiento. Sin historial,
+`needs_clarification=true`; el scope tenía `diagnostic/fees`, pero `fees` no
+habilitaba `explicitDiagnosticSubject`. Se añadió ese tema acotado, sin casos
+por frase ni respuestas nuevas. También se mantuvo la aclaración cuando falta
+el sujeto financiero y se evitó heredar la tarifa de curso ante diagnóstico
+explícito o deducir un beneficio diagnóstico de una oportunidad ambigua.
+
+La respuesta aislada corregida es: «La primera oportunidad de la prueba
+diagnóstica de Competencias Digitales es gratuita.». Se utiliza la evidencia
+adoptada `OP-016`; su procedencia interna se conserva. No se extiende a
+repeticiones ni pruebas especiales.
+
+API typecheck y 679/679 pruebas pasaron; el banco completo se ejecutó y revisó
+nuevamente: 249/249 correctas según evaluación técnica del agente, incluyendo
+61 revisiones nuevas de respuestas libres ligadas a pregunta, historial y fuentes.
+No se importaron PASS ni revisiones de respuestas anteriores. Las dos
+conversaciones HTTP/Mobile se eliminaron y el logout fue confirmado. Current,
+corpus, embeddings, bindings y autenticación se mantuvieron. Detalles en
+[la regresión focalizada](../../rag-quality/results/ccd-mobile-diagnostic-fee-regression.md).
+La aceptación humana continúa pendiente.
 
 ## Revisión visual, incidencias y límites
 
