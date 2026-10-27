@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
-import { isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
+import { CCD_AUTH_NOTICE,isCcdAuthenticated,isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
 import { useSession } from '@/session/session-context';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
@@ -114,6 +114,7 @@ export default function HomeScreen() {
             <View style={styles.greetingBlock}>
               <Text style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
               <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
+              {isCcdAuthenticated() && <Text style={styles.greetingSub}>{CCD_AUTH_NOTICE}</Text>}
             </View>
           </FadeIn>
 

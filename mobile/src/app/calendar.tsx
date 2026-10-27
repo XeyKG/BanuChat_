@@ -11,7 +11,7 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
-import {isCcdLocal} from '@/config/demo-mode';
+import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import { FadeIn } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
@@ -82,7 +82,6 @@ export default function CalendarScreen() {
   const [retryCount, setRetryCount] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [releaseId, setReleaseId] = useState<string | null>(null);
 
   useEffect(() => {
     if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
@@ -100,7 +99,6 @@ export default function CalendarScreen() {
       .then((result) => {
         if (!isMounted) return;
         setEvents(result.events);
-        setReleaseId(result.release_id);
         setLoadState('success');
       })
       .catch(() => {
@@ -181,11 +179,7 @@ export default function CalendarScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
-          {loadState === 'success' && releaseId !== null && (
-            <Text accessibilityLabel={`Versión del calendario ${releaseId}`} style={styles.releaseText}>
-              Calendario: {releaseId.slice(0, 8)}
-            </Text>
-          )}
+          {isCcdAuthenticated() && <Text style={styles.releaseText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator

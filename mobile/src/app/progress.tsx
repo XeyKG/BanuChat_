@@ -11,7 +11,7 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
-import {isCcdLocal} from '@/config/demo-mode';
+import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
@@ -145,6 +145,7 @@ export default function ProgressScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
+          {isCcdAuthenticated() && <Text style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {showSummary && (
             <FadeIn>
               <View style={styles.summaryCard}>

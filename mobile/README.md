@@ -7,18 +7,54 @@ chat/documentos CCD, historial propio, progreso/cursos auxiliares, calendario, n
 convocatorias y recordatorios locales. El nombre interno `ccd_authenticated` se conserva
 por compatibilidad; no hay selector visible de corpus o modalidad.
 
-Desde `backend/api`: `npm start`. Desde `mobile`: `npm start -- --localhost`.
+Desde `backend/api`: `npm start`. Para la development build existente por USB desde
+`mobile`: `./scripts/start-ccd-auth.ps1` (localhost IPv4 y puerto 8084).
+Para Expo Go compatible con SDK 57, usar `./scripts/start-ccd-auth.ps1 -ExpoGo`.
 Para Android USB, comprobar dispositivo y configurar `adb reverse tcp:3004 tcp:3004`
 y el puerto Metro elegido (8081 por defecto; el script local existente usa 8084).
 Las credenciales BanuChat existentes se entregan privadamente por el procedimiento
 del operador; nunca se incluyen en `EXPO_PUBLIC_*`.
 
+La ejecución actual utiliza Expo SDK 57 y exclusivamente REST v2. En
+`ccd_authenticated`, `/auth/me` entrega `evidence_mode=ccd_local` y las seis
+capacidades `chat/history/progress/calendar/announcements/documents`. La release
+documental se acepta desde el backend sin selector ni UUID fijado en la app.
+Progreso/calendario/anuncios son datos auxiliares ficticios; su release estructurada
+puede ser distinta de la documental CCD. Las pantallas lo indican y no muestran IDs
+de release. La vigencia concreta procede de la evidencia del backend, sin negarla
+globalmente en la interfaz.
+
+Configuración pública de validación USB:
+
+```powershell
+$env:EXPO_PUBLIC_DEMO_MODE='ccd_authenticated'
+$env:EXPO_PUBLIC_API_BASE_URL='http://127.0.0.1:3004/api/v2'
+$env:EXPO_PUBLIC_AUTH_LOCAL_CHANNEL='adb_reverse'
+$env:EXPO_NO_TELEMETRY='1'
+adb reverse tcp:3004 tcp:3004
+adb reverse tcp:8084 tcp:8084
+./scripts/start-ccd-auth.ps1
+```
+
+Solo refresh se persiste mediante SecureStore nativo; access queda en memoria y no
+se guarda password. Restaurar usa refresh + me; 401 invalida la sesión. Logout
+limpia localmente y distingue si no pudo confirmar la revocación remota.
+Un POST incierto no se reintenta: se comprueba historial y se puede continuar
+manualmente con advertencia. Un 409 conserva historial y ofrece un chat nuevo sin
+reinyectar mensajes ni atribuir una causa más precisa que el contrato.
+El visor carga solo UUIDs mediante el endpoint protegido v2, presenta texto
+seleccionable sin ejecutar HTML y mantiene el límite de 1.000.000 caracteres.
+
 Servicios y pruebas: [checkpoint unificado](../docs/transition/banuchat-unified-application-checkpoint.md).
+Validación posterior de current y Android físico: [informe Mobile CCD 1.3](../eval/mobile/results/ccd-current-mobile-validation.md).
+La aceptación humana permanece pendiente; el informe distingue las fronteras de cada prueba.
 Las secciones posteriores son antecedentes; la aplicación final usa las seis capacidades.
 
-## Estado vigente CCD autenticado
+## Antecedente: primera integración CCD autenticada
 
-`EXPO_PUBLIC_DEMO_MODE=ccd_authenticated` añade CCD autenticado con REST v2 y
+Esta sección describe la fase anterior al producto unificado, no la navegación vigente.
+
+`EXPO_PUBLIC_DEMO_MODE=ccd_authenticated` añadió CCD autenticado con REST v2 y
 SecureStore; es distinto de `ccd_local`/v1 y del modo `synthetic` predeterminado.
 Valida `me.evidence_mode=ccd_local`, contexto técnico y las tres capacidades
 chat/historial/documentos. No permite seleccionar perfil/release, compartir

@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation, getConversation } from '@/api/conversations';
-import { CCD_NOTICE, isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
+import { CCD_AUTH_NOTICE,CCD_NOTICE,isCcdAuthenticated,isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';
 import {
   MessageRequestError,
   sendMessage,
@@ -365,6 +365,7 @@ export default function ChatScreen() {
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
           <View style={styles.messageColumn}>
             {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
+            {isCcdAuthenticated() && <Text style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
             {conversationState === 'loading' && (
               <View accessibilityLiveRegion="polite" style={styles.conversationStateCard}>
                 <Text style={styles.conversationStateText}>Cargando conversación...</Text>
@@ -410,7 +411,7 @@ export default function ChatScreen() {
                       <BrandMark size={64} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
-                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Consulta documentos CCD, tu progreso, calendario y novedades. Puedes hacer preguntas de seguimiento y abrir las fuentes de cada respuesta.' : CHAT_INTRODUCTION}</Text>
+                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo responder sobre documentación CCD, abrir sus fuentes y consultar tu historial. Cuando estén disponibles, también puedes explorar progreso, calendario y novedades de demostración. ¿Qué quieres consultar?' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
                 <View style={styles.suggestionGrid}>

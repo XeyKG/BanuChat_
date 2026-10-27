@@ -11,6 +11,7 @@ import {
 } from '@/api/announcements';
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
+import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated} from '@/config/demo-mode';
 import { FadeIn } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
@@ -125,6 +126,7 @@ export default function AnnouncementsScreen() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.content}>
+          {isCcdAuthenticated() && <Text style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator
