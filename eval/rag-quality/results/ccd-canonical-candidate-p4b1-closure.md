@@ -376,3 +376,56 @@ No se cambió de branch, no hubo operaciones destructivas, commit ni push.
 `independent_human_acceptance = false`
 
 **P4-B.1 PATCH HARDENED — SUCCESSOR STAGING STILL PENDING**
+
+
+## Q. Recomprobación de la solicitud reiterada de hardening P4-B.1
+
+Corte: `2026-10-27T17:11:48-05:00`, America/Bogota. HEAD inicial/final:
+`0e2c3721606f9d305080f0e10f7933008059b845`, branch `main`.
+La solicitud reiterada describe los dos hallazgos ya corregidos en el apartado P.
+Se comprobó que los dos módulos y sus dos tests coinciden byte a byte con el sello
+del hardening anterior. No se reimplementaron cambios existentes ni se atribuyen
+como modificaciones nuevas de esta comprobación.
+
+Se leyó AGENTS.md completo. El baseline tenía un archivo preexistente untracked:
+`eval/rag-quality/results/ccd-canonical-successor-staging-validation.md`.
+Su contenido y SHA se preservaron exactamente. El corpus privado conserva el adoption
+SHA canónico; se volvió a cotejar el par real two_pending/two_pending_named de OP-003
+con el guard y la fixture, y la presencia literal de la regla general en su derivado.
+La excepción sigue dependiendo del par completo revisado, sin excepción por claim ID.
+La atribución visible ante solicitudes explícitas sigue a cargo de la capa determinista
+basada en supporting_claim_ids; se conservaron las regresiones de fuente incorrecta,
+follow-up, duplicación y fugas.
+
+Por la petición expresa de validación se ejecutaron nuevamente, sin modificar producto:
+
+| Prueba de esta comprobación | Resultado |
+|---|---|
+| API focalizado ccd-knowledge-v2 | 15/15 PASS |
+| API typecheck | PASS |
+| API typecheck:unified | PASS |
+| API npm test | 694/694 PASS |
+| RAG focalizado ccd-knowledge-v2 | 3/3 PASS; 13 escenarios del guard |
+| RAG typecheck | PASS |
+| RAG npm test inicial | 234/238; cuatro fallos SOURCE_REJECTED/read |
+| RAG suite completa serial | 238/238 PASS |
+| git diff --check y scope final | PASS |
+
+El primer fallo se conserva completo en los logs nuevos. Los cuatro casos fallidos
+iniciales fueron expansión CCD, guía CCD, snapshot CCD y flujo fixture OE2; la corrida
+serial pasó. **La causa sigue sin demostrarse** y no se declara resuelto un supuesto
+bug de paralelismo. No se sobrescribieron los resultados anteriores.
+
+Único archivo versionable modificado por esta comprobación: este informe, mediante
+este addendum. El archivo untracked P4-B.2 sigue siendo preexistente, sin cambios.
+Evidencia privada ignorada nueva: `data/ccd/local/p4b1-hardening-recheck/`, con baseline,
+cotejo de implementación existente, logs nuevos de todas las ejecuciones y manifiestos.
+No se arrancaron PostgreSQL, Ollama, N8N o Docker; no hubo DB/E2E/staging, nuevas
+candidatas, bindings, publicación, OE5, commit ni push. La sucesora continúa pendiente.
+Este corte no sustituye el informe P4-B.2 ni acredita evaluación viva o aceptación humana.
+
+`independent_human_acceptance = false`
+
+`institutional_endorsement = false`
+
+**P4-B.1 PATCH HARDENED — SUCCESSOR STAGING STILL PENDING**
