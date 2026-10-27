@@ -87,3 +87,37 @@ No hubo regresión runtime publicada que requiriera rollback; hubo una condició
 Evidencia privada, ignorada por Git: `data/ccd/local/p2-ccd-current-promotion/`. Incluye snapshots, preflight, assert, precheck habitual, tests críticos, no mutación, readiness de rollback, causa de detención, operaciones no ejecutadas y run-manifest con hashes. No se guardan tokens, contraseñas, env, configuraciones privadas ni dumps.
 
 **ESTADO DE ENTREGA BANUCHAT: promoción detenida antes de publicar; current real `3d6cedac-0e86-40c8-909b-d3ff6e8ab741` ready; candidata `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` staging. Preparación explícita de autorizaciones por release pendiente antes de reintentar.**
+
+## Preparación de vinculaciones para CCD 1.3
+
+Actualización posterior, 2026-10-26 en America/Bogota (operación del 2026-10-27 UTC), sobre HEAD `3dcc996f392507b3335ea0b4c6e3f3335e88c65e`. Esta tarea autorizó expresamente preparar las vinculaciones por versión y **no publicar**. El relato anterior documenta la detención original; el bloqueo específico de vinculaciones queda resuelto por la operación descrita aquí.
+
+Eran necesarias porque `AuthService.currentSession()` exige la combinación binding estable + versión aprobada + grant vigente + contexto CCD para la release activa, y `publish_release()` no crea `profile_binding_versions`.
+
+La lectura previa confirmó todas las precondiciones exactas: current anterior ready, candidata CCD 1.3 staging en `banuchat-ccd-local`, contexto candidato `ccd-local-demo`, cinco bindings estables relevantes, cinco grants vigentes `ccd_local/read`, cinco aprobaciones en la release anterior y cero en la candidata. Los cinco principales se derivaron de la intersección de esas relaciones y cuentas activas con credenciales existentes; no se usó una lista manual de UUIDs ni se amplió el conjunto autorizado.
+
+El aprovisionador administrativo existente crea cuentas/bindings/grants y selecciona current; no es un mecanismo adecuado para extender solo una aprobación de versión. Se creó únicamente el script administrativo privado y reproducible `data/ccd/local/p2-profile-binding-preparation/prepare-bindings.mjs`, sin credenciales incorporadas ni cambios en servicios públicos. Reutiliza la conexión administrativa normal, comprueba que ese rol tiene INSERT y que no es el runtime. No se reutilizó un evento `account_provisioned` para atribuir falsamente la creación de cuentas: la auditoría de esta operación puntual queda en evidencia privada.
+
+La operación utilizó una transacción corta con límites de espera, bloqueos compartidos de las relaciones fuente/dataset/releases/contextos y `SHARE ROW EXCLUSIVE` sobre `profile_binding_versions`. Dentro de los bloqueos se revalidaron identidades, estado, conjunto y conteos. Un único **INSERT ... SELECT** derivado de las autorizaciones existentes añadió exactamente cinco filas; `approved_at` se omitió del INSERT para utilizar el valor nuevo generado por PostgreSQL. Se verificaron los cinco timestamps nuevos, la identidad del conjunto y todos los invariantes antes de COMMIT. No hubo `ON CONFLICT DO NOTHING`, UPDATE de filas históricas ni DELETE.
+
+| Comprobación | Antes | Después |
+|---|---:|---:|
+| Aprobaciones de la release anterior | 5 | 5 |
+| Aprobaciones de CCD 1.3 | 0 | 5 |
+| Bindings estables relevantes | 5 | 5 |
+| Grants vigentes CCD/read | 5 | 5 |
+| Nuevos principales/cuentas/perfiles/grants | — | 0 |
+
+La consulta con la misma semántica del componente de autorización de perfil de `currentSession()` encontró **5/5 autorizables** para la candidata: cada principal conserva binding estable, grant vigente, contexto `ccd-local-demo` y versiones anterior/candidata. No hay principales extra. Esta comprobación fue SQL, sin cambiar current ni fingir una respuesta HTTP de staging. No acredita sesiones/tokens ni un smoke post-publicación.
+
+La comparación de snapshots, realizada dentro de la transacción y repetida mediante una conexión posterior, muestra una única diferencia: **cinco filas añadidas a `banuchat_auth.profile_binding_versions`**. El fingerprint de todas las aprobaciones históricas permanece idéntico. No cambiaron cuentas, credenciales, bindings estables, grants, sesiones, tokens, límites ni eventos de seguridad; tampoco corpus, releases, chunks, embeddings, perfiles, roles o ACL. Los snapshots guardan conteos/fingerprints agregados, no hashes de contraseña, emails ni contenido de sesiones. Los principales de la auditoría se representan mediante pseudónimos derivados de sus IDs internos.
+
+El runtime continúa sin INSERT/UPDATE/DELETE sobre `profile_binding_versions`, tanto a nivel de tabla como en los permisos de columna aplicables. Tres intentos DML sin filas, en transacciones revertidas, fueron rechazados con 42501. Las ACL antes/después son idénticas. No se añadieron roles, permisos, SECURITY DEFINER ni endpoints.
+
+Comprobaciones realmente ejecutadas: preflight de solo lectura; sintaxis de ambos scripts privados; INSERT exacto 5/5; validación dentro de la transacción; verificación independiente posterior; equivalencia de autorización 5/5; permisos de catálogo y tres rechazos DML del runtime; comparación integral de snapshots; rechazo de una nueva comprobación de preparación que esperaba cero filas y encontró las cinco ya creadas; `git diff --check`. Este último rechazo es una comprobación esperada del cierre seguro ante repetición, sin segundo INSERT ni retry.
+
+No se modificó TypeScript ni código reutilizable del producto; no correspondió ejecutar API typecheck ni suites del producto para este cambio administrativo. No se inició sesión ni se llamó a `/auth/me`, para respetar la prohibición de modificar sesiones/tokens; su selección de release continúa siendo la current anterior. No se ejecutaron banco de 249 casos, 87 descargas, ingesta, embeddings, reinicio ni `publish_release`. Mobile, MCP y N8N permanecen intactos.
+
+Evidencia privada: `data/ccd/local/p2-profile-binding-preparation/`, con preflight, principales pseudonimizados, operación, snapshots antes/después, equivalencia de autorización, permisos, rechazo esperado de repetición, análisis de fallos y run-manifest. No contiene contraseñas, tokens, env, hashes de contraseña ni emails de recuperación. El único archivo versionable modificado es este informe; sin commit ni push.
+
+**ESTADO DE ENTREGA BANUCHAT: vinculaciones de perfil para CCD 1.3 preparadas y verificadas; current sin cambios; reintento de promoción pendiente.** Current real: `3d6cedac-0e86-40c8-909b-d3ff6e8ab741` ready. Candidata: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` staging.
