@@ -29,11 +29,16 @@ test('v2 rejects mismatched artifacts, duplicate identities, pending-only and co
  }
 });
 
+const reviewedGeneral='Si ya validaste un pilar y te faltan los otros dos, debes aprobar un curso correspondiente a cada pilar pendiente. No necesitas repetir el que ya validaste.';
+const reviewedNamed='Si ya validaste {validated_pillar}, te quedan pendientes los otros dos pilares. Debes aprobar un curso correspondiente a cada uno; no necesitas repetir el pilar ya validado.';
 test('v2 permits only the reviewed named-pillar template with literal general support',async t=>{
- for(const scenario of ['normal-outside','arbitrary','wrong-aspect','no-general','unsupported-general','valid','extra','near-name','repeated','unclosed']){
+ for(const scenario of ['normal-outside','arbitrary','wrong-aspect','no-general','unsupported-general','valid','extra','near-name','repeated','unclosed','invented-fixed-text','extra-proposition','unrelated-backed-general']){
   const f=await fixture(t,1),c=f.adoption.claims[0]!;
-  const general={key:'general',aspects:['two_pending'],text:c.statement};
-  const named={key:'named',aspects:['two_pending_named'],text:'Conservas {validated_pillar} y completas los dos pilares pendientes.'};
+  const general={key:'general',aspects:['two_pending'],text:reviewedGeneral};
+  const named={key:'named',aspects:['two_pending_named'],text:reviewedNamed};
+  if(scenario==='unrelated-backed-general')general.text=c.statement;
+  const a=f.adoption.artifacts[0]!,content=Buffer.from('# '+a.title+'\n\n'+general.text+'\n');
+  await writeFile(path.join(f.root,a.path),content);a.sha256=sha256(content);
   c.presentation_units=[general,named];
   if(scenario==='normal-outside')named.text='Texto ausente del derivado.';
   if(scenario==='arbitrary')named.text='{arbitrary_placeholder}';
@@ -44,7 +49,9 @@ test('v2 permits only the reviewed named-pillar template with literal general su
   if(scenario==='near-name')named.text='{validated_pillar_extra}';
   if(scenario==='repeated')named.text+=' {validated_pillar}';
   if(scenario==='unclosed')named.text='{validated_pillar';
-  if(scenario==='valid')assert.equal((await f.prepare()).documents.length,1);
+  if(scenario==='invented-fixed-text')named.text='Texto inventado {validated_pillar}';
+  if(scenario==='extra-proposition')named.text+=' Además, la matrícula es automática y gratuita.';
+  if(scenario==='valid'){const prepared=await f.prepare();assert.equal(prepared.documents.length,1);assert.equal(prepared.adoption.claims[0]!.claim_id,'REF-0');}
   else await assert.rejects(f.prepare(),scenario);
  }
 });

@@ -116,10 +116,49 @@ test('source follow-ups need a safe student antecedent and respect topic switche
 test('generated source attribution uses only its grounded support and checks visible leakage',async()=>{
  const d=deps();for(const m of d.knowledge.metadata.values()){m.course='Ejemplo Digital';m.topics=['academic'];}
  let content='Una descripción del contenido.',seenPrompt='';
- d.generator_client={async generate(input){seenPrompt=input.system_prompt;assert.match(input.user_prompt,/Alcance de procedencia:/u);return {content:content+'\nFUENTES: [2]',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
+ d.generator_client={async generate(input){seenPrompt=input.system_prompt;assert.doesNotMatch(input.user_prompt,/Alcance de procedencia:|confirmación de dominio|documentación citada/u);return {content:content+'\nFUENTES: [2]',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
  const question='¿Qué temas tiene Ejemplo Digital? ¿Cuál es la fuente?';
  const a=await generateCcdKnowledgeAnswer(d,{release_id:release,query:question});
- assert.equal(a.pilot_strategy,'grounded_synthesis');assert.ok(a.retrieved_claim_ids!.length>a.supporting_claim_ids!.length);
- assert.match(a.content,/respaldada por la documentación citada/u);assert.doesNotMatch(a.content,/confirmación de dominio/u);assert.match(seenPrompt,/normalmente no las expliques/u);assert.match(seenPrompt,/Si se pide explícitamente/u);
+ assert.equal(a.pilot_strategy,'scoped_extract');assert.ok(a.retrieved_claim_ids!.length>a.supporting_claim_ids!.length);
+ assert.match(a.content,/respaldada por la documentación citada/u);assert.doesNotMatch(a.content,/confirmación de dominio/u);assert.match(seenPrompt,/Responde solo la parte factual/u);assert.match(seenPrompt,/No expliques ni atribuyas procedencia/u);
  for(const leak of ['DOMAIN_CONFIRMATION','REF-1',hash,release,'C:\\private\\file.md','documents/artifacts/private.md']){content=leak;const rejected=await generateCcdKnowledgeAnswer(d,{release_id:release,query:question});assert.equal(rejected.insufficient_evidence,true,leak);assert.doesNotMatch(rejected.content,/REF-1|DOMAIN_CONFIRMATION|private/u);}
+});
+
+
+test('only deterministic presentation authors provenance even when synthesis invents documentary attribution',async()=>{
+ const d=deps();
+ for(const m of d.knowledge.metadata.values()){m.course='Ejemplo Digital';m.topics=['academic'];}
+ const scoped=d.retrieve_scoped_chunks!;
+ d.retrieve_scoped_chunks=async(sql,input,keys)=>(await scoped(sql,input,keys)).map(c=>({...c,content:'# '+c.title+'\n\n'+d.knowledge.metadata.get(c.document_key)!.presentation_units![0]!.text}));
+ let generatedCalls=0;
+ d.generator_client={async generate(input){
+  generatedCalls++;assert.doesNotMatch(input.user_prompt,/Alcance de procedencia:/u);
+  assert.match(input.system_prompt,/aunque la pregunta lo solicite/u);
+  return {content:'La primera oportunidad es gratuita. Según el documento institucional citado, esta regla está documentada en una fuente independiente. La documentación citada respalda la afirmación.\nFUENTES: [1]',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};
+ }};
+ const a=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Qué explica Ejemplo Digital sobre la primera oportunidad y cuál es la fuente?'});
+ assert.equal(generatedCalls,1);assert.equal(a.insufficient_evidence,false);
+ assert.equal(a.supporting_claim_ids?.length,1);assert.deepEqual(a.supporting_evidence?.[0]?.basis_kinds,['DOMAIN_CONFIRMATION']);
+ assert.match(a.content,/La primera oportunidad.*es gratuita/u);
+ assert.match(a.content,/no tengo una fuente documental independiente/u);
+ assert.doesNotMatch(a.content,/Según el documento|esta regla está documentada|La documentación citada respalda/u);
+ assert.equal((a.content.match(/confirmación de dominio/gu)??[]).length,1);
+ assert.equal((a.content.match(/no tengo una fuente documental independiente/gu)??[]).length,1);
+ assert.doesNotMatch(a.content,/DOMAIN_CONFIRMATION|DOCUMENT_SOURCE|REF-0/u);
+ // The contextual source request also uses the same factual-only presentation,
+ // even though the internal factual query itself no longer asks for a source.
+ const follow=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Esa regla está en un documento?',history:[{role:'user',content:'¿Qué explica Ejemplo Digital sobre la primera oportunidad?'},{role:'assistant',content:'Texto previo no acreditado.'}]});
+ assert.equal(generatedCalls,2);assert.equal(follow.content,a.content);
+});
+
+test('combined factual and provenance synthesis renders a single explanation without generator duplicates',async()=>{
+ const d=deps();for(const m of d.knowledge.metadata.values()){m.course='Ejemplo Digital';m.topics=['academic'];}
+ const scoped=d.retrieve_scoped_chunks!;
+ d.retrieve_scoped_chunks=async(sql,input,keys)=>(await scoped(sql,input,keys)).map(c=>({...c,content:'# '+c.title+'\n\n'+d.knowledge.metadata.get(c.document_key)!.presentation_units![0]!.text}));
+ d.generator_client={async generate(){return {content:'La primera oportunidad es gratuita. Esta regla procede de una confirmación de dominio del proyecto. Se conserva por una confirmación de dominio, sin fuente independiente.\nFUENTES: [1]',done_reason:'stop',prompt_eval_count:1,eval_count:1,total_duration_ms:1};}};
+ const a=await generateCcdKnowledgeAnswer(d,{release_id:release,query:'¿Qué explica Ejemplo Digital sobre la primera oportunidad y cuál es la fuente?'});
+ assert.equal(a.insufficient_evidence,false);assert.match(a.content,/La primera oportunidad.*es gratuita/u);
+ assert.equal(a.content.split('\n\n').length,2);
+ assert.equal((a.content.match(/confirmación de dominio/gu)??[]).length,1);
+ assert.doesNotMatch(a.content,/Esta regla procede|Se conserva por/u);
 });

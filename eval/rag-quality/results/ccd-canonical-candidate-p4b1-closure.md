@@ -244,3 +244,135 @@ separadas. OE5/SUS no ejecutados. Validación técnica del agente exclusivamente
 
 Parche y cierre offline implementados y validados en los límites anteriores. No hubo
 promoción, preparación de bindings ni ejecución OE5. La tarea se detiene en este informe.
+
+
+## P. Corrección posterior a revisión independiente del primer commit P4-B.1
+
+Fecha/hora: `2026-10-27T13:45:44-05:00`, America/Bogota. Esta continuación parte del HEAD real
+`e7e5782da5f9437c39fabdf9e3c224bedf799615`, branch `main`, working tree limpio.
+AGENTS.md se leyó completamente antes de modificar. Se congelaron HEAD, branch,
+porcelain y hashes iniciales en una nueva ruta privada ignorada:
+`data/ccd/local/p4b1-review-hardening/`. No había cambios preexistentes.
+
+La revisión independiente posterior al primer commit detectó que la excepción
+parametrizada seguía siendo demasiado amplia y que había dos posibles autores
+de la procedencia visible. Las secciones A–O anteriores se conservan como antecedente;
+sus resultados, limitaciones y estado corresponden a aquel corte, no a esta corrida.
+Este addendum no recalifica aquel guard como suficiente ni representa aceptación
+humana final, aval institucional o aprobación de promoción.
+
+### P.1 Relación real de la plantilla y restricción corregida
+
+Se inspeccionaron la adopción privada y el derivado correspondientes a OP-003,
+exclusivamente en lectura. La unidad general `two_pending` establece que, validado
+un pilar, los otros dos se completan aprobando un curso por cada pendiente y sin
+repetir el ya validado. `two_pending_named` es una reformulación revisada concreta
+de esa misma proposición con el nombre del pilar preservado. No es una sustitución
+literal simple dentro del texto general ni una autorización para cualquier prefijo
+u otra proposición que contenga el token.
+
+El guard ahora exige el **par completo de textos revisados**, sus aspectos respectivos
+y el respaldo literal del texto general en el derivado del mismo claim. El texto
+fijo de la unidad parametrizada también forma parte de la excepción: cualquier
+variación, afirmación adicional o unidad general diferente se rechaza. Se conserva
+la comprobación literal ordinaria para las unidades sin plantilla. No hay excepción
+por claim ID, motor de templates ni nuevo schema. Una futura reformulación exigiría
+revisión explícita del par permitido; no se admite automáticamente por similitud.
+
+Se conservaron los diez escenarios existentes, alineando la fixture válida con el
+par realmente adoptado, y se añadieron tres rechazos: «Texto inventado» con el token
+y general válida; forma revisada seguida de una proposición no respaldada; general
+diferente aunque figure literalmente en su derivado. El caso válido utiliza la
+unidad real autorizada y su soporte general real bajo `REF-0`, demostrando que el
+contrato no depende de OP-003 como identidad. Total: **13 escenarios del guard**,
+uno ACCEPT y doce REJECT, incluidos placeholders arbitrarios, repetidos y mal formados.
+
+La comprobación estática adicional cotejó ambos textos de adopción con código y
+fixture, confirmó el SHA del derivado y que la general está dentro de él. La única
+unidad con llaves de la adopción sigue siendo la revisada. Adopción intacta:
+`4824a74e21029a1964d681958b8ca452b35c14de3a1d6c94cd3516c079abf81e`.
+Los 107 claims y sus derivados no se modificaron.
+
+### P.2 Una sola autoridad para procedencia visible
+
+Se retiró `Alcance de procedencia: ...` del contexto del generador. Su system prompt
+ahora exige responder únicamente la parte factual y conservar la línea privada
+FUENTES; prohíbe atribuir procedencia incluso si el usuario la solicita. La explicación
+visible la construye exclusivamente `provenanceText` después de resolver el soporte
+real mediante `supporting_claim_ids`.
+
+No se confía solamente en que el LLM obedezca esa instrucción: para una solicitud
+explícita de procedencia que alcance síntesis, se valida su protocolo y su soporte,
+se conservan los controles de seguridad y se presenta el pasaje factual revisado
+de las fuentes efectivamente utilizadas mediante la estrategia existente
+`scoped_extract`. Su prosa libre no se incorpora a esa respuesta. Después se añade
+una única explicación determinista. Esto evita intentar detectar o borrar
+semánticamente una atribución arbitraria con regex. El pasaje puede resultar más
+general que una síntesis libre; es la opción conservadora para garantizar que una
+atribución inventada o duplicada no forme parte de la respuesta a una petición de fuente.
+
+El indicador de solicitud se conserva también cuando un follow-up se transforma
+en consulta factual interna: la consulta antecedente no tiene por qué mencionar
+fuentes. No cambian contratos públicos ni metadata. Se mantienen asksCcdProvenance,
+resolución contextual, supporting_claim_ids, provenanceText, respuestas breves sin
+petición de procedencia y controles de fugas. `studentText` no se debilitó; se
+reutilizaron sus guards y los de IDs/rutas mediante una función privada local,
+incluida la validación de la prosa generada antes de sustituirla por el pasaje.
+
+Dos regresiones nuevas demuestran que: (1) un generador efectivamente invocado
+puede intentar atribuir a un documento independiente un claim que solo tiene
+confirmación de dominio, pero esa atribución no llega al texto visible; el mismo
+resultado se verifica en follow-up; (2) una consulta combinada factual + procedencia
+no duplica la explicación aunque el generador la repita. La primera oportunidad
+sigue respondiéndose y la explicación aparece una sola vez. El test anterior de
+fuentes recuperadas pero no usadas y los rechazos por labels/IDs/hashes/rutas se
+mantienen, adaptando únicamente la expectativa del prompt y estrategia de presentación.
+
+### P.3 Validación realmente ejecutada en esta continuación
+
+| Comprobación | Resultado nuevo |
+|---|---|
+| API focalizado ccd-knowledge-v2, final | 15/15 PASS |
+| API `npm run typecheck` | PASS |
+| API `npm run typecheck:unified` | PASS |
+| API `npm test` completo | 694/694 PASS |
+| RAG focalizado ccd-knowledge-v2 | 3/3 PASS; incluye los 13 escenarios del guard |
+| RAG `npm run typecheck` | PASS |
+| RAG `npm test` completo, configuración habitual | 238/238 PASS |
+| Cotejo estático del par adoptado y hash del derivado | PASS; contenido preservado |
+| `git diff --check` / scope final contra baseline | PASS; cinco archivos delimitados |
+
+Hubo una ejecución focalizada API intermedia de 14/14 antes de añadir la prueba
+separada de no duplicación; su log se conserva. No se registraron fallos de tests
+en esta continuación ni SOURCE_REJECTED en las ejecuciones nuevas. La suite RAG
+habitual pasó sin necesitar repetición serial. Esto no demuestra la causa de los
+rechazos históricos: sus fallos y causa no demostrada se conservan en el antecedente.
+No se repitió el banco histórico ni su reproducción offline; ese evaluador no cambió.
+
+### P.4 Alcance, evidencia y estado de salida
+
+Cinco archivos versionables modificados exclusivamente por esta continuación:
+
+- `backend/rag/src/ccd/knowledge.ts`
+- `backend/rag/test/ccd-knowledge-v2.test.ts`
+- `backend/api/src/chat/ccd-knowledge.ts`
+- `backend/api/test/ccd-knowledge-v2.test.ts`
+- `eval/rag-quality/results/ccd-canonical-candidate-p4b1-closure.md` (solo addendum)
+
+Evidencia nueva ignorada: `data/ccd/local/p4b1-review-hardening/`, con baseline,
+inspección del par real, cotejo estático y hashes, informe previo al addendum,
+logs completos de pruebas/typechecks, scope final y manifiesto de integridad.
+Los paquetes, outputs y logs de etapas anteriores no se sobrescribieron.
+
+No se arrancó PostgreSQL, Ollama, N8N ni Docker. No se ejecutaron consultas a DB,
+E2E, HTTP de producto, staging ni captura normal de pipeline. No hay release/run
+sucesores, embeddings nuevos, publicaciones ni preparación/cambios de bindings,
+grants, roles o ACL. Current no se inspeccionó en vivo ni se modificó por esta tarea.
+La candidata histórica no representa este código corregido. No se ejecutó OE5.
+No se cambió de branch, no hubo operaciones destructivas, commit ni push.
+
+`institutional_endorsement = false`
+
+`independent_human_acceptance = false`
+
+**P4-B.1 PATCH HARDENED — SUCCESSOR STAGING STILL PENDING**

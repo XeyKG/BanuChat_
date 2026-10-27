@@ -49,12 +49,13 @@ export async function prepareKnowledgeCorpus(options:{corpusRoot:string;institut
   invariant(content.startsWith('# '+a.title+'\n\n')&&!/DOMAIN_CONFIRMATION|DOCUMENT_SOURCE|PENDING_CLARIFICATION|responsable del proyecto|\bpiloto\b|C:[\\/]|BASES:/iu.test(content));
   if(v2)for(const unit of c.presentation_units){
    if(!/[{}]/u.test(unit.text)){invariant(content.includes(unit.text));continue;}
-   // One reviewed presentation exception; braces never bypass source coverage.
-   invariant(unit.text.includes('{validated_pillar}')
-    &&!/[{}]/u.test(unit.text.replace('{validated_pillar}',''))
+   // Closed, reviewed paraphrase pair: the fixed text is part of the exception.
+   // A different assertion needs its own literal derivative support, not a token.
+   const generalText='Si ya validaste un pilar y te faltan los otros dos, debes aprobar un curso correspondiente a cada pilar pendiente. No necesitas repetir el que ya validaste.';
+   invariant(unit.text==='Si ya validaste {validated_pillar}, te quedan pendientes los otros dos pilares. Debes aprobar un curso correspondiente a cada uno; no necesitas repetir el pilar ya validado.'
     &&unit.aspects.includes('two_pending_named'));
    invariant(c.presentation_units.some(general=>general.aspects.includes('two_pending')
-    &&!/[{}]/u.test(general.text)&&content.includes(general.text)));
+    &&general.text===generalText&&content.includes(general.text)));
   }
   documents.push({document_key:a.document_key,title:a.title,retrieval_mode:'chunked',mime_type:'text/markdown',version_label:adoption.version,artifact_path:a.path});
   derivatives.push({document_key:a.document_key,retrieval_mode:'chunked',source_sha256:a.sha256,content_sha256:a.sha256,chunks:[{ordinal:0,locator:`claim:${c.claim_id}:part:1`,content,content_sha256:a.sha256,page_start:null,page_end:null}]});
