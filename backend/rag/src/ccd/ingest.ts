@@ -27,7 +27,7 @@ export async function captureCcdCode(root: string) {
     'backend/rag/tsconfig.json', 'data/ccd/schemas',
     'infra/db/001_initial_schema.sql', 'infra/db/002_ccd_local_manifest.sql',
     'infra/db/003_ccd_chat_demo.sql', 'infra/db/004_ccd_expanded_manifest.sql', 'infra/db/005_ccd_guidance_manifest.sql',
-    'infra/db/013_ccd_knowledge_candidate.sql','backend/api/src/chat/ccd-knowledge.ts','backend/api/src/chat/ccd-knowledge-manifest.ts',
+    'infra/db/013_ccd_knowledge_candidate.sql','infra/db/014_ccd_knowledge_v2.sql','backend/api/src/chat/ccd-knowledge.ts','backend/api/src/chat/ccd-knowledge-manifest.ts',
     'backend/api/src/application/ccd-knowledge-retrieval.ts','backend/api/src/authenticated-runtime.ts'];
   const names = new Set((await git('ls-files', '-z', '--', ...scope) +
     await git('ls-files', '--others', '--exclude-standard', '-z', '--', ...scope)).split('\0').filter(Boolean));

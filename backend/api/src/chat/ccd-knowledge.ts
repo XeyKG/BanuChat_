@@ -13,6 +13,11 @@ export interface CcdKnowledgeEvidenceMetadata {
   course: string | null;
   basis_kinds: Array<'DOCUMENT_SOURCE'|'DOMAIN_CONFIRMATION'|'INFERENCE'|'PENDING_CLARIFICATION'>;
   period: string;
+  knowledge_version?:2;
+  population?:string;
+  conditions?:string[];
+  exceptions?:string[];
+  domain_metadata?:{entity_type:string;current:boolean;temporal_class:string;source_access_class:string;pillar?:number;[key:string]:unknown};
   reference_status: 'adopted';
   presentation_units?:Array<{key:string;aspects:string[];text:string;period?:string;amount_cop?:number}>;
 }
@@ -85,6 +90,59 @@ function citedAnswer(deps:CcdKnowledgeDependencies,release:string,content:string
   const ids=[...new Set(support.map(c=>deps.knowledge.metadata.get(c.document_key)!.claim_id))];
   return {release_id:release,content,insufficient_evidence:false,citations,citation_records:built.citation_records,pilot_strategy:strategy,selected_claim_ids:ids,supporting_claim_ids:ids,cited_claim_ids:ids};
 }
+/** Version-2 entity/period policy selects reviewed aspects, never evaluation IDs.
+ * Text remains in retrieved corpus units; v1 is dispatched unchanged below. */
+async function canonicalEvidence(deps:CcdKnowledgeDependencies,input:DocumentRagInput,subjectQuery:string,trace:(kind:'retrieved'|'selected',chunks:RetrievedDocumentChunk[])=>void):Promise<CcdKnowledgeAnswer|null>{
+ const text=normalized(input.query),subject=normalized(subjectQuery),aspects:string[]=[];
+ const queryScope=ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata);
+ const pillar=/\b(?:pilar 2|segundo pilar|analitica y contenido)\b/u.test(subject)?2:/\b(?:pilar 3|tercer pilar|tecnologias transformativas)\b/u.test(subject)?3:/\b(?:pilar 1|primer pilar|competencias digitales basicas)\b/u.test(subject)?1:null;
+ const diagnostic=/\b(?:pruebas?|diagnostic\p{L}*|instrumentos?|intentos?)\b/u.test(text);
+ const special=/\b(?:extraordinaria|extemporanea)\b/u.test(text);
+ const repeat=/\b(?:repet\p{L}*|segunda|otro intento|otra prueba|volver a presentar|intentos ilimitados|cuantas veces)\b/u.test(text);
+ const courseCompleted=/\b(?:cursos?|materias?|asignaturas?)\b/u.test(subject)&&/\b(?:aprob\p{L}*|aprueb\p{L}*)\b/u.test(text);
+ if(queryScope.topics.includes('attendance')||queryScope.topics.includes('transition')&&!repeat||/\b(?:modelo|recomienda)\b.{0,30}\btelefono\b|\btelefono\b.{0,30}\brecomienda\b/u.test(text))return null;
+ const diagnosticLabel=/\b(?:gestion.{0,20}identidad|narrativas digitales|visualizacion.{0,20}datos|creatividad generativa|legislacion y etica)\b/u.test(text);
+ const mapping=(diagnostic||diagnosticLabel)&&/\b(?:corresponde|mismo curso|equivale|mapeo|es el mismo|mismo que)\b/u.test(text)&&/\b(?:curso|marca personal|contenidos|generativa|marco legal)\b/u.test(text);
+ const years=[...text.matchAll(/\b20\d{2}\b/gu)].map(m=>m[0]);
+ const knownYears=[...deps.knowledge.metadata.values()].flatMap(m=>(m.presentation_units??[]).filter(u=>u.aspects.includes('course_fee')).flatMap(u=>u.period?[u.period]:[]));
+ if(courseCompleted&&repeat)aspects.push('course_completed');
+ else if(mapping)aspects.push('diagnostic_course_mapping');
+ else if(/\bcurso\b/u.test(text)&&years.some(y=>knownYears.includes(y))&&years.some(y=>!knownYears.includes(y)))aspects.push('course_fee','future_fee');
+ else if(repeat&&!courseCompleted&&(!special||/\bdiagnostic\p{L}*\b/u.test(text))){aspects.push('retry_limits');if(/\b(?:cuando quiera|cuando quieran|cualquier dia|cualquier momento)\b/u.test(text))aspects.push('schedule');}
+ else if(/\bintensiv\p{L}*\b/u.test(text)&&/\b(?:reemplaz\p{L}*|elimin\p{L}*|catalogo)\b/u.test(text))aspects.push('intensive_offering');
+ else if(/\b(?:nrc|intensivos|vacacionales)\b/u.test(text)&&/\b(?:2026|125[1-6])\b/u.test(text)){
+  aspects.push(/\b(?:siempre|ahora|actual\p{L}*)\b/u.test(text)?'cosmos_current_period':'intensive_offering');
+ }else if(/\b(?:periodo|nrc)\b/u.test(text)&&/\b(?:seleccionar|selecciono|debo|actual|ahora|siempre)\b/u.test(text))aspects.push('cosmos_current_period');
+ else if(/\b(?:fechas|calendario)\b/u.test(text)&&/\b(?:vigent\p{L}*|hoy|actual\p{L}*|proxim\p{L}*)\b/u.test(text))aspects.push('dynamic_enrollment');
+ else if(/\bcosmos\b/u.test(text)&&/\b(?:inscrib\p{L}*|pago|pagar|matricul\p{L}*)\b/u.test(text))aspects.push('cosmos_enrollment','cosmos_payment');
+ else if(/\b(?:proximas? inscripciones|inscripciones|apertura|numero minimo|minimo de estudiantes|minimo de inscritos|profesor fijo)\b/u.test(text))aspects.push(/\b(?:apertura|minimo|profesor fijo)\b/u.test(text)?'offering_conditions':'dynamic_enrollment');
+ else if(/\b(?:modalidad\p{L}*|presenciales|virtuales|remotos)\b/u.test(text))aspects.push('course_modalities');
+ else if(/\b(?:metodologia|aprendizaje basado|abp|pbl)\b/u.test(text))aspects.push('course_methodology');
+ else if(/\bdigcomp\b/u.test(text)){aspects.push('digcomp');if(/\bcreditos\b/u.test(text))aspects.push('professional_credits');}
+ else if(/\bcreditos\b/u.test(text)&&!/\bsyllabus\b/u.test(text)&&!ccdKnowledgeQueryScope(subjectQuery,deps.knowledge.metadata).courses.length)aspects.push('professional_credits');
+ else if(/\b(?:aprobado no aprobado|aprobado o no aprobado)\b/u.test(text))aspects.push('evaluation_scope');
+ else if(/\b(?:contacto|contactar|telefono|correo|email|bloque|piso|donde queda|donde consulto|comunicarme)\b/u.test(text)&&!/\b(?:personal|celular|contrase)/u.test(text))aspects.push('contact');
+ else if(diagnostic&&/\b(?:opciones|cuales|que pruebas|estructur\p{L}*|sola prueba|una prueba|organizada)\b/u.test(text)&&!special)aspects.push(pillar?`diagnostic_options_${pillar}`:'diagnostic_structure');
+ else if(/\b(?:ruta|pilar|curso)\b/u.test(text)&&/\b(?:mismo|diferencia|distint\p{L}*)\b/u.test(text)&&!special)aspects.push('entity_structure');
+ else if(/\bhoras\b/u.test(text)&&(/\b(?:32|96)\b/u.test(text)||(!diagnostic&&!ccdKnowledgeQueryScope(subjectQuery,deps.knowledge.metadata).courses.length))){aspects.push('course_intensity');if(diagnostic)aspects.push('diagnostic_duration');}
+ if(!aspects.length)return null;
+ const allowed=(m:CcdKnowledgeEvidenceMetadata)=>m.knowledge_version===2&&m.presentation_units?.some(u=>u.aspects.some(a=>aspects.includes(a)))&&
+  (m.domain_metadata?.current!==false||aspects.some(a=>['intensive_offering','offering_conditions','diagnostic_duration'].includes(a)));
+ const keys=[...deps.knowledge.metadata].filter(([,m])=>allowed(m)).map(([k])=>k);
+ if(!keys.length)return refusal(input.release_id);
+ const scoped=deps.retrieve_scoped_chunks;
+ const chunks=await retrieveDocumentChunksForQuery(scoped?{...deps,retrieve_chunks:(sql,i)=>scoped(sql,i,keys)}:deps,{release_id:input.release_id,query:subjectQuery,top_k:20});
+ if(chunks.some(c=>c.release_id!==input.release_id||!deps.knowledge.metadata.has(c.document_key)))throw new Error('CCD evidence scope rejected.');
+ const eligible=chunks.filter(c=>keys.includes(c.document_key));trace('retrieved',eligible);
+ const support:RetrievedDocumentChunk[]=[],texts:string[]=[],units:Array<{claim_id:string;key:string}>=[];
+ for(const aspect of aspects){const c=eligible.find(c=>deps.knowledge.metadata.get(c.document_key)?.presentation_units?.some(u=>u.aspects.includes(aspect)));if(!c)return refusal(input.release_id);
+  const m=deps.knowledge.metadata.get(c.document_key)!,u=m.presentation_units!.find(u=>u.aspects.includes(aspect))!;
+  if(!support.includes(c))support.push(c);if(!texts.includes(u.text))texts.push(u.text);units.push({claim_id:m.claim_id,key:u.key});
+ }
+ trace('selected',support);
+ if(aspects.includes('diagnostic_options_1'))return refusal(input.release_id,texts.join('\n\n'));
+ return {...citedAnswer(deps,input.release_id,texts.join('\n\n'),support,'scoped_extract'),presentation_units:units};
+}
 /** Select reviewed facts by aspect, never by exact question or evaluation ID. */
 function conversationalEvidence(deps:CcdKnowledgeDependencies,chunks:RetrievedDocumentChunk[],scope:CcdKnowledgeQueryScope,query:string,subjectQuery:string):{content:string;support:RetrievedDocumentChunk[];units:NonNullable<CcdKnowledgeAnswer['presentation_units']>;bindings:Record<string,string>}|null{
   const text=normalized(query),aspects:string[]=[];
@@ -136,7 +194,8 @@ function conversationalEvidence(deps:CcdKnowledgeDependencies,chunks:RetrievedDo
   else if(scope.topics.includes('enrollment')&&/\bsemestres?\b/u.test(text))aspects.push(/\b(?:posterior|distintos?|despues)\b/u.test(text)?'later_enrollment':'parallel_enrollment');
   else if(scope.topics.includes('completion')&&!ccdKnowledgeQueryScope(query,deps.knowledge.metadata).topics.includes('transition')&&!/\b(?:que cursos|cuales cursos|elegir|opciones)\b/u.test(text))aspects.push(completionAspect());
   else if(scope.topics.includes('transition')){
-    if(/\b(?:tabla|fila|literal\p{L}*|correspond\p{L}*)\b/u.test(text))aspects.push(equivalenceAspect);
+    if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&/\bpruebas? antigu\p{L}*\b/u.test(text)&&/\b(?:cursos? actuales|oferta vigente)\b/u.test(text))aspects.push('old_tests');
+    else if(/\b(?:tabla|fila|literal\p{L}*|correspond\p{L}*)\b/u.test(text))aspects.push(equivalenceAspect);
     else if(/\b(?:garantiz\p{L}*|automatic\p{L}*|homolog\p{L}*|equival\p{L}*)\b/u.test(text))aspects.push(/\bpruebas?\b/u.test(text)?'old_tests':'transition');
     else if(/\baprob\p{L}*\b/u.test(text)){if(/\b(?:cursos?|materias|asignaturas)\b/u.test(text))aspects.push('transition');aspects.push('antecedents');}
     else if(/\b(?:pruebas?|instrumentos|excel|powerpoint|word)\b/u.test(text)&&!/\b(?:cursos?|materias|asignaturas)\b/u.test(text))aspects.push('old_tests');
@@ -186,6 +245,16 @@ export async function generateCcdKnowledgeAnswer(deps:CcdKnowledgeDependencies,i
 async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:DocumentRagInput,trace:(kind:'retrieved'|'selected',chunks:RetrievedDocumentChunk[])=>void):Promise<CcdKnowledgeAnswer>{
   if(input.release_id!==deps.knowledge.release_id || !deps.retrieve_chunks)throw new Error('CCD knowledge configuration rejected.');
   let resolved=resolveConversationQuery(input.query,input.history??[]);
+  if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&/\b20\d{2}\b/u.test(input.query)&&/\b(?:cuanto|precio|tarifa|costo)\b/u.test(normalized(input.query))&&!/\b(?:curso|prueba|diagnostic)\p{L}*\b/u.test(normalized(input.query))){
+    const reference=resolveConversationQuery(input.query.replace(/\s+en\s+20\d{2}/giu,''),input.history??[]);
+    if(!reference.needs_clarification&&reference.history.some(m=>m.role==='user'&&/\b(?:cursos?|pruebas?|diagnostic\p{L}*)\b/u.test(normalized(m.content))))resolved={history:reference.history,needs_clarification:false,retrieval_query:reference.history.filter(m=>m.role==='user').map(m=>m.content).join('\n')+'\nConsulta actual: '+input.query};
+  }
+  if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&/\blo aprueb\p{L}*\b/u.test(normalized(input.query))){
+    const bounded=boundConversationContext(input.history??[]);
+    let anchor=-1;
+    for(let index=bounded.length-1;index>=0;index--){const m=bounded[index]!;if(m.role==='user'&&/\b(?:cursos?|materias?|asignaturas?|pruebas?|diagnostic\p{L}*|instrumentos?)\b/u.test(normalized(m.content))){anchor=index;break;}}
+    if(anchor>=0&&/\b(?:cursos?|materias?|asignaturas?)\b/u.test(normalized(bounded[anchor]!.content)))resolved={history:bounded.slice(anchor),needs_clarification:false,retrieval_query:bounded[anchor]!.content+'\nConsulta actual: '+input.query};
+  }
   // A declared historical origin can contain "anterior" and still establish a
   // subject. Recover that student anchor only when the shared resolver is ambiguous.
   if(resolved.needs_clarification&&isContextualFollowUp(input.query)){
@@ -204,7 +273,8 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   const explicitFinancialSubject=ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.includes('fees')&&/\b(?:pruebas?|cursos?|extemporanea|extraordinaria)\b/u.test(normalized(input.query));
   const explicitHistoricalSubject=/\b(?:informatica|transicion|cursos? antigu\p{L}*|pruebas? antigu\p{L}*|plan(?:es)? anterior\p{L}*)\b/u.test(normalized(input.query));
   const explicitDiagnosticSubject=/\b(?:pruebas?|diagnostic\p{L}*|pilar)\b/u.test(normalized(input.query))&&ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.some(t=>['threshold','completion','purpose','schedule','fees'].includes(t));
-  const standaloneSubject=explicitPillar||explicitFinancialSubject||explicitHistoricalSubject||explicitDiagnosticSubject;
+  const canonicalSubject=[...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&(/\b(?:insignia|inscripciones|cosmos|periodo|nrc|digcomp|creditos|modalidad\p{L}*|metodologia|telefono institucional|32|96)\b/u.test(normalized(input.query))||!history.length&&/\bprimera oportunidad\b/u.test(normalized(input.query)));
+  const standaloneSubject=explicitPillar||explicitFinancialSubject||explicitHistoricalSubject||explicitDiagnosticSubject||canonicalSubject;
   const query=resolved.needs_clarification&&standaloneSubject?input.query:resolved.retrieval_query;
   // A financial intent alone supplies no subject. An opportunity follow-up needs
   // a diagnostic antecedent; a course price cannot establish that benefit.
@@ -225,6 +295,11 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   const scope=currentAspect?{...currentScope,topics:[...new Set([...currentScope.topics,...contextScope.topics.filter(t=>t==='transition')])],history:currentScope.history||contextScope.history}:contextScope;
   if(/\b(?:todos|cada)\b/u.test(normalized(input.query)) && /\b(?:temarios|contenidos|syllabus)\b/u.test(normalized(input.query)) && scope.courses.length===0)return refusal(input.release_id,'¿Qué curso o cursos quieres consultar? Necesito acotar los temarios para explicarlos con sus fuentes.');
   if(scope.unavailable)return refusal(input.release_id,/\b(?:profesor\p{L}*|docent\p{L}*|dict\p{L}*|impart\p{L}*)\b/u.test(currentText)?'No tengo la programación del próximo semestre, así que todavía no puedo decirte qué profesores estarán asignados.':'No tengo la programación de grupos, cupos u horarios para ese periodo.');
+  if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)){
+    if(/\b(?:oferta|ofrecido|ofrecida)\b/u.test(currentText)&&/\b(?:actual\p{L}*|garantiz\p{L}*|proximo)\b/u.test(currentText))return refusal(input.release_id,'No tengo la programación de grupos, cupos u horarios para ese periodo.');
+    const canonical=await canonicalEvidence(deps,input,query,trace);
+    if(canonical)return canonical;
+  }
   const admitted=(m:CcdKnowledgeEvidenceMetadata)=>{
     if(m.reference_status!=='adopted')return false;
     if(!scope.history && m.topics.some(t=>['history','transition','historical_academic'].includes(t)))return false;

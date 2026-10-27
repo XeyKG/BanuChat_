@@ -16,7 +16,7 @@ async function finalize(lease:WriterLease,release:string,run:string,recipe:Stora
   await lease.transaction(async () => {
     invariant((await lease.query('SELECT id FROM banuchat.datasets WHERE id=1 FOR UPDATE')).rowCount === 1);
     if (transition) {
-      invariant(recipe === 'ccd_expanded_v1' || recipe === 'ccd_guidance_v1' || recipe === 'ccd_knowledge_v1');
+      invariant(recipe === 'ccd_expanded_v1' || recipe === 'ccd_guidance_v1' || recipe === 'ccd_knowledge_v1' || typeof recipe==='object'&&recipe.kind==='ccd_knowledge_v2');
       const pointer = await lease.query<{ current_release_id: string }>('SELECT current_release_id FROM banuchat.datasets WHERE id=1');
       invariant(pointer.rows[0]?.current_release_id === transition.expectedRelease);
       const context = await lease.query(`INSERT INTO banuchat.ccd_demo_contexts(dataset_release_id,profile_key,alias)

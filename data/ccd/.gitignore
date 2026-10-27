@@ -8,3 +8,4 @@ schemas/*
 !schemas/corpus-1.1.schema.json
 !schemas/corpus-1.2.schema.json
 !schemas/knowledge-adoption.schema.json
+!schemas/knowledge-adoption-v2.schema.json

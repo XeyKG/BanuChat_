@@ -50,7 +50,7 @@ export class PgAuthStore {
         JOIN banuchat.ccd_demo_contexts c ON c.dataset_release_id=v.id AND c.profile_key='ccd-local-demo'
         WHERE s.singleton AND s.database_name=current_database() AND s.evidence_mode='ccd_local'
           AND s.dataset_name='banuchat-ccd-local' AND v.status='ready' AND v.manifest->'synthetic'='false'::jsonb
-          AND v.manifest->>'schema_version' IN ('ccd-1.0.0','ccd-1.1.0','ccd-1.2.0','ccd-1.3.0'))
+          AND v.manifest->>'schema_version' IN ('ccd-1.0.0','ccd-1.1.0','ccd-1.2.0','ccd-1.3.0','ccd-1.4.0'))
         AND NOT EXISTS(SELECT 1 FROM banuchat.synthetic_profiles)
         AND (SELECT count(*) FROM banuchat.datasets)=1
         AND NOT EXISTS(SELECT 1 FROM banuchat.dataset_releases WHERE dataset_id<>1 OR (manifest->'synthetic'='false'::jsonb) IS NOT TRUE) AS valid`);

@@ -14,7 +14,7 @@ import {assertAuthenticatedDocumentReads,retrieveAuthenticatedDocumentChunks} fr
 import {knowledgeMode,type KnowledgeMode} from './auth/knowledge-mode.js';
 import type {ConversationOrchestrator} from './orchestration/n8n-conversation.js';
 import {generateCcdKnowledgeAnswer} from './chat/ccd-knowledge.js';
-import {ccdKnowledgeMetadata,CCD_KNOWLEDGE_SCHEMA} from './chat/ccd-knowledge-manifest.js';
+import {ccdKnowledgeMetadata,isCcdKnowledgeSchema} from './chat/ccd-knowledge-manifest.js';
 import {retrieveCcdKnowledgeChunks} from './application/ccd-knowledge-retrieval.js';
 /** Permanent authenticated RAG composition; callers cannot select corpus or SQL through HTTP. */
 export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>,mode:KnowledgeMode='synthetic'):Promise<DocumentRagResponder>{
@@ -24,7 +24,7 @@ export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDepen
   if(mode==='ccd_local'){
    const r=await input.sql.query<{manifest:unknown}>('SELECT manifest FROM banuchat.dataset_releases WHERE id=$1 AND status=\'ready\'',[query.release_id]);
    const manifest=r.rows[0]?.manifest;
-   if(manifest&&typeof manifest==='object'&&'schema_version' in manifest&&manifest.schema_version===CCD_KNOWLEDGE_SCHEMA){
+   if(manifest&&typeof manifest==='object'&&'schema_version' in manifest&&isCcdKnowledgeSchema(manifest.schema_version)){
     return generateCcdKnowledgeAnswer({...input,evidence_mode:mode,retrieve_chunks:retrieveAuthenticatedDocumentChunks,retrieve_scoped_chunks:retrieveCcdKnowledgeChunks,knowledge:{release_id:query.release_id,metadata:ccdKnowledgeMetadata(manifest)}},query);
    }
   }
