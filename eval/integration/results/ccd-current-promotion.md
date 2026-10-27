@@ -1,10 +1,12 @@
-# BanuChat — promoción CCD 1.3 detenida en preflight
+# BanuChat — promoción controlada de CCD 1.3
+
+**Estado actual tras el reintento final:** CCD 1.3 `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` es current y está ready. La release anterior permanece ready histórica. Pasaron smoke, seguridad, 249 casos, 87 artefactos y reinicio habitual; sin rollback. Las fases siguientes conservan la detención inicial y la preparación previa de vinculaciones.
 
 Fecha de verificación: 2026-10-26 UTC. HEAD inicial: `3470f7a6076920037361d18e474f207baa9d5f0c`; repositorio inicialmente limpio.
 
-**Resultado: NO PUBLICADA.** La promoción se detuvo antes de ejecutar `publish_release`, por una dependencia de autorización por release que la operación de publicación no prepara. No se modificaron código funcional, autenticación, permisos, corpus ni configuración para intentar superar el bloqueo.
+**Resultado del primer intento: NO PUBLICADA.** La promoción se detuvo antes de ejecutar `publish_release`, por una dependencia de autorización por release que la operación de publicación no prepara. No se modificaron código funcional, autenticación, permisos, corpus ni configuración para intentar superar el bloqueo.
 
-## Estado final real
+## Estado al cierre del primer intento
 
 | Identidad | Estado inicial | Estado final |
 |---|---|---|
@@ -121,3 +123,83 @@ No se modificó TypeScript ni código reutilizable del producto; no correspondi�
 Evidencia privada: `data/ccd/local/p2-profile-binding-preparation/`, con preflight, principales pseudonimizados, operación, snapshots antes/después, equivalencia de autorización, permisos, rechazo esperado de repetición, análisis de fallos y run-manifest. No contiene contraseñas, tokens, env, hashes de contraseña ni emails de recuperación. El único archivo versionable modificado es este informe; sin commit ni push.
 
 **ESTADO DE ENTREGA BANUCHAT: vinculaciones de perfil para CCD 1.3 preparadas y verificadas; current sin cambios; reintento de promoción pendiente.** Current real: `3d6cedac-0e86-40c8-909b-d3ff6e8ab741` ready. Candidata: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` staging.
+
+## Reintento final de promoción a current
+
+HEAD inicial del reintento: `b391c0679b829906666de7f75e1285ea8905de96`, repositorio limpio. Publicación realizada el **2026-10-27 a las 01:33:46 UTC**, correspondiente al 2026-10-26 en America/Bogota. Esta fase conserva la secuencia real: primer intento detenido → preparación explícita 5/5 → revalidación viva → publicación → aceptación técnica del current real.
+
+### Preflight y publicación exacta
+
+Se consultó nuevamente `banuchat_unified` en loopback 55463. Coincidieron las identidades congeladas, current anterior ready, candidata staging, schema `ccd-1.3.0` y manifiesto aprobado `9bde9ff3c1bd9cd29906751de86d7ed31bece30077b9639042b79d221104da4e`. Se verificaron 87 claims adoptados, 87 documentos/versiones ready/chunks/embeddings válidos de 1024 dimensiones y norma positiva, run existente succeeded y 87 SHA locales aprobados. `assert_release_complete` pasó en lectura.
+
+La autorización se revalidó sin insertar nada: cinco bindings estables, cinco grants vigentes CCD/read, cinco versiones anteriores y cinco candidatas, 5/5 cuentas con la combinación autorizable y cero principales extra. El precheck HTTP habitual pasó sobre la release anterior: login, me, conversación, consulta documental/cita, historial, eliminación del ensayo, logout y rechazo posterior. Se conservó solo una fixture propia, separada y temporal, para la comprobación histórica posterior.
+
+Con el rol administrativo existente `auth_i1b_admin`, una transacción de **46 ms hasta la validación previa a COMMIT** bloqueó dataset y ambas releases, exigió las identidades/estados exactos, bloqueó las relaciones de autorización y revalidó las cinco vinculaciones candidatas. Ejecutó, en este orden:
+
+```sql
+SELECT banuchat.assert_release_complete('f01c1c37-2d3f-4bc7-8940-fe724eb71c9a');
+SELECT banuchat.publish_release('f01c1c37-2d3f-4bc7-8940-fe724eb71c9a');
+```
+
+Se comprobó current igual a la candidata y estado ready dentro de la transacción antes de COMMIT. Hubo **una sola llamada de publicación**, sin UPDATE directo de puntero/status y sin nuevas vinculaciones, cuentas, grants, roles o ACL.
+
+La comprobación inmediata encontró únicamente los cambios propios de la autoridad normal: `datasets.current_release_id`, status staging → ready de la candidata y su `validated_at`, generado por el trigger existente `guard_release`. La release anterior y las otras releases permanecieron idénticas. No hubo nuevas releases, runs, chunks ni embeddings.
+
+### Runtime real, smoke y seguridad
+
+El proceso habitual en 3004 observó el nuevo current **sin reinicio posterior a la publicación**. El smoke pasó diez casos, incluidos propósito del diagnóstico, 70 %, primera oportunidad gratuita, pilar pendiente, insignia, tarifa, transición, guía vigente, profesor futuro sin programación inventada y una secuencia de tres turnos. Todas las conversaciones nuevas y sus citas usaron CCD 1.3; pasaron historial, descarga real con SHA, refresh y logout. La evaluación semántica del smoke fue 10/10.
+
+La validación se hizo sobre la API habitual, su base y su current reales, sin staging, copia temporal ni opción `isolated_pilot`. Para observar retrieval/selección/soporte y ensayar fallos se usó temporalmente un preload privado durante `npm start`: envolvió el retorno normal del RAG y los puertos de retrieval/generación, sin editar los archivos funcionales ni sus decisiones. Solo los requests de ensayo etiquetados se registraron, sin headers de autorización. El control de fallos fue un archivo privado, no un endpoint ni selector HTTP. El banco normal no recibió expectativas/rúbricas ni respuestas anteriores como entrada de generación. La instrumentación se retiró en el reinicio final.
+
+Pasaron ausencia/token inválido, propiedad cruzada GET/POST/DELETE con 404, selectores de release e IDs/campos internos rechazados, rutas de artefacto inválidas, desconocido 404, falta de token 401 y derivado válido con SHA correcto. Refresh invalidó el access anterior; logout invalidó la sesión. No se modificaron permisos ni límites para estas pruebas.
+
+En la dependencia de generación del proceso real se mantuvo pendiente un turno y se aplicó logout, revocación, expiración o deployment incorrecto sobre sesiones de ensayo. Los cuatro POST terminaron 401, sin mensajes ni citas persistidos. Un fallo controlado de la dependencia produjo 500 seguro y cero mensajes/citas. El deployment de ensayo se restauró antes de revocar su sesión; no se alteró el deployment configurado. La expiración se ensayó con timestamps válidos de esa sesión nueva, sin modificar cuentas. No hubo turnos parciales ni retry de POST de resultado incierto.
+
+### Conversaciones históricas
+
+Una conversación propia creada bajo la release anterior conservó su `dataset_release_id`, mensajes y citas. GET del propietario respondió 200 y el historial completo coincidió con el registrado antes de publicar. POST sobre esa conversación devolvió **409**: no añadió mensajes/citas ni migró la conversación. Se eliminó únicamente esa fixture de ensayo mediante el propietario. Los 146 chats preexistentes, 532 mensajes y 267 citas conservaron sus fingerprints después de limpiar todos los ensayos.
+
+### Banco de 249 casos y comparación prepublicación
+
+Se ejecutaron los **249 casos completos por HTTP sobre el current real**. Los 249 respondieron 201, validaron el schema vigente, conservaron el historial exacto y coincidieron con el contenido efectivamente devuelto por el servicio. Se registraron retrieval real, selección real, soporte, citas SQL persistidas y respuesta visible. Se mantuvieron todos los conjuntos:
+
+| Conjunto | Resultado técnico |
+|---|---:|
+| Funcionales | 50/50 |
+| Primarios | 72/72 |
+| Robustez, subconjunto de primarios | 35/35 |
+| Negativos | 24/24 |
+| P0 | 10/10 |
+| Presentación | 28/28 |
+| Aceptación adicional | 12/12 |
+| Guías vigentes | 5/5 |
+
+Incluye nueve secuencias anteriores, tres nuevas, la progresiva y cuatro HTTP adicionales. Resultado semántico: **249/249 correctos** —204 PASS, 26 abstenciones correctas, diez rechazos acotados y nueve aclaraciones—; sin incidencias conversacionales pendientes. No se importó ningún veredicto ni revisión por caso anterior. Se reutilizó únicamente el registro de proposiciones completas de fuente, comprobado por SHA, y se revisaron de nuevo 61 respuestas actuales de redacción libre contra pregunta, historial, condiciones y fuentes. Es validación técnica del agente, no aceptación humana independiente ni aval institucional.
+
+La comparación derivada de los resultados reales muestra **27 textos distintos y cinco historiales distintos solo por redacción de respuestas anteriores**. Retrieval y selección coinciden en 249/249; los 249 historiales conservan exactamente los mensajes enviados. Hay exactamente tres diferencias de soporte/citas, revisadas individualmente:
+
+- `Q-004178`: añade KC-005 porque la respuesta actual explica también competencias, además del temario de KC-006.
+- `Q-004179`: conserva solo KC-006; la respuesta actual se limita a sus contenidos, sin necesitar las otras fuentes antes citadas.
+- `N-0023`: pasa de abstención genérica sin citas a rechazo acotado con MD-037 y OP-006. Explica que la evidencia histórica no confirma vigencia actual; no afirma vigencia ni expiración definitiva. El flag no abstentivo no se tomó como éxito automático: la respuesta completa satisface la rúbrica que permite rechazo acotado.
+
+Estas diferencias conservan significado y respaldo y no se forzó igualdad artificial. El análisis procede de `candidate-vs-current-comparison.jsonl`, no de una atribución manual a otra consulta.
+
+### Artefactos, reinicio y no mutación
+
+Se descargaron **87/87 derivados por HTTP**, con 200, document_version y release correctos, SHA exacto, `nosniff` y bytes iguales a los derivados depurados aprobados. Pasaron las comprobaciones de rutas locales, metadata de gobernanza, originales y secretos. No se regeneraron derivados ni embeddings documentales.
+
+Después de smoke, seguridad, banco y artefactos se detuvo normalmente la API y se ejecutó **`npm start` sin preload**, sin modificar configuración. Un proceso nuevo arrancó leyendo CCD 1.3, pasó login/me, conversación nueva, consulta documental, historial, cita, descarga con SHA y logout. La API quedó funcionando en loopback 3004; el preload temporal ya no está cargado.
+
+Los snapshots finales mantienen manifiesto, pipeline, configuración de embeddings, fuentes/procedencia, documentos, chunks, vectores, release anterior, cinco bindings anteriores y cinco candidatos, grants, bindings estables, cuentas, credenciales, roles y ACL. Las únicas relaciones adicionales con cambios son las de autenticación normal de los ensayos: diez sesiones, doce refresh tokens, 18 eventos de seguridad y 13 filas de límites persistentes añadidas, junto con las actualizaciones normales de esas filas. No se eliminaron logs ni límites para hacer coincidir hashes. Las diez sesiones de ensayo están revocadas y no queda access utilizable de ellas. Conversaciones, mensajes y citas coinciden con el estado anterior al inicio de los ensayos.
+
+### Incidencias, evidencia y cierre del reintento
+
+Antes de publicar hubo una interrupción del harness: se detuvo la API mientras acababa una fixture del precheck. Se conservó el fallo de transporte, se resolvió su estado mediante lectura y se limpiaron sus dos conversaciones y su sesión de ensayo. No se repitió un POST incierto. Un precheck nuevo completo pasó antes de publicar. Además se corrigió una consulta diagnóstica privada que usaba `created_at` en vez del campo de ownership, y una expectativa de snapshot demasiado estrecha que omitía el `validated_at` del trigger existente. No hubo parche funcional ni relajación de contratos para superar estas incidencias; ninguna se contó como PASS de la ejecución interrumpida.
+
+Pasaron API typecheck, RAG typecheck, 19/19 tests críticos API de current/release, CCD knowledge/routing y auth normal, 3/3 tests RAG de CCD knowledge/finalización y `git diff --check`. No se repitieron suites completas innecesarias. Mobile, MCP, N8N, originales y dataset sintético permanecen sin cambios.
+
+La evidencia nueva está en `data/ccd/local/p2-ccd-current-promotion/final-retry/`, incluido su `run-manifest.json`. Las fases anteriores y sus manifiestos se conservan como antecedentes; `phase-index.json` identifica cada fase. Se incluyen snapshots, binding-preflight, precheck completado/interrumpido, publicación, smoke, seguridad, historial, 249 casos, comparación, revisión semántica, 87 descargas, reinicio, limpieza, rollback-readiness y análisis de incidencias, sin secretos.
+
+**No hubo rollback.** La release anterior sigue ready y completa, con su script de rollback controlado disponible, pero no se publicó/revirtió para ensayarlo. Esta entrega acredita únicamente la publicación técnica en el entorno habitual validado; no declara el sistema completo en producción ni aval CCD. Sin commit ni push.
+
+**ESTADO DE ENTREGA BANUCHAT: current real `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` ready; release anterior `3d6cedac-0e86-40c8-909b-d3ff6e8ab741` ready histórica; vinculaciones 5/5; API habitual funcional tras reinicio; 249 casos y 87 artefactos válidos; sin rollback.**
