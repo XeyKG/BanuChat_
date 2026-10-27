@@ -2,13 +2,39 @@
 
 ## Estado
 
-Paquete preparado; **no ejecutado**. No existen aprobaciones nuevas, participantes,
-revisión humana del banco, resultados RAGAS finales, sesiones SUS ni pruebas físicas
-nuevas. Los resultados adversos se conservan y ningún `BLOCKED` se transforma en `PASS`.
+Actualizado OE5-H0 el 27 de octubre de 2026: paquete preparado, **estudio humano no
+ejecutado**. No hay aprobaciones nuevas, reclutamiento, consentimientos obtenidos,
+sesiones SUS o resultados humanos. Las ejecuciones/revisiones técnicas del agente
+no son revisión humana documental independiente ni aceptación de estudiantes.
+Los resultados adversos se conservan; ningún `BLOCKED` se transforma en `PASS`.
 
-La línea base técnica candidata es
-`39b6b6221d61bd7aef2ce236dd124c3b11488345`. Antes de una sesión se registra el
-commit realmente usado y se congela el árbol; no se asume que siga siendo ese commit.
+Base técnica revisada hoy: `5ed14608a9086b59bc880262552ccb2185944d3f`.
+`39b6b6221d61bd7aef2ce236dd124c3b11488345` es el antecedente del paquete anterior,
+no la ejecución actual. Antes de P01 registrar commit real, árbol y freeze completo.
+El producto objetivo es `ccd_authenticated` / REST v2, CCD documental current y
+auxiliares ficticios. Current esperado: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`,
+ready / ccd-1.3.0; reconfirmarlo antes de iniciar, sin hardcodearlo en la app.
+
+## Puerta específica del estudio Android de usabilidad/SUS
+
+**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+
+Estado **READY_FOR_ACADEMIC_REVIEW**, nunca READY_FOR_RECRUITMENT mientras falte
+esa confirmación. Usar [protocolo vigente](../../eval/mobile/oe5-student-validation-protocol.md),
+[instrumentos](../../eval/mobile/human-validation/README.md) y
+[readiness](../../eval/mobile/results/oe5-human-validation-readiness.md).
+También faltan consentimiento/custodia/retiro/contacto revisados, designación de
+roles, cuentas/contexto común, disponibilidad de Android/red y freeze de objetivos.
+
+Android físico ya tiene [recorridos técnicos del agente](../../eval/mobile/results/ccd-current-mobile-validation.md)
+y el último [fix diagnóstico](../../eval/rag-quality/results/ccd-mobile-diagnostic-fee-regression.md).
+No se repiten aquí ni se atribuyen a estudiantes. La documentación CCD reemplaza
+el contenido sintético de T02; cuentas, calendario, progreso y anuncios siguen
+siendo ficticios. Los estudiantes no verifican normas ni autoridad institucional.
+
+Los bloques OE1/RAGAS/revisión documental, iOS/push y OE6/producción conservan sus
+propias puertas globales. No son prerrequisitos automáticos del estudio SUS
+Android salvo decisión académica expresa previa. SUS no cierra OE5 original.
 
 ## Roles mínimos
 
@@ -29,7 +55,7 @@ Una persona puede asumir más de un rol solo si se registra el conflicto y el pr
 académico lo permite. Los dos revisores del banco deben emitir juicios independientes antes
 del arbitraje.
 
-## Prerrequisitos de entrada
+## Prerrequisitos del cierre integral original, distintos de SUS Android
 
 - Decisión escrita sobre corpus/autoridad y uso de los derivados CCD.
 - Aprobación académica/ética aplicable, consentimiento y plan de custodia.
@@ -40,10 +66,13 @@ del arbitraje.
 - Calibración humana del juez completada. Las corridas técnicas existentes sobre 12 casos
   obtuvieron 40/48 coincidencias (0,8333) en dos pasadas, pero sus labels son expectativas
   técnicas, no gold humano ni aceptación del juez.
-- Android e iOS físicos compatibles; build, firma, red y canal local seguro definidos.
+- Para cerrar el compromiso global multiplataforma: completar iOS físico y los
+  recorridos/accesibilidad no acreditados; la ejecución Android técnica existente
+  no acredita iOS. No se exige iOS para calcular SUS Android por defecto.
 - Para push remoto: contrato backend de registro/revocación, credenciales FCM/APNs y
   development build. Sin ellos DV-13 permanece `BLOCKED`.
-- Versión Mobile, backend, release sintética y objetivos T04/T05 fijados antes de reclutar.
+- Versión Mobile/backend, current documental CCD y contexto auxiliar ficticio,
+  objetivos T04/T05 y condiciones temporales fijados antes de reclutar.
 
 ## Orden de ejecución y puertas
 
@@ -51,13 +80,16 @@ del arbitraje.
 
 1. Registrar decisiones externas en la tabla de cierre.
 2. Capturar commit, `git status`, release, manifests/hashes, modelos/digests y hardware.
-3. Verificar separación: estudio UX solo con cuentas y datos sintéticos; revisión CCD solo
-   sobre el subconjunto autorizado; no usar la demo como fallback institucional.
+3. Verificar separación: estudio UX con cuentas ficticias, documentación CCD
+   seleccionada del producto y módulos auxiliares ficticios; revisión documental
+   con revisores propios sobre el subconjunto autorizado. No usar demo como fallback.
 4. Crear un identificador de corrida y una carpeta de evidencia privada. No guardar
    contraseñas, tokens, contactos ni consentimientos en Git.
 
-Puerta: todas las autorizaciones y campos obligatorios existen. Si falta uno, estado
-`BLOCKED` y no se recluta ni se ejecuta RAGAS final.
+Puerta: para cada bloque deben existir sus autorizaciones y campos obligatorios.
+Si falta uno, ese bloque no se ejecuta. La revisión académica/consentimiento/freeze
+sí bloquea reclutamiento SUS; la aprobación de banco/juez bloquea RAGAS final.
+No confundir una puerta global pendiente con un requisito añadido al SUS Android.
 
 ### 2. Revisión humana del banco OE1
 
@@ -112,10 +144,13 @@ protocolo.
 
 ### 5. Validación física Mobile
 
-Ejecutar [`oe5-device-validation-plan.md`](../../eval/mobile/oe5-device-validation-plan.md)
-en Android y iOS físicos. Registrar por dispositivo/build los casos DV-01–DV-14, capturas
-saneadas y logs permitidos. Un export iOS no cuenta como iOS físico; una notificación local
-no cuenta como push remoto.
+Para completar el compromiso original, usar el antecedente
+[`oe5-device-validation-plan.md`](../../eval/mobile/oe5-device-validation-plan.md)
+y contrastarlo con las [ejecuciones CCD/Android posteriores](../../eval/mobile/results/ccd-current-mobile-validation.md).
+No ejecutar de nuevo toda esa matriz como preparación de SUS. iOS físico y
+casos no acreditados siguen pendientes del cierre global. Por dispositivo/build
+conservar estados reales y evidencia saneada. Un export iOS no acredita ejecución
+física; una notificación local no cuenta como push remoto.
 
 Orden recomendado dentro de cada plataforma: sesión/login; chat/cita/artefacto; historial;
 calendario/progreso/anuncios sintéticos; recordatorios locales; 401/403/409/503/red;
@@ -130,10 +165,10 @@ Ejecutar sin cambios oportunistas el
 | Tarea | Recorrido |
 | --- | --- |
 | T01 | Login ficticio, cierre/reapertura y recuperación de sesión |
-| T02 | Chat RAG, cita documental y apertura del documento |
+| T02 | Tres pilares de Competencias Digitales desde documentación CCD, cita y apertura de fuente |
 | T03 | Historial, reapertura y conservación de respuesta/cita |
-| T04 | Calendario, fecha/hora y filtro de categoría |
-| T05 | Progreso completado y anuncio bajo el filtro correcto |
+| T04 | Calendario ficticio: evento único congelado, fecha/hora y filtro de categoría |
+| T05 | Progreso y anuncios ficticios: curso/anuncio únicos congelados, porcentaje y filtro |
 
 Muestra/criterios originales: ≥10 estudiantes UNAB elegibles, al menos tres programas y
 máximo 50 % de un programa; completación global estrictamente >85 %; SUS medio
@@ -143,6 +178,14 @@ estrictamente >70; ningún SUS individual <50. Con 10 × 5 tareas, >85 % exige a
 El moderador no guía. El observador conserva `SUCCESS`, `FAIL` o `BLOCKED`, tiempo,
 errores, asistencia y desviaciones. El SUS de diez ítems se administra inmediatamente;
 un formulario incompleto es `NE` según el protocolo, no se imputa después.
+El denominador primario incluye todas las tareas iniciadas, también BLOCKED;
+informar planificadas `5 × n`, faltantes y bloqueos. Registros incompletos impiden
+declarar aceptación. [Analizador reproducible](../../eval/mobile/analyze-human-validation.mjs)
+y fixtures artificiales son preparación metodológica, no resultados humanos.
+
+AC10 exige además entrevistas/caracterización de 10–15 estudiantes y coordinador;
+no lo satisface automáticamente SUS. Reutilización de participantes para ese fin:
+**REQUIERE DECISIÓN ACADÉMICA ANTES DEL RECLUTAMIENTO**. No añadir preguntas al SUS.
 
 ### 7. Análisis y cierre
 
@@ -158,13 +201,17 @@ un formulario incompleto es `NE` según el protocolo, no se imputa después.
 
 - ID seudónimo y elegibilidad; consentimiento almacenado por separado.
 - Fecha/hora Bogotá, moderador, observador, dispositivo/OS, build/hash y red.
-- Commit, backend, API, release, modo `synthetic` o `ccd_authenticated` y desviaciones.
+- Commit, backend, API v2, current documental, release auxiliar, modo
+  `ccd_authenticated` y desviaciones; sin UID, password o serial.
 - Inicio/fin monotónicos, resultado, errores, asistencia y observación por tarea.
 - Diez respuestas SUS y cálculo individual; nunca contraseña, token, UID asignado o PII.
 - Capturas/logs saneados con identificador de sesión y hash.
 - Incidente técnico, decisión de repetición y razón; la corrida original se conserva.
 
 ## Salidas esperadas, aún vacías
+
+Los CSV humanos siguen vacíos. El inventario siguiente corresponde al cierre
+integral y no impone todos sus bloques como puertas nuevas del SUS Android.
 
 - Acta de autoridad documental y benchmark congelado.
 - Acta de calibración/aceptación del juez.

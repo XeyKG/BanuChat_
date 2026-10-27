@@ -1,5 +1,33 @@
 # Validación funcional de Mobile
 
+## Estado vigente — OE5-H0, 27 de octubre de 2026
+
+El [protocolo vigente propuesto](oe5-student-validation-protocol.md) prepara cinco
+tareas y SUS sobre `ccd_authenticated` / REST v2: documentación CCD current y
+calendario/progreso/anuncios ficticios, con cuentas ficticias. Sustituye para este
+estudio la exigencia anterior de release documental sintética y T02 sobre incidencias.
+Muestra, cuestionario, umbrales, moderación y privacidad se conservan.
+
+Estado **READY_FOR_ACADEMIC_REVIEW**, no READY_FOR_RECRUITMENT ni OE5 PASS.
+**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+
+[Instrumentos y diccionario](human-validation/README.md),
+[analizador reproducible](analyze-human-validation.mjs),
+[readiness](results/oe5-human-validation-readiness.md).
+No hay participantes, consentimientos obtenidos, SUS ni resultados humanos.
+Los CSV con fixture-* son pruebas artificiales del analizador, separados de datos humanos.
+
+La [validación técnica CCD/Android](results/ccd-current-mobile-validation.md) y
+la [corrección diagnóstica](../rag-quality/results/ccd-mobile-diagnostic-fee-regression.md)
+ya tienen evidencia técnica; no son aceptación de estudiantes. iOS, push remoto,
+accesibilidad completa, autoridad documental e infraestructura institucional siguen
+separados. No bloquear SUS Android por iOS salvo decisión académica expresa.
+
+## Antecedentes conservados — M7.4 y preparación OE5 del 24 de octubre
+
+El texto siguiente conserva el alcance histórico sintético/LAN/Expo Go y el estado
+pendiente en ese corte; no sustituye el protocolo CCD actual ni recalifica M7.4.
+
 `eval/mobile/` conserva instrumentos y, posteriormente, registros independientes
 de validación funcional del MVP móvil de BanuChat. El equipo del proyecto realizará
 las pruebas en Android físico con Expo Go, consumiendo el API local por LAN privada

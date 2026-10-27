@@ -1,5 +1,14 @@
 # BanuChat — Diseño de evaluación académica del prototipo
 
+> Nota de precedencia, 27 de octubre de 2026: este documento conserva la propuesta
+> histórica del 22 de octubre y sus límites técnicos de ese momento. Las menciones
+> a backend sin autenticación, participación futura no instrumentada y tareas
+> candidatas no describen el producto actual. Para usabilidad/SUS rige el
+> [protocolo OE5-H0 propuesto](../../eval/mobile/oe5-student-validation-protocol.md),
+> `READY_FOR_ACADEMIC_REVIEW`, con CCD autenticado y auxiliares ficticios.
+> Sus instrumentos no acreditan ejecución humana, revisión documental ni OE1 RAGAS.
+> **PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+
 Fecha de preparación: 22 de octubre de 2026, America/Bogota. Versión propuesta 0.1, pendiente de revisión de Sala de Control y del equipo académico. Base comprobada: `711eacbc5255e0383e2b9fd37cf5a6ff9c16bf0f`; árbol limpio al iniciar. Este informe es el único archivo añadido en la tarea.
 
 El prototipo puede evaluarse como artefacto de Ingeniería de Sistemas para consulta documental conversacional local. El resultado técnico BCH-03/5.3 de **329/329 controles y 43/43 turnos completos** no es una medición de calidad académica, usabilidad estudiantil ni eficacia institucional. T11 sigue siendo no satisfactorio por utilidad conversacional, aunque no concede un derecho universal falso.

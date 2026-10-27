@@ -1,5 +1,29 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+## Actualización metodológica OE5-H0 — 27 de octubre de 2026
+
+Revisión desde `5ed14608a9086b59bc880262552ccb2185944d3f`. El instrumento
+[OE5 vigente propuesto](../../eval/mobile/oe5-student-validation-protocol.md)
+está **READY_FOR_ACADEMIC_REVIEW**, no ejecutado ni aprobado para reclutamiento.
+Conserva ≥10 elegibles, ≥3 programas, ≤50 % de uno, cinco tareas, completación
+`>85 %`, SUS medio >70 y cada individual ≥50. Usa `ccd_authenticated`, documentación
+CCD y auxiliares ficticios; la T02 sintética sobre incidencias queda como antecedente.
+
+**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+Se prepararon consentimiento borrador, guiones, CSV vacíos, freeze y análisis con
+fixtures artificiales. No hay reclutamiento, consentimiento real, sesiones ni SUS.
+El [readiness](../../eval/mobile/results/oe5-human-validation-readiness.md) separa
+esta preparación de los [recorridos Android técnicos](../../eval/mobile/results/ccd-current-mobile-validation.md)
+y la [regresión corregida](../../eval/rag-quality/results/ccd-mobile-diagnostic-fee-regression.md).
+
+Usabilidad/SUS no equivale a revisión humana documental/RAG ni acredita OE1
+RAGAS/autoridad, OE6 producción, servidores/TLS UNAB, iOS, push o impacto
+organizacional. AC10 (entrevistas/caracterización de 10–15 estudiantes y coordinador)
+no queda satisfecho por SUS. Reutilizar participantes para ese fin **REQUIERE
+DECISIÓN ACADÉMICA ANTES DEL RECLUTAMIENTO**; no se añaden preguntas al SUS.
+Los estados académicos originales permanecen: OE1 validación pendiente; OE2–OE6
+parciales. Preparar el instrumento no marca OE5 como PASS.
+
 ## Actualización — aplicación unificada
 
 Decisión funcional del propietario sobre la línea base
@@ -13,8 +37,8 @@ conservan el corte histórico del cierre OE6; no describen la composición vigen
 | OE2 | Ingesta CCD existente conservada; cuentas, cursos, progreso, eventos y novedades ficticios en schema auxiliar sin vectores | Snapshot CCD sin nueva release; migración aislada y prueba de ausencia de documentos sintéticos | Scraping institucional, permisos, tres flujos y métricas de frescura/extracción |
 | OE3 | Seis tools MCP reales; conocimiento CCD y servicios estructurados auxiliares, perfil derivado de cuenta y releases independientes | T09 y seguridad stdio real: seis tools, denegación de perfil ajeno y escrituras | ReAct dirigido por LLM y su evaluación; planificador actual determinista |
 | OE4 | N8N real precede solo al agente multifuente autenticado; metadatos CCD y correlación; calendario ficticio separado | T10/T14: webhook real y 503 sin persistir turno cuando N8N falla | Google Sheets real, BPM/directrices institucionales y sincronización ≤30 min |
-| OE5 | Onboarding/login/Home/chat/fuentes/historial/progreso/completados/calendario/noticias/notificaciones en la misma app | 38 pruebas Mobile; adaptadores Mobile contra HTTP real; export Android/iOS/Web; planificación de recordatorios | Dispositivos físicos, recepción local, accesibilidad/SUS y push remoto autorizado |
-| OE6 | API v2, PostgreSQL aislado, Ollama, MCP y N8N integrados; reinicio recupera sesión e historial | T01–T14 con T07 físico pendiente; corpus/historial canónicos sin cambios | Servidor UNAB, TLS, estabilidad institucional y validación con usuarios |
+| OE5 | Onboarding/login/Home/chat/fuentes/historial/progreso/completados/calendario/noticias/notificaciones en la misma app | 41 pruebas Mobile y recorridos Android físicos técnicos posteriores; protocolo CCD/SUS preparado para revisión | Aceptación con estudiantes/SUS, iOS físico, recepción local no acreditada por esta tanda, accesibilidad completa y push remoto autorizado |
+| OE6 | API v2, PostgreSQL aislado, Ollama, MCP y N8N integrados; reinicio recupera sesión e historial | T01–T14 y recorridos Android técnicos posteriores enlazados; corpus/historial canónicos sin cambios | Servidor UNAB, TLS, estabilidad institucional y validación con usuarios |
 
 Los estados académicos globales se conservan: OE1 **IMPLEMENTADO, VALIDACIÓN PENDIENTE**;
 OE2–OE6 **PARCIAL**. La decisión funcional permite construir el producto; no modifica
@@ -22,6 +46,10 @@ silenciosamente los objetivos formales. Resultados y alcance ejecutado en el
 [checkpoint de aplicación unificada](../transition/banuchat-unified-application-checkpoint.md).
 
 ## Regla de lectura
+
+Las matrices posteriores conservan el corte histórico original; las referencias
+a 38 pruebas o ausencia de Android físico no anulan la evidencia posterior enlazada
+arriba ni convierten esa evidencia técnica en estudio humano.
 
 Línea base técnica: `39b6b6221d61bd7aef2ce236dd124c3b11488345`. Esta matriz
 contrasta los objetivos radicados con evidencia ejecutada; no redefine los OE ni convierte

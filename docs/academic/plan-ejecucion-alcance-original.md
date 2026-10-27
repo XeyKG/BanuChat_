@@ -1,5 +1,14 @@
 # BanuChat — BCH-04: plan de ejecución del alcance original completo
 
+> Nota de precedencia OE5-H0, 27 de octubre de 2026: este plan conserva los
+> compromisos originales y su fotografía histórica, no el estado técnico actual.
+> El [protocolo SUS actual propuesto](../../eval/mobile/oe5-student-validation-protocol.md)
+> prepara cinco tareas sobre CCD autenticado y auxiliares ficticios y está
+> `READY_FOR_ACADEMIC_REVIEW`. No cierra AC6 (iOS/push), AC7 sin sesiones reales,
+> AC10 (entrevistas/caracterización) ni OE1/OE6. SUS no sustituye automáticamente
+> entrevistas de 10–15 estudiantes; reutilizar participantes requiere decisión
+> académica antes del reclutamiento, sin añadir preguntas silenciosamente.
+
 Fecha: **22 de octubre de 2026, America/Bogota**. Propuesta técnica y académica para revisión de Sala de Control. Base inspeccionada: `57237df57f0db0c7918f1d7b8edaca25a3abfbd2`; árbol limpio al comenzar. Las estimaciones de este documento no son fechas, recursos ni autorizaciones confirmados.
 
 ## 1. Decisión vigente y conclusión de viabilidad

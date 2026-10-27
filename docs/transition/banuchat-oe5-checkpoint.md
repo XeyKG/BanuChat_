@@ -1,5 +1,25 @@
 # CHECKPOINT BANUCHAT — OE5
 
+## Nota de precedencia — OE5-H0, 27 de octubre de 2026
+
+El cuerpo posterior es el checkpoint histórico del 24 de octubre, sin reescribir
+sus resultados. El producto objetivo actual es `ccd_authenticated`, REST v2,
+documentación CCD current y módulos auxiliares ficticios. La
+[validación técnica Mobile](../../eval/mobile/results/ccd-current-mobile-validation.md)
+posterior acredita recorridos Android físicos del agente y 41 pruebas locales;
+la [regresión diagnóstica](../../eval/rag-quality/results/ccd-mobile-diagnostic-fee-regression.md)
+acredita la corrección posterior, sin convertirlas en aceptación humana.
+
+El [protocolo OE5 actualizado](../../eval/mobile/oe5-student-validation-protocol.md)
+y sus instrumentos están **READY_FOR_ACADEMIC_REVIEW**; muestra, diez ítems,
+cinco tareas y umbrales se mantienen. Ningún participante reclutado/evaluado.
+**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+La preparación no cierra OE5 original: iOS físico, push remoto, accesibilidad y
+aceptación humana conservan sus brechas. Las menciones posteriores a Android
+pendiente, release sintética y notificaciones describen aquel corte histórico.
+
+## Checkpoint original del 24 de octubre de 2026
+
 24 de octubre de 2026. Implementación preparada sobre
 `085292d10eaa54e6acbba83b67cb33a7163d36a4`, con árbol limpio al inicio. No se hizo
 commit ni push. El alcance se limitó a Mobile, sus contratos REST ya consumidos y los

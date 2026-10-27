@@ -1,0 +1,9 @@
+{
+  "kind": "ARTIFICIAL_ANALYZER_TEST_PARAMETERS_NOT_HUMAN_RESULTS",
+  "note": "49 is a direct predicate test, not a score obtainable from ten integer SUS items; computed SUS has increments of 2.5.",
+  "minimum_successes_of_50": 43,
+  "failing_successes_of_50": 42,
+  "exact_mean_failing": 70,
+  "individual_score_failing_predicate_only": 49,
+  "individual_score_accepted": 50
+}
