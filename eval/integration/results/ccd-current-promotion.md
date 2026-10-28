@@ -360,3 +360,138 @@ producción o finalización de OE5. Se detiene la operación aquí.
 `independent_human_acceptance = false`
 
 **P4-B.3 COMPLETE — SUCCESSOR BINDINGS PREPARED FOR PROMOTION REVIEW**
+
+
+## P4-B.4 — promoción detenida antes de publicar por compatibilidad de artefactos
+
+Cierre 2026-10-28T04:07:21.830045-05:00, America/Bogota.
+
+**P4-B.4 BLOCKED — normal API has no artifact root for CCD 1.4 version label**
+
+Esta sección es aditiva; conserva la promoción histórica CCD 1.3 y P4-B.3.
+La aprobación independiente comunicada fue APPROVE FOR PROMOTION, condicionada
+a las revalidaciones y al runtime normal exigidos por esta tarea. No se efectuó
+la promoción y no se heredaron resultados HTTP de otras etapas como resultados nuevos.
+
+### Git y entorno iniciales
+
+HEAD `19e4f609c4ba331438ae0fff717471664a1cad2d`, branch `main`, working tree limpio. Coincide con el HEAD
+auditado. Desde la revisión materializada `c145b5adb62fee7f4720d2d31322d08d4100c0dd`
+solo cambiaron los informes P4-B.2R y P4-B.3, sin cambios funcionales del producto.
+Se leyó AGENTS.md completo. Sin cambio de branch ni operaciones Git destructivas.
+
+Se revalidó el contenedor PostgreSQL unificado por ID/scope, volumen/mount, base y
+puerto exclusivo loopback 55463; no hay otro contenedor compartiendo volumen/puerto.
+PostgreSQL estaba detenido y se arrancó únicamente ese mismo contenedor. La API no
+tenía listener en 3004 y no fue iniciada por la tarea. No se operaron Ollama ni N8N.
+
+### Puertas de identidad y autorización aprobadas en lectura
+
+Current antes/después: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, ready, ccd-1.3.0.
+Sucesora antes/después: `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, staging, ccd-1.4.0.
+
+La candidata conserva los hashes auditados de manifest y pipeline, embedding config
+y procedencia de código `c145b5adb62fee7f4720d2d31322d08d4100c0dd`. El run
+`821b7f99-44e8-4fa5-be93-c8c361807e07` sigue succeeded; hay 107 documentos/versiones
+ready, 107 chunks y 107 embeddings de 1024 dimensiones y norma positiva. No se
+regeneró contenido ni embeddings ni se releyeron/copiaron los originales.
+
+El conjunto se derivó de nuevo de cuenta activa/no deshabilitada con credencial
+existente, binding estable CCD, versión current, grant CCD/read no revocado,
+contextos current/sucesor compatibles y contexto auxiliar válido. Resultado vivo:
+5 principals elegibles y 5 bindings de la sucesora, igualdad exacta y cero extras.
+El plan auditado P4-B.3 permanece exactamente igual. No se añadieron/corrigieron bindings.
+
+`assert_release_complete` pasó para ambas releases dentro de una transacción
+REPEATABLE READ READ ONLY. CCD 1.3 sigue completa, ready y con sus autorizaciones
+históricas, como destino válido previsto de rollback. No se hizo rollback de ensayo.
+
+### Bloqueo concreto del runtime normal
+
+El comando normal `npm start` carga `scripts/start-unified.mts`, que usa
+`startAuthenticatedApi` de `backend/api/src/authenticated-main.ts`.
+Su configuración CCD define `version_roots` únicamente para:
+
+- `bch03-m01-m12-local-1`;
+- `bch03-ccd-local-2`;
+- `bch03-ccd-local-3`;
+- `bch-ccd-knowledge-1`.
+
+Una consulta READ ONLY de metadata viva confirma que los 107 document_versions
+de la candidata tienen `version_label = bch-ccd-knowledge-2`. Esa clave no existe
+en el mapa normal anterior. Se reconstruyeron sus claves desde el AST TypeScript
+actual, sin asumir una lista histórica como configuración vigente.
+
+`backend/api/src/application/document-artifact.ts` exige, cuando existe
+`version_roots`, que `Object.hasOwn(storage.version_roots, row.version_label)` sea
+true. Si falta la clave lanza `DocumentArtifactError("not_found")`; no hace fallback
+a storage.root. `AuthenticatedResources.artifact()` delega al mismo resolvedor con
+la configuración de arranque, sin registro alternativo para esa versión.
+
+Por tanto, hacer ready/current a la candidata no resolvería la descarga: su label
+seguiría sin root registrado en el producto normal. Es una incompatibilidad
+demostrada entre metadata viva y configuración/guard del código, anterior a la
+publicación. **No se presenta como un HTTP 404 observado**: no se llamó al endpoint,
+no se simuló la respuesta y no se publicó para provocar el fallo.
+
+AGENTS.md ordena: «Si código y contrato vigente son incompatibles, detenerse y
+reportarlo». Además, esta tarea prohíbe modificar producto/configuración para hacer
+pasar la promoción y exige artifact protegido con HTTP 200 y bytes/SHA correctos.
+Se detuvo la operación antes de exponer un current que no cumpliría esa puerta.
+No se añadió ningún root, preload, selector especial, endpoint ni bypass.
+
+Pendiente para una tarea separada: revisar/registrar el root autorizado de esa
+versión en el arranque normal, verificar su correspondencia con los SHA auditados
+y reauditar esa compatibilidad antes de reautorizar la promoción. Esta tarea no
+implementó el cambio ni eligió silenciosamente un directorio alternativo.
+
+### Publicación, smoke y rollback no ejecutados
+
+Llamadas a publish_release: **0**. Transacción de promoción: **no iniciada**.
+COMMIT de publicación: **no intentado**. Rollback de release: **0**, no requerido
+porque current nunca cambió. No hubo UPDATE directo de puntero/status ni otro DML.
+
+No ejecutados por esta detención previa: precheck HTTP con fixture antigua,
+autenticación post-current del conjunto completo, smoke documental/artifact,
+ownership, C01–C09 por HTTP, transición de conversación histórica y reinicio normal
+de API. No existen nuevos PASS de esos controles; los 9/9 de staging siguen siendo
+antecedentes, no validación current. Tampoco se repitieron 249/27/11, descargas
+masivas, embeddings, suites/typechecks generales, Android, MCP/N8N u OE5.
+
+### Snapshots, restauración y evidencia
+
+Snapshot inicial y final READ ONLY: coincidencia exacta de 43 tablas, identidad,
+releases, run, conteos/dimensiones/normas, bindings, grants, contextos, runtime scope,
+cuentas/auth/credenciales/recovery mediante fingerprints, sesiones/tokens,
+conversaciones/mensajes/citas, auxiliares, roles/memberships, owners, schemas y ACL.
+**Cero tablas o filas de producto modificadas**. Sin nuevas sesiones, eventos de
+autenticación o rate limits; no se descifraron credenciales HTTP de ensayo.
+
+PostgreSQL recuperó su estado detenido inicial, conservando volumen, releases,
+bindings y auditoría. La API permanece detenida como al inicio; no quedó ningún
+proceso temporal/instrumentado. Los demás servicios no se modificaron.
+
+Incidente privado conservado: al registrar el número de línea del guard, el
+formatter usó String.index en lugar de indexOf y produjo TypeError dentro del
+primer preflight READ ONLY. Se conservó el intento y su snapshot, se cerró esa
+transacción con ROLLBACK de lectura y se corrigió solo el formatter. La revalidación
+READ ONLY produjo el mismo snapshot y dejó sellada la metadata del bloqueo. No hubo
+fallo runtime post-current ni retry de publicación/DML.
+
+Evidencia privada cerrada/sellada antes de esta sección:
+`data/ccd/local/p4b4-current-promotion/`, con baseline, identidad del entorno,
+snapshots before/after, revalidación de sucesora, equivalencia de bindings,
+rollback readiness, AST/metadata/guard de artefactos, ledger de fases omitidas,
+commit outcome no intentado, diff idéntico, restauración, privacidad y manifiestos
+SHA-256/tamaño. No hay passwords/tokens/recovery values, .env, dumps, originales,
+corpus privado, vectores completos, filas sensibles o paths personales absolutos.
+
+Único cambio versionado autorizado: esta sección aditiva del informe. Contenido
+histórico íntegro, HEAD/branch sin cambios, sin commit/push; git diff --check correcto.
+No se declara promovida la candidata, aval CCD/UNAB, producción institucional ni OE5.
+
+`institutional_endorsement = false`
+
+`independent_human_acceptance = false`
+
+**P4-B.4 BLOCKED — normal API has no artifact root for CCD 1.4 version label**
