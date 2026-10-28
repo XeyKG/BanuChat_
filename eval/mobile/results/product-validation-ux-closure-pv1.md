@@ -1,5 +1,12 @@
 # PV-1 — Technical dry-run & operational freeze readiness
 
+## Referencia posterior PV-1B — 28/10/2026
+
+[PV-1B](product-validation-ux-closure-pv1b.md) verificó por separado el launch legacy
+SDK 57, T02/T03 focales y una pasada limpia T01–T05. Este informe PV-1 conserva
+su BLOCKED histórico y sus incidencias; no se reescriben sus resultados. La
+verificación posterior del canal no completa freeze ni habilita reclutamiento.
+
 28 de octubre de 2026, America/Bogota. BanuChat.
 
 **PV-1 BLOCKED — TECHNICAL DEFECT BEFORE HUMAN STUDY: el overlay Tools de la development build intercepta navegación del instrumento.**

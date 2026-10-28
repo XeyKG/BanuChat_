@@ -1,5 +1,13 @@
 # CHECKPOINT BANUCHAT — OE5
 
+## Precedencia PV-1B — 28/10/2026
+
+El [PV-1B](../../eval/mobile/results/product-validation-ux-closure-pv1b.md) verifica
+el launch legacy explícito de SDK 57: T02/T03 focales y una pasada T01–T05 en
+Android físico sin Tools ni workaround. TECHNICALLY READY FOR FINAL FREEZE,
+no freeze completado ni reclutamiento. PV-1/PV-1A conservan BLOCKED histórico;
+ventana/T04, puerta académica y decisiones operativas siguen pendientes.
+
 ## Precedencia PV-1 — 28/10/2026
 
 El [dry-run físico PV-1](../../eval/mobile/results/product-validation-ux-closure-pv1.md)

@@ -1,5 +1,14 @@
 # BanuChat — paquete ejecutable de validación humana final
 
+## Precedencia PV-1B — 28/10/2026
+
+El [PV-1B](../../eval/mobile/results/product-validation-ux-closure-pv1b.md) acreditó
+canal Android limpio con URL legacy derivada del CLI y flags explícitos; focales
+T02/T03 y una pasada T01–T05 sin workaround. TECHNICALLY READY FOR FINAL FREEZE,
+NOT READY FOR RECRUITMENT. T04/ventana, aprobación académica, consentimiento,
+custodia, roles y freeze final pendientes; TalkBack continúa NOT_EXECUTED.
+PV-1 y PV-1A mantienen sus resultados BLOCKED históricos.
+
 ## Precedencia PV-1 — 28/10/2026
 
 El [dry-run físico PV-1](../../eval/mobile/results/product-validation-ux-closure-pv1.md)

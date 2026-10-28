@@ -1,5 +1,12 @@
 # PV-1A — Study channel remediation & clean technical dry-run
 
+## Referencia posterior PV-1B — 28/10/2026
+
+[PV-1B](product-validation-ux-closure-pv1b.md) probó explícitamente los flags legacy
+SDK 57 y verificó canal limpio/focales/walkthrough. PV-1A conserva su BLOCKED
+histórico: EXPO_NO_DEV_MENU no produjo esos parámetros con el CLI instalado y
+no se ejecutaron sus retests. El resultado posterior no aprueba estudio ni freeze.
+
 28 de octubre de 2026, America/Bogota. BanuChat.
 
 **PV-1A BLOCKED — Expo dev-menu suppression ineffective**

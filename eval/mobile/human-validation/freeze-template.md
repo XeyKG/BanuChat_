@@ -1,5 +1,13 @@
 # Freeze previo a P01 — plantilla sin ejecutar
 
+## Nota PV-1B — canal verificado, freeze pendiente
+
+El [PV-1B](../results/product-validation-ux-closure-pv1b.md) verificó el canal SDK 57
+mediante URL real derivada del CLI con flags legacy; no requiere mover controles
+del producto. Registrar y reconfirmar ese procedimiento/build antes de la tanda.
+TECHNICALLY READY FOR FINAL FREEZE no completa esta plantilla ni habilita
+reclutamiento. T04 sigue sin freeze; puertas académicas/operativas intactas.
+
 ## Nota PV-1 — freeze pendiente
 
 El [dry-run físico PV-1](../results/product-validation-ux-closure-pv1.md) mantiene
