@@ -1018,3 +1018,118 @@ credenciales, recuperación ni paths personales absolutos.
 byte por byte; nuevo texto con LF. git diff --check aprobado y status limitado al
 informe. Sin secretos añadidos, commit ni push. La promoción final queda bloqueada;
 no se continúa con trabajo CCD ni UX/OE5. Sin producción, aval CCD o despliegue UNAB.
+
+## P4-B.4B — corrección de prioridad documental/procedencia en unified
+
+2026-10-28, America/Bogota.
+
+**P4-B.4B COMPLETE — CCD DOCUMENTARY PROVENANCE ROUTING CORRECTED**
+
+Esta sección es aditiva. P4-B.4R conserva su C05 HTTP 503
+DEPENDENCY_UNAVAILABLE y su rollback confirmado; no se reescribe como PASS.
+La causa interna exacta dentro de N8N/MCP no quedó demostrada y esta tarea no
+la atribuye a un servicio concreto. El defecto acreditado es la selección previa
+de composición multifuente para una consulta documental CCD con procedencia.
+
+### Baseline y reproducción antes del cambio
+
+HEAD `7c6169aada992ce15f2dd1f1a991036bea4ba047`, branch `main`, árbol limpio
+incluyendo untracked; coincidencia exacta con la referencia. AGENTS.md leído
+completo. Sin cambios de branch, operaciones Git destructivas, commit ni push.
+
+Se añadió primero una prueba focal para «¿Cuánto cuesta un curso en 2026?
+¿Qué documento lo dice?». Con unified-product.ts todavía idéntico al baseline:
+
+- pasó la clasificación: requiresConversationalOrchestration=true, topic fees y
+  asksCcdProvenance=true;
+- falló la expectativa nueva de RAG directo: se invocó el fake orchestrator.
+
+Reproducción: 2 tests, 1 PASS y 1 FAIL esperado, sin N8N/MCP reales. La combinación
+curso/documento/dice sigue produciendo múltiples operaciones en el planner general;
+no se cambió planCalls ni se desactivó la orquestación de otros productos/modos.
+
+### Cambio aplicado y frontera arquitectónica
+
+Único código funcional modificado: backend/api/src/auth/unified-product.ts.
+Se reutilizan asksCcdProvenance y ccdKnowledgeQueryScope; la primera ya estaba
+exportada, por lo que ccd-knowledge.ts no necesitó cambios.
+
+Antes de requiresConversationalOrchestration(bound), la composición reconoce la
+prioridad documental existente de badge o una solicitud explícita de procedencia
+sobre un tema CCD reconocible. Exige ausencia de intención auxiliar explícita y
+una release ready con schema CCD Knowledge adoptado. Entonces llama exclusivamente
+a input.rag(query), conservando la entrada original, incluida history.
+No se copió generación RAG, cambiaron prompts ni creó otra persistencia.
+
+Para una procedencia sin asunto factual en el turno actual se usa
+boundConversationContext sobre query.history: solo antecedentes USER y el asunto
+más reciente, omitiendo follow-ups que únicamente piden procedencia. No se usa
+texto assistant, ni se busca un tema antiguo a través de un cambio de asunto,
+ni se amplía la memoria. La selección sigue la política de procedencia de
+generateCcdKnowledgeAnswer; el RAG normal conserva la autoridad de respuesta.
+
+La frontera auxiliar comprende mi progreso, mis cursos, mis notas, calendario/
+eventos y anuncios/noticias/convocatorias, en el turno actual o en el antecedente
+USER seleccionado. Una nueva pregunta factual autosuficiente no hereda un asunto
+auxiliar anterior. Se conserva el gate del schema; no hay admisión especial para
+releases desconocidas, ni regla basada en C05, texto exacto o fees exclusivamente.
+
+Los tests distinguen expresamente:
+
+- CCD documental/procedencia pura: C05, follow-up, modalidades, duración y contacto
+  llegan al fake RAG, sin invocar el fake orchestrator; se prueban CCD 1.3 y 1.4;
+- «Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?»
+  y auxiliares con documento continúan invocando el orquestador, sin caer a RAG;
+- el error del fake orchestrator se propaga: no existe try N8N/catch→RAG;
+- badge conserva su test existente sin cambios;
+- procedencia sin antecedente, solo texto assistant, tema reemplazado o USER fuera
+  del contexto acotado no inventan un asunto CCD por esta prioridad;
+- schema desconocido/no adoptado o release no encontrada no activan la prioridad.
+
+### Validación ejecutada
+
+| Comprobación | Resultado |
+| --- | --- |
+| Reproducción pre-fix | 1/2 PASS; 1 FAIL esperado con fuente de producción sin cambios |
+| Routing CCD focal final | **11/11**, cero fail/skipped |
+| CCD Knowledge v1/v2 pertinentes | **22/22**, cero fail/skipped |
+| API npm run typecheck | **PASS** |
+| API npm test, una ejecución completa | **708/708**, cero fail/skipped |
+| git diff --check | **PASS** |
+
+Se añadieron diez tests al archivo focal existente. Los tests de asksCcdProvenance,
+supporting_claim_ids, DOMAIN_CONFIRMATION, DOCUMENT_SOURCE, evidencia mixta,
+follow-up y ausencia de leakage conservaron sus expectativas intactas.
+
+Un caso auxiliar nuevo inicialmente asumía que «fuente documental» producía varias
+tools; el planner no reconoce documental como documento. Se corrigió solo esa
+fixture nueva para preguntar explícitamente «¿Qué documento lo dice?», conforme a
+la frontera solicitada. Se conserva el resultado intermedio 10/11 y su explicación
+privada; no se relajó ninguna aserción existente. La suite completa se ejecutó
+una sola vez después de resolver los focales y no se repitió al pasar.
+
+### Estado, alcance y pendientes
+
+No se arrancó API, PostgreSQL, N8N u Ollama ni se abrió una conexión de producto.
+Cero llamadas a publish_release, cero cambios de bindings/grants y cero DML de
+producto. Los clientes de SQL/RAG/orquestación de los focales son fakes sin servicios.
+
+Estado de partida confirmado por el usuario y el cierre previo: CCD 1.3
+`f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` ready/current; CCD 1.4
+`10af4ffd-effb-41fc-bbfe-4dc48cb3398f` ready/no current. Esta tarea no lo modifica.
+No se presenta como una nueva lectura de estado vivo ni como HTTP C05 post-fix:
+no se conectó a la base y **la promoción sigue pendiente** de otra tarea explícita.
+
+No se modificaron N8N, MCP server/tools/planner, SQL, auth de cuentas/sesiones,
+rate limiter, corpus/adoption, bindings/grants, artifact storage, Mobile, modelos,
+prompts ni top_k. No se ejecutaron bancos 249/107 artifacts, suites RAG/MCP/Mobile,
+Android, nueva ingesta, rematerialización ni promoción.
+
+Archivos versionados de esta tarea: unified-product.ts, ccd-knowledge-routing.test.ts
+y esta sección de eval/integration/results/ccd-current-promotion.md. El prefijo
+histórico del informe se conserva byte por byte; el texto nuevo usa LF.
+Evidencia privada en data/ccd/local/p4b4b-documentary-routing/: baseline,
+reproducción, diff, logs/resultados, integridad de superficies protegidas,
+no-publication, privacidad y manifest SHA-256/tamaño. Sin secretos, credenciales,
+tokens, corpus privado ni paths personales absolutos en la evidencia guardada.
+Sin commit ni push; no se continúa automáticamente con la promoción.
