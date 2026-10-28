@@ -642,3 +642,188 @@ Sin commit ni push; no se continúa con promoción ni nuevas mejoras en esta tar
 `independent_human_acceptance = false`
 
 **P4-B.4A COMPLETE — CCD 1.4 ARTIFACT ROOT REGISTERED AND VERIFIED**
+
+## P4-B.4 — reanudación tras P4-B.4A: publicación y rollback confirmado
+
+Cierre 2026-10-28, America/Bogota. Esta sección es aditiva y conserva el bloqueo
+P4-B.4 original, la corrección P4-B.4A y las fases anteriores.
+
+**P4-B.4 BLOCKED — POST-CURRENT FAILURE, ROLLED BACK TO CCD 1.3: smoke-owner login exhausted the normal rate limit after redundant harness logins**
+
+### Baseline y precondiciones
+
+HEAD `6a40d814a2a072e9b5ab96bf17b83c644102ef4b`, branch `main`, árbol limpio
+incluyendo untracked. Se leyó AGENTS.md completo. Sin cambios de branch, operaciones
+Git destructivas, commit ni push. No se modificó producto.
+
+Se reidentificó el PostgreSQL habitual por ID, scope `unified-isolated`, volumen
+`banuchat-unified-data`, mount `/var/lib/postgresql/data`, base `banuchat_unified`
+y binding exclusivo `127.0.0.1:55463`. Sin otros contenedores compartiendo volumen
+ni puerto. PostgreSQL estaba detenido y solo se arrancó ese contenedor existente.
+La API inicialmente no tenía listener en 3004.
+
+El root normal `bch-ccd-knowledge-2 → data/ccd/local/product-knowledge-v2/` existe
+y coincide con la configuración revisada. No se repitieron los 107 SHA de P4-B.4A.
+El cambio de composición de artifacts no se interpretó como cambio en el scope de
+captureCcdCode: no se recreó ni rematerializó la candidata.
+
+Snapshot inicial READ ONLY de 43 tablas, corpus/runs/vectores, autorización/auth,
+historial, auxiliares, roles/memberships, propietarios y ACL, con fingerprints y
+metadata limitada, sin exportar secretos. Se revalidaron:
+
+- current `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, ready, CCD 1.3;
+- sucesora `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, staging, CCD 1.4;
+- run `821b7f99-44e8-4fa5-be93-c8c361807e07`, succeeded;
+- 107 documentos/versiones ready, 107 chunks, 107 embeddings de dimensión 1024;
+- manifiesto/pipeline/config/procedencia auditados, sin drift;
+- conjunto elegible derivado de nuevo: 5 principals, bindings sucesora 5/5, cero
+  extras; plan P4-B.3 exactamente igual, grants/contextos/auxiliares sin cambios.
+
+assert_release_complete pasó para ambas releases en lectura. CCD 1.3 conservaba
+sus bindings y estaba lista para rollback, sin ensayo de rollback.
+
+### Modificación explícita de la puerta de cuentas
+
+Durante la reanudación se localizaron credenciales de cuatro principals en los dos
+almacenes DPAPI existentes. La quinta cuenta procede de un diagnóstico cuya
+contraseña aleatoria solo se usó en memoria. El usuario confirmó que no existe otro
+almacén autorizado/documentado y modificó expresamente la puerta de P4-B.4:
+verificación SQL release-specific para todos y login HTTP solo para los principals
+con credenciales legítimamente disponibles. La ausencia histórica de una contraseña
+operativa, por sí sola, dejó de ser condición de bloqueo/rollback.
+
+No se restablecieron contraseñas, generaron credenciales, crearon nuevos almacenes,
+intentaron revertir hashes ni fabricaron sesiones/tokens. Las contraseñas DPAPI se
+usaron exclusivamente en memoria. Los conteos de principals y disponibilidad se
+derivaron dinámicamente, sin usar cinco o cuatro como entradas de selección.
+
+Resultado post-current antes del fallo posterior:
+
+| Verificación | Resultado |
+| --- | --- |
+| release_authorization | **5/5**, SQL READ ONLY, exactamente una combinación válida por principal, cero extras |
+| http_login_verified | **4/5**, todos los disponibles: login 200, /auth/me 200, release sucesora, ccd_local, capacidades esperadas, logout 204 |
+| credential_unavailable | **1**, AUTHORIZATION_SQL_VERIFIED_CREDENTIAL_UNAVAILABLE; **sin PASS HTTP** |
+
+La consulta SQL reprodujo el join release-specific de la rama normal CCD de
+AuthService.currentSession: cuenta activa/no deshabilitada con credencial existente,
+binding estable y versión del nuevo current, grant ccd_local/read no revocado,
+contexto CCD correspondiente; además validó el contexto auxiliar de unified y la
+selección de current ready no sintético. No sustituyó la validación de una sesión
+real para el principal sin contraseña operativa.
+
+### Precheck normal y publicación única
+
+API iniciada mediante `npm start` de backend/api, sin preload, instrumentación ni
+runtime alternativo. Bajo CCD 1.3 pasaron login/me, conversación nueva, la consulta
+«¿Qué temas se estudian en el curso de Inteligencia Artificial Generativa?», HTTP 201
+no abstentivo con cita documental, historial exacto y artifact protegido HTTP 200
+con SHA igual al source_sha256 de DB, label bch-ccd-knowledge-1.
+
+Incidencias del arnés privado previas a publicación: inicialmente esperaba un campo
+dataset_release_id en la respuesta HTTP de detalle, aunque el contrato no lo expone.
+Se corrigió solo el arnés para comprobarlo mediante SQL READ ONLY y se reutilizó
+la misma respuesta/conversación, sin repetir el turno RAG; el artifact representativo
+se descargó dos veces en esa comprobación inicial. Mientras se esperaba la
+aclaración sobre la quinta cuenta, se eliminó esa fixture normalmente; después de
+la autorización modificada se creó otra fixture bajo CCD 1.3 para la transición.
+Estas operaciones adicionales y logins quedaron acreditados, no ocultos.
+
+Promoción: **una llamada a publish_release(sucesora) y un COMMIT**, confirmados.
+Transacción corta con bloqueo de dataset/releases y fuentes de autorización,
+revalidación exacta de current/staging/identidad/bindings/grants/contextos,
+assert_release_complete y validación de current sucesora ready y CCD 1.3 ready.
+Se comprobó que solo cambiaron datasets y dataset_releases, con el resto de campos,
+tablas, corpus y seguridad conservados. Sin UPDATE directo de puntero/status ni retry.
+La transacción duró menos de un segundo antes del COMMIT.
+
+### Fallo post-current y causa
+
+Tras los cuatro logins post-current correctos y sus logout, el arnés intentó otro
+login del propietario para iniciar el smoke documental. Ese login agotó la ventana
+normal por UID: límite **5 intentos por 900 segundos**. La planificación del arnés
+introdujo autenticaciones redundantes y fue incorrecta; no se atribuye el fallo a
+RAG ni al arreglo de artifacts de P4-B.4A.
+
+La causa se reconstruyó con lectura del código y estado persistido:
+
+- cuatro login/me/logout post-current completados entre 09:58:42Z y 09:58:45Z;
+- evento rate_limited a las 09:58:46Z, sin sesión adicional exitosa ni conversación
+  documental CCD 1.4 creada;
+- bucket del propietario con siete intentos en 09:45Z–10:00Z, incluidos el intento
+  de smoke y una primera comprobación HTTP de rollback aún dentro de esa ventana;
+- la última fixture existente seguía siendo la del precheck CCD 1.3;
+- tras el cambio natural de ventana, la verificación HTTP de rollback pasó.
+
+El wrapper original conservó el código ERR_ASSERTION y la fase amplia
+ccd14-documentary-artifact, pero no el status HTTP de esa petición. **No se registra
+un 429 observado que no quedó capturado**: la atribución al rate limiter está
+respaldada por los contadores, auditoría, secuencia de sesiones y código. La lectura
+posterior de la fixture antigua no se presenta como smoke de la sucesora.
+
+No se borraron contadores, alteró política, cambió código ni intentó completar el
+smoke con otro principal para evitar el fallo. Se siguió la regla de rollback.
+
+### Rollback único y resultado real
+
+Se confirmó CCD 1.3 ready, completa y con autorización/bindings válidos. Se ejecutó
+**una llamada a publish_release(CCD 1.3) y un COMMIT**, confirmados, sin UPDATE
+directo ni segunda promoción. Current volvió a
+`f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`.
+
+La primera verificación HTTP de rollback se rechazó todavía dentro de la ventana
+agotada. Tras diagnosticar en lectura y pasar naturalmente a la siguiente ventana,
+se verificó sin repetir ninguna operación de publicación: login 200, /auth/me 200
+bajo CCD 1.3, conversación nueva, documental 201 no abstentivo, cita histórica,
+artifact protegido 200 con SHA correcto e historial exacto. Logout normal y
+eliminación exclusiva de las fixtures propias por DELETE del propietario.
+
+**No ejecutados** por la detención inmediata: turno documental/artifact CCD 1.4,
+C01–C09 sobre current, ownership, transición histórica GET/POST 409 bajo CCD 1.4 y
+reinicio normal post-current. No tienen PASS nuevo. Hubo dos arranques normales antes
+de promover; no se confunden con el gate de reinicio post-current.
+
+### Estado final, límites y evidencia
+
+Snapshot final READ ONLY comparado con el inicial: 43 tablas. Current restaurado;
+CCD 1.3 ready. La sucesora permanece **ready, no current**, con validated_at de la
+publicación: el rollback normal solo restableció el puntero, sin volverla a staging.
+No se alteró su status manualmente ni se eliminó la release.
+
+Cambios persistidos clasificados:
+
+- dataset_releases: sin filas nuevas; solo status staging→ready/validated_at de la
+  sucesora; las otras releases permanecen idénticas;
+- sessions: +9, **9/9 revocadas mediante logout normal**;
+- refresh_tokens: +9, retenidos con las sesiones revocadas;
+- security_events: +20, 18 de login/logout y dos rate_limited; auditoría conservada;
+- auth_rate_limits: +13 buckets normales, sin limpieza/reset.
+
+Datasets volvió al fingerprint inicial. Conversaciones, mensajes, citas y ownership
+coinciden con el baseline tras las eliminaciones normales. Corpus, runs, embeddings,
+bindings, grants, cuentas, credenciales, recovery, auxiliares, runtime scope, roles,
+memberships, propietarios y ACL permanecen intactos. No hubo mutaciones inesperadas.
+Ambas releases siguen pasando assert_release_complete; autorización final CCD 1.3 5/5.
+
+API detenida correctamente con SIGINT y PostgreSQL detenido como al inicio, volumen
+y auditoría conservados. No se operaron otros contenedores, Ollama ni N8N. No se
+repitieron 249/27/11, 107 artifacts, suites/typechecks generales, Mobile, MCP,
+Android ni OE5.
+
+Evidencia privada: `data/ccd/local/p4b4-current-promotion-resumed/`, con baseline,
+entorno/root, snapshots, revalidación/rollback readiness, modificación de la puerta,
+prechecks, transacciones, autorización 5/5 y HTTP 4/5 separados, diagnóstico del
+rate limiter, rollback HTTP, cleanup/restauración, privacidad, run manifest y
+files manifest SHA-256/tamaño. Incluye respuestas de las fixtures HTTP propias;
+no copia originales, corpus completo, vectores, passwords/tokens, hashes de
+credenciales, datos de recuperación ni paths personales absolutos.
+
+Único cambio versionable: esta sección de
+`eval/integration/results/ccd-current-promotion.md`. git diff --check aprobado;
+status final limitado a ese archivo. Sin secretos añadidos, commit ni push.
+
+Pendiente para una tarea explícita: revisar el arnés para reutilizar sesiones o
+planificar el presupuesto de login sin modificar límites, y autorizar una nueva
+operación que tenga en cuenta que la sucesora ahora está ready. Esta tarea **no**
+vuelve a promover ni ejecuta etapas posteriores. La línea CCD 1.4 no queda cerrada
+como promoción exitosa. Sin producción, aval CCD, despliegue UNAB ni OE5 completo.
