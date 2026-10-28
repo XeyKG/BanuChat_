@@ -1,5 +1,9 @@
 # BanuChat — información y consentimiento para revisión académica
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Borrador histórico no utilizable para reclutar ni ejecutar SUS; ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 **DRAFT FOR ACADEMIC REVIEW — NOT APPROVED FOR USE**
 
 PV-2 · 28/10/2026. Borrador propuesto a partir del [draft anterior](consent-draft.md).

@@ -1,5 +1,9 @@
 # BanuChat — plan de manejo de datos para revisión
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Archivo histórico: no inicia reclutamiento ni SUS. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 PV-2 · 28/10/2026 · **PROPUESTA PENDIENTE DE DECISIÓN ACADÉMICA; NO IMPLEMENTADA**.
 No se crea almacenamiento de participantes, listas de contacto, consentimientos,
 resultados humanos ni relaciones de identidad en esta tarea.

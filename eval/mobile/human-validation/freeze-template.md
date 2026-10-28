@@ -1,5 +1,9 @@
 # Freeze previo a P01 — plantilla sin ejecutar
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Plantilla histórica: no completar ni usar para abrir reclutamiento o SUS. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 ## Nota PV-1B — canal verificado, freeze pendiente
 
 El [PV-1B](../results/product-validation-ux-closure-pv1b.md) verificó el canal SDK 57

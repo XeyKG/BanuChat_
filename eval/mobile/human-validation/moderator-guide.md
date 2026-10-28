@@ -1,7 +1,11 @@
 # Guía del moderador y observador — OE5-H0-CCD-1.0
 
-Preparada, no ejecutada. No reclutar ni entregar instrumentos hasta resolver:
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Guía histórica: no reclutar, entregar instrumentos ni administrar SUS. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
+Preparada, no ejecutada y fuera de alcance. No existe un paso de reclutamiento
+pendiente de apertura sin decisión posterior del director.
 
 ## Preparación previa a P01
 

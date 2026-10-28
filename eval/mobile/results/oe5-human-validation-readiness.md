@@ -1,12 +1,19 @@
 # BanuChat — OE5-H0: readiness de validación humana y SUS
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Este readiness es histórico y no autoriza reclutamiento ni SUS. Los criterios
+> OE5, incluido SUS, están **NO CUMPLIDOS**. La alternativa del autor es
+> **PROPUESTA / PENDIENTE DE APROBACIÓN**; ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 ## Precedencia PV-0 — 28 de octubre de 2026
 
 El cuerpo siguiente conserva la preparación histórica del 27 de octubre, incluidos
 su HEAD, CCD 1.3, preflight y event-012; no describe el current ni targets operativos
 vigentes. Prevalece [PV-0](product-validation-ux-closure-pv0.md): CCD 1.4 current,
 T02 técnico reconfirmado, T04 PENDIENTE DE VENTANA DE SESIONES y T05 dependiente del
-contexto real. Sigue READY_FOR_ACADEMIC_REVIEW, no reclutamiento ni aprobación.
+contexto real. El estado histórico READY_FOR_ACADEMIC_REVIEW no equivale a
+autorización: no hay reclutamiento ni aprobación.
 
 
 27 de octubre de 2026, America/Bogota. HEAD inicial esperado y observado:
@@ -130,7 +137,8 @@ Son **22 archivos** de documentación, instrumentos y análisis; ningún archivo
 
 ## Qué sigue bloqueando la ejecución
 
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+La decisión vigente es no ejecutar el estudio; no hay puerta de reclutamiento
+pendiente de apertura sin decisión posterior del director.
 
 Además: consentimiento/contacto/custodia/conservación/retiro revisados; designación
 de roles; asignación privada de cuenta/contexto común sin crear ni cambiar cuentas
@@ -155,6 +163,6 @@ No hubo commit/push. Evidencia técnica de preparación ignorada por Git:
 
 ## Decisión
 
-**READY_FOR_ACADEMIC_REVIEW.** Instrumento de validación humana reconciliado con
-el producto actual y preparado para revisión académica. Ningún participante
-reclutado ni evaluado. Reclutamiento/aceptación humana pendientes; no OE5 PASS.
+**Estado de cierre: NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL
+DIRECTOR.** Ningún participante fue reclutado ni evaluado. Los criterios
+originales, incluido SUS, están **NO CUMPLIDOS**; no OE5 PASS.

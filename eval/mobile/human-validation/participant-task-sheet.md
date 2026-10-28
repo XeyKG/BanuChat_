@@ -1,5 +1,9 @@
 # BanuChat — hoja de tareas
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Plantilla histórica no entregable; no autoriza tareas con participantes ni SUS.
+> Ver la [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 **PLANTILLA NO ENTREGABLE: T04 PENDIENTE DE VENTANA DE SESIONES y freeze de
 contexto T05. No iniciar P01 con placeholders ni objetivos históricos.**
 

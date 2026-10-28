@@ -1,5 +1,7 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+> Para OE5 humano rige la [decisión canónica de cierre](oe5-human-validation-closure-decision.md): **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR**. No hay reclutamiento o SUS autorizados; los criterios originales siguen **NO CUMPLIDOS** y la alternativa del autor es **PROPUESTA / PENDIENTE DE APROBACIÓN**.
+
 ## Precedencia PV-0 — 28 de octubre de 2026
 
 [PV-0](../../eval/mobile/results/product-validation-ux-closure-pv0.md) actualiza
@@ -14,12 +16,13 @@ OE1–OE6 se conservan. Sin reclutamiento, consentimiento aprobado, SUS ni cierr
 
 Revisión desde `5ed14608a9086b59bc880262552ccb2185944d3f`. El instrumento
 [OE5 vigente propuesto](../../eval/mobile/oe5-student-validation-protocol.md)
-está **READY_FOR_ACADEMIC_REVIEW**, no ejecutado ni aprobado para reclutamiento.
+es histórico `READY_FOR_ACADEMIC_REVIEW`, no ejecutado ni autorizado para reclutamiento.
 Conserva ≥10 elegibles, ≥3 programas, ≤50 % de uno, cinco tareas, completación
 `>85 %`, SUS medio >70 y cada individual ≥50. Usa `ccd_authenticated`, documentación
 CCD y auxiliares ficticios; la T02 sintética sobre incidencias queda como antecedente.
 
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+No existe una siguiente ejecución humana autorizada; la decisión queda pendiente
+del director según el cierre canónico.
 Se prepararon consentimiento borrador, guiones, CSV vacíos, freeze y análisis con
 fixtures artificiales. No hay reclutamiento, consentimiento real, sesiones ni SUS.
 El [readiness](../../eval/mobile/results/oe5-human-validation-readiness.md) separa

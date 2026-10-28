@@ -1,5 +1,9 @@
 # Consentimiento operativo — borrador OE5-H0
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Borrador histórico no utilizable para reclutar ni ejecutar SUS; ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 **DRAFT — NOT APPROVED FOR USE**
 
 **BORRADOR — NO USAR PARA RECLUTAMIENTO HASTA REVISIÓN ACADÉMICA.**

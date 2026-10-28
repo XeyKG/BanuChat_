@@ -1,6 +1,13 @@
-# Instrumentos OE5-H0 — preparados para revisión
+# Instrumentos OE5-H0 — archivo histórico, no ejecutado
 
-Estado `READY_FOR_ACADEMIC_REVIEW`, no reclutamiento ni aceptación humana.
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> No reclutar, no completar estos instrumentos ni ejecutar SUS. Los criterios
+> originales siguen **NO CUMPLIDOS**; la única alternativa considerada es la del
+> autor y está **PROPUESTA / PENDIENTE DE APROBACIÓN**. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
+Estado histórico `READY_FOR_ACADEMIC_REVIEW`, no autorización vigente para
+reclutamiento ni aceptación humana.
 Rebaseline [PV-0](../results/product-validation-ux-closure-pv0.md), 28/10/2026: CCD 1.4
 técnico current; T04 **PENDIENTE DE VENTANA DE SESIONES** y contexto T05 por congelar.
 No entregar la hoja con placeholders. No cambiaron cinco tareas, SUS, CSV, analyzer
@@ -8,7 +15,7 @@ ni sus criterios; el identificador base OE5-H0-CCD-1.0 se conserva.
 [Protocolo propuesto vigente](../oe5-student-validation-protocol.md),
 [readiness](../results/oe5-human-validation-readiness.md).
 
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+No existe siguiente paso autorizado de reclutamiento o SUS.
 
 ## Archivos y uso futuro
 

@@ -1,5 +1,9 @@
 # BanuChat — cuestionario SUS
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Cuestionario histórico no administrable; SUS permanece **NO CUMPLIDO**. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 OE5-H0-CCD-1.0. Preparado para revisión; no es un formulario ya respondido.
 Código de participante asignado: `[P__]`. No escribir nombre ni credenciales.
 Responder inmediatamente después de las tareas, una opción entera de 1 a 5 por

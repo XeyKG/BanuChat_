@@ -1,5 +1,9 @@
 # Objetivos para revisión y freeze — no entregar como respuestas
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Referencia histórica: no seleccionar objetivos para reclutamiento o SUS. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 ## Estado vigente PV-0 — 28 de octubre de 2026
 
 **No hay objetivos congelados ni autorización de reclutamiento. T04: PENDIENTE DE

@@ -1,4 +1,13 @@
-# BanuChat — paquete ejecutable de validación humana final
+# BanuChat — paquete histórico de validación humana final
+
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> No ejecutar, reclutar ni administrar SUS con este paquete. Los criterios
+> originales están **NO CUMPLIDOS**. La alternativa del autor es
+> **PROPUESTA / PENDIENTE DE APROBACIÓN** y no equivale a SUS ni a una prueba
+> con estudiantes. Ver la [decisión canónica](../academic/oe5-human-validation-closure-decision.md).
+
+Las secciones posteriores preservan el diseño histórico del paquete y no son un
+procedimiento vigente ni una lista de pasos autorizados.
 
 ## Precedencia PV-1B — 28/10/2026
 
@@ -38,12 +47,11 @@ es un objetivo operativo futuro. T05 requiere contexto común explícito: solo d
 de cuatro cuentas con credencial disponible cumplen los candidatos actuales.
 Ni el cierre técnico ni este rebaseline habilitan reclutamiento.
 
-## Puerta específica del estudio Android de usabilidad/SUS
+## Estado de cierre del estudio Android de usabilidad/SUS
 
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
-
-Estado **READY_FOR_ACADEMIC_REVIEW**, nunca READY_FOR_RECRUITMENT mientras falte
-esa confirmación. Usar [protocolo vigente](../../eval/mobile/oe5-student-validation-protocol.md),
+No hay reclutamiento ni ejecución SUS autorizados. El estado histórico
+`READY_FOR_ACADEMIC_REVIEW` no abre una puerta operativa. Consultar el
+[protocolo histórico](../../eval/mobile/oe5-student-validation-protocol.md),
 [instrumentos](../../eval/mobile/human-validation/README.md) y
 [readiness](../../eval/mobile/results/oe5-human-validation-readiness.md).
 También faltan consentimiento/custodia/retiro/contacto revisados, designación de

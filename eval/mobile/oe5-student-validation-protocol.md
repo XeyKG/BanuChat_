@@ -1,18 +1,20 @@
-# OE5 — Protocolo vigente propuesto de tareas y SUS
+# OE5 — Protocolo histórico propuesto de tareas y SUS
+
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Este instrumento se conserva sin completar. No autoriza reclutamiento,
+> participantes ni ejecución de SUS. Ver la [decisión canónica de cierre](../../docs/academic/oe5-human-validation-closure-decision.md): los criterios originales permanecen **NO CUMPLIDOS** y la alternativa del autor es solo **PROPUESTA / PENDIENTE DE APROBACIÓN**.
 
 **OE5-H0-CCD-1.0 — rebaseline PV-0, 28 de octubre de 2026, America/Bogota.**
-Estado: `READY_FOR_ACADEMIC_REVIEW`; **NOT READY FOR RECRUITMENT**.
+Estado histórico de preparación: `READY_FOR_ACADEMIC_REVIEW`; no es un estado
+vigente de autorización y **NOT READY FOR RECRUITMENT**.
 Base técnica de esta revisión: `7c0ba1564cedc650907952099f88c226c7e4d3d3`. Estudio no ejecutado.
 Se conserva el identificador base del protocolo/analyzer y sus criterios; esta
 edición PV-0 se distingue mediante revisión y hashes de instrumentos en el freeze.
 La base `5ed14608a9086b59bc880262552ccb2185944d3f` pertenece a OE5-H0 histórico.
 [Auditoría, contradicciones y matriz PV-0](results/product-validation-ux-closure-pv0.md).
 
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
-
-Instrumento preparado no equivale a aprobación. Cero personas reclutadas, cero
-consentimientos obtenidos, cero sesiones o respuestas SUS reales. No reclutar
-hasta resolver esta puerta y los campos del freeze.
+La decisión vigente es no reclutar ni ejecutar SUS; la confirmación académica
+pendiente se reemplaza por la [decisión de cierre](../../docs/academic/oe5-human-validation-closure-decision.md), pendiente del director.
 
 ## Precedencia e historia
 

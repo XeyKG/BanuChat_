@@ -1,5 +1,11 @@
 # BanuChat — decisiones externas y cronograma de cierre
 
+> La fila y actividades históricas de pruebas humanas quedan subordinadas a la
+> [decisión canónica de cierre OE5](oe5-human-validation-closure-decision.md):
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR**. No
+> autorizan reclutamiento ni SUS; los criterios originales permanecen **NO
+> CUMPLIDOS** y la alternativa del autor es **PROPUESTA / PENDIENTE DE APROBACIÓN**.
+
 ## Estado de decisiones externas
 
 Este documento solicita decisiones; no registra aprobaciones inexistentes. `PENDIENTE`
@@ -13,7 +19,7 @@ original. `NO AUTORIZADO` impide actuar hasta recibir autorización explícita.
 | Google Sheets/calendario real | PENDIENTE; existe fixture, no hoja ni credencial | Propietario funcional de calendario y seguridad TI | ID/owner de fuente, service account o mecanismo aprobado, schema, zonas horarias, cancelación y SLA | OE4 conserva fixture; no se afirma Sheets ni sincronización ≤30 min |
 | Alcance de Agent/ReAct | PENDIENTE; agente/MCP actual es determinista, no LLM ReAct | Director con revisión técnica/seguridad | Decisión conservar/sustituir, casos multietapa, tools/permisos y criterio de evaluación | OE3 queda parcial; no se crea un ciclo LLM sin necesidad aprobada |
 | Dispositivos Android/iOS físicos | PENDIENTE para la validación final; export no equivale a dispositivo | Equipo/laboratorio y responsables de firma | Inventario, OS, build/hash, firma, canal local seguro y agenda | DV físico/accesibilidad y afirmaciones nativas quedan pendientes |
-| Pruebas con estudiantes | NO AUTORIZADAS/NO RECLUTADAS | Director/comité aplicable, reclutamiento y participantes | Aprobación, consentimiento, muestra elegible, agenda, moderador, observador y custodia | No hay completación, SUS ni cierre OE5/OE6 con usuarios reales |
+| Pruebas con estudiantes | CERRADAS: NO EJECUTADAS — FUERA DE ALCANCE | Director | Decisión posterior explícita si desea reconsiderar la alternativa propuesta; no reclutamiento ni SUS por defecto | No hay completación, SUS ni cierre OE5/OE6 con usuarios reales; criterios originales NO CUMPLIDOS |
 | Servidor On-Premise UNAB | PENDIENTE; Docker Desktop local no es UNAB | Infraestructura/seguridad/operación UNAB | Host, CPU/RAM/GPU/disco, SO, red/DNS/TLS, backups, operador, ventana y aceptación | OE6 queda local; no se repite baseline receptor ni se mide disponibilidad |
 | Credenciales push | AUSENTES y no deben inventarse | Dueños FCM/APNs, seguridad y backend | Proyectos/bundles, credenciales custodiadas, contrato de dispositivos y revocación, development builds | Solo recordatorios locales; DV-13 permanece `BLOCKED` |
 
@@ -44,7 +50,7 @@ seguridad en el host institucional, que no se acreditan localmente.
 | P0 | Baseline receptor, soak y hardening | Equipo técnico + operación/seguridad | Recepción; corpus/modelos congelados | 3–5 jornadas | Warm-up/ready gate, carga acordada, ventana soak, fallos/recuperación y media ≤5 s medidos en receptor; no interrupción >5 min según ventana aprobada | Después de recepción; local 1/2/5 ya no se repite como sustituto |
 | P0 | Android/iOS físicos y push si se mantiene | Mobile + dueños de dispositivos/credenciales | Builds/firma/canal/FCM/APNs | 5–8 jornadas | DV-01–DV-14 por plataforma; push remoto solo con registro/revocación real; accesibilidad registrada | Login/chat local pueden avanzar; push/iOS bloqueados por recursos externos |
 | P0 | Revisión del banco, gold, juez y RAGAS | Revisores CCD, árbitro, operador | Autoridad corpus y protocolo | 2–4 jornadas | Banco aprobado/congelado, juez aceptado y baseline completo contra cinco targets, con hashes/denominadores | Revisión puede solaparse con recepción; ejecución espera freeze |
-| P0 | Cinco tareas, SUS y consolidación | Moderador, observador, participantes, custodio | Aprobación, dispositivos y versión congelada | 3–5 jornadas de ejecución/análisis | ≥10 elegibles; cinco tareas; completación >85 %; SUS medio >70 y todos ≥50, o `FAIL` transparente | Reclutamiento puede prepararse; sesiones esperan aprobaciones y freeze |
+| PENDIENTE DEL DIRECTOR | Alternativa OE5 del autor, si se aprueba | Director y autor | Decisión posterior explícita | No estimado | Evidencia limitada: T01–T05 en Android físico, registro e inspección heurística; no SUS ni población objetivo | No reclutamiento ni sesiones de terceros; no sustituye criterios originales |
 | P0 | Informe, matriz y defensa | Equipo + director | Evidencia anterior o decisiones de aceptación de pendientes | 2–4 jornadas | Matriz OE1–OE6 actualizada, resultados/limitaciones, demo reproducible y aceptación académica registrada | Síntesis parcial paralela; conclusión espera resultados/decisiones |
 
 Total aritmético de las siete filas con esfuerzo: **23–41 jornadas-persona**. Las esperas
@@ -62,8 +68,8 @@ ventana completa**, no un cronograma vigente ni un reinicio automático del seme
 | S1–S2 | Congelar baseline y preparar recepción | Decidir alcance, autoridad, fuentes, host, dispositivos y protocolo | Decisiones/owners/agenda registrados |
 | S2–S6 | Recepción/TLS/secretos; fuente/Sheets autorizada en paralelo | Revisión independiente del banco y arbitraje | Host y corpus/fuente aprobados |
 | S4–S8 | Baseline receptor, ready gate, seguridad y soak | Calibración humana del juez | Runtime y juez congelados |
-| S5–S10 | Builds Android/iOS; push solo si se conserva | Preparación de reclutamiento/consentimiento | DV físico suficiente y sesiones autorizadas |
-| S8–S12 | Ejecución retrieval/RAGAS y correcciones solo si se abre un ciclo explícito | Cinco tareas y SUS sobre versión congelada | Resultados completos, incluidos fallos |
+| S5–S10 | Builds Android/iOS; push solo si se conserva | OE5 humano fuera de alcance; decisión del director sobre alternativa del autor | No hay sesiones humanas autorizadas |
+| S8–S12 | Ejecución retrieval/RAGAS y correcciones solo si se abre un ciclo explícito | Sin ejecución de cinco tareas ni SUS con participantes | Criterios OE5 humanos permanecen NO CUMPLIDOS |
 | S12–S16 | Consolidación técnica y demo | Análisis, revisión académica y decisiones sobre brechas | Informe/matriz/aceptación final |
 
 Recepción, autorización de fuentes, revisión del banco y preparación de dispositivos pueden

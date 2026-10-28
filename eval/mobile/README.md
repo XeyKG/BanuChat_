@@ -1,5 +1,7 @@
 # Validación funcional de Mobile
 
+> Para el paquete humano OE5 rige la [decisión canónica de cierre](../../docs/academic/oe5-human-validation-closure-decision.md): **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR**. No hay reclutamiento ni SUS autorizados; los criterios originales están **NO CUMPLIDOS** y la alternativa del autor es **PROPUESTA / PENDIENTE DE APROBACIÓN**.
+
 ## Precedencia vigente — PV-0, 28 de octubre de 2026
 
 [PRODUCT VALIDATION & UX CLOSURE — readiness PV-0](results/product-validation-ux-closure-pv0.md):
@@ -17,8 +19,9 @@ calendario/progreso/anuncios ficticios, con cuentas ficticias. Sustituye para es
 estudio la exigencia anterior de release documental sintética y T02 sobre incidencias.
 Muestra, cuestionario, umbrales, moderación y privacidad se conservan.
 
-Estado **READY_FOR_ACADEMIC_REVIEW**, no READY_FOR_RECRUITMENT ni OE5 PASS.
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+Estado histórico **READY_FOR_ACADEMIC_REVIEW**, no READY_FOR_RECRUITMENT ni OE5 PASS.
+No existe siguiente paso autorizado de reclutamiento o SUS; queda pendiente la
+decisión del director indicada en el cierre canónico.
 
 [Instrumentos y diccionario](human-validation/README.md),
 [analizador reproducible](analyze-human-validation.mjs),

@@ -1,5 +1,11 @@
 # CHECKPOINT BANUCHAT — OE5
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> El paquete humano se conserva como histórico: no hay reclutamiento ni SUS
+> autorizados. Los criterios OE5 originales siguen **NO CUMPLIDOS** y la
+> alternativa del autor es **PROPUESTA / PENDIENTE DE APROBACIÓN**. Ver la
+> [decisión canónica](../academic/oe5-human-validation-closure-decision.md).
+
 ## Precedencia PV-1B — 28/10/2026
 
 El [PV-1B](../../eval/mobile/results/product-validation-ux-closure-pv1b.md) verifica
@@ -36,9 +42,10 @@ la [regresión diagnóstica](../../eval/rag-quality/results/ccd-mobile-diagnosti
 acredita la corrección posterior, sin convertirlas en aceptación humana.
 
 El [protocolo OE5 actualizado](../../eval/mobile/oe5-student-validation-protocol.md)
-y sus instrumentos están **READY_FOR_ACADEMIC_REVIEW**; muestra, diez ítems,
-cinco tareas y umbrales se mantienen. Ningún participante reclutado/evaluado.
-**PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
+y sus instrumentos están archivados; muestra, diez ítems, cinco tareas y
+umbrales se mantienen como criterio histórico **NO CUMPLIDO**. Ningún
+participante fue reclutado/evaluado. No existe siguiente paso autorizado de
+reclutamiento; rige la [decisión de cierre](../academic/oe5-human-validation-closure-decision.md).
 La preparación no cierra OE5 original: iOS físico, push remoto, accesibilidad y
 aceptación humana conservan sus brechas. Las menciones posteriores a Android
 pendiente, release sintética y notificaciones describen aquel corte histórico.
@@ -200,7 +207,9 @@ Antes de despliegue/evaluación se requiere decidir y autorizar un contrato de d
 autenticado, almacenamiento mínimo, revocación, receipts/caducidad, rate limiting y política
 de retención; configurar FCM/APNs/projectId sin commitear secretos; generar development y
 release builds; ejecutar Android/iOS reales; cerrar o aceptar los avisos de dependencias; y
-completar aprobación, reclutamiento y estudio SUS. OE6 no puede presentar la exportación ni
+cerrar entonces las condiciones humanas del estudio. Ese bloque pertenece al
+corte histórico y ya no está autorizado para OE5 humano; rige la decisión de
+cierre. OE6 no puede presentar la exportación ni
 las notificaciones locales como validación de push remoto o despliegue institucional.
 
 ## K. Cierre

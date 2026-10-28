@@ -1,5 +1,9 @@
 # BanuChat — hoja de decisión para revisión académica
 
+> **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR.**
+> Archivo histórico: no inicia reclutamiento ni SUS. Ver la
+> [decisión canónica](../../../docs/academic/oe5-human-validation-closure-decision.md).
+
 PV-2 · 28/10/2026 · **PAQUETE PARA REVISIÓN; NO AUTORIZA RECLUTAMIENTO**.
 No hay participantes, consentimientos obtenidos ni respuestas humanas registradas.
 Este documento propone decisiones; ninguna casilla pendiente implica aprobación.
