@@ -495,3 +495,150 @@ No se declara promovida la candidata, aval CCD/UNAB, producción institucional n
 `independent_human_acceptance = false`
 
 **P4-B.4 BLOCKED — normal API has no artifact root for CCD 1.4 version label**
+
+
+## P4-B.4A — root explícito de artefactos CCD 1.4 registrado y verificado
+
+Cierre 2026-10-28T04:29:57.980689-05:00, America/Bogota.
+
+**P4-B.4A COMPLETE — CCD 1.4 ARTIFACT ROOT REGISTERED AND VERIFIED**
+
+Esta sección es aditiva: el bloqueo histórico P4-B.4 se conserva como detención
+real anterior a cualquier publicación. Esta tarea resuelve exclusivamente su
+configuración de almacenamiento; **no reanuda ni ejecuta la promoción**.
+
+### Baseline y bloqueo revalidado antes del cambio
+
+HEAD real `3a9602b66b878ccd01ef95a925d9b6a3f663bb8b`, branch `main`, working tree inicialmente limpio,
+coincidente con la referencia auditada. Se leyó AGENTS.md completo. Sin cambio
+de branch, operaciones Git destructivas, commit o push.
+
+Desde el código actual se confirmó que startAuthenticatedApi usa version_roots
+en modo ccd_local, registra bch-ccd-knowledge-1 y no registraba bch-ccd-knowledge-2.
+El resolvedor exige Object.hasOwn para el label y rechaza con not_found antes de
+filesystem si falta, sin fallback a storage.root. La ruta normal de recursos
+delega a ese mismo almacenamiento, sin un registro alternativo.
+La metadata viva de la candidata confirmó 107 document_versions con exactamente
+version_label bch-ccd-knowledge-2. Estas premisas pasaron antes de modificar producto.
+
+### Root existente y verificación de bytes
+
+Se usó únicamente `data/ccd/local/product-knowledge-v2/`, que ya existía.
+No se creó otra copia, no se reconstruyó el corpus ni se copiaron PDFs originales.
+El root es un directorio real en la ubicación configurada, sin symlink/junction
+del root; se verificó contención de realpaths de sus componentes/archivos, sin
+symlinks o junctions que escaparan de él.
+
+Adoption v2 SHA-256 observado y esperado:
+`4824a74e21029a1964d681958b8ca452b35c14de3a1d6c94cd3516c079abf81e`.
+Los paths se derivaron de la metadata viva y de los 107 artifacts de adoption,
+sin una lista manual. Cada path/key/SHA coincide entre esas dos fuentes; el
+inventario de artifacts coincide exactamente. Solo se guardaron paths relativos,
+SHA esperado/observado, resultados y conteos, nunca contenido documental.
+
+| Comprobación privada | Resultado |
+|---|---:|
+| expected | 107 |
+| existing | 107 |
+| inside_root | 107 |
+| hash_match | 107 |
+| wrong_label | 0 |
+| missing | 0 |
+| mismatch | 0 |
+
+Después del cambio se importó la configuración real, se comprobó que su root v2
+es exactamente ese directorio y se releyeron sus 107 archivos para confirmar los
+SHA contra la metadata sellada; adoption permaneció idéntica.
+
+### Cambio funcional mínimo
+
+En `backend/api/src/authenticated-main.ts` se añadió explícitamente:
+
+`bch-ccd-knowledge-2 → data/ccd/local/product-knowledge-v2/`.
+
+Para probar la configuración utilizada realmente por el arranque sin abrir una
+API o duplicarla en otro registro, se extrajo solo el antiguo objeto CCD inline
+a `ccdArtifactStorage()`, función pequeña, pura, sin argumentos, en el mismo archivo.
+El arranque normal consume esa misma función; la rama sintética no cambió.
+No hay helper adicional en otro archivo ni clase/framework/servicio de configuración.
+
+Los cuatro roots históricos se conservan con sus paths exactos: m01-m12,
+expanded-v2, guidance-v3 y product-knowledge-v1. La configuración sigue siendo
+una allowlist estática de cinco entradas literales. No hay wildcard, derivación
+de rutas por label, input HTTP, root genérico o fallback nuevo.
+`getDocumentArtifact()` permanece byte por byte intacto.
+
+### Pruebas realmente ejecutadas
+
+Cuatro tests nuevos de API comprueban la configuración CCD normal completa,
+la selección exclusiva del root v2 frente a storage.root/v1, rechazo de labels
+desconocidos o heredados del prototipo con cero accesos filesystem y rechazo de
+bytes v2 con SHA incorrecto. Los tests usan SQL/filesystem controlados, sin
+depender del corpus privado ni iniciar la API. La prueba existente de versión
+desconocida y las de hash incorrecto se conservan sin debilitar aserciones.
+
+| Validación | Resultado nuevo |
+|---|---|
+| Focalizados storage/resolver/HTTP de artefactos | 34/34, cero fail/cancelled/skipped/todo |
+| API npm run typecheck | exit 0 |
+| API npm test, una sola ejecución completa | 698/698, cero fail/cancelled/skipped/todo |
+| 107 artifacts reales mediante el root configurado | 107/107 SHA correctos |
+| Snapshot inicial/final | idénticos, 43 tablas y superficie de seguridad |
+| git diff --check | correcto |
+
+No se repitieron diez corridas ni bancos RAG, suites RAG/MCP/Mobile, verify-local
+de cuatro paquetes, workflows CI, Android, N8N u OE5. Los servidores HTTP/stdio
+fixture que forman parte de la suite API no son el runtime normal ni servicios externos.
+No hubo intermitencias/fallos en las validaciones ejecutadas de esta tarea.
+
+### No publicación y entorno
+
+Current permanece `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, ready, CCD 1.3.
+La candidata `10af4ffd-effb-41fc-bbfe-4dc48cb3398f` permanece staging, CCD 1.4,
+con sus 107 documentos/chunks/embeddings y los bindings preparados intactos.
+Los snapshots fuertes READ ONLY de 43 tablas y seguridad coinciden exactamente:
+cero cambios de releases/status, current pointer, corpus, runs, embedding configs,
+bindings, grants, cuentas/auth, auxiliares, roles, memberships, owners o ACL.
+Llamadas a publish_release: 0. DML de producto: 0.
+
+PostgreSQL se identificó por contenedor/scope/volumen/mount/base y puerto exclusivo
+loopback antes de arrancarlo. Estaba detenido; se arrancó solo ese contenedor para
+lecturas y se restauró su estado detenido, conservando volumen e historial.
+No se inició la API normal ni se cambiaron Ollama, modelos, prompts o top_k.
+No se modificaron SQL, REST/OpenAPI, MCP, N8N, Mobile o workflows CI.
+
+No se hizo una descarga HTTP v2 de la candidata staging ni se alteró el filtro
+de releases ready para simularla. La prueba HTTP real por la ruta protegida
+corresponde a la reanudación de P4-B.4 después de revisar este cambio.
+
+### Scope, evidencia y cierre
+
+Archivos versionados propios de esta tarea:
+
+- `backend/api/src/authenticated-main.ts`;
+- `backend/api/test/ccd-artifact-storage.test.ts`;
+- esta sección aditiva de `eval/integration/results/ccd-current-promotion.md`.
+
+El pequeño helper está dentro del primer archivo y solo permite probar la misma
+configuración que consume el arranque. No se añadieron otras abstracciones.
+El resolvedor, los tests existentes, los contratos, paquetes/locks y todos los
+otros archivos protegidos inspeccionados conservan sus SHA iniciales.
+
+Evidencia privada cerrada/sellada antes de añadir esta sección:
+`data/ccd/local/p4b4a-artifact-root/`, con baseline, bloqueo pre-change, metadata
+viva, identidad del root, SHA de adoption, 107 paths/hashes/resultados sin contenidos,
+diff funcional, logs/resultados de pruebas, snapshot before/after, no-publication,
+restauración, privacidad, run manifest y files manifest SHA-256/tamaño.
+No contiene documentos, PDFs, contenido CCD, .env, passwords/tokens, filas sensibles
+o paths personales absolutos.
+
+El bloqueo P4-B.4 no se reescribe como una promoción aprobada. La compatibilidad
+del root queda corregida y verificada en código/tests y bytes reales; la promoción
+continúa pendiente de revisión y de una tarea de reanudación explícita.
+Sin commit ni push; no se continúa con promoción ni nuevas mejoras en esta tarea.
+
+`institutional_endorsement = false`
+
+`independent_human_acceptance = false`
+
+**P4-B.4A COMPLETE — CCD 1.4 ARTIFACT ROOT REGISTERED AND VERIFIED**
