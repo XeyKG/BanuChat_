@@ -1,165 +1,192 @@
 # BanuChat — operación Docker local
 
-Estado: **`banuchat-dev` es el entorno CCD autenticado principal de desarrollo**.
-PostgreSQL escucha en `127.0.0.1:55453` y la única API habitual en
-`127.0.0.1:3003`. I1B continúa provisionalmente en 55443 y no se usa en el
-arranque diario.
+Estado actualizado en **INFRA-D1, 2026-10-28**, después de Unified, CCD 1.4 y
+PV-1B. La referencia de inventario es [INFRA-D0](../transition/banuchat-docker-rationalization-infra-d0.md)
+y la retirada acotada está acreditada en [INFRA-D1](../transition/banuchat-docker-rationalization-infra-d1.md).
+Los checkpoints históricos conservan el estado que observaron en su fecha.
 
-## Mapa de recursos vigentes
+## VIGENTE — producto actual
 
-| Necesidad | Recurso | Cuándo iniciarlo |
-| --- | --- | --- |
-| Chat CCD autenticado | `banuchat-dev-postgres-ccd-auth-1` | Desarrollo habitual de API/Mobile |
-| Demo y regresión sintética | `banuchat-postgres` | Solo pruebas que exigen PostgreSQL sintético |
-| Automatización asíncrona | `banuchat-n8n` | Solo importación/ejecución manual de workflows N8N |
-| Preparación editorial CCD | `banuchat-ccd-dev-postgres-ccd-1` | Solo al preparar o verificar una publicación autorizada |
-| Reversión histórica | `banuchat-ccd-auth-i1b-test` | No iniciar como API habitual; conservar hasta cumplir las condiciones de retirada |
+| Componente | Ejecución y recurso | Dirección local configurada | Persistencia |
+| --- | --- | --- | --- |
+| PostgreSQL del producto | Docker: `banuchat-unified-postgres`, scope `banuchat.scope=unified-isolated` | `127.0.0.1:55463` | `banuchat-unified-data`; base `banuchat_unified` |
+| API unificada | Proceso Node en host: `npm start` desde `backend/api` | `127.0.0.1:3004` | Usa PostgreSQL Unified |
+| N8N multifuente opcional | Docker: `banuchat-unified-n8n` | `127.0.0.1:15679` | `banuchat-unified-n8n-data` |
+| Ollama | Proceso en host Windows | `127.0.0.1:11434` | Almacén del host; no confundir con el volumen Ollama OE6 |
+| Mobile / Metro | Dispositivo y host, sin contenedor | Metro `127.0.0.1:8084` | Aplicación móvil / bundle de desarrollo |
 
-`data/synthetic` sigue siendo la fuente de verdad de la demo. El corpus CCD, la
-demo sintética, N8N y el entorno editorial mantienen volúmenes separados.
-`CCD_DOCUMENTACION` no se monta en Docker.
+Las direcciones son configuración de arranque, no una declaración de servicios
+activos: INFRA-D1 terminó con los **16 contenedores restantes detenidos** y sin
+arrancar API, Metro, Ollama ni otros servicios.
 
-## Arranque diario
+La API usa fast paths y Document RAG con PostgreSQL y Ollama. La rama multifuente
+vigente espera la orquestación N8N y usa Agent/MCP en host; N8N es necesario cuando
+se ejerce esa capacidad. No es requisito de todos los flujos ni de los casos
+T01–T05 de PV-1B. La antigua afirmación general «N8N no participa en consultas de
+chat» describe el flujo anterior y no toda la aplicación unificada.
 
-Comprobar primero que el contenedor canónico ya existe:
+`data/synthetic` conserva su papel de fuente de verdad de la demo. Unified reúne
+contextos CCD y auxiliar sintético con separación lógica; los almacenes Docker
+sintético/editorial históricos siguen separados. No usar la demo como fallback
+institucional silencioso. `CCD_DOCUMENTACION` no se monta en Docker.
+
+## Arranque autorizado del producto
+
+Estos pasos documentan operación posterior; **no se ejecutaron en INFRA-D1**.
+No aprovisionar ni recrear recursos para un arranque normal.
+
+Comprobar identidad, scope, montaje y estado del PostgreSQL existente:
 
 ```powershell
-docker inspect banuchat-dev-postgres-ccd-auth-1 --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}'
+docker inspect banuchat-unified-postgres --format '{{.Name}} {{.Id}} {{.State.Status}} {{index .Config.Labels "banuchat.scope"}} {{range .Mounts}}{{.Name}} {{end}}'
 ```
 
-Si está detenido, iniciar ese mismo contenedor sin recrearlo:
+El resultado debe corresponder a `banuchat-unified-postgres`, scope
+`unified-isolated` y volumen `banuchat-unified-data`. Contrastar puerto 55463 y
+el inventario antes de iniciar. Si hay deriva, detener la operación y revisarla.
+Cuando el trabajo autorizado lo requiera y esté detenido:
 
 ```powershell
-docker start banuchat-dev-postgres-ccd-auth-1
+docker start banuchat-unified-postgres
 ```
 
-Iniciar la API desde `backend/api`:
+Desde `backend/api`:
 
 ```powershell
-npm run start:ccd-auth
+npm start
 ```
 
-El launcher carga la configuración privada ignorada por Git en
-`infra/local/banuchat-dev/ccd-auth-api.json`. Antes de escuchar valida exactamente:
+El script actual es `scripts/start-unified.mts`. Lee configuración privada
+ignorada por Git y exige `banuchat_unified`, puerto DB 55463 y API 3004. Los alias
+`start:ccd-auth` y `start:authenticated` también apuntan hoy a Unified; no son el
+antiguo arranque en 3003. No imprimir la configuración ni variables privadas.
 
-- proyecto `banuchat-dev` y servicio `postgres-ccd-auth`;
-- contenedor `banuchat-dev-postgres-ccd-auth-1` healthy;
-- base física `banuchat_ccd_auth_i1b_test` en 55453;
-- volumen `banuchat-dev-ccd-auth-data`;
-- red `banuchat-dev-ccd-auth`;
-- modo `ccd_local`, rol runtime y deployment esperados.
+Solo para una prueba o capacidad multifuente autorizada, comprobar primero el
+scope y volumen del N8N existente y, si está detenido, iniciar **ese contenedor**:
 
-Un fallo de identidad impide iniciar la API. El ejemplo público sin secretos es
-[`infra/ccd-auth-api.config.example.json`](../../infra/ccd-auth-api.config.example.json).
-No iniciar a la vez `auth-i1b-operator.mts api`.
+```powershell
+docker inspect banuchat-unified-n8n --format '{{.Name}} {{.State.Status}} {{index .Config.Labels "banuchat.scope"}} {{range .Mounts}}{{.Name}} {{end}}'
+docker start banuchat-unified-n8n
+```
 
-Mobile conserva su launcher y REST v2:
+Conservar el estado N8N y su clave de cifrado bajo custodia privada. No ejecutar
+los scripts `provision-unified*.mts` como sustituto de `start`.
+
+Mobile conserva su launcher actual desde la raíz:
 
 ```powershell
 .\mobile\scripts\start-ccd-auth.ps1
 ```
 
-Para Android USB, seguir el
-[runbook CCD autenticado](ccd-auth-i1b-android.md). La validación física continúa
-pendiente; las pruebas locales no la sustituyen.
+Configura REST v2 en 3004 y Metro en 8084, usando development build por defecto.
+La conexión USB/ADB y la validación con dispositivo/usuarios requieren su propia
+operación; iniciar servicios no acredita esos resultados. Ver el
+[checkpoint Unified](../transition/banuchat-unified-application-checkpoint.md)
+y la evidencia [PV-1B](../../eval/mobile/results/product-validation-ux-closure-pv1b.md).
 
-## Servicios opcionales
+## DO NOT DELETE YET
 
-La demo sintética y N8N comparten el Compose histórico, pero son servicios
-independientes. Desde la raíz:
+Se conservan todos los contenedores siguientes, sus volúmenes y las imágenes y
+redes que correspondan. «Histórico» o «deprecated» no equivale a autorización de
+borrado.
 
-```powershell
-# PostgreSQL sintético
-docker compose --env-file .env -p banuchat-schema-test `
-  -f infra/docker-compose.yml up -d --no-deps postgres
+| Contenedor protegido | Razón concreta |
+| --- | --- |
+| `banuchat-p1-product-staging` | Evidencia de integración P1; sin archivo final integral de DB acreditado |
+| `banuchat-p0-operational-pilot` | Piloto experimental y volumen anónimo identificado; retención pendiente |
+| `banuchat-unified-postgres` | Producto vigente y persistencia current |
+| `banuchat-unified-n8n` | Capacidad multifuente vigente y estado N8N current |
+| `banuchat-oe6-local-ollama-1` | Cache/modelos históricos no archivados; distinto del Ollama host |
+| `banuchat-oe6-local-postgres-synthetic-1` | Demo histórica; comparte persistencia con `banuchat-postgres` |
+| `banuchat-oe6-local-n8n-1` | Dependencia nominal del provisionador N8N Unified; comparte volumen con `banuchat-n8n` |
+| `banuchat-dev-postgres-ccd-auth-1` | Fuente nominal del aprovisionamiento PostgreSQL Unified; recovery pendiente |
+| `banuchat-ccd-auth-i1b-test` | Evidencia y referencia histórica de auth; retención pendiente |
+| `banuchat-ccd-dev-postgres-ccd-1` | Corpus/editorial histórico y evidencia de publicaciones |
+| `banuchat-auth-i1b-uid-test` | Laboratorio Auth; requiere decisión posterior de archivo/retirada |
+| `banuchat-auth-i1a-test` | Laboratorio Auth; requiere decisión posterior de archivo/retirada |
+| `banuchat-auth-r0-replay` | Laboratorio Auth; requiere decisión posterior de archivo/retirada |
+| `banuchat-auth-p4l1-demo` | Laboratorio Auth; requiere decisión posterior de archivo/retirada |
+| `banuchat-n8n` | Estado N8N histórico compartido con OE6; retención pendiente |
+| `banuchat-postgres` | Demo sintética histórica compartida con OE6; retención pendiente |
 
-# N8N, solo para ingesta asíncrona autorizada
-docker compose --env-file .env -p banuchat-schema-test `
-  -f infra/docker-compose.yml up -d --no-deps n8n
-```
+También se conservan las cuatro imágenes, incluida `banuchat/backend:oe6-local`
+aunque ya no tenga contenedores consumidores. No ejecutar `compose down` del
+proyecto OE6: permanecen PostgreSQL, N8N y Ollama, sus labels y sus volúmenes.
 
-N8N no participa en consultas de chat. Su volumen vigente es
-`banuchat-schema-test_n8n_data` y su imagen es `n8nio/n8n:2.40.5`.
+## UNKNOWN_DO_NOT_TOUCH
 
-El entorno editorial CCD se inicia únicamente para preparar publicaciones:
+Sin procedencia/contenido/backup suficientemente demostrados:
 
-```powershell
-docker compose --env-file infra/.env.ccd `
-  -f infra/docker-compose.ccd.yml up -d postgres-ccd
-```
+- `banuchat_n8n_data`;
+- `banuchat_postgres_data`;
+- `banuchatv2_n8n_data`;
+- `banuchatv2_postgres_data`.
 
-No ejecutar ingestas o migraciones por el solo hecho de iniciar PostgreSQL.
+INFRA-D1 no inspeccionó su contenido, no los montó y no los eliminó. Tamaño pequeño
+ni ausencia de consumidores autorizan su retirada.
 
-## Verificación rápida
+## Recovery — deuda current y dependencias
 
-```powershell
-docker inspect banuchat-dev-postgres-ccd-auth-1 --format `
-  'status={{.State.Status}} health={{.State.Health.Status}} port={{(index (index .NetworkSettings.Ports "5432/tcp") 0).HostPort}} volume={{(index .Mounts 0).Name}}'
-Get-NetTCPConnection -State Listen -LocalPort 3003,55453
-```
+**`banuchat-unified-data` no tiene todavía un backup integral posterior a CCD 1.4
+con restore aislado verificado acreditado. `banuchat-unified-n8n-data` tampoco
+tiene backup current verificado acreditado.** Es deuda de una futura decisión de
+recovery/OE6; INFRA-D1 no crea backups ni realiza restores.
 
-El resultado esperado es API solo en loopback:3003, PostgreSQL en 55453, volumen
-`banuchat-dev-ccd-auth-data` y estado healthy. El launcher vuelve a validar estos
-valores y el runtime scope antes de aceptar tráfico.
+El dump anterior a Unified y los backups O1/O4/OE6 son evidencia histórica y no
+cubren las escrituras current de Unified por el solo hecho de existir. Snapshots,
+conteos y catálogos legibles no sustituyen un restore integral verificado.
 
-## Respaldo
+Dependencias actuales de los scripts, aunque el runtime normal use Unified:
 
-Los respaldos O1 verificados están en
-`infra/local/docker-organization/2026-10-24-o1`, con ACL restringida. Incluyen
-CCD autenticado, CCD editorial, demo sintética, globals y estado N8N. Los 32 hashes
-continúan coincidiendo; los tres dumps fueron restaurados en O1 y la copia N8N pasó
-hashes e integridad SQLite.
+- `provision-unified-n8n.mts` inspecciona `banuchat-oe6-local-n8n-1` y exige
+  `banuchat-schema-test_n8n_data`, **incluso con `--workflow-only`**. El arranque
+  normal del N8N vigente no requiere ese contenedor fuente, pero el script de
+  actualización/reaprovisionamiento sí. Conservar ambos hasta sustituir y
+  verificar esa dependencia mediante otra tarea autorizada.
+- `provision-unified.mts` exige como fuente
+  `banuchat-dev-postgres-ccd-auth-1` y `banuchat-dev-ccd-auth-data`; esto no hace
+  de 55453 el PostgreSQL principal actual.
+- `start-unified.mts` aún lee el archivo privado histórico
+  `infra/local/oe6/n8n-conversation.env` y sustituye la URL por la de Unified.
+  No borrar configuración privada por tener un nombre histórico.
 
-El respaldo posterior a la promoción está en
-`infra/local/banuchat-dev/o4-post-promotion.dump`. Su hash coincide y su catálogo
-es legible, pero todavía no se ha restaurado en un destino aislado. Crear un dump
-actualizado antes de cualquier rollback o mantenimiento que pueda separar
-escrituras. Los dumps pueden contener conversaciones y nunca se versionan.
+Una futura recuperación debe preservar DB, roles/owners/ACL, artefactos privados,
+estado N8N y custodia legítima de claves, y demostrar un restore aislado antes de
+una retirada de persistencia. No restaurar sobre Unified, I1B ni otros volúmenes
+existentes; su ejecución necesita alcance separado.
 
-Procedimiento de captura desde la raíz, usando un nombre fechado dentro de
-`infra/local/banuchat-dev`:
+## Arquitectura anterior / legacy
 
-```powershell
-docker exec banuchat-dev-postgres-ccd-auth-1 `
-  pg_dump -U auth_i1b_admin -d banuchat_ccd_auth_i1b_test -Fc `
-  -f /tmp/banuchat-ccd-auth.dump
-docker cp banuchat-dev-postgres-ccd-auth-1:/tmp/banuchat-ccd-auth.dump `
-  infra/local/banuchat-dev/<fecha>-ccd-auth.dump
-docker exec banuchat-dev-postgres-ccd-auth-1 rm -f /tmp/banuchat-ccd-auth.dump
-Get-FileHash -Algorithm SHA256 infra/local/banuchat-dev/<fecha>-ccd-auth.dump
-```
+Antes de Unified, O3/O4 usaba `banuchat-dev-postgres-ccd-auth-1` en 55453, volumen
+`banuchat-dev-ccd-auth-data`, base histórica `banuchat_ccd_auth_i1b_test` y API
+3003. I1B en 55443 era referencia de reversión. Eso es historia, no el arranque
+habitual actual. `docker-compose.dev.yml` conserva el entorno CCD histórico;
+no es la configuración canónica del producto Unified.
 
-Restringir la ACL del archivo y validar su catálogo antes de considerarlo respaldo.
+`docker-compose.yml` conserva demo/N8N histórico y
+`docker-compose.ccd.yml` el entorno editorial. `docker-compose.oe6.yml` conserva
+la receta de transferencia OE6, incluidos el servicio `api`, sus condiciones de
+arranque y configuración privada necesaria. La retirada de su wrapper no borra
+la receta ni la imagen. Si se autoriza reproducirlo, resolver primero puertos,
+credenciales y dependencias; no levantar el stack solo para comprobar existencia.
+Los runbooks OE6/demostración anteriores requieren reconstruir el servicio API
+retirado antes de ejecutar instrucciones que lo nombran.
 
-## Recuperación
+O1 acreditó restauraciones históricas de CCD autenticado/editorial/demo y una
+copia N8N; O4 acreditó hash/catálogo de un dump posterior a aquella promoción,
+sin restore aislado entonces; OE6 acreditó restauración sintética. Esos resultados
+pertenecen a sus checkpoints, no son pruebas repetidas por INFRA-D1. O5 retiró
+solo sus recursos autorizados: ver [checkpoint O5](../transition/docker-organization-o5-checkpoint.md).
 
-1. No sobrescribir el volumen canónico ni I1B.
-2. Verificar hashes del dump y de los globals correspondientes.
-3. Restaurar primero en un volumen y red aislados con PostgreSQL/pgvector 16.
-4. Comparar roles, owners, ACL, tablas, conteos, publicaciones y fingerprints.
-5. Ejecutar la API en un puerto alterno y comprobar autenticación, RAG, historial,
-   citas y documentos.
-6. Promover solo mediante una autorización explícita.
+## Retirada acotada INFRA-D1
 
-Para un fallo de API, preferir corregir hacia delante conservando 55453. Volver a
-I1B ocultaría las escrituras creadas desde O3. Antes de esa conmutación se debe
-cerrar solo la API, crear un dump actualizado y aceptar formalmente historial
-dividido o autorizar una conciliación. No copiar tablas manualmente ni restaurar
-sobre I1B.
+Se eliminaron únicamente los wrappers detenidos
+`banuchat-unified-n8n-port-conflict` y `banuchat-oe6-local-api-1`, por ID completo,
+sin `force` ni retirada de volúmenes. Inventario: **18 → 16 contenedores,
+18 → 18 volúmenes, 12 → 12 redes, 4 → 4 imágenes**. Todos los restantes detenidos.
+El informe D0 se mantiene como inventario histórico anterior a esta retirada.
 
-## Recursos históricos
-
-No ejecutar habitualmente los laboratorios `banuchat-auth-p4l1-demo`,
-`banuchat-auth-r0-replay`, `banuchat-auth-i1a-test`,
-`banuchat-auth-i1b-uid-test`. Sus scripts, contratos, checkpoints y resultados
-versionados se conservan. El verificador temporal O1 y sus recursos fueron retirados
-en la limpieza autorizada; puede reconstruirse desde los respaldos O1.
-
-Los Compose `docker-compose.yml` y `docker-compose.ccd.yml` se conservan porque
-siguen describiendo pruebas sintéticas/N8N y edición CCD. `docker-compose.dev.yml`
-es la configuración canónica por perfiles; activar un perfil no inicia los demás.
-
-O5 eliminó exclusivamente los trece recursos autorizados y conservó inventarios
-anterior/posterior. Los recursos clasificados ARCHIVAR no se eliminaron. Véase el
-[checkpoint O5 final](../transition/docker-organization-o5-checkpoint.md). No usar
-`prune` global para mantenimiento posterior.
+Cualquier futura retirada requiere autorización propia y nombres/IDs exactos
+revisados. No usar `docker system prune`, `docker container prune`,
+`docker volume prune`, `docker network prune`, `docker image prune`,
+`docker compose down` ni `compose down -v` genérico. No tocar build cache.
