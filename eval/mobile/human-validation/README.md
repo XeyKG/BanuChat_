@@ -12,9 +12,17 @@ ni sus criterios; el identificador base OE5-H0-CCD-1.0 se conserva.
 
 ## Archivos y uso futuro
 
+PV-2 prepara un paquete breve, sin resolver decisiones externas ni completar el
+freeze: [hoja para decisión académica](academic-review-decision-sheet.md),
+[consentimiento para revisión](consent-review-draft.md) y
+[plan de manejo de datos](data-handling-review.md).
+El nuevo consentimiento es una propuesta para revisión, no una versión aprobada;
+el draft anterior permanece como antecedente. Ver el
+[informe PV-2](../results/product-validation-ux-closure-pv2.md).
+
 | Instrumento | Uso |
 | --- | --- |
-| [consent-draft.md](consent-draft.md) | Borrador neutral; no usar para reclutar hasta revisión. |
+| [consent-review-draft.md](consent-review-draft.md) | Propuesta PV-2 para revisión; NOT APPROVED FOR USE. [Draft anterior](consent-draft.md) conservado. |
 | [participant-task-sheet.md](participant-task-sheet.md) | Solo instrucciones y T01–T05, sin respuestas ni pistas. |
 | [moderator-guide.md](moderator-guide.md) | Script literal, cronometraje, no asistencia, incidentes y cierre. |
 | [sus-questionnaire.md](sus-questionnaire.md) | Diez ítems originales y escala 1–5; sin preguntas nuevas. |
