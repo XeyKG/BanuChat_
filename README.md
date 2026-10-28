@@ -58,6 +58,16 @@ OE6 ni un SLA. [G2](eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md) perm
 como antecedente histórico separado. Las demás evaluaciones y sus límites están
 en [eval](eval/README.md).
 
+## Verificación automática
+
+Con Node.js 22 y npm, ejecutar desde la raíz `node scripts/verify-local.mjs`.
+Instala con `npm ci` las dependencias bloqueadas de API, RAG, MCP y Mobile;
+ejecuta sus typechecks y `npm test` en secuencia, imprime una tabla y devuelve
+un código distinto de cero si falla la instalación, un chequeo o el resumen de pruebas.
+GitHub Actions ejecuta el mismo script en push y pull request.
+No cubre suites con servicios externos (PostgreSQL, Ollama, N8N), Docker,
+validación en Android ni pruebas con usuarios.
+
 ## Documentación
 
 - [Arquitectura](docs/arquitectura.md): estado actual, objetivo y pendientes.

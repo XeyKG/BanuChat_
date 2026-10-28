@@ -60,13 +60,25 @@ test('AUTH-P3.2 candidate retains exact single-recipient boundary and no arbitra
  assert.equal((await mail.send(message)).state,'accepted');assert.equal(calls,1);
 });
 
-test('AUTH-P3.2 real candidate deadline aborts an injected stalled operation, unknown once without retry',async()=>{
+test('AUTH-P3.2 controlled candidate deadline aborts an injected stalled operation, unknown once without retry',async(t)=>{
+ // AbortSignal.timeout uses Node's internal timer, not the mocked global timer.
+ // Control that boundary explicitly and verify the production deadline argument.
+ t.mock.timers.enable({apis:['setTimeout']});
+ const deadline=t.mock.method(AbortSignal,'timeout',(ms:number)=>{
+  assert.equal(ms,10000);
+  const controller=new AbortController();
+  setTimeout(()=>controller.abort(new DOMException('Timed out','TimeoutError')),ms);
+  return controller.signal;
+ });
  let calls=0,aborted=false;const mail=new ResendHttpsMailDelivery({approved:true,apiKey:'fixture-not-a-key',sender:'sender@project.example',recipients:[message.recipient],
   sendHttp:async(_url,options)=>{calls++;return new Promise((_resolve,reject)=>{
-   const guard=setTimeout(()=>reject(new Error('Deadline did not fire')),12000);
-   options.signal.addEventListener('abort',()=>{aborted=true;clearTimeout(guard);reject(options.signal.reason);},{once:true});
+   options.signal.addEventListener('abort',()=>{aborted=true;reject(options.signal.reason);},{once:true});
   });}});
- const start=performance.now();assert.deepEqual(await mail.send(message),{state:'unknown'});assert.equal(calls,1);assert.equal(aborted,true);assert.ok(performance.now()-start>=9000);
+ const pending=mail.send(message);
+ assert.equal(deadline.mock.callCount(),1);assert.equal(calls,1);assert.equal(aborted,false);
+ t.mock.timers.tick(9999);assert.equal(aborted,false);
+ t.mock.timers.tick(1);assert.equal(aborted,true);
+ assert.deepEqual(await pending,{state:'unknown'});assert.equal(calls,1);
 });
 
 test('AUTH-P3.2 two fresh processes restore the same persisted fixture keys and decrypt/verify without printing material',async()=>{

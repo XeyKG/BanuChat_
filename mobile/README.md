@@ -172,8 +172,9 @@ npm run lint -- --no-cache
 npm run test:local
 ```
 
-Las seis pruebas usan el `tsx` ya instalado en `backend/api/node_modules` para
-evitar otra dependencia móvil; requieren instalar previamente las dependencias API.
+Las pruebas se ejecutan con `npm ci` y `npm test` desde `mobile`, usando su propia
+devDependency `tsx`, sin instalar las dependencias API. `npm run test:local` se
+conserva como alias de `npm test`.
 El [CHECKPOINT incremento 3](../docs/transition/bch02-increment-3-checkpoint.md)
 registra resultados, capturas, conexión real, bloqueos y límites de plataforma.
 

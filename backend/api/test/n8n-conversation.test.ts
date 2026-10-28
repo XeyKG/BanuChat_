@@ -40,13 +40,30 @@ test("rechaza respuesta con correlación distinta", async () => {
     (error: unknown) => error instanceof ConversationOrchestrationError && error.reason === "invalid_response");
 });
 
-test("convierte timeout en dependencia no disponible", async () => {
+test("convierte timeout en dependencia no disponible", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  let calls = 0;
+  let aborted = false;
   const orchestrator = new N8nConversationOrchestrator({ url: "http://127.0.0.1:5678/hook",
-    service_token: TOKEN, timeout_ms: 100, fetch: async (_url, init) => new Promise((_resolve, reject) => {
-      init?.signal?.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
-    }) });
-  await assert.rejects(orchestrator.orchestrate(input),
+    service_token: TOKEN, timeout_ms: 100, fetch: async (_url, init) => {
+      calls += 1;
+      assert.ok(init?.signal);
+      return new Promise((_resolve, reject) => {
+        init.signal!.addEventListener("abort", () => {
+          aborted = true;
+          reject(new Error("aborted"));
+        }, { once: true });
+      });
+    } });
+  const rejected = assert.rejects(orchestrator.orchestrate(input),
     (error: unknown) => error instanceof ConversationOrchestrationError && error.reason === "dependency_unavailable");
+  assert.equal(calls, 1);
+  t.mock.timers.tick(99);
+  assert.equal(aborted, false);
+  t.mock.timers.tick(1);
+  assert.equal(aborted, true);
+  await rejected;
+  assert.equal(calls, 1);
 });
 
 test("configuración N8N es opcional pero no admite valores parciales", () => {

@@ -34,11 +34,13 @@
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
+    "tsx": "^4.20.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test:local": "node --import ../backend/api/node_modules/tsx/dist/loader.mjs --test test/*.test.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "test:local": "npm test",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
