@@ -1133,3 +1133,210 @@ reproducción, diff, logs/resultados, integridad de superficies protegidas,
 no-publication, privacidad y manifest SHA-256/tamaño. Sin secretos, credenciales,
 tokens, corpus privado ni paths personales absolutos en la evidencia guardada.
 Sin commit ni push; no se continúa automáticamente con la promoción.
+
+## P4-B.4F — promoción final y cierre técnico CCD 1.4
+
+2026-10-28, America/Bogota.
+
+**P4-B.4F COMPLETE — CCD 1.4 CURRENT AND TECHNICAL CLOSURE PASSED**
+
+Esta sección es aditiva y conserva íntegros los bloqueos, las publicaciones/rollbacks
+anteriores, P4-B.4A y P4-B.4B. No convierte esos intentos retrospectivamente en PASS.
+El root incompatible se corrigió y revisó en P4-B.4A; las autenticaciones redundantes
+se sustituyeron por sesiones conservadas; la falsa composición multifuente de
+procedencia CCD se corrigió y verificó en P4-B.4B. Este cierre acredita los gates
+runtime actuales después de esas correcciones.
+
+### Baseline y estado inicial revalidado
+
+HEAD real/esperado `17e36a82c09725d6cd1035628c133d4de6ae241c`, branch `main`,
+árbol limpio incluyendo untracked. AGENTS.md leído completo. Sin cambio de branch,
+operaciones Git destructivas, commit ni push; ningún archivo de producto modificado.
+
+Se reidentificó el PostgreSQL unificado habitual por ID y scope unified-isolated,
+volumen banuchat-unified-data, mount /var/lib/postgresql/data, base banuchat_unified
+y binding exclusivo 127.0.0.1:55463. No comparte volumen/puerto con otros contenedores.
+Estaba detenido y solo se arrancó esa instancia existente. API inicialmente ausente
+en 3004. Snapshot inicial READ ONLY de 43 tablas y superficies de seguridad/ACL,
+con metadata y fingerprints sin secretos ni vectores completos.
+
+Estado inicial confirmado en vivo:
+
+- CCD 1.3 `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, ready/current;
+- CCD 1.4 `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, ready/no current;
+- run `821b7f99-44e8-4fa5-be93-c8c361807e07`, succeeded;
+- 107 documentos/versiones ready, 107 chunks, 107 embeddings, dimensión 1024;
+- hashes de identidad/procedencia auditados, bindings/grants/contextos intactos;
+- root normal bch-ccd-knowledge-2 existente y correspondiente a
+  data/ccd/local/product-knowledge-v2/;
+- assert_release_complete aprobado para ambas releases.
+
+No se rematerializó la candidata, modificó status/validated_at ni repitieron ingesta,
+embeddings o 107 hashes. Los cambios de composición revisados en authenticated-main
+y unified-product no se trataron como cambios del scope de captureCcdCode.
+
+### Autorización y presupuesto de login
+
+El conjunto se derivó nuevamente de cuentas activas/no deshabilitadas con credencial
+existente, binding estable, profile_binding_version del destino, grant ccd_local/read
+vigente, contexto CCD y contexto auxiliar único. Resultado inicial, post-current y
+final: **release_authorization 5/5**, exactamente una combinación por principal,
+**cero extras**; plan auditado de P4-B.3 sin drift.
+
+Cuatro principals tienen contraseña operativa disponible en los dos DPAPI conocidos;
+el quinto conserva AUTHORIZATION_SQL_VERIFIED_CREDENTIAL_UNAVAILABLE, acreditado
+solo por SQL, sin PASS HTTP inventado. No se repitió la ronda HTTP 4/5 anterior.
+A/B se seleccionaron dinámicamente entre los elegibles con credencial legítima.
+
+Antes de cualquier login, y otra vez inmediatamente antes del login A, se leyeron
+los buckets pertinentes sin modificarlos: login_uid 5/900s, login_origin 30/900s,
+hash_work 20/60s. El estado natural permitía el plan de dos logins. No hubo resets,
+limpieza de ventanas vencidas, cambios de reloj ni esperas para eludir límites.
+Access/refresh permanecieron exclusivamente en memoria del coordinador.
+
+### Precheck CCD 1.3 y promoción única
+
+API iniciada mediante el comando normal npm start en backend/api, sin preload,
+instrumentación ni runtime alternativo. Un solo login de A bajo CCD 1.3; /auth/me
+200 con release, modo y capacidades correctos. Se conservó esa misma sesión.
+
+Se creó una fixture histórica y se consultó «¿Qué temas se estudian en el curso de
+Inteligencia Artificial Generativa?»: HTTP 201 no abstentivo, cita de CCD 1.3,
+artifact protegido 200 con SHA igual al de DB e historial exacto. La fixture se
+mantuvo hasta comprobar su transición después de publicar.
+
+Transacción corta: bloqueo/revalidación de dataset, releases y fuentes de
+autorización; current exacto CCD 1.3, destino ready, bindings/grants/contextos
+correctos y assert_release_complete del destino. **Una llamada a publish_release
+(CCD 1.4) y un COMMIT**, confirmados; 450 ms antes del COMMIT.
+
+Única mutación dentro de la publicación: **datasets.current_release_id** pasó de
+CCD 1.3 a CCD 1.4. Todas las releases, incluidos status/validated_at, permanecieron
+idénticas. Sin UPDATE manual, segunda publicación ni retry. Rollback: **0 llamadas**.
+
+### Misma sesión y smoke mínimo CCD 1.4
+
+El mismo access token de A, emitido bajo CCD 1.3, resolvió /auth/me 200 sobre CCD 1.4,
+con ccd_local y capacidades esperadas; sin otro login. Autorización global SQL 5/5.
+
+Una conversación NUEVA bajo CCD 1.4 respondió 201 no abstentivo a la consulta
+documental estable, con citas de la sucesora e historial exactamente persistido.
+Se descargó un artifact representativo de esa cita por el endpoint protegido:
+
+- HTTP 200;
+- document_version `6a9e07aa-ace1-4058-a648-4337a083f556`;
+- label **bch-ccd-knowledge-2**;
+- 185 bytes, SHA-256 `04ffe17deeab0edd903f42c3335c33368573c1721f3bfeb39e3fcac636b5c31b` igual al source_sha256 de DB.
+
+No se repitieron las 107 descargas.
+
+### Los nueve controles después de P4-B.4B
+
+Preguntas, historia USER y aserciones congeladas se cotejaron con la fuente P4-B.1
+por SHA; no se cambiaron expectativas. Todos los controles se ejecutaron nuevamente
+por la API normal bajo current CCD 1.4 y la misma sesión A, sin heredar C01–C04.
+Cuando hubo historia, se enviaron los turnos USER congelados por HTTP; sus respuestas
+assistant fueron las reales del producto, sin inyectar texto de fixture controlada.
+
+| Control | Resultado nuevo | Alcance acreditado |
+| --- | --- | --- |
+| C01 | PASS, 201 | Respuesta simple sin procedencia innecesaria |
+| C02 | PASS, 201 | Confirmación de dominio y límite de fuente independiente |
+| C03 | PASS, 201 | Follow-up documental de la regla previa |
+| C04 | PASS, 201 | Modalidades y procedencia documental |
+| C05 | **PASS, 201** | Tarifa 2026, evidencia mixta y límite de atribución |
+| C06 | PASS, 201 | Sin extrapolación de la tarifa a 2027 |
+| C07 | PASS, 201 | Abstención sobre opciones no sustentadas del Pilar 1 |
+| C08 | PASS, 201 | Aclaración ante fuente sin antecedente |
+| C09 | PASS, 201 | Cambio de tema a contacto organizacional y procedencia |
+
+**9/9 PASS, cero fail.** También se verificaron historial exacto, release de cada
+conversación y ausencia de labels técnicos/hashes/UUID/paths en el texto de respuesta
+según las aserciones congeladas.
+
+C05 exacto «¿Cuánto cuesta un curso en 2026? ¿Qué documento lo dice?» devolvió:
+«El curso para completar un pilar pendiente cuesta $362.550 COP en 2026.» Acompañó
+la cita de CCD 1.4 y explicó que la evidencia combina documentación y confirmación
+de dominio, sin atribuir toda la afirmación a un único documento.
+
+No se instrumentó producción para contar invocaciones N8N/MCP. La evidencia actual
+HTTP/semántica y de citas, junto con la frontera ya probada en P4-B.4B sobre el HEAD
+revisado, es la acreditación de este caso. No se ejecutó una nueva consulta
+multifuente ni una evaluación adicional OE3/OE4; no se afirma una traza interna
+que el runtime normal no expone de forma segura.
+
+### Ownership e historial de la release anterior
+
+B hizo su primer y único login. Frente a la conversación de A obtuvo GET 404,
+POST 404 y DELETE 404; después logout 204 normal y sesión revocada.
+
+Con la sesión original de A, la fixture CCD 1.3 respondió GET 200 y conservó
+exactamente mensajes/citas y dataset_release_id antiguo. POST respondió 409;
+el GET posterior y la consulta READ ONLY de release confirmaron cero mensajes
+nuevos, migración o mezcla de releases. Finalmente DELETE 204 por el propietario.
+
+### Reinicio normal sin nueva autenticación
+
+Se detuvo correctamente la API por SIGINT, se confirmó la salida del proceso y la
+ausencia del listener, y se ejecutó nuevamente npm start normal. Nuevo proceso,
+loopback 3004, sin preload/instrumentación. El coordinador mantuvo los tokens de A
+en memoria durante el reinicio.
+
+El **mismo access token** seguía vigente y /auth/me respondió 200 sobre CCD 1.4,
+con la misma sesión. **No se necesitó refresh ni nuevo login.** Se creó otra
+conversación, pasaron documental 201, cita de CCD 1.4, artifact protegido 200 con
+label/SHA correctos e historial exacto. Esa fixture se eliminó normalmente.
+Al finalizar, logout 204 de A y revocación comprobada en DB.
+
+### Snapshot final, limpieza y estado seguro
+
+Snapshot final READ ONLY comparado con 43 tablas. Única diferencia persistente
+de producto: el puntero current apunta a **CCD 1.4**. Releases/status/validated_at,
+corpus 107/107/107, run/embeddings, bindings/grants/contextos, cuentas/credenciales/
+recovery, auxiliares, runtime scope, roles/memberships, propietarios y ACL intactos.
+Conversaciones, mensajes, citas y ownership coinciden con el baseline después
+de eliminar las 12 fixtures propias exclusivamente mediante DELETE normal.
+
+Mutaciones operativas retenidas y clasificadas: sessions +2, refresh_tokens +2,
+security_events +4 (dos login y dos logout), auth_rate_limits +4 buckets. Auditoría
+y contadores conservados; no se borraron para igualar fingerprints.
+
+| Presupuesto observado | Resultado |
+| --- | --- |
+| Login attempts A | 1 |
+| Login attempts B | 1 |
+| Total logins | 2 |
+| Nuevos rate_limited | 0 |
+| Sesiones creadas/revocadas | 2/2 |
+| Refresh por restart | 0 |
+| Rollbacks | 0 |
+
+API detenida correctamente y PostgreSQL devuelto a su estado detenido inicial,
+sin eliminar volumen ni datos. El current CCD 1.4 queda persistido y su servicio
+tras un arranque normal ya fue verificado. No se arrancaron/configuraron otros
+servicios, N8N u Ollama.
+
+### Evidencia, límites y cierre
+
+Evidencia privada: data/ccd/local/p4b4f-final-closure/, con baseline/environment,
+budgets, snapshots, autorización, ciclo de sesión, promoción/me, documentary/artifact,
+C01–C09, ownership, historial, restart, cleanup/restauración, integridad de fuentes,
+privacidad y manifests SHA-256/tamaño. Contiene respuestas de las fixtures propias;
+el correo organizacional público del control C09 se distingue de identidades de
+cuentas. Sin passwords/tokens, hashes de credenciales, datos de recuperación,
+originales íntegros, corpus completo, vectores o paths personales absolutos.
+
+Se conservaron los 16 inputs versionados inspeccionados idénticos al HEAD revisado.
+Único cambio versionable: esta sección de
+eval/integration/results/ccd-current-promotion.md. Prefijo histórico preservado
+byte por byte; nuevo texto con LF. git diff --check aprobado y status limitado
+al informe. Sin secretos añadidos, commit ni push.
+
+No se repitieron 249/27/11, 107 artifacts, embeddings, suites API/RAG/MCP/Mobile,
+Android, evaluación N8N u OE5. Los 708/708 de P4-B.4B permanecen como antecedente,
+no como una suite ejecutada de nuevo en este cierre.
+
+La línea **P4-B / CCD 1.4 queda técnicamente cerrada** con CCD 1.4 current.
+Esto no declara producción institucional, aval CCD, aprobación UNAB, validación
+humana independiente ni OE5 completo. No se abre otra tarea CCD. La siguiente
+etapa será BANUCHAT PRODUCT VALIDATION & UX CLOSURE, sin iniciarla automáticamente.
