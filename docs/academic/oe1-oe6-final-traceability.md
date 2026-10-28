@@ -1,5 +1,15 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+## Precedencia PV-0 — 28 de octubre de 2026
+
+[PV-0](../../eval/mobile/results/product-validation-ux-closure-pv0.md) actualiza
+solo readiness del estudio: CCD 1.4 técnico current, instrumentos rebaselinados,
+T04 PENDIENTE DE VENTANA DE SESIONES y contexto T05 por congelar. Android físico
+técnico fue ejecutado en la etapa posterior enlazada; matriz completa, iOS y
+aceptación humana permanecen pendientes. Los cuerpos históricos y estados formales
+OE1–OE6 se conservan. Sin reclutamiento, consentimiento aprobado, SUS ni cierre OE5.
+
+
 ## Actualización metodológica OE5-H0 — 27 de octubre de 2026
 
 Revisión desde `5ed14608a9086b59bc880262552ccb2185944d3f`. El instrumento

@@ -1,6 +1,11 @@
 # Consentimiento operativo — borrador OE5-H0
 
+**DRAFT — NOT APPROVED FOR USE**
+
 **BORRADOR — NO USAR PARA RECLUTAMIENTO HASTA REVISIÓN ACADÉMICA.**
+
+Revisión de consistencia PV-0, 28/10/2026; sin aprobación ni responsables/contactos
+institucionales añadidos. Los placeholders posteriores permanecen sin resolver.
 
 **PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
 

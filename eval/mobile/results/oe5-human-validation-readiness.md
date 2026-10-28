@@ -1,5 +1,14 @@
 # BanuChat — OE5-H0: readiness de validación humana y SUS
 
+## Precedencia PV-0 — 28 de octubre de 2026
+
+El cuerpo siguiente conserva la preparación histórica del 27 de octubre, incluidos
+su HEAD, CCD 1.3, preflight y event-012; no describe el current ni targets operativos
+vigentes. Prevalece [PV-0](product-validation-ux-closure-pv0.md): CCD 1.4 current,
+T02 técnico reconfirmado, T04 PENDIENTE DE VENTANA DE SESIONES y T05 dependiente del
+contexto real. Sigue READY_FOR_ACADEMIC_REVIEW, no reclutamiento ni aprobación.
+
+
 27 de octubre de 2026, America/Bogota. HEAD inicial esperado y observado:
 `5ed14608a9086b59bc880262552ccb2185944d3f`, árbol limpio al comenzar.
 Preparación metodológica exclusivamente; sin commit ni push.

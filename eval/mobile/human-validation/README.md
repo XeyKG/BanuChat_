@@ -1,6 +1,10 @@
 # Instrumentos OE5-H0 — preparados para revisión
 
 Estado `READY_FOR_ACADEMIC_REVIEW`, no reclutamiento ni aceptación humana.
+Rebaseline [PV-0](../results/product-validation-ux-closure-pv0.md), 28/10/2026: CCD 1.4
+técnico current; T04 **PENDIENTE DE VENTANA DE SESIONES** y contexto T05 por congelar.
+No entregar la hoja con placeholders. No cambiaron cinco tareas, SUS, CSV, analyzer
+ni sus criterios; el identificador base OE5-H0-CCD-1.0 se conserva.
 [Protocolo propuesto vigente](../oe5-student-validation-protocol.md),
 [readiness](../results/oe5-human-validation-readiness.md).
 

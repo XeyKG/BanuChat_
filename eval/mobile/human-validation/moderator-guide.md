@@ -5,6 +5,13 @@ Preparada, no ejecutada. No reclutar ni entregar instrumentos hasta resolver:
 
 ## Preparación previa a P01
 
+Rebaseline PV-0 (28/10/2026): protocolo base conservado, CCD 1.4 técnico current.
+T04 está **PENDIENTE DE VENTANA DE SESIONES**: event-012 solo es antecedente
+histórico, no una selección automática. La hoja con placeholder NO se entrega.
+T05 no es equivalente en todas las cuentas operativas; verificar y congelar un
+contexto común compatible, sin cambiar perfiles/progreso. Ver [readiness PV-0](../results/product-validation-ux-closure-pv0.md).
+
+
 1. Confirmar revisión/procedimiento, consentimiento aprobado, custodia, retención,
    retiro y contacto. Comprobar elegibilidad y diversidad sin solicitar documento,
    contraseña UNAB ni datos académicos personales.

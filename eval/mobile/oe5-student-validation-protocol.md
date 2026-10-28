@@ -1,8 +1,12 @@
 # OE5 — Protocolo vigente propuesto de tareas y SUS
 
-**OE5-H0-CCD-1.0 — 27 de octubre de 2026, America/Bogota.**
-Estado: `READY_FOR_ACADEMIC_REVIEW`. Base técnica revisada:
-`5ed14608a9086b59bc880262552ccb2185944d3f`. Estudio no ejecutado.
+**OE5-H0-CCD-1.0 — rebaseline PV-0, 28 de octubre de 2026, America/Bogota.**
+Estado: `READY_FOR_ACADEMIC_REVIEW`; **NOT READY FOR RECRUITMENT**.
+Base técnica de esta revisión: `7c0ba1564cedc650907952099f88c226c7e4d3d3`. Estudio no ejecutado.
+Se conserva el identificador base del protocolo/analyzer y sus criterios; esta
+edición PV-0 se distingue mediante revisión y hashes de instrumentos en el freeze.
+La base `5ed14608a9086b59bc880262552ccb2185944d3f` pertenece a OE5-H0 histórico.
+[Auditoría, contradicciones y matriz PV-0](results/product-validation-ux-closure-pv0.md).
 
 **PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
 
@@ -33,9 +37,11 @@ oficial, impacto en trámites, disponibilidad institucional, iOS no ejecutado, p
 remoto o producción. Recordatorios locales no equivalen a push; ambos quedan
 fuera de las cinco tareas. No se afirma aval institucional CCD.
 
-Current esperado al preparar: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, `ready`,
-`ccd-1.3.0`. Volver a observar y congelar el valor real inmediatamente antes de
-P01; no fijarlo en la aplicación. Registrar por separado release/contexto auxiliar.
+Current técnico observado en PV-0: `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, `ready`,
+`ccd-1.4.0`, después del cierre técnico P4-B.4F. Volver a observar y congelar el
+valor real inmediatamente antes de P01; no fijarlo en la aplicación. Registrar
+por separado release/contexto auxiliar. Esto no constituye aceptación humana,
+aval CCD, producción institucional ni OE5 completo.
 
 ## Población y muestra conservadas
 
@@ -76,11 +82,16 @@ Registrar modelo sin serial, Android/build, Mobile/Expo, commit/estado Git, hora
 Bogotá, API, current/schema, contexto auxiliar, targets, roles y desviaciones.
 Mantener loopback y canal USB/ADB reverse autorizado; no abrir una red pública.
 
-T02 pasó un preflight técnico el 27 de octubre con una sola conversación: tres
-pilares, cita descargable e historial; después se eliminó y se confirmó logout.
-No es sesión humana. Los [candidatos T04/T05](human-validation/target-candidates.md)
-existen en el contexto observado, pero deben reconfirmarse antes de P01 y ser los
-mismos para todos. No elegirlos después de observar resultados.
+T02 tuvo un preflight histórico el 27 de octubre sobre CCD 1.3. PV-0 lo comprobó
+de nuevo por API normal sobre CCD 1.4: tres pilares, cita, artifact 200/SHA e
+historial; una conversación propia eliminada y logout confirmado. No se repitió
+Android ni se midió comprensión humana. Los [candidatos T04/T05](human-validation/target-candidates.md)
+no son un freeze: T04 está **PENDIENTE DE VENTANA DE SESIONES**; event-012 es solo
+antecedente histórico y no debe imprimirse como objetivo de una tanda futura.
+T05 es compatible en dos de las cuatro cuentas operativas, no en todas. Antes de
+P01 se debe fijar privadamente un contexto común compatible (por ejemplo, una
+cuenta existente usada secuencialmente), reconfirmar objetivos y completar la hoja.
+No elegirlos después de observar resultados.
 
 Todas las cuentas deben ofrecer el mismo contexto objetivo. Puede usarse una
 cuenta ficticia existente secuencialmente, con limpieza entre sesiones; confirmar

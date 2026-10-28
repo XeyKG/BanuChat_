@@ -1,5 +1,14 @@
 # Validación funcional de Mobile
 
+## Precedencia vigente — PV-0, 28 de octubre de 2026
+
+[PRODUCT VALIDATION & UX CLOSURE — readiness PV-0](results/product-validation-ux-closure-pv0.md):
+CCD 1.4 técnico current; paquete READY_FOR_ACADEMIC_REVIEW, no reclutamiento.
+T04 PENDIENTE DE VENTANA DE SESIONES y contexto T05 por congelar; event-012 solo
+es histórico. Android físico técnico ya ejecutado, matriz completa e iOS pendientes,
+aceptación humana pendiente. Los apartados siguientes conservan sus cortes previos.
+
+
 ## Estado vigente — OE5-H0, 27 de octubre de 2026
 
 El [protocolo vigente propuesto](oe5-student-validation-protocol.md) prepara cinco

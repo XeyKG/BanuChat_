@@ -2,18 +2,24 @@
 
 ## Estado
 
-Actualizado OE5-H0 el 27 de octubre de 2026: paquete preparado, **estudio humano no
+Rebaseline PV-0 el 28 de octubre de 2026 sobre OE5-H0: paquete preparado, **estudio humano no
 ejecutado**. No hay aprobaciones nuevas, reclutamiento, consentimientos obtenidos,
 sesiones SUS o resultados humanos. Las ejecuciones/revisiones técnicas del agente
 no son revisión humana documental independiente ni aceptación de estudiantes.
 Los resultados adversos se conservan; ningún `BLOCKED` se transforma en `PASS`.
 
-Base técnica revisada hoy: `5ed14608a9086b59bc880262552ccb2185944d3f`.
+Base técnica de PV-0: `7c0ba1564cedc650907952099f88c226c7e4d3d3`.
+`5ed14608a9086b59bc880262552ccb2185944d3f` es la preparación OE5-H0 histórica.
+[Contradicciones, tareas y matriz de readiness PV-0](../../eval/mobile/results/product-validation-ux-closure-pv0.md).
 `39b6b6221d61bd7aef2ce236dd124c3b11488345` es el antecedente del paquete anterior,
 no la ejecución actual. Antes de P01 registrar commit real, árbol y freeze completo.
 El producto objetivo es `ccd_authenticated` / REST v2, CCD documental current y
-auxiliares ficticios. Current esperado: `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`,
-ready / ccd-1.3.0; reconfirmarlo antes de iniciar, sin hardcodearlo en la app.
+auxiliares ficticios. Current técnico observado: `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`,
+ready / ccd-1.4.0, con cierre técnico P4-B/CCD 1.4. Reconfirmarlo antes de P01,
+sin hardcodearlo en la app. T04: **PENDIENTE DE VENTANA DE SESIONES**; event-012 no
+es un objetivo operativo futuro. T05 requiere contexto común explícito: solo dos
+de cuatro cuentas con credencial disponible cumplen los candidatos actuales.
+Ni el cierre técnico ni este rebaseline habilitan reclutamiento.
 
 ## Puerta específica del estudio Android de usabilidad/SUS
 
@@ -61,7 +67,8 @@ del arbitraje.
 - Aprobación académica/ética aplicable, consentimiento y plan de custodia.
 - Revisión Git, release, modelos/digests, RAGAS y configuración del juez congelados.
 - Banco autorizado: [`benchmark-v1.json`](../../eval/rag-quality/benchmark-v1.json)
-  contiene hoy 63 casos `primary`, todos `draft`; no cumple todavía la condición de
+  se inventarió en OE5-H0 con 63 casos `primary`, todos `draft` (no recontados en PV-0);
+  ese antecedente no acreditaba la condición de
   exactamente 60 casos `primary` aprobados del protocolo.
 - Calibración humana del juez completada. Las corridas técnicas existentes sobre 12 casos
   obtuvieron 40/48 coincidencias (0,8333) en dos pasadas, pero sus labels son expectativas

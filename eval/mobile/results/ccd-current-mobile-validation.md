@@ -1,5 +1,15 @@
 # BanuChat — Mobile con CCD 1.3 current
 
+## Nota de precedencia PV-0 — 28 de octubre de 2026
+
+Este informe conserva íntegra su ejecución histórica CCD 1.3 y sus incidencias.
+Android físico técnico fue ejecutado (YAL-L21/Android 10, build indicada abajo);
+no fue una matriz completa de dispositivos ni aceptación humana/SUS. iOS físico
+sigue pendiente. CCD 1.4 es ahora current según el cierre [P4-B.4F](../../integration/results/ccd-current-promotion.md);
+PV-0 reconfirma T02 por API, sin repetir Android ni atribuir a CCD 1.4 la ejecución
+física anterior. [Readiness vigente PV-0](product-validation-ux-closure-pv0.md).
+
+
 Fecha: 26 de octubre de 2026, America/Bogota; evidencias UTC del 27 de octubre.
 Commit inicial y final: `2802ae5aa7c66eac5680c5af2f0b515d813b636f`.
 El árbol inicial estaba limpio. No se hizo commit ni push durante esa etapa.

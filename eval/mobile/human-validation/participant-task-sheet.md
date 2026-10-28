@@ -1,5 +1,8 @@
 # BanuChat — hoja de tareas
 
+**PLANTILLA NO ENTREGABLE: T04 PENDIENTE DE VENTANA DE SESIONES y freeze de
+contexto T05. No iniciar P01 con placeholders ni objetivos históricos.**
+
 Preparación para revisión; entregar únicamente después de confirmar consentimiento
 y congelar los objetivos de esta versión. Se evalúa la aplicación, no tus
 conocimientos. Puedes pedir una pausa o retirarte. Lee una tarea a la vez.
@@ -33,7 +36,7 @@ Calendario ficticio de demostración.
 En Calendario, encuentra el evento indicado en la hoja de tarea y dime su fecha
 y hora. Después muestra solo los eventos de su categoría.
 
-Evento indicado: **Sesión demo: secuencias de automatización**.
+Evento indicado: **[PENDIENTE DE VENTANA DE SESIONES — completar desde el freeze habilitado]**.
 
 ## T05
 

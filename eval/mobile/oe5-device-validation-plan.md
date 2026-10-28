@@ -1,5 +1,17 @@
 # OE5 — Plan de validación móvil en dispositivo
 
+## Precedencia PV-0 — 28 de octubre de 2026
+
+Plan histórico del 24 de octubre; sus casillas no se recalifican retrospectivamente.
+Los [recorridos Android posteriores](results/ccd-current-mobile-validation.md) sí
+acreditan ejecución técnica física, sin completar esta matriz ni iOS/SUS.
+La preparación antigua y DV-12 ocultan auxiliares CCD y DV-04 muestra release: esas
+expectativas no son guía de ejecución para la aplicación unificada actual, que
+expone auxiliares ficticios y oculta el UUID en calendario. No ejecutar esta receta
+histórica como requisito nuevo del estudio Android. Para T01–T05 rigen el
+[protocolo](oe5-student-validation-protocol.md) y [PV-0](results/product-validation-ux-closure-pv0.md).
+
+
 ## Estado
 
 Instrumento preparado el 24 de octubre de 2026. No contiene resultados. En el entorno

@@ -1,49 +1,67 @@
 # Freeze previo a P01 — plantilla sin ejecutar
 
-Protocolo propuesto: OE5-H0-CCD-1.0. **NO ES AUTORIZACIÓN NI FREEZE COMPLETADO.**
+**NO ES AUTORIZACIÓN NI FREEZE COMPLETADO.** Protocolo base OE5-H0-CCD-1.0,
+rebaseline documental PV-0 del 28/10/2026. Identificar la edición por revisión y
+SHA-256: no confundir la etiqueta base del analyzer con un freeze operativo aprobado.
 
 **PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO: procedimiento/revisión aplicable antes del reclutamiento.**
 
-Completar todos los pendientes críticos después de la revisión y antes de P01.
-Registrar cambios antes de observar resultados. No almacenar serial, credenciales,
-tokens, contactos o consentimientos identificables en esta plantilla versionable.
+No iniciar P01 con campos críticos pendientes. No guardar UID/password, tokens,
+serial, contactos, consentimientos identificables o mapa cuenta→PID en Git.
 
-| Campo obligatorio | Valor / evidencia previa a P01 |
+## A. Conocido técnicamente; no equivale a aprobación para estudiar personas
+
+| Elemento | Referencia PV-0, no sustituye reconfirmación |
 | --- | --- |
-| ID de tanda y versión de protocolo | `[PENDIENTE]`; propuesta OE5-H0-CCD-1.0 |
-| Fecha/hora con zona America/Bogota | `[PENDIENTE]` |
-| Ventana completa prevista de sesiones | `[PENDIENTE]`; compatible con la visibilidad temporal de T04/T05 |
-| Commit realmente utilizado | `[PENDIENTE]`; base de preparación 5ed14608a9086b59bc880262552ccb2185944d3f |
-| git status / cambios permitidos / hashes de trabajo | `[PENDIENTE]`; no asumir limpio por el commit |
-| Hash de protocolo, hoja, SUS y analizador | `[PENDIENTE SHA-256]` |
-| Mobile version / Expo SDK | `[RECONFIRMAR]`; referencia 1.0.0 / 57 |
-| Modelo del dispositivo, sin serial | `[PENDIENTE]` |
-| Android / build instalada / identificador de build o hash | `[PENDIENTE]` |
-| Modo | `ccd_authenticated`, comprobar realmente |
-| API / host / puerto / condiciones de red y Metro | `[PENDIENTE]`; referencia REST v2 loopback 3004 y USB autorizado |
-| Backend current realmente observado | `[PENDIENTE]`; esperado hoy f01c1c37-2d3f-4bc7-8940-fe724eb71c9a |
-| Status y schema | `[PENDIENTE]`; esperados ready / ccd-1.3.0 |
-| me.evidence_mode y capacidades | `[PENDIENTE]`; evidencia CCD local, seis capacidades del producto |
-| Release auxiliar y contexto común | `[PENDIENTE]`; no confundir con current documental |
-| Asignación privada de cuentas ficticias | `[PENDIENTE]`; confirmar mismo contexto, sin copiar UID/password ni mapa de identidades aquí |
-| T02: pregunta, respuesta y fuente verificadas | `[PENDIENTE RECONFIRMACIÓN]`; control técnico preparado, no sesión humana |
-| T04: título y clave de evento, categoría, fecha/hora Bogotá | `[PENDIENTE CONFIRMAR CANDIDATO]` |
-| T04: visible durante todos los días de la tanda | `[PENDIENTE]`; ventana de Mobile día actual…+29 |
-| T05: título/clave de curso, estado y porcentaje | `[PENDIENTE CONFIRMAR CANDIDATO]` |
-| T05: título/clave de anuncio, filtro y vigencia temporal | `[PENDIENTE CONFIRMAR CANDIDATO]` |
-| Hoja entregable con exactamente esos títulos | `[PENDIENTE]`; sin respuestas ni pistas |
-| Moderador / observador por rol | `[PENDIENTE DESIGNACIÓN]`; identificación personal solo en acta privada aprobada |
-| Procedimiento/revisión académica aplicable | PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO |
-| Estado y versión de consentimiento / contacto | `[PENDIENTE REVISIÓN]`; el borrador no es consentimiento obtenido |
-| Custodia, acceso, conservación y manejo de retiro | `[PENDIENTE APROBACIÓN]` |
-| Inclusión de program_code y elegibilidad | `[PENDIENTE REVISIÓN]`; recogida fuera del chat |
-| Muestra y cuotas | ≥10 elegibles, ≥3 programas, máximo 50 % de uno; confirmar plan antes de reclutar |
-| Denominador / faltantes / repeticiones | Todas las tareas iniciadas, incluidos BLOCKED; incompletos impiden declarar aceptación; primera sesión primaria y retest separado |
-| Umbrales | >85 %, SUS medio >70, cada individual ≥50; no redondear para aprobar |
-| Cualquier desviación y decisión anterior a datos | `[PENDIENTE; NO asumir ninguna]` |
-| Decisión final habilitante y evidencia | `[PENDIENTE]`; ausencia de dato no equivale a aprobación |
+| Producto | BanuChat |
+| Modo y API | ccd_authenticated, REST /api/v2; evidencia ccd_local |
+| Current documental técnico | 10af4ffd-effb-41fc-bbfe-4dc48cb3398f, ready, ccd-1.4.0; P4-B.4F cerrado |
+| Auxiliar observado | af157a78-4c51-49c0-b8cc-509257d89f1e; perfiles derivados de bindings, no asumir profile-001 |
+| Instrumento | Exactamente cinco tareas T01–T05, SUS de diez ítems sin cambios |
+| Tiempos y clasificación | 3/8/4/5/5 minutos; una pista de navegación implica FAIL; BLOCKED solo por causa técnica externa |
+| Muestra y umbrales conservados | ≥10 elegibles, ≥3 programas, máximo 50 % de uno; completación >85 %, SUS medio >70, ningún individual <50; sin imputación |
+| Android técnico | Recorridos físicos históricos acreditados; matriz completa/iOS y aceptación humana pendientes |
+| T02 PV-0 | Pregunta literal, tres pilares, cita/artifact e historial por API normal; no mide comprensión humana |
 
-Si cambia un campo tras P01, preservar este freeze, registrar la desviación y
-detener cuando afecte comparabilidad. No sustituir registros adversos ni cambiar
-objetivos durante una tanda. iOS, push remoto y producción se trazan aparte; no
-son exigencias automáticas de esta tanda SUS Android salvo decisión académica expresa.
+## B. RECONFIRM_BEFORE_P01 — completar inmediatamente antes de la tanda
+
+| Campo obligatorio | Valor a completar y comprobación |
+| --- | --- |
+| ID de tanda, protocolo base y revisión aprobada | [PENDIENTE]; conservar primera tanda/retests separados |
+| Fecha/hora Bogotá y ventana completa de sesiones | [PENDIENTE DE VENTANA DE SESIONES], todos los días y duración prevista |
+| HEAD exacto, git status y hashes de trabajo | [PENDIENTE]; base PV-0 7c0ba1564cedc650907952099f88c226c7e4d3d3 no es el HEAD congelado futuro |
+| Hashes SHA-256 de todos los instrumentos | [PENDIENTE]; protocolo, hoja, guía, SUS, consentimiento final, targets, analyzer y CSV schema; comprobar coherencia de edición |
+| Current real / status / schema | [PENDIENTE OBSERVAR]; referencia CCD 1.4 anterior, no asumir que nunca cambió |
+| Release auxiliar y contexto común | [PENDIENTE DERIVAR]; misma asignación compatible durante toda la tanda |
+| Asignación privada de cuenta(s) existentes | [PENDIENTE]; cuatro cuentas operativas no son equivalentes para T05; dos cumplen candidatos. No cambiar bindings/progreso |
+| Build instalada, versión Mobile/Expo e identificador/hash | [PENDIENTE]; referencia histórica Mobile 1.0.0/SDK57 no acredita build instalada actual |
+| Dispositivo y Android | [PENDIENTE]; modelo sin serial, versión/condiciones homogéneas |
+| Red y servicios/API/Metro | [PENDIENTE]; canal USB/ADB reverse autorizado y loopback, sin abrir red pública |
+| /auth/me y capacidades | [PENDIENTE]; current/mode/capacidades y sesión real; credenciales solo privadas |
+| T02 | [PENDIENTE RECONFIRMACIÓN]: pregunta, respuesta/cita y apertura en build/dispositivo de la tanda |
+| T04 | **PENDIENTE DE VENTANA DE SESIONES**; no usar event-012 automáticamente |
+| T04 objeto y visibilidad | [PENDIENTE]: clave/título/categoría/fecha/hora Bogotá; comprobar cada día de la tanda contra D−29 ≤ S ≤ D y límite de resultados |
+| T05 curso y anuncio | [PENDIENTE RECONFIRMACIÓN]: course-003 completed/100 %, announcement-006 active, visibles con filtros; solo si el mismo contexto realmente lo cumple |
+| Hoja entregable | [PENDIENTE]; exactamente títulos congelados, sin placeholders, soluciones, fechas/categorías reveladas ni event-012 heredado |
+| CSV de entrada | [PENDIENTE VERIFICAR]; solo cabeceras antes de iniciar; no poblar con fixtures |
+| Desviaciones/denominadores/repeticiones | [PENDIENTE REGISTRAR]; todas las tareas iniciadas incluidos BLOCKED; incompletos impiden aceptación; no sustituir intentos adversos |
+
+## C. EXTERNAL_DECISION_REQUIRED — no completar por inferencia técnica
+
+| Decisión externa | Estado |
+| --- | --- |
+| Procedimiento/revisión académica aplicable | PENDIENTE DE CONFIRMACIÓN POR EL RESPONSABLE ACADÉMICO |
+| Versión final de consentimiento y mecanismo | [PENDIENTE APROBACIÓN]; draft DRAFT — NOT APPROVED FOR USE |
+| Responsable operativo y contacto para preguntas/retiro | [PENDIENTE DESIGNACIÓN/APROBACIÓN], sin inventar personas ni contacto institucional |
+| Custodia, ubicación, acceso, retención y disposición final | [PENDIENTE APROBACIÓN] |
+| Retiro y tratamiento de datos ya recogidos | [PENDIENTE APROBACIÓN] |
+| Moderador, observador y responsables por rol | [PENDIENTE DESIGNACIÓN]; identificación solo en acta privada aprobada |
+| Muestra, cuotas, elegibilidad y recogida de program_code | [PENDIENTE DECISIÓN/PLAN]; conservar umbrales, fuera del chat, no reclutar aún |
+| Separación de contactos/consentimientos y resultados | [PENDIENTE APROBACIÓN]; seudonimización no garantiza anonimato absoluto |
+| Eventual reutilización para AC10 entrevistas/caracterización | [PENDIENTE DECISIÓN ACADÉMICA PREVIA]; no añadir preguntas al SUS |
+| Decisión final habilitante y evidencia fechada | [PENDIENTE]; ausencia de información no es aprobación |
+
+Si cambia un campo después de P01, preservar el freeze original, registrar la
+desviación y detener cuando afecte comparabilidad. No cambiar objetivos ni borrar
+resultados desfavorables. iOS/push/producción y evaluación documental se trazan
+separadamente; no son puertas automáticas del SUS Android. Ver [PV-0](../results/product-validation-ux-closure-pv0.md).

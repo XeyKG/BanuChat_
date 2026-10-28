@@ -1,5 +1,15 @@
 # CHECKPOINT BANUCHAT — OE5
 
+## Precedencia PV-0 — 28 de octubre de 2026
+
+El [rebaseline PV-0](../../eval/mobile/results/product-validation-ux-closure-pv0.md)
+refleja CCD 1.4 técnico current tras P4-B.4F. Conserva cinco tareas/criterios,
+READY_FOR_ACADEMIC_REVIEW y la puerta académica, con T04/contexto T05 sin freeze.
+Android físico técnico está acreditado por la etapa Mobile posterior; matriz completa,
+iOS y aceptación humana siguen pendientes. Este checkpoint histórico y sus estados
+no se convierten en resultados nuevos ni en OE5 completo.
+
+
 ## Nota de precedencia — OE5-H0, 27 de octubre de 2026
 
 El cuerpo posterior es el checkpoint histórico del 24 de octubre, sin reescribir
