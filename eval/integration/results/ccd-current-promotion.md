@@ -827,3 +827,194 @@ planificar el presupuesto de login sin modificar límites, y autorizar una nueva
 operación que tenga en cuenta que la sucesora ahora está ready. Esta tarea **no**
 vuelve a promover ni ejecuta etapas posteriores. La línea CCD 1.4 no queda cerrada
 como promoción exitosa. Sin producción, aval CCD, despliegue UNAB ni OE5 completo.
+
+## P4-B.4R — reintento con sesión conservada: C05 bloqueado y rollback confirmado
+
+2026-10-28, America/Bogota. Sección aditiva: conserva íntegramente las fases
+anteriores, P4-B.4A y la primera publicación/rollback por autenticaciones redundantes.
+
+**P4-B.4R BLOCKED — PRODUCT FAILURE, ROLLED BACK TO CCD 1.3: C05 HTTP 503 DEPENDENCY_UNAVAILABLE**
+
+### Baseline y presupuesto antes de autenticar
+
+HEAD real y esperado `e8c35cf832e8d69464ff2b8735b1104a56ddc8cd`, branch `main`,
+árbol limpio incluyendo untracked. AGENTS.md leído completo. Sin cambios de branch,
+operaciones Git destructivas, commit ni push. No se modificó producto.
+
+Se reidentificó el contenedor PostgreSQL habitual por ID/scope, volumen/mount,
+base `banuchat_unified` y puerto exclusivo loopback 55463. Inicialmente estaba
+detenido; solo se arrancó ese contenedor existente. API inicialmente ausente en 3004.
+
+Estado vivo inicial correcto: CCD 1.3 `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`
+ready/current, y CCD 1.4 `10af4ffd-effb-41fc-bbfe-4dc48cb3398f` ready/no current.
+No se exigió staging ni se alteró status/validated_at. Se confirmaron 107 documentos,
+107 chunks y 107 embeddings de 1024 dimensiones, run
+`821b7f99-44e8-4fa5-be93-c8c361807e07` succeeded, identidad/procedencia auditadas,
+root normal v2 existente y assert_release_complete para ambas releases.
+No se repitieron ingesta, materialización, 107 hashes ni bancos/suites generales.
+
+Se derivaron todos los principals y las credenciales disponibles en los dos DPAPI
+existentes. Autorización release-specific **5/5**, exactamente una combinación
+válida por principal, cero extras; bindings/grants/contextos y contexto auxiliar
+conservados. Cuatro disponen de credencial operativa; el quinto conserva el estado
+AUTHORIZATION_SQL_VERIFIED_CREDENTIAL_UNAVAILABLE, sin PASS HTTP inventado.
+El HTTP 4/5 de la publicación anterior no se repitió ni se contabiliza como nuevo.
+
+Antes de cualquier login se inspeccionaron READ ONLY los buckets aplicables:
+login_uid 5/900s para A y B, login_origin 30/900s y hash_work 20/60s. Había presupuesto
+natural suficiente para dos logins. Se seleccionaron A/B dinámicamente entre los
+principals autorizados con credencial legítima, por consumo vigente e identidad,
+sin hardcodear sus identificadores ni el conteo de credenciales disponibles.
+Se revalidó el presupuesto inmediatamente antes del único login realizado.
+
+Plan explícito: un login de A, sesión conservada para toda la secuencia incluido
+restart; un login de B exclusivamente para ownership. Tokens/access/refresh solo
+en memoria del coordinador. Sin resets de límites, nuevas contraseñas/almacenes,
+sesiones fabricadas ni modificaciones de cuentas/bindings/grants.
+
+### Gates realmente aprobados
+
+API iniciada mediante `npm start` normal, sin preload, instrumentación ni runtime
+alternativo. A hizo **un** login bajo CCD 1.3. /auth/me confirmó la release antigua,
+evidence mode y capacidades. Con esa sesión se creó la fixture histórica y pasó
+la consulta documental «¿Qué temas se estudian en el curso de Inteligencia Artificial
+Generativa?»: respuesta 201 no abstentiva, cita válida, artifact protegido 200 con
+SHA correcto e historial exacto. No se hizo logout antes de promover.
+
+Promoción: una llamada a publish_release(CCD 1.4) y un COMMIT, confirmados.
+Duración previa al COMMIT: 424 ms. La transacción bloqueó/revalidó
+los objetos y fuentes de autorización pertinentes; seleccionó una sucesora ya ready.
+**Única tabla cambiada: banuchat.datasets, exclusivamente current_release_id.**
+Todas las releases, status y validated_at permanecieron idénticos. Sin UPDATE directo,
+segunda publicación de la sucesora ni retry.
+
+Con el mismo access token/sesión de A, /auth/me respondió 200 y adoptó CCD 1.4,
+ccd_local y las capacidades esperadas. Se volvió a comprobar SQL **5/5**, cero extras.
+
+Una conversación NUEVA bajo CCD 1.4 respondió 201 no abstentivo a la misma consulta,
+con citas de la sucesora e historial exacto. Se descargó **un artifact representativo**
+por el endpoint protegido: HTTP 200, document_version
+`6a9e07aa-ace1-4058-a648-4337a083f556`, label **bch-ccd-knowledge-2**,
+185 bytes, SHA-256 `04ffe17deeab0edd903f42c3335c33368573c1721f3bfeb39e3fcac636b5c31b` igual al source_sha256 de DB.
+Esto sí prueba por HTTP real el root de P4-B.4A; no es una simulación ni la descarga
+histórica. No se descargaron los 107 artifacts.
+
+### C01–C09: resultado explícito y fallo real observado
+
+Se conservaron las preguntas y aserciones congeladas. Se usó la misma sesión de A,
+con conversaciones separadas y mensajes previos de usuario enviados por HTTP normal;
+las respuestas previas fueron las reales, sin inyectar el texto de assistant de la
+fixture controlada. No se sustituyó la API por un runtime de diagnóstico.
+
+| Control | Resultado nuevo |
+| --- | --- |
+| C01 | PASS, HTTP 201 y rúbrica congelada aprobada |
+| C02 | PASS, HTTP 201 y rúbrica congelada aprobada |
+| C03 | PASS, HTTP 201, follow-up real y rúbrica aprobada |
+| C04 | PASS, HTTP 201 y rúbrica congelada aprobada |
+| C05 | **FAIL: HTTP 503, DEPENDENCY_UNAVAILABLE**, esperado 201 |
+| C06 | NOT_EXECUTED: detención tras C05 y rollback |
+| C07 | NOT_EXECUTED: detención tras C05 y rollback |
+| C08 | NOT_EXECUTED: detención tras C05 y rollback |
+| C09 | NOT_EXECUTED: detención tras C05 y rollback |
+
+C05 exacto: «¿Cuánto cuesta un curso en 2026? ¿Qué documento lo dice?».
+503 observado a las 08:19:15.966 America/Bogota (13:19:15.966Z). No hubo respuesta
+201 para evaluar sus aserciones de tarifa/procedencia mixta. El registro HTTP
+conserva status y código seguros; no se presenta como error de serialización del
+arnés ni como un 429 inferido. Total: **4 PASS, 1 FAIL, 4 no ejecutados**, sin 9/9.
+
+### Clasificación y límite causal
+
+Después del rollback se inspeccionó el código y se evaluaron únicamente predicados
+puros, sin repetir C05 por HTTP ni llamar servicios de diagnóstico:
+
+- requiresConversationalOrchestration devuelve false para C04 y **true para C05**;
+- C05 reconoce el tema fees; no aplica el bypass documental de badge;
+- planCalls combina find_documents, get_courses y search_knowledge al encontrar
+  curso/documento/dice; más de una operación activa la orquestación;
+- unifiedResponder evalúa esa rama **antes** de su retorno final a input.rag(query),
+  invoca el orquestador configurado y después el agente MCP;
+- falta/fallo del orquestador y ciertos fallos de dependencias se proyectan como
+  DEPENDENCY_UNAVAILABLE/503 en la API normal.
+
+La consulta congelada entra, por tanto, en una dependencia de orquestación de la
+composición normal; es compatible con el 503 observado. **No quedó demostrada la
+causa exacta dentro de esa dependencia**, ni que se alcanzara MCP, ni una regresión
+del contenido CCD 1.4 o de Ollama. No se instrumentó el runtime para atribuir una
+excepción interna no expuesta. El fallo acreditado es el servicio HTTP del control
+obligatorio bajo current, suficiente para bloquear este cierre. RAG/artifact del
+smoke anterior sí habían pasado.
+
+Propuesta para una tarea separada: revisar el desvío de esta consulta canónica CCD
+a orquestación compuesta antes de Document RAG y su dependencia N8N/MCP. No se
+implementó un bypass, cambió el router, modificó la pregunta/rúbrica, activó N8N,
+ni intentó hacer pasar el control con otro runtime. No hubo otra promoción.
+
+### Rollback, sesión y gates pendientes
+
+Rollback normal una vez mediante publish_release(CCD 1.3), un COMMIT, confirmado;
+509 ms antes del COMMIT. Solo cambió el puntero current, sin status/validated_at.
+Se confirmó CCD 1.3 completa/ready con autorización SQL 5/5. **La misma sesión de A**
+siguió funcionando: /auth/me 200 sobre CCD 1.3, nueva conversación documental 201,
+cita/artifact histórico 200 con SHA correcto e historial exacto. Sin nuevo login,
+refresh ni retry de publicación.
+
+Se eliminaron las ocho fixtures propias por DELETE normal del propietario y se
+hizo logout de A al final. Su única sesión quedó revocada en DB. El gate de ownership
+y el primer login de B no llegaron a ejecutarse. Tampoco la transición histórica
+GET/POST409 bajo CCD 1.4 ni el reinicio normal post-current.
+
+El helper de reutilización de access se usó también para verificar rollback; sus
+etiquetas internas restart en el ledger no significan que se reiniciara la API.
+Hubo un arranque normal y una detención normal: **ningún PASS de restart**.
+
+Consumo observado, contrastado con los buckets persistidos y la auditoría:
+
+| Medida | Resultado |
+| --- | --- |
+| Login attempts A | 1 |
+| Login attempts B | 0, etapa no alcanzada |
+| Total logins | 1 |
+| Nuevos rate_limited | 0 |
+| Sesiones creadas/revocadas | 1/1 |
+
+El presupuesto máximo de dos logins se respetó. Este fallo es distinto del
+agotamiento de login_uid del intento previo.
+
+### Snapshot final, restauración y evidencia
+
+Snapshot final READ ONLY: 43 tablas. Current vuelve a CCD 1.3; la sucesora sigue
+ready/no current. Datasets y todas las releases coinciden exactamente con el
+baseline, incluidos status/validated_at. Corpus 107/107/107, run/embeddings,
+bindings/grants/contextos, cuentas/credenciales/recovery, auxiliares, runtime scope,
+roles/memberships, propietarios y ACL permanecen intactos. Conversaciones/mensajes/
+citas/ownership coinciden con el baseline después del cleanup normal.
+
+Cambios persistidos exclusivamente operativos: sessions +1 (revocada), refresh_tokens
++1, security_events +2 (login/logout) y auth_rate_limits +3 buckets. Cero eventos
+rate_limited; no se borraron auditoría ni buckets para igualar fingerprints.
+
+Incidencia privada de cierre, posterior al rollback: el agregado de security_events
+usaba created_at en lugar del occurred_at instalado (42703, READ ONLY revertido).
+Se verificó el esquema y corrigió solo esa consulta privada; el snapshot final pasó.
+Se conserva la evidencia del primer intento. No causó el 503 de C05 ni añadió
+logins o publicaciones.
+
+API detenida correctamente con SIGINT y PostgreSQL devuelto a su estado detenido
+inicial, conservando volumen/auditoría. No se arrancaron/configuraron otros servicios,
+N8N u Ollama. No se repitieron 249/27/11, suites generales, 107 artifacts, Mobile,
+MCP, Android ni OE5.
+
+Evidencia privada en `data/ccd/local/p4b4r-final-promotion/`: baseline, presupuesto,
+snapshots, autorización, ciclo de sesión, promoción, me/smoke/artifact current,
+los nueve estados de controles, clasificación C05, rollback, cleanup/restauración,
+privacidad y manifests SHA-256/tamaño. Incluye respuestas de fixtures propias,
+sin originales íntegros, corpus completo, vectores, passwords/tokens, hashes de
+credenciales, recuperación ni paths personales absolutos.
+
+Único cambio versionable: esta sección de
+`eval/integration/results/ccd-current-promotion.md`. Prefijo histórico preservado
+byte por byte; nuevo texto con LF. git diff --check aprobado y status limitado al
+informe. Sin secretos añadidos, commit ni push. La promoción final queda bloqueada;
+no se continúa con trabajo CCD ni UX/OE5. Sin producción, aval CCD o despliegue UNAB.
