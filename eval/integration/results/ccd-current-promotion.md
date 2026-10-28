@@ -203,3 +203,160 @@ La evidencia nueva está en `data/ccd/local/p2-ccd-current-promotion/final-retry
 **No hubo rollback.** La release anterior sigue ready y completa, con su script de rollback controlado disponible, pero no se publicó/revirtió para ensayarlo. Esta entrega acredita únicamente la publicación técnica en el entorno habitual validado; no declara el sistema completo en producción ni aval CCD. Sin commit ni push.
 
 **ESTADO DE ENTREGA BANUCHAT: current real `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` ready; release anterior `3d6cedac-0e86-40c8-909b-d3ff6e8ab741` ready histórica; vinculaciones 5/5; API habitual funcional tras reinicio; 249 casos y 87 artefactos válidos; sin rollback.**
+
+
+## P4-B.3 — preparación controlada de bindings de la sucesora CCD 1.4
+
+Cierre 2026-10-28T03:40:59.188483-05:00, America/Bogota. **P4-B.3 COMPLETE — SUCCESSOR BINDINGS PREPARED FOR PROMOTION REVIEW**.
+Las fases históricas anteriores se conservan íntegras. La aprobación independiente
+comunicada para esta etapa fue únicamente APPROVE FOR BINDING PREPARATION.
+
+### A. Git inicial y elegibilidad
+
+HEAD real `111c5e33f10e267b43dc0f9ea473485e61567153`, branch `main`, working tree inicialmente limpio.
+Coincide con la referencia auditada; no hay commits posteriores que requieran
+revisión adicional. Se leyó AGENTS.md completo. Sin cambio de branch, operaciones
+destructivas, commit o push.
+
+### B. Current/candidata y entorno antes
+
+| Release | Estado inicial y final | Schema |
+|---|---|---|
+| `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a` | ready; current sin cambios | ccd-1.3.0 |
+| `10af4ffd-effb-41fc-bbfe-4dc48cb3398f` | staging; sin activación | ccd-1.4.0 |
+
+La sucesora conserva el run `821b7f99-44e8-4fa5-be93-c8c361807e07` succeeded,
+107 documentos/versiones ready, 107 chunks y 107 embeddings de dimensión 1024 y
+norma positiva. Sus hashes de manifest/pipeline, embedding config y revisión de
+código coinciden con la evidencia P4-B.2R. No se regeneró ni modificó nada de ello.
+
+Se verificó el contenedor unificado por ID, scope, volumen, mount, base y publicación
+exclusiva loopback 55463. Ningún otro contenedor comparte ese volumen o puerto.
+La conexión viva confirmó `banuchat_unified`, dataset CCD, product_config versión 1
+y runtime_scope/deployment iguales a la configuración habitual. La identidad de
+deployment se conserva mediante fingerprint, sin copiar configuración privada.
+
+### C–E. Derivación dinámica y plan exacto
+
+La fuente de verdad fue el estado vivo, contrastado con currentSession y los
+contratos/constraints de autorización realmente instalados. Intersección de:
+cuenta activa y no deshabilitada con credencial existente (solo existencia), binding
+estable CCD, versión válida para el current exacto con igual dataset/profile,
+grant preexistente CCD/read sin revocación y contexto CCD de current existente.
+Se comprobó además el contexto auxiliar requerido por el producto unificado.
+Las cuentas no tienen deployment individual: se verificó el guard compartido de
+database/deployment/runtime_scope, sin inventar una relación por cuenta.
+
+Resultado derivado: **5 principals elegibles**. No se usaron UUIDs, número de
+cuentas, perfiles o grants históricos como lista de entrada.
+
+El plan exacto para cada principal de esa intersección es:
+`principal → dataset 1 / profile_key ccd-local-demo → current f01c1c37-2d3f-4bc7-8940-fe724eb71c9a → successor 10af4ffd-effb-41fc-bbfe-4dc48cb3398f`.
+La identidad del principal se representa solo mediante pseudónimo SHA-256 en la
+evidencia privada. Allí se guardan las 5 entradas completas, aprobación current,
+fingerprints de cuenta/binding/grant/contextos y checks de contexto equivalente.
+No hay duplicados, extras u omisiones; dataset/profile son los mismos. El contexto
+sucesor ya existía y tenía la misma identidad/alias técnico; no se creó contexto.
+
+Plan sellado **antes del DML**, SHA-256 `a9a83e4878c1161de381a5d47e297d8c5c3cd0227fc3d168e6b94cc7f2aa20f2`.
+También se selló el script privado que lo aplica y se verificaron ambos hashes
+antes de la transacción. Los grants son condición de elegibilidad, no filas a copiar.
+
+### F–G. Filas preexistentes e INSERT
+
+Filas previas para la sucesora: **0**.
+El aprovisionador de cuentas no es adecuado: crea cuentas/bindings/grants y
+selecciona current. Se siguió el antecedente de DML administrativo privado,
+limitado exclusivamente a versiones de binding y sin cambiar SQL versionado.
+
+Una sola transacción y un solo INSERT SELECT añadieron **5 filas**; sin
+ON CONFLICT DO NOTHING, UPDATE, DELETE ni retry del INSERT. `approved_at` se omitió
+para usar el valor nuevo generado por PostgreSQL; se comprobó respecto al inicio
+de la transacción y a las aprobaciones anteriores.
+
+Antes de escribir se revalidaron current, staging, integridad de candidata, conjunto
+exacto y snapshot baseline. Se usó el guard histórico SHARE ROW EXCLUSIVE sobre
+profile_binding_versions para filas ausentes/nuevas versiones, junto con bloqueos
+solo de las filas fuente necesarias: cuentas con versión current, credenciales,
+grants incluidos los revocados, bindings, contextos y filas de dataset/runtime.
+El bloqueo de cuentas serializa también nuevos hijos grant/credencial por sus FKs.
+No se bloquearon tablas de sesiones, tokens o recovery.
+
+### H–I. Validación y diferencias before/after
+
+Antes de COMMIT se comprobaron cardinalidad, conjunto exacto, dataset/release/profile,
+FKs, timestamps y ausencia de cualquier otra mutación. Una conexión independiente
+posterior repitió la derivación y la comparación completa.
+
+`successor_binding_principals == eligible_current_principals`: **5/5**.
+
+`unexpected_successor_binding_principals == 0`.
+
+La consulta READ ONLY con la semántica del componente de autorización de perfil de
+currentSession encontró exactamente una combinación válida por principal para la
+sucesora. Esto no es un login, sesión o smoke HTTP de staging ni la hace servible
+como current. No se invocaron currentSession ni resource_context, que pueden tocar sesiones.
+
+Snapshots inicial y final en REPEATABLE READ READ ONLY, con conteos/fingerprints de
+43 tablas y superficie de seguridad. Los snapshots internos son consultas
+sin efectos dentro de la transacción que contiene el INSERT; no se describen como
+una transacción READ ONLY. Diferencia exacta: **solo 5 filas añadidas a
+banuchat_auth.profile_binding_versions para la sucesora**. Todas las versiones
+históricas conservan sus conteos/fingerprints; todas las otras tablas son idénticas.
+
+### J–K. Current y seguridad
+
+Current sigue siendo `f01c1c37-2d3f-4bc7-8940-fe724eb71c9a`, ready, CCD 1.3; la sucesora
+`10af4ffd-effb-41fc-bbfe-4dc48cb3398f` sigue staging. Cero llamadas a publish_release, cero
+cambios de puntero/status, cero publicación y cero promoción.
+
+Grants, bindings estables, cuentas, credenciales, recovery, sesiones/tokens,
+conversaciones/mensajes/citas, auth ownership, perfiles y releases auxiliares,
+corpus, runs y embeddings no cambiaron. Roles, memberships, owners, schemas y ACL
+de tablas/columnas/funciones son idénticos. El runtime conserva ausencia de permisos
+INSERT/UPDATE/DELETE sobre profile_binding_versions, incluido nivel de columna.
+No se crearon cuentas, perfiles, grants, contexto, permisos o sesiones.
+
+### L. Evidencia, restauración e incidentes
+
+Paquete privado ignorado: `data/ccd/local/p4b3-binding-preparation/`.
+Baseline Git, identidad de entorno, snapshot before, contrato instalado, integridad
+current/candidata, derivación, plan y sello previo, validación con bloqueos,
+transaction result, filas pseudonimizadas, post-binding, snapshot after/diff,
+no-publication/security, restauración, privacidad y run/files manifests SHA-256/tamaño.
+La evidencia privada quedó cerrada y sellada antes de añadir esta sección.
+
+PostgreSQL estaba detenido; se arrancó únicamente el contenedor identificado y se
+restauró su estado detenido al terminar. Bindings, candidata, run, volumen e historial
+se conservan. No se inició API, ni se operaron Ollama, Mobile, MCP, N8N u otros servicios.
+
+Incidente conservado: el primer sellado de plan encontró ENOENT porque el harness
+privado pasó una URL de módulo como string de filesystem. Ocurrió después de las
+lecturas y antes de todo DML; se archivó el intento, se corrigió únicamente el
+instrumento y se revalidó. La revisión previa al DML normalizó Date/JSON para las
+comparaciones; el plan persistido siguió byte a byte igual y se renovó el sello del
+instrumento antes de su única aplicación. No se usó una discrepancia de producto
+como excepción ni hubo una segunda inserción.
+
+Pasaron sintaxis del instrumento, preflight/contratos/FKs/plan sellado, inserción y
+validaciones pre-COMMIT, verificación independiente, snapshots/seguridad, privacidad
+y git diff --check. No se repitieron suites/typechecks de producto: no hubo cambios
+funcionales. No se ejecutó smoke completo, RAG, promoción u OE5.
+No se exportaron passwords, hashes de contraseña, tokens, recovery data, correos,
+filas sensibles, .env, dumps, corpus privado, PDFs o datos personales.
+
+### M–N. Git final, límite y estado
+
+Única modificación versionada propia de esta tarea: esta sección aditiva en
+`eval/integration/results/ccd-current-promotion.md`. Todo el contenido histórico se
+conserva íntegro. HEAD/branch sin cambios, sin commit ni push; git diff --check correcto.
+
+Los bindings quedan preparados únicamente para revisión de promoción en otra etapa.
+No se declara aprobada esa promoción, publicación, aceptación CCD/institucional,
+producción o finalización de OE5. Se detiene la operación aquí.
+
+`institutional_endorsement = false`
+
+`independent_human_acceptance = false`
+
+**P4-B.3 COMPLETE — SUCCESSOR BINDINGS PREPARED FOR PROMOTION REVIEW**
