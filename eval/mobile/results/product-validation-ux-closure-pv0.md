@@ -1,5 +1,13 @@
 # PV-0 — Product Validation & UX Closure: rebaseline y readiness
 
+## Precedencia PV-1 — 28/10/2026
+
+El [dry-run físico PV-1](product-validation-ux-closure-pv1.md) ejecutó T01–T05,
+pero mantiene bloqueado el cierre técnico del canal: Tools intercepta navegación
+y requirió un workaround. TalkBack sobre la app quedó sin acreditar por setup.
+No se cambió producto, no hay freeze final ni autorización para reclutar;
+este antecedente PV-0 y su puerta académica se conservan.
+
 28 de octubre de 2026, America/Bogota.
 
 **PV-0 COMPLETE — PACKAGE REBASELINED, NOT READY FOR RECRUITMENT**

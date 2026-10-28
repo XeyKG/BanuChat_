@@ -1,5 +1,12 @@
 # CHECKPOINT BANUCHAT — OE5
 
+## Precedencia PV-1 — 28/10/2026
+
+El [dry-run físico PV-1](../../eval/mobile/results/product-validation-ux-closure-pv1.md)
+ejecutó T01–T05, pero no cierra readiness: Tools intercepta navegación del canal
+y TalkBack sobre la app no quedó acreditado por setup. Sin corrección de producto,
+freeze final, participantes o SUS; puerta académica y T04 definitivo pendientes.
+
 ## Precedencia PV-0 — 28 de octubre de 2026
 
 El [rebaseline PV-0](../../eval/mobile/results/product-validation-ux-closure-pv0.md)

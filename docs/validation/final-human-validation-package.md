@@ -1,5 +1,13 @@
 # BanuChat — paquete ejecutable de validación humana final
 
+## Precedencia PV-1 — 28/10/2026
+
+El [dry-run físico PV-1](../../eval/mobile/results/product-validation-ux-closure-pv1.md)
+completó técnicamente T01–T05 con workaround de Tools. El cierre técnico del canal
+queda bloqueado hasta resolver esa interferencia; la revisión TalkBack de la app
+no quedó acreditada por setup. Sin cambios de producto, freeze, reclutamiento o
+SUS humano. T04 provisional PV-1 no sustituye la ventana/target final ni la puerta académica.
+
 ## Estado
 
 Rebaseline PV-0 el 28 de octubre de 2026 sobre OE5-H0: paquete preparado, **estudio humano no

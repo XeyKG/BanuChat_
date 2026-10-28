@@ -1,5 +1,13 @@
 # Freeze previo a P01 — plantilla sin ejecutar
 
+## Nota PV-1 — freeze pendiente
+
+El [dry-run físico PV-1](../results/product-validation-ux-closure-pv1.md) mantiene
+pendiente resolver la interferencia de Tools del canal y acreditar TalkBack con
+setup operativo. T01–T05 fueron ejecutables con maniobra técnica; no es un PASS
+limpio de navegación ni un freeze. event-016 se usó solo como PV1_DRY_RUN_ONLY,
+NOT_FROZEN_FOR_P01; T04 sigue PENDIENTE DE VENTANA DE SESIONES.
+
 **NO ES AUTORIZACIÓN NI FREEZE COMPLETADO.** Protocolo base OE5-H0-CCD-1.0,
 rebaseline documental PV-0 del 28/10/2026. Identificar la edición por revisión y
 SHA-256: no confundir la etiqueta base del analyzer con un freeze operativo aprobado.
