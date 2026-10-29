@@ -1,5 +1,10 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+> **Corte vigente de entrega, 29/10/2026:** consultar la
+> [matriz actualizada OE1–OE6](oe1-oe6-current-status.md). Este archivo conserva
+> sus cortes históricos y citas originales; sus pendientes de banco/RAGAS o Android
+> no reemplazan la evidencia posterior enlazada en la matriz vigente.
+
 > Para OE5 humano rige la [decisión canónica de cierre](oe5-human-validation-closure-decision.md): **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR**. No hay reclutamiento o SUS autorizados; los criterios originales siguen **NO CUMPLIDOS** y la alternativa del autor es **PROPUESTA / PENDIENTE DE APROBACIÓN**.
 
 ## Precedencia PV-0 — 28 de octubre de 2026

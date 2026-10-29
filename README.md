@@ -1,83 +1,70 @@
 # BanuChat
 
-BanuChat es un prototipo académico de Ingeniería de Sistemas en implementación
-incremental, para desarrollo y demostración local. Todos sus datos funcionales son
-100 % sintéticos y están versionados en `data/synthetic/`, su fuente de verdad.
-PostgreSQL + pgvector conserva la representación procesada. No hay datos, scraping,
-APIs ni integración real de UNAB/CCD, despliegue o autenticación institucional.
+Prototipo académico de Ingeniería de Sistemas para consulta asistida y demostración
+local. La aplicación vigente usa **login propio BanuChat, cuentas ficticias, REST v2
+y Expo SDK 57**. El recorrido documental CCD 1.4.0 está comprobado por REST y en
+Android físico; no equivale a autenticación, aprobación ni despliegue institucional.
 
-## Estado actual
+## Qué datos utiliza
 
-- La app móvil (Expo SDK 57, React Native y TypeScript) consume exclusivamente REST.
-  Implementa selección de perfiles sintéticos, chat con citas y apertura interna de
-  documentos Markdown sintéticos, historial, calendario, progreso y anuncios.
-  Seleccionar un perfil no equivale a autenticarse.
-  Las validaciones manuales por etapa y sus límites están en [Mobile](mobile/README.md).
-- La API REST implementa conversaciones, mensajes, historial, artefactos documentales
-  y lecturas de perfiles/calendario/progreso/anuncios. El Intent Router determinista
-  usa el catálogo `1.2.0-draft`: M3.1 léxico y M3.2 ponderado están implementados.
-  Despacha catálogo de cursos, progreso, calendario, anuncios y localización exacta
-  de documentos mediante servicios de aplicación, y social/ayuda/fuera de alcance
-  mediante renderers estáticos.
-- El fallback actual es Document RAG directo: embedding de la pregunta con
-  `qwen3-embedding:0.6b` mediante Ollama → búsqueda exacta en PostgreSQL + pgvector
-  → fragmentos → generación con `qwen3:4b-instruct` mediante Ollama → citas y
-  persistencia del turno. Ollama es el runtime local; pgvector almacena y compara
-  vectores. Las citas conservan procedencia y facilitan verificar lo recuperado;
-  no garantizan exactitud de la respuesta.
-- La ingesta TypeScript implementa preflight, procesamiento/chunking, embeddings,
-  publicación atómica, aprobación/procedencia, recovery/retry explícitos y HTTP
-  interno `execute`/`retry`/`recover`/`status`. N0 validó startup/status; N2 versionó
-  e importó el workflow manual; [N3](eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)
-  lo ejecutó en N8N 2.40.5 local: publicó una release `ready/current` con 76 items,
-  12 versiones documentales y 60 embeddings; la segunda ejecución fue
-  `already_current`. N8N orquesta y queda fuera del camino síncrono móvil.
+- **Producto local vigente:** documentos CCD seleccionados y derivados autorizados
+  para pruebas locales, en `data/ccd/local`, ignorados por Git. Conservan procedencia,
+  periodos y restricciones; no tienen ratificación institucional formal.
+- **Datos auxiliares:** perfiles, progreso, cursos, calendario y novedades ficticios,
+  separados del corpus documental. El backend asigna el perfil a la cuenta; la UI
+  actual no ofrece selección libre de identidad.
+- **Demo histórica y fixtures:** `data/synthetic` permanece congelado y es la fuente
+  de verdad de esa demo. No se utiliza como fallback documental institucional.
 
-## Arquitectura actual y objetivo
+El repositorio público no incluye el corpus CCD privado, bancos, respuestas,
+credenciales ni la configuración local. Clonarlo no aprovisiona una instalación CCD.
 
-Actual: **Mobile → REST → Intent Router → fast path o Document RAG directo**. En la
-demo sintética, los fallbacks que requieren dos fuentes pasan por el webhook N8N y
-el agente acotado OE3, que consume MCP por stdio. CCD autenticado conserva Document
-RAG directo y nunca usa las tools sintéticas.
+## Arquitectura y capacidades actuales
 
-El ciclo implementado de agente es determinista y limitado; no acredita ReAct dirigido
-por LLM. Continúan pendientes fuentes institucionales, Sheets real, push, RAGAS humana,
-SUS/dispositivos y despliegue universitario. El paquete local, las mediciones y los
-límites actuales están en el [checkpoint OE6](docs/transition/banuchat-oe6-checkpoint.md).
+Mobile → REST v2 autenticado → autorización/propiedad → router determinista.
+Las lecturas estructuradas usan servicios PostgreSQL; las consultas documentales
+usan Document RAG con PostgreSQL/pgvector y Ollama. Algunas solicitudes multifuente
+pasan por N8N y un agente determinista acotado que consume MCP de lectura.
+**Ese agente no es ReAct dirigido por un LLM.** N8N no interviene en cada consulta;
+la ingesta manual local delega procesamiento y embeddings en `backend/rag`.
 
-## Evidencia versionada
+Hay chat, citas y visor protegido, historial propio, refresh/logout y módulos
+auxiliares ficticios. Las citas permiten verificar procedencia; no garantizan por
+sí mismas que una respuesta sea completa o correcta.
 
-[K2](eval/retrieval/results/k2-v1-2026-10-01.md) evaluó retrieval en 18 casos chunked
-con top_k=5: MRR@5≈0.8519, Recall@5=Hit@5=1 y Precision@5≈0.2222 (su máximo
-teórico agregado por el gold). No mide calidad de generación o UX.
+## Evidencia y límites
 
-La medición posterior [L1-B](eval/generation/results/l1-b-rag-latency-2026-10-03.md)
-registró diez solicitudes warm secuenciales: media 4013.57 ms, mediana 3956.78 ms,
-8/10 por debajo de 5000 ms. Es evidencia local acotada; no demuestra formalmente
-OE6 ni un SLA. [G2](eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md) permanece
-como antecedente histórico separado. Las demás evaluaciones y sus límites están
-en [eval](eval/README.md).
+- [OE1: cierre técnico](eval/rag-quality/results/oe1-cierre02-technical-report.md):
+  43 casos, 39 respuestas y cuatro abstenciones. RAGAS fue exploratorio y tres de
+  sus cuatro medias quedaron bajo las referencias preliminares. La aceptación
+  académica y la revisión independiente siguen pendientes.
+- [Integración CCD](eval/integration/results/ccd-integration-01-summary.md):
+  FLOW-01/02/03/04, REST autenticado y regresiones; no reemplaza el baseline histórico.
+- [Android físico CCD 1.4.0](eval/mobile/results/android-mvp-ccd14-validation.md):
+  login, chat, fuentes, historial, carga, abstención, restauración y logout en un
+  YAL-L21/Android 10. No es SUS, aceptación humana ni matriz de dispositivos.
 
-## Verificación automática
+Fuentes institucionales automáticas, ReAct, Google Sheets real, push remoto,
+usabilidad con estudiantes y despliegue en servidores UNAB no están acreditados.
+Los seis objetivos no se declaran aprobados por tener una demostración funcional.
 
-Con Node.js 22 y npm, ejecutar desde la raíz `node scripts/verify-local.mjs`.
-Instala con `npm ci` las dependencias bloqueadas de API, RAG, MCP y Mobile;
-ejecuta sus typechecks y `npm test` en secuencia, imprime una tabla y devuelve
-un código distinto de cero si falla la instalación, un chequeo o el resumen de pruebas.
-GitHub Actions ejecuta el mismo script en push y pull request.
-No cubre suites con servicios externos (PostgreSQL, Ollama, N8N), Docker,
-validación en Android ni pruebas con usuarios.
+## Preparar y presentar la entrega
 
-## Documentación
+1. [Estado vigente y precedencia documental](docs/estado-vigente.md).
+2. [Procedimiento de demostración local](docs/operations/final-integrated-demonstration.md).
+   Preflight de lectura desde la raíz: `node scripts/demo-preflight.mjs`;
+   con servicios activos y USB preparado: `node scripts/demo-preflight.mjs --running --adb`.
+3. [Matriz vigente OE1–OE6](docs/academic/oe1-oe6-current-status.md).
+4. [Paquete breve para revisión del director](docs/academic/entrega-01-director-brief.md).
+5. [Guion de demostración y sustentación](docs/academic/entrega-01-demonstration-script.md).
+6. [Cierre de ENTREGA-01](docs/transition/entrega-01-summary.md).
 
-- [Arquitectura](docs/arquitectura.md): estado actual, objetivo y pendientes.
-- [Docs y ADR](docs/README.md): especificaciones y decisiones históricas.
-- [Backend](backend/README.md), [API](backend/api/README.md),
-  [ingesta/RAG](backend/rag/README.md) y [MCP](backend/mcp-server/README.md).
-- [N8N](n8n/README.md), [Mobile](mobile/README.md) e [infraestructura](infra/README.md).
+Los detalles de componente viven en [API](backend/api/README.md),
+[Mobile](mobile/README.md), [RAG/ingesta](backend/rag/README.md) y
+[MCP](backend/mcp-server/README.md). Los documentos históricos mantienen su corte;
+la ficha vigente identifica las contradicciones de presentación sin reescribirlos.
 
-El Compose histórico conserva PostgreSQL/pgvector y N8N. OE6 añade un Compose de
-transferencia separado con imagen backend, health checks, volúmenes externos y
-perfiles de operación/CCD; tampoco aplica SQL automáticamente. Embeddings usa 1024
-dimensiones y distancia coseno, sin HNSW/IVFFlat; `full_document` no se fragmenta
-ni vectoriza.
+Para una verificación completa con instalación de dependencias existe
+`node scripts/verify-local.mjs`: ejecuta `npm ci`, typechecks y suites de API, RAG,
+MCP y Mobile. No es el preflight de demostración ni sustituye pruebas con servicios,
+Android o usuarios. No se requiere repetirlo antes de cada presentación.
