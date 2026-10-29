@@ -3,6 +3,17 @@ import type {RetrievedDocumentChunk} from '../application/document-retrieval.js'
 
 const normalize=(s:string)=>s.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\bdijital(es)?\b/gu,'digital$1').replace(/\bprueva(s)?\b/gu,'prueba$1');
 type Metadata=ReadonlyMap<string,CcdKnowledgeEvidenceMetadata>;
+/** A request about a source's warrant is different from asking for live data.
+ * Mixed questions still take the availability guard. */
+export function ccdDocumentaryQuery(query:string):'limit'|'historical_table'|null {
+  const text=normalize(query);
+  if(/\b(?:histor\p{L}*|transicion|antigu\p{L}*)\b/u.test(text)&&/\b(?:tabla|prosa|fila)\b/u.test(text))return 'historical_table';
+  const source=/\b(?:syllabus|temario|documento|edicion)\b/u.test(text);
+  const warrant=/\b(?:confirma|acredita|garantiza|demuestra|permite asegurar|permite confirmar)\b/u.test(text);
+  const live=/\b(?:docentes?|profesores?|horarios?|cupos?|matricula|oferta|grupos?)\b/u.test(text);
+  const actualRequest=/\b(?:quien|que profesor|que docente|que horarios|cuales son|dime|muestrame|reserv\p{L}*|matriculame)\b/u.test(text);
+  return source&&warrant&&live&&!actualRequest?'limit':null;
+}
 export interface CcdQueryIntent {
   courses:string[];
   subject:'academic'|'procedure'|'operational';
@@ -27,7 +38,7 @@ export function resolveCcdQueryIntent(query:string,metadata:Metadata):CcdQueryIn
   }
   const periods=[...query.matchAll(/\b(?:19|20)\d{2}(?:(?:10|60))?\b/gu)].map(m=>m[0]);
   const historical=/\b(?:histor\p{L}*|antigu\p{L}*|transicion|convocatoria|temario de|lineamientos)\b/u.test(text)||(/\b(?:describ\p{L}*|autorizab\p{L}*)\b/u.test(text)&&periods.length>0);
-  const subject=experience?'procedure':academicWords&&!administrative&&!diagnostic&&(courses.length>0||/\bherramientas?\b/u.test(text))?'academic':'operational';
+  const subject=experience?'procedure':ccdDocumentaryQuery(query)==='historical_table'?'operational':academicWords&&!administrative&&!diagnostic&&(courses.length>0||/\bherramientas?\b/u.test(text))?'academic':'operational';
   const aspects:string[]=[];
   if(experience){
     if(/\b(?:dimensiones|preguntas|instrumento|cantidad|cuantas)\b/u.test(text))aspects.push('procedure_dimensions');

@@ -11,7 +11,7 @@ import {StdioMcpClientFactory} from '../agent/mcp-client.js';
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
 import {randomUUID} from 'node:crypto';
 import {asksCcdProvenance,ccdKnowledgeQueryScope} from '../chat/ccd-knowledge.js';
-import {boundConversationContext} from '../chat/conversation-context.js';
+import {boundConversationContext,resolveConversationQuery} from '../chat/conversation-context.js';
 import {isCcdKnowledgeSchema} from '../chat/ccd-knowledge-manifest.js';
 export interface AuxiliaryContext {release_id:string;profile_key:string;alias:string;}
 /** Only existing structured read services receive this adapter; never RAG or arbitrary HTTP SQL. */
@@ -54,8 +54,13 @@ export function unifiedResponder(input:{sql:SqlQueryClient;router:IntentRouter;r
   }
   const recognition=scope.topics.includes('badge');
   const documentaryProvenance=provenance&&(subjectScope.topics.length>0||subjectScope.courses.length>0);
-  const explicitAuxiliary=[query.query,subject].some(text=>/\b(?:calendario|eventos?|anuncios?|noticias?|convocatorias?|mi\s+progreso|mis\s+(?:cursos|notas))\b/iu.test(text));
-  if((recognition||documentaryProvenance)&&!explicitAuxiliary){
+  const resolved=resolveConversationQuery(query.query,query.history??[]);
+  const documentarySubject=resolved.needs_clarification?subject:resolved.retrieval_query;
+  const explicitAuxiliary=[query.query,subject,documentarySubject].some(text=>/\b(?:calendario|eventos?|anuncios?|noticias?|convocatorias?|mi\s+progreso|mis\s+(?:cursos|notas))\b/iu.test(text));
+  // "Files" can be a syllabus topic, not a request to locate artifacts plus a
+  // second knowledge tool. Keep explicit auxiliary requests on their own path.
+  const documentaryContent=/\b(?:syllabus|temario|contenidos documentados)\b/iu.test(documentarySubject);
+  if((recognition||documentaryProvenance||documentaryContent)&&!explicitAuxiliary){
    const release=await input.sql.query<{schema_version:string}>("SELECT manifest->>'schema_version' AS schema_version FROM banuchat.dataset_releases WHERE id=$1 AND status='ready'",[query.release_id]);
    if(isCcdKnowledgeSchema(release.rows[0]?.schema_version))return input.rag(query);
   }
