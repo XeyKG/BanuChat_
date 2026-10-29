@@ -1,0 +1,2380 @@
+{
+  "schema_version": "oe2-oe4-automation-1",
+  "at": "2026-10-29T23:33:16.834Z",
+  "date_bogota": "2026-10-29",
+  "status": "BANUCHAT_OE2_OE4_AUTOMATION_VALIDATED",
+  "scope": "Authorized local fixtures; real Unified N8N scheduler at 10 seconds; no institutional acquisition or SQL publication.",
+  "period_seconds_test": 10,
+  "template_period_hours": 6,
+  "workflow_ids": [
+    "BchOe2A010mvu6isyp",
+    "BchOe2A011mvu6isyp",
+    "BchOe2A012mvu6isyp"
+  ],
+  "scheduler": {
+    "total_observed": 36,
+    "controlled_scenario_executions": 33,
+    "extra_during_deactivation": [
+      {
+        "execution_id": "131",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.044",
+        "stopped_at": "2026-10-29 23:36:10.193",
+        "duration_ms": 149,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      },
+      {
+        "execution_id": "132",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.058",
+        "stopped_at": "2026-10-29 23:36:10.296",
+        "duration_ms": 238,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      },
+      {
+        "execution_id": "133",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.072",
+        "stopped_at": "2026-10-29 23:36:10.303",
+        "duration_ms": 231,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      }
+    ],
+    "all_mode_trigger": true,
+    "no_execution_retry": true,
+    "success": 15,
+    "expected_error": 21,
+    "executions": [
+      {
+        "execution_id": "98",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:20.136",
+        "stopped_at": "2026-10-29 23:34:20.693",
+        "duration_ms": 557,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "99",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:20.147",
+        "stopped_at": "2026-10-29 23:34:20.683",
+        "duration_ms": 536,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "100",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:20.159",
+        "stopped_at": "2026-10-29 23:34:20.697",
+        "duration_ms": 538,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "101",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:30.028",
+        "stopped_at": "2026-10-29 23:34:30.179",
+        "duration_ms": 151,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "102",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:30.035",
+        "stopped_at": "2026-10-29 23:34:30.286",
+        "duration_ms": 251,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "103",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:30.039",
+        "stopped_at": "2026-10-29 23:34:30.333",
+        "duration_ms": 294,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "104",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:40.030",
+        "stopped_at": "2026-10-29 23:34:40.192",
+        "duration_ms": 162,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "105",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:40.037",
+        "stopped_at": "2026-10-29 23:34:40.322",
+        "duration_ms": 285,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "106",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:40.043",
+        "stopped_at": "2026-10-29 23:34:40.329",
+        "duration_ms": 286,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "107",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:50.028",
+        "stopped_at": "2026-10-29 23:34:50.628",
+        "duration_ms": 600,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "108",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:50.040",
+        "stopped_at": "2026-10-29 23:34:50.622",
+        "duration_ms": 582,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "109",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:34:50.048",
+        "stopped_at": "2026-10-29 23:34:50.636",
+        "duration_ms": 588,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "110",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:00.041",
+        "stopped_at": "2026-10-29 23:35:00.256",
+        "duration_ms": 215,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "111",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:00.053",
+        "stopped_at": "2026-10-29 23:35:00.369",
+        "duration_ms": 316,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "112",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:00.062",
+        "stopped_at": "2026-10-29 23:35:00.374",
+        "duration_ms": 312,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "113",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:10.030",
+        "stopped_at": "2026-10-29 23:35:10.546",
+        "duration_ms": 516,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "114",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:10.038",
+        "stopped_at": "2026-10-29 23:35:10.658",
+        "duration_ms": 620,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "115",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:10.045",
+        "stopped_at": "2026-10-29 23:35:10.674",
+        "duration_ms": 629,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "116",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:20.023",
+        "stopped_at": "2026-10-29 23:35:20.214",
+        "duration_ms": 191,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "117",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:20.028",
+        "stopped_at": "2026-10-29 23:35:20.334",
+        "duration_ms": 306,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "118",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:20.034",
+        "stopped_at": "2026-10-29 23:35:20.342",
+        "duration_ms": 308,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "119",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:30.030",
+        "stopped_at": "2026-10-29 23:35:30.149",
+        "duration_ms": 119,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Stop Without Running"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "120",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:30.044",
+        "stopped_at": "2026-10-29 23:35:30.244",
+        "duration_ms": 200,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Stop Without Running"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "121",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:30.055",
+        "stopped_at": "2026-10-29 23:35:30.254",
+        "duration_ms": 199,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Stop Without Running"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "122",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:40.032",
+        "stopped_at": "2026-10-29 23:35:40.539",
+        "duration_ms": 507,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "123",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:40.039",
+        "stopped_at": "2026-10-29 23:35:40.623",
+        "duration_ms": 584,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "124",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:40.047",
+        "stopped_at": "2026-10-29 23:35:40.629",
+        "duration_ms": 582,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Reconcile After Uncertain Run",
+          "Record Failure After Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "125",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:50.033",
+        "stopped_at": "2026-10-29 23:35:50.222",
+        "duration_ms": 189,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "126",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:50.041",
+        "stopped_at": "2026-10-29 23:35:50.325",
+        "duration_ms": 284,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "127",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:35:50.053",
+        "stopped_at": "2026-10-29 23:35:50.342",
+        "duration_ms": 289,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "128",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:00.038",
+        "stopped_at": "2026-10-29 23:36:00.141",
+        "duration_ms": 103,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Require Operator Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "129",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:00.046",
+        "stopped_at": "2026-10-29 23:36:00.481",
+        "duration_ms": 435,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Require Operator Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "130",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:00.055",
+        "stopped_at": "2026-10-29 23:36:00.474",
+        "duration_ms": 419,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Require Operator Reconciliation"
+        ],
+        "scenario_execution": true
+      },
+      {
+        "execution_id": "131",
+        "workflow_id": "BchOe2A012mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.044",
+        "stopped_at": "2026-10-29 23:36:10.193",
+        "duration_ms": 149,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      },
+      {
+        "execution_id": "132",
+        "workflow_id": "BchOe2A010mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.058",
+        "stopped_at": "2026-10-29 23:36:10.296",
+        "duration_ms": 238,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      },
+      {
+        "execution_id": "133",
+        "workflow_id": "BchOe2A011mvu6isyp",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-29 23:36:10.072",
+        "stopped_at": "2026-10-29 23:36:10.303",
+        "duration_ms": 231,
+        "nodes": [
+          "Accelerated Test Every 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once"
+        ],
+        "scenario_execution": false
+      }
+    ]
+  },
+  "stages": [
+    {
+      "name": "initial_acquisition",
+      "status": "PASS",
+      "expected_scheduler_status": "success",
+      "wait_and_observe_ms": 19089,
+      "execution_ids": [
+        "98",
+        "99",
+        "100"
+      ],
+      "executions": [
+        {
+          "execution_id": "98",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:20.136",
+          "stopped_at": "2026-10-29 23:34:20.693",
+          "duration_ms": 557,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "99",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:20.147",
+          "stopped_at": "2026-10-29 23:34:20.683",
+          "duration_ms": 536,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "100",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:20.159",
+          "stopped_at": "2026-10-29 23:34:20.697",
+          "duration_ms": 538,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "98",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 19,
+          "outcome": "not_started",
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "100",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 14,
+          "outcome": "not_started",
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "99",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 11,
+          "outcome": "not_started",
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "98",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 33,
+          "outcome": "updated",
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "100",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 33,
+          "outcome": "updated",
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "99",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 29,
+          "outcome": "updated",
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        }
+      ],
+      "snapshots_preserved": false
+    },
+    {
+      "name": "repeated_unchanged",
+      "status": "PASS",
+      "expected_scheduler_status": "success",
+      "wait_and_observe_ms": 9180,
+      "execution_ids": [
+        "101",
+        "102",
+        "103"
+      ],
+      "executions": [
+        {
+          "execution_id": "101",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:30.028",
+          "stopped_at": "2026-10-29 23:34:30.179",
+          "duration_ms": 151,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "102",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:30.035",
+          "stopped_at": "2026-10-29 23:34:30.286",
+          "duration_ms": 251,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "103",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:30.039",
+          "stopped_at": "2026-10-29 23:34:30.333",
+          "duration_ms": 294,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "101",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 10,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "101",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 22,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        },
+        {
+          "operation_id": "102",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 10,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "103",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 13,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "102",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 22,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        },
+        {
+          "operation_id": "103",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 33,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "created_modified_deleted",
+      "status": "PASS",
+      "expected_scheduler_status": "success",
+      "wait_and_observe_ms": 9232,
+      "execution_ids": [
+        "104",
+        "105",
+        "106"
+      ],
+      "executions": [
+        {
+          "execution_id": "104",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:40.030",
+          "stopped_at": "2026-10-29 23:34:40.192",
+          "duration_ms": 162,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "105",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:40.037",
+          "stopped_at": "2026-10-29 23:34:40.322",
+          "duration_ms": 285,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "106",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:40.043",
+          "stopped_at": "2026-10-29 23:34:40.329",
+          "duration_ms": 286,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "104",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 9,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "104",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 38,
+          "outcome": "updated",
+          "changes": {
+            "created": 1,
+            "modified": 1,
+            "deleted": 1,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "105",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 12,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "106",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 11,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "105",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 30,
+          "outcome": "updated",
+          "changes": {
+            "created": 1,
+            "modified": 1,
+            "deleted": 1,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "106",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 32,
+          "outcome": "updated",
+          "changes": {
+            "created": 1,
+            "modified": 1,
+            "deleted": 1,
+            "unchanged": 0
+          }
+        }
+      ],
+      "snapshots_preserved": false
+    },
+    {
+      "name": "duplicate_records",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 10622,
+      "execution_ids": [
+        "107",
+        "108",
+        "109"
+      ],
+      "executions": [
+        {
+          "execution_id": "107",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:50.028",
+          "stopped_at": "2026-10-29 23:34:50.628",
+          "duration_ms": 600,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "108",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:50.040",
+          "stopped_at": "2026-10-29 23:34:50.622",
+          "duration_ms": 582,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "109",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:34:50.048",
+          "stopped_at": "2026-10-29 23:34:50.636",
+          "duration_ms": 588,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [
+        "SOURCE_INVALID"
+      ],
+      "request_summary": [
+        {
+          "operation_id": "107",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 19,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "108",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 16,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "109",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 16,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "107",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 29
+        },
+        {
+          "operation_id": "108",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 22
+        },
+        {
+          "operation_id": "109",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 25
+        },
+        {
+          "operation_id": "108",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 9,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "107",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 9,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "109",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 11,
+          "operation_state": "idle"
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "empty_source",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 9063,
+      "execution_ids": [
+        "110",
+        "111",
+        "112"
+      ],
+      "executions": [
+        {
+          "execution_id": "110",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:00.041",
+          "stopped_at": "2026-10-29 23:35:00.256",
+          "duration_ms": 215,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "111",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:00.053",
+          "stopped_at": "2026-10-29 23:35:00.369",
+          "duration_ms": 316,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "112",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:00.062",
+          "stopped_at": "2026-10-29 23:35:00.374",
+          "duration_ms": 312,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [
+        "SOURCE_EMPTY"
+      ],
+      "request_summary": [
+        {
+          "operation_id": "110",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "110",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 422,
+          "delivered": true,
+          "duration_ms": 27
+        },
+        {
+          "operation_id": "110",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 19,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "111",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 10,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "112",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 10,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "111",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 422,
+          "delivered": true,
+          "duration_ms": 21
+        },
+        {
+          "operation_id": "112",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 422,
+          "delivered": true,
+          "duration_ms": 21
+        },
+        {
+          "operation_id": "111",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 13,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "112",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 13,
+          "operation_state": "idle"
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "invalid_calendar_date",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 10437,
+      "execution_ids": [
+        "113",
+        "114",
+        "115"
+      ],
+      "executions": [
+        {
+          "execution_id": "113",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:10.030",
+          "stopped_at": "2026-10-29 23:35:10.546",
+          "duration_ms": 516,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "114",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:10.038",
+          "stopped_at": "2026-10-29 23:35:10.658",
+          "duration_ms": 620,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "115",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:10.045",
+          "stopped_at": "2026-10-29 23:35:10.674",
+          "duration_ms": 629,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [
+        "SOURCE_INVALID"
+      ],
+      "request_summary": [
+        {
+          "operation_id": "113",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 10,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "113",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 29
+        },
+        {
+          "operation_id": "114",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "113",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "115",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 7,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "114",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 24
+        },
+        {
+          "operation_id": "115",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 400,
+          "delivered": true,
+          "duration_ms": 23
+        },
+        {
+          "operation_id": "114",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 9,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "115",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "temporary_source_unavailable",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 9045,
+      "execution_ids": [
+        "116",
+        "117",
+        "118"
+      ],
+      "executions": [
+        {
+          "execution_id": "116",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:20.023",
+          "stopped_at": "2026-10-29 23:35:20.214",
+          "duration_ms": 191,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "117",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:20.028",
+          "stopped_at": "2026-10-29 23:35:20.334",
+          "duration_ms": 306,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "118",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:20.034",
+          "stopped_at": "2026-10-29 23:35:20.342",
+          "duration_ms": 308,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [
+        "SOURCE_UNAVAILABLE"
+      ],
+      "request_summary": [
+        {
+          "operation_id": "116",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "116",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 28
+        },
+        {
+          "operation_id": "116",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 12,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "117",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 7,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "118",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 6,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "117",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 19
+        },
+        {
+          "operation_id": "118",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 14
+        },
+        {
+          "operation_id": "117",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 7,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "118",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 8,
+          "operation_state": "idle"
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "status_dependency_unavailable",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 9414,
+      "execution_ids": [
+        "119",
+        "120",
+        "121"
+      ],
+      "executions": [
+        {
+          "execution_id": "119",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:30.030",
+          "stopped_at": "2026-10-29 23:35:30.149",
+          "duration_ms": 119,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Stop Without Running"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "120",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:30.044",
+          "stopped_at": "2026-10-29 23:35:30.244",
+          "duration_ms": 200,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Stop Without Running"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "121",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:30.055",
+          "stopped_at": "2026-10-29 23:35:30.254",
+          "duration_ms": 199,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Stop Without Running"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [
+        "TEST_DEPENDENCY_UNAVAILABLE"
+      ],
+      "request_summary": [
+        {
+          "operation_id": "119",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 1
+        },
+        {
+          "operation_id": "120",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 1
+        },
+        {
+          "operation_id": "121",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 503,
+          "delivered": true,
+          "duration_ms": 1
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "lost_response_reconciled",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 10460,
+      "execution_ids": [
+        "122",
+        "123",
+        "124"
+      ],
+      "executions": [
+        {
+          "execution_id": "122",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:40.032",
+          "stopped_at": "2026-10-29 23:35:40.539",
+          "duration_ms": 507,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "123",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:40.039",
+          "stopped_at": "2026-10-29 23:35:40.623",
+          "duration_ms": 584,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "124",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:40.047",
+          "stopped_at": "2026-10-29 23:35:40.629",
+          "duration_ms": 582,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once",
+            "Reconcile After Uncertain Run",
+            "Record Failure After Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "122",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 5,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "122",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": false,
+          "duration_ms": 324,
+          "outcome": "updated",
+          "changes": {
+            "created": 0,
+            "modified": 2,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "123",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 5,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "124",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 5,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "123",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": false,
+          "duration_ms": 27,
+          "outcome": "updated",
+          "changes": {
+            "created": 0,
+            "modified": 2,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "124",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": false,
+          "duration_ms": 26,
+          "outcome": "updated",
+          "changes": {
+            "created": 0,
+            "modified": 2,
+            "deleted": 0,
+            "unchanged": 0
+          }
+        },
+        {
+          "operation_id": "122",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 6,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "123",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 5,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "124",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 4,
+          "operation_state": "idle"
+        }
+      ],
+      "snapshots_preserved": false
+    },
+    {
+      "name": "recovery_after_state_check",
+      "status": "PASS",
+      "expected_scheduler_status": "success",
+      "wait_and_observe_ms": 9003,
+      "execution_ids": [
+        "125",
+        "126",
+        "127"
+      ],
+      "executions": [
+        {
+          "execution_id": "125",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:50.033",
+          "stopped_at": "2026-10-29 23:35:50.222",
+          "duration_ms": 189,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "126",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:50.041",
+          "stopped_at": "2026-10-29 23:35:50.325",
+          "duration_ms": 284,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "127",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "success",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:35:50.053",
+          "stopped_at": "2026-10-29 23:35:50.342",
+          "duration_ms": 289,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Run Fixture Flow Once"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "125",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 6,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "125",
+          "category": "news",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 18,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        },
+        {
+          "operation_id": "126",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 17,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "127",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 15,
+          "operation_state": "idle"
+        },
+        {
+          "operation_id": "126",
+          "category": "calls",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 24,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        },
+        {
+          "operation_id": "127",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/run",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 15,
+          "outcome": "unchanged",
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          }
+        }
+      ],
+      "snapshots_preserved": true
+    },
+    {
+      "name": "busy_state_no_automatic_recovery",
+      "status": "PASS",
+      "expected_scheduler_status": "error",
+      "wait_and_observe_ms": 10450,
+      "execution_ids": [
+        "128",
+        "129",
+        "130"
+      ],
+      "executions": [
+        {
+          "execution_id": "128",
+          "workflow_id": "BchOe2A012mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:36:00.038",
+          "stopped_at": "2026-10-29 23:36:00.141",
+          "duration_ms": 103,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Require Operator Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "129",
+          "workflow_id": "BchOe2A010mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:36:00.046",
+          "stopped_at": "2026-10-29 23:36:00.481",
+          "duration_ms": 435,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Require Operator Reconciliation"
+          ],
+          "scenario_execution": true
+        },
+        {
+          "execution_id": "130",
+          "workflow_id": "BchOe2A011mvu6isyp",
+          "mode": "trigger",
+          "status": "error",
+          "retry_of": null,
+          "started_at": "2026-10-29 23:36:00.055",
+          "stopped_at": "2026-10-29 23:36:00.474",
+          "duration_ms": 419,
+          "nodes": [
+            "Accelerated Test Every 10 Seconds",
+            "Fixture Configuration",
+            "Check Last Valid State",
+            "Admit Only Idle State",
+            "Require Operator Reconciliation"
+          ],
+          "scenario_execution": true
+        }
+      ],
+      "http_error_codes": [],
+      "request_summary": [
+        {
+          "operation_id": "128",
+          "category": "news",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 11,
+          "operation_state": "running"
+        },
+        {
+          "operation_id": "129",
+          "category": "academic_offer",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 6,
+          "operation_state": "running"
+        },
+        {
+          "operation_id": "130",
+          "category": "calls",
+          "endpoint": "/internal/oe2/status",
+          "status": 200,
+          "delivered": true,
+          "duration_ms": 3,
+          "operation_state": "running"
+        }
+      ],
+      "snapshots_preserved": true
+    }
+  ],
+  "protection": {
+    "read_only_fingerprint_tables": 38,
+    "protected_data_unchanged": true,
+    "fingerprint_scope": "38 tables readable by the existing runtime role in banuchat, banuchat_auth and banuchat_aux; no privilege escalation or direct chunk-table read",
+    "ccd_current_preserved": true,
+    "ccd_schema_version": "ccd-1.4.0",
+    "conversation_workflow_unchanged": true,
+    "agent_mcp_code_changed": false,
+    "source_fixtures_modified": false,
+    "sql_publications": 0
+  },
+  "final": {
+    "test_schedules_inactive": true,
+    "no_execution_after_deactivation": true,
+    "test_services_stopped": true,
+    "n8n_health": 200,
+    "api_anonymous_status": 401,
+    "conversation_webhook": 200,
+    "conversation_correlation": true
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "build": "PASS",
+    "rag_unit": {
+      "tests": 247,
+      "pass": 247,
+      "fail": 0,
+      "skip": 0,
+      "oe2_tests_included": 15
+    },
+    "independent_fixture_reference": {
+      "records_correct": 6,
+      "records_total": 6,
+      "fields_correct": 42,
+      "fields_total": 42
+    },
+    "initial_unit_run": {
+      "pass": 243,
+      "fail": 4,
+      "reason": "SOURCE_REJECTED/read on schema reads in the OneDrive workspace; exact cause not established; focused rerun 4/4 and full rerun 247/247 passed without corpus or SafeReader changes"
+    },
+    "db_e2e": "NOT_EXECUTED",
+    "oe1_benchmarks": "NOT_EXECUTED",
+    "android": "NOT_EXECUTED"
+  },
+  "integration": {
+    "oe2_output": "Validated local snapshots and execution journal",
+    "consumed_by_banuchat_services": false,
+    "existing_automatic_publication_adapter": false,
+    "ingestion_boundary": "Requires a complete reviewed candidate, approval registry, immutable source identity and explicit release publication. No OE2 adapter exists. Calendar synchronization covers only calendar events.",
+    "institutional_update_sla_verified": false
+  }
+}

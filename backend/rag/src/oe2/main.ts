@@ -4,24 +4,23 @@ import { FileOe2StateStore, runOe2FixtureFlow } from './flow.js';
 import { createOe2HttpServer } from './server.js';
 import type { Oe2Category } from './types.js';
 
-const FIXTURE_SOURCE_IDS: Record<Oe2Category, string> = {
-  academic_offer: 'fixture-academic-offer-v1', calls: 'fixture-calls-v1', news: 'fixture-news-v1',
-};
+export function createOe2FixtureService(fixtureRoot:string,stateRoot:string) {
+  const fixtures=path.resolve(fixtureRoot),state=path.resolve(stateRoot);
+  const contains=(a:string,b:string)=>{const relative=path.relative(a,b);return relative===''||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative));};
+  if(contains(fixtures,state)||contains(state,fixtures))throw new Error('OE2 roots must be disjoint');
+  const store=new FileOe2StateStore(state);
+  return {
+    run:(category:Oe2Category,sourceId:string,operationId?:string)=>runOe2FixtureFlow({category,sourceId,fixtureRoot:fixtures,store,...(operationId?{operationId}:{})}),
+    status:(category:Oe2Category)=>store.status(category),
+  };
+}
 
 export async function startOe2FixtureService(env: NodeJS.ProcessEnv = process.env): Promise<void> {
   const fixtureRoot = env.BANUCHAT_OE2_FIXTURE_ROOT;
   const stateRoot = env.BANUCHAT_OE2_STATE_ROOT;
   const serviceToken = env.BANUCHAT_OE2_SERVICE_TOKEN;
   if (!fixtureRoot || !stateRoot || !serviceToken) throw new Error('Invalid OE2 runtime configuration');
-  const store = new FileOe2StateStore(path.resolve(stateRoot));
-  const service = {
-    run: (category: Oe2Category, sourceId: string) => runOe2FixtureFlow({
-      category, sourceId, fixtureRoot: path.resolve(fixtureRoot), store,
-    }),
-    status: async (category: Oe2Category) => (await store.load(category)) ?? {
-      outcome: 'not_started', category, source_id: FIXTURE_SOURCE_IDS[category], published_to_ccd: false,
-    },
-  };
+  const service = createOe2FixtureService(fixtureRoot,stateRoot);
   const server = createOe2HttpServer(service, serviceToken);
   await new Promise<void>((resolve, reject) => {
     server.once('error', reject);

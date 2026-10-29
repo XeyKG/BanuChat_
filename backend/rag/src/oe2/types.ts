@@ -63,11 +63,15 @@ export interface Oe2ExecutionRecord {
   started_at: string;
   finished_at: string;
   outcome: 'succeeded' | 'failed';
-  error_code?: 'SOURCE_NOT_AUTHORIZED' | 'SOURCE_INVALID' | 'STATE_ERROR' | 'INTERNAL_ERROR';
+  error_code?: import('./errors.js').Oe2ErrorCode;
+  operation_id?: string;
+  duration_ms?: number;
+  result?: Oe2RunResult;
 }
 
 export interface Oe2StateStore {
   load(category: Oe2Category): Promise<Oe2Snapshot | undefined>;
   save(snapshot: Oe2Snapshot): Promise<void>;
   recordRun?(record: Oe2ExecutionRecord): Promise<void>;
+  withLease?<T>(category: Oe2Category, operation: () => Promise<T>): Promise<T>;
 }

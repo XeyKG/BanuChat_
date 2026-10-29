@@ -102,6 +102,14 @@ fuentes `fixture_only`, escucha en loopback y nunca publica en PostgreSQL/CCD. L
 workflows periódicos asociados permanecen inactivos. Esto es infraestructura reusable,
 no scraping institucional acreditado. Evaluación: `npm run evaluate:oe2`.
 
+OE2/OE4-AUTOMATION-01 comprobó los tres procesos mediante clones temporales del
+scheduler Unified a 10 segundos, con fixtures y snapshots aislados. Añade exclusión
+de escritor por categoría, rechazo de fuentes vacías, verificación del estado
+persistido, correlación y reconciliación sin retry automático. Los disparadores de
+prueba terminaron inactivos y el workflow conversacional se conservó. Los snapshots
+OE2 todavía no alimentan los servicios de BanuChat ni publican releases.
+Reproducción y límites: [evaluación de automatización](../../eval/oe2/automation/README.md).
+
 Como antecedente de la etapa 5I, este README registró **176 PASS / 0 FAIL / 0 SKIP**
 unitarios y **38 PASS / 0 FAIL / 0 SKIP** PostgreSQL, en corridas separadas sobre
 PostgreSQL 16.15 y pgvector 0.8.6. La E2E real histórica de Implementación 3 fue otra

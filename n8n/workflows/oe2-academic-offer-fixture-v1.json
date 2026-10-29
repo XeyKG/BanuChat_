@@ -3,59 +3,369 @@
   "id": "BanuChatOe2OfferFixture1",
   "nodes": [
     {
-      "parameters": { "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] } },
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
       "id": "1a7f0f8a-2f2e-4a62-9e74-2e0dc7b3f101",
       "name": "Every 6 Hours",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
-      "parameters": { "assignments": { "assignments": [
-        { "id": "4c773298-7930-466d-8f3e-efde4c184101", "name": "base_url", "value": "__BANUCHAT_OE2_BASE_URL__", "type": "string" },
-        { "id": "c130a25a-d6ed-4ca4-8e0f-a8ef67c42101", "name": "category", "value": "academic_offer", "type": "string" },
-        { "id": "8cfec830-08f1-41cc-adc9-c93b42d21101", "name": "source_id", "value": "fixture-academic-offer-v1", "type": "string" }
-      ] }, "options": {} },
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4c773298-7930-466d-8f3e-efde4c184101",
+              "name": "base_url",
+              "value": "__BANUCHAT_OE2_BASE_URL__",
+              "type": "string"
+            },
+            {
+              "id": "c130a25a-d6ed-4ca4-8e0f-a8ef67c42101",
+              "name": "category",
+              "value": "academic_offer",
+              "type": "string"
+            },
+            {
+              "id": "8cfec830-08f1-41cc-adc9-c93b42d21101",
+              "name": "source_id",
+              "value": "fixture-academic-offer-v1",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
       "id": "4f64a71f-8e0b-42b1-a4ac-f14a62125101",
       "name": "Fixture Configuration",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
-        "method": "POST", "url": "={{ $json.base_url + '/internal/oe2/status' }}",
-        "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
-        "sendBody": true, "contentType": "raw", "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ category: $json.category }) }}", "options": { "timeout": 30000 }
+        "method": "POST",
+        "url": "={{ $json.base_url + '/internal/oe2/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ category: $json.category }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-BanuChat-Operation-Id",
+              "value": "={{ $execution.id }}"
+            }
+          ]
+        }
       },
-      "id": "6e8cfa55-af08-4c97-a355-fd51964f7101", "name": "Check Last Valid State",
-      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [700, 300],
-      "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE2 Service" } },
-      "retryOnFail": false, "onError": "continueErrorOutput"
+      "id": "6e8cfa55-af08-4c97-a355-fd51964f7101",
+      "name": "Check Last Valid State",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat OE2 Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "method": "POST", "url": "={{ $('Fixture Configuration').first().json.base_url + '/internal/oe2/run' }}",
-        "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
-        "sendBody": true, "contentType": "raw", "rawContentType": "application/json",
+        "method": "POST",
+        "url": "={{ $('Fixture Configuration').first().json.base_url + '/internal/oe2/run' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
         "body": "={{ JSON.stringify({ category: $('Fixture Configuration').first().json.category, source_id: $('Fixture Configuration').first().json.source_id }) }}",
-        "options": { "timeout": 60000 }
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-BanuChat-Operation-Id",
+              "value": "={{ $execution.id }}"
+            }
+          ]
+        }
       },
-      "id": "8a15111f-4cd9-40fc-81fd-e98a81318101", "name": "Run Fixture Flow Once",
-      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [960, 260],
-      "credentials": { "httpHeaderAuth": { "id": "__RELINK_AFTER_IMPORT__", "name": "BanuChat OE2 Service" } },
-      "retryOnFail": false, "onError": "continueErrorOutput"
+      "id": "8a15111f-4cd9-40fc-81fd-e98a81318101",
+      "name": "Run Fixture Flow Once",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat OE2 Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "oe2-idle-condition",
+              "leftValue": "={{ $json.operation_state }}",
+              "rightValue": "idle",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "oe2-admission-idle",
+      "name": "Admit Only Idle State",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        930,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Fixture Configuration').first().json.base_url + '/internal/oe2/status' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ category: $('Fixture Configuration').first().json.category }) }}",
+        "options": {
+          "timeout": 30000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-BanuChat-Operation-Id",
+              "value": "={{ $execution.id }}"
+            }
+          ]
+        }
+      },
+      "id": "oe2-reconcile",
+      "name": "Reconcile After Uncertain Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1450,
+        450
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat OE2 Service"
+        }
+      },
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "OE2 status unavailable; no operation was started or retried."
+      },
+      "id": "oe2-status-failed",
+      "name": "Stop Without Running",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        950,
+        550
+      ]
+    },
+    {
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "OE2 state is busy or uncertain; no automatic recovery."
+      },
+      "id": "oe2-busy",
+      "name": "Require Operator Reconciliation",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        650
+      ]
+    },
+    {
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "OE2 run failed; last state was inspected; no automatic retry."
+      },
+      "id": "oe2-run-failed",
+      "name": "Record Failure After Reconciliation",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "OE2 run and status failed; inspect state before any further operation."
+      },
+      "id": "oe2-reconcile-failed",
+      "name": "Require Manual State Inspection",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        650
+      ]
     }
   ],
   "connections": {
-    "Every 6 Hours": { "main": [[{ "node": "Fixture Configuration", "type": "main", "index": 0 }]] },
-    "Fixture Configuration": { "main": [[{ "node": "Check Last Valid State", "type": "main", "index": 0 }]] },
-    "Check Last Valid State": { "main": [[{ "node": "Run Fixture Flow Once", "type": "main", "index": 0 }]] }
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Fixture Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fixture Configuration": {
+      "main": [
+        [
+          {
+            "node": "Check Last Valid State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Last Valid State": {
+      "main": [
+        [
+          {
+            "node": "Admit Only Idle State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop Without Running",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Admit Only Idle State": {
+      "main": [
+        [
+          {
+            "node": "Run Fixture Flow Once",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Require Operator Reconciliation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Fixture Flow Once": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Reconcile After Uncertain Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reconcile After Uncertain Run": {
+      "main": [
+        [
+          {
+            "node": "Record Failure After Reconciliation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Require Manual State Inspection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
   "versionId": "4f20bf7d-bebc-4c36-a45d-723918db1101",
-  "meta": { "templateCredsSetupCompleted": false },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
   "tags": []
 }

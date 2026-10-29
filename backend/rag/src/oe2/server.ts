@@ -2,12 +2,13 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Oe2Category, Oe2RunResult } from './types.js';
+import { Oe2FlowError } from './errors.js';
 
 const CATEGORIES = new Set<Oe2Category>(['academic_offer', 'calls', 'news']);
 const BODY_LIMIT = 16 * 1024;
 
 export interface Oe2HttpService {
-  run(category: Oe2Category, sourceId: string): Promise<Oe2RunResult>;
+  run(category: Oe2Category, sourceId: string, operationId?: string): Promise<Oe2RunResult>;
   status(category: Oe2Category): Promise<unknown>;
 }
 
@@ -35,28 +36,36 @@ async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
 }
 
 export function createOe2HttpServer(service: Oe2HttpService, serviceToken: string) {
-  if (serviceToken.length < 32) throw new Error('Invalid OE2 HTTP configuration');
+  if (serviceToken.length < 32 || /\s/u.test(serviceToken)) throw new Error('Invalid OE2 HTTP configuration');
   const expected = digest(serviceToken);
   return createServer((req, res) => void (async () => {
     if (req.method !== 'POST' || (req.url !== '/internal/oe2/run' && req.url !== '/internal/oe2/status')) {
       send(res, 404, { error_code: 'NOT_FOUND', retryable: false }); return;
     }
     if (!authenticated(req, expected)) { send(res, 401, { error_code: 'UNAUTHORIZED', retryable: false }); return; }
+    let request: Record<string,unknown>,category:Oe2Category,operationId:string|undefined;
     try {
-      const request = await body(req);
+      request = await body(req);
       if (typeof request.category !== 'string' || !CATEGORIES.has(request.category as Oe2Category)) throw new Error('category');
-      const category = request.category as Oe2Category;
+      category = request.category as Oe2Category;
+      const correlation=req.headers['x-banuchat-operation-id'];
+      if (correlation!==undefined && (typeof correlation!=='string' || !/^[a-zA-Z0-9_-]{1,100}$/u.test(correlation))) throw new Error('correlation');
+      operationId=correlation;
       if (req.url === '/internal/oe2/status') {
         if (Object.keys(request).some(key => key !== 'category')) throw new Error('fields');
-        send(res, 200, await service.status(category)); return;
-      }
-      if (Object.keys(request).some(key => !['category', 'source_id'].includes(key))
+      } else if (Object.keys(request).some(key => !['category', 'source_id'].includes(key))
         || typeof request.source_id !== 'string' || request.source_id.length === 0) throw new Error('fields');
-      send(res, 200, await service.run(category, request.source_id));
+    } catch { send(res,400,{error_code:'INVALID_REQUEST',retryable:false}); return; }
+    try {
+      if (req.url === '/internal/oe2/status') send(res,200,await service.status(category));
+      else send(res,200,await service.run(category,request.source_id as string,operationId));
     } catch (error) {
-      const code = error instanceof Error && error.message === 'OE2_SOURCE_NOT_AUTHORIZED'
-        ? 'SOURCE_NOT_AUTHORIZED' : 'INVALID_REQUEST';
-      send(res, code === 'SOURCE_NOT_AUTHORIZED' ? 403 : 400, { error_code: code, retryable: false });
+      const message=error instanceof Error?error.message:'';
+      const code=error instanceof Oe2FlowError?error.code:message==='OE2_SOURCE_NOT_AUTHORIZED'?'SOURCE_NOT_AUTHORIZED'
+        :message.startsWith('OE2_')?'SOURCE_INVALID':'INTERNAL_ERROR';
+      const status=code==='SOURCE_NOT_AUTHORIZED'?403:code==='SOURCE_INVALID'?400:code==='SOURCE_EMPTY'?422:
+        code==='RUN_IN_PROGRESS'?409:['SOURCE_UNAVAILABLE','STATE_ERROR'].includes(code)?503:500;
+      send(res,status,{error_code:code,retryable:code==='SOURCE_UNAVAILABLE'});
     }
   })().catch(() => send(res, 500, { error_code: 'INTERNAL_ERROR', retryable: false })));
 }
