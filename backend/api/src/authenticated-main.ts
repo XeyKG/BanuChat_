@@ -37,7 +37,7 @@ export async function startAuthenticatedApi(){
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
   const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,
-   ...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow}))})}:{}),
+   ...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),
    document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator},mode),artifacts});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
   let stopping=false;const stop=async()=>{if(stopping)return;stopping=true;server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool?.end();};

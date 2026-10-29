@@ -12,6 +12,7 @@
   },
   "include": [
     "scripts/*unified*.mts",
+    "scripts/evaluate-agent-orchestration.mts",
     "../../mobile/scripts/evaluate-unified-client.mts",
     "scripts/unified-check.d.ts"
   ]

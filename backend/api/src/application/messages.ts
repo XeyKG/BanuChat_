@@ -26,6 +26,7 @@ import { boundConversationContext, type ConversationMessage } from "../chat/conv
 import {
   McpAgentError,
   requiresConversationalOrchestration,
+  requiredMcpSources,
   type McpAgentInput,
 } from "../agent/bounded-mcp-agent.js";
 import {
@@ -561,6 +562,7 @@ export async function sendMessage(
       ) {
         await dependencies.conversation_orchestrator.orchestrate({
           operation_id: randomUUID(),
+          required_sources: requiredMcpSources(agentInput),
           release_id: context.dataset_release_id,
           demo_mode: "synthetic",
           route: "agent_fallback",

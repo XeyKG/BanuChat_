@@ -1,0 +1,978 @@
+{
+  "at": "2026-10-29T23:06:14.441Z",
+  "date_bogota": "2026-10-29",
+  "status": "BANUCHAT_OE3_OE4_AGENT_ORCHESTRATION_VALIDATED",
+  "baseline_commit": "f2724505fa4a0543b64644cb8ce21e36c34592a7",
+  "baseline_source_sha256": "ea25090616e068a73d05de70e476acd8995b1abca14d73082b3c59984b37896e",
+  "scenarios_sha256": "0db76c117ff287f812a3f022a1a117a501fb9f3813bbc06741804891d00d34a8",
+  "method": "Synthetic development experiment with hard B guards also applied to C. C shares the initial rule action and invokes the actual LLM only after validated observations. S13 injects admission failure; real N8N outage in operational report. Earlier initial-selection pilot kept separately. No blind or statistical claim.",
+  "model": {
+    "name": "qwen3:4b-instruct",
+    "digest": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "runtime": "0.35.0",
+    "temperature": 0,
+    "seed": 42,
+    "num_ctx": 4096,
+    "num_predict": 64,
+    "per_decision_timeout_ms": 12000
+  },
+  "planner_requests": 13,
+  "policies": [
+    {
+      "policy": "A",
+      "cases": 18,
+      "passed": 12,
+      "ordered_selection_correct": 15,
+      "outcome_correct": 12,
+      "expected_answers_complete": 5,
+      "expected_answers_total": 6,
+      "correct_abstentions": 3,
+      "expected_abstentions_total": 7,
+      "expected_errors_observed": 4,
+      "expected_errors_total": 5,
+      "unexpected_errors": 0,
+      "subject_owner_and_budget_cases_respected": false,
+      "median_case_ms": 1,
+      "max_case_ms": 4
+    },
+    {
+      "policy": "B",
+      "cases": 18,
+      "passed": 18,
+      "ordered_selection_correct": 18,
+      "outcome_correct": 18,
+      "expected_answers_complete": 6,
+      "expected_answers_total": 6,
+      "correct_abstentions": 7,
+      "expected_abstentions_total": 7,
+      "expected_errors_observed": 5,
+      "expected_errors_total": 5,
+      "unexpected_errors": 0,
+      "subject_owner_and_budget_cases_respected": true,
+      "median_case_ms": 1,
+      "max_case_ms": 144
+    },
+    {
+      "policy": "C",
+      "cases": 18,
+      "passed": 13,
+      "ordered_selection_correct": 14,
+      "outcome_correct": 13,
+      "expected_answers_complete": 2,
+      "expected_answers_total": 6,
+      "correct_abstentions": 7,
+      "expected_abstentions_total": 7,
+      "expected_errors_observed": 4,
+      "expected_errors_total": 5,
+      "unexpected_errors": 0,
+      "subject_owner_and_budget_cases_respected": true,
+      "median_case_ms": 450,
+      "max_case_ms": 6946
+    }
+  ],
+  "initial_selection_pilot": {
+    "description": "Development pilot with LLM also choosing initial action, before the observation-only C protocol",
+    "cases": 18,
+    "passed": 4
+  },
+  "scenarios": [
+    {
+      "id": "S01",
+      "category": "documental simple",
+      "expected": {
+        "tools": [
+          "search_knowledge"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 4
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 144
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 6946
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "category": "estructurada",
+      "expected": {
+        "tools": [
+          "get_courses"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_courses"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 2
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_courses"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 2
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_courses"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 420
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "category": "dos fuentes",
+      "expected": {
+        "tools": [
+          "get_profile_progress",
+          "get_announcements"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 2
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 5
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 539
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "category": "seguimiento",
+      "expected": {
+        "tools": [
+          "get_profile_progress",
+          "get_announcements"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 3
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 529
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "category": "primera fuente vacía",
+      "expected": {
+        "tools": [
+          "get_profile_progress"
+        ],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 475
+        }
+      ]
+    },
+    {
+      "id": "S06",
+      "category": "fuentes incompatibles",
+      "expected": {
+        "tools": [
+          "find_documents",
+          "search_knowledge"
+        ],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": false,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 4
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 498
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "category": "más de dos pasos",
+      "expected": {
+        "tools": [],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 2
+        },
+        {
+          "policy": "B",
+          "tools": [],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        }
+      ]
+    },
+    {
+      "id": "S08",
+      "category": "MCP malformado",
+      "expected": {
+        "tools": [
+          "search_knowledge"
+        ],
+        "outcome": "error"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 1
+        }
+      ]
+    },
+    {
+      "id": "S09",
+      "category": "MCP indisponible",
+      "expected": {
+        "tools": [
+          "search_knowledge"
+        ],
+        "outcome": "error"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "search_knowledge"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        }
+      ]
+    },
+    {
+      "id": "S10",
+      "category": "datos personales ajenos",
+      "expected": {
+        "tools": [],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "answered",
+          "pass": false,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "C",
+          "tools": [],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        }
+      ]
+    },
+    {
+      "id": "S11",
+      "category": "cambio de release",
+      "expected": {
+        "tools": [
+          "get_profile_progress",
+          "get_announcements"
+        ],
+        "outcome": "error"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 506
+        }
+      ]
+    },
+    {
+      "id": "S12",
+      "category": "instrucción recuperada maliciosa",
+      "expected": {
+        "tools": [
+          "find_documents",
+          "search_knowledge"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 1109
+        }
+      ]
+    },
+    {
+      "id": "S13",
+      "category": "N8N caído",
+      "expected": {
+        "tools": [],
+        "outcome": "error"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "C",
+          "tools": [],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        }
+      ]
+    },
+    {
+      "id": "S14",
+      "category": "metadata vacía y contenido recuperable",
+      "expected": {
+        "tools": [
+          "find_documents",
+          "search_knowledge"
+        ],
+        "outcome": "answered"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "find_documents"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "find_documents"
+          ],
+          "outcome": "abstained",
+          "pass": false,
+          "duration_ms": 426
+        }
+      ]
+    },
+    {
+      "id": "S15",
+      "category": "documento sin fragmentos",
+      "expected": {
+        "tools": [
+          "find_documents"
+        ],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "outcome": "answered",
+          "pass": false,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "find_documents"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "find_documents"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 450
+        }
+      ]
+    },
+    {
+      "id": "S16",
+      "category": "eventos ajenos a cursos observados",
+      "expected": {
+        "tools": [
+          "get_profile_progress",
+          "get_calendar_events"
+        ],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress",
+            "get_calendar_events"
+          ],
+          "outcome": "answered",
+          "pass": false,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress",
+            "get_calendar_events"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 3
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress",
+            "get_calendar_events"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 537
+        }
+      ]
+    },
+    {
+      "id": "S17",
+      "category": "presupuesto reducido",
+      "expected": {
+        "tools": [
+          "get_profile_progress"
+        ],
+        "outcome": "abstained"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 1
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "abstained",
+          "pass": true,
+          "duration_ms": 382
+        }
+      ]
+    },
+    {
+      "id": "S18",
+      "category": "propietario incompatible",
+      "expected": {
+        "tools": [
+          "get_profile_progress"
+        ],
+        "outcome": "error"
+      },
+      "observed": [
+        {
+          "policy": "A",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "answered",
+          "pass": false,
+          "duration_ms": 1
+        },
+        {
+          "policy": "B",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        },
+        {
+          "policy": "C",
+          "tools": [
+            "get_profile_progress"
+          ],
+          "outcome": "error",
+          "pass": true,
+          "duration_ms": 0
+        }
+      ]
+    }
+  ],
+  "operational": {
+    "result": "PASS",
+    "tests": [
+      {
+        "name": "authenticated_account",
+        "status": "PASS",
+        "duration_ms": 127
+      },
+      {
+        "name": "six_real_mcp_tools",
+        "status": "PASS",
+        "duration_ms": 8011
+      },
+      {
+        "name": "literal_document_search_empty_and_filter",
+        "status": "PASS",
+        "duration_ms": 4105
+      },
+      {
+        "name": "http_progress_announcements",
+        "status": "PASS",
+        "duration_ms": 9323
+      },
+      {
+        "name": "http_documents_courses",
+        "status": "PASS",
+        "duration_ms": 5006
+      },
+      {
+        "name": "http_no_evidence",
+        "status": "PASS",
+        "duration_ms": 6036
+      },
+      {
+        "name": "http_over_budget",
+        "status": "PASS",
+        "duration_ms": 745
+      },
+      {
+        "name": "http_foreign_person",
+        "status": "PASS",
+        "duration_ms": 376
+      },
+      {
+        "name": "baseline_vs_adaptive_real_mcp",
+        "status": "PASS",
+        "duration_ms": 8098
+      },
+      {
+        "name": "raw_unified_protocol_rejects_untrusted_arguments",
+        "status": "PASS",
+        "duration_ms": 3746
+      },
+      {
+        "name": "real_mcp_deadline_and_stale_pins",
+        "status": "PASS",
+        "duration_ms": 10380
+      },
+      {
+        "name": "reader_privileges",
+        "status": "PASS",
+        "duration_ms": 17
+      },
+      {
+        "name": "account_and_conversation_isolation",
+        "status": "PASS",
+        "duration_ms": 4412
+      },
+      {
+        "name": "n8n_authentication_and_invalid_transition",
+        "status": "PASS",
+        "duration_ms": 180
+      },
+      {
+        "name": "real_n8n_outage_no_turn_persistence",
+        "status": "PASS",
+        "duration_ms": 1940
+      }
+    ],
+    "six_tools": [
+      {
+        "tool": "search_knowledge",
+        "items_within_requested_limit": 5,
+        "call_duration_ms": 4256
+      },
+      {
+        "tool": "find_documents",
+        "items_within_requested_limit": 4,
+        "call_duration_ms": 26
+      },
+      {
+        "tool": "get_courses",
+        "items_within_requested_limit": 10,
+        "call_duration_ms": 24
+      },
+      {
+        "tool": "get_calendar_events",
+        "items_within_requested_limit": 10,
+        "call_duration_ms": 31
+      },
+      {
+        "tool": "get_announcements",
+        "items_within_requested_limit": 2,
+        "call_duration_ms": 25
+      },
+      {
+        "tool": "get_profile_progress",
+        "items_within_requested_limit": 5,
+        "call_duration_ms": 27
+      }
+    ],
+    "source_fingerprint_unchanged": true,
+    "fingerprint_scope": "document_versions, dataset pointers and release metadata readable by existing runtime role; no privilege escalation or direct chunk-table fingerprint",
+    "baseline_direct": [
+      {
+        "policy": "A",
+        "duration_ms": 4053
+      },
+      {
+        "policy": "B",
+        "duration_ms": 4030
+      }
+    ],
+    "http_agent_runs": [
+      {
+        "tools": [
+          "get_profile_progress",
+          "get_announcements"
+        ],
+        "call_count": 2,
+        "terminal_reason": "answered",
+        "duration_ms": 4365
+      },
+      {
+        "tools": [
+          "get_profile_progress",
+          "get_announcements"
+        ],
+        "call_count": 2,
+        "terminal_reason": "answered",
+        "duration_ms": 4263
+      },
+      {
+        "tools": [
+          "find_documents",
+          "get_courses"
+        ],
+        "call_count": 2,
+        "terminal_reason": "answered",
+        "duration_ms": 4602
+      },
+      {
+        "tools": [
+          "find_documents",
+          "search_knowledge"
+        ],
+        "call_count": 2,
+        "terminal_reason": "no_evidence",
+        "duration_ms": 5625
+      }
+    ],
+    "live_service": {
+      "api_port": 3004,
+      "result": "PASS",
+      "duration_ms": 5020,
+      "selected_tools": [
+        "get_profile_progress",
+        "get_announcements"
+      ]
+    }
+  },
+  "validation": {
+    "api_typecheck": "PASS",
+    "unified_scripts_typecheck": "PASS",
+    "mcp_typecheck": "PASS",
+    "api_selected_tests": 61,
+    "mcp_existing_tests": 24,
+    "mcp_new_adapter_tests": 4,
+    "mcp_stdio_regression_reexecuted": 9,
+    "operational_checks": 15,
+    "live_port_3004_smoke": "PASS",
+    "physical_android": "NOT_EXECUTED",
+    "oe1_43_questions": "NOT_EXECUTED"
+  },
+  "limits": [
+    "Development cases, not blind or statistical evaluation",
+    "Synthetic MCP in-memory for A/B in policy experiment; real Ollama for C",
+    "C shares rule admission and hard guards, which account for permission safety",
+    "Source coverage is a mechanical citation metric, not a general semantic correctness score",
+    "Real SQL release pointers were not changed: stale pins tested live, between-step change simulated",
+    "No direct chunk-table fingerprint or privilege escalation",
+    "Raw CCD responses and complete traces are private and Git-ignored"
+  ]
+}

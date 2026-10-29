@@ -6,6 +6,7 @@ import type {
 import type { ConversationMessage } from "../chat/conversation-context.js";
 import {
   McpClientError,
+  validateMcpObservation,
   type McpToolName,
   type McpToolSessionFactory,
 } from "./mcp-client.js";
@@ -28,6 +29,7 @@ export interface McpAgentStepTrace {
   purpose: string;
   outcome: "selected" | "success" | "no_evidence" | "error" | "continue" | "stop";
   evidence: readonly string[];
+  reason?: string;
 }
 
 export interface McpAgentTrace {
@@ -40,7 +42,10 @@ export interface McpAgentTrace {
     | "no_evidence"
     | "step_limit"
     | "tool_error"
-    | "release_changed";
+    | "release_changed"
+    | "clarification"
+    | "incompatible_evidence"
+    | "unauthorized_subject";
 }
 
 export interface McpAgentInput {
@@ -56,6 +61,8 @@ export interface McpAgentDependencies {
   /** Independent pinned source releases in the authenticated product. */
   source_releases?: {documents:string;structured:string};
   trace?: (trace: McpAgentTrace) => void;
+  /** Trusted experimental injection only; production uses the rule policy. */
+  decision_policy?: (state: AgentDecisionState) => Promise<AgentAction>;
   limits?: Partial<{
     max_steps: number;
     max_calls: number;
@@ -114,17 +121,19 @@ function calendarRange(query: string, now: string): { date_from: string; date_to
   return { date_from: today, date_to: addDays(today, 30) };
 }
 
-function planCalls(input: McpAgentInput): PlannedCall[] {
-  const current = normalized(input.query);
+function planningSubject(query: string, history: readonly ConversationMessage[] = []): string {
+  const current = normalized(query);
   const followUp = /^(?:y|tambien|ademas|entonces|cuales|esas|esos|ellos|ellas)\b/u.test(
     current.replace(/^[^\p{L}\p{N}]+/u, ""),
   );
   const previousUser = followUp
-    ? [...(input.history ?? [])].reverse().find((message) => message.role === "user")?.content
+    ? [...history].reverse().find((message) => message.role === "user")?.content
     : undefined;
-  const planningQuery = previousUser === undefined
-    ? input.query
-    : `${previousUser}\n${input.query}`;
+  return previousUser === undefined ? query : `${previousUser}\n${query}`;
+}
+
+function interpretRequests(input: McpAgentInput): PlannedCall[] {
+  const planningQuery = planningSubject(input.query, input.history);
   const text = normalized(planningQuery);
   const plans: PlannedCall[] = [];
   const profile = /\b(mi|mis|perfil|progreso|complete|completados?|inscritos?|cursando)\b/u.test(text);
@@ -147,7 +156,9 @@ function planCalls(input: McpAgentInput): PlannedCall[] {
     });
   }
   if (document) {
-    const term = planningQuery.match(/\b(?:documento|gu[ií]a|archivo)s?\b/iu)?.[0] ?? "guía";
+    const term = planningQuery.match(/[«"]([^»"]{2,500})[»"]/u)?.[1]
+      ?? planningQuery.match(/\b(?:documento|gu[ií]a|archivo)s?\s+(?:sobre\s+)?(.+?)(?:[?¿.!]|,|\s+y\s+|$)/iu)?.[1]
+      ?? "guía";
     plans.push({
       tool: "find_documents",
       input: { query: term, limit: 5 },
@@ -191,7 +202,7 @@ function planCalls(input: McpAgentInput): PlannedCall[] {
 }
 
 export function requiresConversationalOrchestration(input: McpAgentInput): boolean {
-  return planCalls(input).length > 1;
+  return requiredMcpSources(input) > 1;
 }
 
 function object(value: unknown): Record<string, unknown> {
@@ -361,115 +372,188 @@ async function beforeDeadline<T>(promise: Promise<T>, remainingMs: number): Prom
   }
 }
 
+export type AgentAction = McpToolName | "respond" | "clarify" | "abstain";
+export interface AgentDecisionState {
+  query: string;
+  allowed_actions: readonly AgentAction[];
+  recommended_action: AgentAction;
+  observations: readonly { tool: McpToolName; evidence: readonly string[]; output: Record<string, unknown> }[];
+}
+
+export function requiredMcpSources(input: McpAgentInput): number {
+  return interpretRequests(input).length;
+}
+
+export function mcpQueryRestriction(query: string, history?: readonly ConversationMessage[]): string | undefined {
+  query = planningSubject(query, history);
+  if (/\b(?:progreso|notas|perfil)\s+(?:personal\s+)?(?:de|del)\s+(?!mi\b|mis\b|demostracion\b)/u.test(normalized(query)) ||
+      /\b(?:otro|otra)\s+(?:estudiante|usuario|persona|cuenta)|\bu[0-9]{7,}\b/u.test(normalized(query))) {
+    return "Solo puedo consultar el progreso de la cuenta autenticada. No puedo consultar información personal ajena.";
+  }
+  return undefined;
+}
+
+export function clarifyMcpSources(releaseId: string): DocumentRagAnswer {
+  return insufficient(releaseId, CLARIFY_LIMIT);
+}
+
+interface Observation { plan: PlannedCall; output: Record<string, unknown> }
+
+/** Only validated identities and retrieval modes influence transitions, never content instructions. */
+function nextDecision(requests: PlannedCall[], observations: Observation[]): {
+  action: AgentAction; reason: string; allowed: AgentAction[];
+} {
+  const latest = observations.at(-1);
+  if (latest) {
+    const ids = evidenceIds(latest.plan.tool, latest.output);
+    if (ids.length === 0) {
+      if (latest.plan.tool === "find_documents" && requests.some(p => p.tool === "search_knowledge") &&
+          !observations.some(o => o.plan.tool === "search_knowledge")) {
+        return { action: "search_knowledge", reason: "metadata_empty_content_requested", allowed: ["search_knowledge", "abstain", "clarify"] };
+      }
+      return { action: "abstain", reason: "required_source_empty", allowed: ["abstain", "clarify"] };
+    }
+    if (latest.plan.tool === "find_documents" && requests.some(p => p.tool === "search_knowledge") &&
+        rows(latest.output, "documents").every(row => row.retrieval_mode === "full_document")) {
+      return { action: "clarify", reason: "full_document_metadata_only", allowed: ["clarify", "abstain"] };
+    }
+  }
+  const pending = requests.filter(p => !observations.some(o => o.plan.tool === p.tool));
+  return pending.length ? { action: pending[0]!.tool, reason: latest ? "evidence_allows_next_source" : "initial_user_intent",
+    allowed: [...pending.map(p => p.tool), "abstain", "clarify"] }
+    : { action: "respond", reason: "all_required_sources_observed", allowed: ["respond", "abstain", "clarify"] };
+}
+
+function reconcileObservations(observations: Observation[], query: string): boolean {
+  const metadata = observations.find(o => o.plan.tool === "find_documents");
+  const knowledge = observations.find(o => o.plan.tool === "search_knowledge");
+  if (metadata && knowledge && rows(metadata.output, "documents").length) {
+    const ids = new Set(rows(metadata.output, "documents").filter(r => r.retrieval_mode === "chunked").map(r => r.document_version_id));
+    const matches = rows(knowledge.output, "matches").filter(r => ids.has(r.document_version_id));
+    if (!matches.length) return false;
+    knowledge.output = { ...knowledge.output, matches, evidence: { status: "found", match_count: matches.length } };
+  }
+  const progress = observations.find(o => o.plan.tool === "get_profile_progress");
+  const calendar = observations.find(o => o.plan.tool === "get_calendar_events");
+  if (progress && calendar && /\b(?:mis cursos|mi progreso)\b/u.test(normalized(query))) {
+    const ids = new Set(rows(progress.output, "courses").map(r => r.course_key));
+    const events = rows(calendar.output, "events").filter(r => ids.has(r.course_key));
+    if (!events.length) return false;
+    calendar.output = { ...calendar.output, events };
+  }
+  return true;
+}
+
 export async function runBoundedMcpAgent(
   dependencies: McpAgentDependencies,
   input: McpAgentInput,
 ): Promise<DocumentRagAnswer> {
-  const maxSteps = dependencies.limits?.max_steps ?? 2;
-  const maxCalls = dependencies.limits?.max_calls ?? 2;
-  const maxObservationBytes = dependencies.limits?.max_observation_bytes ?? 32 * 1024;
-  const totalTimeoutMs = dependencies.limits?.total_timeout_ms ?? 30_000;
-  const planned = planCalls(input);
+  const maxSteps = Math.min(2, dependencies.limits?.max_steps ?? 2);
+  const maxCalls = Math.min(2, dependencies.limits?.max_calls ?? 2);
+  const maxObservationBytes = Math.min(32 * 1024, dependencies.limits?.max_observation_bytes ?? 32 * 1024);
+  const totalTimeoutMs = Math.min(30_000, dependencies.limits?.total_timeout_ms ?? 30_000);
+  if (![maxSteps, maxCalls, maxObservationBytes, totalTimeoutMs].every(n => Number.isInteger(n) && n > 0)) {
+    throw new McpAgentError("invalid_result");
+  }
+  const requests = interpretRequests(input);
   const traceSteps: McpAgentStepTrace[] = [];
+  const selected: McpToolName[] = [];
   const started = performance.now();
+  const remaining = (): number => totalTimeoutMs - (performance.now() - started);
   let callCount = 0;
   const finish = (terminal_reason: McpAgentTrace["terminal_reason"]): void => {
-    dependencies.trace?.({ intent_received: input.query, selected_tools: planned.map((plan) => plan.tool),
-      steps: traceSteps, call_count: callCount, terminal_reason });
+    dependencies.trace?.({ intent_received: input.query, selected_tools: [...selected],
+      steps: [...traceSteps], call_count: callCount, terminal_reason });
   };
-
-  if (planned.length > 2 && maxSteps >= 2) {
-    finish("step_limit");
-    return insufficient(input.release_id, CLARIFY_LIMIT);
-  }
+  const restriction = mcpQueryRestriction(input.query, input.history);
+  if (restriction) { finish("unauthorized_subject"); return insufficient(input.release_id, restriction); }
+  if (requests.length > 2) { finish("step_limit"); return clarifyMcpSources(input.release_id); }
 
   let session;
+  let openingExpired = false;
+  const opening = dependencies.sessions.open(input.profile_key).then(async opened => {
+    if (openingExpired) await opened.close();
+    return opened;
+  });
+  try { session = await beforeDeadline(opening, remaining()); }
+  catch { openingExpired = true; finish("tool_error"); throw new McpAgentError("dependency_unavailable"); }
+  const observations: Observation[] = [];
   try {
-    session = await beforeDeadline(
-      dependencies.sessions.open(input.profile_key),
-      totalTimeoutMs - (performance.now() - started),
-    );
-  } catch {
-    finish("tool_error");
-    throw new McpAgentError("dependency_unavailable");
-  }
-  const observations: { plan: PlannedCall; output: Record<string, unknown> }[] = [];
-  try {
-    for (let index = 0; index < planned.length; index += 1) {
-      const plan = planned[index]!;
-      const step = index + 1;
-      if (step > maxSteps || callCount >= maxCalls || performance.now() - started >= totalTimeoutMs) {
-        traceSteps.push({ step, phase: "decision", tool: plan.tool, purpose: plan.purpose,
-          outcome: "stop", evidence: [] });
-        finish("step_limit");
-        return insufficient(input.release_id, CLARIFY_LIMIT);
+    while (true) {
+      const decision = nextDecision(requests, observations);
+      let action = decision.action;
+      if (dependencies.decision_policy) {
+        action = await beforeDeadline(dependencies.decision_policy({ query: planningSubject(input.query, input.history),
+          allowed_actions: decision.allowed, recommended_action: decision.action,
+          observations: observations.map(o => ({ tool: o.plan.tool, evidence: evidenceIds(o.plan.tool, o.output), output: structuredClone(o.output) })) }), remaining());
+        if (!decision.allowed.includes(action)) throw new McpAgentError("invalid_result");
       }
+      const latest = observations.at(-1);
+      if (latest) traceSteps.push({ step: callCount, phase: "decision", tool: latest.plan.tool,
+        purpose: latest.plan.purpose, outcome: ["respond", "clarify", "abstain"].includes(action) ? "stop" : "continue",
+        evidence: evidenceIds(latest.plan.tool, latest.output), reason: decision.reason + ":" + action });
+      if (action === "clarify") {
+        finish("clarification");
+        return insufficient(input.release_id, decision.reason === "full_document_metadata_only"
+          ? "El documento localizado solo permite verificar sus metadatos. Solicita localizar el archivo para abrirlo; no puedo resumir su contenido con estas herramientas."
+          : CLARIFY_LIMIT);
+      }
+      if (action === "abstain") { finish("no_evidence"); return insufficient(input.release_id); }
+      if (action === "respond") break;
+      const plan = requests.find(p => p.tool === action)!;
+      const step = callCount + 1;
+      if (step > maxSteps || callCount >= maxCalls) { finish("step_limit"); return clarifyMcpSources(input.release_id); }
+      selected.push(plan.tool);
       traceSteps.push({ step, phase: "selection", tool: plan.tool, purpose: plan.purpose,
-        outcome: "selected", evidence: [] });
+        outcome: "selected", evidence: [], reason: decision.reason });
       let output: Record<string, unknown>;
       try {
         callCount += 1;
-        output = await beforeDeadline(
-          session.call(plan.tool, plan.input),
-          totalTimeoutMs - (performance.now() - started),
-        );
+        output = await beforeDeadline(session.call(plan.tool, plan.input), remaining());
+        if (Buffer.byteLength(JSON.stringify(output), "utf8") > maxObservationBytes) throw new McpAgentError("invalid_result");
+        validateMcpObservation(plan.tool, output);
       } catch (error) {
-        traceSteps.push({ step, phase: "execution", tool: plan.tool, purpose: plan.purpose,
-          outcome: "error", evidence: [] });
-        finish("tool_error");
-        if (error instanceof McpClientError && ["tool_unavailable", "timeout"].includes(error.reason)) {
-          throw new McpAgentError("dependency_unavailable");
-        }
+        traceSteps.push({ step, phase: "execution", tool: plan.tool, purpose: plan.purpose, outcome: "error", evidence: [] });
         if (error instanceof McpClientError && error.reason === "not_found") {
-          throw new McpAgentError("release_changed");
+          finish("release_changed"); throw new McpAgentError("release_changed");
         }
+        if (error instanceof McpClientError && ["tool_unavailable", "timeout"].includes(error.reason)) throw new McpAgentError("dependency_unavailable");
         if (error instanceof McpAgentError) throw error;
         throw new McpAgentError("invalid_result");
       }
-      if (Buffer.byteLength(JSON.stringify(output), "utf8") > maxObservationBytes) {
-        finish("tool_error");
-        throw new McpAgentError("invalid_result");
-      }
       const expectedRelease = dependencies.source_releases
-        ? (plan.tool === 'search_knowledge' || plan.tool === 'find_documents'
-          ? dependencies.source_releases.documents : dependencies.source_releases.structured)
+        ? (plan.tool === "search_knowledge" || plan.tool === "find_documents" ? dependencies.source_releases.documents : dependencies.source_releases.structured)
         : input.release_id;
-      if (output.release_id !== expectedRelease) {
-        finish("release_changed");
-        throw new McpAgentError("release_changed");
-      }
+      if (output.release_id !== expectedRelease) { finish("release_changed"); throw new McpAgentError("release_changed"); }
+      if (plan.tool === "get_profile_progress" && object(output.profile).profile_key !== input.profile_key) throw new McpAgentError("invalid_result");
       const evidence = evidenceIds(plan.tool, output);
       traceSteps.push({ step, phase: "observation", tool: plan.tool, purpose: plan.purpose,
-        outcome: evidence.length === 0 ? "no_evidence" : "success", evidence });
-      if (evidence.length === 0) {
-        traceSteps.push({ step, phase: "decision", tool: plan.tool, purpose: plan.purpose,
-          outcome: "stop", evidence: [] });
-        finish("no_evidence");
-        return insufficient(input.release_id);
-      }
+        outcome: evidence.length ? "success" : "no_evidence", evidence });
       observations.push({ plan, output });
-      traceSteps.push({ step, phase: "decision", tool: plan.tool, purpose: plan.purpose,
-        outcome: index + 1 < planned.length ? "continue" : "stop", evidence });
+      if (!reconcileObservations(observations, planningSubject(input.query, input.history))) {
+        traceSteps.push({ step, phase: "decision", tool: plan.tool, purpose: plan.purpose, outcome: "stop", evidence, reason: "sources_have_no_matching_identity" });
+        finish("incompatible_evidence"); return insufficient(input.release_id);
+      }
     }
-
     const rendered: RenderedObservation[] = [];
     let citationIndex = 0;
     for (const observation of observations) {
       const part = renderObservation(observation.plan.tool, observation.output, String(observation.output.release_id), citationIndex);
-      citationIndex += part.citations.length;
-      rendered.push(part);
+      citationIndex += part.citations.length; rendered.push(part);
     }
-    let content = rendered.map((part) => part.content).filter(Boolean).join("\n\n");
-    if (planned.some((plan) => plan.tool === "get_profile_progress") &&
-      planned.some((plan) => plan.tool === "get_announcements")) {
+    let content = rendered.map((part,index) => dependencies.source_releases && part.content
+      ? `${observations[index]!.plan.tool === "find_documents" || observations[index]!.plan.tool === "search_knowledge"
+        ? "Evidencia documental CCD" : "Datos auxiliares ficticios"}:\n${part.content}` : part.content).filter(Boolean).join("\n\n");
+    if (selected.includes("get_profile_progress") && selected.includes("get_announcements")) {
       content += "\n\nEstas fuentes permiten comparar progreso y convocatorias, pero no demuestran elegibilidad ni una recomendación personal.";
     }
     finish("answered");
     return { release_id: input.release_id, content, insufficient_evidence: false,
-      citations: rendered.flatMap((part) => part.citations),
-      citation_records: rendered.flatMap((part) => part.citation_records) };
+      citations: rendered.flatMap(part => part.citations), citation_records: rendered.flatMap(part => part.citation_records) };
+  } catch (error) {
+    if (!(error instanceof McpAgentError && error.reason === "release_changed")) finish("tool_error");
+    throw error instanceof McpAgentError ? error : new McpAgentError("invalid_result");
   } finally {
-    await session.close();
+    await beforeDeadline(session.close(), Math.max(1, Math.min(1_000, remaining()))).catch(() => undefined);
   }
 }
-

@@ -22,7 +22,7 @@ test("envía una operación correlacionada y valida la directiva cerrada", async
       observedAuthorization = new Headers(init?.headers).get("x-banuchat-service-token");
       assert.deepEqual(JSON.parse(String(init?.body)), input);
       return new Response(JSON.stringify({ operation_id: OPERATION,
-        directive: "invoke_bounded_mcp_agent", workflow: "oe4-conversation-v1" }),
+        release_id: RELEASE, state: "authorized", directive: "invoke_bounded_mcp_agent", workflow: "oe4-conversation-v1" }),
       { status: 200, headers: { "Content-Type": "application/json" } });
     },
   });
@@ -72,4 +72,27 @@ test("configuración N8N es opcional pero no admite valores parciales", () => {
   assert.deepEqual(loadN8nConversationRuntimeConfig({ BANUCHAT_N8N_SERVICE_TOKEN: TOKEN,
     BANUCHAT_N8N_CONVERSATION_URL: "http://127.0.0.1:5678/hook" }),
   { service_token: TOKEN, url: "http://127.0.0.1:5678/hook", timeout_ms: 4000 });
+});
+
+test('admission asks for clarification over two sources and correlates the release',async()=>{
+ const request={...input,required_sources:3};
+ const orchestrator=new N8nConversationOrchestrator({url:'http://127.0.0.1:15679/hook',service_token:TOKEN,
+  fetch:async()=>new Response(JSON.stringify({operation_id:OPERATION,release_id:RELEASE,state:'clarification_required',
+   directive:'request_clarification',workflow:'oe4-conversation-v1'}),{headers:{'Content-Type':'application/json'}})});
+ assert.equal((await orchestrator.orchestrate(request)).directive,'request_clarification');
+});
+
+test('admission rejects wrong release, state, directive and extra capabilities',async()=>{
+ const valid={operation_id:OPERATION,release_id:RELEASE,state:'authorized',directive:'invoke_bounded_mcp_agent',workflow:'oe4-conversation-v1'};
+ for(const extra of [{release_id:OPERATION},{state:'clarification_required'},{directive:'request_clarification'},{tools:['write_sql']}]){
+  const orchestrator=new N8nConversationOrchestrator({url:'http://127.0.0.1:15679/hook',service_token:TOKEN,
+   fetch:async()=>new Response(JSON.stringify({...valid,...extra}),{headers:{'Content-Type':'application/json'}})});
+  await assert.rejects(orchestrator.orchestrate(input),ConversationOrchestrationError);
+ }
+});
+
+test('invalid source budgets are rejected before network access',async()=>{
+ const orchestrator=new N8nConversationOrchestrator({url:'http://127.0.0.1:15679/hook',service_token:TOKEN,fetch:async()=>{throw new Error('must not call');}});
+ for(const required_sources of [0,-1,7,1.5,NaN])await assert.rejects(orchestrator.orchestrate({...input,required_sources}),
+  e=>e instanceof ConversationOrchestrationError&&e.reason==='invalid_response');
 });

@@ -1,8 +1,9 @@
-export type ConversationOrchestrationDirective = "invoke_bounded_mcp_agent";
+export type ConversationOrchestrationDirective = "invoke_bounded_mcp_agent" | "request_clarification";
 
 export interface ConversationOrchestrationInput {
   operation_id: string;
   release_id: string;
+  required_sources?: number;
   demo_mode: "synthetic" | "ccd_local";
   route: "agent_fallback";
   requested_capability: "bounded_mcp_agent";
@@ -11,6 +12,8 @@ export interface ConversationOrchestrationInput {
 export interface ConversationOrchestrationResult {
   operation_id: string;
   directive: ConversationOrchestrationDirective;
+  release_id: string;
+  state: "authorized" | "clarification_required";
   workflow: "oe4-conversation-v1";
 }
 
@@ -58,24 +61,28 @@ function validUrl(value: string): URL {
   return parsed;
 }
 
-function validResult(value: unknown, operationId: string): ConversationOrchestrationResult {
+function validResult(value: unknown, input: ConversationOrchestrationInput): ConversationOrchestrationResult {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new ConversationOrchestrationError("invalid_response");
   }
   const result = value as Record<string, unknown>;
+  const needsClarification = (input.required_sources ?? 2) > 2;
+  const directive = needsClarification ? "request_clarification" : "invoke_bounded_mcp_agent";
+  const state = needsClarification ? "clarification_required" : "authorized";
   if (
     Object.keys(result).some(
-      (key) => !["operation_id", "directive", "workflow"].includes(key),
+      (key) => !["operation_id", "directive", "workflow", "release_id", "state"].includes(key),
     ) ||
-    result.operation_id !== operationId ||
-    result.directive !== "invoke_bounded_mcp_agent" ||
+    result.operation_id !== input.operation_id ||
+    result.release_id !== input.release_id || result.state !== state ||
+    result.directive !== directive ||
     result.workflow !== "oe4-conversation-v1"
   ) {
     throw new ConversationOrchestrationError("invalid_response");
   }
   return {
-    operation_id: operationId,
-    directive: "invoke_bounded_mcp_agent",
+    operation_id: input.operation_id, release_id: input.release_id, state,
+    directive,
     workflow: "oe4-conversation-v1",
   };
 }
@@ -103,7 +110,8 @@ export class N8nConversationOrchestrator implements ConversationOrchestrator {
   async orchestrate(
     input: ConversationOrchestrationInput,
   ): Promise<ConversationOrchestrationResult> {
-    if (!UUID_PATTERN.test(input.operation_id) || !UUID_PATTERN.test(input.release_id)) {
+    if (!UUID_PATTERN.test(input.operation_id) || !UUID_PATTERN.test(input.release_id) ||
+        !Number.isInteger(input.required_sources ?? 2) || (input.required_sources ?? 2) < 1 || (input.required_sources ?? 2) > 6) {
       throw new ConversationOrchestrationError("invalid_response");
     }
     const controller = new AbortController();
@@ -136,7 +144,7 @@ export class N8nConversationOrchestrator implements ConversationOrchestrator {
       } catch {
         throw new ConversationOrchestrationError("invalid_response");
       }
-      const result = validResult(value, input.operation_id);
+      const result = validResult(value, input);
       this.options.trace?.(result);
       return result;
     } catch (error) {

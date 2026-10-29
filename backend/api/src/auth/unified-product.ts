@@ -6,7 +6,7 @@ import {getAnnouncements} from '../application/announcements.js';
 import {dispatchChatQuery} from '../chat/chat-dispatcher.js';
 import type {DocumentRagResponder,McpAgentResponder} from '../application/messages.js';
 import type {IntentRouter} from '../routing/intent-router-types.js';
-import {requiresConversationalOrchestration,runBoundedMcpAgent} from '../agent/bounded-mcp-agent.js';
+import {requiresConversationalOrchestration,runBoundedMcpAgent,requiredMcpSources,clarifyMcpSources,mcpQueryRestriction} from '../agent/bounded-mcp-agent.js';
 import {StdioMcpClientFactory} from '../agent/mcp-client.js';
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
 import {randomUUID} from 'node:crypto';
@@ -36,6 +36,8 @@ export const unifiedAnnouncements=(sql:SqlQueryClient,input:Parameters<typeof ge
 export function unifiedResponder(input:{sql:SqlQueryClient;router:IntentRouter;rag:DocumentRagResponder;principal:string;aux:AuxiliaryContext;
  mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator}):McpAgentResponder{
  return async query=>{
+  const restriction=mcpQueryRestriction(query.query,query.history);
+  if(restriction)return {release_id:query.release_id,content:restriction,insufficient_evidence:true,citations:[],citation_records:[]};
   const decision=input.router.route({content:query.query,context:{profile_selected:true,now:query.now}});
   const bound={...query,profile_key:input.aux.profile_key};
   if(decision.route==='capabilities_help')return {release_id:query.release_id,content:'Puedo ayudarte a consultar documentos CCD con sus fuentes, tu progreso y cursos, el calendario, noticias y convocatorias, y tus conversaciones anteriores.',insufficient_evidence:false,citations:[],citation_records:[]};
@@ -66,10 +68,16 @@ export function unifiedResponder(input:{sql:SqlQueryClient;router:IntentRouter;r
   }
   if(requiresConversationalOrchestration(bound)){
    if(!input.orchestrator)throw new AuthError('DEPENDENCY_UNAVAILABLE');
-   await input.orchestrator.orchestrate({operation_id:randomUUID(),release_id:query.release_id,demo_mode:'ccd_local',route:'agent_fallback',requested_capability:'bounded_mcp_agent'});
+   const operation_id=randomUUID(),started=performance.now();
+   const admission=await input.orchestrator.orchestrate({operation_id,release_id:query.release_id,required_sources:requiredMcpSources(bound),demo_mode:'ccd_local',route:'agent_fallback',requested_capability:'bounded_mcp_agent'});
+   if(admission.directive==='request_clarification')return clarifyMcpSources(query.release_id);
    const sessions=new StdioMcpClientFactory({args:['--import','tsx','src/unified-main.ts'],environment:{...input.mcp_environment,
     MCP_PRINCIPAL_ID:input.principal,MCP_DOCUMENT_RELEASE:query.release_id,MCP_STRUCTURED_RELEASE:input.aux.release_id}});
-   return runBoundedMcpAgent({sessions,source_releases:{documents:query.release_id,structured:input.aux.release_id}},bound);
+   return runBoundedMcpAgent({sessions,source_releases:{documents:query.release_id,structured:input.aux.release_id},trace:trace=>{
+    // No user text, source paths, document content, principal or credentials in runtime logs.
+    console.log(JSON.stringify({event:'unified_agent',operation_id,document_release:query.release_id,structured_release:input.aux.release_id,
+     selected_tools:trace.selected_tools,steps:trace.steps.map(({purpose,...step})=>step),call_count:trace.call_count,terminal_reason:trace.terminal_reason,duration_ms:Math.round(performance.now()-started)}));
+   }},bound);
   }
   if(['profile_progress','calendar_events','announcements','basic_social','capabilities_help'].includes(decision.route)){
    const result=await dispatchChatQuery({sql:auxiliarySql(input.sql),router:input.router},{content:query.query,profile_key:input.aux.profile_key,release_id:input.aux.release_id,now:query.now});

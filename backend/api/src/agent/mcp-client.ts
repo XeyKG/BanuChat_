@@ -151,6 +151,13 @@ function validateSuccess(
   return output as Record<string, unknown>;
 }
 
+/** Also enforce the frozen output contract for injected session implementations. */
+export function validateMcpObservation(tool: McpToolName, output: unknown): void {
+  if (!loadContract().validators.get(tool)?.output(output)) {
+    throw new McpClientError("invalid_output", tool);
+  }
+}
+
 export class StdioMcpClientFactory implements McpToolSessionFactory {
   constructor(private readonly options: StdioMcpClientOptions = {}) {}
 
@@ -213,8 +220,9 @@ export class StdioMcpClientFactory implements McpToolSessionFactory {
         } catch (error) {
           if (error instanceof McpClientError) throw error;
           const text = error instanceof Error ? `${error.name} ${error.message}` : "";
+          const code = typeof error === "object" && error !== null && "code" in error ? error.code : undefined;
           throw new McpClientError(
-            /timeout/iu.test(text) ? "timeout" : "tool_unavailable",
+            code === "REQUEST_TIMEOUT" || /timeout|timed\s+out/iu.test(text) ? "timeout" : "tool_unavailable",
             tool,
           );
         }

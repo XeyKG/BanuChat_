@@ -203,6 +203,14 @@ test("cliente API integra SDK y transporte stdio con el servidor MCP existente",
   }
 });
 
+test('SDK REQUEST_TIMEOUT is sanitized as timeout and the session closes',async()=>{
+ const factory=new StdioMcpClientFactory({args:['--import','tsx','test/stdio-fixture.ts'],environment:{FIXTURE_SLOW:'1'},call_timeout_ms:5});
+ const session=await factory.open('demo-student');
+ try{await assert.rejects(session.call('get_courses',{}),e=>e instanceof McpClientError&&e.reason==='timeout');}
+ finally{await session.close();}
+ await assert.rejects(session.call('get_courses',{}),e=>e instanceof McpClientError&&e.reason==='invalid_tool');
+});
+
 test("agent_fallback sintético atraviesa el servicio de mensajes y persiste citas MCP", async () => {
   const fake = fakeFactory();
   const sql: SqlQueryClient = { async query<T>() { return { rows: [{ dataset_release_id: RELEASE,
@@ -237,7 +245,7 @@ test("consulta multifuente atraviesa N8N antes del agente y conserva correlació
   await sendMessage({ sql, router, document_rag: async () => { throw new Error("must not call RAG"); },
     conversation_orchestrator: { async orchestrate(value) {
       operations.push("n8n"); assert.equal(value.release_id, RELEASE);
-      return { operation_id: value.operation_id, directive: "invoke_bounded_mcp_agent",
+      return { operation_id: value.operation_id, release_id: value.release_id, state: "authorized", directive: "invoke_bounded_mcp_agent",
         workflow: "oe4-conversation-v1" };
     } },
     agent_fallback: async value => { operations.push("agent"); return runBoundedMcpAgent({ sessions: fake.factory }, value); },

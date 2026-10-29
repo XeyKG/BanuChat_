@@ -14,7 +14,10 @@
       "name": "Authenticated Conversation Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [240, 300],
+      "position": [
+        240,
+        300
+      ],
       "webhookId": "a238179b-06d5-42e5-9e27-6768ea5f0101",
       "credentials": {
         "httpHeaderAuth": {
@@ -26,66 +29,218 @@
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
           "conditions": [
-            { "id": "b75a93d7-c25d-4dbb-88f0-a7f1935a0101", "leftValue": "={{ ['synthetic', 'ccd_local'].includes($json.body.demo_mode) }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } },
-            { "id": "5bd0ea18-47c3-4caa-b152-08c825b10101", "leftValue": "={{ $json.body.route }}", "rightValue": "agent_fallback", "operator": { "type": "string", "operation": "equals" } },
-            { "id": "37cc6093-8dba-4f08-82ac-5d2fa67a0101", "leftValue": "={{ $json.body.requested_capability }}", "rightValue": "bounded_mcp_agent", "operator": { "type": "string", "operation": "equals" } },
-            { "id": "619d6ed7-02e6-493f-99be-6edfb8140101", "leftValue": "={{ $json.body.operation_id }}", "rightValue": "", "operator": { "type": "string", "operation": "notEmpty", "singleValue": true } },
-            { "id": "68464613-703d-4a4c-a43b-342a40da0101", "leftValue": "={{ $json.body.release_id }}", "rightValue": "", "operator": { "type": "string", "operation": "notEmpty", "singleValue": true } }
+            {
+              "id": "b75a93d7-c25d-4dbb-88f0-a7f1935a0101",
+              "leftValue": "={{ ['synthetic', 'ccd_local'].includes($json.body.demo_mode) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "5bd0ea18-47c3-4caa-b152-08c825b10101",
+              "leftValue": "={{ $json.body.route }}",
+              "rightValue": "agent_fallback",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "37cc6093-8dba-4f08-82ac-5d2fa67a0101",
+              "leftValue": "={{ $json.body.requested_capability }}",
+              "rightValue": "bounded_mcp_agent",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "619d6ed7-02e6-493f-99be-6edfb8140101",
+              "leftValue": "={{ /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test($json.body.operation_id ?? '') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "68464613-703d-4a4c-a43b-342a40da0101",
+              "leftValue": "={{ /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test($json.body.release_id ?? '') }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "8c72f8ca-380d-4fc4-ae52-bc929c910001",
+              "leftValue": "={{ Number.isInteger($json.body.required_sources ?? 2) && ($json.body.required_sources ?? 2) >= 1 && ($json.body.required_sources ?? 2) <= 6 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
           ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "dbfae849-f6ae-4bfd-919f-b44d49c80101",
-      "name": "Supported Synthetic Branch",
+      "name": "Validate Bounded Admission",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [500, 300]
+      "position": [
+        500,
+        300
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            { "id": "83275484-abcb-44d0-b9ce-192f3c060101", "name": "operation_id", "value": "={{ $('Authenticated Conversation Webhook').first().json.body.operation_id }}", "type": "string" },
-            { "id": "dcaa9df9-4294-4180-aa5e-d708a3bb0101", "name": "directive", "value": "invoke_bounded_mcp_agent", "type": "string" },
-            { "id": "d3773a6f-f155-408c-a60a-dd9e21190101", "name": "workflow", "value": "oe4-conversation-v1", "type": "string" }
+            {
+              "id": "83275484-abcb-44d0-b9ce-192f3c060101",
+              "name": "operation_id",
+              "value": "={{ $('Authenticated Conversation Webhook').first().json.body.operation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "dcaa9df9-4294-4180-aa5e-d708a3bb0101",
+              "name": "directive",
+              "value": "={{ ($('Authenticated Conversation Webhook').first().json.body.required_sources ?? 2) > 2 ? 'request_clarification' : 'invoke_bounded_mcp_agent' }}",
+              "type": "string"
+            },
+            {
+              "id": "d3773a6f-f155-408c-a60a-dd9e21190101",
+              "name": "workflow",
+              "value": "oe4-conversation-v1",
+              "type": "string"
+            },
+            {
+              "id": "8c72f8ca-380d-4fc4-ae52-bc929c910002",
+              "name": "release_id",
+              "value": "={{ $('Authenticated Conversation Webhook').first().json.body.release_id }}",
+              "type": "string"
+            },
+            {
+              "id": "8c72f8ca-380d-4fc4-ae52-bc929c910003",
+              "name": "state",
+              "value": "={{ ($('Authenticated Conversation Webhook').first().json.body.required_sources ?? 2) > 2 ? 'clarification_required' : 'authorized' }}",
+              "type": "string"
+            }
           ]
         },
         "options": {}
       },
       "id": "47eb2261-7102-4b6a-aa59-ece989ad0101",
-      "name": "Approve Bounded Agent Transition",
+      "name": "Decide Operational Admission",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [740, 240]
+      "position": [
+        740,
+        240
+      ]
     },
     {
-      "parameters": { "respondWith": "json", "responseBody": "={{ $json }}", "options": { "responseCode": 200 } },
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
       "id": "ce51b467-497b-44af-a455-dc32500c0101",
       "name": "Return Correlated Directive",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
-      "position": [980, 240]
+      "position": [
+        980,
+        240
+      ]
     },
     {
-      "parameters": { "respondWith": "json", "responseBody": "={{ { error_code: 'UNSUPPORTED_ORCHESTRATION', retryable: false } }}", "options": { "responseCode": 422 } },
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error_code: 'UNSUPPORTED_ORCHESTRATION', retryable: false } }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
       "id": "08552431-a0de-4e66-b90d-5193f80f0101",
       "name": "Reject Unsupported Transition",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
-      "position": [740, 380]
+      "position": [
+        740,
+        380
+      ]
     }
   ],
   "connections": {
-    "Authenticated Conversation Webhook": { "main": [[{ "node": "Supported Synthetic Branch", "type": "main", "index": 0 }]] },
-    "Supported Synthetic Branch": { "main": [[{ "node": "Approve Bounded Agent Transition", "type": "main", "index": 0 }], [{ "node": "Reject Unsupported Transition", "type": "main", "index": 0 }]] },
-    "Approve Bounded Agent Transition": { "main": [[{ "node": "Return Correlated Directive", "type": "main", "index": 0 }]] }
+    "Authenticated Conversation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Bounded Admission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Bounded Admission": {
+      "main": [
+        [
+          {
+            "node": "Decide Operational Admission",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject Unsupported Transition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decide Operational Admission": {
+      "main": [
+        [
+          {
+            "node": "Return Correlated Directive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "active": false,
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
   "versionId": "6414c86f-7cb6-4517-8833-bef2f4010101",
-  "meta": { "templateCredsSetupCompleted": false },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
   "tags": []
 }
