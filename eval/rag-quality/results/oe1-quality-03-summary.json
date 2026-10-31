@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-31",
+  "timezone": "America/Bogota",
+  "scope": "OE1 focal development correction, not independent quality evaluation",
+  "baseline_commit": "e31cbbbdb58133555f771f9bc2baafa8f1d31ebd",
+  "already_implemented": {
+    "commit": "ca2408c",
+    "flow03": "Documentary/historical guards already present; preserved",
+    "flow04": "Bounded detail sections and complete paragraphs already present; residual budget/context defects corrected"
+  },
+  "controlled_comparison": {
+    "new_tests": 7,
+    "before": {
+      "pass": 2,
+      "fail": 5
+    },
+    "after": {
+      "pass": 7,
+      "fail": 0
+    },
+    "mechanisms": [
+      "Reject over-budget or instruction-bearing summary as a complete package",
+      "Skip indivisible over-budget details and inspect later fitting facts",
+      "Refuse without generation when all factual packages are rejected",
+      "Align source numbering and citations with usable factual packages"
+    ],
+    "not_a_quality_percentage": true
+  },
+  "validation": {
+    "typecheck": {
+      "command": "npm run typecheck",
+      "workdir": "backend/api",
+      "result": "PASS"
+    },
+    "regression": {
+      "command": "node --import tsx --test test/ccd-quality-budget.test.ts test/ccd-documentary-evidence.test.ts test/ccd-documentary-routing.test.ts test/ccd-query-selection.test.ts test/ccd-knowledge.test.ts test/ccd-knowledge-v2.test.ts test/ccd-knowledge-routing.test.ts test/ccd-context-adversarial.test.ts test/ccd-selector-p0.test.ts test/ccd-mode.test.ts test/ccd-operational-pilot.test.ts test/document-rag.test.ts test/document-evidence.test.ts test/document-citations.test.ts",
+      "workdir": "backend/api",
+      "pass": 214,
+      "fail": 0
+    },
+    "operational": {
+      "result": "PASS",
+      "entrypoint": "createAuthenticatedDocumentRag -> generateCcdKnowledgeAnswer",
+      "read_only": true,
+      "transaction_end": "ROLLBACK",
+      "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "cases": [
+        {
+          "scenario": "requested_detail",
+          "result": "PASS",
+          "status": "answer",
+          "citations_verified": 1,
+          "duration_ms": 4871,
+          "generator_calls": 1,
+          "requested_top_k": [
+            20
+          ]
+        },
+        {
+          "scenario": "documentary_limit",
+          "result": "PASS",
+          "status": "answer",
+          "citations_verified": 1,
+          "duration_ms": 366,
+          "generator_calls": 0,
+          "requested_top_k": [
+            20
+          ]
+        },
+        {
+          "scenario": "historical_documentary_boundary",
+          "result": "PASS",
+          "status": "answer",
+          "citations_verified": 1,
+          "duration_ms": 187,
+          "generator_calls": 0,
+          "requested_top_k": [
+            20
+          ]
+        },
+        {
+          "scenario": "unaccredited_availability",
+          "result": "PASS",
+          "status": "abstention",
+          "citations_verified": 0,
+          "duration_ms": 18,
+          "generator_calls": 0,
+          "requested_top_k": []
+        }
+      ],
+      "protected_tables": 43,
+      "tables_unchanged": true,
+      "between_passes_unchanged": true,
+      "first_probe": {
+        "checker_result": "FAIL",
+        "observed_status": "abstention",
+        "assessment": "The first checker expected an answer for a detail absent from that course. Evidence was inspected before selecting a supported detail query. Original trace retained; abstention is not classified as a product defect."
+      },
+      "sessions_created": 0,
+      "database_writes": 0,
+      "http_test": false,
+      "mobile_test": false
+    },
+    "file_integrity": {
+      "result": "PASS",
+      "protected_files": 27918,
+      "baseline_corpus_and_private_configuration_unchanged": true
+    },
+    "diff_check": "PASS"
+  },
+  "limits": [
+    "Known synthetic development controls, not a blind protocol or a new quality estimate",
+    "Contradiction test checks preserved context, not universal semantic adjudication",
+    "Lexical injection filtering is conservative, not universal protection",
+    "Oversized or rejected statements can lead to safe abstention",
+    "FLOW-05 cause remains unconfirmed; no model/prompt change",
+    "Historical and current availability guards remain intact"
+  ],
+  "preservation": {
+    "baseline_rerun": false,
+    "ragas_executed": false,
+    "flow01_02_operational_rerun": false,
+    "corpus_changed": false,
+    "model_changed": false,
+    "embeddings_changed": false,
+    "prompts_changed": false,
+    "top_k_changed": false,
+    "contracts_changed": false,
+    "schemas_changed": false,
+    "config_changed": false,
+    "services_restarted": false,
+    "commit": false,
+    "push": false
+  }
+}

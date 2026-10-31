@@ -5,9 +5,14 @@ const unsafe=/(?:ignora|ignore|desobedece|revela|reveal|override|system\s*prompt
 /** Read only bounded, published factual sections, never the rest of an artifact.
  * Details remain untrusted evidence under the existing generator instruction. */
 export function ccdEvidenceText(content:string,query:string,limit=1600):string {
+ if(!Number.isInteger(limit)||limit<=0)return '';
+ limit=Math.min(limit,1600);
  const lines=content.replace(/\r\n?/gu,'\n').split('\n');
  const statement=lines.join('\n').split(/\n\s*\n/u)[1]?.trim()??'';
- const summary=statement.split('\n').filter(line=>!unsafe.test(normalize(line))).join('\n').slice(0,limit);
+ // The statement supplies the scope for every detail. Never cut off its final
+ // condition or reconstruct it after deleting an instruction-bearing line.
+ if(!statement||statement.length>limit||unsafe.test(normalize(statement)))return '';
+ const summary=statement;
  const terms=[...new Set(normalize(query).split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>=4&&!generic.has(w)).map(w=>w.slice(0,5)))];
  const candidates:string[]=[];let section=false,code=false,paragraph:string[]=[];
  const flush=()=>{
@@ -31,6 +36,6 @@ export function ccdEvidenceText(content:string,query:string,limit=1600):string {
  }
  flush();
  let result=summary;
- for(const detail of candidates){const addition='\n'+detail;if(result.length+addition.length>limit)break;result+=addition;}
+ for(const detail of candidates){const addition='\n'+detail;if(result.length+addition.length>limit)continue;result+=addition;}
  return result;
 }
