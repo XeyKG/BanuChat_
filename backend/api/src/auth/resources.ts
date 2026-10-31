@@ -18,6 +18,7 @@ import {auxiliaryContext,unifiedProgress,unifiedCalendar,unifiedAnnouncements,un
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
 import type {PresentationCitation} from '../chat/chat-types.js';
 import {readOe2Demo,type Oe2PublicationReader,type Oe2DemoKind,type Oe2DemoFilters} from '../application/oe2-demo.js';
+import {readOe2Changes,type ChangeFilters} from '../application/oe2-changes.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -38,6 +39,11 @@ export class AuthenticatedResources {
   // Release the normal product connection before waiting on an optional source.
   await this.unit(token,async()=>undefined);
   return readOe2Demo(this.unified.oe2_reader,kind,filters,now);
+ }
+ async oe2Changes(token:string,filters:ChangeFilters){
+  if(!this.unified)throw new AuthError('NOT_FOUND');
+  await this.unit(token,async()=>undefined);
+  return readOe2Changes(this.unified.oe2_reader,filters);
  }
  private async unit<T>(token:string,operation:(c:SqlQueryClient,context:ResourceContext)=>Promise<T>,id:string|null=null,binding=false,turn=false):Promise<T>{
   try{return await this.transactions.run(async c=>{

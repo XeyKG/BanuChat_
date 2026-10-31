@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {useRouter} from 'expo-router';
+import {useRouter,useLocalSearchParams} from 'expo-router';
 import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {getOe2Demo,formatOe2CivilDate,OE2_ERROR_TEXT,OE2_STATUS_TEXT,Oe2Error,type Oe2Category,type Oe2Response,type Oe2ErrorKind,type Programming,type Publication} from '@/api/oe2-demo';
@@ -10,7 +10,10 @@ import {colors,layout,radii,spacing,typography} from '@/ui/tokens';
 const categories:[Oe2Category,string][]=[['programming','Programación'],['calls','Convocatorias'],['news','Novedades']];
 const time=(value:string)=>new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',dateStyle:'short',timeStyle:'short'}).format(new Date(value));
 export default function Oe2Screen(){
- const router=useRouter();const [category,setCategory]=useState<Oe2Category>('programming'),[status,setStatus]=useState('all'),[search,setSearch]=useState(''),[query,setQuery]=useState(''),[revision,setRevision]=useState(0);
+ const router=useRouter(),params=useLocalSearchParams<{category?:string;query?:string}>();
+ const initialCategory:Oe2Category=params.category==='calls'||params.category==='news'?params.category:'programming';
+ const initialQuery=typeof params.query==='string'&&[...params.query].length>=2&&[...params.query].length<=100?params.query:'';
+ const [category,setCategory]=useState<Oe2Category>(initialCategory),[status,setStatus]=useState('all'),[search,setSearch]=useState(initialQuery),[query,setQuery]=useState(initialQuery),[revision,setRevision]=useState(0);
  const [state,setState]=useState<'loading'|'success'|'error'>('loading'),[error,setError]=useState<Oe2ErrorKind>('connection'),[data,setData]=useState<Oe2Response|null>(null);
  useEffect(()=>{let active=true;setState('loading');setData(null);void getOe2Demo(category,query,status).then(r=>{if(active){setData(r);setState('success');}}).catch(e=>{if(active){setError(e instanceof Oe2Error?e.kind:'connection');setState('error');}});return()=>{active=false;};},[category,query,status,revision]);
  const select=(value:Oe2Category)=>{if(value===category)return;setState('loading');setCategory(value);setStatus('all');setSearch('');setQuery('');};
@@ -21,6 +24,7 @@ export default function Oe2Screen(){
   <ScreenHeader title="Publicaciones OE2" subtitle="Demostración ficticia independiente" onAction={()=>router.replace('/home')}/>
   <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
    <Text style={styles.notice}>Datos ficticios publicados por el pipeline OE2. Esta sección no contiene documentos CCD ni sustituye el calendario, catálogo o noticias habituales.</Text>
+   <AppButton label="Banu al día" variant="secondary" onPress={()=>router.push('/oe2-changes')}/>
    <View style={styles.row} accessibilityRole="radiogroup">{categories.map(([value,label])=><Pressable key={value} accessibilityRole="radio" accessibilityState={{checked:category===value}} accessibilityLabel={`OE2 ${label}`} onPress={()=>select(value)} style={[styles.chip,category===value&&styles.selected]}><Text style={styles.label}>{label}</Text></Pressable>)}</View>
    <View style={styles.search}><TextInput accessibilityLabel="Buscar publicaciones OE2" placeholder="Buscar título o código (mínimo 2 letras)" value={search} onChangeText={setSearch} style={styles.input} maxLength={100} onSubmitEditing={()=>{if(canSearch)setQuery(search.trim());}}/><AppButton label="Buscar" disabled={!canSearch} onPress={()=>setQuery(search.trim())}/></View>
    {filters.length>0&&<View style={styles.row} accessibilityRole="radiogroup">{filters.map(value=><Pressable key={value} accessibilityRole="radio" accessibilityState={{checked:status===value}} accessibilityLabel={`OE2 filtro ${value==='all'?'Todos':OE2_STATUS_TEXT[value]}`} style={[styles.chip,status===value&&styles.selected]} onPress={()=>{if(value!==status){setState('loading');setStatus(value);}}}><Text style={styles.label}>{value==='all'?'Todos':OE2_STATUS_TEXT[value]}</Text></Pressable>)}</View>}

@@ -79,7 +79,7 @@ export class AuthSession {
  private token(){if(this.access&&this.expires>this.now()+5000)return Promise.resolve(this.access);return this.refresh();}
  async resource(url:string,options:RequestInit={}):Promise<Response>{
   if(this.snapshot.phase!=='authenticated')throw new SessionError();const epoch=this.epoch,base=this.base();
-  const target=url.slice(base.length),oe2=/^\/demo\/oe2\/(?:programming|announcements)(?:\?|$)/u.test(target);
+  const target=url.slice(base.length),oe2=/^\/demo\/oe2\/(?:programming|announcements|changes)(?:\?|$)/u.test(target);
   if(!url.startsWith(base+'/')||(!oe2&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||(oe2&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
   const access=await this.token();this.check(epoch);const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+access);
   const messagePost=options.method?.toUpperCase()==='POST'&&/^\/conversations\/[^/?#]+\/messages$/u.test(url.slice(base.length));

@@ -9,6 +9,7 @@ import type {CalendarEventType} from '../application/calendar-events.js';
 import type {ProfileProgressStatus} from '../application/profile-progress.js';
 import type {AnnouncementTemporalStatus} from '../application/announcements.js';
 import {validateOe2Filters,type Oe2DemoFilters} from '../application/oe2-demo.js';
+import {validateChangeFilters,type ChangeFilters} from '../application/oe2-changes.js';
 
 const common={'Cache-Control':'no-store',Vary:'Authorization'};
 const jsonType='application/json; charset=utf-8';
@@ -38,7 +39,7 @@ function v2Links<T>(value:T):T {
   return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
-export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
+export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'|'oe2Changes'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
  async function handle(request:IncomingMessage,response:ServerResponse){
  let allow:string|undefined;
  try{
@@ -69,9 +70,10 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
   const chat=/^\/api\/v2\/conversations\/([^/]+)(\/messages)?$/u.exec(path);
   const doc=/^\/api\/v2\/documents\/([^/]+)\/artifact$/u.exec(path);
   const oe2=input.oe2_demo&&['/api/v2/demo/oe2/programming','/api/v2/demo/oe2/announcements'].includes(path)?path.endsWith('/programming')?'programming':'announcements':undefined;
+  const changes=input.oe2_demo&&path==='/api/v2/demo/oe2/changes';
   if(path==='/api/v2/conversations')allow='GET, POST';
   else if(chat)allow=chat[2]?'POST':'GET, DELETE';
-  else if(oe2 || doc || ['/api/v2/me/progress','/api/v2/calendar/events','/api/v2/announcements'].includes(path))allow='GET';
+  else if(changes || oe2 || doc || ['/api/v2/me/progress','/api/v2/calendar/events','/api/v2/announcements'].includes(path))allow='GET';
   if(!allow)throw new AuthError('NOT_FOUND');
   const method=request.method??'';if(!allow.split(', ').includes(method))throw new AuthError('METHOD_NOT_ALLOWED');
   const auth=headers.filter(([k])=>k.toLowerCase()==='authorization');const m=auth.length===1?/^Bearer ([A-Za-z0-9_-]{43})$/iu.exec(auth[0]![1]):null;
@@ -89,6 +91,12 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
    parsed=parseBody(body);
   }
   const now=(input.now??(()=>new Date().toISOString()))();const resources=input.resources;
+  if(changes){
+   params(q,['category','change_type','limit']);const filters:ChangeFilters={};
+   for(const key of ['category','change_type']as const){const value=single(q,key);if(value!==undefined)Object.assign(filters,{[key]:value});}
+   const n=limit(q);if(n!==undefined)filters.limit=n;validateChangeFilters(filters);
+   if(!resources.oe2Changes)throw new AuthError('DEPENDENCY_UNAVAILABLE');reply(response,200,await resources.oe2Changes(token,filters));return;
+  }
   if(oe2){
    params(q,oe2==='programming'?['query','mode','limit']:['query','type','temporal_status','limit']);
    const filters:Oe2DemoFilters={};for(const key of ['query','mode','type','temporal_status']as const){const v=single(q,key);if(v!==undefined)Object.assign(filters,{[key]:v});}

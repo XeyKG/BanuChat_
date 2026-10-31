@@ -1,5 +1,54 @@
 # Contrato REST v2 — BanuChat
 
+## Revisión 5.2.0 — Banu al día
+
+BANU-AL-DIA-01 autoriza un único GET adicional, exclusivamente en Unified local:
+`/api/v2/demo/oe2/changes`. Usa Bearer, autorización de recursos y el lector fixture
+existentes. Cuerpo vacío; métodos ajenos 405 con Allow GET; parámetros únicos:
+`category=academic_offer|calls|news`, `change_type=created|modified|removed` y
+`limit=1..50` (defecto 20). Desconocidos, duplicados o inválidos: 400. No se admiten
+IDs de releases/fuentes, SQL, rutas ni selectores de perfil. Las rutas anteriores
+conservan su semántica. Respuestas no-store, Vary Authorization.
+
+El historial se lee en un solo snapshot REPEATABLE READ READ ONLY con el mismo
+marker/rol/destino del lector. Orden: published_at persistido en UTC a **seis
+decimales**, no UUID, inserción o nombre de workflow. Current debe ser la última
+publicación ready y su predecesora es la inmediata anterior por ese orden. No hay
+secuencia persistida que resuelva empates: fechas idénticas se rechazan con 503,
+sin fabricar desempate. También se rechazan current no ready/no más reciente,
+timeline inválido o mayor de 100 releases ready, candidatos corruptos/incompatibles
+y aprobación no vinculada al hash. No se saltan publicaciones para elegir otra
+pareja conveniente. Una única release válida devuelve `no_previous`, sin altas
+artificiales ni contadores de cambios.
+
+La respuesta `oe2_changes_response` contiene fictional_auxiliary, current/previous
+release y fechas de publicación en BanuChat, comparison_status, counts globales
+(created/modified/removed/unchanged), matched_count, has_more y tarjetas filtradas.
+Sin predecesora, previous_release_id/previous_published_at son null y los contadores
+y tarjetas están vacíos. Los contadores globales no cambian al filtrar; matched_count
+cuenta las tarjetas coincidentes antes del límite. Un vacío filtrado conserva ambas
+releases y el estado compared.
+
+La identidad es (categoría, fuente admitida, record_id). Ambos candidatos y sus
+proyecciones SQL se revalidan. El comparador usa todos los campos compatibles del
+registro, incluidos título y versión; normaliza instantes equivalentes y conserva
+fechas civiles. Los hashes verifican integridad, no convierten diferencias de bytes
+de snapshot en cambios semánticos. available_at no participa en la clasificación.
+
+Cada tarjeta incluye identidad, categoría, tipo, título, current_available, orígenes
+anterior/actual y solo campos distintos con before/after; null expresa ausencia.
+Un retirado tiene current_available=false y current_source=null, y no enlaza a la
+publicación actual. Origen público: source_id, record_id, source_version,
+source_published_at y observed_at. published_at del envelope es publicación en
+BanuChat; source_published_at pertenece al contenido; observed_at es available_at
+del snapshot utilizado, **no** la primera detección demostrada ni la causa del cambio.
+No se devuelven candidatos, snapshots crudos, paths, approval_ref o hashes internos.
+El comparador no registra lecturas personales ni produce push/notificaciones.
+
+Fuente ausente o inconsistencia histórica: 503 DEPENDENCY_UNAVAILABLE saneado;
+login, historial, chat CCD y demás recursos no dependen de esta comparación. No
+hay migraciones, escrituras de fuente, publicaciones nuevas o integración MCP/RAG.
+
 ## Revisión 5.1.0 — lectura OE2 opcional de demostración
 
 PRODUCT-OE2-MOBILE-04 autoriza únicamente dos GET adicionales en Unified local:

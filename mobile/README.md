@@ -1,5 +1,12 @@
 # BanuChat Mobile
 
+**Banu al día** se abre desde Publicaciones OE2. Compara dos releases ficticias,
+muestra resumen global, filtros y campos Antes/Ahora, con publicación de BanuChat,
+fecha del origen y observación del snapshot diferenciadas. No es un contador de
+notificaciones personales. Las retiradas no enlazan a registros actuales. La
+pantalla maneja vacío filtrado, ausencia de predecesora, carga, error y reintento,
+usando el transporte de sesión existente y las fechas civiles sin convertir a UTC.
+
 PRODUCT-OE2-MOBILE-04 añade **Publicaciones OE2** a Home autenticada. Consume
 solo los GET `/api/v2/demo/oe2/programming` y `/api/v2/demo/oe2/announcements` con
 Bearer existente. Muestra programación de grupos, convocatorias y novedades

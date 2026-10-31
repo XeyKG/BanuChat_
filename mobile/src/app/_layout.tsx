@@ -31,6 +31,7 @@ function Navigation(){
           <Stack.Screen name="announcements" />
           <Stack.Screen name="notifications" />
           <Stack.Screen name="oe2" />
+          <Stack.Screen name="oe2-changes" />
         </Stack.Protected>
       </Stack>
     </View>

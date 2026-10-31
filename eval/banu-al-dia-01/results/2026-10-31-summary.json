@@ -1,0 +1,267 @@
+{
+  "status": "BANUCHAT_AL_DIA_ANDROID_VALIDATED",
+  "scope": "fictional_auxiliary_only",
+  "baseline_commit": "278b353e4ca5e6144ba2dcdddd90d5bc22f655c5",
+  "rest": [
+    {
+      "at": "2026-10-31T04:43:49.756Z",
+      "phase": "comparison",
+      "result": "PASS",
+      "checks": [
+        {
+          "name": "auth_filters_and_methods",
+          "status": "PASS",
+          "duration_ms": 165,
+          "evidence": {
+            "anonymous": 401,
+            "methods": 405,
+            "invalid": 400
+          }
+        },
+        {
+          "name": "real_persisted_release_pair_and_schema",
+          "status": "PASS",
+          "duration_ms": 593,
+          "evidence": {
+            "counts": {
+              "created": 0,
+              "modified": 1,
+              "removed": 0,
+              "unchanged": 5
+            },
+            "fields": [
+              {
+                "field": "summary",
+                "before": "Contenido sintético para validar extracción y detección de cambios.",
+                "after": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia."
+              },
+              {
+                "field": "source_version",
+                "before": "fixture-pipeline-02-mvv2hih9-v2",
+                "after": "fixture-rollback-concurrency-v3"
+              }
+            ],
+            "public_schema_valid": true
+          }
+        },
+        {
+          "name": "filters_repeat_and_previous_routes_unchanged",
+          "status": "PASS",
+          "duration_ms": 3081,
+          "evidence": {
+            "same_history": true,
+            "same_response": true,
+            "existing_routes": 200
+          }
+        }
+      ]
+    },
+    {
+      "at": "2026-10-31T04:50:11.100Z",
+      "phase": "unavailable",
+      "result": "PASS",
+      "checks": [
+        {
+          "name": "auth_filters_and_methods",
+          "status": "PASS",
+          "duration_ms": 150,
+          "evidence": {
+            "anonymous": 401,
+            "methods": 405,
+            "invalid": 400
+          }
+        },
+        {
+          "name": "isolated_failure_preserves_product",
+          "status": "PASS",
+          "duration_ms": 260,
+          "evidence": {
+            "changes": 503,
+            "me": 200,
+            "progress": 200,
+            "history": 200
+          }
+        }
+      ]
+    }
+  ],
+  "comparison": {
+    "evidence_mode": "fictional_auxiliary",
+    "comparison_status": "compared",
+    "current_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+    "current_published_at": "2026-10-30T14:29:48.727734Z",
+    "previous_published_at": "2026-10-30T14:29:20.148356Z",
+    "counts": {
+      "created": 0,
+      "modified": 1,
+      "removed": 0,
+      "unchanged": 5
+    },
+    "matched_count": 1,
+    "has_more": false,
+    "changes": [
+      {
+        "id": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+        "category": "news",
+        "change_type": "modified",
+        "title": "Nueva guía demostrativa disponible — actualizada por scheduler",
+        "current_available": true,
+        "previous_source": {
+          "source_id": "fixture-news-v1",
+          "record_id": "NEWS-001",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v2",
+          "source_published_at": "2026-10-05T16:30:00.000Z",
+          "observed_at": "2026-10-30T14:29:10.220Z"
+        },
+        "current_source": {
+          "source_id": "fixture-news-v1",
+          "record_id": "NEWS-001",
+          "source_version": "fixture-rollback-concurrency-v3",
+          "source_published_at": "2026-10-05T16:30:00.000Z",
+          "observed_at": "2026-10-30T14:29:48.680Z"
+        },
+        "fields": [
+          {
+            "field": "summary",
+            "before": "Contenido sintético para validar extracción y detección de cambios.",
+            "after": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia."
+          },
+          {
+            "field": "source_version",
+            "before": "fixture-pipeline-02-mvv2hih9-v2",
+            "after": "fixture-rollback-concurrency-v3"
+          }
+        ]
+      }
+    ]
+  },
+  "integrity": {
+    "at": "2026-10-31T04:55:57.816Z",
+    "mode": "Existing fixture reader role; BEGIN READ ONLY; no pipeline execution or publication",
+    "initially_running": true,
+    "result": "PASS",
+    "current": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "retained_releases": 6,
+    "source_snapshots": 18,
+    "candidate_hashes_and_all_projected_rows_intact": true,
+    "final_running": true
+  },
+  "android": {
+    "at": "2026-10-31T04:57:42.136Z",
+    "result": "PASS",
+    "device": {
+      "authorized_devices": 1,
+      "android": "10",
+      "build_installed": true,
+      "model": "YAL-L21"
+    },
+    "native_ccd_chat": {
+      "messages": 2,
+      "citations": 1,
+      "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "while_oe2_stopped": true
+    },
+    "before_after_matches_persisted_values": true,
+    "removed_filter_empty_as_expected": true,
+    "recovery_same_comparison": true,
+    "mobile_logged_out": true,
+    "oe2_all_rows_unchanged": true,
+    "unified_protected_tables_unchanged": 20,
+    "private_configuration_unchanged": true,
+    "n8n_workflow_unchanged": true,
+    "oe2_schedules_inactive": true,
+    "screenshots": [
+      {
+        "name": "01-home.png",
+        "sha256": "864c57c4986b5036b7639161ddcb853fdc5ea088684c784cfe3c1d8323510652"
+      },
+      {
+        "name": "02-radar-loading.png",
+        "sha256": "0298d3d0a6fd66df1a2a902cd0406b0026bfecf63f4c036daa509760d98d1aff"
+      },
+      {
+        "name": "03-radar.png",
+        "sha256": "8cc10c44266abd2f6d2f0c9bb9a3f33382d748bdf732a601e42a4e1672f2fa90"
+      },
+      {
+        "name": "04-summary.png",
+        "sha256": "3c91b38dc1b116c388da39d3cec88675bfb25c2881c1ea74a04c2edfd510b89f"
+      },
+      {
+        "name": "05-before-after.png",
+        "sha256": "122e8b5abad01b586cbbadeb4c4829d94f47a332212f8c02dba66f998713d1ea"
+      },
+      {
+        "name": "06-before-after.png",
+        "sha256": "76ee9155d2f72ae53448bbdd4df42330bfaf641b9504a73ce19165c1fd08bd4d"
+      },
+      {
+        "name": "07-current-publication.png",
+        "sha256": "4a5b1487900a45d303528ca64a8728b95a9da6d0dfd21ae13d8ff49266de751b"
+      },
+      {
+        "name": "08-removed-filter.png",
+        "sha256": "62c6ef6b6164dee12d1de192f21056d22ffef454969af438b48a6f376c1ec250"
+      },
+      {
+        "name": "09-category-filter.png",
+        "sha256": "ff51a3333d1669f042e551c25a8ae3e266a427df1a3f6d2103cb588d59f59702"
+      },
+      {
+        "name": "10-source-error.png",
+        "sha256": "fa866f7ebef5ac4f34d6a6a467bfd4a134b37995b2c71195aab41c55ed1c1632"
+      },
+      {
+        "name": "11-ccd-loading.png",
+        "sha256": "95a6d0f0fbc2f64db63f6f76a434ce984a1f8142593ed3555886edc61464ec24"
+      },
+      {
+        "name": "12-ccd-response.png",
+        "sha256": "756f4e3f6b1ea65c69c374fd0da4f1e3de87a04bc9a73b6a3ef57bdb46d7b761"
+      },
+      {
+        "name": "13-retry-loading.png",
+        "sha256": "fb74ac946d9d3a29215a2a5622b663b4e588d54fcdaf21a40ff25d4677fe21b2"
+      },
+      {
+        "name": "14-recovered.png",
+        "sha256": "ccdac29c0e69af6da03e7f9341dddce43b52a74df3285699534ceadd96c83991"
+      },
+      {
+        "name": "15-logout.png",
+        "sha256": "851ebc8baa6fc33f02b61b3358611e0a5f968327d8faa80cc7cb21bcfa639dec"
+      }
+    ],
+    "n8n_health": 200,
+    "audit_session_logout": 204
+  },
+  "validation": {
+    "backend_typecheck": "PASS",
+    "backend_unified_typecheck": "PASS",
+    "mobile_typecheck": "PASS",
+    "backend_focused_tests": {
+      "pass": 20,
+      "fail": 0
+    },
+    "mobile_focused_tests": {
+      "pass": 14,
+      "fail": 0
+    }
+  },
+  "limits": [
+    "No current publication was created, changed or rolled back.",
+    "Actual current pair has no added or removed records; native removed filter was empty. Positive added/removed, first release and unchanged comparisons use in-memory fixtures.",
+    "Native session expiration was not forced; transport test covers it.",
+    "Observed time describes the snapshot observation, not first detection.",
+    "No institutional freshness, per-user unread state or notification delivery is claimed."
+  ],
+  "changes": {
+    "new_rest_operations": 1,
+    "new_database_objects": 0,
+    "new_publications": 0,
+    "new_dependencies": 0,
+    "commit": false,
+    "push": false
+  }
+}

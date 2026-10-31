@@ -3,7 +3,7 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "BanuChat REST API v2 — cuentas ficticias y conocimiento explícito",
-    "version": "5.1.0",
+    "version": "5.2.0",
     "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido. BCH-D37/CCD-AUTH-I1B: modo de conocimiento explícito por despliegue; contexto técnico CCD sin identidad institucional. Recuperación de correo suspendida."
   },
   "servers": [
@@ -1192,6 +1192,92 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/oe2_announcements_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true,
+        "x-local-unified-demo-only": true
+      }
+    },
+    "/demo/oe2/changes": {
+      "get": {
+        "operationId": "get_demo_oe2_changes",
+        "summary": "Banu al día: comparar current y predecesora aprobada por publicación UTC a microsegundos, sin desempate por UUID",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "academic_offer",
+                "calls",
+                "news"
+              ]
+            }
+          },
+          {
+            "name": "change_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created",
+                "modified",
+                "removed"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comparación ficticia determinista o ausencia explícita de predecesora; contadores globales y tarjetas filtradas.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oe2_changes_response"
                 }
               }
             }
@@ -2729,6 +2815,391 @@
             }
           }
         }
+      },
+      "oe2_change_origin": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "record_id",
+          "source_version",
+          "source_published_at",
+          "observed_at"
+        ],
+        "properties": {
+          "source_id": {
+            "enum": [
+              "fixture-academic-offer-v1",
+              "fixture-calls-v1",
+              "fixture-news-v1"
+            ]
+          },
+          "record_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "source_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "source_published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "oe2_changed_field": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "before",
+          "after"
+        ],
+        "properties": {
+          "field": {
+            "enum": [
+              "title",
+              "course_code",
+              "period",
+              "mode",
+              "start_date",
+              "end_date",
+              "audience",
+              "opens_at",
+              "closes_at",
+              "summary",
+              "source_version",
+              "source_published_at"
+            ]
+          },
+          "before": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "after": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "oe2_change": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "category",
+          "change_type",
+          "title",
+          "current_available",
+          "previous_source",
+          "current_source",
+          "fields"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^oe2-(academic_offer|calls|news)-[a-f0-9]{40}$"
+          },
+          "category": {
+            "enum": [
+              "academic_offer",
+              "calls",
+              "news"
+            ]
+          },
+          "change_type": {
+            "enum": [
+              "created",
+              "modified",
+              "removed"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "current_available": {
+            "type": "boolean"
+          },
+          "previous_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/oe2_change_origin"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/oe2_change_origin"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fields": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 12,
+            "items": {
+              "$ref": "#/components/schemas/oe2_changed_field"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "change_type": {
+                  "const": "removed"
+                }
+              },
+              "required": [
+                "change_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "current_available": {
+                  "const": false
+                },
+                "current_source": {
+                  "type": "null"
+                },
+                "previous_source": {
+                  "$ref": "#/components/schemas/oe2_change_origin"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "current_available": {
+                  "const": true
+                },
+                "current_source": {
+                  "$ref": "#/components/schemas/oe2_change_origin"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "change_type": {
+                  "const": "created"
+                }
+              },
+              "required": [
+                "change_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "previous_source": {
+                  "type": "null"
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "previous_source": {
+                  "$ref": "#/components/schemas/oe2_change_origin"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "oe2_change_counts": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "created",
+          "modified",
+          "removed",
+          "unchanged"
+        ],
+        "properties": {
+          "created": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "modified": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "removed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "unchanged": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "oe2_changes_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evidence_mode",
+          "comparison_status",
+          "current_release_id",
+          "previous_release_id",
+          "current_published_at",
+          "previous_published_at",
+          "counts",
+          "matched_count",
+          "has_more",
+          "changes"
+        ],
+        "properties": {
+          "evidence_mode": {
+            "const": "fictional_auxiliary"
+          },
+          "comparison_status": {
+            "enum": [
+              "compared",
+              "no_previous"
+            ]
+          },
+          "current_release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "previous_release_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_published_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$"
+          },
+          "previous_published_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "counts": {
+            "$ref": "#/components/schemas/oe2_change_counts"
+          },
+          "matched_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "has_more": {
+            "type": "boolean"
+          },
+          "changes": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/oe2_change"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "comparison_status": {
+                  "const": "no_previous"
+                }
+              },
+              "required": [
+                "comparison_status"
+              ]
+            },
+            "then": {
+              "properties": {
+                "previous_release_id": {
+                  "type": "null"
+                },
+                "previous_published_at": {
+                  "type": "null"
+                },
+                "counts": {
+                  "properties": {
+                    "created": {
+                      "const": 0
+                    },
+                    "modified": {
+                      "const": 0
+                    },
+                    "removed": {
+                      "const": 0
+                    },
+                    "unchanged": {
+                      "const": 0
+                    }
+                  }
+                },
+                "matched_count": {
+                  "const": 0
+                },
+                "has_more": {
+                  "const": false
+                },
+                "changes": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "previous_release_id": {
+                  "$ref": "#/components/schemas/uuid"
+                },
+                "previous_published_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{6}Z$"
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "parameters": {

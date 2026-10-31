@@ -27,10 +27,13 @@ export function parseOe2Response(value:unknown,category:Oe2Category):Oe2Response
 export async function getOe2Demo(category:Oe2Category,query='',status='all'):Promise<Oe2Response>{
  const filters=new URLSearchParams({limit:'20'});if(query.trim())filters.set('query',query.trim());
  if(category!=='programming'){filters.set('type',category);filters.set('temporal_status',status);}
+ return requestOe2(`${category==='programming'?'programming':'announcements'}?${filters}`,value=>parseOe2Response(value,category));
+}
+export async function requestOe2<T>(path:string,parse:(value:unknown)=>T):Promise<T>{
  try{
-  const r=await resourceFetch(`${getApiBaseUrl()}/demo/oe2/${category==='programming'?'programming':'announcements'}?${filters}`);
+  const r=await resourceFetch(`${getApiBaseUrl()}/demo/oe2/${path}`);
   if(r.status===401)throw new Oe2Error('session');if(r.status===503)throw new Oe2Error('unavailable');if(r.status!==200)throw new Oe2Error('connection');
-  return parseOe2Response(await r.json(),category);
+  return parse(await r.json());
  }catch(error){if(error instanceof Oe2Error)throw error;try{if(getAuthSession().getSnapshot().phase==='signed_out')throw new Oe2Error('session');}catch(sessionError){if(sessionError instanceof Oe2Error)throw sessionError;}throw new Oe2Error('connection');}
 }
 /** Civil dates are labels, never instants passed through a timezone conversion. */

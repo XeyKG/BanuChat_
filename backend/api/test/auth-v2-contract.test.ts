@@ -78,6 +78,7 @@ const expected = [
   "DELETE /conversations/{conversation_id}", "POST /conversations/{conversation_id}/messages",
   "GET /calendar/events", "GET /announcements", "GET /documents/{document_version_id}/artifact", "GET /me/progress",
   "GET /demo/oe2/programming", "GET /demo/oe2/announcements",
+  "GET /demo/oe2/changes",
 ];
 const publicIds = new Set(["login", "refresh_session", "request_password_reset", "confirm_password_reset"]);
 const methods = new Set(["get", "post", "delete"]);
@@ -87,9 +88,9 @@ function operations(): Array<{ path: string; method: string; value: ObjectValue;
     .map(([method, value]) => ({ path, method, value: object(value), item: object(item) })));
 }
 
-test("v2 retains fifteen existing operations and adds two authorized read-only OE2 operations without identity bypass", () => {
+test("v2 retains fifteen existing operations and three authorized read-only OE2 operations without identity bypass", () => {
   assert.equal(contract.openapi, "3.1.0");
-  assert.equal(object(contract.info).version, "5.1.0");
+  assert.equal(object(contract.info).version, "5.2.0");
   assert.deepEqual(contract.servers, [{ url: "/api/v2", description: "Base relativa; TLS obligatorio fuera del canal local aislado autorizado." }]);
   assert.deepEqual(operations().map(o => `${o.method.toUpperCase()} ${o.path}`), expected);
   assert.equal(operations().filter(o => o.path.startsWith("/auth/")).length, 6);
@@ -144,6 +145,15 @@ test("authorized OE2 schemas preserve civil programming, closed provenance and n
   rejects('oe2_programming',{...row,start_date:'2026-11-03T00:00:00Z'});rejects('oe2_source',{...source,source_path:'private/file'});
   const news={id:'oe2-news-'+'b'.repeat(40),type:'news',title:'Novedad ficticia',description:'Sin vencimiento',valid_from:envelope.reference_time,valid_until:null,temporal_status:'published',source:{...source,source_id:'fixture-news-v1',record_id:'NEWS-001'}};
   accepts('oe2_announcements_response',{...envelope,announcements:[news]});rejects('oe2_announcement',{...news,temporal_status:'active'});rejects('oe2_announcement',{...news,valid_until:envelope.reference_time});
+});
+
+test('Banu al día contract has explicit no-previous state, removed records without current access and no private provenance',()=>{
+ const origin={source_id:'fixture-news-v1',record_id:'NEWS-001',source_version:'fixture-v1',source_published_at:'2026-10-01T13:00:00Z',observed_at:'2026-10-30T10:00:00Z'};
+ const envelope={evidence_mode:'fictional_auxiliary',comparison_status:'no_previous',current_release_id:uuid,previous_release_id:null,current_published_at:'2026-10-30T12:00:00.000002Z',previous_published_at:null,counts:{created:0,modified:0,removed:0,unchanged:0},matched_count:0,has_more:false,changes:[]};
+ accepts('oe2_changes_response',envelope);rejects('oe2_changes_response',{...envelope,counts:{...envelope.counts,created:6}});
+ const removed={id:'oe2-news-'+'a'.repeat(40),category:'news',change_type:'removed',title:'Novedad ficticia retirada',current_available:false,previous_source:origin,current_source:null,fields:[{field:'summary',before:'Resumen original',after:null}]};
+ accepts('oe2_change',removed);rejects('oe2_change',{...removed,current_available:true});rejects('oe2_change_origin',{...origin,source_path:'internal'});rejects('oe2_change_origin',{...origin,record_sha256:'a'.repeat(64)});
+ accepts('oe2_changes_response',{...envelope,comparison_status:'compared',previous_release_id:'22222222-2222-4222-8222-222222222222',previous_published_at:'2026-10-30T12:00:00.000001Z',counts:{created:0,modified:0,removed:1,unchanged:5},matched_count:1,changes:[removed]});
 });
 
 test("AUTH-P0 request schemas reject extra identity selectors, wrong types, noncanonical UID and tokens", () => {

@@ -8,7 +8,9 @@ export interface Oe2Publication {
  valid:boolean;release_id:string;published_at:string;candidate:DemoCandidate;
  programming:Record<string,unknown>[];announcements:Record<string,unknown>[];
 }
-export interface Oe2PublicationReader {read():Promise<Oe2Publication>}
+export interface Oe2PublicationReader {read():Promise<Oe2Publication>;readHistory?:()=>Promise<Oe2PublicationHistory>}
+export interface Oe2HistoryEntry {release_id:string;published_at:string;content_sha256:string;approval_ref:string}
+export interface Oe2PublicationHistory {current_release_id:string;timeline:Oe2HistoryEntry[];publications:Oe2Publication[]}
 export interface Oe2PublicSource {source_id:string;record_id:string;source_version:string;published_at:string;record_sha256:string;snapshot_sha256:string}
 export interface Oe2Programming {id:string;title:string;course_code:string;period:string;mode:string;start_date:string;end_date:string;temporal_status:'upcoming'|'in_progress'|'finished';source:Oe2PublicSource}
 export interface Oe2Announcement {id:string;type:'calls'|'news';title:string;description:string;valid_from:string;valid_until:string|null;temporal_status:'upcoming'|'active'|'expired'|'published';source:Oe2PublicSource}
@@ -30,11 +32,10 @@ function source(c:DemoCandidate,category:'academic_offer'|'calls'|'news',id:stri
  const o=c.origins.find(r=>r.category===category&&r.record_id===id)!,a=c.artifacts.find(a=>a.category===category)!;
  return {source_id:o.source_id,record_id:o.record_id,source_version:o.source_version,published_at:new Date(o.published_at).toISOString(),record_sha256:o.record_sha256,snapshot_sha256:a.snapshot_sha256};
 }
-/** Verifies SQL projection against the approved immutable candidate before exposure. */
-export function projectOe2Publication(p:Oe2Publication,kind:Oe2DemoKind,input:Oe2DemoFilters,now:string):Oe2ProgrammingResponse|Oe2AnnouncementsResponse {
- validateOe2Filters(kind,input);
+/** Shared integrity check for current-publication and historical read paths. */
+export function validateOe2Publication(p:Oe2Publication):void {
  try{
-  if(p.valid!==true||!Number.isFinite(Date.parse(now))||!Number.isFinite(Date.parse(p.published_at))||!/^[a-f0-9-]{36}$/u.test(p.release_id))throw Error();
+  if(p.valid!==true||!Number.isFinite(Date.parse(p.published_at))||!/^[a-f0-9-]{36}$/u.test(p.release_id))throw Error();
   revalidateCandidate(p.candidate);const c=p.candidate;
   for(const [actual,expected,key]of [[p.programming,c.programming,'programming_key'],[p.announcements,c.announcements,'announcement_key']]as const){
    if(actual.length!==expected.length)throw Error();
@@ -46,6 +47,13 @@ export function projectOe2Publication(p:Oe2Publication,kind:Oe2DemoKind,input:Oe
     }
    }
   }
+ }catch{throw new AuthError('DEPENDENCY_UNAVAILABLE');}
+}
+/** Verifies SQL projection against the approved immutable candidate before exposure. */
+export function projectOe2Publication(p:Oe2Publication,kind:Oe2DemoKind,input:Oe2DemoFilters,now:string):Oe2ProgrammingResponse|Oe2AnnouncementsResponse {
+ validateOe2Filters(kind,input);
+ try{
+  if(!Number.isFinite(Date.parse(now)))throw Error();validateOe2Publication(p);const c=p.candidate;
   const envelope:Envelope={release_id:p.release_id,published_at:new Date(p.published_at).toISOString(),reference_time:now,evidence_mode:'fictional_auxiliary'};
   const matches=(text:string)=>input.query===undefined||text.toLocaleLowerCase('es').includes(input.query.toLocaleLowerCase('es'));
   const n=input.limit??20;

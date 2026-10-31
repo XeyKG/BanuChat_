@@ -283,6 +283,16 @@ mantiene su host fijo en `127.0.0.1`.
   directamente y [J2](test/intent-http-integration.test.ts) lo prueba por HTTP.
 ## Publicaciones OE2 opcionales en Unified
 
+**Banu al día (BANU-AL-DIA-01)** añade `GET /api/v2/demo/oe2/changes` para comparar
+current con la publicación ready inmediatamente anterior por fecha UTC a
+microsegundos, en el mismo lector/snapshot protegido. Empates e historia inválida
+se rechazan, sin desempatar por UUID. No escribe ni publica. Contrato:
+[REST v2 5.2.0](api-contract-v2.md). Evaluación focal, con la API normal iniciada:
+`node --import tsx scripts/evaluate-unified-oe2-changes.mts`; durante una caída
+controlada de la fuente puede usarse `--expect-unavailable`, sin que ese script
+detenga servicios. Sus expectativas reales corresponden a la pareja fixture
+auditada, no a cualquier publicación futura.
+
 PRODUCT-OE2-MOBILE-04 añade dos GET autenticados: `/api/v2/demo/oe2/programming`
 y `/api/v2/demo/oe2/announcements`. Contrato y filtros:
 [REST v2 5.1.0](api-contract-v2.md). La fuente es ficticia, separada de los datos
