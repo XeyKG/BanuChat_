@@ -1,0 +1,455 @@
+{
+  "schema_version": "product-integration-evidence-1",
+  "date_bogota": "2026-10-30",
+  "timezone": "America/Bogota",
+  "at": "2026-10-31T03:00:42.075Z",
+  "status": "BANUCHAT_UNIFIED_MULTISOURCE_REST_VALIDATED",
+  "baseline_commit": "d8bbe5780cfdbbf69c7019abbe054238dbc4ab63",
+  "evidence_basis": "12 actual product checks across initial and resumed runs, plus supplemental read-only integrity audit. Raw run files retain their FAIL statuses for evaluator defects; no claim that a corrected full HTTP runner was rerun.",
+  "diagnosis": {
+    "before_api_listener": false,
+    "before_api_entrypoint_process": false,
+    "dependencies_valid": true,
+    "action": "Started existing normal entrypoint node --import tsx scripts/start-unified.mts with unchanged private configuration",
+    "product_code_fix": false,
+    "previous_exit_cause": "NOT_ESTABLISHED_no_persistent_exit_evidence"
+  },
+  "source_releases": {
+    "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+    "auxiliary_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+    "capabilities": [
+      "chat",
+      "history",
+      "progress",
+      "calendar",
+      "announcements",
+      "documents"
+    ]
+  },
+  "checks": [
+    {
+      "name": "normal_entrypoint_authenticated",
+      "status": "PASS",
+      "duration_ms": 229
+    },
+    {
+      "name": "direct_product_resources",
+      "status": "PASS",
+      "duration_ms": 104
+    },
+    {
+      "name": "chat_progress_announcements",
+      "status": "PASS",
+      "duration_ms": 3534
+    },
+    {
+      "name": "chat_followup",
+      "status": "PASS",
+      "duration_ms": 2646
+    },
+    {
+      "name": "chat_documents_catalogue",
+      "status": "PASS",
+      "duration_ms": 2402
+    },
+    {
+      "name": "document_citation_artifact",
+      "status": "PASS",
+      "duration_ms": 37
+    },
+    {
+      "name": "chat_missing_evidence_adaptive_search",
+      "status": "PASS",
+      "duration_ms": 8213
+    },
+    {
+      "name": "chat_over_two_tools",
+      "status": "PASS",
+      "duration_ms": 168
+    },
+    {
+      "name": "chat_foreign_profile",
+      "status": "PASS",
+      "duration_ms": 92
+    },
+    {
+      "name": "remaining_mcp_sources_and_read_role",
+      "status": "PASS",
+      "duration_ms": 2917
+    },
+    {
+      "name": "n8n_admission_and_historical_recovery",
+      "status": "PASS",
+      "duration_ms": 96,
+      "evidence": {
+        "missing_auth": 403,
+        "invalid_metadata": 422,
+        "outage_repeated": false,
+        "prior_real_outage_at": "2026-10-29T23:06:42.591Z",
+        "prior_real_outage_http": 503,
+        "prior_failed_turn_messages": 0
+      }
+    },
+    {
+      "name": "owner_isolation_logout_and_reopen_history",
+      "status": "PASS",
+      "duration_ms": 265,
+      "evidence": {
+        "other_owner_get": 404,
+        "other_owner_list_omits_conversation": true,
+        "account_profiles_differ": true,
+        "revoked_access": 401,
+        "reopened_messages": 4,
+        "citations_preserved": true
+      }
+    }
+  ],
+  "turns": [
+    {
+      "name": "progress_announcements",
+      "query": "Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?",
+      "http_status": 201,
+      "duration_ms": 3492,
+      "insufficient_evidence": false,
+      "citation_counts": {
+        "profile_course": 2,
+        "announcement": 2
+      },
+      "trace": [
+        {
+          "event": "unified_n8n",
+          "operation_id": "7c03bcce-ebe8-4202-8011-cd685f1a67a1",
+          "state": "authorized",
+          "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f"
+        },
+        {
+          "event": "unified_agent",
+          "operation_id": "7c03bcce-ebe8-4202-8011-cd685f1a67a1",
+          "selected_tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "call_count": 2,
+          "terminal_reason": "answered",
+          "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+          "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+          "decisions": [
+            {
+              "tool": "get_profile_progress",
+              "outcome": "continue",
+              "reason": "evidence_allows_next_source:get_announcements"
+            },
+            {
+              "tool": "get_announcements",
+              "outcome": "stop",
+              "reason": "all_required_sources_observed:respond"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "followup",
+      "query": "¿Y qué convocatorias activas podrían interesarme?",
+      "http_status": 201,
+      "duration_ms": 2620,
+      "insufficient_evidence": false,
+      "citation_counts": {
+        "profile_course": 2,
+        "announcement": 2
+      },
+      "trace": [
+        {
+          "event": "unified_n8n",
+          "operation_id": "071a061c-7e60-4d56-bb96-350fcffc8809",
+          "state": "authorized",
+          "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f"
+        },
+        {
+          "event": "unified_agent",
+          "operation_id": "071a061c-7e60-4d56-bb96-350fcffc8809",
+          "selected_tools": [
+            "get_profile_progress",
+            "get_announcements"
+          ],
+          "call_count": 2,
+          "terminal_reason": "answered",
+          "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+          "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+          "decisions": [
+            {
+              "tool": "get_profile_progress",
+              "outcome": "continue",
+              "reason": "evidence_allows_next_source:get_announcements"
+            },
+            {
+              "tool": "get_announcements",
+              "outcome": "stop",
+              "reason": "all_required_sources_observed:respond"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "documents_catalogue",
+      "query": "Busca el documento «<título CCD seleccionado, conservado en evidencia privada>» y los cursos del catálogo",
+      "http_status": 201,
+      "duration_ms": 2354,
+      "insufficient_evidence": false,
+      "citation_counts": {
+        "document": 1,
+        "course": 5
+      },
+      "trace": [
+        {
+          "event": "unified_n8n",
+          "operation_id": "2ca1ca16-c895-47a3-a27b-d5685aa4d2ca",
+          "state": "authorized",
+          "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f"
+        },
+        {
+          "event": "unified_agent",
+          "operation_id": "2ca1ca16-c895-47a3-a27b-d5685aa4d2ca",
+          "selected_tools": [
+            "find_documents",
+            "get_courses"
+          ],
+          "call_count": 2,
+          "terminal_reason": "answered",
+          "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+          "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+          "decisions": [
+            {
+              "tool": "find_documents",
+              "outcome": "continue",
+              "reason": "evidence_allows_next_source:get_courses"
+            },
+            {
+              "tool": "get_courses",
+              "outcome": "stop",
+              "reason": "all_required_sources_observed:respond"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "no_evidence",
+      "query": "Según el documento «zxqv-sin-evidencia-product03», explica su contenido",
+      "http_status": 201,
+      "duration_ms": 8163,
+      "insufficient_evidence": true,
+      "citation_counts": {},
+      "trace": [
+        {
+          "event": "unified_n8n",
+          "operation_id": "64ffbb37-f5d0-4b5d-8a27-f9e497931ab5",
+          "state": "authorized",
+          "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f"
+        },
+        {
+          "event": "unified_agent",
+          "operation_id": "64ffbb37-f5d0-4b5d-8a27-f9e497931ab5",
+          "selected_tools": [
+            "find_documents",
+            "search_knowledge"
+          ],
+          "call_count": 2,
+          "terminal_reason": "no_evidence",
+          "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+          "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+          "decisions": [
+            {
+              "tool": "find_documents",
+              "outcome": "continue",
+              "reason": "metadata_empty_content_requested:search_knowledge"
+            },
+            {
+              "tool": "search_knowledge",
+              "outcome": "stop",
+              "reason": "required_source_empty:abstain"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "over_budget",
+      "query": "Mis cursos completados, convocatorias y calendario",
+      "http_status": 201,
+      "duration_ms": 115,
+      "insufficient_evidence": true,
+      "citation_counts": {},
+      "trace": [
+        {
+          "event": "unified_n8n",
+          "operation_id": "e4702be8-7d74-473c-9df8-fc6b52591403",
+          "state": "clarification_required",
+          "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f"
+        }
+      ]
+    },
+    {
+      "name": "foreign_profile",
+      "query": "Muéstrame el progreso de otro estudiante y las convocatorias",
+      "http_status": 201,
+      "duration_ms": 41,
+      "insufficient_evidence": true,
+      "citation_counts": {},
+      "trace": []
+    }
+  ],
+  "semantic_checks": {
+    "completed_courses_and_active_announcements_match_read_services": true,
+    "no_personal_eligibility_inference": true,
+    "document_title_and_catalogue_names_match_real_sources": true,
+    "ccd_and_fictional_sources_distinguished": true,
+    "citation_releases_valid": true,
+    "artifact_authenticated_200": true,
+    "missing_metadata_causes_content_search_and_abstention": true,
+    "over_budget_clarifies_before_agent": true,
+    "foreign_subject_rejected_before_tools": true,
+    "history_reopened_after_logout_with_identical_content_and_citations": true
+  },
+  "additional_real_mcp": [
+    {
+      "tool": "search_knowledge",
+      "duration_ms": 285,
+      "release_id": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "returned_count": 5
+    },
+    {
+      "tool": "get_calendar_events",
+      "duration_ms": 22,
+      "release_id": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+      "returned_count": 5
+    },
+    {
+      "tool": "get_courses",
+      "duration_ms": 21,
+      "release_id": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+      "returned_count": 10
+    },
+    {
+      "tool": "get_profile_progress",
+      "duration_ms": 28,
+      "release_id": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+      "returned_count": 5
+    }
+  ],
+  "integrity": {
+    "at": "2026-10-31T03:00:42.075Z",
+    "mode": "Supplemental read-only audit; no POST or dependency restart",
+    "result": "PASS",
+    "protected_tables": 20,
+    "protected_tables_unchanged": true,
+    "existing_history_sources_unchanged": true,
+    "new_owned_history_sources": 6,
+    "conversation_workflow_unchanged": true,
+    "test_schedules_inactive": true,
+    "api_anonymous_status": 401,
+    "n8n_health": 200
+  },
+  "oe2_integrity": {
+    "at": "2026-10-31T02:58:19.376Z",
+    "mode": "Existing fixture reader role; BEGIN READ ONLY; no pipeline execution or publication",
+    "initially_running": false,
+    "result": "PASS",
+    "current": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "retained_releases": 6,
+    "source_snapshots": 18,
+    "candidate_hashes_and_all_projected_rows_intact": true,
+    "final_running": false
+  },
+  "final_services": {
+    "api": {
+      "loopback": 3004,
+      "running": true,
+      "anonymous_challenge": 401,
+      "authenticated_requests": "PASS",
+      "left_running": true
+    },
+    "postgres": {
+      "loopback": 55463,
+      "running": true
+    },
+    "ollama": {
+      "loopback": 11434,
+      "version_and_model_digest_checks": [
+        {
+          "check": "ollama_runtime",
+          "status": "PASS",
+          "reason": "PINNED_OLLAMA_VERSION_REQUIRED"
+        },
+        {
+          "check": "generator_model",
+          "status": "PASS",
+          "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+        },
+        {
+          "check": "embedding_model",
+          "status": "PASS",
+          "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+        },
+        {
+          "check": "embedding_runtime",
+          "status": "PASS",
+          "reason": "RELEASE_RUNTIME_VERSION_REQUIRED"
+        }
+      ]
+    },
+    "n8n": {
+      "loopback": 15679,
+      "health": 200,
+      "conversation_active_unchanged": true,
+      "correlation": "PASS",
+      "restart_performed": false
+    },
+    "mcp": {
+      "transport": "stdio per request",
+      "read_only_role": "PASS",
+      "no_permanent_http_listener": true
+    },
+    "metro": {
+      "port": 8084,
+      "running": false,
+      "started": false
+    },
+    "android": {
+      "authorized_devices": 0,
+      "native_validation": "NOT_EXECUTED",
+      "adb_inventory_performed": true,
+      "new_build_installed": false,
+      "new_reverse_added": false
+    }
+  },
+  "validation": {
+    "api_typecheck": "PASS",
+    "unified_typecheck": "PASS",
+    "product_checks": 12,
+    "read_only_audits": 2,
+    "git_diff_check": "PASS",
+    "oe1_ragas": "NOT_EXECUTED",
+    "accelerated_oe2_scheduler": "NOT_EXECUTED",
+    "product_unit_suites": "NOT_REEXECUTED_no_product_source_changes",
+    "changed_paths_authorized": true,
+    "private_credentials_scan": "PASS",
+    "new_files_whitespace_clean": true
+  },
+  "limitations": [
+    "Android not connected; no new native result",
+    "Production policy is bounded adaptive deterministic rules, not LLM-directed ReAct",
+    "Dependency outage evidence reused from 2026-10-29; not repeated",
+    "No public programming endpoint; isolated OE2 remains outside Unified",
+    "Fingerprint limited to tables readable by existing roles; no direct chunk table fingerprint",
+    "Initial evaluator sent an invalid logout body; resumed check corrected it",
+    "Evaluator initially included mutable turn_sources in corpus fingerprints; supplemental READ ONLY audit confirmed prior rows unchanged and exactly six own rows added; final runner corrected and typechecked without replaying completed turns"
+  ],
+  "private_evidence_sha256": {
+    "rest-1793415450530/result.json": "dea7ab9e16e8728e77d7aa3d9b202a8048be42c9a8b9e6ddbdc0c79775d28c87",
+    "rest-1793415572645/result.json": "5b870decd749a4ecdda325f4f1388a9c8d0434f9642bdcc0097d3e460a00e53f",
+    "supplemental-read-audit.json": "98eadaeb148ace8b5c6bd2348829a30f34eb9645480919579c3f5a62d136b123",
+    "oe2-integrity.json": "a61a408a98f455687e32f8c12a89eb0174fce4fb3457e4095a4172803b22dc45"
+  }
+}
