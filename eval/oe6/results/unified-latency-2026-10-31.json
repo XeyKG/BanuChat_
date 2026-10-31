@@ -1,0 +1,695 @@
+{
+  "task": "OE1-OE6-LATENCY-DIAG-01",
+  "status": "BANUCHAT_LATENCY_CAUSE_IDENTIFIED",
+  "run": "16c6a702-5b1a-4a91-874d-026f3d861fca",
+  "date": "2026-10-31",
+  "base_head": "7435c80bb5d2b674d5e1bef913f9a7447eb198fd",
+  "protocol": "eval/oe6/latency-diagnostic-protocol.md",
+  "configuration": {
+    "generator_model": "qwen3:4b-instruct",
+    "generator_revision": "0edcdef34593eac1aa2be9c7d06c432dcf81945adca5eca2f27662c18f168ba0",
+    "generator_runtime": "0.35.0",
+    "embedding": "qwen3-embedding:0.6b",
+    "dimension": 1024
+  },
+  "initial_residency": [],
+  "results": [
+    {
+      "qid": "C1",
+      "status": 200,
+      "expected": 200,
+      "http_ms": 37.348,
+      "server_ms": 35.314,
+      "timings": {
+        "router": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "embedding_inclusive": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "embedding_verification_subset": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "generator_inclusive": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "generator_verification_subset": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "persist_rpc": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 0,
+      "inference_calls": []
+    },
+    {
+      "qid": "D1",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 14302.869,
+      "insufficient_evidence": false,
+      "citations": 4,
+      "document_citations": 4,
+      "server_ms": 14294.944,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 2.135
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 6341.157
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 77.581
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 26.277
+        },
+        "generator_inclusive": {
+          "calls": 1,
+          "wall_ms": 7797.579
+        },
+        "generator_verification_subset": {
+          "calls": 2,
+          "wall_ms": 103.966
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 31.362
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 12,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 6263.192,
+          "reported": {
+            "total_duration_ms": 6251.33,
+            "load_duration_ms": 6167.942,
+            "prompt_eval_count": 18
+          }
+        },
+        {
+          "endpoint": "/api/chat",
+          "wall_ms": 7693.164,
+          "reported": {
+            "total_duration_ms": 7683.457,
+            "load_duration_ms": 5206.205,
+            "prompt_eval_duration_ms": 840.273,
+            "eval_duration_ms": 1603.253,
+            "prompt_eval_count": 1313,
+            "eval_count": 57
+          }
+        }
+      ]
+    },
+    {
+      "qid": "D2",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 4518.94,
+      "insufficient_evidence": false,
+      "citations": 4,
+      "document_citations": 4,
+      "server_ms": 4507.118,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.716
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 2560.557
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 122.933
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 14.115
+        },
+        "generator_inclusive": {
+          "calls": 1,
+          "wall_ms": 1864.975
+        },
+        "generator_verification_subset": {
+          "calls": 2,
+          "wall_ms": 85.941
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 13.35
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 12,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 2437.47,
+          "reported": {
+            "total_duration_ms": 2428.998,
+            "load_duration_ms": 2354.698,
+            "prompt_eval_count": 18
+          }
+        },
+        {
+          "endpoint": "/api/chat",
+          "wall_ms": 1778.823,
+          "reported": {
+            "total_duration_ms": 1769.211,
+            "load_duration_ms": 10.355,
+            "prompt_eval_duration_ms": 123.94,
+            "eval_duration_ms": 1597.077,
+            "prompt_eval_count": 1313,
+            "eval_count": 58
+          }
+        }
+      ]
+    },
+    {
+      "qid": "D3",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 4469.001,
+      "insufficient_evidence": false,
+      "citations": 3,
+      "document_citations": 3,
+      "server_ms": 4462.287,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.134
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 141.04
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 74.804
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 8.185
+        },
+        "generator_inclusive": {
+          "calls": 1,
+          "wall_ms": 4225.234
+        },
+        "generator_verification_subset": {
+          "calls": 2,
+          "wall_ms": 94.571
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 17.654
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 12,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 66.088,
+          "reported": {
+            "total_duration_ms": 54.036,
+            "load_duration_ms": 3.664,
+            "prompt_eval_count": 19
+          }
+        },
+        {
+          "endpoint": "/api/chat",
+          "wall_ms": 4130.498,
+          "reported": {
+            "total_duration_ms": 4119.956,
+            "load_duration_ms": 4.465,
+            "prompt_eval_duration_ms": 326.407,
+            "eval_duration_ms": 3754.654,
+            "prompt_eval_count": 1216,
+            "eval_count": 134
+          }
+        }
+      ]
+    },
+    {
+      "qid": "D4",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 3345.792,
+      "insufficient_evidence": false,
+      "citations": 3,
+      "document_citations": 3,
+      "server_ms": 3336.824,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.604
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 114.662
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 76.946
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 8.081
+        },
+        "generator_inclusive": {
+          "calls": 1,
+          "wall_ms": 3152.837
+        },
+        "generator_verification_subset": {
+          "calls": 2,
+          "wall_ms": 82.04
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 8.729
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 12,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 37.537,
+          "reported": {
+            "total_duration_ms": 26.872,
+            "load_duration_ms": 6.42,
+            "prompt_eval_count": 20
+          }
+        },
+        {
+          "endpoint": "/api/chat",
+          "wall_ms": 3070.657,
+          "reported": {
+            "total_duration_ms": 3063.977,
+            "load_duration_ms": 6.087,
+            "prompt_eval_duration_ms": 143.569,
+            "eval_duration_ms": 2883.385,
+            "prompt_eval_count": 913,
+            "eval_count": 105
+          }
+        }
+      ]
+    },
+    {
+      "qid": "D5",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 172.11,
+      "insufficient_evidence": false,
+      "citations": 2,
+      "document_citations": 2,
+      "server_ms": 165.164,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.069
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 101.712
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 57.728
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 10.713
+        },
+        "generator_inclusive": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "generator_verification_subset": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 10.417
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 6,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 43.823,
+          "reported": {
+            "total_duration_ms": 33.142,
+            "load_duration_ms": 5.112,
+            "prompt_eval_count": 30
+          }
+        }
+      ]
+    },
+    {
+      "qid": "D6",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 873.474,
+      "insufficient_evidence": true,
+      "citations": 0,
+      "document_citations": 0,
+      "server_ms": 864.714,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.447
+        },
+        "embedding_inclusive": {
+          "calls": 1,
+          "wall_ms": 144.149
+        },
+        "embedding_verification_subset": {
+          "calls": 2,
+          "wall_ms": 98.958
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 2,
+          "wall_ms": 8.641
+        },
+        "generator_inclusive": {
+          "calls": 1,
+          "wall_ms": 656.802
+        },
+        "generator_verification_subset": {
+          "calls": 2,
+          "wall_ms": 123.303
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 5.519
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 12,
+      "inference_calls": [
+        {
+          "endpoint": "/api/embed",
+          "wall_ms": 45.019,
+          "reported": {
+            "total_duration_ms": 34.76,
+            "load_duration_ms": 8.573,
+            "prompt_eval_count": 24
+          }
+        },
+        {
+          "endpoint": "/api/chat",
+          "wall_ms": 533.299,
+          "reported": {
+            "total_duration_ms": 528.342,
+            "load_duration_ms": 7.476,
+            "prompt_eval_duration_ms": 261.301,
+            "eval_duration_ms": 231.46,
+            "prompt_eval_count": 1127,
+            "eval_count": 9
+          }
+        }
+      ]
+    },
+    {
+      "qid": "C2",
+      "status": 201,
+      "expected": 201,
+      "http_ms": 30.275,
+      "insufficient_evidence": false,
+      "citations": 0,
+      "document_citations": 0,
+      "server_ms": 28.786,
+      "timings": {
+        "router": {
+          "calls": 1,
+          "wall_ms": 0.381
+        },
+        "embedding_inclusive": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "embedding_verification_subset": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "reference_guard_and_retrieval_rpc": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "generator_inclusive": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "generator_verification_subset": {
+          "calls": 0,
+          "wall_ms": 0
+        },
+        "persist_rpc": {
+          "calls": 1,
+          "wall_ms": 4.753
+        },
+        "evidence_preparation": "NOT_MEASURED",
+        "answer_validation": "NOT_MEASURED",
+        "complete_query_resolution": "NOT_MEASURED",
+        "pool_acquisition": "NOT_MEASURED"
+      },
+      "verification_http_calls": 0,
+      "inference_calls": []
+    }
+  ],
+  "aggregate": {
+    "documentary": {
+      "n": 6,
+      "mean_ms": 4613.698,
+      "median_ms": 3907.397,
+      "max_ms": 14302.869
+    },
+    "controls": {
+      "n": 2,
+      "mean_ms": 33.812,
+      "median_ms": 33.812,
+      "max_ms": 37.348
+    },
+    "documentary_with_generator": {
+      "n": 5,
+      "mean_ms": 5502.015,
+      "median_ms": 4469.001,
+      "max_ms": 14302.869
+    },
+    "cited_documentary_with_generator": {
+      "n": 4,
+      "mean_ms": 6659.151,
+      "median_ms": 4493.971,
+      "max_ms": 14302.869
+    }
+  },
+  "counts": {
+    "documentary": 6,
+    "controls": 2,
+    "query_http_successes": 8,
+    "query_http_errors": 0,
+    "cited_documentary": 5,
+    "abstentions": 1,
+    "embedding_inferences": 6,
+    "generator_inferences": 5,
+    "runtime_verification_http": 66,
+    "administrative_in_runner": 9,
+    "unauthenticated_readiness_checks": 2,
+    "total_api_requests_in_task": 19,
+    "own_conversations_created": 7,
+    "own_messages_persisted": 14,
+    "own_citations_persisted": 16,
+    "retries": 0,
+    "concurrency": 1
+  },
+  "residency": [
+    {
+      "qid": "BEFORE",
+      "models": []
+    },
+    {
+      "qid": "D1",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:18.1599754-05:00"
+        }
+      ]
+    },
+    {
+      "qid": "D2",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:22.7207197-05:00"
+        },
+        {
+          "name": "qwen3-embedding:0.6b",
+          "size": 2370652077,
+          "size_vram": 2370652077,
+          "expires_at": "2026-10-31T16:21:20.8264339-05:00"
+        }
+      ]
+    },
+    {
+      "qid": "D3",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:27.2449258-05:00"
+        },
+        {
+          "name": "qwen3-embedding:0.6b",
+          "size": 2370652077,
+          "size_vram": 2370652077,
+          "expires_at": "2026-10-31T16:21:22.9947599-05:00"
+        }
+      ]
+    },
+    {
+      "qid": "D4",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:30.6240924-05:00"
+        },
+        {
+          "name": "qwen3-embedding:0.6b",
+          "size": 2370652077,
+          "size_vram": 2370652077,
+          "expires_at": "2026-10-31T16:21:27.4790811-05:00"
+        }
+      ]
+    },
+    {
+      "qid": "D5",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:30.6240924-05:00"
+        },
+        {
+          "name": "qwen3-embedding:0.6b",
+          "size": 2370652077,
+          "size_vram": 2370652077,
+          "expires_at": "2026-10-31T16:21:30.8315323-05:00"
+        }
+      ]
+    },
+    {
+      "qid": "D6",
+      "models": [
+        {
+          "name": "qwen3:4b-instruct",
+          "size": 3178149969,
+          "size_vram": 3178149969,
+          "expires_at": "2026-10-31T16:21:31.7403597-05:00"
+        },
+        {
+          "name": "qwen3-embedding:0.6b",
+          "size": 2370652077,
+          "size_vram": 2370652077,
+          "expires_at": "2026-10-31T16:21:31.0794041-05:00"
+        }
+      ]
+    }
+  ],
+  "preservation": {
+    "files": true,
+    "tables": true,
+    "foreign": true,
+    "oe2": true,
+    "n8n": true,
+    "identities": true,
+    "models": true,
+    "artifacts": true,
+    "current": true
+  },
+  "final_api": {
+    "usual_entrypoint": true,
+    "observer_enabled": false,
+    "normal_process_recorded": true,
+    "unauthenticated_status": 401,
+    "logout_status": 204
+  },
+  "measurement_limits": {
+    "B": "Router observed; full query resolution NOT_MEASURED",
+    "D": "Reference authorization guard plus retrieval RPC combined in this capture, including client/network/DB wait; not exclusive pgvector CPU",
+    "E": "NOT_MEASURED",
+    "G": "NOT_MEASURED",
+    "H": "Persistence RPC observed; full persistence boundary not isolated",
+    "pool_acquisition": "NOT_MEASURED",
+    "nested_spans": "Parent and child scopes must not be added",
+    "overhead": "Not independently calibrated",
+    "sample": "Fixed small heterogeneous sequence with a planned duplicate; not SLA or independent performance benchmark"
+  },
+  "attribution": {
+    "confirmed": [
+      "Model load time reported by Ollama explains much of D1 and the embedding portion of D2",
+      "Generator token evaluation is the largest recorded component in D3 and D4",
+      "Repeated runtime verification is observed but does not explain multi-second delays in this pass"
+    ],
+    "not_confirmed": [
+      "Reason the embedding was not resident after D1",
+      "VRAM pressure, eviction policy, storage cache or driver cause",
+      "CPU-only versus GPU time and scheduling waits",
+      "Exact E/G durations",
+      "Cause of the historical 10487ms turn"
+    ]
+  },
+  "observation_correction": "Captured SQL label matched a privilege guard mentioning the retrieval RPC. Public timings combine guard and RPC. Final observer fixes label ordering; original code and raw traces preserved privately; no inference repeated.",
+  "private_trace_policy": "Full spans, process bookkeeping and integrity digests remain under restricted LOCALAPPDATA custody, outside Git/OneDrive; public results contain only request/stage aggregates and numeric model counters."
+}
