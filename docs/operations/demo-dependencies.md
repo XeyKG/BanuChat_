@@ -1,5 +1,13 @@
 # BanuChat — dependencias y reproducibilidad de la demo
 
+> Recuperación local, 31/10/2026: el
+> [checkpoint OE6-UNIFIED-RECOVERY-01](../../eval/oe6/CHECKPOINT-OE6-UNIFIED-RECOVERY-01.md)
+> y su [runbook](unified-isolated-recovery.md) añaden restore real de Unified/OE2
+> sin reemplazar los ensayos históricos. Cobertura **parcial**: N8N solo como
+> archivo de definiciones, secretos/DPAPI sin restaurar y 33 referencias históricas
+> CCD sin bytes coincidentes en la raíz consultada; 107/107 current verificados.
+> No implica arranque del producto desde copia, atomicidad global ni servidor UNAB.
+
 OE6-DEMO-READINESS-01, 31/10/2026. Complementa el
 [procedimiento vigente](final-integrated-demonstration.md). Verificar una recepción
 en otro computador sigue siendo trabajo separado; no se ensayó aquí.

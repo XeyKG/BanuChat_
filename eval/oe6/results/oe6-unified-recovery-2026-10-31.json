@@ -1,0 +1,185 @@
+{
+  "schema_version": "banuchat-unified-recovery-1",
+  "task": "OE6-UNIFIED-RECOVERY-01",
+  "status": "BANUCHAT_OE6_UNIFIED_RECOVERY_PARTIAL",
+  "run": "1d3b3e42-c077-43b7-a8f3-162ee35d933f",
+  "started_at": "2026-10-31T19:27:09.431Z",
+  "completed_at": "2026-10-31T19:27:20.610Z",
+  "exercise_duration_ms": 11179,
+  "base_head": "a56fc191ff4386316932f65d5849d4c2a2a9e0b9",
+  "stores": {
+    "unified": {
+      "database": "banuchat_unified",
+      "version": "16.15 (Debian 16.15-1.pgdg12+2)",
+      "extensions": [
+        {
+          "name": "plpgsql",
+          "version": "1.0"
+        },
+        {
+          "name": "vector",
+          "version": "0.8.6"
+        }
+      ],
+      "table_count": 43,
+      "total_rows": 3841,
+      "backup": {
+        "bytes": 2998038,
+        "sha256": "2c6b21b3976ab860e7c6526eeb3eb37c90ca09fd916ffccf4acd83bc6baf5ed8"
+      },
+      "duration_ms": 5193,
+      "comparisons": {
+        "tables": true,
+        "structure": true,
+        "checks": true,
+        "extensions": true,
+        "database_meta": true,
+        "roles": true,
+        "memberships": true,
+        "all_source_roles_nologin": true
+      },
+      "structure_counts": {
+        "domains": 6,
+        "schemas": 3,
+        "relations": 133,
+        "constraints": 286,
+        "columns": 330,
+        "routines": 29,
+        "triggers": 21,
+        "policies": 0,
+        "defaults": 0,
+        "indexes": 90,
+        "types": 6
+      },
+      "checks": {
+        "aux_current": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+        "ccd_current": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+        "orphan_owners": 0,
+        "manifest_sha256": "fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852",
+        "orphan_messages": 0,
+        "orphan_sessions": 0,
+        "orphan_citations": 0,
+        "bad_vector_config": 0,
+        "invalid_aux_owner": 0,
+        "missing_embedding": 0,
+        "conversations_without_owner": 8,
+        "mismatched_citation_release": 0
+      },
+      "temporary_container_removed": true,
+      "isolation": {
+        "network": "none",
+        "published_ports": 0,
+        "source_volume_mounted": false,
+        "persistent_target_volume": false
+      }
+    },
+    "oe2": {
+      "database": "postgres",
+      "version": "16.15 (Debian 16.15-1.pgdg12+2)",
+      "extensions": [
+        {
+          "name": "plpgsql",
+          "version": "1.0"
+        }
+      ],
+      "table_count": 7,
+      "total_rows": 98,
+      "backup": {
+        "bytes": 36785,
+        "sha256": "9a70925d88237d08eac45db4488d384efe32ba73ce56ba6b5d096686497218f6"
+      },
+      "duration_ms": 3400,
+      "comparisons": {
+        "tables": true,
+        "structure": true,
+        "checks": true,
+        "extensions": true,
+        "database_meta": true,
+        "roles": true,
+        "memberships": true,
+        "all_source_roles_nologin": true
+      },
+      "structure_counts": {
+        "domains": 0,
+        "schemas": 1,
+        "relations": 16,
+        "constraints": 36,
+        "columns": 52,
+        "routines": 2,
+        "triggers": 6,
+        "policies": 0,
+        "defaults": 0,
+        "indexes": 9,
+        "types": 0
+      },
+      "checks": {
+        "ready": 6,
+        "marker": "fictional-oe2-pipeline-demo-02",
+        "current": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "snapshots": 18,
+        "invalid_origins": 0
+      },
+      "temporary_container_removed": true,
+      "isolation": {
+        "network": "none",
+        "published_ports": 0,
+        "source_volume_mounted": false,
+        "persistent_target_volume": false
+      }
+    }
+  },
+  "artifacts": {
+    "references": 251,
+    "verified_and_copied": 218,
+    "current_verified": 107,
+    "historical_unavailable": 33,
+    "source_unchanged": true
+  },
+  "n8n": {
+    "workflows": 12,
+    "history": 12,
+    "published": 1,
+    "definitions_equal": true,
+    "n8n_runtime_started": false,
+    "n8n_full_restore": false,
+    "redactions": 0,
+    "source_execution_count": 116,
+    "source_credentials_count": 11,
+    "json_archive": {
+      "bytes": 303442,
+      "sha256": "324658948d23b1cfc8f3cf7afa90c3c64691bf27b4e0586f1efa0c39d53a1812"
+    },
+    "sqlite_archive": {
+      "bytes": 196608,
+      "sha256": "7f398e3b1c73bbbf0a5546eb986716e1c3da58901790a0526193426bc8c55d42"
+    },
+    "coverage": "Redacted definition archive only; not an N8N-native restore"
+  },
+  "source_preserved": {
+    "unified": true,
+    "oe2": true,
+    "n8n_selected": true,
+    "configs": true,
+    "artifacts": true,
+    "identities": true
+  },
+  "cleanup_complete": true,
+  "custody": {
+    "location": "LOCALAPPDATA/BanuChat/recovery/OE6-UNIFIED-RECOVERY-01 (possible MSIX local redirection)",
+    "outside_repository": true,
+    "outside_onedrive": true,
+    "restricted_to_current_windows_user": true,
+    "files_transferred": 574,
+    "all_transfer_hashes_match": true,
+    "backups_retained": true
+  },
+  "limitations": [
+    "No global atomic snapshot across stores",
+    "33 historical artifact references do not match available bytes in the permitted roots; current 107 match",
+    "Eight preexisting conversations without owner were preserved, not repaired",
+    "No N8N credentials, encryption keys, user identities, execution payloads or complete instance restore",
+    "No private config/DPAPI copy, decryption, restored-account login or application startup",
+    "No institutional deployment, RTO/RPO, SLA, portability or complete OE6 claim"
+  ],
+  "executed_script_sha256": "eb8a54e23133ee3764120b0796f3f5ae718e8b56c8e3684b3e34382ee667ef61"
+}
