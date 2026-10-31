@@ -148,9 +148,14 @@ async function saveNotificationPreference(
 }
 
 async function cancelRecords(records: readonly ScheduledNotification[]): Promise<void> {
-  await Promise.allSettled(
+  const results = await Promise.allSettled(
     records.map((record) => Notifications.cancelScheduledNotificationAsync(record.identifier)),
   );
+  // Keep the persisted identifiers when the OS did not confirm cancellation.
+  // The caller can report failure and an explicit later action can reconcile it.
+  if (results.some((result) => result.status === 'rejected')) {
+    throw new Error('NOTIFICATION_CANCEL_FAILED');
+  }
 }
 
 function triggerFor(candidate: ReminderCandidate): Notifications.DateTriggerInput {

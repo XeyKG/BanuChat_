@@ -13,7 +13,7 @@ import {
 import { Platform } from 'react-native';
 
 import { useAuth } from '@/auth/auth-provider';
-import { destinationForAccount, parseNotificationData } from './model';
+import { destinationForAccount } from './model';
 import {
   configureForegroundNotifications,
   disableNotificationsForAccount,
@@ -57,7 +57,6 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const previousPrincipalRef = useRef<string | null>(null);
   const currentPrincipalRef = useRef<string | null>(null);
   const handledResponsesRef = useRef(new Set<string>());
-  const handledDedupeKeysRef = useRef(new Set<string>());
   const me = snapshot.phase === 'authenticated' ? snapshot.me : null;
   const principalId = me?.principal_id ?? null;
   const eligible =
@@ -108,7 +107,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const previousPrincipal = previousPrincipalRef.current;
     if (previousPrincipal !== null && previousPrincipal !== principalId) {
-      void disableNotificationsForAccount(previousPrincipal);
+      void disableNotificationsForAccount(previousPrincipal).catch(() => {
+        setError(true);
+      });
     }
     previousPrincipalRef.current = principalId;
   }, [principalId]);
@@ -117,11 +118,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     (response: Notifications.NotificationResponse) => {
       if (!eligible || me === null || principalId === null) return;
       const identifier = response.notification.request.identifier;
-      const data = parseNotificationData(response.notification.request.content.data);
-      if (
-        handledResponsesRef.current.has(identifier) ||
-        (data !== null && handledDedupeKeysRef.current.has(data.dedupe_key))
-      ) {
+      // A new delivery for an updated event or another local test may share its
+      // event key. Only a repeated callback for the same native request is a duplicate.
+      if (handledResponsesRef.current.has(identifier)) {
         return;
       }
       const destination = destinationForAccount(
@@ -131,9 +130,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       );
       if (destination === null) return;
       handledResponsesRef.current.add(identifier);
-      if (data !== null) handledDedupeKeysRef.current.add(data.dedupe_key);
       if (handledResponsesRef.current.size > 64) handledResponsesRef.current.clear();
-      if (handledDedupeKeysRef.current.size > 64) handledDedupeKeysRef.current.clear();
       Notifications.clearLastNotificationResponse();
       router.push(destination === 'calendar' ? '/calendar' : '/announcements');
     },
