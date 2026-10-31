@@ -139,6 +139,15 @@ login válido ni corrección semántica. No repite el recorrido físico acredita
 
 ## 5. Cuenta ficticia y recorrido
 
+PRODUCT-OE2-MOBILE-04: con la configuración privada opcional y el contenedor
+fixture existente ya verificados, Home → Publicaciones OE2 permite consultar
+programación de grupos, convocatorias y novedades ficticias. Revisar sus filtros,
+fechas civiles, release y origen, sin confundirlos con catálogo, anuncios habituales
+o documentos CCD. Si la fuente no está disponible, usar reintento manual cuando
+se restablezca; no publicar otras releases ni ejecutar el scheduler para reparar
+una lectura. La API conserva sus demás funciones. La sección usa el mismo build
+SDK 57, Metro y reverses descritos arriba; no necesita otra instalación Android.
+
 Usar una cuenta técnica ya existente por el procedimiento privado del operador,
 sin cuentas UNAB, registro público ni creación/reset de contraseñas. Si el operador
 necesita consultar la custodia DPAPI, exclusivamente en su terminal privada desde

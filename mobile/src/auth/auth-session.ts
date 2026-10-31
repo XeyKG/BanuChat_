@@ -6,7 +6,7 @@ export interface CurrentSession {
 }
 interface Pair {access_token:string;refresh_token:string;token_type:'Bearer';expires_in:number;session_expires_at:string;}
 export interface RefreshStore {available():Promise<boolean>;get():Promise<string|null>;set(token:string):Promise<void>;clear():Promise<void>;}
-export type AuthSnapshot={phase:'restoring'|'signed_out'|'authenticated'|'unavailable';me:CurrentSession|null;epoch:number;logoutRemoteConfirmed?:boolean|null};
+export type AuthSnapshot={phase:'restoring'|'signed_out'|'authenticated'|'unavailable';me:CurrentSession|null;epoch:number;logoutRemoteConfirmed?:boolean|null;sessionExpired?:boolean};
 export class SessionError extends Error {constructor(){super('No se pudo validar la sesión. Inicia sesión nuevamente.');}}
 const tokenPattern=/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
@@ -29,10 +29,11 @@ export class AuthSession {
  private io:Promise<void>=Promise.resolve();private listeners=new Set<()=>void>();
  private snapshot:AuthSnapshot={phase:'restoring',me:null,epoch:0};
  private signingIn=false;private logoutRemoteConfirmed:boolean|null=null;
+ private sessionExpired=false;
  constructor(private readonly store:RefreshStore,private readonly base:()=>string,private readonly request:typeof fetch=(...args)=>globalThis.fetch(...args),private readonly now=Date.now){}
  getSnapshot=()=>this.snapshot;
  subscribe=(listener:()=>void)=>{this.listeners.add(listener);return ()=>{this.listeners.delete(listener);};};
- private publish(phase:AuthSnapshot['phase'],me:CurrentSession|null=null){this.snapshot={phase,me,epoch:this.epoch,logoutRemoteConfirmed:this.logoutRemoteConfirmed};this.listeners.forEach(l=>l());}
+ private publish(phase:AuthSnapshot['phase'],me:CurrentSession|null=null){if(phase==='authenticated')this.sessionExpired=false;this.snapshot={phase,me,epoch:this.epoch,logoutRemoteConfirmed:this.logoutRemoteConfirmed,...(this.sessionExpired?{sessionExpired:true}:{})};this.listeners.forEach(l=>l());}
  private storage<T>(work:()=>Promise<T>):Promise<T>{const result=this.io.then(work);this.io=result.then(()=>{},()=>{});return result;}
  private check(epoch:number){if(epoch!==this.epoch)throw new SessionError();}
  private async raw(path:string,method:string,body?:unknown,access?:string):Promise<Response>{
@@ -78,19 +79,21 @@ export class AuthSession {
  private token(){if(this.access&&this.expires>this.now()+5000)return Promise.resolve(this.access);return this.refresh();}
  async resource(url:string,options:RequestInit={}):Promise<Response>{
   if(this.snapshot.phase!=='authenticated')throw new SessionError();const epoch=this.epoch,base=this.base();
-  if(!url.startsWith(base+'/')||!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(url.slice(base.length)))throw new SessionError();
+  const target=url.slice(base.length),oe2=/^\/demo\/oe2\/(?:programming|announcements)(?:\?|$)/u.test(target);
+  if(!url.startsWith(base+'/')||(!oe2&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||(oe2&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
   const access=await this.token();this.check(epoch);const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+access);
   const messagePost=options.method?.toUpperCase()==='POST'&&/^\/conversations\/[^/?#]+\/messages$/u.test(url.slice(base.length));
   const diagnosticStart=messagePost?startMessageHttpDiagnostic():undefined;
   let response:Response;try{response=await this.request(url,{...options,headers,redirect:'error',cache:'no-store'});}catch{throw new SessionError();}this.check(epoch);
   if(messagePost)recordRejectedMessageHttp(response,diagnosticStart);
-  if(response.status===401){await this.invalidate();throw new SessionError();}
+  if(response.status===401){this.sessionExpired=true;await this.invalidate();throw new SessionError();}
   const json=response.json.bind(response),text=response.text.bind(response);
   response.json=async()=>{const result:unknown=await json();this.check(epoch);return result;};
   response.text=async()=>{const result=await text();this.check(epoch);return result;};
   return response;
  }
  async logout():Promise<boolean>{
+  this.sessionExpired=false;
   const access=this.access,expires=this.expires;this.logoutRemoteConfirmed=null;
   const saved=this.storage(()=>this.store.get()).catch(()=>null);await this.invalidate();const epoch=this.epoch;let confirmed=false;
   try{let target=access;const stored=await saved;

@@ -30,6 +30,7 @@ function Navigation(){
           <Stack.Screen name="progress" />
           <Stack.Screen name="announcements" />
           <Stack.Screen name="notifications" />
+          <Stack.Screen name="oe2" />
         </Stack.Protected>
       </Stack>
     </View>

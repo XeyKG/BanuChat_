@@ -1,5 +1,14 @@
 # BanuChat Mobile
 
+PRODUCT-OE2-MOBILE-04 añade **Publicaciones OE2** a Home autenticada. Consume
+solo los GET `/api/v2/demo/oe2/programming` y `/api/v2/demo/oe2/announcements` con
+Bearer existente. Muestra programación de grupos, convocatorias y novedades
+ficticias, release y procedencia; no cambia el catálogo ni el chat. Las fechas
+civiles se presentan sin conversión horaria. La sección distingue carga, vacío,
+conexión, fuente opcional ausente y sesión expirada, con filtros y reintento manual.
+No hay credenciales ni configuración de la fuente PostgreSQL en Expo.
+La fuente puede fallar sin impedir las otras pantallas.
+
 ## Aplicación unificada vigente
 
 El producto usa una sola experiencia autenticada en `http://127.0.0.1:3004/api/v2`:

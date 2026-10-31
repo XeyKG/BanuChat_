@@ -3,7 +3,7 @@
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "info": {
     "title": "BanuChat REST API v2 — cuentas ficticias y conocimiento explícito",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "description": "Contrato AUTH-P0 con delta de recuperación BCH-D31/AUTH-P3.1. Autenticación propia BanuChat con UID sintético y contraseña independiente; no valida credenciales UNAB. Recuperación por UID y código de ocho dígitos al contacto privado verificado; capturador local solo como doble, sin acreditar entrega externa. Sin registro público, administración cliente, federación, Agent/ReAct o MCP conversacional. Normativa completa: api-contract-v2.md y ../../infra/db/auth-permissions.md. v1 permanece congelada y no se monta en el despliegue protegido. BCH-D37/CCD-AUTH-I1B: modo de conocimiento explícito por despliegue; contexto técnico CCD sin identidad institucional. Recuperación de correo suspendida."
   },
   "servers": [
@@ -1047,6 +1047,187 @@
         "x-unknown-query-parameters": "reject",
         "x-empty-request-body": true
       }
+    },
+    "/demo/oe2/programming": {
+      "get": {
+        "operationId": "get_demo_oe2_programming",
+        "summary": "Consultar programación ficticias OE2; solo Unified local",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_-]{0,39}$"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anuncios y referencia temporal efectiva.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oe2_programming_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true,
+        "x-local-unified-demo-only": true
+      }
+    },
+    "/demo/oe2/announcements": {
+      "get": {
+        "operationId": "get_demo_oe2_announcements",
+        "summary": "Consultar convocatorias y novedades ficticias OE2; solo Unified local",
+        "description": "Solo release vigente. query: coincidencia literal sin distinguir mayúsculas en título/descripción. active: valid_from <= reference_time y fin null o >= reference_time; upcoming: inicio posterior; expired: fin anterior; all: sin filtro temporal. reference_time se captura una vez o respeta el instante suministrado, también en resultados vacíos. Orden valid_from y announcement_key ascendentes. No implementa push. En la composición unificada CCD, lee exclusivamente la publicación auxiliar ficticia independiente. El perfil se deriva de la cuenta autenticada; no se usa documentación sintética. La composición histórica CCD sin auxiliares conserva 403.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "calls",
+                "news"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "temporal_status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "all",
+                "upcoming",
+                "active",
+                "expired",
+                "published"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Anuncios y referencia temporal efectiva.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/no_store"
+              },
+              "Vary": {
+                "$ref": "#/components/headers/vary_authorization"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/oe2_announcements_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error_400"
+          },
+          "401": {
+            "$ref": "#/components/responses/error_401"
+          },
+          "403": {
+            "$ref": "#/components/responses/error_403"
+          },
+          "404": {
+            "$ref": "#/components/responses/error_404"
+          },
+          "405": {
+            "$ref": "#/components/responses/error_405"
+          },
+          "413": {
+            "$ref": "#/components/responses/error_413"
+          },
+          "429": {
+            "$ref": "#/components/responses/error_429"
+          },
+          "500": {
+            "$ref": "#/components/responses/error_500"
+          },
+          "503": {
+            "$ref": "#/components/responses/error_503"
+          }
+        },
+        "x-unknown-query-parameters": "reject",
+        "x-empty-request-body": true,
+        "x-local-unified-demo-only": true
+      }
     }
   },
   "components": {
@@ -1882,7 +2063,16 @@
         "minLength": 9,
         "maxLength": 13,
         "pattern": "^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$",
-        "oneOf": [{ "minLength": 9, "maxLength": 9 }, { "minLength": 13, "maxLength": 13 }],
+        "oneOf": [
+          {
+            "minLength": 9,
+            "maxLength": 9
+          },
+          {
+            "minLength": 13,
+            "maxLength": 13
+          }
+        ],
         "description": "Convención ficticia BanuChat: nuevas cuentas U + ocho dígitos ASCII; legado BCH-DEMO-#### sin renombrar. No acredita identidad universitaria."
       },
       "opaque_token": {
@@ -2269,6 +2459,276 @@
         "pattern": "^[0-9]{8}$",
         "writeOnly": true,
         "description": "Código CSPRNG ASCII de recuperación; 300 segundos, cinco intentos, ligado al UID y propósito. No es token de sesión."
+      },
+      "oe2_source": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_id",
+          "record_id",
+          "source_version",
+          "published_at",
+          "record_sha256",
+          "snapshot_sha256"
+        ],
+        "properties": {
+          "source_id": {
+            "enum": [
+              "fixture-academic-offer-v1",
+              "fixture-calls-v1",
+              "fixture-news-v1"
+            ]
+          },
+          "record_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "source_version": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "record_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "snapshot_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "oe2_programming": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "course_code",
+          "period",
+          "mode",
+          "start_date",
+          "end_date",
+          "temporal_status",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^oe2-academic_offer-[a-f0-9]{40}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "course_code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "period": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "mode": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "start_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "end_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "temporal_status": {
+            "enum": [
+              "upcoming",
+              "in_progress",
+              "finished"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/oe2_source"
+          }
+        }
+      },
+      "oe2_announcement": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "title",
+          "description",
+          "valid_from",
+          "valid_until",
+          "temporal_status",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^oe2-(calls|news)-[a-f0-9]{40}$"
+          },
+          "type": {
+            "enum": [
+              "calls",
+              "news"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "temporal_status": {
+            "enum": [
+              "upcoming",
+              "active",
+              "expired",
+              "published"
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/oe2_source"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "news"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "valid_until": {
+                  "type": "null"
+                },
+                "temporal_status": {
+                  "enum": [
+                    "upcoming",
+                    "published"
+                  ]
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "temporal_status": {
+                  "enum": [
+                    "upcoming",
+                    "active",
+                    "expired"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "oe2_programming_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "release_id",
+          "published_at",
+          "reference_time",
+          "evidence_mode",
+          "programming"
+        ],
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reference_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidence_mode": {
+            "const": "fictional_auxiliary"
+          },
+          "programming": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/oe2_programming"
+            }
+          }
+        }
+      },
+      "oe2_announcements_response": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "release_id",
+          "published_at",
+          "reference_time",
+          "evidence_mode",
+          "announcements"
+        ],
+        "properties": {
+          "release_id": {
+            "$ref": "#/components/schemas/uuid"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reference_time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidence_mode": {
+            "const": "fictional_auxiliary"
+          },
+          "announcements": {
+            "type": "array",
+            "maxItems": 50,
+            "items": {
+              "$ref": "#/components/schemas/oe2_announcement"
+            }
+          }
+        }
       }
     },
     "parameters": {

@@ -281,3 +281,33 @@ mantiene su host fijo en `127.0.0.1`.
   no resultados ejecutados ni preguntas RAGAS. El router sí está implementado
   en el runtime del prototipo; [intent-router.test.ts](test/intent-router.test.ts) lo prueba
   directamente y [J2](test/intent-http-integration.test.ts) lo prueba por HTTP.
+## Publicaciones OE2 opcionales en Unified
+
+PRODUCT-OE2-MOBILE-04 añade dos GET autenticados: `/api/v2/demo/oe2/programming`
+y `/api/v2/demo/oe2/announcements`. Contrato y filtros:
+[REST v2 5.1.0](api-contract-v2.md). La fuente es ficticia, separada de los datos
+auxiliares habituales y de CCD; no participa en chat, MCP ni RAG.
+
+La configuración opcional del operador reside en
+`infra/local/unified/oe2-reader.json`, excluida de Git. Admite exactamente
+`enabled: true`, `transport: docker_local_psql`,
+`container: banuchat-oe6-local-postgres-synthetic-1`, `database: postgres` y
+`role: banuchat_oe2_pipeline_reader`. No contiene secretos móviles. Sin archivo,
+con configuración inválida o fuente detenida, solo estas consultas dan 503; el
+arranque y las funciones habituales continúan disponibles.
+
+La topología existente solo permite acceder a ese PostgreSQL desde Docker Linux.
+El adaptador usa Docker/psql local, argumentos fijos y el rol lector existente,
+con transacción READ ONLY y snapshot consistente. No añade puertos, grants,
+servicios, bases ni credenciales. Exige contenedor/volumen, marker, rol y release
+ready; verifica las filas contra el candidato publicado y nunca recibe SQL o
+paths del cliente. No conserva una conexión Unified mientras espera esa fuente.
+Es una integración de demostración para este host preparado, no un transporte
+portable. Los límites internos rechazan publicaciones mayores de 51 programaciones
+o 101 anuncios; no se ofrecen paginación ni un conector institucional.
+
+Con la API normal iniciada y fuente disponible, desde `backend/api`:
+`node --import tsx scripts/evaluate-unified-oe2-mobile.mts`.
+`--expect-unavailable` se usa solo durante una indisponibilidad controlada decidida
+por el operador: el evaluador no detiene servicios y acredita 503 junto con chat
+CCD operativo. Guarda respuestas y huellas exclusivamente en almacenamiento privado.

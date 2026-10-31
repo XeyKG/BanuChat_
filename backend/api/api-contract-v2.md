@@ -1,5 +1,43 @@
 # Contrato REST v2 — BanuChat
 
+## Revisión 5.1.0 — lectura OE2 opcional de demostración
+
+PRODUCT-OE2-MOBILE-04 autoriza únicamente dos GET adicionales en Unified local:
+
+| Ruta | Filtros opcionales, únicos | Respuesta 200 |
+| --- | --- | --- |
+| `/demo/oe2/programming` | `query` (2–100 caracteres), `mode` (1–40, `[a-z][a-z0-9_-]*`), `limit` (1–50; defecto 20) | `oe2_programming_response` |
+| `/demo/oe2/announcements` | `query`, `type` (`calls`/`news`), `temporal_status` (`all`, `upcoming`, `active`, `expired`, `published`; defecto `all`), `limit` | `oe2_announcements_response` |
+
+Base `/api/v2`, Bearer vigente y autorización de recursos existentes. Solo GET y
+cuerpo vacío; parámetros desconocidos/repetidos o inválidos: 400; métodos ajenos:
+405 con Allow GET; sin sesión: 401. En otras composiciones estas rutas dan 404.
+Todos los resultados usan no-store y Vary Authorization. `now` viene del servidor;
+no se admite selector de perfil, release, SQL, ruta o instante de referencia.
+
+Ambas respuestas contienen `evidence_mode=fictional_auxiliary`, `release_id`,
+`published_at`, `reference_time` y una lista limitada. El puntero, estado ready y
+registros proceden de una transacción REPEATABLE READ READ ONLY en la fuente OE2,
+independiente de Unified. Se comprueban identidad, marker y proyección contra el
+candidato aprobado. Fuente ausente/no configurada o integridad inválida: 503
+DEPENDENCY_UNAVAILABLE saneado, sin impedir el arranque ni las otras rutas.
+
+Programación conserva grupo/código/periodo/modalidad y fechas civiles YYYY-MM-DD,
+con estados upcoming/in_progress/finished según el día en Bogotá, inclusivo en los
+extremos. No define cursos, cupos o inscripción. Convocatorias conservan apertura,
+cierre y estados upcoming/active/expired, sin inferencia de elegibilidad. Novedades
+usan publicación, valid_until null y estados upcoming/published; published nunca
+significa convocatoria abierta. Una lista vacía conserva el envelope de release.
+
+La procedencia pública incluye source_id, record_id, source_version, published_at,
+record_sha256 y snapshot_sha256, vinculados al candidato de esa release. Estos
+hashes pertenecen exclusivamente a fixtures; no son rutas ni credenciales. No se
+exponen source_path, nombres de archivos, candidate_text, snapshots crudos o paths
+de almacenamiento. La configuración opcional queda solo en el backend privado,
+sin EXPO_PUBLIC ni credenciales móviles. No se incorporan estos datos a MCP, RAG,
+chat, catálogo o anuncios habituales. v1, MCP y los quince endpoints anteriores
+mantienen sus contratos; OpenAPI v2 5.1.0 describe las dos adiciones.
+
 ## Revisión 5.0.0 — aplicación unificada
 
 La decisión del propietario autoriza una sola composición autenticada: documentos CCD

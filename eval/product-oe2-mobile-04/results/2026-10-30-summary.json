@@ -1,0 +1,259 @@
+{
+  "schema_version": "oe2-mobile-evidence-1",
+  "date_bogota": "2026-10-30",
+  "timezone": "America/Bogota",
+  "status": "BANUCHAT_OE2_MOBILE_INTEGRATION_ANDROID_VALIDATED",
+  "baseline_commit": "d6e3cfb839e7b07f91dc2ebe3a79ffb6ca2767e4",
+  "working_tree_changes": true,
+  "endpoints": [
+    "GET /api/v2/demo/oe2/programming",
+    "GET /api/v2/demo/oe2/announcements"
+  ],
+  "rest_contract_version": "5.1.0",
+  "scope": "Optional read-only fixture source; no loading into Unified/CCD and no chat/MCP integration of OE2",
+  "real_rest": {
+    "positive": [
+      {
+        "name": "existing_auth_and_negative_controls",
+        "status": "PASS",
+        "duration_ms": 135
+      },
+      {
+        "name": "programming_and_public_provenance",
+        "status": "PASS",
+        "duration_ms": 431
+      },
+      {
+        "name": "calls_and_news_temporal_semantics",
+        "status": "PASS",
+        "duration_ms": 840
+      },
+      {
+        "name": "filters_empty_limit_and_idempotent_read",
+        "status": "PASS",
+        "duration_ms": 1676
+      }
+    ],
+    "unavailable": [
+      {
+        "name": "existing_auth_and_negative_controls",
+        "status": "PASS",
+        "duration_ms": 153
+      },
+      {
+        "name": "optional_source_failure",
+        "status": "PASS",
+        "duration_ms": 411
+      },
+      {
+        "name": "ccd_chat_survives_source_failure",
+        "status": "PASS",
+        "duration_ms": 10760
+      }
+    ],
+    "read_publication_sha256_before": "8e744e8a3cbfab974cfaf16a793cf37620e6df227f38019ca9deef2c1aa9b571",
+    "read_publication_sha256_after": "8e744e8a3cbfab974cfaf16a793cf37620e6df227f38019ca9deef2c1aa9b571",
+    "programming_records": 2,
+    "call_records": 2,
+    "news_records": 2,
+    "civil_dates": [
+      "2026-11-03",
+      "2026-11-28"
+    ],
+    "published_news_have_no_expiration": true,
+    "call_status_observed": "expired",
+    "source_offline_http": 503,
+    "ccd_chat_while_offline": 201,
+    "logout": 204
+  },
+  "android": {
+    "device": {
+      "model": "YAL-L21",
+      "authorized_devices": 1,
+      "build_installed": true,
+      "android": "10"
+    },
+    "build": "Existing development build; Expo SDK 57; no installation",
+    "transport": "USB reverse 3004/8084",
+    "actual_native_execution": true,
+    "cases": [
+      "login",
+      "home",
+      "oe2_navigation",
+      "programming_dates_and_provenance",
+      "calls_and_temporal_status",
+      "news_without_expiry",
+      "query_empty_and_clear",
+      "loading",
+      "source_unavailable",
+      "retry_recovery",
+      "return_home",
+      "multisource_chat",
+      "expand_four_citations",
+      "history_reopen",
+      "selected_control_regression",
+      "logout"
+    ],
+    "chat": {
+      "operation_id": "73768beb-6517-46bc-8045-e466b8cd3831",
+      "tools": [
+        "get_profile_progress",
+        "get_announcements"
+      ],
+      "call_count": 2,
+      "duration_ms": 3223,
+      "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+      "citations": 4,
+      "persisted_messages": 2,
+      "reopened_identical": true,
+      "source_labels_match_ui": true
+    },
+    "final_signed_out": true,
+    "screenshots": [
+      {
+        "name": "01-initial.png",
+        "sha256": "101415fc7d8d3c6e7c8881bcfa925ef910d490672574989cc7833eefa5a5111f"
+      },
+      {
+        "name": "02-home.png",
+        "sha256": "233f5bb875086b4c611c3ea1849964099db552e2e0fe799ef242216ebf1f2949"
+      },
+      {
+        "name": "03-oe2-loading.png",
+        "sha256": "95768bb3598b5a6e3bd6399b350406c511edb02a7c0d177ac6d7ec8332d41fe4"
+      },
+      {
+        "name": "04-programming.png",
+        "sha256": "a3bc76c6248f269e4b998bc195428038510a0f98619c9d446f611aa1dc2265c8"
+      },
+      {
+        "name": "05-programming-dates.png",
+        "sha256": "c9401ba7e670a49709d0881d876b748d7850944ebab0a3761e2f6722305cd2b2"
+      },
+      {
+        "name": "06-filter-loading.png",
+        "sha256": "1785b46b8d81f5dcc76c587c1fa5dd1be88ce279c5280ff6d213c61f7cb1ea56"
+      },
+      {
+        "name": "07-empty.png",
+        "sha256": "eeafcc19ca979e5514d3eedea756dfb5b64a61258ef4c2ab9dd300bd43b7c86f"
+      },
+      {
+        "name": "08-calls.png",
+        "sha256": "8c8eb8ec10ffc7cfaa8688f9555219121bcecb88c077e2b37fcf3c5d5671b76b"
+      },
+      {
+        "name": "09-calls-open-empty.png",
+        "sha256": "aec6e2239109794a51213dd969edf061a8af451dfc0d46f4156b2d95ceb20e27"
+      },
+      {
+        "name": "10-news.png",
+        "sha256": "4c34fb92347ce53c2c1485cf71c1e42c5386321a81f70491959d25c91538e247"
+      },
+      {
+        "name": "11-source-unavailable.png",
+        "sha256": "166587f9a3b9631bb892964c4e1161191971687659c17f5b9e54160918f1ea68"
+      },
+      {
+        "name": "12-error-retry-button.png",
+        "sha256": "7231446268a03cd5fcb0f90ae8d2e5ceb02eed97838d6cbd596aa2c9c0f20b00"
+      },
+      {
+        "name": "13-retry-loading.png",
+        "sha256": "de480c2ff97d514746a996e2fc1e0281d560c3851ab5602c08b7629277df0531"
+      },
+      {
+        "name": "14-recovered.png",
+        "sha256": "bc912b15b286d9ea6e687f7de9a898bcec404b333973040487c5421f497c5c0e"
+      },
+      {
+        "name": "15-chat-loading.png",
+        "sha256": "bae1c48c06d2b125545207e68f3b33bfa6f655cf988796c1abe011b7e500aa9f"
+      },
+      {
+        "name": "16-chat-answer.png",
+        "sha256": "dec503f6208a6ceb2fd76d51f2661bfe40453774c24ff2dfdeb7ba2250bc38dc"
+      },
+      {
+        "name": "17-chat-sources.png",
+        "sha256": "caebec267f375e35346d8754666f6f8e5fef389f83313c70b86395443b59a2a9"
+      },
+      {
+        "name": "18-history.png",
+        "sha256": "70038da24c91c491cbe945779867feb26ce1a0288461cf94fdea13c21b5b3860"
+      },
+      {
+        "name": "19-history-reopened.png",
+        "sha256": "9db714676ff3c219fc8176c70014ddbdd683982c76993069db9c27950f3411e0"
+      },
+      {
+        "name": "20-logout.png",
+        "sha256": "c49ebe356ad6bb4398f000ac44bbb57e813485e9f1c800b60cf98ad1641a10e8"
+      },
+      {
+        "name": "21-selected-controls.png",
+        "sha256": "779fc9bce87195baae51baf4a8169c99b335075d2024941bf4419f2654d1699f"
+      },
+      {
+        "name": "22-final-logout.png",
+        "sha256": "19147f819c47b7f43a5cbd5049fc1f1ed328d42e70f46cdd45f1027c8458156b"
+      }
+    ],
+    "expiry_state": "Unit-tested 401 invalidation and login notice; not forced on physical device"
+  },
+  "integrity": {
+    "oe2_retained_releases": 6,
+    "oe2_snapshots": 18,
+    "oe2_current": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "oe2_all_rows_unchanged": true,
+    "unified_protected_tables_unchanged": 20,
+    "conversation_workflow_unchanged": true,
+    "oe2_test_schedules_inactive": true,
+    "no_new_publication": true,
+    "no_source_data_write": true,
+    "no_oe2_data_copied_to_unified": true
+  },
+  "final_services": {
+    "api": "127.0.0.1:3004 running",
+    "unified_postgres": "127.0.0.1:55463 running",
+    "ollama": "127.0.0.1:11434 existing version/models passed",
+    "n8n": "127.0.0.1:15679 running, health 200, conversation unchanged",
+    "metro": "127.0.0.1:8084 running existing SDK57 entrypoint",
+    "oe2_fixture_postgres": "Existing container running intentionally for the optional feature; original volume retained",
+    "mobile": "Existing build, logged out",
+    "adb_reverses": "3004/8084 retained for local demonstration",
+    "preflight": "DEPENDENCY_CHECKS_PASSED"
+  },
+  "validation": {
+    "api_typecheck": "PASS",
+    "unified_typecheck": "PASS",
+    "mobile_typecheck": "PASS",
+    "api_focused_tests": {
+      "pass": 16,
+      "fail": 0
+    },
+    "mobile_focused_tests": {
+      "pass": 16,
+      "fail": 0
+    },
+    "git_diff_check": "PASS",
+    "oe1_ragas": "NOT_EXECUTED",
+    "oe2_scheduler": "NOT_EXECUTED",
+    "new_dependencies": 0
+  },
+  "corrected_defects": [
+    "Client allowlist initially rejected the two newly authorized GET paths; narrowly extended without anonymous access",
+    "PostgreSQL json_agg uses multiline JSON; reader now parses the bounded JSON value as a whole",
+    "Repeated selection of an already active category/filter could leave loading without a new effect; selection is now a no-op and physically regressed",
+    "401 expiry state persists through protected-route unmount to the login notice; cleared on login/logout"
+  ],
+  "limitations": [
+    "Transport uses existing local Docker/psql socket and reader role; not a portable production connector",
+    "Source failure/retry and normal navigation were tested physically; expiry/network-disconnection classification additionally covered by unit tests",
+    "No pagination beyond bounded lists, institutional source, enrollment, seats or eligibility",
+    "Adaptive deterministic production Agent remains unchanged; OE2 source is not available to chat, MCP or RAG",
+    "Data fingerprint covers 20 tables readable by existing runtime role, excluding sessions/history and direct chunk-table access",
+    "Native audit initially expected unaccented input; Android keyboard autocorrection was normalized for comparison without resending the message"
+  ]
+}

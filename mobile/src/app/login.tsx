@@ -17,6 +17,7 @@ export default function Login(){
  return <SafeAreaView style={styles.safe}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}><View style={styles.card}>
   <BrandMark size={48}/><Text style={styles.title}>Inicia sesión en BanuChat</Text>
   <Text style={styles.copy}>Ingresa con tu usuario y contraseña de BanuChat.</Text>
+  {snapshot.sessionExpired===true&&<Text accessibilityRole="alert" style={styles.error}>Tu sesión expiró. Vuelve a iniciar sesión para consultar tus datos.</Text>}
   <Text style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" style={styles.input}/>
   <Text style={styles.label}>Contraseña</Text><TextInput accessibilityLabel="Contraseña" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" editable={!busy&&!unavailable} style={styles.input} onSubmitEditing={()=>void signIn()}/>
   {unavailable&&<Text accessibilityRole="alert" style={styles.error}>El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.</Text>}

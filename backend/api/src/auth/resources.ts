@@ -17,6 +17,7 @@ import {knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
 import {auxiliaryContext,unifiedProgress,unifiedCalendar,unifiedAnnouncements,unifiedResponder} from './unified-product.js';
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
 import type {PresentationCitation} from '../chat/chat-types.js';
+import {readOe2Demo,type Oe2PublicationReader,type Oe2DemoKind,type Oe2DemoFilters} from '../application/oe2-demo.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -31,7 +32,13 @@ export class AuthenticatedResources {
  private readonly activity=new ConversationActivityCoordinator();
  constructor(private readonly pool:Pool,private readonly chat:Omit<SendMessageDependencies,'demo_mode'|'read_context'|'commit_turn'|'persist'>,
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
-   private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator}){this.transactions=new PgTransactionRunner(pool);}
+   private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader}){this.transactions=new PgTransactionRunner(pool);}
+ async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
+  if(!this.unified)throw new AuthError('NOT_FOUND');
+  // Release the normal product connection before waiting on an optional source.
+  await this.unit(token,async()=>undefined);
+  return readOe2Demo(this.unified.oe2_reader,kind,filters,now);
+ }
  private async unit<T>(token:string,operation:(c:SqlQueryClient,context:ResourceContext)=>Promise<T>,id:string|null=null,binding=false,turn=false):Promise<T>{
   try{return await this.transactions.run(async c=>{
    const ctx=(await c.query<ResourceContext>('SELECT * FROM banuchat_auth.resource_context($1,$2,$3,$4)',[token,id,binding,turn])).rows[0];

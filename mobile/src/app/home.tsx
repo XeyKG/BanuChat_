@@ -197,6 +197,16 @@ export default function HomeScreen() {
               disabled={isStartingChat}
               delay={430}
             />
+            <QuickAction
+              title="Publicaciones OE2"
+              description="Programación, convocatorias y novedades ficticias del pipeline."
+              tint={colors.violet}
+              tintSoft={colors.violetSoft}
+              icon="doc"
+              onPress={() => router.push('/oe2' as Href)}
+              disabled={isStartingChat}
+              delay={450}
+            />
             </>}
             <QuickAction
               title="Historial"

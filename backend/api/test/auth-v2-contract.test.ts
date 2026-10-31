@@ -77,6 +77,7 @@ const expected = [
   "POST /conversations", "GET /conversations", "GET /conversations/{conversation_id}",
   "DELETE /conversations/{conversation_id}", "POST /conversations/{conversation_id}/messages",
   "GET /calendar/events", "GET /announcements", "GET /documents/{document_version_id}/artifact", "GET /me/progress",
+  "GET /demo/oe2/programming", "GET /demo/oe2/announcements",
 ];
 const publicIds = new Set(["login", "refresh_session", "request_password_reset", "confirm_password_reset"]);
 const methods = new Set(["get", "post", "delete"]);
@@ -86,9 +87,9 @@ function operations(): Array<{ path: string; method: string; value: ObjectValue;
     .map(([method, value]) => ({ path, method, value: object(value), item: object(item) })));
 }
 
-test("AUTH-P0 v2 declares exactly fifteen operations, six identity operations, and no selector/admin/registration bypass", () => {
+test("v2 retains fifteen existing operations and adds two authorized read-only OE2 operations without identity bypass", () => {
   assert.equal(contract.openapi, "3.1.0");
-  assert.equal(object(contract.info).version, "5.0.0");
+  assert.equal(object(contract.info).version, "5.1.0");
   assert.deepEqual(contract.servers, [{ url: "/api/v2", description: "Base relativa; TLS obligatorio fuera del canal local aislado autorizado." }]);
   assert.deepEqual(operations().map(o => `${o.method.toUpperCase()} ${o.path}`), expected);
   assert.equal(operations().filter(o => o.path.startsWith("/auth/")).length, 6);
@@ -132,6 +133,17 @@ test("AUTH-P0 compiles every schema and resolves every local reference without e
       assert.equal(value.requestBody, undefined);
     }
   }
+});
+
+test("authorized OE2 schemas preserve civil programming, closed provenance and non-expiring news",()=>{
+  const source={source_id:'fixture-academic-offer-v1',record_id:'OFF-001',source_version:'fixture-v1',published_at:'2026-10-30T12:00:00Z',record_sha256:'a'.repeat(64),snapshot_sha256:'b'.repeat(64)};
+  const row={id:'oe2-academic_offer-'+'a'.repeat(40),title:'Programación ficticia',course_code:'DEMO-01',period:'DEMO-2026',mode:'virtual',start_date:'2026-11-03',end_date:'2026-11-28',temporal_status:'upcoming',source};
+  const envelope={release_id:uuid,published_at:'2026-10-30T12:00:00Z',reference_time:'2026-10-30T12:00:00Z',evidence_mode:'fictional_auxiliary'};
+  accepts('oe2_programming_response',{...envelope,programming:[row]});accepts('oe2_programming_response',{...envelope,programming:[]});
+  rejects('oe2_programming_response',{...envelope,evidence_mode:'ccd_local',programming:[row]});
+  rejects('oe2_programming',{...row,start_date:'2026-11-03T00:00:00Z'});rejects('oe2_source',{...source,source_path:'private/file'});
+  const news={id:'oe2-news-'+'b'.repeat(40),type:'news',title:'Novedad ficticia',description:'Sin vencimiento',valid_from:envelope.reference_time,valid_until:null,temporal_status:'published',source:{...source,source_id:'fixture-news-v1',record_id:'NEWS-001'}};
+  accepts('oe2_announcements_response',{...envelope,announcements:[news]});rejects('oe2_announcement',{...news,temporal_status:'active'});rejects('oe2_announcement',{...news,valid_until:envelope.reference_time});
 });
 
 test("AUTH-P0 request schemas reject extra identity selectors, wrong types, noncanonical UID and tokens", () => {
