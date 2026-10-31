@@ -1,0 +1,258 @@
+{
+  "task": "OE6-CCD-HISTORICAL-ARTIFACTS-01",
+  "status": "BANUCHAT_CCD_HISTORICAL_ARTIFACTS_DIAGNOSED",
+  "at": "2026-10-31T20:36:36.563Z",
+  "base_head": "db7918137af31a16e504a8c7160f823f4b68c5e6",
+  "references": {
+    "total_distinct": 251,
+    "matching": 218,
+    "affected": 33,
+    "categories": {
+      "A": 0,
+      "B": 0,
+      "C": 0,
+      "D": 33,
+      "E": 0
+    },
+    "affected_document_versions": 33,
+    "distinct_paths": 33,
+    "affected_current_versions": 0,
+    "current_verified": 107
+  },
+  "releases": [
+    {
+      "release_alias": "R1",
+      "status": "ready",
+      "schema": "ccd-1.0.0",
+      "is_current": false,
+      "imported_at": "2026-10-21T22:56:42.877943+00:00",
+      "versions": 2,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R2",
+      "status": "ready",
+      "schema": "ccd-1.1.0",
+      "is_current": false,
+      "imported_at": "2026-10-21T23:52:16.228534+00:00",
+      "versions": 10,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R3",
+      "status": "ready",
+      "schema": "ccd-1.2.0",
+      "is_current": false,
+      "imported_at": "2026-10-22T05:38:15.875384+00:00",
+      "versions": 12,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R4",
+      "status": "ready",
+      "schema": "ccd-1.3.0",
+      "is_current": false,
+      "imported_at": "2026-10-26T21:37:16.777743+00:00",
+      "versions": 87,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R5",
+      "status": "staging",
+      "schema": "ccd-1.4.0",
+      "is_current": false,
+      "imported_at": "2026-10-27T13:38:57.172999+00:00",
+      "versions": 107,
+      "affected_versions": 33,
+      "impact": {
+        "messages": 0,
+        "citations": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R6",
+      "status": "staging",
+      "schema": "ccd-1.4.0",
+      "is_current": false,
+      "imported_at": "2026-10-27T14:20:46.261111+00:00",
+      "versions": 107,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    },
+    {
+      "release_alias": "R7",
+      "status": "ready",
+      "schema": "ccd-1.4.0",
+      "is_current": true,
+      "imported_at": "2026-10-28T07:33:55.225667+00:00",
+      "versions": 107,
+      "affected_versions": 0,
+      "impact": {
+        "citations": 0,
+        "messages": 0,
+        "conversations": 0
+      }
+    }
+  ],
+  "impact": {
+    "messages": 0,
+    "citations": 0,
+    "conversations": 0
+  },
+  "service": {
+    "not_found": 33,
+    "other_results": 0,
+    "current_sample_verified": true,
+    "http_authentication_tested": false,
+    "non_ready_release_versions": 33,
+    "live_hash_guard_reached": false
+  },
+  "copies": {
+    "references_with_exact_file": 33,
+    "physical_matches": 49,
+    "versions_with_one_exact_sql_chunk": 33,
+    "prior_verified_backup_chunk_fingerprint_matches": true,
+    "by_search_root": {
+      "runtime:bch03-m01-m12-local-1": 0,
+      "runtime:bch03-ccd-local-2": 0,
+      "runtime:bch03-ccd-local-3": 0,
+      "runtime:bch-ccd-knowledge-1": 8,
+      "runtime:bch-ccd-knowledge-2": 0,
+      "prior-recovery-verified-artifacts": 8,
+      "p4b-audit-snapshot": 33,
+      "p4b1-audit-input-snapshot": 0
+    }
+  },
+  "search": [
+    {
+      "root": "runtime:bch03-m01-m12-local-1",
+      "available": true,
+      "markdown_files": 2
+    },
+    {
+      "root": "runtime:bch03-ccd-local-2",
+      "available": true,
+      "markdown_files": 10
+    },
+    {
+      "root": "runtime:bch03-ccd-local-3",
+      "available": true,
+      "markdown_files": 12
+    },
+    {
+      "root": "runtime:bch-ccd-knowledge-1",
+      "available": true,
+      "markdown_files": 87
+    },
+    {
+      "root": "runtime:bch-ccd-knowledge-2",
+      "available": true,
+      "markdown_files": 107
+    },
+    {
+      "root": "prior-recovery-verified-artifacts",
+      "available": true,
+      "markdown_files": 218
+    },
+    {
+      "root": "p4b-audit-snapshot",
+      "available": true,
+      "markdown_files": 107
+    },
+    {
+      "root": "p4b1-audit-input-snapshot",
+      "available": true,
+      "markdown_files": 107
+    }
+  ],
+  "preservation": {
+    "tables": true,
+    "identity": true,
+    "runtime_files": true,
+    "candidate_files": true,
+    "custody_dump": true,
+    "related_tables_supplement_equal": true
+  },
+  "custody": {
+    "historical_sync_risk": "NO DETERMINADO",
+    "current_custody_verified": true,
+    "metadata_only": true,
+    "cloud_access": false,
+    "local_metadata": {
+      "logs": {
+        "files": 2349,
+        "earliest": "2026-10-25T22:10:39.416Z",
+        "latest": "2026-10-26T13:53:10.819Z",
+        "extensions": {
+          ".txt": 2,
+          ".keystore": 1,
+          ".log": 1,
+          ".odlsent": 72,
+          ".odlgz": 28,
+          ".odl": 2241,
+          ".aodl": 1,
+          ".otc": 1,
+          ".otc-shm": 1,
+          ".otc-wal": 1
+        }
+      },
+      "settings": {
+        "files": 28,
+        "earliest": "2026-10-25T22:10:39.541Z",
+        "latest": "2026-10-31T05:52:16.880Z",
+        "extensions": {
+          ".ini": 7,
+          ".db": 7,
+          ".db-shm": 4,
+          ".db-wal": 4,
+          ".txt": 4,
+          ".json": 2
+        }
+      }
+    }
+  },
+  "limitations": [
+    "No restoration, file copying to product, reconstruction or mapping changes",
+    "No cloud-account access or retrospective proof of synchronization",
+    "Direct artifact service + read-only SQL, no new session or HTTP route test",
+    "SQL hash equality identifies stored bytes, not an existing standalone artifact file",
+    "Bounded authorized-root search; no global claim that files do not exist elsewhere"
+  ],
+  "observation": {
+    "existing_file_wrong_hash": 33,
+    "ready_document_versions": 218,
+    "ready_affected_document_versions": 0,
+    "staging_affected_document_versions": 33
+  },
+  "additional_impact": {
+    "conversations_via_citations": 0,
+    "messages_pinned_to_affected_release": 0,
+    "citations_by_version_chunk_or_provenance": 0,
+    "conversations_pinned_to_affected_release": 0
+  }
+}
