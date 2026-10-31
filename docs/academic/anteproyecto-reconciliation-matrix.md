@@ -1,5 +1,16 @@
 # Matriz de reconciliación académica de BanuChat
 
+> **Actualización de precedencia, 31/10/2026:** este documento conserva el cotejo
+> A4.1 del 16/10, sus transcripciones originales y el diagnóstico técnico de esa
+> fecha. El estado técnico actual y sus criterios A–I están en la
+> [matriz vigente OE1–OE6](oe1-oe6-current-status.md); el
+> [checkpoint de auditoría](CHECKPOINT-OE1-OE6-CLOSURE-GAP-01.md) registra el delta.
+> Se cotejaron nuevamente las pp. 7–8 y 20–21 del PDF original, por extracción e
+> inspección visual, con el mismo SHA-256 consignado en esa matriz. No se volvió a
+> auditar visualmente todo el PDF ni se alteran sus objetivos. Los “Estado repo”,
+> clasificaciones y propuestas de A4.1 son históricos; su actualización técnica
+> no concede ratificación documental o aprobación académica.
+
 ## 1. Propósito
 
 **A4.1 — cotejado contra el anteproyecto original, 2026-10-16.** Esta revisión

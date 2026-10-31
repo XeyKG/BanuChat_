@@ -1,5 +1,17 @@
 # BanuChat — trazabilidad definitiva OE1–OE6
 
+> **Precedencia vigente, 31/10/2026 — OE1-OE6-CLOSURE-GAP-01:** la
+> [matriz vigente](oe1-oe6-current-status.md) incorpora QUALITY-03/04, scheduler y
+> publicación OE2, REST/Android multifuente, radar, notificaciones físicas locales
+> y readiness Unified. El [checkpoint de auditoría](CHECKPOINT-OE1-OE6-CLOSURE-GAP-01.md)
+> registra brechas y cinco próximos trabajos. Los cuerpos siguientes son cortes
+> históricos: no usar “RAGAS no ejecutado”, “MCP no integrado”, “scheduler pendiente”
+> o “Android pendiente” de esos cortes como estado actual global. Su evidencia,
+> resultados y compromisos originales se conservan; ninguna aprobación se infiere.
+> La decisión canónica OE5 humano mantiene precedencia y no se modifica.
+
+## Cortes históricos conservados
+
 > **Corte vigente de entrega, 29/10/2026:** consultar la
 > [matriz actualizada OE1–OE6](oe1-oe6-current-status.md). Este archivo conserva
 > sus cortes históricos y citas originales; sus pendientes de banco/RAGAS o Android

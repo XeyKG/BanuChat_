@@ -1,5 +1,48 @@
 # BanuChat — decisiones externas y cronograma de cierre
 
+## Registro vigente de decisiones — 31/10/2026
+
+La [matriz vigente](oe1-oe6-current-status.md) contiene el cotejo A–I, las seis
+alternativas de alcance y el backlog **actual de cinco actividades**.
+El [checkpoint](CHECKPOINT-OE1-OE6-CLOSURE-GAP-01.md) recomienda
+OE6-UNIFIED-RECOVERY-01. Esta actualización no registra ninguna decisión externa
+nueva ni inicia las tareas propuestas.
+
+| Asunto | Estado vigente y efecto |
+| --- | --- |
+| Autoridad documental y evaluación OE1 | Pendiente ratificación/independencia y decisión de banco/k/juez. RAGAS sí se ejecutó el 29/10 sobre 39 respuestas de 43 intentadas; tres metas quedaron por debajo. QUALITY-03/04 posteriores no sustituyen ese baseline |
+| Adquisición institucional OE2 | No autorizada. Tres schedulers fixture y publicación aislada comprobados; no acreditan scraping, >90 % institucional ni <24 h desde sitio CCD |
+| Agent/ReAct OE3 | Producto adaptativo determinista y MCP reales comprobados; política LLM C solo experimental. Sustitución o conservación del ReAct original pendiente del director; no desarrollar por etiqueta |
+| Sheets/BPM OE4 | N8N participa en rama multifuente y automatización local; no existe Sheets autorizado ni prueba ≤30 min/100 % flujos originales. Fuentes sintéticas de perfiles sí son compatibles con A0 |
+| Plataformas y notificaciones OE5 | Android físico y recepción local comprobados al 31/10. iOS físico/push remoto y evaluación completa de accesibilidad pendientes; no confundir local con push ni export con prueba iOS |
+| Validación humana OE5/OE6 | Rige la decisión canónica enlazada abajo: criterios originales NO CUMPLIDOS, sin reclutamiento/SUS autorizados; alternativa del autor pendiente de aprobación |
+| Infraestructura y operación OE6 | Readiness local Unified acreditado; falta receptor/operador/ventana institucional y evaluación SLA. Restore sintético anterior no cubre coherencia de todo Unified actual |
+
+No se atribuyen decisiones al director, CCD o TI sin respuesta documentada.
+La autoridad académica puede decidir alcance; permisos de datos y operación
+institucional deben ser otorgados por sus responsables correspondientes.
+
+### Impacto vigente sobre planificación
+
+La siguiente tarea recomendada es recuperación aislada del Unified actual, sin
+activar automatismos restaurados ni tocar fuentes protegidas. Investigación
+causal OE1 y diagnóstico de latencia tienen presupuesto acotado y no autorizan
+nuevos benchmarks. La preparación metodológica puede avanzar; evaluación
+independiente y ramas institucionales siguen sujetas a sus dependencias.
+
+Solo se estiman esfuerzos relativos en P1–P5 de la matriz. No hay fechas nuevas,
+plazo institucional confirmado ni tiempo restante calculable. **Las 23–41
+jornadas-persona y las 16 semanas que siguen son cifras/plantillas históricas,
+no estimación actual ni autorización para ejecutar sus actividades.** Android,
+RAGAS y scheduler ya tienen evidencia posterior: no se repiten por figurar
+pendientes en una tabla antigua. Las actividades humanas antiguas no son backlog
+activo. No hay reclutamiento ni SUS.
+
+## Registro histórico conservado
+
+El cuerpo siguiente conserva decisiones y planificación anteriores; las
+afirmaciones técnicas superadas se interpretan con el registro vigente anterior.
+
 > La fila y actividades históricas de pruebas humanas quedan subordinadas a la
 > [decisión canónica de cierre OE5](oe5-human-validation-closure-decision.md):
 > **NO EJECUTADO — FUERA DE ALCANCE — PENDIENTE DE DECISIÓN DEL DIRECTOR**. No
