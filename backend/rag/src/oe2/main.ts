@@ -1,19 +1,7 @@
-import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { FileOe2StateStore, runOe2FixtureFlow } from './flow.js';
 import { createOe2HttpServer } from './server.js';
-import type { Oe2Category } from './types.js';
-
-export function createOe2FixtureService(fixtureRoot:string,stateRoot:string) {
-  const fixtures=path.resolve(fixtureRoot),state=path.resolve(stateRoot);
-  const contains=(a:string,b:string)=>{const relative=path.relative(a,b);return relative===''||(!relative.startsWith('..'+path.sep)&&relative!=='..'&&!path.isAbsolute(relative));};
-  if(contains(fixtures,state)||contains(state,fixtures))throw new Error('OE2 roots must be disjoint');
-  const store=new FileOe2StateStore(state);
-  return {
-    run:(category:Oe2Category,sourceId:string,operationId?:string)=>runOe2FixtureFlow({category,sourceId,fixtureRoot:fixtures,store,...(operationId?{operationId}:{})}),
-    status:(category:Oe2Category)=>store.status(category),
-  };
-}
+import {createOe2FixtureService} from './service.js';
+export {createOe2FixtureService} from './service.js';
 
 export async function startOe2FixtureService(env: NodeJS.ProcessEnv = process.env): Promise<void> {
   const fixtureRoot = env.BANUCHAT_OE2_FIXTURE_ROOT;

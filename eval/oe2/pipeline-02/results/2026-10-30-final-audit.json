@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-30T15:11:05.147Z",
+  "conversation_workflow_unchanged": true,
+  "all_pipeline_clones_inactive": true,
+  "final_run_execution_count_unchanged": 12,
+  "n8n_running": true,
+  "unified_postgres_running": true,
+  "synthetic_postgres_stopped": true,
+  "fixture_runtime_stopped": true,
+  "fixture_runtime_exit_code": 0,
+  "n8n_health": 200,
+  "usual_api_health": "unavailable"
+}

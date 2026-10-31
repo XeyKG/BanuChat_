@@ -1,0 +1,786 @@
+{
+  "schema_version": "oe2-pipeline-demo-evidence-1",
+  "at": "2026-10-30T14:28:11.264Z",
+  "date_bogota": "2026-10-30",
+  "status": "BANUCHAT_OE2_PIPELINE_DEMO_E2E_VALIDATED",
+  "scope": "fixture-only existing empty postgres database in synthetic container; no new database/schema; no CCD or users copied",
+  "source": {
+    "baseline_commit": "ecc99386e461d36935e5484167a95f35eba4e1db",
+    "working_tree_changes": true,
+    "executed_runtime_bundle_sha256": "9e2edab94ab5a713d0793cb47a35d85b123437e1d739cb6d30248ab44429f39e",
+    "executed_checks_bundle_sha256": "b8a18b50330dab015967856677d0843e3390d15e94b95fdd9cd84c8aaad83f81",
+    "supplemental_read_bundle_sha256": "327d0a7a3bcc109574c9aebb4170459c1b64b029d7d95a96f9a815361b4d9d4f"
+  },
+  "phases": [
+    {
+      "name": "scheduler_to_approved_publication_v1",
+      "status": "PASS",
+      "duration_ms": 12529,
+      "current_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+      "candidate_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d"
+    },
+    {
+      "name": "changed_snapshot_requires_separate_approval",
+      "status": "PASS",
+      "duration_ms": 8678,
+      "current_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+      "candidate_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+    },
+    {
+      "name": "scheduler_change_to_publication_and_services_v2",
+      "status": "PASS",
+      "duration_ms": 10303,
+      "current_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+      "candidate_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+    }
+  ],
+  "approval": {
+    "automatic_approval": false,
+    "scope": "fictional_auxiliary_only",
+    "binding": "policy + three admitted source IDs + original fixture hashes + complete normalized records; observation time excluded",
+    "changed_snapshot_did_not_publish_before_approval": true
+  },
+  "scheduler": {
+    "interval_seconds": 10,
+    "observed": 12,
+    "success": 11,
+    "rejected": 1,
+    "all_trigger": true,
+    "no_execution_retries": true,
+    "executions": [
+      {
+        "execution_id": "147",
+        "workflow_id": "BchOe2P022mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:00.108",
+        "stopped_at": "2026-10-30 14:29:00.416",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "updated",
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "source_sha256": "7702ac3a6fccef9a287d0f469a8f658d75c2ae60265ada27f57f1872126ae752",
+          "available_at": "2026-10-30T14:29:00.382Z",
+          "record_count": 2,
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "awaiting_snapshots"
+        }
+      },
+      {
+        "execution_id": "148",
+        "workflow_id": "BchOe2P020mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:00.120",
+        "stopped_at": "2026-10-30 14:29:00.521",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "updated",
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "source_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "available_at": "2026-10-30T14:29:00.425Z",
+          "record_count": 2,
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "published",
+          "release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "previous_release_id": "6ca83849-14c8-4a2a-8384-1a6b16312508",
+          "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d"
+        }
+      },
+      {
+        "execution_id": "149",
+        "workflow_id": "BchOe2P021mvv2hih9",
+        "mode": "trigger",
+        "status": "error",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:00.129",
+        "stopped_at": "2026-10-30 14:29:00.515",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "updated",
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "source_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+          "available_at": "2026-10-30T14:29:00.411Z",
+          "record_count": 2,
+          "changes": {
+            "created": 2,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 0
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        }
+      },
+      {
+        "execution_id": "150",
+        "workflow_id": "BchOe2P020mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:10.025",
+        "stopped_at": "2026-10-30 14:29:10.167",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "source_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "available_at": "2026-10-30T14:29:10.109Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "previous_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d"
+        }
+      },
+      {
+        "execution_id": "151",
+        "workflow_id": "BchOe2P021mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:10.032",
+        "stopped_at": "2026-10-30 14:29:10.237",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "source_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+          "available_at": "2026-10-30T14:29:10.197Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "previous_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d"
+        }
+      },
+      {
+        "execution_id": "152",
+        "workflow_id": "BchOe2P022mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:10.036",
+        "stopped_at": "2026-10-30 14:29:10.247",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "updated",
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "source_sha256": "1854f9bbb16d51fd20fb4285bad0b3c46295d7f3af3c7ec99d83fff702bad606",
+          "available_at": "2026-10-30T14:29:10.220Z",
+          "record_count": 2,
+          "changes": {
+            "created": 1,
+            "modified": 1,
+            "deleted": 1,
+            "unchanged": 0
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "awaiting_approval",
+          "candidate_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "153",
+        "workflow_id": "BchOe2P022mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:20.029",
+        "stopped_at": "2026-10-30 14:29:20.165",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "source_sha256": "1854f9bbb16d51fd20fb4285bad0b3c46295d7f3af3c7ec99d83fff702bad606",
+          "available_at": "2026-10-30T14:29:20.113Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "published",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "154",
+        "workflow_id": "BchOe2P020mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:20.035",
+        "stopped_at": "2026-10-30 14:29:20.213",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "source_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "available_at": "2026-10-30T14:29:20.169Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "155",
+        "workflow_id": "BchOe2P021mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:20.040",
+        "stopped_at": "2026-10-30 14:29:20.233",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "source_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+          "available_at": "2026-10-30T14:29:20.206Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "156",
+        "workflow_id": "BchOe2P020mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:30.057",
+        "stopped_at": "2026-10-30 14:29:30.198",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "source_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "available_at": "2026-10-30T14:29:30.151Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "157",
+        "workflow_id": "BchOe2P021mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:30.066",
+        "stopped_at": "2026-10-30 14:29:30.256",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "source_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+          "available_at": "2026-10-30T14:29:30.217Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      },
+      {
+        "execution_id": "158",
+        "workflow_id": "BchOe2P022mvv2hih9",
+        "mode": "trigger",
+        "status": "success",
+        "retry_of": null,
+        "started_at": "2026-10-30 14:29:30.074",
+        "stopped_at": "2026-10-30 14:29:30.276",
+        "nodes": [
+          "Test Scheduler 10 Seconds",
+          "Fixture Configuration",
+          "Check Last Valid State",
+          "Admit Only Idle State",
+          "Run Fixture Flow Once",
+          "Publish Only Approved Demo Candidate"
+        ],
+        "acquisition": {
+          "outcome": "unchanged",
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "source_sha256": "1854f9bbb16d51fd20fb4285bad0b3c46295d7f3af3c7ec99d83fff702bad606",
+          "available_at": "2026-10-30T14:29:30.242Z",
+          "record_count": 2,
+          "changes": {
+            "created": 0,
+            "modified": 0,
+            "deleted": 0,
+            "unchanged": 2
+          },
+          "publication_lag_verifiable": false,
+          "publication_lag_reason": "fixture_source",
+          "published_to_ccd": false
+        },
+        "publication": {
+          "outcome": "unchanged",
+          "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+        }
+      }
+    ],
+    "publication_events": [
+      {
+        "at": "2026-10-30T14:29:00.507Z",
+        "operation_id": "148",
+        "outcome": "published",
+        "release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+        "previous_release_id": "6ca83849-14c8-4a2a-8384-1a6b16312508",
+        "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d"
+      },
+      {
+        "at": "2026-10-30T14:29:20.152Z",
+        "operation_id": "153",
+        "outcome": "published",
+        "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "previous_release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+        "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+      }
+    ],
+    "other_event_outcomes": {
+      "rejected": 1,
+      "published": 2,
+      "unchanged": 7,
+      "awaiting_approval": 1
+    }
+  },
+  "releases": {
+    "retained_total": 6,
+    "automatic_this_run": [
+      {
+        "id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+        "status": "ready",
+        "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d",
+        "approval_ref": "OE2-PIPELINE-02/operator-v1-mvv2hih9",
+        "published_at": "2026-10-30T14:29:00.501Z"
+      },
+      {
+        "id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "status": "ready",
+        "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a",
+        "approval_ref": "OE2-PIPELINE-02/operator-v2-mvv2hih9",
+        "published_at": "2026-10-30T14:29:20.148Z"
+      }
+    ],
+    "explicit_concurrency_test": {
+      "outcome": "published",
+      "release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+      "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+      "content_sha256": "e2f414fdddcc9951d9e0da3f6432354221291d49691bb4cb0d616ae376fa8f2e"
+    },
+    "previous_demo_versions_retained": 3,
+    "final_current": "8ed084d9-2d5e-4f90-8011-99912278b27c"
+  },
+  "queries": {
+    "existing_rest_path": "/api/v1/announcements",
+    "rest_contract_changed": false,
+    "news": {
+      "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+      "reference_time": "2026-10-06T12:00:00Z",
+      "announcements": [
+        {
+          "announcement_key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+          "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+          "description": "Contenido sintético para validar extracción y detección de cambios. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+          "valid_from": "2026-10-05T16:30:00.000Z",
+          "valid_until": null,
+          "temporal_status": "active"
+        },
+        {
+          "announcement_key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+          "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+          "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+          "valid_from": "2026-10-08T19:00:00.000Z",
+          "valid_until": null,
+          "temporal_status": "upcoming"
+        }
+      ]
+    },
+    "call_counts": {
+      "before_opening": 2,
+      "during_opening": 2,
+      "after_closing": 2
+    },
+    "news_no_expiration": true,
+    "programming": {
+      "evidence_mode": "fictional_auxiliary",
+      "programming": [
+        {
+          "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+          "programming_key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+          "category": "academic_offer",
+          "record_id": "OFF-002",
+          "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+          "course_code": "DEMO-CCD-02",
+          "period": "DEMO-2026-10",
+          "mode": "teleclase",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-28",
+          "source_path": "programming/oe2-academic_offer.snapshot.json",
+          "source_locator": "/records/1",
+          "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+          "source_id": "fixture-academic-offer-v1",
+          "fixture_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "snapshot_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "origin_published_at": "2026-10-01T13:00:00.000Z"
+        },
+        {
+          "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+          "programming_key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+          "category": "academic_offer",
+          "record_id": "OFF-001",
+          "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+          "course_code": "DEMO-CCD-01",
+          "period": "DEMO-2026-10",
+          "mode": "virtual",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-28",
+          "source_path": "programming/oe2-academic_offer.snapshot.json",
+          "source_locator": "/records/0",
+          "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+          "source_id": "fixture-academic-offer-v1",
+          "fixture_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "snapshot_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "origin_published_at": "2026-10-01T13:00:00.000Z"
+        }
+      ]
+    },
+    "programming_rest_endpoint": "NOT_IMPLEMENTED_frozen_contract_has_no_programming_resource",
+    "provenance": "Verified through existing getAnnouncements service, source snapshot bytes, per-record locator and SQL origin references; source metadata is not exposed by the frozen REST response"
+  },
+  "checks": [
+    {
+      "name": "existing_rest_news_calls_and_temporal_semantics",
+      "status": "PASS",
+      "duration_ms": 74
+    },
+    {
+      "name": "programming_service_without_catalogue_fabrication",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "origin_hashes_and_snapshot_references",
+      "status": "PASS",
+      "duration_ms": 8
+    },
+    {
+      "name": "second_execution_is_idempotent",
+      "status": "PASS",
+      "duration_ms": 15,
+      "evidence": {
+        "outcome": "unchanged",
+        "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a"
+      }
+    },
+    {
+      "name": "rollback_after_records_before_pointer",
+      "status": "PASS",
+      "duration_ms": 22,
+      "evidence": {
+        "unchanged_release": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "no_partial_staging": true
+      }
+    },
+    {
+      "name": "one_concurrent_writer_and_no_duplicate_publication",
+      "status": "PASS",
+      "duration_ms": 27,
+      "evidence": {
+        "outcome": "published",
+        "release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "content_sha256": "e2f414fdddcc9951d9e0da3f6432354221291d49691bb4cb0d616ae376fa8f2e"
+      }
+    },
+    {
+      "name": "stale_base_and_unapproved_source_rejection",
+      "status": "PASS",
+      "duration_ms": 10,
+      "evidence": {
+        "stale_or_older_candidate_rejected": true,
+        "unapproved_rejected": true,
+        "source_not_admitted_rejected": true
+      }
+    },
+    {
+      "name": "read_only_query_role_and_immutable_ready_releases",
+      "status": "PASS",
+      "duration_ms": 7,
+      "evidence": {
+        "reader_cannot_write": true,
+        "previous_release_immutable": true
+      }
+    }
+  ],
+  "supplemental_civil_date_read": {
+    "result": "PASS",
+    "current_unchanged": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "release_count_unchanged": 6
+  },
+  "protection": {
+    "baseline_tables_fingerprinted": 16,
+    "unified_tables_fingerprinted": 38,
+    "unchanged_during_final_run": true,
+    "unchanged_across_increment": true,
+    "conversation_workflow_unchanged": true,
+    "ccd_copied": false,
+    "usual_accounts_copied": false,
+    "new_databases": 0,
+    "new_schemas": 0,
+    "new_fixture_tables": 7,
+    "new_scoped_roles": 2,
+    "embedding_context": "Only an existing synthetic embedding configuration UUID is retained for read-service compatibility. No embeddings or model execution."
+  },
+  "final": {
+    "schedules_inactive": true,
+    "no_new_execution_during_12_seconds_after_deactivation": true,
+    "fixture_runtime_stopped": true,
+    "fixture_runtime_exit_code": 0,
+    "synthetic_postgres_restored_stopped": true
+  },
+  "validation": {
+    "typecheck": "PASS",
+    "build": "PASS",
+    "rag_unit_tests": {
+      "pass": 252,
+      "fail": 0,
+      "skip": 0
+    },
+    "oe2_focused_after_factory_split": {
+      "pass": 20,
+      "fail": 0
+    },
+    "real_pipeline_checks": 8,
+    "read_only_civil_date_check": "PASS",
+    "oe1_benchmark": "NOT_EXECUTED",
+    "agent_mcp_tests": "NOT_REEXECUTED_no_changes",
+    "git_diff_check": "PASS",
+    "changed_paths_authorized": true,
+    "private_credentials_scan": "PASS"
+  },
+  "limitations": [
+    "Fixture-only approval, not institutional approval or general OE2 completion",
+    "Programming is published and queryable through its isolated service; public REST programming is pending an authorized contract",
+    "Temporal active on a news item means publication without documented expiry, not an open call",
+    "Normal authenticated Unified services do not consume this separate demo dataset",
+    "Prior attempts kept privately: parser UMD packaging failure and an unintended CLI startup from bundling; final run separates the pure factory and exits 0",
+    "Sandbox-limited test attempts were not counted; the completed permitted run is 252/252"
+  ],
+  "final_audit": {
+    "at": "2026-10-30T15:11:05.147Z",
+    "conversation_workflow_unchanged": true,
+    "all_pipeline_clones_inactive": true,
+    "final_run_execution_count_unchanged": 12,
+    "n8n_running": true,
+    "unified_postgres_running": true,
+    "synthetic_postgres_stopped": true,
+    "fixture_runtime_stopped": true,
+    "fixture_runtime_exit_code": 0,
+    "n8n_health": 200,
+    "usual_api_health": "unavailable"
+  }
+}
