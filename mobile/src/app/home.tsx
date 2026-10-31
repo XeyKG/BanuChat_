@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, type Href } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createConversation } from '@/api/conversations';
@@ -187,7 +187,7 @@ export default function HomeScreen() {
               disabled={isStartingChat}
               delay={400}
             />
-            <QuickAction
+            {Platform.OS !== 'web' && <QuickAction
               title="Notificaciones"
               description="Configura tus permisos y recordatorios."
               tint={colors.amber}
@@ -196,7 +196,7 @@ export default function HomeScreen() {
               onPress={() => router.push('/notifications' as Href)}
               disabled={isStartingChat}
               delay={430}
-            />
+            />}
             <QuickAction
               title="Publicaciones OE2"
               description="Programación, convocatorias y novedades ficticias del pipeline."
@@ -252,7 +252,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
   container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
+  content: { width: '100%', maxWidth: Platform.OS==='web'?800:layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },

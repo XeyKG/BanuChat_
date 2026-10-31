@@ -3,7 +3,6 @@ import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {Alert} from '@/ui/confirmation';
 
 import {
   createConversation,

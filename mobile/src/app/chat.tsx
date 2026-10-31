@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {Alert} from '@/ui/confirmation';
 
 import { createConversation, getConversation } from '@/api/conversations';
 import { CCD_AUTH_NOTICE,CCD_NOTICE,isCcdAuthenticated,isCcdLocal,isCcdKnowledge } from '@/config/demo-mode';

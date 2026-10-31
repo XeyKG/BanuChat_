@@ -1,27 +1,29 @@
 import {useState} from 'react';
-import {ActivityIndicator,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
+import {ActivityIndicator,Platform,ScrollView,StyleSheet,Text,TextInput,View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Redirect,useRouter} from 'expo-router';
 import {useAuth} from '@/auth/auth-provider';
+import {SessionError} from '@/auth/auth-session';
 import {isCcdLocal} from '@/config/demo-mode';
 import {AppButton} from '@/components/app-button';
 import {BrandMark} from '@/ui/animated';
 import {colors,radii,spacing,layout} from '@/ui/tokens';
 
 export default function Login(){
- const {client,snapshot}=useAuth(),router=useRouter();const [uid,setUid]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(false);
+ const {client,snapshot}=useAuth(),router=useRouter();const [uid,setUid]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(false),[errorKind,setErrorKind]=useState<SessionError['kind']>('session');
  if(isCcdLocal())return <Redirect href="/profiles" />;
  if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
  const unavailable=snapshot.phase==='unavailable',valid=[9,13].includes(uid.length)&&/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(uid)&&password.length>0&&[...password].length<=128;
- async function signIn(){if(!valid||busy)return;setBusy(true);setError(false);try{await client.login(uid,password);setPassword('');router.replace('/home');}catch{setPassword('');setError(true);}finally{setBusy(false);}}
+ async function signIn(){if(!valid||busy)return;setBusy(true);setError(false);try{await client.login(uid,password);setPassword('');router.replace('/home');}catch(error){setPassword('');setErrorKind(error instanceof SessionError?error.kind:'session');setError(true);}finally{setBusy(false);}}
  return <SafeAreaView style={styles.safe}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}><View style={styles.card}>
   <BrandMark size={48}/><Text style={styles.title}>Inicia sesión en BanuChat</Text>
   <Text style={styles.copy}>Ingresa con tu usuario y contraseña de BanuChat.</Text>
+  {Platform.OS==='web'&&<Text style={styles.copy}>Demostración local con cuenta ficticia. La sesión solo vive en esta pestaña; al recargar debes iniciar sesión de nuevo.</Text>}
   {snapshot.sessionExpired===true&&<Text accessibilityRole="alert" style={styles.error}>Tu sesión expiró. Vuelve a iniciar sesión para consultar tus datos.</Text>}
   <Text style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" style={styles.input}/>
   <Text style={styles.label}>Contraseña</Text><TextInput accessibilityLabel="Contraseña" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" editable={!busy&&!unavailable} style={styles.input} onSubmitEditing={()=>void signIn()}/>
-  {unavailable&&<Text accessibilityRole="alert" style={styles.error}>El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.</Text>}
-  {error&&<Text accessibilityRole="alert" style={styles.error}>No se pudo iniciar sesión. Revisa tus datos y la conexión autorizada.</Text>}
+  {unavailable&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'?'La sesión web no está disponible. Abre el origen local autorizado.':'El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.'}</Text>}
+  {error&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'&&errorKind==='credentials'?'Usuario o contraseña inválidos.':Platform.OS==='web'&&errorKind==='unavailable'?'El servicio no está disponible. Inténtalo más tarde.':'No se pudo iniciar sesión. Revisa tus datos y la conexión autorizada.'}</Text>}
   {snapshot.logoutRemoteConfirmed===false&&<Text accessibilityRole="alert" style={styles.error}>La sesión se cerró en este dispositivo. No se pudo confirmar la revocación remota.</Text>}
   {busy&&<ActivityIndicator accessibilityLabel="Iniciando sesión"/>}
   <AppButton label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} disabled={!valid||unavailable}/>

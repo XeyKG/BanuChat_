@@ -46,6 +46,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "web:export": "node scripts/export-unified-web.mjs",
+    "web:serve": "node scripts/serve-unified-web.mjs",
+    "web:test": "node --test scripts/test-unified-web.mjs",
     "lint": "expo lint"
   },
   "private": true

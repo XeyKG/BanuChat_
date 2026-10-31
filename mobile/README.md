@@ -1,5 +1,12 @@
 # BanuChat Mobile
 
+WEB-01 reutiliza este mismo proyecto en navegador. Arranque local:
+`npm run web:export`, luego `npm run web:serve`, y abrir
+`http://127.0.0.1:8085/login`. Requiere Unified en 3004 y una cuenta ficticia
+existente. La sesión web vive solo en memoria de la pestaña; Android conserva
+SecureStore. Véanse el [procedimiento web](../docs/operations/web-local.md) y el
+[checkpoint WEB-01](../docs/transition/CHECKPOINT-WEB-01.md).
+
 **Banu al día** se abre desde Publicaciones OE2. Compara dos releases ficticias,
 muestra resumen global, filtros y campos Antes/Ahora, con publicación de BanuChat,
 fecha del origen y observación del snapshot diferenciadas. No es un contador de

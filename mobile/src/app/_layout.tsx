@@ -5,7 +5,8 @@ import { SessionProvider,useSession } from '@/session/session-context';
 import { isCcdLocal } from '@/config/demo-mode';
 import {AuthProvider,useAuth} from '@/auth/auth-provider';
 import {NotificationProvider} from '@/notifications/notification-provider';
-import {ActivityIndicator,View} from 'react-native';
+import {ActivityIndicator,Platform,View} from 'react-native';
+import {WebFrame} from '@/components/web-frame';
 
 export default function RootLayout() {
   return <AuthProvider><NotificationProvider><SessionProvider><Navigation /></SessionProvider></NotificationProvider></AuthProvider>;
@@ -16,7 +17,7 @@ function Navigation(){
   if(!ccd&&snapshot.phase==='restoring')return <View style={{flex:1,justifyContent:'center'}}><ActivityIndicator accessibilityLabel="Validando sesión" /></View>;
   const authenticated=ccd?activeProfile!==null:snapshot.phase==='authenticated';
   return (
-    <View style={{flex:1}}>
+    <WebFrame><View style={{flex:1}}>
       <StatusBar style="dark" />
       <Stack key={ccd?'ccd':authenticated?String(snapshot.epoch):'signed-out'} initialRouteName={ccd?'profiles':authenticated?'home':snapshot.epoch>0?'login':'index'} screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="index" />
@@ -29,11 +30,13 @@ function Navigation(){
           <Stack.Screen name="calendar" />
           <Stack.Screen name="progress" />
           <Stack.Screen name="announcements" />
-          <Stack.Screen name="notifications" />
           <Stack.Screen name="oe2" />
           <Stack.Screen name="oe2-changes" />
         </Stack.Protected>
+        <Stack.Protected guard={Platform.OS!=='web'&&!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
+          <Stack.Screen name="notifications" />
+        </Stack.Protected>
       </Stack>
-    </View>
+    </View></WebFrame>
   );
 }

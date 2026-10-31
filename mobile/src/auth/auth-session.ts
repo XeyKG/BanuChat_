@@ -7,7 +7,7 @@ export interface CurrentSession {
 interface Pair {access_token:string;refresh_token:string;token_type:'Bearer';expires_in:number;session_expires_at:string;}
 export interface RefreshStore {available():Promise<boolean>;get():Promise<string|null>;set(token:string):Promise<void>;clear():Promise<void>;}
 export type AuthSnapshot={phase:'restoring'|'signed_out'|'authenticated'|'unavailable';me:CurrentSession|null;epoch:number;logoutRemoteConfirmed?:boolean|null;sessionExpired?:boolean};
-export class SessionError extends Error {constructor(){super('No se pudo validar la sesión. Inicia sesión nuevamente.');}}
+export class SessionError extends Error {constructor(readonly kind:'session'|'credentials'|'unavailable'='session'){super('No se pudo validar la sesión. Inicia sesión nuevamente.');}}
 const tokenPattern=/^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const capabilities=['chat','history','progress','calendar','announcements','documents'];
@@ -39,7 +39,7 @@ export class AuthSession {
  private async raw(path:string,method:string,body?:unknown,access?:string):Promise<Response>{
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
   try{return await this.request(this.base()+path,{method,redirect:'error',cache:'no-store',headers:{...(body===undefined?{}:{'Content-Type':'application/json'}),...(access?{Authorization:'Bearer '+access}:{})},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:controller.signal});}
-  catch{throw new SessionError();}finally{clearTimeout(timer);}
+  catch{throw new SessionError('unavailable');}finally{clearTimeout(timer);}
  }
  private async invalidate(){this.epoch++;this.access=null;this.expires=0;this.publish('signed_out');try{await this.storage(()=>this.store.clear());}catch{this.publish('unavailable');}}
  private async discard(access:string){try{await this.raw('/auth/logout','POST',undefined,access);}catch{/* No retry and no assertion of remote revocation. */}}
@@ -49,12 +49,12 @@ export class AuthSession {
   await this.invalidate();const epoch=this.epoch;let issued:Pair|undefined;
   try{
    if(!await this.store.available()){this.publish('unavailable');throw new SessionError();}
-   const r=await this.raw('/auth/login','POST',{synthetic_uid:selectedUid,password});if(r.status!==200)throw new SessionError();issued=pair(await r.json());this.check(epoch);
+   const r=await this.raw('/auth/login','POST',{synthetic_uid:selectedUid,password});if(r.status!==200)throw new SessionError(r.status===401?'credentials':r.status>=500?'unavailable':'session');issued=pair(await r.json());this.check(epoch);
    const meResponse=await this.raw('/auth/me','GET',undefined,issued.access_token);if(meResponse.status!==200)throw new SessionError();const me=current(await meResponse.json());this.check(epoch);
    if(me.synthetic_uid!==selectedUid||me.session_expires_at!==issued.session_expires_at)throw new SessionError();
    await this.storage(async()=>{this.check(epoch);await this.store.set(issued!.refresh_token);});this.check(epoch);
    this.access=issued.access_token;this.expires=Math.min(this.now()+issued.expires_in*1000,Date.parse(issued.session_expires_at));this.publish('authenticated',me);
-  }catch{if(issued)await this.discard(issued.access_token);if(epoch===this.epoch)await this.invalidate();throw new SessionError();}
+  }catch(error){if(issued)await this.discard(issued.access_token);if(epoch===this.epoch)await this.invalidate();throw error instanceof SessionError?error:new SessionError();}
   finally{password='';this.signingIn=false;}
  }
  async restore():Promise<void>{
