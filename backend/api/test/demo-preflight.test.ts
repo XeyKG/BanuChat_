@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {assessConfiguration,assessUnifiedContainer,assessPublication,assessServicePort,safeFailure} from '../scripts/demo-preflight.mjs';
+import {readiness,readinessStatus,workflowReady,baseReadiness} from '../scripts/demo-readiness-probes.mjs';
 const cfg={database:'banuchat_unified',database_port:55463,api_port:3004,ollama_base_url:'http://127.0.0.1:11434',generator_model:'qwen3:4b-instruct',generator_model_revision:'a'.repeat(64),generator_runtime_version:'0.35.0',runtime_user:'synthetic',runtime_password:'synthetic-secret-never-printed'};
 const container={Name:'/banuchat-unified-postgres',State:{Running:true},NetworkSettings:{Ports:{'5432/tcp':[{HostIp:'127.0.0.1',HostPort:'55463'}]}},Mounts:[{Type:'volume',Name:'banuchat-unified-data'}]};
 test('preflight accepts only existing Unified configuration, not historical lab or remote Ollama',()=>{
@@ -19,4 +20,20 @@ test('free startup ports differ from missing running services; occupied wrong se
 test('error reports suppress credentials, provider bodies, command arguments and native stacks',()=>{
  for(const error of [{code:'42501',message:cfg.runtime_password,stderr:'private provider body',stack:'private stack'},{code:'ENOENT',cmd:'private command'},{message:cfg.runtime_password}]){const result=safeFailure('synthetic_probe',error);assert.equal(result.status,'FAIL');assert.doesNotMatch(JSON.stringify(result),/synthetic-secret|private provider|private stack|private command/u);}
  assert.equal(safeFailure('sql',{code:'42501'}).reason,'READ_PRIVILEGE_MISSING_NO_ESCALATION');
+});
+
+test('readiness separates required failures, optional loss and untested execution',()=>{
+ const core=readiness('core',true,true,'READ_ONLY_CHECKED'),optional=readiness('oe2',false,false,'SOURCE_STOPPED');
+ assert.equal(optional.status,'OPTIONAL_UNAVAILABLE');assert.equal(readinessStatus([core,optional]),'READY');
+ assert.equal(readinessStatus([core,readiness('n8n',false,true,'STOPPED')]),'NOT_READY');
+ assert.equal(readinessStatus([core,{component:'running',required:true,status:'NOT_TESTED',reason:'STARTUP_ONLY'}]),'NOT_TESTED');
+});
+test('a listening port cannot establish a published conversational workflow',()=>{
+ assert.equal(workflowReady({tcp:true}),false);assert.equal(workflowReady({active:true,published:true,registered:true}),true);
+ for(const field of ['active','published','registered'])assert.equal(workflowReady({...{active:true,published:true,registered:true},[field]:false}),false);
+});
+test('optional mobile availability does not hide exposed or unexpected listeners',()=>{
+ assert.equal(baseReadiness({check:'metro',status:'FAIL',reason:'SERVICE_NOT_RUNNING'}).status,'OPTIONAL_UNAVAILABLE');
+ assert.equal(baseReadiness({check:'metro',status:'FAIL',reason:'NON_LOOPBACK_LISTENER_REJECTED'}).status,'NOT_READY');
+ assert.equal(baseReadiness({check:'adb',status:'NOT_EXECUTED',reason:'OPT_IN'}).status,'NOT_TESTED');
 });

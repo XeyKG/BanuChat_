@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import {Pool} from 'pg';
 import {assessApi,assessExpo,assessModel,assessListener,authorizedSerials,check,type Check} from '../src/operations/ccd-preflight.js';
 import {validateQueryEmbeddingConfig} from '../src/application/document-query-retrieval.js';
+import {extendedReadiness,baseReadiness,readinessStatus,type Readiness} from './demo-readiness-probes.mjs';
 
 const root=fileURLToPath(new URL('../../../',import.meta.url));
 const releaseId='10af4ffd-effb-41fc-bbfe-4dc48cb3398f',manifestHash='fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852';
@@ -94,7 +95,11 @@ export async function runPreflight(args:string[]):Promise<number>{
    observations.device_model=run(['shell','getprop','ro.product.model']);
   });
  }else checks.push({check:'adb',status:'NOT_EXECUTED',reason:'OPT_IN_WITH_ADB_NO_PHYSICAL_VALIDATION_PERFORMED'});
- const result={at:new Date().toISOString(),phase:running?'services_running':'before_start',status:checks.some(c=>c.status==='FAIL')?'NOT_READY':running?'DEPENDENCY_CHECKS_PASSED':'PREREQUISITES_CHECKED',checks,observations,mutations:'none; optional private report only',scope:'No login, queries, model generation, RAGAS, baseline or physical UI replay'};
- if(args.includes('--report')){const directory=join(root,'data/ccd/local/delivery/entrega-01');command('git',['check-ignore','--quiet','--',join(directory,'preflight.json')]);await mkdir(directory,{recursive:true});await writeFile(join(directory,'preflight-'+Date.now()+'.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});}
+ const components:Readiness[]=checks.map(baseReadiness);
+ if(!running)components.push({component:'running_product',status:'NOT_TESTED',required:true,reason:'STARTUP_PREREQUISITES_ONLY_USE_RUNNING_AFTER_START'});
+ components.push(...await extendedReadiness(root,config));
+ observations.readiness_scope='Dependency checks, not authenticated product correctness, stdio execution or physical receipt. Optional source loss never blocks documentary chat readiness.';
+ const result={at:new Date().toISOString(),phase:running?'services_running':'before_start',status:readinessStatus(components),components,checks,observations,mutations:'none; optional private report only',scope:'No login, generation, embeddings, publication, workflow invocation or physical UI replay'};
+ if(args.includes('--report')){const directory=join(root,'infra/local/oe6-demo-readiness-01');command('git',['check-ignore','--quiet','--',join(directory,'preflight.json')]);await mkdir(directory,{recursive:true});await writeFile(join(directory,'preflight-'+Date.now()+'.json'),JSON.stringify(result,null,2)+'\n',{flag:'wx'});}
  console.log(JSON.stringify(result,null,2));return result.status==='NOT_READY'?1:0;
 }

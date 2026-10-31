@@ -1,0 +1,392 @@
+{
+  "status": "BANUCHAT_OE6_DEMO_READINESS_VALIDATED",
+  "date": "2026-10-31",
+  "timezone": "America/Bogota",
+  "baseline": "0590265ee30f1b8c6d3ee74e0b3f351a01e71bbd",
+  "scope": "Prepared habitual local computer only; not UNAB deployment, independent portability, full OE6 or performance certification",
+  "versions": {
+    "node": "v24.19.0",
+    "postgres": "16.15 (Debian 16.15-1.pgdg12+2)",
+    "n8n": "2.40.5",
+    "expo": "57.0.31",
+    "react_native": "0.86.3",
+    "ollama": "0.35.0"
+  },
+  "preflight": {
+    "prepared_mobile_status": "READY",
+    "final_after_usb_cleanup": "READY",
+    "components": [
+      {
+        "component": "node",
+        "status": "READY",
+        "required": true,
+        "reason": "NODE_22_OR_LATER_REQUIRED"
+      },
+      {
+        "component": "local_dependencies",
+        "status": "READY",
+        "required": true,
+        "reason": "EXISTING_DEPENDENCIES_PRESENT_NO_INSTALL_PERFORMED"
+      },
+      {
+        "component": "expo_sdk",
+        "status": "READY",
+        "required": true,
+        "reason": "EXPO_57_REQUIRED"
+      },
+      {
+        "component": "private_configuration",
+        "status": "READY",
+        "required": true,
+        "reason": "EXISTING_UNIFIED_CONFIGURATION_REQUIRED"
+      },
+      {
+        "component": "private_startup_files",
+        "status": "READY",
+        "required": true,
+        "reason": "PRIVATE_STARTUP_AND_OPERATOR_FILES_PRESENT_CONTENT_NOT_DISPLAYED"
+      },
+      {
+        "component": "postgres_container",
+        "status": "READY",
+        "required": true,
+        "reason": "EXACT_UNIFIED_LOOPBACK_AND_EXISTING_VOLUME_REQUIRED"
+      },
+      {
+        "component": "sql_read_only",
+        "status": "READY",
+        "required": true,
+        "reason": "READ_ONLY_TRANSACTION_REQUIRED"
+      },
+      {
+        "component": "current_release",
+        "status": "READY",
+        "required": true,
+        "reason": "EXPECTED_CURRENT_CCD14_MANIFEST_REQUIRED"
+      },
+      {
+        "component": "release_embedding_configuration",
+        "status": "READY",
+        "required": true,
+        "reason": "PINNED_1024_COSINE_CONFIGURATION_VALIDATED"
+      },
+      {
+        "component": "ollama_runtime",
+        "status": "READY",
+        "required": true,
+        "reason": "PINNED_OLLAMA_VERSION_REQUIRED"
+      },
+      {
+        "component": "generator_model",
+        "status": "READY",
+        "required": true,
+        "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+      },
+      {
+        "component": "embedding_model",
+        "status": "READY",
+        "required": true,
+        "reason": "PINNED_MODEL_DIGEST_CAPABILITY_DIMENSION_REQUIRED"
+      },
+      {
+        "component": "embedding_runtime",
+        "status": "READY",
+        "required": true,
+        "reason": "RELEASE_RUNTIME_VERSION_REQUIRED"
+      },
+      {
+        "component": "api",
+        "status": "READY",
+        "required": true,
+        "reason": "EXPECTED_SERVICE_ALREADY_LISTENING"
+      },
+      {
+        "component": "metro",
+        "status": "READY",
+        "required": false,
+        "reason": "EXPECTED_SERVICE_ALREADY_LISTENING"
+      },
+      {
+        "component": "adb_device",
+        "status": "READY",
+        "required": false,
+        "reason": "EXACTLY_ONE_PREVIOUSLY_AUTHORIZED_DEVICE_REQUIRED"
+      },
+      {
+        "component": "adb_reverse",
+        "status": "READY",
+        "required": false,
+        "reason": "USB_REVERSE_3004_AND_8084_REQUIRED"
+      },
+      {
+        "component": "development_build",
+        "status": "READY",
+        "required": false,
+        "reason": "EXISTING_DEVELOPMENT_BUILD_REQUIRED_NO_INSTALL_PERFORMED"
+      },
+      {
+        "component": "n8n_conversation",
+        "status": "READY",
+        "required": true,
+        "reason": "HEALTH_ACTIVE_PUBLISHED_WEBHOOK_AND_PRIVATE_CONFIG_CHECKED_NOT_E2E"
+      },
+      {
+        "component": "mcp_agent_preparation",
+        "status": "READY",
+        "required": true,
+        "reason": "SIX_TOOL_CONTRACT_ENTRYPOINT_AND_READ_ONLY_ROLE_READY_NOT_STDIO_E2E"
+      },
+      {
+        "component": "oe2_current",
+        "status": "READY",
+        "required": false,
+        "reason": "EXISTING_ISOLATED_PUBLICATION_AND_PROJECTIONS_VALIDATED",
+        "details": {
+          "current_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c"
+        }
+      },
+      {
+        "component": "banu_al_dia",
+        "status": "READY",
+        "required": false,
+        "reason": "APPROVED_CONSISTENT_HISTORY_VALIDATED_NO_PUBLICATION",
+        "details": {
+          "ready_releases": 6,
+          "current_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+          "previous_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+          "comparison_status": "compared",
+          "counts": {
+            "created": 0,
+            "modified": 1,
+            "removed": 0,
+            "unchanged": 5
+          }
+        }
+      },
+      {
+        "component": "local_notification_dependencies",
+        "status": "READY",
+        "required": false,
+        "reason": "EXPO57_NATIVE_PACKAGES_PRESENT_DEVICE_RECEIPT_NOT_TESTED"
+      },
+      {
+        "component": "authenticated_product_e2e",
+        "status": "NOT_TESTED",
+        "required": false,
+        "reason": "RUN_BOUNDED_AUTHENTICATED_SMOKE_SEPARATELY"
+      },
+      {
+        "component": "physical_notification_receipt",
+        "status": "NOT_TESTED",
+        "required": false,
+        "reason": "REQUIRES_DEVICE_UI_NOT_A_PREFLIGHT_API_CALL"
+      }
+    ],
+    "cleanup_optional_unavailable": [
+      {
+        "component": "adb_reverse",
+        "status": "OPTIONAL_UNAVAILABLE",
+        "required": false,
+        "reason": "USB_REVERSE_3004_AND_8084_REQUIRED"
+      }
+    ]
+  },
+  "authenticated_http": {
+    "result": "PASS",
+    "denominator": 16,
+    "expected_statuses_observed": 16,
+    "retries": 0,
+    "concurrency": 1,
+    "thermal_state": "not_controlled_no_deliberate_warmup_or_unload",
+    "requests": [
+      {
+        "name": "login",
+        "method": "POST",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 83
+      },
+      {
+        "name": "current_session",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 19
+      },
+      {
+        "name": "progress",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 25
+      },
+      {
+        "name": "calendar",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 22
+      },
+      {
+        "name": "announcements",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 32
+      },
+      {
+        "name": "oe2_programming",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 455
+      },
+      {
+        "name": "oe2_calls",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 443
+      },
+      {
+        "name": "oe2_news",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 443
+      },
+      {
+        "name": "banu_al_dia",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 459
+      },
+      {
+        "name": "create_conversation",
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "duration_ms": 34
+      },
+      {
+        "name": "documentary_turn",
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "duration_ms": 10487
+      },
+      {
+        "name": "documentary_artifact",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 33
+      },
+      {
+        "name": "multisource_turn",
+        "method": "POST",
+        "status": 201,
+        "expected": 201,
+        "duration_ms": 4205
+      },
+      {
+        "name": "reopen_history",
+        "method": "GET",
+        "status": 200,
+        "expected": 200,
+        "duration_ms": 42
+      },
+      {
+        "name": "logout",
+        "method": "POST",
+        "status": 204,
+        "expected": 204,
+        "duration_ms": 25
+      },
+      {
+        "name": "revoked_access",
+        "method": "GET",
+        "status": 401,
+        "expected": 401,
+        "duration_ms": 25
+      }
+    ],
+    "correlation": {
+      "status": "READY",
+      "operation_id": "6cf973c0-ab5f-48ba-bac8-8a818f7ff57e",
+      "tools": [
+        "get_profile_progress",
+        "get_announcements"
+      ],
+      "call_count": 2,
+      "terminal": "answered",
+      "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "structured_release": "af157a78-4c51-49c0-b8cc-509257d89f1e"
+    },
+    "functional": {
+      "document_release": "10af4ffd-effb-41fc-bbfe-4dc48cb3398f",
+      "auxiliary_release": "af157a78-4c51-49c0-b8cc-509257d89f1e",
+      "oe2_release": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+      "programming": 2,
+      "calls": 2,
+      "news": 2,
+      "comparison": {
+        "created": 0,
+        "modified": 1,
+        "removed": 0,
+        "unchanged": 5
+      },
+      "documentary_citations": 4,
+      "multisource_citations": 4,
+      "history_messages": 4
+    }
+  },
+  "android": {
+    "authorized_devices": 1,
+    "model": "YAL-L21",
+    "android": "10",
+    "existing_development_build": true,
+    "login": true,
+    "oe2_and_radar": true,
+    "local_receipt": true,
+    "calendar_opened_from_notification": true,
+    "logout": true,
+    "final_pending": 0
+  },
+  "integrity": {
+    "at": "2026-10-31T17:52:10.486Z",
+    "result": "PASS",
+    "protected_files_unchanged": 4239,
+    "corpus_tables_equal_to_preserved_snapshot": 7,
+    "ccd_current_artifacts_and_chunks_verified": 107,
+    "embedding_rows_unchanged": true,
+    "oe2_all_rows_unchanged": true,
+    "oe2_ready_releases": 6,
+    "oe2_snapshots": 18,
+    "n8n_conversation_definition_and_versions_unchanged": true,
+    "oe2_test_schedulers_inactive": true,
+    "no_permissions_or_config_changed": true
+  },
+  "validation": {
+    "api_typecheck": "PASS",
+    "unified_scripts_typecheck": "PASS",
+    "preflight_tests": {
+      "pass": 16,
+      "fail": 0
+    },
+    "launcher_node_check": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "services_started": 0,
+  "services_stopped": 0,
+  "limitations": [
+    "Preflight readiness is dependency-specific, separate from authenticated E2E and physical receipt",
+    "No new failure injection, recovery, stress, soak or backup/restore; historical evidence is scoped separately",
+    "Documentary HTTP turn exceeded five seconds in this one uncontrolled sample; no SLA or historical comparison inferred",
+    "No second host, UNAB server, iOS, remote push, institutional source or SUS validation",
+    "OE2 remains outside RAG, MCP and chat"
+  ],
+  "commit": false,
+  "push": false
+}

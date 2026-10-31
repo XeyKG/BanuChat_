@@ -1,20 +1,41 @@
-# BanuChat — demostración local reproducible en Android
+# BanuChat — demostración integral local vigente
 
-Procedimiento vigente para el computador de desarrollo ya preparado, 29/10/2026.
-Sustituye la secuencia de dos carriles descrita en versiones anteriores de este
-archivo. No aprovisiona un computador nuevo ni publica servicios institucionales.
-La [validación física acreditada](../../eval/mobile/results/android-mvp-ccd14-validation.md)
-se reutiliza: seguir este guion en una sustentación es una demostración, no otra
-medición OE1, SUS o evaluación ciega.
+Revisión OE6-DEMO-READINESS-01, 31/10/2026, America/Bogota. Procedimiento para
+el computador habitual ya preparado. No instala un entorno nuevo ni acredita
+portabilidad, despliegue UNAB o cumplimiento completo de OE6.
 
-## 1. Preparación e inventario
+## 1. Topología y límites
 
-Usar la misma cuenta Windows del operador, sus configuraciones privadas y el
-Android previamente autorizado. Tener dependencias locales instaladas, Docker
-Desktop, Ollama, Android platform-tools y el development build existente. No
-instalar otro Expo Go: el instalado 58 no sustituye al build compatible con SDK 57.
+El producto habitual usa **Mobile SDK 57 → REST v2 Unified, loopback 3004**.
+Document RAG consulta el corpus CCD seleccionado; las operaciones estructuradas
+usan auxiliares ficticios independientes. La rama multifuente solicita admisión
+N8N y ejecuta en la API el Agent adaptativo determinista, limitado a dos tools MCP
+stdio. No es un ReAct LLM. OE2 y Banu al día son lecturas separadas: no son fuentes
+del RAG, del MCP ni del chat actual.
 
-Desde la raíz del repositorio, en PowerShell:
+| Dependencia | Identidad vigente | Necesaria para |
+| --- | --- | --- |
+| PostgreSQL Unified | 16.15, `banuchat-unified-postgres`, `banuchat_unified`, `127.0.0.1:55463`, volumen `banuchat-unified-data` | Auth, historial, CCD y auxiliares |
+| CCD | schema 1.4.0, current `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, manifest `fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852` | Evidencia documental seleccionada; no aval CCD |
+| Auxiliares | current `af157a78-4c51-49c0-b8cc-509257d89f1e` | Progreso, calendario, catálogo y anuncios ficticios |
+| Ollama | Loopback 11434, runtime 0.35.0; revisiones fijadas privadamente | `qwen3-embedding:0.6b`, 1024D/coseno, y `qwen3:4b-instruct` |
+| N8N | 2.40.5, `banuchat-unified-n8n`, loopback 15679, volumen `banuchat-unified-n8n-data`, workflow publicado `BanuChatOe4Conversation1` | Rama multifuente; no la consulta documental directa |
+| MCP | Proceso stdio efímero `backend/mcp-server/src/unified-main.ts`, rol lector existente, seis tools | Se inicia desde el Agent, sin puerto MCP público |
+| OE2 opcional | `banuchat-oe6-local-postgres-synthetic-1`, base `postgres`, volumen `banuchat-schema-test_pgvector_data` | Programación, convocatorias, novedades y radar |
+| Mobile | Metro 127.0.0.1:8084, Expo 57.0.31 / React Native 0.86.3, build `com.anonymous.banuchat` | Demostración Android mediante USB reverse |
+
+OE2 conserva su red host Linux y el lector Docker/psql local protegido. No se
+sustituye por TCP Windows ni se abre un puerto. Current conocido:
+`8ed084d9-2d5e-4f90-8011-99912278b27c`; seis ready/18 snapshots. El radar compara
+la predecesora por publicación, sin convertir una prueba acelerada en actualización
+institucional. Sus contadores actuales pueden verificarse, nunca forzarse publicando.
+Node observado: 24.19.0; el launcher exige al menos 22. Versiones observadas en
+esta ventana, no una autorización para actualizar las instalaciones existentes.
+
+## 2. Inventario antes de arrancar
+
+Desde la raíz, guardar HEAD, cambios, listeners, procesos/contenedores y reverses
+iniciales en una carpeta privada ignorada. No copiar secretos al informe público.
 
 ```powershell
 git rev-parse HEAD
@@ -22,168 +43,153 @@ git status --short
 node scripts/demo-preflight.mjs --report
 ```
 
-El preflight utiliza el runtime local existente de API; no instala dependencias.
-Reutiliza validadores de API, Expo, modelos y configuración de embeddings. Verifica
-Unified, current/manifest por SQL READ ONLY y versiones/digests en Ollama mediante
-metadatos, sin embeddings ni generación. Antes de iniciar, acepta puertos libres;
-si están ocupados exige la respuesta esperada y enlace loopback. No inicia Docker,
-Ollama, API, Metro ni el daemon ADB. Solo `--report` escribe un informe nuevo en
-`data/ccd/local/delivery/entrega-01/`, ignorado por Git.
+Configuración necesaria: `infra/local/unified/application.json`,
+`infra/local/oe6/n8n-conversation.env`, custodia Windows DPAPI de cuentas ficticias
+y artefactos CCD autorizados existentes. OE2 requiere además el archivo opcional
+`infra/local/unified/oe2-reader.json`. Nunca imprimir sus contenidos, contraseñas,
+refresh/access tokens o seriales del teléfono en grabaciones o entregables.
+La [matriz de reproducibilidad](demo-dependencies.md) distingue Git de estos recursos.
 
-Prerrequisitos privados: `infra/local/unified/application.json`,
-`infra/local/oe6/n8n-conversation.env` y custodia DPAPI de las cuentas ficticias en
-`infra/local/auth-i1b/operator-accounts.dpapi`. No imprimir esos archivos ni copiarlos
-al paquete público. Un checkout público sin ellos no reproduce la demo CCD.
+## 3. Arranque seguro, solo cuando un componente está detenido
 
-## 2. Servicios existentes
+Orden: PostgreSQL/Ollama → N8N para multifuente → API habitual → Metro → Android.
+La fuente OE2 es opcional para el core; el recorrido completo necesita que esté disponible.
 
-Destino único de esta demostración:
+1. Inspeccionar nombre, estado, bindings y volumen de cada contenedor existente.
+   El preflight no inicia nada. Ante identidad distinta, registrar bloqueo.
+2. Si coincide la identidad y estaba detenido, iniciar únicamente ese contenedor:
+   `docker start banuchat-unified-postgres`, `docker start banuchat-unified-n8n`
+   o, si se requiere OE2, `docker start banuchat-oe6-local-postgres-synthetic-1`.
+   Registrar qué inició esta ventana. No usar Compose up/down, migraciones,
+   aprovisionadores, publicación, recreación, prune ni borrado de volúmenes.
+3. Reutilizar Ollama existente. Si está detenido y 11434 está libre, abrir su
+   instalación o `ollama serve` en terminal propia. No hacer pull, unload, tuning
+   o warm-up automático. Un digest distinto bloquea la demo; no se reemplaza.
+4. Si 3004 está libre, desde `backend/api`, ejecutar `npm start`. Reutiliza
+   `scripts/start-unified.mts` y la configuración privada. Para evidencias, redirigir
+   stdout/stderr a archivos privados y registrar PID. No matar un listener desconocido.
+5. Si 8084 está libre, desde `mobile`, ejecutar `./scripts/start-ccd-auth.ps1`.
+   Conserva `ccd_authenticated`, API v2 3004, localhost IPv4 y SDK 57. No LAN/tunnel,
+   Expo Go de otra versión, instalación de APK ni generación android/ios.
 
-| Dependencia | Identidad esperada |
-| --- | --- |
-| PostgreSQL | `banuchat-unified-postgres`, base `banuchat_unified`, loopback 55463 |
-| Volumen | `banuchat-unified-data`; preservar datos y mount existentes |
-| Current CCD | `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, schema `ccd-1.4.0`, `ready` |
-| Manifest | `fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852` |
-| Ollama | Loopback 11434; versión/digests coincidentes con configuración privada y release |
-| Modelos | `qwen3-embedding:0.6b` (1024D/coseno) y `qwen3:4b-instruct` |
-| API / Metro | `127.0.0.1:3004` / `127.0.0.1:8084` |
+Si los procesos ya existen, verificar su procedencia. Un 401 o `/status` correcto
+no identifica por sí solo el commit ni el entorno efectivo. La ventana validada
+reutilizó la API y Metro iniciados en OE5, con PID/entrypoint/logs comprobados;
+no se recargaron ni detuvieron los componentes compartidos.
 
-Si PostgreSQL está detenido, inspeccionar únicamente campos no secretos:
+## 4. Android y preflight de ejecución
 
-```powershell
-docker inspect --format '{{.Name}} {{.State.Status}}' banuchat-unified-postgres
-docker inspect --format '{{range .Mounts}}{{println .Type .Name .Destination}}{{end}}' banuchat-unified-postgres
-docker volume inspect --format '{{.Name}}' banuchat-unified-data
-```
-
-Solo si coinciden contenedor y volumen existentes y se decide iniciar la demo:
-`docker start banuchat-unified-postgres`. Si no existen, detenerse; no crear,
-restaurar o sustituir bases/volúmenes. No usar Compose `up` como reparación,
-migraciones, aprovisionadores, `down -v` o `prune`.
-
-Si Ollama está detenido, abrir la instalación local existente; `ollama serve`
-solo en una terminal dedicada cuando 11434 esté libre. No ejecutar `pull` ni
-cambiar modelos para hacer pasar el preflight. Si una versión o digest difiere,
-registrarlo y conservar el entorno, sin descargar ni ajustar durante la demo.
-
-N8N 15679 es necesario para las solicitudes multifuente que lo utilizan, no para
-el recorrido documental acotado de este guion. El chequeo TCP es informativo y no
-acredita un webhook publicado. En ENTREGA-01 ese puerto no estaba disponible;
-se reutiliza la evidencia anterior para explicar esa rama. No se inicia N8N ni se
-republican workflows automáticamente. No presentar una consulta multifuente como
-operativa si no se ha comprobado su servicio, credencial y workflow existentes.
-
-## 3. API actual y puertos
-
-Si 3004 está libre, desde otra terminal:
-
-```powershell
-Set-Location backend/api
-npm start
-```
-
-Este comando reutiliza `scripts/start-unified.mts` y la configuración privada.
-El mensaje esperado indica REST v2 exclusivamente en loopback. Si la API ya está
-activa y se conoce la terminal/versión que la inició, reutilizarla. Un 401 correcto
-no prueba por sí solo el commit cargado ni el corpus de una cuenta. Ante puerto
-ocupado por proceso desconocido o respuesta incorrecta, detenerse y registrar el
-conflicto; no terminar procesos ajenos ni abrir otra API/laboratorio para ocultarlo.
-El comando histórico `npm run ops:ccd` apunta a otro entorno y no es este preflight.
-
-## 4. Android y Metro
-
-El teléfono debe estar desbloqueado, autorizado previamente y conectado por USB.
-Usar `adb` del PATH o el ejecutable existente
-`$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe`. En una terminal privada:
+Comprobar de nuevo ADB; no asumir que el dispositivo sigue presente. Si el daemon
+no está iniciado, `adb devices` es una acción explícita del operador: el preflight
+no lo inicia. Debe haber un dispositivo previamente autorizado; con varios, elegir
+explícitamente el YAL-L21 autorizado y usar `-s`. No publicar su serial.
 
 ```powershell
 adb devices -l
+adb reverse --list
 adb reverse tcp:3004 tcp:3004
 adb reverse tcp:8084 tcp:8084
-```
-
-Debe haber exactamente un dispositivo autorizado (`device`); no publicar su serial.
-Si hay varios, seleccionar explícitamente el autorizado con `-s` y no continuar
-con una selección automática. Si aparece `unauthorized`, `offline` o ninguno,
-no declarar validación física. El preflight `--adb` no inicia el daemon si falta;
-el inventario anterior es una acción explícita del operador.
-
-Si 8084 está libre, desde otra terminal:
-
-```powershell
-Set-Location mobile
-./scripts/start-ccd-auth.ps1
-```
-
-El script configura únicamente su proceso: `ccd_authenticated`, API v2 local,
-canal `adb_reverse`, Expo SDK 57 y telemetría desactivada. Usa el build existente
-y localhost IPv4. No cambiar a `--lan`, `--tunnel` ni generar `android/` o `ios/`.
-Si Metro ya escucha, confirmar que pertenece a este proyecto/configuración;
-`/status` no acredita por sí solo su entorno efectivo. El script rechaza otro
-listener en 8084 y no lo mata.
-
-Abrir en el build instalado el proyecto
-`exp+banuchat://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8084`, o usar
-su pantalla de proyectos locales. No reinstalar APKs ni sustituirlo por Web.
-Desde la raíz, comprobar el conjunto:
-
-```powershell
 node scripts/demo-preflight.mjs --running --adb --report
 ```
 
-Resultado esperado: `DEPENDENCY_CHECKS_PASSED`; código de salida 0. Un fallo produce
-`NOT_READY` y salida 1. Revisar también el estado informativo de N8N y el número de
-archivos Git modificados: no certifica versión cargada, identidad civil del dueño,
-login válido ni corrección semántica. No repite el recorrido físico acreditado.
+Abrir el build existente con
+`exp+banuchat://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8084`.
+Esperar a que la introducción/login/Home sean visibles antes de introducir datos;
+un tap durante una transición no acredita login. No usar coordenadas históricas
+sin consultar la pantalla. No cambiar hora, fuente, permisos globales o batería.
 
-## 5. Cuenta ficticia y recorrido
+El reporte actualizado usa estados por componente:
 
-PRODUCT-OE2-MOBILE-04: con la configuración privada opcional y el contenedor
-fixture existente ya verificados, Home → Publicaciones OE2 permite consultar
-programación de grupos, convocatorias y novedades ficticias. Revisar sus filtros,
-fechas civiles, release y origen, sin confundirlos con catálogo, anuncios habituales
-o documentos CCD. Si la fuente no está disponible, usar reintento manual cuando
-se restablezca; no publicar otras releases ni ejecutar el scheduler para reparar
-una lectura. La API conserva sus demás funciones. La sección usa el mismo build
-SDK 57, Metro y reverses descritos arriba; no necesita otra instalación Android.
-
-Usar una cuenta técnica ya existente por el procedimiento privado del operador,
-sin cuentas UNAB, registro público ni creación/reset de contraseñas. Si el operador
-necesita consultar la custodia DPAPI, exclusivamente en su terminal privada desde
-`backend/api`: `node --import tsx test/auth-i1b-operator.mts accounts`. Ese comando
-muestra secretos deliberadamente: no grabar ni adjuntar su salida; el preflight
-nunca lo ejecuta. DPAPI depende del usuario/equipo que preparó la custodia.
-
-Seguir el [guion breve](../academic/entrega-01-demonstration-script.md): login →
-Home → chat → consulta documental → cita → documento → seguimiento → historial →
-logout. Usar la documentación seleccionada, conservar periodo/población y distinguir
-auxiliares ficticios de expedientes reales. Una respuesta con cita no demuestra
-por sí sola suficiencia o corrección; mostrar también una abstención legítima.
-
-Si un POST termina de forma incierta, no reenviarlo automáticamente: comprobar
-historial antes de otra acción. Un 409 requiere atender el conflicto y abrir otro
-chat solo por acción explícita, sin trasladar mensajes. No cambiar current para
-probarlo. Un error de servicio no se resuelve modificando corpus, modelos o guardias.
-
-## 6. Cierre y diagnóstico
-
-Cerrar sesión y verificar que el historial protegido vuelve al acceso. Conservar
-solo evidencia depurada en rutas privadas ignoradas. Borrar únicamente chats propios
-si se decide limpiar la demostración; no cuentas ni historiales ajenos.
-
-Si se desea terminar la ventana, cerrar con Ctrl+C solo las terminales API/Metro
-iniciadas para ella. Retirar únicamente los reverses agregados en esa ventana:
-`adb reverse --remove tcp:3004` y `adb reverse --remove tcp:8084`; no `--remove-all`.
-No detener servicios compartidos ni borrar datos. En ENTREGA-01 los listeners ya
-existían y se preservaron; no se repitió Android.
-
-| Diagnóstico | Acción dentro del alcance |
+| Estado | Interpretación |
 | --- | --- |
-| Archivo privado o dependencia ausente | Usar el entorno preparado del operador; no inventar secretos ni sustituir CCD por la demo |
-| SQL sin privilegio de lectura | Registrar bloqueo; no otorgar permisos ni usar un rol superior para forzar el chequeo |
-| Release/manifest distintos | Detener demo CCD 1.4.0; no cambiar current ni publicar otra release |
-| Modelo/versión incorrectos | Conservar configuración y registrar divergencia; sin tuning o descargas automáticas |
-| Puerto ocupado no reconocido | Preservar proceso y resolver su identidad antes de continuar |
-| Android no disponible/build ausente | Mantener evidencia histórica con fecha; no simular otra validación física |
-| N8N no disponible | Limitar demo a documentos/servicios directos; no afirmar rama multifuente comprobada hoy |
+| READY | Pasó la comprobación descrita; no garantiza automáticamente E2E |
+| NOT_READY | Falló una dependencia necesaria o una guardia de seguridad |
+| OPTIONAL_UNAVAILABLE | Rama opcional ausente; puede continuar una demo acotada, declarando la omisión |
+| NOT_TESTED | No se ejecutó esa frontera: por ejemplo login, stdio E2E o recepción física |
+
+`--running` exige la API habitual. Sin él, el agregado queda NOT_TESTED como chequeo
+previo de arranque. Un exit 0 no equivale a todo el guion validado: revisar estados
+y alcance. N8N se comprueba por identidad/volumen, health, workflow activo/publicado,
+webhook registrado y configuración privada válida, sin invocarlo. MCP comprueba
+contrato/dependencias y rol lector, sin ejecutar tools. La recepción física y el
+producto autenticado permanecen NOT_TESTED hasta su comprobación separada.
+`--report` escribe ahora en `infra/local/oe6-demo-readiness-01/`, no en el directorio
+histórico ENTREGA-01. `NOT_READY` devuelve exit 1; no instala ni repara dependencias.
+
+## 5. Recorrido coherente con una cuenta ficticia
+
+Usar exclusivamente una cuenta técnica existente por el procedimiento privado;
+seleccionar un perfil no sustituye autenticación. Mantener visibles estas fronteras:
+**documentos CCD**, **auxiliares ficticios habituales** y **publicaciones OE2 aisladas**.
+
+1. Login → Home. Confirmar capacidades y aviso de demostración, sin inferir expediente real.
+2. Chat documental: una consulta de contenido admitido, respuesta con cita, abrir su
+   fuente autenticada. Conservar edición/población; no prometer oferta de grupos.
+3. Chat multifuente: «Según mis cursos completados, ¿qué convocatorias activas podrían
+   interesarme?». Verificar N8N/Agent correlacionados y `get_profile_progress` seguido
+   de `get_announcements`, hasta dos tools, sin afirmar elegibilidad. Si la rama no
+   está operativa, marcarla omitida; no fingir que una consulta directa la sustituyó.
+4. Home → Progreso y Calendario. Mostrar su aviso ficticio y release auxiliar,
+   independiente de las citas CCD; una lectura no actualiza notas ni matrículas.
+5. Publicaciones OE2 → Programación / Convocatorias / Novedades. Mostrar identidad y
+   versión de origen y distinguir una novedad sin vencimiento de una convocatoria abierta.
+6. Banu al día → fechas de ambas publicaciones, resumen y Antes/Ahora. Un filtro vacío
+   puede ser correcto. No son novedades personales no leídas ni un feed dentro del chat.
+7. Notificaciones → permiso/estado → «Enviar prueba local en 5 segundos». Esperar
+   recepción visible en Android y tocar la tarjeta. No llamar recepción a la promesa
+   de Expo. Es local, ficticia y no push remoto; no alterar la hora para probar 24 h.
+8. Historial → reabrir la conversación propia y sus citas. No consultar ni borrar las
+   conversaciones de otro usuario. Las fuentes requieren la sesión vigente.
+9. Si se activaron recordatorios, desactivar/cancelar; luego logout. Consultar el estado
+   antes de repetir: la cancelación por cambio de cuenta es asíncrona. Confirmar cero
+   pendientes propios y login visible. No borrar preferencias o avisos de otras cuentas/apps.
+
+Muestra HTTP reproducible opcional, desde `backend/api`:
+
+```powershell
+node --import tsx scripts/evaluate-unified-demo-readiness.mts --run-once
+```
+
+Usa la API existente y DPAPI internamente; crea una conversación propia, conserva
+la evidencia e historial y cierra su sesión. Una sola pasada, sin reset de cuotas,
+retry, servidor nuevo, scheduler o perturbación de dependencias. Para acreditar la
+correlación del proceso existente, definir `BANUCHAT_DEMO_API_LOG` con la ruta del
+stdout privado de esa API; sin ella la correlación queda NOT_TESTED. El informe
+completo es privado. Si un POST queda incierto, consultar historial antes de decidir
+otra acción; no relanzar la pasada automáticamente. Un 429 exige respetar la ventana,
+un 409 atender el conflicto y un 503 registrar la dependencia, sin modificar corpus.
+
+## 6. Cierre seguro
+
+Registrar estado final y comparar con el inicial. Cerrar sesión, esperar la
+cancelación y confirmar pendientes propios; no borrar chats ni datos para simular
+un entorno limpio. No cancelar todas las notificaciones del teléfono.
+
+Solo para terminales/procesos que inició esta ventana, Ctrl+C o cierre controlado
+con PID registrado. No terminar por número de puerto ni detener recursos compartidos.
+Los contenedores que ya estaban activos permanecen activos. Si uno se inició aquí,
+su apagado requiere confirmar que sigue siendo exclusivo de esta ventana; nunca
+usar down -v, borrar modelos, cuentas, datos, publicaciones o logs históricos.
+
+Retirar únicamente reverses añadidos, usando el mismo dispositivo seleccionado:
+`adb reverse --remove tcp:3004` / `adb reverse --remove tcp:8084`; no remove-all.
+Eliminar solo el volcado UI temporal propio, no archivos de otras apps. En esta
+validación no se iniciaron servicios: la API, Metro, PostgreSQL, Ollama y N8N existentes
+se preservaron. Sin Android disponible, completar REST, registrar la muestra física
+como pendiente y reutilizar la evidencia anterior con fecha, sin atribuir otra ejecución.
+
+## 7. Historial, métricas y límites
+
+Los checkpoints OE6 del 25/10 describen la demo v1 sintética y CCD separados, Docker
+RAG, concurrencia 1/2/5 y backup/restore sintético de 16 tablas. Son evidencia histórica,
+no rendimiento, restauración o portabilidad de Unified actual. El contraste y las
+contradicciones documentales están en la [matriz de dependencias](demo-dependencies.md).
+Las caídas N8N y OE2 ya acreditadas se reutilizan; no detener servicios compartidos
+para repetirlas. No correr automáticamente `eval/oe6/run-stability.mjs`, RAGAS, las
+43 preguntas, scheduler acelerado, stress ni backup/restore como parte de esta demo.
+
+Esta ventana mide HTTP hasta parsear la respuesta, secuencialmente, con denominador
+explícito y sin retries. No controla temperatura/residencia de modelos ni prueba SLA,
+soak, recuperación ante pérdida del host o servidor UNAB. Las fuentes institucionales,
+TLS/DNS, otro computador, iOS, push remoto y SUS requieren validaciones/autorizaciones
+separadas; este procedimiento no las sustituye.
