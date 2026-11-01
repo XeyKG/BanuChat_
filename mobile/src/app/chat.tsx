@@ -26,8 +26,8 @@ import { ChatSources } from '@/components/chat-sources';
 import { useSession } from '@/session/session-context';
 import {useChatState} from '@/session/use-chat-state';
 import {useAuth} from '@/auth/auth-provider';
-import { BrandMark, BubbleIn, FadeIn, TypingIndicator } from '@/ui/animated';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { BrandMark, BubbleIn, FadeIn, TypingIndicator, useMotionReduced } from '@/ui/animated';
+import { colors, layout, radii, spacing, typography, textStyles } from '@/ui/tokens';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'conflict' | 'uncertain' | 'invalid_response' | null;
@@ -71,6 +71,8 @@ function singleParam(value: string | string[] | undefined): string | null {
 }
 
 export default function ChatScreen() {
+  const reducedMotion = useMotionReduced();
+  const [inputFocused, setInputFocused] = useState(false);
   const router = useRouter();
   const { activeProfile } = useSession();
   const params = useLocalSearchParams<{ conversation_id?: string | string[] }>();
@@ -338,7 +340,6 @@ export default function ChatScreen() {
           <View style={styles.headerIdentity}>
             <View style={styles.banuAvatar}>
               <BrandMark size={38} />
-              <View style={styles.presenceDot} />
             </View>
             <View style={styles.headerCopy}>
               <Text style={styles.headerTitle}>Banu</Text>
@@ -363,7 +364,7 @@ export default function ChatScreen() {
           ref={scrollViewRef}
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: !reducedMotion })}>
           <View testID="chat-column" style={styles.messageColumn}>
             {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
             {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
@@ -409,7 +410,7 @@ export default function ChatScreen() {
                 <FadeIn>
                   <View style={styles.emptyHero}>
                     <View style={styles.emptyMarkHalo}>
-                      <BrandMark size={64} />
+                      <BrandMark size={48} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
                     <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo responder sobre documentación CCD, abrir sus fuentes y consultar tu historial. Cuando estén disponibles, también puedes explorar progreso, calendario y novedades de demostración. ¿Qué quieres consultar?' : CHAT_INTRODUCTION}</Text>
@@ -440,16 +441,16 @@ export default function ChatScreen() {
               message.role === 'user' ? (
                 <BubbleIn key={message.message_id} style={styles.userRow}>
                   <View testID="chat-user" style={styles.userBubble}>
-                    <Text testID="chat-message" style={styles.userText}>{message.content}</Text>
+                    <Text selectable testID="chat-message" style={styles.userText}>{message.content}</Text>
                   </View>
                 </BubbleIn>
               ) : (
                 <BubbleIn key={message.message_id} style={styles.assistantRow}>
                   <View style={styles.assistantAvatar}>
-                    <BrandMark size={30} />
+                    <BrandMark size={24} /><Text style={styles.authorLabel}>Banu</Text>
                   </View>
                   <View testID="chat-assistant" style={styles.assistantBody}>
-                    <Text testID="chat-message" style={styles.assistantText}>{message.content}</Text>
+                    <Text selectable testID="chat-message" style={styles.assistantText}>{message.content}</Text>
 
                     {message.insufficient_evidence && (
                       <View accessibilityRole="alert" style={styles.evidenceWarning}>
@@ -469,7 +470,7 @@ export default function ChatScreen() {
             {conversationState === 'ready' && isSending && (
               <BubbleIn style={styles.assistantRow}>
                 <View style={styles.assistantAvatar}>
-                  <BrandMark size={30} />
+                  <BrandMark size={24} /><Text style={styles.authorLabel}>Banu</Text>
                 </View>
                 <View style={styles.thinkingBubble}>
                   <TypingIndicator color={colors.accent} />
@@ -578,11 +579,13 @@ export default function ChatScreen() {
           )}
 
           <View testID="chat-composer-row" style={styles.composerRow}>
-            <View testID="chat-input-shell" style={styles.inputShell}>
+            <View testID="chat-input-shell" style={[styles.inputShell, inputFocused && styles.inputFocused]}>
               <TextInput
                 accessibilityLabel="Mensaje"
                 editable={!isSending && !isConversationLocked}
                 multiline
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
                 onChangeText={(value) => {
                   setContent(value);
                   if (sendError === 'http') setSendError(null);
@@ -596,7 +599,7 @@ export default function ChatScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Enviar mensaje"
-              accessibilityState={{ busy: isSending, disabled: !isContentValid || isConversationLocked }}
+              accessibilityState={{ busy: isSending, disabled: !isContentValid || isSending || isConversationLocked }}
               disabled={!isContentValid || isSending || isConversationLocked}
               onPress={() => void submitMessage()}
               style={({ pressed }) => [
@@ -610,6 +613,7 @@ export default function ChatScreen() {
             </Pressable>
           </View>
 
+          <Text testID="chat-composer-hint" style={styles.composerHint}>Las respuestas pueden ser incompletas. Revisa las fuentes.</Text>
           {characterCount > CHARACTER_COUNTER_THRESHOLD && (
             <Text
               accessibilityLabel={`${characterCount} de ${CHARACTER_LIMIT} caracteres`}
@@ -669,17 +673,6 @@ const styles = StyleSheet.create({
   },
   headerIdentity: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
   banuAvatar: { position: 'relative' },
-  presenceDot: {
-    position: 'absolute',
-    right: -1,
-    bottom: -1,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: colors.background,
-    backgroundColor: colors.success,
-  },
   headerCopy: { flex: 1 },
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
   headerSubtitle: { color: colors.muted, fontSize: typography.caption, lineHeight: 17 },
@@ -709,7 +702,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.xl,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
   conversationStateTitle: {
     color: colors.ink,
@@ -725,12 +717,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   conversationStateActions: { width: '100%', gap: spacing.sm },
-  emptyState: { gap: spacing.xl, paddingVertical: spacing.xl },
+  emptyState: { gap: spacing.xl, paddingVertical: spacing.md },
   emptyHero: { alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg },
   emptyMarkHalo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 72,
+    height: 72,
+    borderRadius: radii.xl,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accentSoft,
@@ -747,11 +739,12 @@ const styles = StyleSheet.create({
   suggestionChip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: radii.pill,
+    minHeight: layout.minTouchTarget,
+    justifyContent: 'center',
+    borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
   suggestionChipPressed: { opacity: 0.7 },
   suggestionText: { color: colors.ink, fontSize: typography.small, fontWeight: '600' },
@@ -762,16 +755,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radii.lg,
     borderBottomRightRadius: radii.sm,
-    backgroundColor: colors.accent,
-    ...shadows.soft,
+    backgroundColor: colors.brand,
   },
   userText: { color: colors.white, fontSize: typography.body, lineHeight: 23 },
-  assistantRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
-  assistantAvatar: { marginTop: 2 },
-  assistantBody: { flex: 1, gap: spacing.xs, paddingTop: spacing.xxs },
-  assistantText: { color: colors.ink, fontSize: typography.body, lineHeight: 24 },
+  assistantRow: { alignItems: 'flex-start', gap: spacing.xs, minWidth: 0 },
+  assistantAvatar: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  authorLabel: { color: colors.textSecondary, fontSize: typography.meta, fontWeight: '600' },
+  assistantBody: { width: '100%', minWidth: 0, gap: spacing.sm, padding: spacing.md, borderWidth: 1, borderColor: colors.border, borderRadius: radii.lg, backgroundColor: colors.surface },
+  assistantText: { color: colors.ink, ...textStyles.body },
   thinkingBubble: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -780,7 +774,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
   thinkingText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
   evidenceWarning: {
@@ -788,7 +781,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     padding: spacing.sm,
     borderWidth: 1,
-    borderColor: '#F0DFA8',
+    borderColor: colors.warningBorder,
     borderRadius: radii.md,
     backgroundColor: colors.warningSoft,
   },
@@ -801,7 +794,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.surface,
   },
   composerRow: {
     width: '100%',
@@ -820,14 +813,15 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderColor: colors.borderStrong,
-    borderRadius: 25,
+    borderRadius: radii.md,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
+  inputFocused: { borderColor: colors.accent },
   input: {
     color: colors.ink,
     fontSize: typography.body,
-    lineHeight: 22,
+    lineHeight: 24,
+    minHeight: layout.minTouchTarget,
     maxHeight: 108,
     textAlignVertical: 'center',
   },
@@ -835,14 +829,13 @@ const styles = StyleSheet.create({
   sendButton: {
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.accent,
-    ...shadows.soft,
   },
   sendButtonDisabled: { backgroundColor: colors.borderStrong },
-  sendButtonPressed: { transform: [{ scale: 0.92 }] },
+  sendButtonPressed: { opacity: 0.75 },
   sendButtonGlyph: { color: colors.white, fontSize: 22, fontWeight: '800', marginTop: -2 },
   characterCount: {
     width: '100%',
@@ -854,6 +847,7 @@ const styles = StyleSheet.create({
     paddingRight: spacing.sm,
   },
   limitExceeded: { color: colors.error, fontWeight: '800' },
+  composerHint: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', color: colors.muted, fontSize: typography.caption, lineHeight: 18, textAlign: 'center' },
   errorBanner: {
     width: '100%',
     maxWidth: layout.maxReadingWidth,
@@ -862,7 +856,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: '#F3C2BE',
+    borderColor: colors.errorBorder,
     backgroundColor: colors.errorSoft,
   },
   errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20, textAlign: 'center' },

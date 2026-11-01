@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Citation, CitationSourceKind } from '@/api/messages';
 import { isCcdLocal } from '@/config/demo-mode';
 import { DocGlyph } from '@/ui/icons';
+import { FadeIn } from '@/ui/animated';
 import { colors, layout, radii, spacing, typography } from '@/ui/tokens';
 
 const LABEL_PREFIXES: Record<CitationSourceKind, RegExp> = {
@@ -84,7 +85,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
       </Pressable>
 
       {isExpanded && (
-        <View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} testID="chat-sources" style={styles.list}>
+        <FadeIn><View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} testID="chat-sources" style={styles.list}>
           {citations.map((citation) => {
             const detail = sourceDetail(citation);
             const canOpenDocument = hasOpenableDocument(citation);
@@ -95,8 +96,8 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
                 </View>
                 <View style={styles.sourceText}>
                   <Text testID="source-kind" style={styles.sourceKind}>{KIND_LABELS[citation.source_kind]}</Text>
-                  <Text style={styles.sourceLabel}>{readableLabel(citation)}</Text>
-                  {detail !== null && <Text style={styles.sourceDetail}>{detail}</Text>}
+                  <Text selectable style={styles.sourceLabel}>{readableLabel(citation)}</Text>
+                  {detail !== null && <Text selectable style={styles.sourceDetail}>{detail}</Text>}
                   {canOpenDocument && (
                     <Pressable
                       accessibilityLabel={`Abrir documento ${readableLabel(citation)}`}
@@ -121,7 +122,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
               </View>
             );
           })}
-        </View>
+        </View></FadeIn>
       )}
     </View>
   );
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
     paddingHorizontal: spacing.sm,
-    borderRadius: radii.pill,
+    borderRadius: radii.sm,
     borderWidth: 1,
     borderColor: colors.accentSoftStrong,
     backgroundColor: colors.accentSoft,
@@ -176,8 +177,8 @@ const styles = StyleSheet.create({
   sourceText: { flex: 1, gap: 2 },
   sourceKind: {
     color: colors.muted,
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: typography.caption,
+    fontWeight: '600',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: spacing.xs,
     paddingHorizontal: spacing.md,
-    borderRadius: radii.pill,
+    borderRadius: radii.sm,
     borderWidth: 1,
     borderColor: colors.accent,
     backgroundColor: colors.surface,

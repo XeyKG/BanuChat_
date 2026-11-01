@@ -1,5 +1,18 @@
 # BanuChat Mobile
 
+UIX-01 consolida la identidad azul/índigo, el login responsive, Home centrada en
+Banu y la lectura del chat en web y Android. Reutiliza tokens y componentes;
+no cambia rutas, sesión ni transportes. Evidencias y límites en el
+[checkpoint UIX-01](../docs/transition/CHECKPOINT-UIX-01.md).
+Comparaciones locales regenerables: con el proxy web existente disponible,
+`node scripts/check-uix01.mjs before` antes de cambiar la UI y
+`node scripts/check-uix01.mjs after` después de exportarla; luego
+`node scripts/compare-uix01.mjs`. El evaluador intercepta toda la API con fixtures
+100 % sintéticos, no lee credenciales ni consulta backend. Guarda 44 capturas
+por etapa y una galería en `.expo/uix01/comparison-index.html`, ignorada por Git.
+Ejecutar `before` sobre una base conservada: hacerlo sobre la UI final reemplaza
+la evidencia base. WEB-02 sigue siendo el recorrido integrado real independiente.
+
 WEB-03 mejora la presentación del mismo proyecto en navegador, conservando los
 flujos de WEB-02. La comparación visual, validaciones y límites están en el
 [checkpoint WEB-03](../docs/transition/CHECKPOINT-WEB-03.md).

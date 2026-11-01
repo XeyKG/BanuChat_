@@ -31,7 +31,7 @@ export function AppButton({
 
   return (
     <Pressable
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled: isDisabled }}
       disabled={isDisabled}
@@ -84,5 +84,5 @@ const styles = StyleSheet.create({
   secondaryLabel: { color: colors.ink },
   quietLabel: { color: colors.textSecondary },
   disabled: { opacity: 0.45 },
-  pressed: { opacity: 0.82, transform: [{ scale: 0.985 }] },
+  pressed: { opacity: 0.82 },
 });

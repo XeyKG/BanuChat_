@@ -9,7 +9,7 @@ import { useSession } from '@/session/session-context';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, FadeIn, MonogramAvatar, PressableScale } from '@/ui/animated';
 import { CalendarGlyph, ChartGlyph, ChevronGlyph, ClockGlyph, DocGlyph, SparkGlyph } from '@/ui/icons';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, layout, radii, spacing, typography, textStyles } from '@/ui/tokens';
 
 interface QuickActionProps {
   title: string;
@@ -112,9 +112,9 @@ export default function HomeScreen() {
 
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
-              <Text testID="home-greeting" style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
+              <Text style={styles.eyebrow}>TU ESPACIO ACADÉMICO</Text>
+              <Text accessibilityRole="header" testID="home-greeting" style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
               <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
-              {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.greetingSub}>{CCD_AUTH_NOTICE}</Text>}
             </View>
           </FadeIn>
 
@@ -127,10 +127,8 @@ export default function HomeScreen() {
               onPress={() => void startChat()}
               scaleTo={0.98}>
               <View testID="home-hero" style={styles.heroCard}>
-                <View aria-hidden style={styles.heroGlowOne} />
-                <View aria-hidden style={styles.heroGlowTwo} />
                 <View testID="home-hero-icon" style={styles.heroIconWrap}>
-                  <SparkGlyph color={colors.white} size={26} />
+                  <BrandMark size={48} />
                 </View>
                 <Text testID="home-hero-title" style={styles.heroTitle}>Pregúntale a Banu</Text>
                 <Text testID="home-hero-body" style={styles.heroBody}>
@@ -139,12 +137,15 @@ export default function HomeScreen() {
                     : (isCcdKnowledge() ? 'Consulta los documentos CCD, pregunta de nuevo y abre las fuentes de las respuestas.' : 'Progreso, eventos, anuncios y material del programa, con citas verificables.')}
                 </Text>
                 <View testID="home-hero-cta" style={styles.heroCtaRow}>
-                  {isStartingChat && <ActivityIndicator color={colors.white} size="small" />}
+                  {isStartingChat && <ActivityIndicator color={colors.brand} size="small" />}
                   <Text style={styles.heroCta}>{isStartingChat ? 'Abriendo...' : 'Iniciar conversación'}</Text>
+                  <ChevronGlyph color={colors.brand} size={16} />
                 </View>
               </View>
             </PressableScale>
           </FadeIn>
+
+          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.demoNotice}>{CCD_AUTH_NOTICE}</Text>}
 
           {startChatError && (
             <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
@@ -160,8 +161,8 @@ export default function HomeScreen() {
             {!isCcdLocal() && snapshot.me?.capabilities.includes('progress') && <><QuickAction
               title="Calendario"
               description="Actividades de los próximos 30 días."
-              tint={colors.violet}
-              tintSoft={colors.violetSoft}
+              tint={colors.accent}
+              tintSoft={colors.accentSoft}
               icon="calendar"
               onPress={() => router.push('/calendar')}
               disabled={isStartingChat}
@@ -170,8 +171,8 @@ export default function HomeScreen() {
             <QuickAction
               title="Mi progreso"
               description="Avance registrado para este perfil."
-              tint={colors.success}
-              tintSoft={colors.successSoft}
+              tint={colors.accent}
+              tintSoft={colors.accentSoft}
               icon="chart"
               onPress={() => router.push('/progress')}
               disabled={isStartingChat}
@@ -180,8 +181,8 @@ export default function HomeScreen() {
             <QuickAction
               title="Noticias y novedades"
               description="Consulta noticias y convocatorias."
-              tint={colors.amber}
-              tintSoft={colors.amberSoft}
+              tint={colors.accent}
+              tintSoft={colors.accentSoft}
               icon="doc"
               onPress={() => router.push('/announcements')}
               disabled={isStartingChat}
@@ -200,8 +201,8 @@ export default function HomeScreen() {
             <QuickAction
               title="Publicaciones OE2"
               description="Programación, convocatorias y novedades ficticias del pipeline."
-              tint={colors.violet}
-              tintSoft={colors.violetSoft}
+              tint={colors.accent}
+              tintSoft={colors.accentSoft}
               icon="doc"
               onPress={() => router.push('/oe2' as Href)}
               disabled={isStartingChat}
@@ -257,52 +258,34 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
   greetingBlock: { gap: spacing.xxs },
-  greeting: { color: colors.ink, fontSize: typography.title, lineHeight: 36, fontWeight: '800', letterSpacing: -0.6 },
+  eyebrow: { ...textStyles.eyebrow, color: colors.muted, marginBottom: spacing.xs },
+  greeting: { ...textStyles.title, color: colors.ink },
   greetingSub: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 24 },
+  demoNotice: { color: colors.textSecondary, fontSize: typography.meta, lineHeight: 21, padding: spacing.md, borderLeftWidth: 3, borderColor: colors.warning, borderRadius: radii.sm, backgroundColor: colors.warningSoft },
   heroCard: {
     overflow: 'hidden',
     gap: spacing.sm,
     padding: spacing.xl,
     borderRadius: radii.xl,
-    backgroundColor: colors.accent,
-    ...shadows.card,
-  },
-  heroGlowOne: {
-    position: 'absolute',
-    top: -60,
-    right: -40,
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-  },
-  heroGlowTwo: {
-    position: 'absolute',
-    bottom: -70,
-    left: -30,
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: 'rgba(20,26,60,0.22)',
+    backgroundColor: colors.brand,
   },
   heroIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 17,
+    width: 48,
+    height: 48,
+    borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
     marginBottom: spacing.xs,
   },
   heroTitle: { color: colors.white, fontSize: 24, lineHeight: 30, fontWeight: '800', letterSpacing: -0.4 },
-  heroBody: { color: 'rgba(255,255,255,0.85)', fontSize: typography.small, lineHeight: 21 },
-  heroCtaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
-  heroCta: { color: colors.white, fontSize: typography.body, fontWeight: '800' },
+  heroBody: { color: colors.onBrandSecondary, ...textStyles.body },
+  heroCtaRow: { minHeight: layout.minTouchTarget, alignSelf: 'flex-start', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radii.sm, backgroundColor: colors.white },
+  heroCta: { color: colors.brand, fontSize: typography.small, fontWeight: '700' },
   errorBanner: {
     gap: spacing.xxs,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: '#F3C2BE',
+    borderColor: colors.errorBorder,
     borderRadius: radii.md,
     backgroundColor: colors.errorSoft,
   },
@@ -310,11 +293,9 @@ const styles = StyleSheet.create({
   errorText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
   quickSection: { gap: spacing.sm },
   sectionLabel: {
-    color: colors.muted,
-    fontSize: typography.caption,
-    fontWeight: '800',
-    letterSpacing: 0.9,
-    textTransform: 'uppercase',
+    color: colors.ink,
+    fontSize: typography.body,
+    fontWeight: '700',
     marginBottom: spacing.xs,
   },
   quickCard: {
@@ -327,7 +308,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
   quickIconWrap: {
     width: 46,
@@ -337,8 +317,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   quickCopy: { flex: 1, gap: 2 },
-  quickTitle: { color: colors.ink, fontSize: typography.body, fontWeight: '800', letterSpacing: -0.2 },
-  quickDescription: { color: colors.textSecondary, fontSize: 13, lineHeight: 18 },
+  quickTitle: { color: colors.ink, fontSize: typography.body, fontWeight: '600', letterSpacing: -0.2 },
+  quickDescription: { color: colors.textSecondary, fontSize: typography.meta, lineHeight: 20 },
   sessionSection: {
     gap: spacing.xs,
     paddingTop: spacing.md,

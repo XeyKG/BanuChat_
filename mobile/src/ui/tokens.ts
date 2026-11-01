@@ -1,8 +1,8 @@
 export const colors = {
   // Superficies
-  background: '#F6F7FA',
+  background: '#F5F6FA',
   surface: '#FFFFFF',
-  surfaceSoft: '#FAFBFD',
+  surfaceSoft: '#F8F9FC',
 
   // Bordes
   border: '#E7E9F0',
@@ -34,6 +34,9 @@ export const colors = {
   warningSoft: '#FFF8E6',
   error: '#C4322B',
   errorSoft: '#FEF1F0',
+  errorBorder: '#F3C2BE',
+  warningBorder: '#E9D6A4',
+  onBrandSecondary: '#D8DDF4',
 
   // Acentos secundarios
   violet: '#6D4AC8',
@@ -53,6 +56,7 @@ export const spacing = {
   xl: 24,
   xxl: 32,
   xxxl: 40,
+  section: 48,
 } as const;
 
 export const radii = {
@@ -66,6 +70,7 @@ export const radii = {
 
 export const typography = {
   caption: 12,
+  meta: 13,
   small: 14,
   body: 16,
   heading: 22,
@@ -73,8 +78,19 @@ export const typography = {
   display: 34,
 } as const;
 
+// Shared rhythm; platforms retain their own layout and system typeface.
+export const textStyles = {
+  eyebrow: { fontSize: typography.caption, lineHeight: 18, fontWeight: '700', letterSpacing: 1.1, textTransform: 'uppercase' },
+  title: { fontSize: typography.title, lineHeight: 38, fontWeight: '700', letterSpacing: -0.8 },
+  heading: { fontSize: typography.heading, lineHeight: 30, fontWeight: '700', letterSpacing: -0.4 },
+  body: { fontSize: typography.body, lineHeight: 25 },
+  small: { fontSize: typography.small, lineHeight: 22 },
+} as const;
+
+export const motion = { press: 120, enter: 180, progress: 240 } as const;
+
 export const layout = {
-  minTouchTarget: 44,
+  minTouchTarget: 48,
   controlHeight: 52,
   maxContentWidth: 560,
   maxReadingWidth: 680,
@@ -82,24 +98,12 @@ export const layout = {
 
 export const shadows = {
   soft: {
-    shadowColor: '#10122A',
-    shadowOpacity: 0.06,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    boxShadow: '0 2px 6px rgba(16, 18, 42, 0.04)',
   },
   card: {
-    shadowColor: '#10122A',
-    shadowOpacity: 0.09,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 4,
+    boxShadow: '0 6px 20px rgba(16, 18, 42, 0.06)',
   },
   pop: {
-    shadowColor: '#10122A',
-    shadowOpacity: 0.16,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 8,
+    boxShadow: '0 8px 24px rgba(16, 18, 42, 0.12)',
   },
 } as const;

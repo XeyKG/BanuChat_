@@ -3,8 +3,8 @@ import {useGlobalSearchParams, usePathname, useRouter, type Href} from 'expo-rou
 import {Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions} from 'react-native';
 import {useAuth} from '@/auth/auth-provider';
 import {createConversation} from '@/api/conversations';
-import {BrandMark} from '@/ui/animated';
-import {colors, radii, spacing} from '@/ui/tokens';
+import {BrandMark, MonogramAvatar} from '@/ui/animated';
+import {colors, radii, spacing, textStyles} from '@/ui/tokens';
 import {webAppearance} from '@/ui/web-appearance';
 import {CalendarGlyph, ChartGlyph, ChatGlyph, ClockGlyph, DocGlyph, SparkGlyph} from '@/ui/icons';
 
@@ -63,9 +63,10 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
       <View style={styles.brandRow}><View style={styles.brand}><BrandMark size={32}/><Text style={styles.title}>BanuChat</Text></View>
         {!desktop && <Pressable accessibilityRole="button" accessibilityLabel="Menú de navegación" aria-expanded={menu} aria-controls="web-navigation" style={styles.link} onPress={()=>setMenu(v=>!v)}><Text style={styles.linkText}>{menu?'Cerrar menú':'Menú'}</Text></Pressable>}
       </View>
-      {desktop && <Text style={styles.copy}>Tu espacio de consulta</Text>}
+      {desktop && <Text style={styles.copy}>Tu asistente académico</Text>}
       {(desktop||menu) && <ScrollView nativeID="web-navigation" role="navigation" accessibilityLabel="Navegación BanuChat" style={styles.navScroll} contentContainerStyle={styles.links}>
         {links.filter(item=>item.enabled).map((item,index) => <View key={item.path}>
+          {index===2 && <Text style={styles.groupLabel}>EXPLORAR</Text>}
           <Pressable accessibilityRole="button" accessibilityLabel={`Navegar a ${item.label}`} aria-current={pathname===item.path?'page':undefined}
             onPress={() => go(item.path)} style={[styles.link, pathname === item.path && styles.selected]}>
             <View style={styles.navLabel}><item.Icon size={18} color={pathname===item.path?colors.accent:colors.muted}/><Text style={styles.linkText}>{item.label}</Text></View>
@@ -85,7 +86,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
           <Text style={styles.linkText}>Cerrar sesión</Text>
         </Pressable>
       </ScrollView>}
-      {desktop && <View style={styles.footer}><Text style={styles.copy}>{snapshot.me?.profile.alias}</Text>
+      {desktop && <View style={styles.footer}><View style={styles.account}><MonogramAvatar alias={snapshot.me?.profile.alias??'BanuChat'} size={32}/><Text style={styles.accountName}>{snapshot.me?.profile.alias}</Text></View>
         <Text style={styles.copy}>Demostración local · cuenta ficticia</Text>
         <Text style={styles.copy}>Al recargar se cierra el acceso en esta pestaña. Usa Cerrar sesión para revocarlo.</Text></View>}
     </View>
@@ -99,10 +100,13 @@ const styles = StyleSheet.create({
   sidebar:{width:248,borderRightWidth:1,borderRightColor:colors.border,paddingTop:spacing.xl},
   topbar:{borderBottomWidth:1,borderBottomColor:colors.border,padding:12,maxHeight:'65%'},
   brandRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
-  brand:{flexDirection:'row',alignItems:'center',gap:8},title:{fontSize:19,fontWeight:'800',color:colors.brand},
+  brand:{flexDirection:'row',alignItems:'center',gap:spacing.sm},title:{fontSize:20,fontWeight:'800',letterSpacing:-0.6,color:colors.brand},
   navScroll:{flexShrink:1},links:{gap:4},chatActions:{paddingLeft:12,borderLeftWidth:2,borderColor:colors.border},
-  link:{minHeight:44,justifyContent:'center',paddingHorizontal:12,borderRadius:radii.sm},
+  link:{minHeight:48,justifyContent:'center',paddingVertical:spacing.xs,paddingHorizontal:spacing.sm,borderRadius:radii.sm},
   navLabel:{flexDirection:'row',alignItems:'center',gap:12},
-  selected:{backgroundColor:colors.accentSoft},linkText:{color:colors.brand,fontWeight:'700',fontSize:14},
-  footer:{marginTop:'auto',gap:spacing.sm},copy:{fontSize:13,lineHeight:20,color:colors.muted},
+  selected:{backgroundColor:colors.accentSoft},linkText:{color:colors.brand,fontWeight:'600',fontSize:14},
+  groupLabel:{...textStyles.eyebrow,color:colors.muted,paddingHorizontal:spacing.sm,paddingTop:spacing.lg,paddingBottom:spacing.xs},
+  footer:{marginTop:'auto',gap:spacing.sm,borderTopWidth:1,borderColor:colors.border,paddingTop:spacing.md},
+  account:{flexDirection:'row',alignItems:'center',gap:spacing.xs},accountName:{...textStyles.small,color:colors.ink,fontWeight:'600',flex:1},
+  copy:{fontSize:13,lineHeight:20,color:colors.muted},
 });

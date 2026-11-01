@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { colors } from '@/ui/tokens';
 
@@ -179,21 +179,9 @@ export function DocGlyph({ color = colors.accent, size = 22 }: GlyphProps) {
 
 /** Chevron derecho. */
 export function ChevronGlyph({ color = colors.muted, size = 16 }: GlyphProps) {
-  const bar = size * 0.62;
   return (
-    <View style={{ width: size * 0.6, height: size, alignItems: 'center', justifyContent: 'center' }}>
-      <View
-        style={[
-          glyphStyles.chevronBar,
-          { width: bar, backgroundColor: color, transform: [{ rotate: '-45deg' }, { translateY: -size * 0.16 }] },
-        ]}
-      />
-      <View
-        style={[
-          glyphStyles.chevronBar,
-          { width: bar, backgroundColor: color, transform: [{ rotate: '45deg' }, { translateY: size * 0.16 }] },
-        ]}
-      />
+    <View aria-hidden style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: size * 0.46, height: size * 0.46, borderTopWidth: 2, borderRightWidth: 2, borderColor: color, transform: [{ rotate: '45deg' }] }} />
     </View>
   );
 }
@@ -253,11 +241,3 @@ export function TrashGlyph({ color = colors.error, size = 18 }: GlyphProps) {
     </View>
   );
 }
-
-const glyphStyles = StyleSheet.create({
-  chevronBar: {
-    position: 'absolute',
-    height: 2.2,
-    borderRadius: 2,
-  },
-});

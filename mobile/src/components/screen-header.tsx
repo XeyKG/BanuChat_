@@ -1,6 +1,6 @@
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, layout, spacing, typography } from '@/ui/tokens';
+import { colors, layout, spacing, typography, radii, textStyles } from '@/ui/tokens';
 
 interface ScreenHeaderProps {
   title: string;
@@ -20,7 +20,7 @@ export function ScreenHeader({
   return (
     <View testID="screen-header" style={styles.header}>
       <View style={styles.heading}>
-        <Text testID="screen-title" style={styles.title}>{title}</Text>
+        <Text accessibilityRole="header" testID="screen-title" style={styles.title}>{title}</Text>
         {subtitle !== undefined && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
       <Pressable
@@ -56,11 +56,8 @@ const styles = StyleSheet.create({
   },
   heading: { flex: 1, gap: 2 },
   title: {
+    ...textStyles.heading,
     color: colors.ink,
-    fontSize: typography.heading,
-    fontWeight: '800',
-    letterSpacing: -0.4,
-    lineHeight: 28,
   },
   subtitle: {
     color: colors.textSecondary,
@@ -71,7 +68,7 @@ const styles = StyleSheet.create({
     minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
-    borderRadius: 19,
+    borderRadius: radii.sm,
     borderWidth: 1,
     borderColor: colors.borderStrong,
     backgroundColor: colors.surface,
