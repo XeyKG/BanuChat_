@@ -1,11 +1,13 @@
 import {spawn, execFileSync} from 'node:child_process';
-import {mkdir, readFile, writeFile} from 'node:fs/promises';
+import {mkdir, readFile, writeFile, rm} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {demoAccounts} from '../../backend/api/test/auth-i1b/accounts.ts';
+import {runWeb02} from './unified-web02-journey.mts';
 
 const origin='http://127.0.0.1:8085';
-const run=path.join(process.env.LOCALAPPDATA!,'BanuChat','web-01',randomUUID());
+const web02=process.argv.includes('--web02');
+const run=path.join(process.env.LOCALAPPDATA!,'BanuChat',web02?'web-02':'web-01',randomUUID());
 await mkdir(run,{recursive:true});
 const sid=execFileSync('whoami',['/user','/fo','csv','/nh'],{encoding:'utf8'}).match(/S-1-[0-9-]+/u)![0];
 execFileSync('icacls',[run,'/inheritance:r','/grant:r',`*${sid}:(OI)(CI)(F)`],{stdio:'ignore'});
@@ -49,10 +51,13 @@ async function fill(label:string,value:string) {
   if(!found)throw new Error('INPUT_NOT_FOUND');await pause(150);
 }
 async function snapshot(name:string) {
+  if(web02)await pause(450);
   const dom=await evaluate(`({url:location.href,text:document.body.innerText,labels:[...document.querySelectorAll('[aria-label]')].map(e=>e.getAttribute('aria-label')),width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,localStorageKeys:Object.keys(localStorage),sessionStorageKeys:Object.keys(sessionStorage)})`);
-  await writeFile(path.join(run,name+'.json'),JSON.stringify(dom,null,2));
-  const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
-  await writeFile(path.join(run,name+'.png'),Buffer.from(shot.data,'base64'));
+  const safeAuxiliary=['/home','/progress','/calendar','/announcements','/oe2','/oe2-changes'].includes(new URL(dom.url).pathname);
+  const saved=web02?{route:new URL(dom.url).pathname,width:dom.width,overflow:dom.overflow,localStorageKeys:dom.localStorageKeys,sessionStorageKeys:dom.sessionStorageKeys,...(safeAuxiliary?{labels:dom.labels}:{})}:dom;
+  await writeFile(path.join(run,name+'.json'),JSON.stringify(saved,null,2));
+  if(!web02||safeAuxiliary){const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+    await writeFile(path.join(run,name+'.png'),Buffer.from(shot.data,'base64'));}
   return dom;
 }
 function pass(name:string,details:Record<string,unknown>={}) {report.steps.push({name,result:'PASS',at:new Date().toISOString(),...details});console.log('PASS '+name);}
@@ -88,6 +93,12 @@ try {
   await until(`!!document.querySelector('[aria-label="Usuario"]')`);
   const first=await snapshot('01-login');pass(currentStep,{width:first.width,overflow:first.overflow});
   if(process.argv.includes('--inspect')) { report.state='INSPECTED'; }
+  else if(web02){
+    await runWeb02({origin,run,call,evaluate,until,click,fill,snapshot,pass,requestCounts,accesses,consoleText,skipLoginControls:process.argv.includes('--skip-login-controls'),privacyOnly:process.argv.includes('--privacy-only'),
+      getAccess:()=>browserAccess,setStep:name=>{currentStep=name;},setDialog:accept=>{acceptDialog=accept;},
+      setFetchHandler:handler=>events.set('Fetch.requestPaused',[handler])});
+    report.state=process.argv.includes('--privacy-only')?'WEB_02_PRIVACY_CHECKS_PASSED':'BANUCHAT_WEB_02_BROWSER_VALIDATED';
+  }
   else {
     const accounts=await demoAccounts();
     currentStep='login-invalid';await fill('Usuario',accounts[0].uid);await fill('Contraseña','incorrecta exclusivamente de prueba');await click('Iniciar sesión');
@@ -162,12 +173,23 @@ try {
   }
 } catch(error) {report.state='FAILED';report.failed_step=currentStep;report.error=error instanceof Error?error.message:'UNKNOWN';console.log('FAILED '+currentStep+' '+report.error);try{await snapshot('failure');}catch{}process.exitCode=1;}
 finally {
+  let revoked=0,alreadyInactive=0,unconfirmed=0;
   for(const access of accesses){try{
     const me=await fetch(origin+'/api/v2/auth/me',{headers:{Authorization:'Bearer '+access}});
-    if(me.status===200)await fetch(origin+'/api/v2/auth/logout',{method:'POST',headers:{Origin:origin,Authorization:'Bearer '+access}});
-  }catch{/* Never retry an uncertain revocation. */}}
-  await writeFile(path.join(run,'report.json'),JSON.stringify(report,null,2));
-  console.log('PRIVATE_REPORT '+run);
+    if(me.status===200){const ended=await fetch(origin+'/api/v2/auth/logout',{method:'POST',headers:{Origin:origin,Authorization:'Bearer '+access}});if(ended.status===204)revoked++;else unconfirmed++;}
+    else if(me.status===401)alreadyInactive++;else unconfirmed++;
+  }catch{unconfirmed++;/* Never retry an uncertain revocation. */}}
+  if(web02){report.steps.push({name:'session-cleanup',result:unconfirmed?'FAIL':'PASS',revoked,alreadyInactive,unconfirmed});if(unconfirmed){report.state='BANUCHAT_WEB_02_PARTIAL';process.exitCode=1;}}
   if(socket?.readyState===WebSocket.OPEN){try{await call('Browser.close');}catch{}socket.close();}
   if(browser.exitCode===null)browser.kill();
+  if(web02){
+    await Promise.race([new Promise<void>(resolve=>{if(browser.exitCode!==null)resolve();else browser.once('exit',()=>resolve());}),pause(3000)]);
+    // Delete only this run's newly created disposable profile, never a user profile.
+    const relative=path.relative(path.resolve(run),path.resolve(profile));let removed=false;
+    if(relative==='edge-profile'){try{await rm(profile,{recursive:true,force:true});removed=true;}catch{/* Report cleanup uncertainty without deleting other paths. */}}
+    report.steps.push({name:'disposable-profile-cleanup',result:removed?'PASS':'FAIL'});
+    if(!removed){report.state='BANUCHAT_WEB_02_PARTIAL';process.exitCode=1;}
+  }
+  await writeFile(path.join(run,'report.json'),JSON.stringify(report,null,2));
+  console.log('PRIVATE_REPORT '+run);
 }

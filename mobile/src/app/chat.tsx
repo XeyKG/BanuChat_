@@ -24,6 +24,8 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ChatSources } from '@/components/chat-sources';
 import { useSession } from '@/session/session-context';
+import {useChatState} from '@/session/use-chat-state';
+import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, BubbleIn, FadeIn, TypingIndicator } from '@/ui/animated';
 import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
 
@@ -72,23 +74,26 @@ export default function ChatScreen() {
   const router = useRouter();
   const { activeProfile } = useSession();
   const params = useLocalSearchParams<{ conversation_id?: string | string[] }>();
+  const conversationId = singleParam(params.conversation_id);
+  const {client,snapshot}=useAuth();
   const scrollViewRef = useRef<ScrollView>(null);
   const isMountedRef = useRef(true);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [conversationLoadResult, setConversationLoadResult] = useState<ConversationLoadResult>({
+  const [messages, setMessages] = useChatState<ChatMessage[]>(conversationId,'messages',[]);
+  const [conversationLoadResult, setConversationLoadResult] = useChatState<ConversationLoadResult>(conversationId,'load',{
     requestKey: null,
     state: 'loading',
   });
-  const [conversationRetryCount, setConversationRetryCount] = useState(0);
-  const [content, setContent] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [sendError, setSendError] = useState<SendError>(null);
+  const [conversationRetryCount, setConversationRetryCount] = useChatState(conversationId,'retry',0);
+  const [content, setContent] = useChatState(conversationId,'draft','');
+  const [isSending, setIsSending] = useChatState(conversationId,'sending',false);
+  const [sendError, setSendError] = useChatState<SendError>(conversationId,'sendError',null);
   const [isStartingNew, setIsStartingNew] = useState(false);
   const [newConversationError, setNewConversationError] = useState(false);
   const [pendingUncertainSend, setPendingUncertainSend] =
-    useState<PendingUncertainSend | null>(null);
+    useChatState<PendingUncertainSend | null>(conversationId,'uncertain',null);
   const [reconciliationState, setReconciliationState] =
-    useState<ReconciliationState | null>(null);
+    useChatState<ReconciliationState | null>(conversationId,'reconciliation',null);
+  const canApplyResult=()=>isMountedRef.current||(Platform.OS==='web'&&client.getSnapshot().phase==='authenticated'&&client.getSnapshot().epoch===snapshot.epoch);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -101,7 +106,6 @@ export default function ChatScreen() {
     if (activeProfile === null) router.replace(isCcdLocal()?'/profiles':'/login');
   }, [activeProfile, router]);
 
-  const conversationId = singleParam(params.conversation_id);
   const isConversationValid = conversationId !== null && UUID_PATTERN.test(conversationId);
   const activeProfileKey = activeProfile?.profile_key ?? null;
   const conversationRequestKey =
@@ -150,7 +154,7 @@ export default function ChatScreen() {
   }, [activeProfileKey, conversationId, conversationRequestKey, isConversationValid]);
 
   function returnHome() {
-    router.replace('/home');
+    if(Platform.OS==='web')router.push('/home');else router.replace('/home');
   }
 
   function retryConversationLoad() {
@@ -202,13 +206,13 @@ export default function ChatScreen() {
     setReconciliationState(null);
     try {
       const result = await sendMessage(activeConversationId, outgoing);
-      if (!isMountedRef.current) return;
-      setMessages((current) => [...current, result.user_message, result.assistant_message]);
+      if (!canApplyResult()) return;
+      setMessages((current) => [...current,...[result.user_message,result.assistant_message].filter(next=>!current.some(message=>message.message_id===next.message_id))]);
       setContent('');
       setPendingUncertainSend(null);
       setReconciliationState(null);
     } catch (error) {
-      if (!isMountedRef.current) return;
+      if (!canApplyResult()) return;
       if (error instanceof MessageRequestError) {
         if (error.kind === 'timeout' || error.kind === 'network') {
           setSendError('uncertain');
@@ -228,7 +232,7 @@ export default function ChatScreen() {
         setSendError('invalid_response');
       }
     } finally {
-      if (isMountedRef.current) setIsSending(false);
+      if (canApplyResult()) setIsSending(false);
     }
   }
 
@@ -239,10 +243,7 @@ export default function ChatScreen() {
     try {
       const created = await createConversation(activeProfile.profile_key);
       if (!isMountedRef.current) return;
-      setMessages([]);
-      setContent('');
-      setSendError(null);
-      setPendingUncertainSend(null);
+      if(Platform.OS!=='web'){setMessages([]);setContent('');setSendError(null);setPendingUncertainSend(null);}
       router.replace({ pathname: '/chat', params: { conversation_id: created.conversation_id } });
     } catch {
       if (isMountedRef.current) setNewConversationError(true);
@@ -263,7 +264,7 @@ export default function ChatScreen() {
     setReconciliationState('checking');
     try {
       const detail = await getConversation(activeConversationId);
-      if (!isMountedRef.current) return;
+      if (!canApplyResult()) return;
 
       const prefixMatches =
         detail.messages.length >= pendingUncertainSend.baselineCount &&
@@ -302,7 +303,7 @@ export default function ChatScreen() {
 
       setReconciliationState('changed');
     } catch {
-      if (isMountedRef.current) setReconciliationState('check_failed');
+      if (canApplyResult()) setReconciliationState('check_failed');
     }
   }
 

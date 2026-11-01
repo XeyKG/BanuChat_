@@ -40,7 +40,8 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     {path:'/oe2-changes',label:'Banu al día',enabled:can('progress')},
   ];
   function closeMenu(){setMenu(false);setChatMenu(false);}
-  function go(path:string){router.navigate(path as Href);closeMenu();}
+  function focusContent(){requestAnimationFrame(()=>document.getElementById('web-main')?.focus());}
+  function go(path:string){if(pathname!==path)router.push(path as Href);closeMenu();focusContent();}
   async function newChat(){
     if(startingRef.current || !snapshot.me)return;
     startingRef.current=true;setStarting(true);setError(false);
@@ -70,7 +71,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
             <Pressable accessibilityRole="button" accessibilityLabel="Navegar a Chat" aria-expanded={chatMenu} aria-current={pathname==='/chat'?'page':undefined} style={[styles.link,pathname==='/chat'&&styles.selected]} onPress={()=>setChatMenu(v=>!v)}><Text style={styles.linkText}>Chat</Text></Pressable>
             {chatMenu && <View style={styles.chatActions}>
               <Pressable accessibilityRole="button" accessibilityLabel="Nueva conversación web" disabled={starting} accessibilityState={{disabled:starting,busy:starting}} style={styles.link} onPress={()=>void newChat()}><Text style={styles.linkText}>{starting?'Creando...':'Nueva conversación'}</Text></Pressable>
-              {lastChat.current && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>{router.navigate({pathname:'/chat',params:{conversation_id:lastChat.current!}});closeMenu();}}><Text style={styles.linkText}>Volver al chat abierto</Text></Pressable>}
+              {lastChat.current && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>{router.navigate({pathname:'/chat',params:{conversation_id:lastChat.current!}});closeMenu();focusContent();}}><Text style={styles.linkText}>Volver al chat abierto</Text></Pressable>}
               {can('history') && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>go('/history')}><Text style={styles.linkText}>Continuar desde historial</Text></Pressable>}
               {error && <Text accessibilityRole="alert" style={styles.copy}>No fue posible crear la conversación. Puedes intentarlo de nuevo.</Text>}
             </View>}
@@ -83,7 +84,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
       </ScrollView>}
       {desktop && <View style={styles.footer}><Text style={styles.copy}>{snapshot.me?.profile.alias}</Text>
         <Text style={styles.copy}>Demostración local · cuenta ficticia</Text>
-        <Text style={styles.copy}>Al recargar se cierra el acceso en esta pestaña. Usa Salir para revocar la sesión.</Text></View>}
+        <Text style={styles.copy}>Al recargar se cierra el acceso en esta pestaña. Usa Cerrar sesión para revocarlo.</Text></View>}
     </View>
     <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{children}</View>
   </View>;

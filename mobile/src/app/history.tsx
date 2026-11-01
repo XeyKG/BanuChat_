@@ -3,6 +3,7 @@ import { CCD_NOTICE, isCcdLocal } from '@/config/demo-mode';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -85,7 +86,8 @@ export default function HistoryScreen() {
   }
 
   function openConversation(conversationId: string) {
-    router.push({ pathname: '/chat', params: { conversation_id: conversationId } });
+    const destination={pathname:'/chat' as const,params:{conversation_id:conversationId}};
+    if(Platform.OS==='web')router.navigate(destination);else router.push(destination);
   }
 
   async function startNewConversation() {

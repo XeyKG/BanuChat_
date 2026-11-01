@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {useRouter} from 'expo-router';
-import {ActivityIndicator,Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
+import {ActivityIndicator,Platform,Pressable,ScrollView,StyleSheet,Text,View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {getOe2Changes,CATEGORY_LABELS,CHANGE_LABELS,formatChangeInstant,type ChangeCategory,type ChangeType,type ChangesResponse} from '@/api/oe2-changes';
 import {Oe2Error,OE2_ERROR_TEXT,type Oe2ErrorKind} from '@/api/oe2-demo';
@@ -37,4 +37,4 @@ export default function Oe2ChangesScreen(){
   </ScrollView>
  </SafeAreaView>;
 }
-const styles=StyleSheet.create({safe:{flex:1,backgroundColor:colors.background},container:{padding:spacing.lg,gap:spacing.md,maxWidth:layout.maxContentWidth,width:'100%',alignSelf:'center'},notice:{padding:spacing.md,backgroundColor:colors.warningSoft,borderRadius:radii.md,lineHeight:22},filters:{flexDirection:'row',flexWrap:'wrap',gap:spacing.xs},chip:{minHeight:layout.minTouchTarget,justifyContent:'center',padding:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.md,backgroundColor:colors.surface},selected:{borderColor:colors.accent,backgroundColor:colors.accentSoft},card:{gap:spacing.sm,padding:spacing.md,borderWidth:1,borderColor:colors.border,borderRadius:radii.lg,backgroundColor:colors.surface},title:{fontSize:18,fontWeight:'800',color:colors.ink},meta:{fontSize:12,lineHeight:19,color:colors.textSecondary}});
+const styles=StyleSheet.create({safe:{flex:1,backgroundColor:colors.background},container:{padding:spacing.lg,gap:spacing.md,maxWidth:Platform.OS==='web'?960:layout.maxContentWidth,width:'100%',alignSelf:'center'},notice:{padding:spacing.md,backgroundColor:colors.warningSoft,borderRadius:radii.md,lineHeight:22},filters:{flexDirection:'row',flexWrap:'wrap',gap:spacing.xs},chip:{minHeight:layout.minTouchTarget,justifyContent:'center',padding:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.md,backgroundColor:colors.surface},selected:{borderColor:colors.accent,backgroundColor:colors.accentSoft},card:{gap:spacing.sm,padding:spacing.md,borderWidth:1,borderColor:colors.border,borderRadius:radii.lg,backgroundColor:colors.surface},title:{fontSize:18,fontWeight:'800',color:colors.ink},meta:{fontSize:12,lineHeight:19,color:colors.textSecondary}});

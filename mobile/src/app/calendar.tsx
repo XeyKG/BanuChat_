@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -74,10 +74,13 @@ interface DayGroup {
 export default function CalendarScreen() {
   const router = useRouter();
   const { activeProfile } = useSession();
-  const [range] = useState(() => {
+  const [range,setRange] = useState(() => {
     const dateFrom = getBogotaCivilToday();
     return { dateFrom, dateTo: addCivilDays(dateFrom, 29) };
   });
+  const [dateFrom,setDateFrom]=useState(range.dateFrom);
+  const validDate=/^\d{4}-\d{2}-\d{2}$/u.test(dateFrom)&&Number.isFinite(Date.parse(dateFrom+'T12:00:00Z'))&&new Date(dateFrom+'T12:00:00Z').toISOString().slice(0,10)===dateFrom;
+  function applyDate(){if(validDate){setLoadState('loading');setRange({dateFrom,dateTo:addCivilDays(dateFrom,29)});}}
   const [filter, setFilter] = useState<EventFilter>('all');
   const [retryCount, setRetryCount] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>('loading');
@@ -146,10 +149,16 @@ export default function CalendarScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
-        subtitle="Próximos 30 días · hora de Bogotá"
+        subtitle={Platform.OS==='web'?`${range.dateFrom} al ${range.dateTo} · hora de Bogotá`:'Próximos 30 días · hora de Bogotá'}
         title="Calendario"
       />
 
+      {Platform.OS==='web' && <View style={styles.dateRange}>
+        <View style={styles.dateField}><Text style={styles.dateLabel}>Desde (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha inicial del calendario" value={dateFrom} onChangeText={setDateFrom} maxLength={10} autoCorrect={false} onSubmitEditing={applyDate} style={styles.dateInput}/></View>
+        <AppButton label="Ver 30 días" disabled={!validDate} onPress={applyDate}/>
+        <AppButton label="Hoy" variant="secondary" onPress={()=>{const today=getBogotaCivilToday();setDateFrom(today);setLoadState('loading');setRange({dateFrom:today,dateTo:addCivilDays(today,29)});}}/>
+        {!validDate&&<Text accessibilityRole="alert" style={styles.dateError}>Ingresa una fecha válida en formato AAAA-MM-DD.</Text>}
+      </View>}
       <View style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View accessibilityRole="radiogroup" style={styles.filters}>
@@ -273,6 +282,8 @@ export default function CalendarScreen() {
 }
 
 const styles = StyleSheet.create({
+  dateRange:{width:'100%',maxWidth:960,alignSelf:'center',flexDirection:'row',flexWrap:'wrap',alignItems:'flex-end',gap:spacing.sm,padding:spacing.md},
+  dateField:{flexGrow:1,minWidth:180,gap:spacing.xs},dateLabel:{fontSize:14,color:colors.textSecondary},dateInput:{minHeight:44,padding:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,backgroundColor:colors.surface},dateError:{width:'100%',color:colors.error},
   safeArea: { flex: 1, backgroundColor: colors.background },
   filterBar: {
     paddingVertical: spacing.sm,

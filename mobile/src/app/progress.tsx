@@ -44,7 +44,8 @@ function formatBogotaDate(timestamp: string): string {
 
 export default function ProgressScreen() {
   const router = useRouter();
-  const columns=Platform.OS==='web' && useWindowDimensions().width>=1024;
+  const width=useWindowDimensions().width;
+  const columns=Platform.OS==='web' && width>=1024;
   const { activeProfile } = useSession();
   const profileKey = activeProfile?.profile_key ?? null;
   const profileAlias = activeProfile?.alias ?? null;
