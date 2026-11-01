@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, layout, spacing, typography } from '@/ui/tokens';
 
@@ -42,7 +42,7 @@ export function ScreenHeader({
 const styles = StyleSheet.create({
   header: {
     width: '100%',
-    maxWidth: layout.maxReadingWidth,
+    maxWidth: Platform.OS==='web'?960:layout.maxReadingWidth,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',

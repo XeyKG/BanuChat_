@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -56,11 +56,14 @@ export default function AnnouncementsScreen() {
   const [retryCount, setRetryCount] = useState(0);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [search,setSearch] = useState(''), [query,setQuery] = useState('');
+  const canSearch=[...search.trim()].length!==1;
+  function searchAnnouncements(){if(canSearch){setLoadState('loading');setQuery(search.trim());setRetryCount(count=>count+1);}}
 
   useEffect(() => {
     let isMounted = true;
 
-    void getAnnouncements({ temporalStatus: filter })
+    void getAnnouncements({ temporalStatus: filter, query })
       .then((result) => {
         if (!isMounted) return;
         setAnnouncements(result.announcements);
@@ -75,7 +78,7 @@ export default function AnnouncementsScreen() {
     return () => {
       isMounted = false;
     };
-  }, [filter, retryCount]);
+  }, [filter, query, retryCount]);
 
   function selectFilter(value: AnnouncementFilter) {
     if (value === filter) return;
@@ -97,6 +100,7 @@ export default function AnnouncementsScreen() {
         title="Noticias y novedades"
       />
 
+      {Platform.OS==='web' && <View style={styles.search}><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Buscar anuncios (mínimo 2 letras)" value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={styles.input}/><AppButton label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
       <View style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View accessibilityRole="radiogroup" style={styles.filters}>
@@ -193,6 +197,8 @@ export default function AnnouncementsScreen() {
 }
 
 const styles = StyleSheet.create({
+  search:{width:'100%',maxWidth:960,alignSelf:'center',padding:spacing.md,flexDirection:'row',gap:spacing.sm,flexWrap:'wrap'},
+  input:{flexGrow:1,minWidth:180,minHeight:44,padding:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,backgroundColor:colors.surface},
   safeArea: { flex: 1, backgroundColor: colors.background },
   filterBar: {
     paddingVertical: spacing.sm,
@@ -218,7 +224,7 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
   content: {
     width: '100%',
-    maxWidth: layout.maxContentWidth,
+    maxWidth: Platform.OS==='web'?960:layout.maxContentWidth,
     alignSelf: 'center',
     gap: spacing.xl,
   },

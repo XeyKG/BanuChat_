@@ -27,11 +27,15 @@ function Navigation(){
           <Stack.Screen name="home" /><Stack.Screen name="chat" /><Stack.Screen name="history" /><Stack.Screen name="document" />
         </Stack.Protected>
         <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
-          <Stack.Screen name="calendar" />
           <Stack.Screen name="progress" />
-          <Stack.Screen name="announcements" />
           <Stack.Screen name="oe2" />
           <Stack.Screen name="oe2-changes" />
+        </Stack.Protected>
+        <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('calendar')===true}>
+          <Stack.Screen name="calendar" />
+        </Stack.Protected>
+        <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('announcements')===true}>
+          <Stack.Screen name="announcements" />
         </Stack.Protected>
         <Stack.Protected guard={Platform.OS!=='web'&&!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
           <Stack.Screen name="notifications" />

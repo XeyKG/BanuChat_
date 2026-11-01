@@ -7,6 +7,7 @@ import {parseGroundedAnswer, GROUNDED_ANSWER_INSTRUCTION} from './document-evide
 import {resolveConversationQuery,isContextualFollowUp,boundConversationContext} from './conversation-context.js';
 import {resolveCcdQueryIntent,periodMatchesIntent,requestedAcademicRole,selectAcademicComparison,ccdDocumentaryQuery} from './ccd-query-intent.js';
 import {ccdEvidenceText} from './ccd-evidence-text.js';
+import {planCcdEvidence,matchesCcdFacet,ccdCapabilityBoundary,canonicalCcdCatalogText} from './ccd-semantic-plan.js';
 
 /** Reviewed CCD reference policy; storage and authenticated retrieval are supplied by the normal runtime. */
 export interface CcdKnowledgeEvidenceMetadata {
@@ -81,7 +82,7 @@ export interface CcdKnowledgeDependencies extends DocumentRagDependencies {
   knowledge: {release_id:string;metadata:ReadonlyMap<string,CcdKnowledgeEvidenceMetadata>};
   retrieve_scoped_chunks?:(sql:SqlQueryClient,input:DocumentRetrievalInput,keys:readonly string[])=>Promise<RetrievedDocumentChunk[]>;
 }
-export type CcdKnowledgeAnswer=DocumentRagAnswer&{pilot_strategy?:'scoped_extract'|'grounded_synthesis';retrieved_claim_ids?:string[];selected_claim_ids?:string[];supporting_claim_ids?:string[];cited_claim_ids?:string[];presentation_units?:Array<{claim_id:string;key:string}>;presentation_bindings?:Record<string,string>;supporting_evidence?:Array<{claim_id:string;period:string;basis_kinds:CcdKnowledgeEvidenceMetadata['basis_kinds']}>};
+export type CcdKnowledgeAnswer=DocumentRagAnswer&{pilot_strategy?:'scoped_extract'|'grounded_synthesis';unanswered_aspects?:string[];retrieved_claim_ids?:string[];selected_claim_ids?:string[];supporting_claim_ids?:string[];cited_claim_ids?:string[];presentation_units?:Array<{claim_id:string;key:string}>;presentation_bindings?:Record<string,string>;supporting_evidence?:Array<{claim_id:string;period:string;basis_kinds:CcdKnowledgeEvidenceMetadata['basis_kinds']}>};
 /** Explicit source requests are separate from the factual subject. */
 export function asksCcdProvenance(query:string):boolean{
   return /\b(?:de donde (?:sale|viene|proviene)|(?:cual|que) (?:es (?:la |el )?)?(?:fuente|origen|respaldo)|que documento|(?:esta|estan) documentad\p{L}*|(?:esta|estan|aparece|aparecen|figura|figuran) en (?:un|el|que) documento|en que documento|que (?:lo|la|los|las) respalda)\b/u.test(normalized(query));
@@ -112,6 +113,56 @@ function citedAnswer(deps:CcdKnowledgeDependencies,release:string,content:string
   const citations=built.citations.map((c,i)=>({...c,label:studentText(support[i]!.title)??'Información de Competencias Digitales'}));
   const ids=[...new Set(support.map(c=>deps.knowledge.metadata.get(c.document_key)!.claim_id))];
   return {release_id:release,content,insufficient_evidence:false,citations,citation_records:built.citation_records,pilot_strategy:strategy,selected_claim_ids:ids,supporting_claim_ids:ids,cited_claim_ids:ids};
+}
+/** Cover every requested attribute before returning an extract. Missing evidence
+ * is explicit, never replaced by a high-ranked but unrelated catalogue passage. */
+async function semanticEvidence(deps:CcdKnowledgeDependencies,input:DocumentRagInput,subjectQuery:string,trace:(kind:'retrieved'|'selected',chunks:RetrievedDocumentChunk[])=>void):Promise<CcdKnowledgeAnswer|null>{
+ const intent=resolveCcdQueryIntent(subjectQuery,deps.knowledge.metadata);
+ if(intent.subject==='academic'||intent.aspects.length||ccdDocumentaryQuery(subjectQuery)==='historical_table')return null;
+ const plan=planCcdEvidence(input.query,subjectQuery,intent.courses);
+ if(!plan)return null;
+ const requestedYears=[...input.query.matchAll(/\b20\d{2}\b/gu)].map(m=>m[0]);
+ const feeYears=[...deps.knowledge.metadata.values()].flatMap(m=>(m.presentation_units??[]).filter(u=>u.aspects.includes('course_fee')).flatMap(u=>u.period?[u.period]:[]));
+ if(requestedYears.length&&requestedYears.some(year=>!feeYears.includes(year))){
+  const fee=plan.facets.find(f=>f.aspect==='course_fee');
+  if(fee){if(requestedYears.some(year=>feeYears.includes(year)))plan.facets.push({aspect:'future_fee',label:'la tarifa de otros periodos'});else fee.aspect='future_fee';}
+ }
+ const admits=(m:CcdKnowledgeEvidenceMetadata,facet:typeof plan.facets[number])=>m.reference_status==='adopted'&&m.knowledge_version===2&&
+  (!facet.aspect.startsWith('catalog')||m.course===null)&&
+  (facet.aspect!=='hours'||intent.courses.includes(m.course??''))&&
+  (m.domain_metadata?.current!==false||['diagnostic_duration','diagnostic_platforms','diagnostic_monitoring'].includes(facet.aspect)||intent.historical)&&
+  (m.domain_metadata?.current!==false||!requestedYears.length||periodMatchesIntent(m.period,intent))&&
+  (facet.aspect!=='course_fee'||!requestedYears.length||periodMatchesIntent(m.period,intent))&&
+  m.presentation_units?.some(u=>matchesCcdFacet(facet,u));
+ const keys=[...deps.knowledge.metadata].filter(([,m])=>plan.facets.some(f=>admits(m,f))).map(([key])=>key);
+ // When a catalog uses an older alias, retrieve the adopted course's own
+ // overview before using its canonical name; metadata alone is not a citation.
+ const catalogUnits=[...deps.knowledge.metadata.values()].flatMap(m=>(m.presentation_units??[]).filter(u=>plan.facets.some(f=>f.aspect.startsWith('catalog')&&matchesCcdFacet(f,u))));
+ const canonicalKeys=new Map<string,string>();
+ for(const [key,m]of deps.knowledge.metadata){
+  if(!m.course||m.domain_metadata?.current===false||canonicalKeys.has(m.course)||!m.presentation_units?.some(u=>u.aspects.includes('academic_overview')))continue;
+  if(catalogUnits.some(u=>canonicalCcdCatalogText(u.text,new Map([[key,m]]))!==u.text)){canonicalKeys.set(m.course,key);if(!keys.includes(key))keys.push(key);}
+ }
+ const scoped=deps.retrieve_scoped_chunks;
+ const rows=keys.length?await retrieveDocumentChunksForQuery(scoped?{...deps,retrieve_chunks:(sql,i)=>scoped(sql,i,keys)}:deps,{release_id:input.release_id,query:subjectQuery,top_k:20}):[];
+ if(rows.some(c=>c.release_id!==input.release_id||!deps.knowledge.metadata.has(c.document_key)))throw new Error('CCD evidence scope rejected.');
+ const eligible=rows.filter(c=>keys.includes(c.document_key));trace('retrieved',eligible);
+ const retrievedNames=new Map(eligible.filter(c=>[...canonicalKeys.values()].includes(c.document_key)).map(c=>[c.document_key,deps.knowledge.metadata.get(c.document_key)!]));
+ const support:RetrievedDocumentChunk[]=[],paragraphs:string[]=[],units:NonNullable<CcdKnowledgeAnswer['presentation_units']>=[],missing:string[]=[];
+ for(const facet of plan.facets){
+  const c=eligible.find(c=>admits(deps.knowledge.metadata.get(c.document_key)!,facet));
+  if(!c){missing.push(facet.aspect);paragraphs.push(`No tengo evidencia suficiente para precisar ${facet.label}.`);continue;}
+  const m=deps.knowledge.metadata.get(c.document_key)!,unit=m.presentation_units!.find(u=>matchesCcdFacet(facet,u))!;
+  const value=facet.aspect.startsWith('catalog')?canonicalCcdCatalogText(unit.text,retrievedNames):unit.text;
+  if(value!==unit.text)for(const source of eligible.filter(c=>retrievedNames.has(c.document_key)&&value.includes(retrievedNames.get(c.document_key)!.course!)))if(!support.includes(source))support.push(source);
+  if(!paragraphs.includes(value))paragraphs.push(value);
+  if(!support.includes(c))support.push(c);units.push({claim_id:m.claim_id,key:unit.key});
+ }
+ if(plan.courseCount&&!missing.includes('requirement')&&!missing.includes('completion')&&/\b(?:tres|3) pilares\b/u.test(normalized(paragraphs.join(' ')))&&/\b(?:cada|correspondiente)\b/u.test(normalized(paragraphs.join(' '))))
+  paragraphs.unshift('Si completas los tres pilares únicamente mediante cursos, son tres cursos en total, uno por pilar. Si ya validaste un pilar mediante la prueba, no necesitas cursarlo.');
+ trace('selected',support);
+ if(!support.length)return {...refusal(input.release_id,paragraphs.join('\n\n')),unanswered_aspects:missing};
+ return {...citedAnswer(deps,input.release_id,paragraphs.join('\n\n'),support,'scoped_extract'),insufficient_evidence:missing.length>0,presentation_units:units,unanswered_aspects:missing};
 }
 /** Version-2 entity/period policy selects reviewed aspects, never evaluation IDs.
  * Text remains in retrieved corpus units; v1 is dispatched unchanged below. */
@@ -259,6 +310,9 @@ function conversationalEvidence(deps:CcdKnowledgeDependencies,chunks:RetrievedDo
 }
 /** Shared generator/embedding/retrieval/citation contracts, private candidate only. */
 export async function generateCcdKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:DocumentRagInput):Promise<CcdKnowledgeAnswer>{
+  if(input.release_id!==deps.knowledge.release_id||!deps.retrieve_chunks)throw new Error('CCD knowledge configuration rejected.');
+  const boundary=ccdCapabilityBoundary(input.query);
+  if(boundary)return refusal(input.release_id,boundary);
   let retrieved:RetrievedDocumentChunk[]=[],selected:RetrievedDocumentChunk[]=[];
   const provenanceRequested=asksCcdProvenance(input.query);
   let factualInput=input;
@@ -282,13 +336,15 @@ export async function generateCcdKnowledgeAnswer(deps:CcdKnowledgeDependencies,i
   // extracted or attributed by its source protocol, not every retrieved package.
   const supporting=answer.supporting_claim_ids??[];
   const evidence=[...deps.knowledge.metadata.values()].filter(m=>supporting.includes(m.claim_id));
-  const explanation=provenanceRequested&&!answer.insufficient_evidence&&supporting.length?provenanceText(new Set(evidence.flatMap(m=>m.basis_kinds))):'';
+  const explanation=provenanceRequested&&supporting.length?provenanceText(new Set(evidence.flatMap(m=>m.basis_kinds))):'';
   const visible=visibleKnowledgeText(deps,answer.content+(explanation?'\n\n'+explanation:''));
   if(visible===null)return {...refusal(input.release_id),retrieved_claim_ids:ids(retrieved),selected_claim_ids:ids(selected),supporting_claim_ids:[],cited_claim_ids:[],supporting_evidence:[]};
   return {...answer,content:visible,retrieved_claim_ids:ids(retrieved),selected_claim_ids:ids(selected),supporting_claim_ids:supporting,cited_claim_ids:answer.cited_claim_ids??[],supporting_evidence:[...deps.knowledge.metadata.values()].filter(m=>supporting.includes(m.claim_id)).map(m=>({claim_id:m.claim_id,period:m.period,basis_kinds:m.basis_kinds}))};
 }
 async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:DocumentRagInput,trace:(kind:'retrieved'|'selected',chunks:RetrievedDocumentChunk[])=>void,provenanceRequested:boolean):Promise<CcdKnowledgeAnswer>{
   if(input.release_id!==deps.knowledge.release_id || !deps.retrieve_chunks)throw new Error('CCD knowledge configuration rejected.');
+  const capabilityBoundary=ccdCapabilityBoundary(input.query);
+  if(capabilityBoundary)return refusal(input.release_id,capabilityBoundary);
   let resolved=resolveConversationQuery(input.query,input.history??[]);
   if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&/\b20\d{2}\b/u.test(input.query)&&/\b(?:cuanto|precio|tarifa|costo)\b/u.test(normalized(input.query))&&!/\b(?:curso|prueba|diagnostic)\p{L}*\b/u.test(normalized(input.query))){
     const reference=resolveConversationQuery(input.query.replace(/\s+en\s+20\d{2}/giu,''),input.history??[]);
@@ -319,7 +375,8 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   const explicitHistoricalSubject=/\b(?:informatica|transicion|cursos? antigu\p{L}*|pruebas? antigu\p{L}*|plan(?:es)? anterior\p{L}*)\b/u.test(normalized(input.query));
   const explicitDiagnosticSubject=/\b(?:pruebas?|diagnostic\p{L}*|pilar)\b/u.test(normalized(input.query))&&ccdKnowledgeQueryScope(input.query,deps.knowledge.metadata).topics.some(t=>['threshold','completion','purpose','schedule','fees'].includes(t));
   const canonicalSubject=[...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)&&(/\b(?:insignia|inscripciones|cosmos|periodo|nrc|digcomp|creditos|modalidad\p{L}*|metodologia|telefono institucional|32|96)\b/u.test(normalized(input.query))||!history.length&&/\bprimera oportunidad\b/u.test(normalized(input.query)));
-  const standaloneSubject=explicitPillar||explicitFinancialSubject||explicitHistoricalSubject||explicitDiagnosticSubject||canonicalSubject;
+  const semanticSubject=planCcdEvidence(input.query,input.query,resolveCcdQueryIntent(input.query,deps.knowledge.metadata).courses)!==null;
+  const standaloneSubject=explicitPillar||explicitFinancialSubject||explicitHistoricalSubject||explicitDiagnosticSubject||canonicalSubject||semanticSubject;
   const query=resolved.needs_clarification&&standaloneSubject?input.query:resolved.retrieval_query;
   // A financial intent alone supplies no subject. An opportunity follow-up needs
   // a diagnostic antecedent; a course price cannot establish that benefit.
@@ -355,6 +412,8 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   }
   if([...deps.knowledge.metadata.values()].some(m=>m.knowledge_version===2)){
     if(/\b(?:oferta|ofrecido|ofrecida)\b/u.test(currentText)&&/\b(?:actual\p{L}*|garantiz\p{L}*|proximo)\b/u.test(currentText))return refusal(input.release_id,'No tengo la programación de grupos, cupos u horarios para ese periodo.');
+    const semantic=await semanticEvidence(deps,input,query,trace);
+    if(semantic)return semantic;
     const canonical=await canonicalEvidence(deps,input,query,trace);
     if(canonical)return canonical;
   }
@@ -386,6 +445,17 @@ async function generateKnowledgeAnswer(deps:CcdKnowledgeDependencies,input:Docum
   const budget=scope.topics.includes('academic')?(scope.courses.length>1?4:3):6;
   for(const c of eligible){if(chunks.length>=budget)break;if(!chunks.includes(c))chunks.push(c);}
   if(!chunks.length)return refusal(input.release_id);
+  // An absent identifier in selected evidence does not establish its absence
+  // from an entire original syllabus. Explain the supported scope instead.
+  if(scope.topics.includes('academic')&&scope.courses.length===1&&requestedAcademicRole(input.query,scope.courses)==='academic_contents'&&/\b(?:ley|decreto|norma|articulo)\b/u.test(normalized(input.query))&&/\b(?:nombre|numero|exact\p{L}*|cual|dime)\b/u.test(normalized(input.query))){
+    const packages=chunks.filter(c=>deps.knowledge.metadata.get(c.document_key)?.presentation_units?.some(u=>u.aspects.includes('academic_contents'))).map(c=>({chunk:c,text:ccdEvidenceText(c.content,input.query)})).filter(p=>p.text.length>0);
+    const material=packages.map(p=>p.chunk),texts=packages.map(p=>p.text);
+    if(!material.length)return refusal(input.release_id);
+    if(material.length&&!/\b(?:ley|decreto|articulo)\s+(?:numero\s+)?\d+/u.test(normalized(texts.join(' ')))){
+      trace('selected',material);
+      return {...citedAnswer(deps,input.release_id,texts.join('\n\n')+'\n\nLa evidencia disponible no identifica el nombre y número exactos de la norma solicitada. No puedo deducirlos de una descripción temática ni afirmar que el documento completo no cite normas.',material,'scoped_extract'),insufficient_evidence:true,unanswered_aspects:['academic_legal_identifier']};
+    }
+  }
   if(scope.topics.includes('academic')&&scope.courses.length>1 && scope.courses.some(course=>!chunks.some(c=>deps.knowledge.metadata.get(c.document_key)?.course===course)))return refusal(input.release_id,'Falta evidencia de alguno de los cursos solicitados; necesito acotar la comparación.');
   // A comparison exposes each source separately rather than inventing shared attributes.
   if(scope.topics.includes('academic')&&scope.courses.length>1){

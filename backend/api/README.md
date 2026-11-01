@@ -13,6 +13,16 @@ v1/CCD anteriores se conservan como regresión y no alimentan la aplicación fin
 Arranque, evidencia y limitaciones: [checkpoint unificado](../../docs/transition/banuchat-unified-application-checkpoint.md).
 Las secciones posteriores registran antecedentes.
 
+RAG-SEMANTIC-QUALITY-01 incorpora selección por sujeto y atributos independientes
+para preguntas compuestas sobre diagnóstico, catálogo, matrícula, intensidad y
+créditos. Conserva las unidades publicadas y sus periodos; si falta un atributo,
+lo declara y mantiene solo las citas del contenido respaldado. Los nombres del
+catálogo se normalizan únicamente con una ficha de curso recuperada de la misma
+release. Las solicitudes de expedientes reales, autorizaciones económicas o
+archivos internos por nombre/código no habilitan consultas ni herramientas.
+Esto no modifica contratos REST ni publica otro corpus. Resultados y límites:
+[checkpoint semántico](../../docs/transition/CHECKPOINT-RAG-SEMANTIC-QUALITY-01.md).
+
 ## Entorno operativo CCD autenticado
 
 O4 promovió `banuchat-dev-postgres-ccd-auth-1` como PostgreSQL principal de

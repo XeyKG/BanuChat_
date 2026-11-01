@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
   filterTextSelected: { color: colors.white },
   container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
+  content: { width: '100%', maxWidth: Platform.OS==='web'?960:layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
   stateCard: {
     alignItems: 'center',
     gap: spacing.sm,

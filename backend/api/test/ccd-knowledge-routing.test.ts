@@ -92,7 +92,6 @@ test('explicit auxiliary requests retain orchestration despite recognized CCD pr
  for(const query of [
   '¿Cuánto cuestan mis cursos? ¿Qué documento lo dice?',
   '¿Qué cursos completé en mi progreso? ¿Qué documento lo dice?',
-  '¿Qué calificación tienen mis notas? ¿Qué documento lo dice?',
   '¿Cuándo hay eventos en el calendario? ¿Qué documento lo dice?',
   '¿Qué anuncios de cursos hay? ¿Qué documento lo dice?',
   '¿Qué noticias de cursos hay? ¿Qué documento lo dice?',
@@ -107,6 +106,12 @@ test('explicit auxiliary requests retain orchestration despite recognized CCD pr
   assert.equal(f.ragQueries.length,0,query);
   assert.equal(f.schemaQueries.length,0,query);
  }
+});
+
+test('a personal-grade request is a capability boundary even when it asks for documentary provenance',async()=>{
+ const f=routingFixture();const a=await f.responder(question('¿Qué calificación tienen mis notas? ¿Qué documento lo dice?'));
+ assert.equal(a.insufficient_evidence,true);assert.match(a.content,/No tengo acceso a expedientes personales/u);
+ assert.equal(f.orchestrationCalls,0);assert.equal(f.ragQueries.length,0);assert.equal(f.schemaQueries.length,0);
 });
 
 test('auxiliary user antecedent cannot become CCD provenance through a follow-up',async()=>{

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -44,6 +44,7 @@ function formatBogotaDate(timestamp: string): string {
 
 export default function ProgressScreen() {
   const router = useRouter();
+  const columns=Platform.OS==='web' && useWindowDimensions().width>=1024;
   const { activeProfile } = useSession();
   const profileKey = activeProfile?.profile_key ?? null;
   const profileAlias = activeProfile?.alias ?? null;
@@ -201,11 +202,11 @@ export default function ProgressScreen() {
           )}
 
           {loadState === 'success' && courses.length > 0 && (
-            <View style={styles.courseList}>
+            <View style={[styles.courseList,columns&&styles.courseGrid]}>
               {courses.map((course, index) => {
                 const meta = STATUS_META[course.status];
                 return (
-                  <FadeIn key={course.course_key} delay={Math.min(index, 6) * 70}>
+                  <FadeIn key={course.course_key} delay={Math.min(index, 6) * 70} style={columns?styles.gridItem:undefined}>
                     <View style={styles.courseCard}>
                       <View style={styles.courseHeading}>
                         <Text style={styles.courseName}>{course.course_name}</Text>
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
   filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
   filterTextSelected: { color: colors.white },
   container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
+  content: { width: '100%', maxWidth: Platform.OS==='web'?960:layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
   summaryCard: {
     overflow: 'hidden',
     gap: spacing.lg,
@@ -342,6 +343,8 @@ const styles = StyleSheet.create({
   stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
   retryButton: { minWidth: 144 },
   courseList: { gap: spacing.sm },
+  courseGrid:{flexDirection:'row',flexWrap:'wrap',alignItems:'stretch'},
+  gridItem:{width:'48%',flexGrow:1},
   courseCard: {
     gap: spacing.md,
     padding: spacing.md,

@@ -13,6 +13,7 @@ import {randomUUID} from 'node:crypto';
 import {asksCcdProvenance,ccdKnowledgeQueryScope} from '../chat/ccd-knowledge.js';
 import {boundConversationContext,resolveConversationQuery} from '../chat/conversation-context.js';
 import {isCcdKnowledgeSchema} from '../chat/ccd-knowledge-manifest.js';
+import {ccdCapabilityBoundary} from '../chat/ccd-semantic-plan.js';
 export interface AuxiliaryContext {release_id:string;profile_key:string;alias:string;}
 /** Only existing structured read services receive this adapter; never RAG or arbitrary HTTP SQL. */
 export function auxiliarySql(sql:SqlQueryClient):SqlQueryClient {
@@ -36,6 +37,8 @@ export const unifiedAnnouncements=(sql:SqlQueryClient,input:Parameters<typeof ge
 export function unifiedResponder(input:{sql:SqlQueryClient;router:IntentRouter;rag:DocumentRagResponder;principal:string;aux:AuxiliaryContext;
  mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator}):McpAgentResponder{
  return async query=>{
+  const boundary=ccdCapabilityBoundary(query.query);
+  if(boundary)return {release_id:query.release_id,content:boundary,insufficient_evidence:true,citations:[],citation_records:[]};
   const restriction=mcpQueryRestriction(query.query,query.history);
   if(restriction)return {release_id:query.release_id,content:restriction,insufficient_evidence:true,citations:[],citation_records:[]};
   const decision=input.router.route({content:query.query,context:{profile_selected:true,now:query.now}});

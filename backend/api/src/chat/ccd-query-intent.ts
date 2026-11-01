@@ -74,6 +74,7 @@ export function periodMatchesIntent(period:string,intent:CcdQueryIntent):boolean
 
 export function requestedAcademicRole(query:string,courses:readonly string[]):string|undefined {
   let text=normalize(query);for(const course of courses)text=text.split(normalize(course)).join(' ');
+  if(/\b(?:ley|decreto|norma|articulo)\b/u.test(text)&&/\b(?:nombre|numero|exact\p{L}*|cual|dime)\b/u.test(text))return 'academic_contents';
   if(/\b(?:contenidos?|temarios?|temas?|clases|tipos)\b/u.test(text))return 'academic_contents';
   if(/\b(?:competencias?|aprendizajes?)\b/u.test(text))return 'academic_competencies';
   return undefined;

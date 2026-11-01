@@ -21,6 +21,7 @@ export interface AnnouncementsResponse {
 
 export interface AnnouncementsInput {
   temporalStatus: AnnouncementFilter;
+  query?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -87,6 +88,7 @@ export async function getAnnouncements(
   input: AnnouncementsInput,
 ): Promise<AnnouncementsResponse> {
   const query = new URLSearchParams({ temporal_status: input.temporalStatus });
+  if (input.query?.trim()) query.set('query', input.query.trim());
   const response = await fetch(`${getApiBaseUrl()}/announcements?${query.toString()}`, {
     method: 'GET',
   });
