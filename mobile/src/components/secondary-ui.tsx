@@ -1,6 +1,7 @@
 import {Children, useState, type ReactNode} from 'react';
 import {ActivityIndicator, Platform, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle} from 'react-native';
-import {colors, layout, radii, spacing, textStyles, typography} from '@/ui/tokens';
+import {colors, layout, radii, spacing, textStyles, typography, shadows} from '@/ui/tokens';
+import {BanuAvatar} from '@/components/banu-avatar';
 
 /** Shared secondary-screen surfaces. Layout stays in RN, including on web. */
 export function ContentColumn({children, testID, reading=false, style}: {children:ReactNode;testID?:string;reading?:boolean;style?:StyleProp<ViewStyle>}) {
@@ -32,6 +33,7 @@ export function StatusBadge({children,tint=colors.accent,soft=colors.accentSoft}
 export function ScreenState({kind,title,body,children,loadingLabel}: {kind:'loading'|'error'|'empty';title:string;body?:string;children?:ReactNode;loadingLabel?:string}) {
   return <View testID={`screen-state-${kind}`} accessibilityRole={kind==='error'?'alert':undefined} accessibilityLiveRegion="polite" style={[styles.state,kind==='error'&&styles.error]}>
     {kind==='loading'&&<ActivityIndicator color={colors.accent} accessibilityLabel={loadingLabel??title.replace(/\.\.\.$/,'')}/>}
+    {kind==='empty'&&<BanuAvatar size={56}/>}
     <Text style={styles.stateTitle}>{title}</Text>
     {body!==undefined&&<Text selectable style={styles.stateBody}>{body}</Text>}
     {children}
@@ -54,7 +56,7 @@ export const secondaryStyles=StyleSheet.create({
   heading:{...textStyles.heading,color:colors.ink},
   title:{fontSize:typography.body,lineHeight:24,fontWeight:'700',color:colors.ink},
   body:{...textStyles.small,color:colors.textSecondary},
-  input:{minHeight:layout.controlHeight,minWidth:0,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,padding:spacing.sm,color:colors.ink,backgroundColor:colors.surface,fontSize:typography.body},
+  input:{minHeight:layout.controlHeight,minWidth:0,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,padding:spacing.sm,color:colors.ink,backgroundColor:colors.surfaceSoft,fontSize:typography.body,...shadows.inset},
 });
 
 const styles=StyleSheet.create({
@@ -63,8 +65,8 @@ const styles=StyleSheet.create({
   card:{padding:spacing.lg,gap:spacing.sm,borderWidth:1,borderColor:colors.border,borderRadius:radii.lg,backgroundColor:colors.surface,minWidth:0},
   notice:{fontSize:typography.meta,lineHeight:21,color:colors.textSecondary,paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderLeftWidth:3,borderColor:colors.warning,borderRadius:radii.sm,backgroundColor:colors.warningSoft},
   meta:{fontSize:typography.meta,lineHeight:21,color:colors.textSecondary},
-  chip:{minHeight:layout.minTouchTarget,justifyContent:'center',paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,backgroundColor:colors.surface},
-  selected:{backgroundColor:colors.accentSoft,borderColor:colors.accent},
+  chip:{minHeight:layout.minTouchTarget,justifyContent:'center',paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,backgroundColor:colors.background,...shadows.raised},
+  selected:{backgroundColor:colors.accentSoft,borderColor:colors.accent,...shadows.inset},
   chipLabel:{...textStyles.small,fontWeight:'600',color:colors.textSecondary},
   selectedLabel:{color:colors.accentStrong},
   badge:{alignSelf:'flex-start',paddingHorizontal:spacing.xs,paddingVertical:spacing.xxs,borderRadius:radii.sm},

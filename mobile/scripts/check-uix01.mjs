@@ -10,7 +10,14 @@ import {secondaryReview} from './uix02-review.mjs';
 const stage = process.argv[2];
 assert.ok(['before', 'after'].includes(stage), 'Use before or after');
 const secondary=process.argv.includes('--secondary');
-const root = path.resolve(secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
+const approved=process.argv.includes('--uix04a');
+const brand=process.argv.includes('--brand')||approved;
+const widths=approved?[1440,820,390,360]:[1366,768,390];
+const root = path.resolve(approved?'.expo/uix04a':brand?'.expo/uix03':secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
+if(approved&&stage==='before'){
+  let exists=false;try{await readFile(path.join(run,'report.json'));exists=true;}catch(error){if(error.code!=='ENOENT')throw error;}
+  assert.equal(exists,false,'UIX04A_BASELINE_EXISTS_REFUSE_OVERWRITE');
+}
 await mkdir(run, {recursive:true});
 const profile = path.join(root, 'edge-' + randomUUID());
 const browser = spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', [
@@ -26,7 +33,7 @@ const tokenPair={access_token:'A'.repeat(43),refresh_token:'B'.repeat(42)+'A',to
 const citation={index:0,source_kind:'document',label:'Documento: Guía sintética de estudio · UIX',locator:'section:1: Orientación de ejemplo',release_id:id,document_version_id:docId,artifact_url:`/api/v2/documents/${docId}/artifact`};
 const normalMessages=[{message_id:id,role:'user',content:'¿Cómo puedo organizar mi semana de estudio? Ejemplo sintético UIX.',created_at:timestamp},{message_id:docId,role:'assistant',content:'Ejemplo visual · contenido 100 % sintético.\n\nOrganiza las tareas en bloques de estudio y reserva un momento para revisar tus avances. Puedes consultar las fuentes de esta respuesta para ampliar la información.\n\nEste texto solo permite evaluar la interfaz; no describe una regla institucional.',created_at:timestamp,insufficient_evidence:false,citations:[citation]}];
 const review=secondary?secondaryReview({id,docId,me,timestamp,pause}):null;
-let mode='normal', loginFault=0, messageFault=0, sequence=0, socket, postCount=0, escapedApi=0;
+let mode='normal', agendaMode='empty', loginFault=0, messageFault=0, sequence=0, socket, postCount=0, escapedApi=0;
 const pending=new Map(), shots=[], checks=[], errors=[];
 async function call(method,params={}){const key=++sequence;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(key);reject(Error('CDP_TIMEOUT '+method));},30000);pending.set(key,{resolve,reject,timer});socket.send(JSON.stringify({id:key,method,params}));});}
 async function evaluate(expression){const r=await call('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true,userGesture:true});if(r.exceptionDetails)throw Error('BROWSER_EXPRESSION '+r.exceptionDetails.text);return r.result.value;}
@@ -38,7 +45,7 @@ async function key(key){await call('Input.dispatchKeyEvent',{type:'keyDown',key,
 async function menu(){if(await evaluate(`(()=>{const e=document.querySelector('[aria-label="Menú de navegación"]');return e&&e.getAttribute('aria-expanded')!=='true'})()`))await click('Menú de navegación');}
 async function nav(label){await menu();await click('Navegar a '+label);await pause(650);}
 async function size(width){await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await pause(200);}
-async function capture(name,width){await size(width);await pause(800);const metrics=await evaluate(`(()=>{const v=${visible},controls=[...document.querySelectorAll('[role="button"],[role="radio"],input,textarea')].filter(v);return {width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,smallControls:controls.filter(e=>e.getBoundingClientRect().height<43).map(e=>e.getAttribute('aria-label')||e.textContent),horizontalScroll:[...document.querySelectorAll('[data-testid="chat-assistant"],[data-testid="chat-user"]')].filter(v).some(e=>e.scrollWidth>e.clientWidth+1)}})()`);assert.equal(metrics.overflow,false,name+' root overflow');assert.equal(metrics.horizontalScroll,false,name+' message overflow');assert.deepEqual(metrics.smallControls,[],name+' small controls');if(stage==='after'&&name==='login'&&width===1366){assert.ok(await evaluate(`(()=>{const frame=document.querySelector('[data-testid="login-layout"]').getBoundingClientRect(),story=document.querySelector('[data-testid="login-story"]').getBoundingClientRect();return Math.abs(story.height-frame.height)<3;})()`),'LOGIN_PANEL_HEIGHT');}const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const file=name+'-'+width+'.png';await writeFile(path.join(run,file),Buffer.from(shot.data,'base64'));shots.push({name,file,...metrics});}
+async function capture(name,width){await size(width);await pause(800);const metrics=await evaluate(`(()=>{const v=${visible},controls=[...document.querySelectorAll('[role="button"],[role="radio"],input,textarea')].filter(v);return {width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,internalOverflow:[...document.querySelectorAll('[data-testid="chat-suggestion"]')].filter(v).filter(e=>e.scrollWidth>e.clientWidth+2).map(e=>e.textContent),smallControls:controls.filter(e=>e.getBoundingClientRect().height<43).map(e=>e.getAttribute('aria-label')||e.textContent),horizontalScroll:[...document.querySelectorAll('[data-testid="chat-assistant"],[data-testid="chat-user"]')].filter(v).some(e=>e.scrollWidth>e.clientWidth+1)}})()`);assert.equal(metrics.overflow,false,name+' root overflow');assert.equal(metrics.horizontalScroll,false,name+' message overflow');assert.deepEqual(metrics.internalOverflow,[],name+' internal suggestion overflow');assert.deepEqual(metrics.smallControls,[],name+' small controls');if(stage==='after'&&name==='login'&&width===1366){assert.ok(await evaluate(`(()=>{const frame=document.querySelector('[data-testid="login-layout"]').getBoundingClientRect(),story=document.querySelector('[data-testid="login-story"]').getBoundingClientRect();return Math.abs(story.height-frame.height)<3;})()`),'LOGIN_PANEL_HEIGHT');}const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const file=name+'-'+width+'.png';await writeFile(path.join(run,file),Buffer.from(shot.data,'base64'));shots.push({name,file,...metrics});}
 async function fixtures(p){const {requestId,request}=p,u=new URL(request.url);let code=200,body;
   const override=await review?.fixture(request);
   if(override){await call('Fetch.fulfillRequest',{requestId,responseCode:override.code,responseHeaders:[{name:'Content-Type',value:override.contentType??'application/json'}],body:Buffer.from(override.contentType?override.body:JSON.stringify(override.body)).toString('base64')});return;}
@@ -51,7 +58,11 @@ async function fixtures(p){const {requestId,request}=p,u=new URL(request.url);le
   else if(u.pathname==='/api/v2/conversations/'+id)body={conversation_id:id,started_at:timestamp,profile:me.profile,messages:mode==='empty'?[]:mode==='long'?normalMessages.map(m=>({...m,content:m.content+'\n\n'+('palabralargasinseparadores'.repeat(18)),...(m.role==='assistant'?{insufficient_evidence:true}:{})})):normalMessages};
   else if(u.pathname.endsWith('/artifact')){await call('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/markdown; charset=utf-8'}],body:Buffer.from('# Documento sintético UIX\n\nTexto de prueba seleccionable. No contiene documentos CCD.').toString('base64')});return;}
   else if(u.pathname.endsWith('/me/progress'))body={release_id:id,profile:me.profile,courses:[{course_key:'uix-study',course_name:'Curso sintético para revisión UIX',status:'in_progress',progress_percent:37,started_at:timestamp,completed_at:null}]};
-  else if(u.pathname.endsWith('/calendar/events'))body={release_id:id,events:[]};
+  else if(u.pathname.endsWith('/calendar/events')){
+    if(approved&&agendaMode==='loading')await pause(6000);
+    code=approved&&agendaMode==='error'?503:200;
+    body=code!==200?{error:{code:'DEPENDENCY_UNAVAILABLE'}}:{release_id:id,events:approved&&agendaMode==='content'?[{event_key:'uix04-fixture',title:'Actividad sintética para revisión UIX-04A',description:'Solo fixture visual interceptado',event_type:'general',starts_at:'2026-11-03T15:00:00Z',ends_at:null,course_key:null,announcement_key:null}]:[]};
+  }
   else if(u.pathname==='/api/v2/announcements')body={release_id:id,reference_time:timestamp,announcements:[]};
   else {code=503;body={error:{code:'DEPENDENCY_UNAVAILABLE'}};}
   await call('Fetch.fulfillRequest',{requestId,responseCode:code,responseHeaders:[{name:'Content-Type',value:'application/json'},{name:'Cache-Control',value:'no-store'}],...(code===204?{}:{body:Buffer.from(JSON.stringify(body)).toString('base64')})});
@@ -63,28 +74,48 @@ try{
  socket.onmessage=e=>{const d=JSON.parse(String(e.data));if(d.id){const p=pending.get(d.id);if(p){clearTimeout(p.timer);pending.delete(d.id);d.error?p.reject(Error(JSON.stringify(d.error))):p.resolve(d.result);}}else if(d.method==='Fetch.requestPaused')void fixtures(d.params).catch(e=>errors.push(String(e)));else if(d.method==='Runtime.exceptionThrown')errors.push(d.params.exceptionDetails.text);else if(d.method==='Network.responseReceived'&&d.params.response.url.includes('/api/')&&!d.params.response.fromServiceWorker&&d.params.response.remoteIPAddress)escapedApi++;};
  await call('Page.enable');await call('Runtime.enable');await call('Network.enable');await call('Fetch.enable',{patterns:[{urlPattern:origin+'/api/*',requestStage:'Request'}]});
  await size(1366);await call('Page.navigate',{url:origin+'/login'});await until(`!!document.querySelector('[aria-label="Usuario"]')`);
- for(const w of [1366,768,390])await capture('login',w);
+ for(const w of widths)await capture('login',w);
  await fill('Usuario',me.synthetic_uid);await fill('Contraseña','Solo UIX sintético');loginFault=401;await click('Iniciar sesión');await until(`document.body.innerText.includes('Usuario o contraseña inválidos.')`);await capture('login-error',390);checks.push('login rejected credentials');
  await fill('Contraseña','Solo UIX sintético');await click('Iniciar sesión');await until(`location.pathname==='/home'`);
  if(review){await review.run({nav,capture,size,click,until,evaluate,key,call,menu,checks,stage});}else{
- for(const w of [1366,768,390])await capture('home',w);
+ for(const w of widths)await capture('home',w);
  await click('Abrir chat con Banu');await until(`document.body.innerText.includes('Ejemplo visual ·')`);
- for(const w of [1366,768,390]){await capture('chat',w);await click('Mostrar 1 fuentes');await capture('sources',w);await click('Ocultar 1 fuentes');}
+ for(const w of widths){await capture('chat',w);await click('Mostrar 1 fuentes');await capture('sources',w);await click('Ocultar 1 fuentes');}
  await click('Mostrar 1 fuentes');await click('Abrir documento Guía sintética de estudio · UIX');await until(`document.body.innerText.includes('Texto de prueba seleccionable')`);await capture('document',390);checks.push('open synthetic source viewer');
  await nav('Inicio');await menu();await click('Navegar a Chat');await click('Volver al chat abierto');await until(`!!document.querySelector('[aria-label="Mensaje"]')`);
  await fill('Mensaje','Borrador UIX conservado');await nav('Inicio');await size(1366);await click('Navegar a Chat');await click('Volver al chat abierto');await until(`document.querySelector('[aria-label="Mensaje"]')?.value==='Borrador UIX conservado'`);checks.push('draft survives navigation and resize');
- for(const [label,name] of [['Historial','history'],['Progreso','progress'],['Calendario','calendar-empty'],['Anuncios y convocatorias','announcements-empty'],['Publicaciones OE2','oe2-error'],['Banu al día','changes-error']]){await nav(label);for(const w of [1366,768,390])await capture(name,w);await size(1366);}
- mode='long';await nav('Inicio');await click('Navegar a Chat');await click('Volver al chat abierto');await until(`document.body.innerText.includes('palabralargasinseparadores')`);for(const w of [1366,768,390])await capture('long-abstention',w);
- mode='empty';await nav('Inicio');await menu();await click('Navegar a Chat');await click('Volver al chat abierto');await until(`document.body.innerText.includes('Bienvenida de Banu')`);for(const w of [1366,768,390])await capture('chat-empty',w);
+ for(const [label,name] of [['Historial','history'],['Progreso','progress'],['Calendario','calendar-empty'],['Anuncios y convocatorias','announcements-empty'],['Publicaciones OE2','oe2-error'],['Banu al día','changes-error']]){await nav(label);for(const w of widths)await capture(name,w);await size(1366);}
+ mode='long';await nav('Inicio');await click('Navegar a Chat');await click('Volver al chat abierto');await until(`document.body.innerText.includes('palabralargasinseparadores')`);for(const w of widths)await capture('long-abstention',w);
+ mode='empty';await nav('Inicio');await menu();await click('Navegar a Chat');await click('Volver al chat abierto');await until(`document.body.innerText.includes('Bienvenida de Banu')`);for(const w of widths)await capture('chat-empty',w);
+ if(approved&&stage==='after'){
+   const previousDraft=await evaluate(`document.querySelector('[aria-label="Mensaje"]').value`);
+   await size(390);await fill('Mensaje','a'.repeat(4001));await until(`document.body.innerText.includes('4001/4000')`);
+   assert.equal(await evaluate(`document.querySelector('[aria-label="Enviar mensaje"]').getAttribute('aria-disabled')`),'true');await capture('character-limit-exceeded',390);
+   await fill('Mensaje','a'.repeat(4000));await until(`document.body.innerText.includes('4000/4000')`);
+   assert.notEqual(await evaluate(`document.querySelector('[aria-label="Enviar mensaje"]').getAttribute('aria-disabled')`),'true');await capture('character-limit-valid',390);
+   await fill('Mensaje',previousDraft);checks.push('4001 characters disables send; 4000 remains valid; no POST and original draft restored');
+ }
  const suggestion=await evaluate(`[...document.querySelectorAll('[aria-label^="Sugerencia:"]')].find(${visible}).getAttribute('aria-label')`);await click(suggestion);assert.ok(await evaluate(`document.querySelector('[aria-label="Mensaje"]').value.length>0`));checks.push('suggestion populates draft without sending');
- await click('Enviar mensaje');await until(`document.body.innerText.includes('Banu está pensando')`);await capture('generating',390);await until(`document.body.innerText.includes('No fue posible obtener una respuesta')`);for(const w of [1366,768,390])await capture('chat-error',w);assert.equal(postCount,1);checks.push('single intercepted POST; error retains draft');
+ await click('Enviar mensaje');await until(`document.body.innerText.includes('Banu está pensando')`);await capture('generating',390);await until(`document.body.innerText.includes('No fue posible obtener una respuesta')`);for(const w of widths)await capture('chat-error',w);assert.equal(postCount,1);checks.push('single intercepted POST; error retains draft');
  await size(390);await menu();await capture('menu',390);await key('Escape');assert.equal(await evaluate(`document.activeElement.getAttribute('aria-label')`),'Menú de navegación');checks.push('Escape closes compact menu and restores focus');
  await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});await nav('Inicio');await capture('reduced-motion',390);
  if(stage==='after'){assert.equal(await evaluate(`document.getAnimations().filter(a=>a.playState==='running').length`),0);checks.push('reduced motion has no running animation');}
+ if(approved&&stage==='after'){
+   for(const state of ['content','error','loading']){
+     await nav('Historial');await size(1440);agendaMode=state;await nav('Inicio');
+     await until(state==='content'?`document.body.innerText.includes('Actividad sintética para revisión UIX-04A')`:state==='error'?`document.body.innerText.includes('No pudimos consultar la agenda')`:`!!document.querySelector('[aria-label="Cargando agenda"]')`);
+     await capture('agenda-'+state,1440);
+   }
+   await nav('Historial');await size(390);agendaMode='empty';await nav('Inicio');
+   checks.push('existing calendar preview: content, error, loading and navigation during pending GET');
+   assert.equal(await evaluate(`document.activeElement.getAttribute('data-testid')`),'core-page-heading');
+   checks.push('core navigation focuses the page heading without outlining the whole panel');
+ }
  await evaluate(`document.querySelector('[aria-label="Menú de navegación"]').focus()`);await key('Tab');assert.ok(await evaluate(`getComputedStyle(document.activeElement).outlineWidth==='3px'`));checks.push('Tab focus visible');
  await menu();await click('Cerrar sesión web');await until(`!!document.querySelector('[aria-label="Usuario"]')`);await call('Page.navigate',{url:origin+'/history'});await until(`location.pathname==='/'||!!document.querySelector('[aria-label="Usuario"]')`);checks.push('signed-out protected route blocked');
  }
+ if(brand&&stage==='after'){await until(`[...document.querySelectorAll('[data-testid="banu-avatar"] img')].some(e=>e.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})&&e.complete&&e.naturalWidth>0)`);const logos=await evaluate(`[...document.querySelectorAll('[data-testid="banu-avatar"] img')].filter(e=>e.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})).map(e=>({loaded:e.complete&&e.naturalWidth>0,fit:getComputedStyle(e).objectFit}))`);assert.ok(logos.length>0,'BANU_LOGO_MISSING');assert.ok(logos.every(l=>l.loaded&&l.fit==='contain'),'BANU_LOGO_NOT_LOADED_OR_CROPPED');checks.push('supplied Banu image loaded and contained without crop');}
  assert.equal(escapedApi,0);assert.deepEqual(errors,[]);checks.push('all API traffic intercepted; no backend requests; no runtime exceptions');
  console.log('UIX_'+stage.toUpperCase()+'_PASSED '+shots.length+' screenshots');
-}catch(e){console.log('UIX_FAILED '+e.message);process.exitCode=1;errors.push(e.message);}
+}catch(e){console.log('UIX_FAILED '+e.message);process.exitCode=1;errors.push(e.message);if(brand){try{await writeFile(path.join(run,'failure.json'),JSON.stringify(await evaluate("({route:location.pathname,text:document.body.innerText.slice(0,800)})"),null,2));}catch{}}}
 finally{await writeFile(path.join(run,'report.json'),JSON.stringify({stage,scope:'UI with 100% synthetic browser-intercepted API; no backend validation',shots,checks,errors,postCount,escapedApi},null,2));if(socket?.readyState===WebSocket.OPEN){try{await call('Browser.close');}catch{}socket.close();}if(browser.exitCode===null)browser.kill();console.log('EVIDENCE '+run);}

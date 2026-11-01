@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors, motion } from '@/ui/tokens';
+import { BanuAvatar } from '@/components/banu-avatar';
 
 /** Subscribe as well as read: a preference change takes effect without reload. */
 export function useMotionReduced() {
@@ -73,28 +74,36 @@ interface PressableScaleProps extends PressableProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** Accessible Pressable; subtle, interruptible press feedback. */
-export function PressableScale({ children, scaleTo = 0.99, style, ...rest }: PressableScaleProps) {
+/** Shared UI-thread feedback; no work when disabled by the motion preference. */
+export function usePressFeedback(scaleTo=0.99,enabled=true) {
   const reduced = useMotionReduced();
   const scale = useSharedValue(1);
   useEffect(() => {
-    if (reduced) { cancelAnimation(scale); scale.set(1); }
+    if (reduced||!enabled) { cancelAnimation(scale); scale.set(1); }
     return () => cancelAnimation(scale);
-  }, [reduced, scale]);
+  }, [reduced, enabled, scale]);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.get() }],
   }));
+  const pressIn=()=>scale.set(withTiming(reduced||!enabled ? 1 : scaleTo, { duration: motion.press, easing: Easing.bezier(0.23, 1, 0.32, 1), reduceMotion: ReduceMotion.System }));
+  const pressOut=()=>scale.set(withTiming(1, { duration: motion.press, reduceMotion: ReduceMotion.System }));
+  return {animatedStyle,pressIn,pressOut};
+}
+
+/** Accessible Pressable; subtle, interruptible press feedback. */
+export function PressableScale({ children, scaleTo = 0.99, style, ...rest }: PressableScaleProps) {
+  const {animatedStyle,pressIn,pressOut}=usePressFeedback(scaleTo,!rest.disabled);
 
   return (
     <Pressable
       {...rest}
       style={styles.stretch}
       onPressIn={(event) => {
-        scale.set(withTiming(reduced ? 1 : scaleTo, { duration: motion.press, easing: Easing.bezier(0.23, 1, 0.32, 1), reduceMotion: ReduceMotion.System }));
+        pressIn();
         rest.onPressIn?.(event);
       }}
       onPressOut={(event) => {
-        scale.set(withTiming(1, { duration: motion.press, reduceMotion: ReduceMotion.System }));
+        pressOut();
         rest.onPressOut?.(event);
       }}>
       <Animated.View style={[styles.stretch, animatedStyle, style]}>{children}</Animated.View>
@@ -140,6 +149,7 @@ function TypingDot({ index, color, animate }: { index: number; color: string; an
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 0.4 + 0.6 * lift.get(),
+    transform: [{scale: 0.85 + 0.15 * lift.get()}],
   }));
 
   return <Animated.View style={[styles.typingDot, { backgroundColor: color }, animatedStyle]} />;
@@ -227,51 +237,16 @@ export function MonogramAvatar({ alias, size = 44 }: { alias: string; size?: num
   );
 }
 
-/** Marca BanuChat: chispa dentro de un cuadrado redondeado. */
-export function BrandMark({ size = 40 }: { size?: number }) {
-  return (
-    <View
-      style={[
-        styles.brandMark,
-        {
-          width: size,
-          height: size,
-          borderRadius: size * 0.3,
-        },
-      ]}>
-      <View
-        style={{
-          width: size * 0.42,
-          height: size * 0.42,
-          borderRadius: size * 0.11,
-          backgroundColor: colors.white,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
-      <View
-        style={{
-          position: 'absolute',
-          width: size * 0.2,
-          height: size * 0.2,
-          borderRadius: size * 0.05,
-          backgroundColor: colors.accent,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
-    </View>
-  );
+/** Existing brand entry point, now backed by the exact supplied Banu artwork. */
+export function BrandMark({ size = 40, variant='color', framed=true }: { size?: number;variant?:'color'|'light'|'dark';framed?:boolean }) {
+  return <BanuAvatar size={size} variant={variant} framed={framed}/>;
 }
 
 const styles = StyleSheet.create({
   stretch: { width: '100%' },
-  typingRow: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 20 },
-  typingDot: { width: 7, height: 7, borderRadius: 4 },
+  typingRow: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 24 },
+  typingDot: { width: 6, height: 6, borderRadius: 3 },
   track: { width: '100%', overflow: 'hidden' },
   fill: { height: '100%', width: '100%', transformOrigin: 'left center' },
   avatar: { alignItems: 'center', justifyContent: 'center' },
-  brandMark: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.accent,
-  },
 });

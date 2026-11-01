@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,7 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {Alert} from '@/ui/confirmation';
 
 import { createConversation, getConversation } from '@/api/conversations';
@@ -27,7 +28,8 @@ import { useSession } from '@/session/session-context';
 import {useChatState} from '@/session/use-chat-state';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, BubbleIn, FadeIn, TypingIndicator, useMotionReduced } from '@/ui/animated';
-import { colors, layout, radii, spacing, typography, textStyles } from '@/ui/tokens';
+import {BanuPageHeading,BanuWordmark,NativeCoreNavigation} from '@/components/banu-core';
+import { colors, layout, radii, spacing, typography, textStyles, shadows } from '@/ui/tokens';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
 type SendError = 'http' | 'conflict' | 'uncertain' | 'invalid_response' | null;
@@ -60,6 +62,7 @@ const SUGGESTIONS = [
   '¿Qué puedes hacer?',
 ];
 
+const RESPONSE_NOTICE='Las respuestas pueden ser incompletas. Revisa las fuentes.';
 const CHARACTER_LIMIT = 4000;
 const CHARACTER_COUNTER_THRESHOLD = 3200;
 
@@ -72,7 +75,10 @@ function singleParam(value: string | string[] | undefined): string | null {
 
 export default function ChatScreen() {
   const reducedMotion = useMotionReduced();
+  const insets=useSafeAreaInsets();
   const [inputFocused, setInputFocused] = useState(false);
+  const [keyboardVisible,setKeyboardVisible]=useState(false);
+  useEffect(()=>{if(Platform.OS==='web')return;const show=Keyboard.addListener('keyboardDidShow',()=>setKeyboardVisible(true)),hide=Keyboard.addListener('keyboardDidHide',()=>setKeyboardVisible(false));return()=>{show.remove();hide.remove();};},[]);
   const router = useRouter();
   const { activeProfile } = useSession();
   const params = useLocalSearchParams<{ conversation_id?: string | string[] }>();
@@ -172,7 +178,7 @@ export default function ChatScreen() {
           <BrandMark size={52} />
           <Text style={styles.invalidTitle}>No fue posible abrir esta conversación</Text>
           <Text style={styles.invalidText}>Vuelve al inicio para crear una conversación válida.</Text>
-          <AppButton label="Volver al inicio" onPress={returnHome} style={styles.invalidButton} />
+          <AppButton tone="banu" label="Volver al inicio" onPress={returnHome} style={styles.invalidButton} />
         </View>
       </SafeAreaView>
     );
@@ -183,6 +189,7 @@ export default function ChatScreen() {
   const isContentValid = content.trim().length > 0 && characterCount <= CHARACTER_LIMIT;
   const isConversationLocked =
     conversationState !== 'ready' || sendError === 'conflict' || sendError === 'uncertain' || sendError === 'invalid_response';
+  const latestAnswer=messages.filter((message):message is SentAssistantMessage=>message.role==='assistant').at(-1);
   const showEmptyState = conversationState === 'ready' && messages.length === 0;
 
   async function submitMessage(text?: string) {
@@ -332,18 +339,23 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="core-chat-screen" style={styles.safeArea}>
+      {Platform.OS!=='web'&&!keyboardVisible&&<View style={styles.nativeTop}><BanuWordmark compact/></View>}
+      {!keyboardVisible&&(Platform.OS==='web'?<BanuPageHeading eyebrow="CONVERSA CON BANU" title="Tu espacio para preguntar" subtitle="Resuelve tus dudas y explora las fuentes." action={<AppButton tone="banu" label="Nuevo chat" accessibilityLabel="Nueva conversación desde chat" variant="secondary" onPress={()=>void openNewConversation()} loading={isStartingNew} disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/>}/>:<View style={styles.nativeToolbar}><Text accessibilityRole="header" style={styles.nativeToolbarTitle}>Conversa con Banu</Text><AppButton tone="banu" label="Nuevo chat" accessibilityLabel="Nueva conversación desde chat" variant="secondary" onPress={()=>void openNewConversation()} loading={isStartingNew} disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/></View>)}
+      {newConversationError&&sendError!=='conflict'&&<Text accessibilityRole="alert" style={styles.errorText}>No fue posible crear otra conversación. Puedes intentarlo de nuevo.</Text>}
+      <View testID="chat-layout" style={styles.chatLayout}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'web' ? 'height' : 'padding'}
+        keyboardVerticalOffset={Platform.OS==='web'?0:insets.top+spacing.lg}
         style={styles.keyboardView}>
         <View testID="chat-header" style={styles.header}>
           <View style={styles.headerIdentity}>
             <View style={styles.banuAvatar}>
-              <BrandMark size={38} />
+              <BrandMark size={Platform.OS==='web'?38:32} framed={false} />
             </View>
             <View style={styles.headerCopy}>
               <Text style={styles.headerTitle}>Banu</Text>
-              <Text style={styles.headerSubtitle}>Tu asistente BanuChat</Text>
+              <Text style={styles.headerSubtitle}>Tu compañero académico</Text>
             </View>
           </View>
           <Pressable
@@ -362,6 +374,7 @@ export default function ChatScreen() {
 
         <ScrollView
           ref={scrollViewRef}
+          style={styles.messageScroll}
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: !reducedMotion })}>
@@ -410,7 +423,7 @@ export default function ChatScreen() {
                 <FadeIn>
                   <View style={styles.emptyHero}>
                     <View style={styles.emptyMarkHalo}>
-                      <BrandMark size={48} />
+                      <BrandMark size={72} framed={false} />
                     </View>
                     <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
                     <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo responder sobre documentación CCD, abrir sus fuentes y consultar tu historial. Cuando estén disponibles, también puedes explorar progreso, calendario y novedades de demostración. ¿Qué quieres consultar?' : CHAT_INTRODUCTION}</Text>
@@ -418,9 +431,10 @@ export default function ChatScreen() {
                 </FadeIn>
                 <View testID="chat-suggestions" style={styles.suggestionGrid}>
                   {(isCcdKnowledge() ? ['¿Cuáles son los cursos de Competencias Digitales?', '¿Qué son las pruebas diagnósticas?', '¿Cuál es el correo de contacto del CCD?', '¿Qué puedes hacer?'] : SUGGESTIONS).map((suggestion, index) => (
-                    <FadeIn key={suggestion} delay={140 + index * 80}>
+                    <FadeIn key={suggestion} delay={140 + index * 80} style={styles.suggestionItem}>
                       <Pressable
                         accessibilityRole="button"
+                        testID="chat-suggestion"
                         accessibilityLabel={`Sugerencia: ${suggestion}`}
                         accessibilityState={{ disabled: conversationState !== 'ready' }}
                         disabled={conversationState !== 'ready'}
@@ -446,10 +460,8 @@ export default function ChatScreen() {
                 </BubbleIn>
               ) : (
                 <BubbleIn key={message.message_id} style={styles.assistantRow}>
-                  <View style={styles.assistantAvatar}>
-                    <BrandMark size={24} /><Text style={styles.authorLabel}>Banu</Text>
-                  </View>
-                  <View testID="chat-assistant" style={styles.assistantBody}>
+                  <View style={styles.assistantAvatar}><BrandMark size={30} framed={false}/></View>
+                  <View testID="chat-assistant" style={styles.assistantBody}><Text style={styles.authorLabel}>Banu</Text>
                     <Text selectable testID="chat-message" style={styles.assistantText}>{message.content}</Text>
 
                     {message.insufficient_evidence && (
@@ -470,10 +482,10 @@ export default function ChatScreen() {
             {conversationState === 'ready' && isSending && (
               <BubbleIn style={styles.assistantRow}>
                 <View style={styles.assistantAvatar}>
-                  <BrandMark size={24} /><Text style={styles.authorLabel}>Banu</Text>
+                  <BrandMark size={30} framed={false}/><Text style={styles.authorLabel}>Banu</Text>
                 </View>
                 <View style={styles.thinkingBubble}>
-                  <TypingIndicator color={colors.accent} />
+                  <TypingIndicator color={colors.banuMagenta} />
                   <Text accessibilityLiveRegion="polite" style={styles.thinkingText}>
                     Banu está pensando...
                   </Text>
@@ -578,8 +590,9 @@ export default function ChatScreen() {
             </View>
           )}
 
-          <View testID="chat-composer-row" style={styles.composerRow}>
-            <View testID="chat-input-shell" style={[styles.inputShell, inputFocused && styles.inputFocused]}>
+          <View testID="chat-composer-row" style={[styles.composerRow,inputFocused&&styles.composerFocused]}>
+            <Text style={styles.composerLabel}>Tu pregunta</Text>
+            <View testID="chat-input-shell" style={[styles.inputShell,keyboardVisible&&styles.inputWithKeyboard, inputFocused && styles.inputFocused]}>
               <TextInput
                 accessibilityLabel="Mensaje"
                 editable={!isSending && !isConversationLocked}
@@ -590,12 +603,13 @@ export default function ChatScreen() {
                   setContent(value);
                   if (sendError === 'http') setSendError(null);
                 }}
-                placeholder="Escríbele a Banu..."
-                placeholderTextColor={colors.muted}
-                style={[styles.input, isConversationLocked && styles.inputLocked]}
+                placeholder="¿Qué te gustaría saber?"
+                placeholderTextColor={colors.banuMuted}
+                style={[styles.input,keyboardVisible&&styles.inputWithKeyboard, isConversationLocked && styles.inputLocked]}
                 value={content}
               />
             </View>
+            <View style={styles.composerFooter}><Text style={styles.composerInstruction}>{Platform.OS!=='web'?RESPONSE_NOTICE:'Pulsa enviar para preguntar'}</Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Enviar mensaje"
@@ -610,10 +624,10 @@ export default function ChatScreen() {
               <Text aria-hidden style={styles.sendButtonGlyph}>
                 ↑
               </Text>
-            </Pressable>
+            </Pressable></View>
           </View>
 
-          <Text testID="chat-composer-hint" style={styles.composerHint}>Las respuestas pueden ser incompletas. Revisa las fuentes.</Text>
+          {Platform.OS==='web'&&<Text testID="chat-composer-hint" style={styles.composerHint}>{RESPONSE_NOTICE}</Text>}
           {characterCount > CHARACTER_COUNTER_THRESHOLD && (
             <Text
               accessibilityLabel={`${characterCount} de ${CHARACTER_LIMIT} caracteres`}
@@ -626,13 +640,19 @@ export default function ChatScreen() {
           )}
         </View>
       </KeyboardAvoidingView>
+      {Platform.OS==='web'&&<View testID="chat-context" style={styles.context}><ScrollView contentContainerStyle={styles.contextContent}><Text accessibilityRole="header" style={styles.contextTitle}>Detrás de la respuesta</Text><Text style={styles.contextCopy}>Un lugar para consultar las referencias de esta conversación.</Text>{latestAnswer&&latestAnswer.citations.length>0?<ChatSources citations={latestAnswer.citations} context/>:<Text style={styles.contextCaption}>{conversationState==='loading'?'Cargando conversación…':'Las fuentes aparecerán aquí cuando una respuesta incluya referencias.'}</Text>}<Text style={styles.contextCaption}>Consulta la procedencia y el alcance de cada fuente. La disponibilidad de un documento no implica aval institucional.</Text></ScrollView></View>}
+      </View>
+      <NativeCoreNavigation active="chat" onHome={returnHome} onChat={()=>{}} busy={isSending}/>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  keyboardView: { flex: 1 },
+  safeArea:{flex:1,minHeight:0,backgroundColor:colors.banuCanvas,paddingHorizontal:spacing.lg,paddingTop:spacing.lg,gap:spacing.lg},
+  nativeToolbar:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:spacing.sm},nativeToolbarTitle:{flex:1,minWidth:0,fontSize:17,lineHeight:24,fontWeight:'600',color:colors.banuInk},
+  nativeTop:{paddingBottom:spacing.xs},chatLayout:{width:'100%',flex:1,minHeight:0,flexDirection:'row',gap:spacing.lg},
+  keyboardView:{flex:1,width:Platform.OS==='web'?undefined:'100%',minWidth:0,minHeight:0,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,overflow:'hidden',...shadows.banuPanel},
+  newChatButton:{minHeight:48,paddingHorizontal:spacing.sm},context:{display:'none',width:244,alignSelf:'flex-start',maxHeight:'100%',borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,...shadows.banuPanel},contextContent:{padding:spacing.lg,gap:spacing.md},contextTitle:{fontSize:16,lineHeight:24,fontWeight:'600',color:colors.banuInk},contextCopy:{fontSize:13,lineHeight:22,color:colors.banuMuted},contextCaption:{fontSize:12,lineHeight:20,color:colors.banuMuted,backgroundColor:colors.banuCanvas,padding:spacing.sm,borderRadius:radii.sm},
   invalidContainer: {
     flex: 1,
     width: '100%',
@@ -644,15 +664,15 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
   invalidTitle: {
-    color: colors.ink,
+    color: colors.banuInk,
     fontSize: typography.heading,
     lineHeight: 29,
-    fontWeight: '800',
+    fontWeight: '600',
     letterSpacing: -0.4,
     textAlign: 'center',
   },
   invalidText: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.body,
     lineHeight: 23,
     textAlign: 'center',
@@ -660,34 +680,34 @@ const styles = StyleSheet.create({
   invalidButton: { minWidth: 180, marginTop: spacing.sm },
   header: {
     width: '100%',
-    maxWidth: layout.maxReadingWidth,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+    paddingHorizontal: Platform.OS==='web'?spacing.lg:spacing.sm,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: colors.banuBorder,
   },
-  headerIdentity: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flex: 1 },
+  headerIdentity: { flexDirection: 'row', alignItems: 'center', gap: Platform.OS==='web'?spacing.sm:spacing.xs, flex: 1, minWidth:0 },
   banuAvatar: { position: 'relative' },
   headerCopy: { flex: 1 },
-  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: '800', letterSpacing: -0.3 },
-  headerSubtitle: { color: colors.muted, fontSize: typography.caption, lineHeight: 17 },
+  headerTitle: { color: colors.banuInk, fontSize: 15, fontWeight: '600', letterSpacing: -0.3 },
+  headerSubtitle: { color: colors.banuMuted, fontSize: 12, lineHeight: 18 },
   headerAction: {
     minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     borderRadius: 19,
     borderWidth: 1,
-    borderColor: colors.borderStrong,
+    borderColor: colors.banuBorder,
     backgroundColor: colors.surface,
   },
-  headerActionText: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
+  headerActionText: { color: colors.banuInk, fontSize: typography.small, fontWeight: '700' },
   headerActionDisabled: { opacity: 0.5 },
   pressed: { opacity: 0.7 },
+  messageScroll:{flex:1,minHeight:0},
   messageList: { flexGrow: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.lg },
   messageColumn: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', gap: spacing.md },
   conversationStateCard: {
@@ -699,19 +719,19 @@ const styles = StyleSheet.create({
     marginVertical: spacing.xl,
     padding: spacing.xl,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.banuBorder,
     borderRadius: radii.xl,
     backgroundColor: colors.surface,
   },
   conversationStateTitle: {
-    color: colors.ink,
+    color: colors.banuInk,
     fontSize: typography.body,
     lineHeight: 23,
     fontWeight: '800',
     textAlign: 'center',
   },
   conversationStateText: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.small,
     lineHeight: 21,
     textAlign: 'center',
@@ -720,34 +740,37 @@ const styles = StyleSheet.create({
   emptyState: { gap: spacing.xl, paddingVertical: spacing.md },
   emptyHero: { alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg },
   emptyMarkHalo: {
-    width: 72,
-    height: 72,
+    width: 80,
+    height: 80,
     borderRadius: radii.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accentSoft,
+    backgroundColor: 'transparent',
     marginBottom: spacing.sm,
   },
-  emptyTitle: { color: colors.ink, fontSize: typography.heading, fontWeight: '800', letterSpacing: -0.4 },
+  emptyTitle: { color: colors.banuInk, fontSize: typography.heading, fontWeight: '800', letterSpacing: -0.4 },
   emptyBody: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.body,
     lineHeight: 24,
     textAlign: 'center',
   },
   suggestionGrid: { gap: spacing.xs },
+  suggestionItem:{maxWidth:'100%',minWidth:0,flexShrink:1},
   suggestionChip: {
+    maxWidth:'100%',minWidth:0,flexShrink:1,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     minHeight: layout.minTouchTarget,
     justifyContent: 'center',
     borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: colors.banuBorder,
+    backgroundColor: colors.banuCanvas,
+    ...shadows.raised,
   },
   suggestionChipPressed: { opacity: 0.7 },
-  suggestionText: { color: colors.ink, fontSize: typography.small, fontWeight: '600' },
+  suggestionText: { flexShrink:1, color: colors.banuInk, fontSize: typography.small, fontWeight: '600' },
   userRow: { alignItems: 'flex-end' },
   userBubble: {
     maxWidth: '85%',
@@ -755,14 +778,14 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radii.lg,
     borderBottomRightRadius: radii.sm,
-    backgroundColor: colors.brand,
+    backgroundColor: colors.banuSoft,
   },
-  userText: { color: colors.white, fontSize: typography.body, lineHeight: 23 },
-  assistantRow: { alignItems: 'flex-start', gap: spacing.xs, minWidth: 0 },
+  userText: { color: colors.banuMagentaStrong, fontSize: typography.body, lineHeight: 23 },
+  assistantRow: { flexDirection:'row',alignItems: 'flex-start', gap: spacing.sm, minWidth: 0 },
   assistantAvatar: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  authorLabel: { color: colors.textSecondary, fontSize: typography.meta, fontWeight: '600' },
-  assistantBody: { width: '100%', minWidth: 0, gap: spacing.sm, padding: spacing.md, borderWidth: 1, borderColor: colors.border, borderRadius: radii.lg, backgroundColor: colors.surface },
-  assistantText: { color: colors.ink, ...textStyles.body },
+  authorLabel: { color: colors.banuInk, fontSize: typography.meta, fontWeight: '600' },
+  assistantBody: { flex:1, minWidth: 0, gap: spacing.sm, backgroundColor: colors.surface },
+  assistantText: { color: colors.banuInk, ...textStyles.body },
   thinkingBubble: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -772,10 +795,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radii.lg,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    borderColor: colors.banuBorder,
+    backgroundColor: colors.banuSoft,
   },
-  thinkingText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
+  thinkingText: { color: colors.banuSecondary, fontSize: typography.small, fontWeight: '600' },
   evidenceWarning: {
     gap: spacing.xxs,
     marginTop: spacing.xs,
@@ -786,68 +809,53 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warningSoft,
   },
   evidenceWarningTitle: { color: colors.warning, fontSize: typography.small, fontWeight: '800' },
-  evidenceWarningText: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  evidenceWarningText: { color: colors.banuSecondary, fontSize: 13, lineHeight: 19 },
   composer: {
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
     paddingBottom: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.banuBorder,
     backgroundColor: colors.surface,
   },
-  composerRow: {
-    width: '100%',
-    maxWidth: layout.maxReadingWidth,
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: spacing.xs,
-  },
-  inputShell: {
-    flex: 1,
-    minHeight: 50,
-    maxHeight: 120,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    borderRadius: radii.md,
-    backgroundColor: colors.surface,
-  },
-  inputFocused: { borderColor: colors.accent },
+  composerRow:{width:'100%',maxWidth:layout.maxReadingWidth,alignSelf:'center',gap:spacing.xxs,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.md,padding:spacing.sm,backgroundColor:colors.surface,...shadows.banuInset},
+  composerFocused:{borderColor:colors.banuMagenta},composerLabel:{fontSize:12,lineHeight:18,fontWeight:'600',color:colors.banuMuted},composerFooter:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',gap:spacing.xs},composerInstruction:{flex:1,fontSize:11,lineHeight:17,color:colors.banuMuted},
+  inputShell:{width:'100%',minWidth:0,minHeight:48,maxHeight:120,justifyContent:'center'},
+  inputWithKeyboard:{maxHeight:72},
+  inputFocused: { borderColor: colors.banuMagenta },
   input: {
-    color: colors.ink,
+    width:'100%',
+    color: colors.banuInk,
     fontSize: typography.body,
     lineHeight: 24,
     minHeight: layout.minTouchTarget,
     maxHeight: 108,
     textAlignVertical: 'center',
   },
-  inputLocked: { color: colors.muted },
+  inputLocked: { color: colors.banuMuted },
   sendButton: {
     width: 50,
     height: 50,
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accent,
+    backgroundColor: colors.banuMagenta,
   },
-  sendButtonDisabled: { backgroundColor: colors.borderStrong },
+  sendButtonDisabled: { backgroundColor: colors.banuBorder },
   sendButtonPressed: { opacity: 0.75 },
   sendButtonGlyph: { color: colors.white, fontSize: 22, fontWeight: '800', marginTop: -2 },
   characterCount: {
     width: '100%',
     maxWidth: layout.maxReadingWidth,
     alignSelf: 'center',
-    color: colors.muted,
+    color: colors.banuMuted,
     fontSize: typography.caption,
     textAlign: 'right',
     paddingRight: spacing.sm,
   },
   limitExceeded: { color: colors.error, fontWeight: '800' },
-  composerHint: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', color: colors.muted, fontSize: typography.caption, lineHeight: 18, textAlign: 'center' },
+  composerHint: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', color: colors.banuMuted, fontSize: typography.caption, lineHeight: 18, textAlign: 'center' },
   errorBanner: {
     width: '100%',
     maxWidth: layout.maxReadingWidth,
@@ -874,7 +882,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   uncertainText: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.small,
     lineHeight: 20,
     textAlign: 'center',

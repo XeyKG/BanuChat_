@@ -134,7 +134,9 @@ export async function runWeb02(b:Browser){
   for(const [label,path]of [['Inicio','/home'],['Progreso','/progress'],['Calendario','/calendar'],['Anuncios y convocatorias','/announcements'],['Publicaciones OE2','/oe2'],['Banu al día','/oe2-changes']]){
    await nav(label,path);await pause(180);const shot=await b.snapshot('responsive-'+width+'-'+path.slice(1));assert.equal(shot.overflow,false,'ROOT_OVERFLOW_'+width+'_'+path);
    await menu();assert.equal(await b.evaluate(`(()=>{const v=${visible};return [...document.querySelectorAll('[aria-current="page"]')].filter(v).length})()`),1,'ACTIVE_SECTION');
-   if(width<1024){await keyboard('Escape');assert.equal(await b.evaluate(`document.querySelector('[aria-label="Menú de navegación"]').getAttribute('aria-expanded')`),'false');assert.equal(await b.evaluate(`document.activeElement.getAttribute('aria-label')`),'Menú de navegación');}
+   const compactMenu=await b.evaluate(`(()=>{const v=${visible};return [...document.querySelectorAll('[aria-label="Menú de navegación"]')].some(v)})()`);
+   if(compactMenu){await keyboard('Escape');assert.equal(await b.evaluate(`document.querySelector('[aria-label="Menú de navegación"]').getAttribute('aria-expanded')`),'false');assert.equal(await b.evaluate(`document.activeElement.getAttribute('aria-label')`),'Menú de navegación');}
+   else assert.equal(await b.evaluate(`(()=>{const v=${visible};return [...document.querySelectorAll('[aria-label="Navegación BanuChat"]')].some(v)})()`),true,'DESKTOP_NAVIGATION_VISIBLE');
   }
  }
  await menu();await b.evaluate(`document.querySelector('[aria-label="Navegar a Progreso"]').focus()`);await keyboard('Enter');await b.until(`location.pathname==='/progress'`);await pause(120);assert.equal(await b.evaluate(`document.activeElement.id`),'web-main');

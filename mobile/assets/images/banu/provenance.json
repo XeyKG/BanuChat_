@@ -1,0 +1,12 @@
+{
+  "provided_for": "UIX-03",
+  "source": "Archivos aportados por el propietario del proyecto",
+  "transformations": "Ninguna; copias byte a byte, sin recorte, recolor ni redibujo",
+  "width": 1254,
+  "height": 1254,
+  "assets": [
+    {"file": "banu-color.png", "original": "Banuchat.png", "sha256": "07bcc4dd2d7e49b1437f0f3b6defb830299d435a9b71930d931f2bde90134787"},
+    {"file": "banu-white.png", "original": "White owl logo with transparent background-4.png", "sha256": "91fbb2e4b1d6bc3a2696edf1b64b8885c5bddb796b42a22ccfc055a002ef770b"},
+    {"file": "banu-black.png", "original": "Black owl logo with transparent background-3.png", "sha256": "6d7d5d5aa6123e49e8d4b28dba3f8a7634c3c925421f3a6d9293db836dc51e43"}
+  ]
+}

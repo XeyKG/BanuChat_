@@ -60,21 +60,21 @@ function hasOpenableDocument(citation: Citation): citation is Citation & {
   );
 }
 
-export function ChatSources({ citations }: { citations: Citation[] }) {
+export function ChatSources({ citations,context=false }: { citations: Citation[];context?:boolean }) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const sourceCount = citations.length;
 
   return (
     <View style={styles.container}>
-      <Pressable
+      {!context&&<Pressable
         accessibilityLabel={`${isExpanded ? 'Ocultar' : 'Mostrar'} ${sourceCount} fuentes`}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}
         onPress={() => setIsExpanded((current) => !current)}
         style={({ pressed }) => [styles.toggle, pressed && styles.pressed]}>
         <View style={styles.toggleLeft}>
-          <DocGlyph color={colors.accent} size={15} />
+          <DocGlyph color={colors.banuMagenta} size={15} />
           <Text style={styles.toggleText}>
             {sourceCount === 1 ? '1 fuente' : `${sourceCount} fuentes`}
           </Text>
@@ -82,9 +82,9 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
         <Text aria-hidden style={styles.toggleSymbol}>
           {isExpanded ? '−' : '+'}
         </Text>
-      </Pressable>
+      </Pressable>}
 
-      {isExpanded && (
+      {(context||isExpanded) && (
         <FadeIn><View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} testID="chat-sources" style={styles.list}>
           {citations.map((citation) => {
             const detail = sourceDetail(citation);
@@ -141,14 +141,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: colors.accentSoftStrong,
-    backgroundColor: colors.accentSoft,
+    borderColor: colors.banuBorder,
+    backgroundColor: colors.banuSoft,
     alignSelf: 'flex-start',
     paddingRight: spacing.md,
   },
   toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  toggleText: { color: colors.accentStrong, fontSize: 13, fontWeight: '700' },
-  toggleSymbol: { color: colors.accentStrong, fontSize: 16, fontWeight: '700', marginLeft: spacing.xs },
+  toggleText: { color: colors.banuMagentaStrong, fontSize: 13, fontWeight: '700' },
+  toggleSymbol: { color: colors.banuMagentaStrong, fontSize: 16, fontWeight: '700', marginLeft: spacing.xs },
   pressed: { opacity: 0.7 },
   list: { gap: spacing.xs, marginTop: spacing.xs },
   source: {
@@ -158,8 +158,8 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
     borderRadius: radii.md,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceSoft,
+    borderColor: colors.banuBorder,
+    backgroundColor: colors.banuCanvas,
   },
   sourceIndexBadge: {
     width: 22,
@@ -167,23 +167,23 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.banuSoft,
   },
   sourceIndex: {
-    color: colors.accentStrong,
+    color: colors.banuMagentaStrong,
     fontSize: typography.caption,
     fontWeight: '800',
   },
-  sourceText: { flex: 1, gap: 2 },
+  sourceText: { flex: 1, minWidth:0, gap: 2 },
   sourceKind: {
-    color: colors.muted,
+    color: colors.banuMuted,
     fontSize: typography.caption,
     fontWeight: '600',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
   },
-  sourceLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700', lineHeight: 20 },
-  sourceDetail: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  sourceLabel: { color: colors.banuInk, fontSize: typography.small, fontWeight: '700', lineHeight: 20 },
+  sourceDetail: { color: colors.banuSecondary, fontSize: 13, lineHeight: 19 },
   openDocument: {
     minHeight: layout.minTouchTarget,
     alignSelf: 'flex-start',
@@ -192,11 +192,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: radii.sm,
     borderWidth: 1,
-    borderColor: colors.accent,
+    borderColor: colors.banuMagenta,
     backgroundColor: colors.surface,
   },
   openDocumentText: {
-    color: colors.accentStrong,
+    color: colors.banuMagentaStrong,
     fontSize: typography.small,
     fontWeight: '800',
   },

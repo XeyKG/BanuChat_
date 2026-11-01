@@ -4,6 +4,21 @@ export const colors = {
   surface: '#FFFFFF',
   surfaceSoft: '#F8F9FC',
 
+  // UIX-04A approved brand, adopted by the three core screens only.
+  // Existing secondary screens retain their validated UIX-02 tokens.
+  banuInk: '#24283C',
+  banuNavy: '#252D4B',
+  banuMagenta: '#9B326F',
+  banuMagentaStrong: '#80265A',
+  banuSoft: '#F7EDF3',
+  banuCanvas: '#FAF9FB',
+  banuBorder: '#E9E7EC',
+  banuMuted: '#686A79',
+  banuSecondary: '#5E6171',
+  banuOnNavy: '#D2D3DF',
+  banuOnNavyAccent: '#E2BFD3',
+  banuOrange: '#BC6412',
+
   // Bordes
   border: '#E7E9F0',
   borderStrong: '#D4D8E3',
@@ -97,6 +112,18 @@ export const layout = {
 } as const;
 
 export const shadows = {
+  banuPanel: {boxShadow:'0 2px 5px rgba(38,32,62,0.025), 0 14px 34px rgba(43,33,66,0.065), inset 0 1px 0 rgba(255,255,255,0.9)'},
+  banuControl: {boxShadow:'0 3px 0 rgba(60,22,52,0.07), 0 8px 20px rgba(116,31,84,0.08), inset 0 1px 0 rgba(255,255,255,0.2)'},
+  banuInset: {boxShadow:'inset 0 2px 6px rgba(51,35,65,0.045), inset 0 1px 0 rgba(255,255,255,0.9)'},
+  banuHero: {boxShadow:'0 19px 40px rgba(38,34,71,0.13), inset 0 1px 0 rgba(255,255,255,0.09)'},
+  // Static light/dark relief for controls and short, highlighted surfaces only.
+  // Borders and focus remain visible independently of these shadows.
+  raised: {
+    boxShadow: '-3px -3px 8px rgba(255, 255, 255, 0.9), 3px 4px 10px rgba(27, 35, 80, 0.08)',
+  },
+  inset: {
+    boxShadow: 'inset 2px 2px 4px rgba(27, 35, 80, 0.06), inset -2px -2px 4px rgba(255, 255, 255, 0.8)',
+  },
   soft: {
     boxShadow: '0 2px 6px rgba(16, 18, 42, 0.04)',
   },
@@ -107,3 +134,5 @@ export const shadows = {
     boxShadow: '0 8px 24px rgba(16, 18, 42, 0.12)',
   },
 } as const;
+
+export const banuHeroGradient = 'linear-gradient(134deg, #252D4B 15%, #30314F 77%, #3C2A4E 100%)';

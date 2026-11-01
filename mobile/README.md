@@ -1,5 +1,35 @@
 # BanuChat Mobile
 
+UIX-04A reproduce Login, Home y Chat desde `BanuChat_mockup_refinado_UIX04.html`
+aprobado: magenta Banu, hero navy con mascota original, accesos en dos columnas,
+agenda de REST en escritorio y chat continuo con compositor y fuentes. Extiende
+los tokens existentes sin cambiar los colores de contenido de las pantallas
+secundarias. El login sigue siendo real; no integra el chatbot simulado del HTML.
+Véase el [checkpoint UIX-04A](../docs/transition/CHECKPOINT-UIX-04A.md).
+
+Comparación: `node scripts/check-uix01.mjs before --uix04a` **antes** de modificar
+la base; ese baseline se protege contra sobrescritura. Después de exportar,
+`node scripts/check-uix01.mjs after --uix04a` y
+`node scripts/compare-uix01.mjs --uix04a`. Salida `.expo/uix04a/`, a
+1440/820/390/360 × 900; incluye estados adicionales de agenda. La galería contra
+el mockup usa `reference-render/` generado localmente desde el ZIP aprobado,
+sin recursos HTTP: `node scripts/capture-uix04a-reference.mjs [ruta-al-HTML]`
+verifica el SHA-256 aprobado antes de renderizar. Las capturas de fixtures y las del HTML no sustituyen WEB-02
+contra la API real ni la validación física Android. No inicia UIX-04B.
+
+UIX-03 incorpora los tres PNG de Banu aportados por el propietario, sin redibujo,
+recorte ni recolor. `BanuAvatar` usa expo-image ya instalado; `BrandMark` conserva
+su entrada compartida. La identidad aparece en login, Home, chat y estados vacíos.
+El relieve sutil queda en controles y accesos, con lectura plana para respuestas
+y documentos; movimiento breve con reduced motion. Procedencia y hashes en
+`assets/images/banu/provenance.json` y resultados en el
+[checkpoint UIX-03](../docs/transition/CHECKPOINT-UIX-03.md).
+Capturas nuevas: `node scripts/check-uix01.mjs before --brand` sobre la base,
+`node scripts/check-uix01.mjs after --brand` sobre la exportación modificada y
+`node scripts/compare-uix01.mjs --brand`. Salida separada `.expo/uix03/`, sin
+sobrescribir UIX-01/02; API interceptada con datos sintéticos. WEB-02 real permanece
+como regresión funcional independiente.
+
 UIX-02 extiende la identidad de UIX-01 a historial, progreso, calendario,
 anuncios, OE2, Banu al día, visor y notificaciones. Consolida superficies,
 filtros, estados y procedencia en `src/components/secondary-ui.tsx`, con rejillas
