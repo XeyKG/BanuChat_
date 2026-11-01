@@ -1,5 +1,18 @@
 # BanuChat Mobile
 
+UIX-02 extiende la identidad de UIX-01 a historial, progreso, calendario,
+anuncios, OE2, Banu al día, visor y notificaciones. Consolida superficies,
+filtros, estados y procedencia en `src/components/secondary-ui.tsx`, con rejillas
+medidas sobre el espacio disponible y sin reglas CSS dependientes de wrappers.
+El lint global queda sin errores ni advertencias. Véanse resultados y límites
+del recorrido físico en el [checkpoint UIX-02](../docs/transition/CHECKPOINT-UIX-02.md).
+Para evidencia sintética nueva, usar el harness existente con
+`node scripts/check-uix01.mjs before --secondary` sobre la base y
+`node scripts/check-uix01.mjs after --secondary` sobre la exportación modificada;
+después `node scripts/compare-uix01.mjs --secondary`. La salida independiente
+vive en `.expo/uix02/`: no sobrescribe evidencia UIX-01. Toda la API de esas
+capturas se intercepta en la pestaña; el recorrido WEB-02 real sigue separado.
+
 UIX-01 consolida la identidad azul/índigo, el login responsive, Home centrada en
 Banu y la lectura del chat en web y Android. Reutiliza tokens y componentes;
 no cambia rutas, sesión ni transportes. Evidencias y límites en el

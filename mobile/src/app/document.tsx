@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -11,7 +11,8 @@ import {
 import { AppButton } from '@/components/app-button';
 import { isCcdKnowledge } from '@/config/demo-mode';
 import { ScreenHeader } from '@/components/screen-header';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import {ContentColumn,ScreenState,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
+import { colors, radii, spacing, typography } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 
@@ -91,109 +92,49 @@ export default function DocumentScreen() {
       />
 
       {!isValidId ? (
-        <View accessibilityRole="alert" style={styles.stateCard}>
-          <Text style={styles.stateTitle}>Referencia de documento inválida</Text>
-          <Text style={styles.stateText}>
-            Vuelve al chat y selecciona una fuente documental válida.
-          </Text>
-        </View>
+        <View style={secondaryStyles.scroll}><ContentColumn reading><ScreenState kind="error" title="Referencia de documento inválida" body="Vuelve al chat y selecciona una fuente documental válida."/></ContentColumn></View>
       ) : visibleLoadState === 'loading' ? (
-        <View accessibilityLiveRegion="polite" style={styles.stateCard}>
-          <ActivityIndicator
-            accessibilityLabel="Cargando documento"
-            color={colors.accent}
-            size="large"
-          />
-          <Text style={styles.stateText}>Cargando documento...</Text>
-        </View>
+        <View style={secondaryStyles.scroll}><ContentColumn reading><ScreenState kind="loading" title="Cargando documento..."/></ContentColumn></View>
       ) : visibleLoadState === 'error' ? (
-        <View accessibilityRole="alert" style={[styles.stateCard, styles.errorCard]}>
-          <Text style={styles.stateTitle}>No fue posible abrir el documento</Text>
-          <Text style={styles.stateText}>{errorMessage(errorKind)}</Text>
+        <View style={secondaryStyles.scroll}><ContentColumn reading><ScreenState kind="error" title="No fue posible abrir el documento" body={errorMessage(errorKind)}>
           <AppButton
             label="Reintentar"
             onPress={() => setRetryCount((current) => current + 1)}
-            style={styles.retryButton}
           />
-        </View>
+        </ScreenState></ContentColumn></View>
       ) : (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView contentContainerStyle={secondaryStyles.scroll}><ContentColumn reading>
           <View style={styles.notice}>
             <Text style={styles.noticeText}>Revisa la fecha, el periodo y el alcance indicados en la fuente.</Text>
           </View>
-          <View style={styles.documentCard}>
-            <Text selectable style={styles.documentText}>
+          <SurfaceCard testID="document-card">
+            <Text selectable testID="document-text" style={styles.documentText}>
               {content}
             </Text>
-          </View>
-        </ScrollView>
+          </SurfaceCard>
+        </ContentColumn></ScrollView>
       )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  stateCard: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.xl,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  errorCard: { borderColor: colors.error, backgroundColor: colors.errorSoft },
-  stateTitle: {
-    color: colors.ink,
-    fontSize: typography.body,
-    lineHeight: 23,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  stateText: {
-    color: colors.textSecondary,
-    fontSize: typography.small,
-    lineHeight: 21,
-    textAlign: 'center',
-  },
-  retryButton: { minWidth: 144 },
-  scrollContent: {
-    width: '100%',
-    maxWidth: layout.maxReadingWidth,
-    alignSelf: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-  },
-  notice: {
+safeArea: { flex: 1, backgroundColor: colors.background },
+notice: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radii.md,
     backgroundColor: colors.accentSoft,
   },
-  noticeText: {
+noticeText: {
     color: colors.accentStrong,
     fontSize: typography.small,
     fontWeight: '700',
     textAlign: 'center',
   },
-  documentCard: {
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  documentText: {
+documentText: {
     color: colors.ink,
     fontSize: typography.body,
     lineHeight: 25,
-  },
+  }
 });

@@ -25,13 +25,16 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
   const desktop = useWindowDimensions().width >= 1024;
   const [menu,setMenu] = useState(false), [chatMenu,setChatMenu] = useState(false);
   const [starting,setStarting] = useState(false), [error,setError] = useState(false);
-  const startingRef = useRef(false), lastChat = useRef<string|null>(null);
+  const startingRef = useRef(false);
+  const [lastChat,setLastChat] = useState<string|null>(null);
   useEffect(()=>{
     const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&(menu||chatMenu)){setMenu(false);setChatMenu(false);document.querySelector<HTMLElement>(desktop?'[aria-label="Navegar a Chat"]':'[aria-label="Menú de navegación"]')?.focus();}};
     document.addEventListener('keydown',escape);
     return()=>document.removeEventListener('keydown',escape);
   },[menu,chatMenu,desktop]);
-  if (pathname === '/chat' && typeof params.conversation_id === 'string') lastChat.current = params.conversation_id;
+  // Route-derived state: remember the latest real conversation before rendering
+  // its navigation affordance. Same session lifetime as the former ref.
+  if (pathname === '/chat' && typeof params.conversation_id === 'string' && lastChat !== params.conversation_id) setLastChat(params.conversation_id);
   const can = (capability:string) => snapshot.me?.capabilities.includes(capability) === true;
   const links = [
     {path:'/home',label:'Inicio',enabled:true,Icon:SparkGlyph},
@@ -75,7 +78,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
             <Pressable accessibilityRole="button" accessibilityLabel="Navegar a Chat" aria-expanded={chatMenu} aria-current={pathname==='/chat'?'page':undefined} style={[styles.link,pathname==='/chat'&&styles.selected]} onPress={()=>setChatMenu(v=>!v)}><View style={styles.navLabel}><ChatGlyph size={18}/><Text style={styles.linkText}>Chat</Text></View></Pressable>
             {chatMenu && <View style={styles.chatActions}>
               <Pressable accessibilityRole="button" accessibilityLabel="Nueva conversación web" disabled={starting} accessibilityState={{disabled:starting,busy:starting}} style={styles.link} onPress={()=>void newChat()}><Text style={styles.linkText}>{starting?'Creando...':'Nueva conversación'}</Text></Pressable>
-              {lastChat.current && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>{router.navigate({pathname:'/chat',params:{conversation_id:lastChat.current!}});closeMenu();focusContent();}}><Text style={styles.linkText}>Volver al chat abierto</Text></Pressable>}
+              {lastChat && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>{router.navigate({pathname:'/chat',params:{conversation_id:lastChat}});closeMenu();focusContent();}}><Text style={styles.linkText}>Volver al chat abierto</Text></Pressable>}
               {can('history') && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>go('/history')}><Text style={styles.linkText}>Continuar desde historial</Text></Pressable>}
               {error && <Text accessibilityRole="alert" style={styles.copy}>No fue posible crear la conversación. Puedes intentarlo de nuevo.</Text>}
             </View>}

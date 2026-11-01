@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -9,11 +9,12 @@ import {
   type ProgressStatus,
 } from '@/api/progress';
 import { AppButton } from '@/components/app-button';
+import {CardGrid,ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, radii, spacing, typography, textStyles } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 type ProgressFilter = 'all' | ProgressStatus;
@@ -44,8 +45,6 @@ function formatBogotaDate(timestamp: string): string {
 
 export default function ProgressScreen() {
   const router = useRouter();
-  const width=useWindowDimensions().width;
-  const columns=Platform.OS==='web' && width>=1024;
   const { activeProfile } = useSession();
   const profileKey = activeProfile?.profile_key ?? null;
   const profileAlias = activeProfile?.alias ?? null;
@@ -118,40 +117,17 @@ export default function ProgressScreen() {
         title="Progreso"
       />
 
-      <View testID="aux-filters" style={styles.filterBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View accessibilityRole="radiogroup" style={styles.filters}>
-            {FILTERS.map((option) => {
-              const isSelected = filter === option.value;
-              return (
-                <Pressable
-                  key={option.value}
-                  accessibilityLabel={`Mostrar cursos ${option.label.toLowerCase()}`}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: isSelected }}
-                  onPress={() => selectFilter(option.value)}
-                  style={({ pressed }) => [
-                    styles.filterButton,
-                    isSelected && styles.filterButtonSelected,
-                    pressed && styles.pressed,
-                  ]}>
-                  <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </ScrollView>
+      <View testID="aux-filters" style={secondaryStyles.filterBar}>
+        <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar cursos ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View testID="aux-content" style={styles.content}>
-          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
+      <ScrollView contentContainerStyle={secondaryStyles.scroll}>
+        <ContentColumn testID="aux-content">
+          {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
           {showSummary && (
             <FadeIn>
               <View style={styles.summaryCard}>
-                <View aria-hidden style={styles.summaryGlow} />
+
                 <View style={styles.summaryMain}>
                   <Text style={styles.summaryLabel}>Resumen del perfil</Text>
                   <Text style={styles.summaryValue}>{summary.total} cursos</Text>
@@ -176,56 +152,29 @@ export default function ProgressScreen() {
             </FadeIn>
           )}
 
-          {loadState === 'loading' && (
-            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
-              <ActivityIndicator
-                accessibilityLabel="Cargando progreso"
-                size="large"
-                color={colors.accent}
-              />
-              <Text style={styles.stateText}>Cargando progreso...</Text>
-            </View>
-          )}
-
-          {loadState === 'error' && (
-            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
-              <Text style={styles.stateTitle}>No fue posible cargar el progreso</Text>
-              <Text style={styles.stateText}>Comprueba la conexión e intenta nuevamente.</Text>
-              <AppButton label="Reintentar" onPress={retry} style={styles.retryButton} />
-            </View>
-          )}
-
-          {loadState === 'success' && courses.length === 0 && (
-            <View style={styles.stateCard}>
-              <Text style={styles.stateTitle}>Sin cursos</Text>
-              <Text style={styles.stateText}>No hay cursos con el estado seleccionado.</Text>
-            </View>
-          )}
+          {loadState === 'loading' && <ScreenState kind="loading" title="Cargando progreso..."/>}
+          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar el progreso" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>}
+          {loadState === 'success' && courses.length === 0 && <ScreenState kind="empty" title="Sin cursos" body="No hay cursos con el estado seleccionado."/>}
 
           {loadState === 'success' && courses.length > 0 && (
-            <View testID="course-list" style={[styles.courseList,columns&&styles.courseGrid]}>
+            <CardGrid testID="course-list">
               {courses.map((course, index) => {
                 const meta = STATUS_META[course.status];
                 return (
-                  <FadeIn key={course.course_key} delay={Math.min(index, 6) * 70} style={columns?styles.gridItem:undefined}>
-                    <View style={styles.courseCard}>
+                  <FadeIn key={course.course_key} delay={Math.min(index, 6) * 70}>
+                    <SurfaceCard>
                       <View style={styles.courseHeading}>
                         <Text style={styles.courseName}>{course.course_name}</Text>
-                        <View style={[styles.statusBadge, { backgroundColor: meta.soft }]}>
-                          <Text style={[styles.status, { color: meta.tint }]}>{meta.label}</Text>
-                        </View>
+                        <StatusBadge tint={meta.tint} soft={meta.soft}>{meta.label}</StatusBadge>
                       </View>
 
-                      <View
-                        accessibilityLabel={`${course.progress_percent} por ciento completado`}
-                        accessibilityRole="progressbar"
-                        accessibilityValue={{ min: 0, max: 100, now: course.progress_percent }}
-                        style={styles.progressBlock}>
+                      <View style={styles.progressBlock}>
                         <View style={styles.progressRow}>
                           <Text style={styles.progressLabel}>Avance</Text>
                           <Text style={styles.percent}>{course.progress_percent}%</Text>
                         </View>
                         <AnimatedProgressBar
+                          accessibilityLabel={`${course.course_name}: ${course.progress_percent} por ciento completado`}
                           percent={course.progress_percent}
                           tint={
                             course.status === 'completed'
@@ -253,122 +202,61 @@ export default function ProgressScreen() {
                           )}
                         </View>
                       )}
-                    </View>
+                    </SurfaceCard>
                   </FadeIn>
                 );
               })}
-            </View>
+            </CardGrid>
           )}
-        </View>
+        </ContentColumn>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  filterBar: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  filters: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.lg },
-  filterButton: {
-    minHeight: layout.minTouchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.surface,
-  },
-  filterButtonSelected: { borderColor: colors.accent, backgroundColor: colors.accent },
-  filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
-  filterTextSelected: { color: colors.white },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: Platform.OS==='web'?960:layout.maxContentWidth, alignSelf: 'center', gap: spacing.lg },
-  summaryCard: {
+safeArea: { flex: 1, backgroundColor: colors.background },
+summaryCard: {
     overflow: 'hidden',
-    gap: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: radii.xl,
-    backgroundColor: colors.brand,
-    ...shadows.card,
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
+    borderWidth:1,
+    borderColor:colors.border,
   },
-  summaryGlow: {
-    position: 'absolute',
-    top: -70,
-    right: -50,
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  summaryMain: { gap: spacing.xxs },
-  summaryLabel: {
-    color: 'rgba(255,255,255,0.72)',
+summaryMain: { gap: spacing.xxs },
+summaryLabel: {
+    color: colors.textSecondary,
     fontSize: typography.small,
     fontWeight: '600',
   },
-  summaryValue: {
-    color: colors.white,
-    fontSize: 46,
-    lineHeight: 52,
+summaryValue: {
+    color: colors.brand,
+    fontSize: typography.heading,
+    lineHeight: 30,
     fontWeight: '800',
     letterSpacing: -1.2,
   },
-  summaryStats: {
+summaryStats: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.18)',
+    borderTopColor: colors.border,
     paddingTop: spacing.md,
   },
-  summaryStat: { flex: 1, alignItems: 'center', gap: 2 },
-  summaryStatValue: { color: colors.white, fontSize: 20, fontWeight: '800' },
-  summaryStatLabel: { color: 'rgba(255,255,255,0.72)', fontSize: typography.caption, fontWeight: '600' },
-  summaryDivider: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.18)' },
-  stateCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  errorCard: { borderColor: '#F3C2BE', backgroundColor: colors.errorSoft },
-  stateTitle: { color: colors.ink, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
-  stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
-  retryButton: { minWidth: 144 },
-  courseList: { gap: spacing.sm },
-  courseGrid:{flexDirection:'row',flexWrap:'wrap',alignItems:'stretch'},
-  gridItem:{width:'48%',flexGrow:1},
-  courseCard: {
-    gap: spacing.md,
-    padding: spacing.md,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  courseHeading: { gap: spacing.xs, alignItems: 'flex-start' },
-  courseName: { color: colors.ink, fontSize: 18, lineHeight: 24, fontWeight: '800', letterSpacing: -0.2 },
-  statusBadge: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 3,
-    borderRadius: radii.pill,
-  },
-  status: { fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
-  progressBlock: { gap: spacing.xs },
-  progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  progressLabel: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
-  percent: { color: colors.ink, fontSize: typography.small, fontWeight: '800' },
-  dateBlock: { gap: spacing.xs, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
-  dateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
-  dateLabel: { color: colors.ink, fontWeight: '700' },
-  pressed: { opacity: 0.68 },
+summaryStat: { flex: 1, alignItems: 'center', gap: 2 },
+summaryStatValue: { color: colors.brand, fontSize: typography.body, fontWeight: '700' },
+summaryStatLabel: { color: colors.textSecondary, fontSize: typography.meta, fontWeight: '600',textAlign:'center' },
+summaryDivider: { width: 1, height: 30, backgroundColor: colors.border },
+courseHeading: { gap: spacing.xs, alignItems: 'flex-start' },
+courseName: { ...textStyles.heading, color: colors.ink },
+progressBlock: { gap: spacing.xs },
+progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+progressLabel: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
+percent: { color: colors.brand, fontSize: typography.heading, fontWeight: '700', fontVariant: ['tabular-nums'] },
+dateBlock: { gap: spacing.xs, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
+dateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
+dateLabel: { color: colors.ink, fontWeight: '700' }
 });

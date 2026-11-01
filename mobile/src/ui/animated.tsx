@@ -151,11 +151,13 @@ export function AnimatedProgressBar({
   tint = colors.accent,
   trackColor = colors.border,
   height = 8,
+  accessibilityLabel,
 }: {
   percent: number;
   tint?: string;
   trackColor?: string;
   height?: number;
+  accessibilityLabel?: string;
 }) {
   const reduced = useMotionReduced();
   const progress = useSharedValue(Math.max(0, Math.min(100, percent)) / 100);
@@ -174,7 +176,7 @@ export function AnimatedProgressBar({
   }));
 
   return (
-    <View accessibilityRole="progressbar" accessibilityValue={{ min: 0, max: 100, now: Math.max(0, Math.min(100, percent)) }} style={[styles.track, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>
+    <View accessibilityRole="progressbar" accessibilityLabel={accessibilityLabel} accessibilityValue={{ min: 0, max: 100, now: Math.max(0, Math.min(100, percent)) }} style={[styles.track, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>
       <Animated.View
         style={[styles.fill, { backgroundColor: tint, borderRadius: height / 2 }, animatedStyle]}
       />

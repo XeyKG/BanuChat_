@@ -115,7 +115,10 @@ export async function runWeb02(b:Browser){
  pass('web02-oe2',{programming:oe2.programming.length,categories:3,metadata:true,search:true,civilDates:true,controlledOptionalSourceFailureRecovered:true});
 
  step('web02-changes');await nav('Banu al día','/oe2-changes');await ready('Comparando publicaciones OE2');const changes=await api('/demo/oe2/changes?limit=20');assert.equal(changes.comparison_status,'compared');
- await assertText('Sin cambios: '+changes.counts.unchanged);assert.ok(changes.changes.length>0);
+ // UIX-02 separates value/label visually and exposes each statistic as one
+ // accessible group. Check every count against REST, not its text layout.
+ for(const [key,label] of [['created','Añadidos'],['modified','Modificados'],['removed','Retirados'],['unchanged','Sin cambios']] as const){const name=label+': '+changes.counts[key];assert.equal(await b.evaluate(`[...document.querySelectorAll('[aria-label]')].some(e=>e.getAttribute('aria-label')===${JSON.stringify(name)})`),true,'CHANGE_COUNT_'+key);}
+ assert.ok(changes.changes.length>0);
  await b.click('Ver Antes / Ahora');await assertText('Antes:');await assertText('Ahora:');
  for(const field of changes.changes[0].fields){if(field.before&&!field.field.endsWith('_at')&&!field.field.endsWith('_date'))await assertText(field.before);if(field.after&&!field.field.endsWith('_at')&&!field.field.endsWith('_date'))await assertText(field.after);}
  await b.snapshot('07-changes');for(const label of ['Programación','Convocatorias','Novedades','Todos']){await b.click('Información: '+label);await ready('Comparando publicaciones OE2');}

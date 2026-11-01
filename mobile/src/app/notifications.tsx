@@ -4,8 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
+import {ContentColumn,DemoNotice,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { useNotifications } from '@/notifications/notification-provider';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, radii, spacing, typography, textStyles } from '@/ui/tokens';
 
 const PERMISSION_COPY = {
   checking: 'Comprobando el permiso del dispositivo...',
@@ -37,18 +38,19 @@ export default function NotificationsScreen() {
         subtitle="Tus permisos y recordatorios"
         title="Notificaciones"
       />
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-          <View style={styles.card}>
+      <ScrollView contentContainerStyle={secondaryStyles.scroll}>
+        <ContentColumn>
+          <DemoNotice>Recordatorios locales con datos de demostración. La prueba local no es push remoto.</DemoNotice>
+          <SurfaceCard>
             <Text style={styles.cardTitle}>Permiso y recordatorios</Text>
             <Text accessibilityLiveRegion="polite" style={styles.cardText}>
               {PERMISSION_COPY[notifications.permission]}
             </Text>
             <View style={styles.statusRow}>
               <Text style={styles.statusLabel}>Estado local</Text>
-              <Text style={[styles.statusValue, notifications.enabled && styles.statusEnabled]}>
+              <StatusBadge tint={notifications.enabled?colors.success:colors.muted} soft={notifications.enabled?colors.successSoft:colors.surfaceSoft}>
                 {notifications.enabled ? 'Activo' : 'Inactivo'}
-              </Text>
+              </StatusBadge>
             </View>
             <Text style={styles.cardText}>
               {notifications.scheduledCount === 1
@@ -80,9 +82,9 @@ export default function NotificationsScreen() {
               onPress={() => void notifications.disable()}
               variant="quiet"
             />
-          </View>
+          </SurfaceCard>
 
-          <View style={styles.card}>
+          <SurfaceCard>
             <Text style={styles.cardTitle}>Qué se programa</Text>
             <Text style={styles.cardText}>
               BanuChat usa tus eventos de calendario y novedades. Los
@@ -93,9 +95,9 @@ export default function NotificationsScreen() {
               Al abrir una notificación, la app valida la cuenta activa y lleva a Calendario o
               Anuncios. Al cerrar o cambiar de cuenta cancela lo programado para la cuenta anterior.
             </Text>
-          </View>
+          </SurfaceCard>
 
-          <View style={styles.card}>
+          <SurfaceCard>
             <Text style={styles.cardTitle}>Push remoto</Text>
             <Text style={styles.cardText}>{REMOTE_COPY[notifications.remoteState]}</Text>
             <Text style={styles.note}>
@@ -107,34 +109,18 @@ export default function NotificationsScreen() {
                 La aplicación recibió una notificación durante esta apertura.
               </Text>
             )}
-          </View>
-        </View>
+          </SurfaceCard>
+        </ContentColumn>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-    gap: spacing.md,
-  },
-  card: {
-    gap: spacing.md,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  cardTitle: { color: colors.ink, fontSize: typography.heading, fontWeight: '800' },
-  cardText: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 24 },
-  statusRow: {
+safeArea: { flex: 1, backgroundColor: colors.background },
+cardTitle: { ...textStyles.heading, color: colors.ink },
+cardText: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 24 },
+statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -144,11 +130,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: colors.border,
   },
-  statusLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
-  statusValue: { color: colors.muted, fontSize: typography.small, fontWeight: '800' },
-  statusEnabled: { color: colors.success },
-  errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20 },
-  note: {
+statusLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
+errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20 },
+note: {
     color: colors.muted,
     fontSize: typography.small,
     lineHeight: 21,
@@ -156,5 +140,5 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     backgroundColor: colors.surfaceSoft,
   },
-  successText: { color: colors.success, fontSize: typography.small, fontWeight: '700' },
+successText: { color: colors.success, fontSize: typography.small, fontWeight: '700' }
 });

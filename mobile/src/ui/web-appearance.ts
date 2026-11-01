@@ -37,19 +37,9 @@ export const webAppearance = `
 }
 #banu-web-frame [data-testid="screen-title"],
 #banu-web-frame [data-testid="home-greeting"] { font-size:28px;line-height:36px;letter-spacing:-.6px; }
-#banu-web-frame [data-testid="aux-controls"],
-#banu-web-frame [data-testid="aux-filters"] {
-  width:100%;max-width:1008px;align-self:center;padding-left:24px;padding-right:24px;
-}
-#banu-web-frame [data-testid="aux-controls"] { padding-top:16px;padding-bottom:8px; }
-#banu-web-frame [data-testid="aux-filters"] { padding-top:12px;padding-bottom:12px; }
-#banu-web-frame [data-testid="aux-filters"] [role="radiogroup"] { padding:0;flex-wrap:wrap; }
-#banu-web-frame [data-testid="aux-content"] { max-width:960px; }
-#banu-web-frame [data-testid="oe2-scroll"] > div { max-width:1008px;padding:24px; }
 #banu-web-frame [data-testid="source-meta"],
 #banu-web-frame [data-testid="source-kind"] { font-size:13px;line-height:20px;overflow-wrap:anywhere; }
-#banu-web-frame [data-testid="publication-card"] { padding:24px;gap:10px; }
-#banu-web-frame [data-testid="publication-card"] > div { line-height:24px; }
+#banu-web-frame [data-testid="document-text"] { overflow-wrap:anywhere; }
 #banu-web-frame [data-testid="demo-notice"] {
   background:${colors.warningSoft};border-radius:10px;border-left:3px solid ${colors.amber};
   padding:12px 16px;font-size:13px;line-height:21px;text-align:left;color:${colors.textSecondary};
@@ -60,9 +50,6 @@ export const webAppearance = `
 #banu-web-frame [data-testid="home-hero-body"] { max-width:68ch;line-height:24px; }
 #banu-web-frame [data-testid="home-actions"] { gap:16px; }
 #banu-web-frame [data-testid="home-action-card"] { height:100%;box-shadow:none;min-height:96px; }
-#banu-web-frame [data-testid="history-content"] { max-width:960px; }
-#banu-web-frame [data-testid="history-new"] { align-self:flex-start;padding-left:20px;padding-right:24px; }
-#banu-web-frame [data-testid="history-card"] { height:100%;box-shadow:none; }
 #banu-web-frame [data-testid="chat-header"] { max-width:792px;padding:16px 24px; }
 #banu-web-frame [data-testid="chat-column"] { max-width:744px;gap:24px; }
 #banu-web-frame [data-testid="chat-user"] { padding:14px 18px;max-width:85%;box-shadow:none; }
@@ -94,9 +81,6 @@ export const webAppearance = `
   #banu-web-frame [data-testid="home-hero-cta"] { justify-self:start; }
   #banu-web-frame [data-testid="chat-suggestions"] { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
   #banu-web-frame [data-testid="chat-suggestions"] [role="button"] { height:100%; }
-  #banu-web-frame [data-testid="history-list"] { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px; }
-  #banu-web-frame [data-testid="change-field"] { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px; }
-  #banu-web-frame [data-testid="change-field"] > div:first-child { grid-column:1 / -1; }
 }
 @media (min-width:1024px) {
   #banu-web-frame [data-testid="login-layout"] { display:grid;grid-template-columns:46% 54%;align-content:stretch;max-width:1120px;gap:0;min-height:660px;border-radius:24px;overflow:hidden;background:${colors.surface};border:1px solid ${colors.border}; }
@@ -106,9 +90,6 @@ export const webAppearance = `
   #banu-web-frame [data-testid="login-story-body"] > div:nth-child(2) { font-size:36px;line-height:44px;letter-spacing:-1px; }
   #banu-web-frame [data-testid="login-story-footer"] { display:flex; }
   #banu-web-frame [data-testid="login-form"] { padding:56px;align-self:center;max-width:none; }
-  #banu-web-frame [data-testid="announcement-list"],
-  #banu-web-frame [data-testid="course-list"] { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px; }
-  #banu-web-frame [data-testid="course-list"] > div { width:100% !important;min-width:0;flex-basis:auto; }
 }
 @media (min-width:1200px) {
   #banu-web-frame [data-testid="home-hero"] { grid-template-columns:64px minmax(0,1fr) auto; }
@@ -118,10 +99,6 @@ export const webAppearance = `
   #banu-web-frame [data-testid="screen-header"] { padding:16px;gap:12px; }
   #banu-web-frame [data-testid="screen-title"],
   #banu-web-frame [data-testid="home-greeting"] { font-size:24px;line-height:32px; }
-  #banu-web-frame [data-testid="aux-controls"],
-  #banu-web-frame [data-testid="aux-filters"] { padding-left:16px;padding-right:16px; }
-  #banu-web-frame [data-testid="oe2-scroll"] > div { padding:16px; }
-  #banu-web-frame [data-testid="publication-card"] { padding:16px; }
   #banu-web-frame [data-testid="home-hero"] { padding:24px; }
   #banu-web-frame [data-testid="chat-header"] { padding:12px 16px; }
   #banu-web-frame [data-testid="chat-column"] { gap:20px; }

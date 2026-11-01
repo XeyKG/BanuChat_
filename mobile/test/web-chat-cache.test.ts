@@ -18,3 +18,12 @@ test('pending completion updates only the original conversation and notifies its
  const cache=new WebChatCache();cache.reset(1);const first=cache.slot(1,'first','sending',false),second=cache.slot(1,'second','sending',false);let notified=0;first.listeners.add(()=>notified++);
  cache.update(first,true);cache.update(first,false);cache.update(first,false);assert.equal(notified,2);assert.equal(second.value,false);
 });
+test('repeated slot reads with fresh initial objects keep identity, listeners and pending values',()=>{
+ const cache=new WebChatCache();cache.reset(1);
+ const first=cache.slot<string[]>(1,'chat','messages',[]);let notified=0;first.listeners.add(()=>notified++);
+ cache.update(first,['respuesta sintética']);
+ for(let i=0;i<4;i++)assert.equal(cache.slot<string[]>(1,'chat','messages',[]),first);
+ assert.deepEqual(first.value,['respuesta sintética']);assert.equal(first.listeners.size,1);assert.equal(notified,1);
+ const loading=cache.slot(1,'chat','load',{state:'loading'});cache.update(loading,{state:'ready'});
+ assert.equal(cache.slot(1,'chat','load',{state:'loading'}),loading);assert.equal(loading.value.state,'ready');
+});

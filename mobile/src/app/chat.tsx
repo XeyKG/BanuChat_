@@ -153,7 +153,7 @@ export default function ChatScreen() {
     return () => {
       isMounted = false;
     };
-  }, [activeProfileKey, conversationId, conversationRequestKey, isConversationValid]);
+  }, [activeProfileKey, conversationId, conversationRequestKey, isConversationValid, setConversationLoadResult, setMessages]);
 
   function returnHome() {
     if(Platform.OS==='web')router.push('/home');else router.replace('/home');

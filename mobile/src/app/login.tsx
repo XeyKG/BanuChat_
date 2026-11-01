@@ -22,14 +22,14 @@ export default function Login(){
  <View testID="login-layout" style={styles.layout}>
  <View testID="login-story" style={styles.story}>
   <View style={styles.brand}><BrandMark size={40}/><Text style={styles.wordmark}>BanuChat</Text></View>
-  <View testID="login-story-body" style={styles.storyBody}>
+  {Platform.OS==='web'&&<View testID="login-story-body" style={styles.storyBody}>
    <Text style={styles.eyebrow}>TU ESPACIO ACADÉMICO</Text>
    <Text style={styles.storyTitle}>{'Una pregunta.\nUn buen comienzo.'}</Text>
    <Text style={styles.storyCopy}>Conversa con Banu, explora el material disponible y encuentra las fuentes detrás de cada respuesta.</Text>
    <View style={styles.storyFeature}><DocGlyph color={colors.onBrandSecondary}/><Text style={styles.featureCopy}>Consulta documentos y sus fuentes</Text></View>
    <View style={styles.storyFeature}><ClockGlyph color={colors.onBrandSecondary}/><Text style={styles.featureCopy}>Retoma tus conversaciones</Text></View>
-  </View>
-  <Text testID="login-story-footer" style={styles.storyFoot}>Un asistente para acompañar tus consultas.</Text>
+  </View>}
+  {Platform.OS==='web'&&<Text testID="login-story-footer" style={styles.storyFoot}>Un asistente para acompañar tus consultas.</Text>}
  </View>
  <View testID="login-form" style={styles.card}>
   <View style={styles.heading}><Text accessibilityRole="header" style={styles.title}>Inicia sesión en BanuChat</Text>

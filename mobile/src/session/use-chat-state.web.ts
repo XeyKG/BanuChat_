@@ -1,4 +1,4 @@
-import {useCallback,useMemo,useSyncExternalStore,type Dispatch,type SetStateAction} from 'react';
+import {useCallback,useSyncExternalStore,type Dispatch,type SetStateAction} from 'react';
 import {useAuth} from '../auth/auth-provider';
 import type {AuthSession} from '../auth/auth-session';
 import {WebChatCache} from './web-chat-cache';
@@ -15,7 +15,9 @@ function cacheFor(client:AuthSession){
 }
 export function useChatState<T>(conversation:string|null,field:string,initial:T):[T,Dispatch<SetStateAction<T>>]{
   const {client,snapshot}=useAuth(),cache=cacheFor(client);
-  const slot=useMemo(()=>cache.slot(snapshot.epoch,conversation??'invalid',field,initial),[cache,snapshot.epoch,conversation,field]);
+  // slot() returns the existing object by key; initial is used only on creation,
+  // just like useState. No memo dependency on freshly created initial objects.
+  const slot=cache.slot(snapshot.epoch,conversation??'invalid',field,initial);
   const subscribe=useCallback((listener:()=>void)=>{slot.listeners.add(listener);return()=>{slot.listeners.delete(listener);};},[slot]);
   const read=useCallback(()=>slot.value,[slot]);
   const value=useSyncExternalStore(subscribe,read,read);

@@ -5,10 +5,12 @@ import {spawn} from 'node:child_process';
 import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {secondaryReview} from './uix02-review.mjs';
 
 const stage = process.argv[2];
 assert.ok(['before', 'after'].includes(stage), 'Use before or after');
-const root = path.resolve('.expo/uix01'), run = path.join(root, stage);
+const secondary=process.argv.includes('--secondary');
+const root = path.resolve(secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
 await mkdir(run, {recursive:true});
 const profile = path.join(root, 'edge-' + randomUUID());
 const browser = spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', [
@@ -23,6 +25,7 @@ const me={principal_id:id,session_id:id,synthetic_uid:'U08000001',session_expire
 const tokenPair={access_token:'A'.repeat(43),refresh_token:'B'.repeat(42)+'A',token_type:'Bearer',expires_in:900,session_expires_at:expires};
 const citation={index:0,source_kind:'document',label:'Documento: Guía sintética de estudio · UIX',locator:'section:1: Orientación de ejemplo',release_id:id,document_version_id:docId,artifact_url:`/api/v2/documents/${docId}/artifact`};
 const normalMessages=[{message_id:id,role:'user',content:'¿Cómo puedo organizar mi semana de estudio? Ejemplo sintético UIX.',created_at:timestamp},{message_id:docId,role:'assistant',content:'Ejemplo visual · contenido 100 % sintético.\n\nOrganiza las tareas en bloques de estudio y reserva un momento para revisar tus avances. Puedes consultar las fuentes de esta respuesta para ampliar la información.\n\nEste texto solo permite evaluar la interfaz; no describe una regla institucional.',created_at:timestamp,insufficient_evidence:false,citations:[citation]}];
+const review=secondary?secondaryReview({id,docId,me,timestamp,pause}):null;
 let mode='normal', loginFault=0, messageFault=0, sequence=0, socket, postCount=0, escapedApi=0;
 const pending=new Map(), shots=[], checks=[], errors=[];
 async function call(method,params={}){const key=++sequence;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(key);reject(Error('CDP_TIMEOUT '+method));},30000);pending.set(key,{resolve,reject,timer});socket.send(JSON.stringify({id:key,method,params}));});}
@@ -37,6 +40,8 @@ async function nav(label){await menu();await click('Navegar a '+label);await pau
 async function size(width){await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await pause(200);}
 async function capture(name,width){await size(width);await pause(800);const metrics=await evaluate(`(()=>{const v=${visible},controls=[...document.querySelectorAll('[role="button"],[role="radio"],input,textarea')].filter(v);return {width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,smallControls:controls.filter(e=>e.getBoundingClientRect().height<43).map(e=>e.getAttribute('aria-label')||e.textContent),horizontalScroll:[...document.querySelectorAll('[data-testid="chat-assistant"],[data-testid="chat-user"]')].filter(v).some(e=>e.scrollWidth>e.clientWidth+1)}})()`);assert.equal(metrics.overflow,false,name+' root overflow');assert.equal(metrics.horizontalScroll,false,name+' message overflow');assert.deepEqual(metrics.smallControls,[],name+' small controls');if(stage==='after'&&name==='login'&&width===1366){assert.ok(await evaluate(`(()=>{const frame=document.querySelector('[data-testid="login-layout"]').getBoundingClientRect(),story=document.querySelector('[data-testid="login-story"]').getBoundingClientRect();return Math.abs(story.height-frame.height)<3;})()`),'LOGIN_PANEL_HEIGHT');}const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const file=name+'-'+width+'.png';await writeFile(path.join(run,file),Buffer.from(shot.data,'base64'));shots.push({name,file,...metrics});}
 async function fixtures(p){const {requestId,request}=p,u=new URL(request.url);let code=200,body;
+  const override=await review?.fixture(request);
+  if(override){await call('Fetch.fulfillRequest',{requestId,responseCode:override.code,responseHeaders:[{name:'Content-Type',value:override.contentType??'application/json'}],body:Buffer.from(override.contentType?override.body:JSON.stringify(override.body)).toString('base64')});return;}
   if(u.pathname.endsWith('/auth/login')){code=loginFault||200;loginFault=0;body=code===200?tokenPair:{error:{code:'INVALID_CREDENTIALS'}};}
   else if(u.pathname.endsWith('/auth/me'))body=me;
   else if(u.pathname.endsWith('/auth/logout'))code=204;
@@ -61,6 +66,7 @@ try{
  for(const w of [1366,768,390])await capture('login',w);
  await fill('Usuario',me.synthetic_uid);await fill('Contraseña','Solo UIX sintético');loginFault=401;await click('Iniciar sesión');await until(`document.body.innerText.includes('Usuario o contraseña inválidos.')`);await capture('login-error',390);checks.push('login rejected credentials');
  await fill('Contraseña','Solo UIX sintético');await click('Iniciar sesión');await until(`location.pathname==='/home'`);
+ if(review){await review.run({nav,capture,size,click,until,evaluate,key,call,menu,checks,stage});}else{
  for(const w of [1366,768,390])await capture('home',w);
  await click('Abrir chat con Banu');await until(`document.body.innerText.includes('Ejemplo visual ·')`);
  for(const w of [1366,768,390]){await capture('chat',w);await click('Mostrar 1 fuentes');await capture('sources',w);await click('Ocultar 1 fuentes');}
@@ -77,6 +83,7 @@ try{
  if(stage==='after'){assert.equal(await evaluate(`document.getAnimations().filter(a=>a.playState==='running').length`),0);checks.push('reduced motion has no running animation');}
  await evaluate(`document.querySelector('[aria-label="Menú de navegación"]').focus()`);await key('Tab');assert.ok(await evaluate(`getComputedStyle(document.activeElement).outlineWidth==='3px'`));checks.push('Tab focus visible');
  await menu();await click('Cerrar sesión web');await until(`!!document.querySelector('[aria-label="Usuario"]')`);await call('Page.navigate',{url:origin+'/history'});await until(`location.pathname==='/'||!!document.querySelector('[aria-label="Usuario"]')`);checks.push('signed-out protected route blocked');
+ }
  assert.equal(escapedApi,0);assert.deepEqual(errors,[]);checks.push('all API traffic intercepted; no backend requests; no runtime exceptions');
  console.log('UIX_'+stage.toUpperCase()+'_PASSED '+shots.length+' screenshots');
 }catch(e){console.log('UIX_FAILED '+e.message);process.exitCode=1;errors.push(e.message);}

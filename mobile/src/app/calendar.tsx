@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -9,11 +9,12 @@ import {
   type CalendarEventType,
 } from '@/api/calendar';
 import { AppButton } from '@/components/app-button';
+import {ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,secondaryStyles} from '@/components/secondary-ui';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import { FadeIn } from '@/ui/animated';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, radii, shadows, spacing, typography, textStyles } from '@/ui/tokens';
 import { addCivilDays, getBogotaCivilToday } from '@/utils/bogota-date';
 
 type LoadState = 'loading' | 'error' | 'success';
@@ -153,69 +154,22 @@ export default function CalendarScreen() {
         title="Calendario"
       />
 
-      {Platform.OS==='web' && <View testID="aux-controls" style={styles.dateRange}>
-        <View style={styles.dateField}><Text style={styles.dateLabel}>Desde (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha inicial del calendario" value={dateFrom} onChangeText={setDateFrom} maxLength={10} autoCorrect={false} onSubmitEditing={applyDate} style={styles.dateInput}/></View>
-        <AppButton label="Ver 30 días" disabled={!validDate} onPress={applyDate}/>
-        <AppButton label="Hoy" variant="secondary" onPress={()=>{const today=getBogotaCivilToday();setDateFrom(today);setLoadState('loading');setRange({dateFrom:today,dateTo:addCivilDays(today,29)});}}/>
+      {Platform.OS==='web' && <View testID="aux-controls" style={[secondaryStyles.filterBar,styles.dateRange]}>
+        <View style={styles.dateField}><Text style={styles.dateLabel}>Desde (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha inicial del calendario" value={dateFrom} onChangeText={setDateFrom} maxLength={10} autoCorrect={false} onSubmitEditing={applyDate} style={secondaryStyles.input}/></View>
+        <AppButton label="Ver 30 días" style={{paddingHorizontal:spacing.sm}} disabled={!validDate} onPress={applyDate}/>
+        <AppButton label="Hoy" style={{paddingHorizontal:spacing.sm}} variant="secondary" onPress={()=>{const today=getBogotaCivilToday();setDateFrom(today);setLoadState('loading');setRange({dateFrom:today,dateTo:addCivilDays(today,29)});}}/>
         {!validDate&&<Text accessibilityRole="alert" style={styles.dateError}>Ingresa una fecha válida en formato AAAA-MM-DD.</Text>}
       </View>}
-      <View testID="aux-filters" style={styles.filterBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View accessibilityRole="radiogroup" style={styles.filters}>
-            {FILTERS.map((option) => {
-              const isSelected = filter === option.value;
-              return (
-                <Pressable
-                  key={option.value}
-                  accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: isSelected }}
-                  onPress={() => selectFilter(option.value)}
-                  style={({ pressed }) => [
-                    styles.filterButton,
-                    isSelected && styles.filterButtonSelected,
-                    pressed && styles.pressed,
-                  ]}>
-                  <Text style={[styles.filterText, isSelected && styles.filterTextSelected]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </ScrollView>
+      <View testID="aux-filters" style={secondaryStyles.filterBar}>
+        <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View testID="aux-content" style={styles.content}>
-          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.releaseText}>{CCD_AUXILIARY_NOTICE}</Text>}
-          {loadState === 'loading' && (
-            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
-              <ActivityIndicator
-                accessibilityLabel="Cargando calendario"
-                size="large"
-                color={colors.accent}
-              />
-              <Text style={styles.stateText}>Cargando calendario...</Text>
-            </View>
-          )}
-
-          {loadState === 'error' && (
-            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
-              <Text style={styles.stateTitle}>No fue posible cargar el calendario</Text>
-              <Text style={styles.stateText}>Comprueba la conexión e intenta nuevamente.</Text>
-              <AppButton label="Reintentar" onPress={retry} style={styles.retryButton} />
-            </View>
-          )}
-
-          {loadState === 'success' && events.length === 0 && (
-            <View style={styles.stateCard}>
-              <Text style={styles.stateTitle}>Sin eventos</Text>
-              <Text style={styles.stateText}>
-                No hay eventos en este periodo para el filtro seleccionado.
-              </Text>
-            </View>
-          )}
+      <ScrollView contentContainerStyle={secondaryStyles.scroll}>
+        <ContentColumn testID="aux-content">
+          {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
+          {loadState === 'loading' && <ScreenState kind="loading" title="Cargando calendario..."/>}
+          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar el calendario" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>}
+          {loadState === 'success' && events.length === 0 && <ScreenState kind="empty" title="Sin eventos" body="No hay eventos en este periodo para el filtro seleccionado."/>}
 
           {loadState === 'success' &&
             dayGroups.map((group, groupIndex) => {
@@ -253,19 +207,15 @@ export default function CalendarScreen() {
                             <View style={[styles.eventAccent, { backgroundColor: meta.tint }]} />
                             <View style={styles.eventBody}>
                               <View style={styles.eventTopRow}>
-                                <View style={[styles.eventTypeBadge, { backgroundColor: meta.soft }]}>
-                                  <Text style={[styles.eventType, { color: meta.tint }]}>
-                                    {meta.label}
-                                  </Text>
-                                </View>
+                                <StatusBadge tint={meta.tint} soft={meta.soft}>{meta.label}</StatusBadge>
                                 <Text style={styles.eventTime}>
                                   {timeFormatter.format(new Date(event.starts_at))}
                                   {event.ends_at !== null &&
                                     ` – ${timeFormatter.format(new Date(event.ends_at))}`}
                                 </Text>
                               </View>
-                              <Text style={styles.eventTitle}>{event.title}</Text>
-                              <Text style={styles.eventDescription}>{event.description}</Text>
+                              <Text selectable style={styles.eventTitle}>{event.title}</Text>
+                              <Text selectable style={styles.eventDescription}>{event.description}</Text>
                             </View>
                           </View>
                         );
@@ -275,57 +225,21 @@ export default function CalendarScreen() {
                 </FadeIn>
               );
             })}
-        </View>
+        </ContentColumn>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  dateRange:{width:'100%',maxWidth:960,alignSelf:'center',flexDirection:'row',flexWrap:'wrap',alignItems:'flex-end',gap:spacing.sm,padding:spacing.md},
-  dateField:{flexGrow:1,minWidth:180,gap:spacing.xs},dateLabel:{fontSize:14,color:colors.textSecondary},dateInput:{minHeight:44,padding:spacing.sm,borderWidth:1,borderColor:colors.borderStrong,borderRadius:radii.sm,backgroundColor:colors.surface},dateError:{width:'100%',color:colors.error},
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  filterBar: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  filters: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.lg },
-  filterButton: {
-    minHeight: layout.minTouchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    backgroundColor: colors.surface,
-  },
-  filterButtonSelected: {
-    borderColor: colors.accent,
-    backgroundColor: colors.accent,
-  },
-  filterText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
-  filterTextSelected: { color: colors.white },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: Platform.OS==='web'?960:layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
-  stateCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  errorCard: { borderColor: '#F3C2BE', backgroundColor: colors.errorSoft },
-  stateTitle: { color: colors.ink, fontSize: typography.body, lineHeight: 23, fontWeight: '700', textAlign: 'center' },
-  stateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 21, textAlign: 'center' },
-  releaseText: { color: colors.muted, fontSize: typography.caption, fontWeight: '700' },
-  retryButton: { minWidth: 144 },
-  dayGroup: { gap: spacing.sm },
-  dayHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  dayBadge: {
+dateRange:{flexDirection:'row',flexWrap:'wrap',alignItems:'flex-end',gap:spacing.sm},
+dateField:{flexBasis:140,flexGrow:1,minWidth:140,gap:spacing.xs},
+dateLabel:{fontSize:14,color:colors.textSecondary},
+dateError:{width:'100%',color:colors.error},
+safeArea: { flex: 1, backgroundColor: colors.background },
+dayGroup: { gap: spacing.sm },
+dayHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+dayBadge: {
     width: 52,
     height: 52,
     borderRadius: 16,
@@ -336,13 +250,13 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     ...shadows.soft,
   },
-  dayNumber: { color: colors.ink, fontSize: 18, fontWeight: '800', lineHeight: 21 },
-  dayMonth: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'capitalize' },
-  dayHeaderCopy: { flex: 1, gap: 1 },
-  dayName: { color: colors.ink, fontSize: typography.body, fontWeight: '800', letterSpacing: -0.2 },
-  dayCount: { color: colors.muted, fontSize: typography.caption },
-  eventList: { gap: spacing.sm, paddingLeft: spacing.xs },
-  eventCard: {
+dayNumber: { color: colors.ink, fontSize: 18, fontWeight: '800', lineHeight: 21 },
+dayMonth: { color: colors.muted, fontSize: 11, fontWeight: '700', textTransform: 'capitalize' },
+dayHeaderCopy: { flex: 1, gap: 1 },
+dayName: { color: colors.ink, fontSize: typography.body, fontWeight: '800', letterSpacing: -0.2 },
+dayCount: { color: colors.muted, fontSize: typography.caption },
+eventList: { gap: spacing.sm, paddingLeft: spacing.md, borderLeftWidth: 2, borderLeftColor: colors.borderStrong },
+eventCard: {
     flexDirection: 'row',
     overflow: 'hidden',
     borderWidth: 1,
@@ -351,17 +265,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     ...shadows.soft,
   },
-  eventAccent: { width: 4 },
-  eventBody: { flex: 1, gap: spacing.xs, padding: spacing.md },
-  eventTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  eventTypeBadge: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 3,
-    borderRadius: radii.pill,
-  },
-  eventType: { fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
-  eventTime: { color: colors.muted, fontSize: typography.caption, fontWeight: '600' },
-  eventTitle: { color: colors.ink, fontSize: 17, lineHeight: 23, fontWeight: '800', letterSpacing: -0.2 },
-  eventDescription: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
-  pressed: { opacity: 0.68 },
+eventAccent: { width: 4 },
+eventBody: { flex: 1, gap: spacing.xs, padding: spacing.md },
+eventTopRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+eventTime: { color: colors.muted, fontSize: typography.caption, fontWeight: '600' },
+eventTitle: { ...textStyles.body, color: colors.ink, fontWeight: '700' },
+eventDescription: { ...textStyles.small, color: colors.textSecondary }
 });

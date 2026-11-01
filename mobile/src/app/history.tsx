@@ -22,9 +22,10 @@ import {
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
-import { FadeIn, PressableScale } from '@/ui/animated';
+import { FadeIn } from '@/ui/animated';
+import {CardGrid,ContentColumn,DemoNotice,ScreenState,secondaryStyles} from '@/components/secondary-ui';
 import { ChatGlyph, ChevronGlyph, TrashGlyph } from '@/ui/icons';
-import { colors, layout, radii, shadows, spacing, typography } from '@/ui/tokens';
+import { colors, layout, radii, spacing, textStyles } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 
@@ -148,38 +149,20 @@ export default function HistoryScreen() {
         subtitle="Tus conversaciones y fuentes"
         title={isCcdLocal() ? 'Historial de demostración' : 'Historial'}
       />
-      <ScrollView contentContainerStyle={styles.container}>
-        <View testID="history-content" style={styles.content}>
-          {isCcdLocal() && <Text style={styles.stateText}>{CCD_NOTICE} Al recargar o finalizar, se pierde esta lista local; el backend conserva los chats. No se enumeran conversaciones de otras aperturas.</Text>}
+      <ScrollView contentContainerStyle={secondaryStyles.scroll}>
+        <ContentColumn testID="history-content">
+          {isCcdLocal() && <DemoNotice>{CCD_NOTICE} Al recargar o finalizar, se pierde esta lista local; el backend conserva los chats. No se enumeran conversaciones de otras aperturas.</DemoNotice>}
           {loadState === 'loading' && (
-            <View accessibilityLiveRegion="polite" style={styles.stateCard}>
-              <ActivityIndicator
-                accessibilityLabel="Cargando historial"
-                size="large"
-                color={colors.accent}
-              />
-              <Text style={styles.stateText}>Cargando conversaciones...</Text>
-            </View>
+            <ScreenState kind="loading" loadingLabel="Cargando historial" title="Cargando conversaciones..."/>
           )}
 
           {loadState === 'error' && (
-            <View accessibilityLiveRegion="polite" style={[styles.stateCard, styles.errorCard]}>
-              <Text style={styles.stateTitle}>No fue posible cargar el historial</Text>
-              <Text style={styles.stateText}>Comprueba la conexión e intenta nuevamente.</Text>
-              <AppButton label="Reintentar" onPress={retry} style={styles.stateButton} />
-            </View>
+            <ScreenState kind="error" title="No fue posible cargar el historial" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>
           )}
 
           {loadState === 'success' && conversations.length === 0 && (
             <FadeIn>
-              <View style={styles.emptyCard}>
-                <View style={styles.emptyIconHalo}>
-                  <ChatGlyph color={colors.accent} size={34} />
-                </View>
-                <Text style={styles.stateTitle}>{isCcdLocal() ? 'No hay conversaciones en esta apertura' : 'Aún no tienes conversaciones'}</Text>
-                <Text style={styles.stateText}>
-                  Inicia tu primera conversación con Banu y aparecerá aquí.
-                </Text>
+              <ScreenState kind="empty" title={isCcdLocal() ? 'No hay conversaciones en esta apertura' : 'Aún no tienes conversaciones'} body="Inicia tu primera conversación con Banu y aparecerá aquí.">
                 <AppButton
                   label="Iniciar conversación"
                   loading={isStartingChat}
@@ -187,31 +170,23 @@ export default function HistoryScreen() {
                   onPress={() => void startNewConversation()}
                   style={styles.stateButton}
                 />
-              </View>
+              </ScreenState>
             </FadeIn>
           )}
 
           {loadState === 'success' && conversations.length > 0 && (
             <>
               <FadeIn>
-                <PressableScale
-                  accessibilityRole="button"
+                <AppButton label="Nueva conversación"
                   accessibilityLabel="Iniciar una nueva conversación"
-                  accessibilityState={{ busy: isStartingChat }}
+                  loading={isStartingChat}
+                  loadingLabel="Creando conversación..."
                   disabled={isStartingChat}
-                  onPress={() => void startNewConversation()}>
-                  <View testID="history-new" style={styles.newConversationCard}>
-                    <View style={styles.newConversationIcon}>
-                      <ChatGlyph color={colors.white} size={18} />
-                    </View>
-                    <Text style={styles.newConversationText}>
-                      {isStartingChat ? 'Creando conversación...' : 'Nueva conversación'}
-                    </Text>
-                  </View>
-                </PressableScale>
+                  style={{alignSelf:'flex-start'}}
+                  onPress={() => void startNewConversation()}/>
               </FadeIn>
 
-              <View testID="history-list" style={styles.list}>
+              <CardGrid testID="history-list" minItemWidth={300}>
                 {conversations.map((conversation, index) => (
                   <FadeIn key={conversation.conversation_id} delay={80 + index * 60}>
                     <View testID="history-card" style={styles.conversationCard}>
@@ -228,16 +203,17 @@ export default function HistoryScreen() {
                         </View>
                         <View style={styles.conversationCopy}>
                           <Text style={styles.conversationDate}>
-                            {formatStartedAt(conversation.started_at)}
+                            {dateFormatter.format(new Date(conversation.started_at))}
                           </Text>
                           <Text style={styles.conversationMeta}>
-                            {conversation.message_count === 0
+                            {timeFormatter.format(new Date(conversation.started_at))}{' · '}{conversation.message_count === 0
                               ? 'Sin mensajes'
                               : conversation.message_count === 1
                                 ? '1 mensaje'
                                 : `${conversation.message_count} mensajes`}
                           </Text>
                         </View>
+                        <ChevronGlyph color={colors.accent} size={16}/>
                       </Pressable>
                       {!isCcdLocal() && <Pressable
                         accessibilityRole="button"
@@ -253,112 +229,42 @@ export default function HistoryScreen() {
                         {deletingId === conversation.conversation_id ? (
                           <ActivityIndicator color={colors.error} size="small" />
                         ) : (
-                          <TrashGlyph color={colors.error} size={17} />
+                          <><TrashGlyph color={colors.error} size={17} /><Text style={styles.deleteLabel}>Eliminar</Text></>
                         )}
                       </Pressable>}
-                      <ChevronGlyph color={colors.muted} size={15} />
                     </View>
                   </FadeIn>
                 ))}
-              </View>
+              </CardGrid>
             </>
           )}
-        </View>
+        </ContentColumn>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.lg },
-  content: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center', gap: spacing.md },
-  stateCard: {
-    alignItems: 'center',
-    gap: spacing.md,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.xl,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  errorCard: { borderColor: '#F3C2BE', backgroundColor: colors.errorSoft },
-  stateTitle: {
-    color: colors.ink,
-    fontSize: typography.body,
-    lineHeight: 23,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  stateText: {
-    color: colors.textSecondary,
-    fontSize: typography.small,
-    lineHeight: 21,
-    textAlign: 'center',
-  },
-  stateButton: { minWidth: 180 },
-  emptyCard: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.xxl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.xl,
-    backgroundColor: colors.surface,
-    ...shadows.soft,
-  },
-  emptyIconHalo: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.accentSoft,
-    marginBottom: spacing.xs,
-  },
-  newConversationCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    borderRadius: radii.lg,
-    backgroundColor: colors.accent,
-    ...shadows.soft,
-  },
-  newConversationIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-  },
-  newConversationText: { color: colors.white, fontSize: typography.body, fontWeight: '800' },
-  list: { gap: spacing.sm },
-  conversationCard: {
+safeArea: { flex: 1, backgroundColor: colors.background },
+stateButton: { minWidth: 180 },
+conversationCard: {
     minHeight: 76,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingRight: spacing.md,
+    gap: spacing.xxs,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
-    ...shadows.soft,
   },
-  openConversationButton: {
+openConversationButton: {
     flex: 1,
     minHeight: 74,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    paddingLeft: spacing.md,
+    paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  conversationIcon: {
+conversationIcon: {
     width: 42,
     height: 42,
     borderRadius: 14,
@@ -366,16 +272,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.accentSoft,
   },
-  conversationCopy: { flex: 1, gap: 2 },
-  conversationDate: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
-  conversationMeta: { color: colors.muted, fontSize: typography.caption },
-  deleteButton: {
-    width: layout.minTouchTarget,
-    height: layout.minTouchTarget,
-    borderRadius: layout.minTouchTarget / 2,
+conversationCopy: { flex: 1, gap: 2 },
+conversationDate: { color: colors.ink, ...textStyles.body, fontWeight: '700' },
+conversationMeta: { color: colors.muted, ...textStyles.small },
+deleteButton: {
+    minHeight: layout.minTouchTarget,
+    flexDirection:'row',
+    gap:spacing.xs,
+    paddingHorizontal:spacing.md,
+    paddingVertical:spacing.xs,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.errorSoft,
+    alignSelf:'flex-end',
   },
-  pressed: { opacity: 0.65 },
+deleteLabel:{...textStyles.small,color:colors.error,fontWeight:'600'},
+pressed: { opacity: 0.65 }
 });
