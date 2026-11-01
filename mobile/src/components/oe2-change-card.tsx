@@ -13,9 +13,9 @@ export function Oe2ChangeCard({change,onCurrent}:{change:Oe2Change;onCurrent:()=
   <Text selectable>Origen: {origin.source_id} · {origin.record_id}{'\n'}Versión: {origin.source_version}</Text>
   <AppButton label={expanded?'Ocultar detalle':'Ver Antes / Ahora'} variant="secondary" onPress={()=>setExpanded(v=>!v)}/>
   {expanded&&<View style={styles.detail}>
-   {change.fields.map(f=><View key={f.field} style={styles.field}><Text style={styles.label}>{FIELD_LABELS[f.field]}</Text><Text selectable>Antes: {formatChangeValue(f.field,f.before)}</Text><Text selectable>Ahora: {formatChangeValue(f.field,f.after)}</Text></View>)}
-   {([['Antes',change.previous_source],['Ahora',change.current_source]]as const).map(([label,s])=>s&&<Text key={label} style={styles.meta}>{label} · Publicación de origen: {formatChangeInstant(s.source_published_at)}{'\n'}Observación OE2: {formatChangeInstant(s.observed_at)}</Text>)}
-   <Text style={styles.meta}>La observación corresponde al snapshot usado; no acredita el primer instante de detección ni una causa del cambio.</Text>
+   {change.fields.map(f=><View key={f.field} testID="change-field" style={styles.field}><Text style={styles.label}>{FIELD_LABELS[f.field]}</Text><Text selectable>Antes: {formatChangeValue(f.field,f.before)}</Text><Text selectable>Ahora: {formatChangeValue(f.field,f.after)}</Text></View>)}
+   {([['Antes',change.previous_source],['Ahora',change.current_source]]as const).map(([label,s])=>s&&<Text key={label} testID="source-meta" style={styles.meta}>{label} · Publicación de origen: {formatChangeInstant(s.source_published_at)}{'\n'}Observación OE2: {formatChangeInstant(s.observed_at)}</Text>)}
+   <Text testID="source-meta" style={styles.meta}>La observación corresponde al snapshot usado; no acredita el primer instante de detección ni una causa del cambio.</Text>
   </View>}
   {change.current_available&&<AppButton label="Ver publicación actual" onPress={onCurrent}/>}
  </View>;

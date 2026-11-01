@@ -134,3 +134,34 @@ separada. Esta versión acredita únicamente Edge headless local; no acredita
 compatibilidad universal, usabilidad con estudiantes, iOS, push ni una nueva
 validación física Android. El bundle Android se exporta con Hermes conservando
 Expo SDK 57; no se generan proyectos nativos.
+
+## Revisión visual WEB-03
+
+El estilo exclusivo web se instala desde `WebFrame.web` usando los tokens
+existentes. Las pantallas compartidas identifican sus regiones con `testID`;
+esos identificadores no cambian sus estilos ni flujos nativos.
+
+Con la exportación y el proxy local disponibles:
+
+```powershell
+node --import tsx scripts/check-unified-web-browser.mts --web03-before
+# Aplicar los cambios visuales y volver a exportar antes de la comparación.
+node --import tsx scripts/check-unified-web-browser.mts --web03-after
+```
+
+Cada recorrido usa **un login real**, un perfil Edge descartable y una carpeta
+privada bajo `%LOCALAPPDATA%/BanuChat/web-03/<uuid>` con ACL del usuario. No repetir
+logins para esperar un bloqueo: respetar la ventana descrita arriba.
+Las capturas tienen 1366, 768 y 390 píxeles de ancho y 900 de alto. Auxiliares
+usan datos ficticios reales; chat e historial reciben fixtures explícitamente
+sintéticos mediante CDP. El evaluador bloquea el POST de generación/error y
+comprueba que el chat propio siga vacío en backend. La versión final elimina
+únicamente ese chat nuevo, tras verificarlo. No consulta conversaciones existentes
+para preparar las capturas ni abre documentos CCD.
+
+Se guardan PNG, metadatos sin cuerpos de conversación, mediciones e informe de
+limpieza de sesiones y perfil. La marca que permite capturar chat/historial solo
+se activa en el recorrido visual con respuestas sintéticas interceptadas; el
+recorrido funcional WEB-02 conserva su exclusión de esas capturas. La comparación
+final, sus límites y las rutas privadas están en el
+[checkpoint WEB-03](../transition/CHECKPOINT-WEB-03.md).

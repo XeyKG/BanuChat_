@@ -4,10 +4,12 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {demoAccounts} from '../../backend/api/test/auth-i1b/accounts.ts';
 import {runWeb02} from './unified-web02-journey.mts';
+import {runWeb03} from './unified-web03-visual.mts';
 
 const origin='http://127.0.0.1:8085';
-const web02=process.argv.includes('--web02');
-const run=path.join(process.env.LOCALAPPDATA!,'BanuChat',web02?'web-02':'web-01',randomUUID());
+const visualStage=process.argv.includes('--web03-before')?'before':process.argv.includes('--web03-after')?'after':null;
+const web02=process.argv.includes('--web02')||visualStage!==null;
+const run=path.join(process.env.LOCALAPPDATA!,'BanuChat',visualStage?'web-03':web02?'web-02':'web-01',randomUUID());
 await mkdir(run,{recursive:true});
 const sid=execFileSync('whoami',['/user','/fo','csv','/nh'],{encoding:'utf8'}).match(/S-1-[0-9-]+/u)![0];
 execFileSync('icacls',[run,'/inheritance:r','/grant:r',`*${sid}:(OI)(CI)(F)`],{stdio:'ignore'});
@@ -54,9 +56,10 @@ async function snapshot(name:string) {
   if(web02)await pause(450);
   const dom=await evaluate(`({url:location.href,text:document.body.innerText,labels:[...document.querySelectorAll('[aria-label]')].map(e=>e.getAttribute('aria-label')),width:innerWidth,overflow:document.documentElement.scrollWidth>innerWidth,localStorageKeys:Object.keys(localStorage),sessionStorageKeys:Object.keys(sessionStorage)})`);
   const safeAuxiliary=['/home','/progress','/calendar','/announcements','/oe2','/oe2-changes'].includes(new URL(dom.url).pathname);
+  const safeFixture=visualStage!==null&&await evaluate(`window.__banuVisualFixture===location.pathname`);
   const saved=web02?{route:new URL(dom.url).pathname,width:dom.width,overflow:dom.overflow,localStorageKeys:dom.localStorageKeys,sessionStorageKeys:dom.sessionStorageKeys,...(safeAuxiliary?{labels:dom.labels}:{})}:dom;
   await writeFile(path.join(run,name+'.json'),JSON.stringify(saved,null,2));
-  if(!web02||safeAuxiliary){const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  if(!web02||safeAuxiliary||safeFixture){const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     await writeFile(path.join(run,name+'.png'),Buffer.from(shot.data,'base64'));}
   return dom;
 }
@@ -93,6 +96,11 @@ try {
   await until(`!!document.querySelector('[aria-label="Usuario"]')`);
   const first=await snapshot('01-login');pass(currentStep,{width:first.width,overflow:first.overflow});
   if(process.argv.includes('--inspect')) { report.state='INSPECTED'; }
+  else if(visualStage){
+    await runWeb03({origin,run,call,evaluate,until,click,fill,snapshot,pass,requestCounts,accesses,consoleText,skipLoginControls:true,privacyOnly:false,
+      getAccess:()=>browserAccess,setStep:name=>{currentStep=name;},setDialog:accept=>{acceptDialog=accept;},setFetchHandler:handler=>events.set('Fetch.requestPaused',[handler])},visualStage);
+    report.state=visualStage==='after'?'BANUCHAT_WEB_03_VISUAL_VALIDATED':'WEB_03_BASELINE_CAPTURED';
+  }
   else if(web02){
     await runWeb02({origin,run,call,evaluate,until,click,fill,snapshot,pass,requestCounts,accesses,consoleText,skipLoginControls:process.argv.includes('--skip-login-controls'),privacyOnly:process.argv.includes('--privacy-only'),
       getAccess:()=>browserAccess,setStep:name=>{currentStep=name;},setDialog:accept=>{acceptDialog=accept;},

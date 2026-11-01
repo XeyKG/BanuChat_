@@ -153,13 +153,13 @@ export default function CalendarScreen() {
         title="Calendario"
       />
 
-      {Platform.OS==='web' && <View style={styles.dateRange}>
+      {Platform.OS==='web' && <View testID="aux-controls" style={styles.dateRange}>
         <View style={styles.dateField}><Text style={styles.dateLabel}>Desde (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha inicial del calendario" value={dateFrom} onChangeText={setDateFrom} maxLength={10} autoCorrect={false} onSubmitEditing={applyDate} style={styles.dateInput}/></View>
         <AppButton label="Ver 30 días" disabled={!validDate} onPress={applyDate}/>
         <AppButton label="Hoy" variant="secondary" onPress={()=>{const today=getBogotaCivilToday();setDateFrom(today);setLoadState('loading');setRange({dateFrom:today,dateTo:addCivilDays(today,29)});}}/>
         {!validDate&&<Text accessibilityRole="alert" style={styles.dateError}>Ingresa una fecha válida en formato AAAA-MM-DD.</Text>}
       </View>}
-      <View style={styles.filterBar}>
+      <View testID="aux-filters" style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View accessibilityRole="radiogroup" style={styles.filters}>
             {FILTERS.map((option) => {
@@ -187,8 +187,8 @@ export default function CalendarScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-          {isCcdAuthenticated() && <Text style={styles.releaseText}>{CCD_AUXILIARY_NOTICE}</Text>}
+        <View testID="aux-content" style={styles.content}>
+          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.releaseText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator

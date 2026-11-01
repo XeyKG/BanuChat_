@@ -118,7 +118,7 @@ export default function ProgressScreen() {
         title="Progreso"
       />
 
-      <View style={styles.filterBar}>
+      <View testID="aux-filters" style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View accessibilityRole="radiogroup" style={styles.filters}>
             {FILTERS.map((option) => {
@@ -146,8 +146,8 @@ export default function ProgressScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-          {isCcdAuthenticated() && <Text style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
+        <View testID="aux-content" style={styles.content}>
+          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {showSummary && (
             <FadeIn>
               <View style={styles.summaryCard}>
@@ -203,7 +203,7 @@ export default function ProgressScreen() {
           )}
 
           {loadState === 'success' && courses.length > 0 && (
-            <View style={[styles.courseList,columns&&styles.courseGrid]}>
+            <View testID="course-list" style={[styles.courseList,columns&&styles.courseGrid]}>
               {courses.map((course, index) => {
                 const meta = STATUS_META[course.status];
                 return (

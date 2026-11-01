@@ -5,10 +5,16 @@ import {useAuth} from '@/auth/auth-provider';
 import {createConversation} from '@/api/conversations';
 import {BrandMark} from '@/ui/animated';
 import {colors, radii, spacing} from '@/ui/tokens';
+import {webAppearance} from '@/ui/web-appearance';
+import {CalendarGlyph, ChartGlyph, ChatGlyph, ClockGlyph, DocGlyph, SparkGlyph} from '@/ui/icons';
 
 export function WebFrame({children}: {children: ReactNode}) {
   const {snapshot} = useAuth();
-  if (snapshot.phase !== 'authenticated') return <View style={styles.main}>{children}</View>;
+  useEffect(()=>{
+    const sheet=document.createElement('style');sheet.textContent=webAppearance;
+    document.head.append(sheet);return()=>sheet.remove();
+  },[]);
+  if (snapshot.phase !== 'authenticated') return <View nativeID="banu-web-frame" style={styles.main}>{children}</View>;
   return <AuthenticatedFrame key={snapshot.epoch}>{children}</AuthenticatedFrame>;
 }
 
@@ -21,23 +27,20 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
   const [starting,setStarting] = useState(false), [error,setError] = useState(false);
   const startingRef = useRef(false), lastChat = useRef<string|null>(null);
   useEffect(()=>{
-    const sheet=document.createElement('style');
-    sheet.textContent='[role="button"]:focus-visible,[role="radio"]:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #3B4FE0;outline-offset:3px}.web-skip{position:absolute;left:8px;top:-100px;z-index:100;background:white;padding:12px}.web-skip:focus{top:8px}';
-    document.head.append(sheet);
-    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'){setMenu(false);setChatMenu(false);document.querySelector<HTMLElement>('[aria-label="Menú de navegación"]')?.focus();}};
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&(menu||chatMenu)){setMenu(false);setChatMenu(false);document.querySelector<HTMLElement>(desktop?'[aria-label="Navegar a Chat"]':'[aria-label="Menú de navegación"]')?.focus();}};
     document.addEventListener('keydown',escape);
-    return()=>{sheet.remove();document.removeEventListener('keydown',escape);};
-  },[]);
+    return()=>document.removeEventListener('keydown',escape);
+  },[menu,chatMenu,desktop]);
   if (pathname === '/chat' && typeof params.conversation_id === 'string') lastChat.current = params.conversation_id;
   const can = (capability:string) => snapshot.me?.capabilities.includes(capability) === true;
   const links = [
-    {path:'/home',label:'Inicio',enabled:true},
-    {path:'/history',label:'Historial',enabled:can('history')},
-    {path:'/progress',label:'Progreso',enabled:can('progress')},
-    {path:'/calendar',label:'Calendario',enabled:can('calendar')},
-    {path:'/announcements',label:'Anuncios y convocatorias',enabled:can('announcements')},
-    {path:'/oe2',label:'Publicaciones OE2',enabled:can('progress')},
-    {path:'/oe2-changes',label:'Banu al día',enabled:can('progress')},
+    {path:'/home',label:'Inicio',enabled:true,Icon:SparkGlyph},
+    {path:'/history',label:'Historial',enabled:can('history'),Icon:ClockGlyph},
+    {path:'/progress',label:'Progreso',enabled:can('progress'),Icon:ChartGlyph},
+    {path:'/calendar',label:'Calendario',enabled:can('calendar'),Icon:CalendarGlyph},
+    {path:'/announcements',label:'Anuncios y convocatorias',enabled:can('announcements'),Icon:DocGlyph},
+    {path:'/oe2',label:'Publicaciones OE2',enabled:can('progress'),Icon:DocGlyph},
+    {path:'/oe2-changes',label:'Banu al día',enabled:can('progress'),Icon:SparkGlyph},
   ];
   function closeMenu(){setMenu(false);setChatMenu(false);}
   function focusContent(){requestAnimationFrame(()=>document.getElementById('web-main')?.focus());}
@@ -54,7 +57,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     finally{startingRef.current=false;setStarting(false);}
   }
   // Keep the screen subtree stable at every breakpoint, preserving chat state.
-  return <View style={[styles.frame, {flexDirection: desktop ? 'row' : 'column'}]}>
+  return <View nativeID="banu-web-frame" style={[styles.frame, {flexDirection: desktop ? 'row' : 'column'}]}>
     <a className="web-skip" href="#web-main">Saltar al contenido</a>
     <View style={[styles.navigation, desktop ? styles.sidebar : styles.topbar]}>
       <View style={styles.brandRow}><View style={styles.brand}><BrandMark size={32}/><Text style={styles.title}>BanuChat</Text></View>
@@ -65,10 +68,10 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
         {links.filter(item=>item.enabled).map((item,index) => <View key={item.path}>
           <Pressable accessibilityRole="button" accessibilityLabel={`Navegar a ${item.label}`} aria-current={pathname===item.path?'page':undefined}
             onPress={() => go(item.path)} style={[styles.link, pathname === item.path && styles.selected]}>
-            <Text style={styles.linkText}>{item.label}</Text>
+            <View style={styles.navLabel}><item.Icon size={18} color={pathname===item.path?colors.accent:colors.muted}/><Text style={styles.linkText}>{item.label}</Text></View>
           </Pressable>
           {index===0 && can('chat') && <>
-            <Pressable accessibilityRole="button" accessibilityLabel="Navegar a Chat" aria-expanded={chatMenu} aria-current={pathname==='/chat'?'page':undefined} style={[styles.link,pathname==='/chat'&&styles.selected]} onPress={()=>setChatMenu(v=>!v)}><Text style={styles.linkText}>Chat</Text></Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Navegar a Chat" aria-expanded={chatMenu} aria-current={pathname==='/chat'?'page':undefined} style={[styles.link,pathname==='/chat'&&styles.selected]} onPress={()=>setChatMenu(v=>!v)}><View style={styles.navLabel}><ChatGlyph size={18}/><Text style={styles.linkText}>Chat</Text></View></Pressable>
             {chatMenu && <View style={styles.chatActions}>
               <Pressable accessibilityRole="button" accessibilityLabel="Nueva conversación web" disabled={starting} accessibilityState={{disabled:starting,busy:starting}} style={styles.link} onPress={()=>void newChat()}><Text style={styles.linkText}>{starting?'Creando...':'Nueva conversación'}</Text></Pressable>
               {lastChat.current && <Pressable accessibilityRole="button" style={styles.link} onPress={()=>{router.navigate({pathname:'/chat',params:{conversation_id:lastChat.current!}});closeMenu();focusContent();}}><Text style={styles.linkText}>Volver al chat abierto</Text></Pressable>}
@@ -93,12 +96,13 @@ const styles = StyleSheet.create({
   frame:{flex:1,minWidth:0,backgroundColor:colors.background},
   main:{flex:1,minWidth:0,minHeight:0},
   navigation:{backgroundColor:colors.surface,borderColor:colors.border,padding:spacing.md,gap:spacing.md},
-  sidebar:{width:244,borderRightWidth:1,paddingTop:spacing.xl},
-  topbar:{borderBottomWidth:1,padding:8,maxHeight:'65%'},
+  sidebar:{width:248,borderRightWidth:1,borderRightColor:colors.border,paddingTop:spacing.xl},
+  topbar:{borderBottomWidth:1,borderBottomColor:colors.border,padding:12,maxHeight:'65%'},
   brandRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
   brand:{flexDirection:'row',alignItems:'center',gap:8},title:{fontSize:19,fontWeight:'800',color:colors.brand},
   navScroll:{flexShrink:1},links:{gap:4},chatActions:{paddingLeft:12,borderLeftWidth:2,borderColor:colors.border},
   link:{minHeight:44,justifyContent:'center',paddingHorizontal:12,borderRadius:radii.sm},
+  navLabel:{flexDirection:'row',alignItems:'center',gap:12},
   selected:{backgroundColor:colors.accentSoft},linkText:{color:colors.brand,fontWeight:'700',fontSize:14},
   footer:{marginTop:'auto',gap:spacing.sm},copy:{fontSize:13,lineHeight:20,color:colors.muted},
 });

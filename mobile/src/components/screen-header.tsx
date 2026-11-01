@@ -18,9 +18,9 @@ export function ScreenHeader({
   onAction,
 }: ScreenHeaderProps) {
   return (
-    <View style={styles.header}>
+    <View testID="screen-header" style={styles.header}>
       <View style={styles.heading}>
-        <Text style={styles.title}>{title}</Text>
+        <Text testID="screen-title" style={styles.title}>{title}</Text>
         {subtitle !== undefined && <Text style={styles.subtitle}>{subtitle}</Text>}
       </View>
       <Pressable

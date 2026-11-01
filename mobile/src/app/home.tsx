@@ -31,7 +31,7 @@ function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabl
         accessibilityState={{ disabled }}
         disabled={disabled}
         onPress={onPress}>
-        <View style={[styles.quickCard, disabled && styles.disabled]}>
+        <View testID="home-action-card" style={[styles.quickCard, disabled && styles.disabled]}>
           <View style={[styles.quickIconWrap, { backgroundColor: tintSoft }]}>
             {icon === 'calendar' && <CalendarGlyph color={tint} size={22} />}
             {icon === 'chart' && <ChartGlyph color={tint} size={22} />}
@@ -99,9 +99,9 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
+        <View testID="home-content" style={styles.content}>
           <FadeIn>
-            <View style={styles.topBar}>
+            <View testID="home-topbar" style={styles.topBar}>
               <View style={styles.brandRow}>
                 <BrandMark size={36} />
                 <Text style={styles.brandName}>BanuChat</Text>
@@ -112,9 +112,9 @@ export default function HomeScreen() {
 
           <FadeIn delay={80}>
             <View style={styles.greetingBlock}>
-              <Text style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
+              <Text testID="home-greeting" style={styles.greeting}>{`Hola, ${activeProfile.alias}`}</Text>
               <Text style={styles.greetingSub}>¿Qué quieres consultar hoy?</Text>
-              {isCcdAuthenticated() && <Text style={styles.greetingSub}>{CCD_AUTH_NOTICE}</Text>}
+              {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.greetingSub}>{CCD_AUTH_NOTICE}</Text>}
             </View>
           </FadeIn>
 
@@ -126,19 +126,19 @@ export default function HomeScreen() {
               disabled={isStartingChat}
               onPress={() => void startChat()}
               scaleTo={0.98}>
-              <View style={styles.heroCard}>
+              <View testID="home-hero" style={styles.heroCard}>
                 <View aria-hidden style={styles.heroGlowOne} />
                 <View aria-hidden style={styles.heroGlowTwo} />
-                <View style={styles.heroIconWrap}>
+                <View testID="home-hero-icon" style={styles.heroIconWrap}>
                   <SparkGlyph color={colors.white} size={26} />
                 </View>
-                <Text style={styles.heroTitle}>Pregúntale a Banu</Text>
-                <Text style={styles.heroBody}>
+                <Text testID="home-hero-title" style={styles.heroTitle}>Pregúntale a Banu</Text>
+                <Text testID="home-hero-body" style={styles.heroBody}>
                   {isStartingChat
                     ? (isCcdLocal() ? 'Creando una conversación de demostración...' : 'Creando una conversación segura...')
                     : (isCcdKnowledge() ? 'Consulta los documentos CCD, pregunta de nuevo y abre las fuentes de las respuestas.' : 'Progreso, eventos, anuncios y material del programa, con citas verificables.')}
                 </Text>
-                <View style={styles.heroCtaRow}>
+                <View testID="home-hero-cta" style={styles.heroCtaRow}>
                   {isStartingChat && <ActivityIndicator color={colors.white} size="small" />}
                   <Text style={styles.heroCta}>{isStartingChat ? 'Abriendo...' : 'Iniciar conversación'}</Text>
                 </View>
@@ -153,7 +153,7 @@ export default function HomeScreen() {
             </View>
           )}
 
-          <View style={styles.quickSection}>
+          <View testID="home-actions" style={styles.quickSection}>
             <FadeIn delay={230}>
               <Text style={styles.sectionLabel}>Accesos directos</Text>
             </FadeIn>

@@ -100,8 +100,8 @@ export default function AnnouncementsScreen() {
         title="Noticias y novedades"
       />
 
-      {Platform.OS==='web' && <View style={styles.search}><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Buscar anuncios (mínimo 2 letras)" value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={styles.input}/><AppButton label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
-      <View style={styles.filterBar}>
+      {Platform.OS==='web' && <View testID="aux-controls" style={styles.search}><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Buscar anuncios (mínimo 2 letras)" value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={styles.input}/><AppButton label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
+      <View testID="aux-filters" style={styles.filterBar}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View accessibilityRole="radiogroup" style={styles.filters}>
             {FILTERS.map((option) => {
@@ -129,8 +129,8 @@ export default function AnnouncementsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
-          {isCcdAuthenticated() && <Text style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
+        <View testID="aux-content" style={styles.content}>
+          {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.stateText}>{CCD_AUXILIARY_NOTICE}</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
               <ActivityIndicator
@@ -158,7 +158,7 @@ export default function AnnouncementsScreen() {
           )}
 
           {loadState === 'success' && announcements.length > 0 && (
-            <View style={styles.announcementList}>
+            <View testID="announcement-list" style={styles.announcementList}>
               {announcements.map((announcement, index) => {
                 const meta = STATUS_META[announcement.temporal_status];
                 return (

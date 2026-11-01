@@ -22,8 +22,8 @@ export default function Oe2Screen(){
  const canSearch=[...search.trim()].length!==1;
  return <SafeAreaView style={styles.safe}>
   <ScreenHeader title="Publicaciones OE2" subtitle="Demostración ficticia independiente" onAction={()=>router.replace('/home')}/>
-  <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-   <Text style={styles.notice}>Datos ficticios publicados por el pipeline OE2. Esta sección no contiene documentos CCD ni sustituye el calendario, catálogo o noticias habituales.</Text>
+  <ScrollView testID="oe2-scroll" contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+   <Text testID="demo-notice" style={styles.notice}>Datos ficticios publicados por el pipeline OE2. Esta sección no contiene documentos CCD ni sustituye el calendario, catálogo o noticias habituales.</Text>
    <AppButton label="Banu al día" variant="secondary" onPress={()=>router.push('/oe2-changes')}/>
    <View style={styles.row} accessibilityRole="radiogroup">{categories.map(([value,label])=><Pressable key={value} accessibilityRole="radio" accessibilityState={{checked:category===value}} accessibilityLabel={`OE2 ${label}`} onPress={()=>select(value)} style={[styles.chip,category===value&&styles.selected]}><Text style={styles.label}>{label}</Text></Pressable>)}</View>
    <View style={styles.search}><TextInput accessibilityLabel="Buscar publicaciones OE2" placeholder="Buscar título o código (mínimo 2 letras)" value={search} onChangeText={setSearch} style={styles.input} maxLength={100} onSubmitEditing={()=>{if(canSearch)setQuery(search.trim());}}/><AppButton label="Buscar" disabled={!canSearch} onPress={()=>setQuery(search.trim())}/></View>
@@ -31,13 +31,13 @@ export default function Oe2Screen(){
    {state==='loading'&&<View style={styles.card} accessibilityLiveRegion="polite"><ActivityIndicator accessibilityLabel="Cargando publicaciones OE2"/><Text>Cargando publicaciones OE2...</Text></View>}
    {state==='error'&&<View style={styles.card} accessibilityLiveRegion="polite"><Text style={styles.title}>{error==='unavailable'?'Fuente de demostración no disponible':error==='session'?'Sesión expirada':'Error al consultar'}</Text><Text>{OE2_ERROR_TEXT[error]}</Text><AppButton label={error==='session'?'Iniciar sesión':'Reintentar'} onPress={()=>error==='session'?router.replace('/login'):setRevision(r=>r+1)}/></View>}
    {state==='success'&&data&&<>
-    <Text selectable style={styles.meta}>Última release publicada: {data.release_id}{'\n'}Publicación: {time(data.published_at)}</Text>
+    <Text selectable testID="source-meta" style={styles.meta}>Última release publicada: {data.release_id}{'\n'}Publicación: {time(data.published_at)}</Text>
     {!rows.length&&<View style={styles.card} accessibilityLiveRegion="polite"><Text style={styles.title}>Sin registros</Text><Text>No hay publicaciones ficticias con estos filtros.</Text><AppButton label="Limpiar filtros" onPress={()=>{setSearch('');setQuery('');setStatus('all');}}/></View>}
-    {rows.map(row=><View key={row.id} style={styles.card}>
+    {rows.map(row=><View key={row.id} testID="publication-card" style={styles.card}>
      <Text style={styles.tag}>FICTICIO · {category==='programming'?'Programación de grupo':category==='calls'?'Convocatoria':'Novedad'}</Text>
      <Text style={styles.title}>{row.title}</Text><Text style={styles.status}>{OE2_STATUS_TEXT[row.temporal_status]}</Text>
      {'course_code'in row?<><Text>Código: {row.course_code} · Periodo: {row.period}</Text><Text>Modalidad: {row.mode}</Text><Text>Inicio: {formatOe2CivilDate(row.start_date)} · Fin: {formatOe2CivilDate(row.end_date)}</Text></>:<><Text>{row.description}</Text><Text>{row.type==='calls'?'Apertura':'Publicada'}: {time(row.valid_from)}</Text>{row.valid_until!==null&&<Text>Cierre: {time(row.valid_until)}</Text>}{row.type==='calls'&&<Text>No determina elegibilidad individual.</Text>}</>}
-     <Text selectable style={styles.meta}>Origen: {row.source.source_id} · {row.source.record_id}{'\n'}Versión: {row.source.source_version}{'\n'}Publicación de origen: {time(row.source.published_at)}</Text>
+     <Text selectable testID="source-meta" style={styles.meta}>Origen: {row.source.source_id} · {row.source.record_id}{'\n'}Versión: {row.source.source_version}{'\n'}Publicación de origen: {time(row.source.published_at)}</Text>
     </View>)}
    </>}
    <AppButton label="Volver a Home" onPress={()=>router.replace('/home')}/>

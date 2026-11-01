@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {demoAccounts} from '../../backend/api/test/auth-i1b/accounts.ts';
 
-interface Browser {
+export interface Browser {
  origin:string;run:string;skipLoginControls:boolean;privacyOnly:boolean;call:(method:string,params?:Record<string,unknown>)=>Promise<any>;
  evaluate:(expression:string)=>Promise<any>;until:(expression:string,timeout?:number)=>Promise<void>;
  click:(label:string)=>Promise<void>;fill:(label:string,value:string)=>Promise<void>;snapshot:(name:string)=>Promise<any>;
@@ -135,7 +135,9 @@ export async function runWeb02(b:Browser){
   }
  }
  await menu();await b.evaluate(`document.querySelector('[aria-label="Navegar a Progreso"]').focus()`);await keyboard('Enter');await b.until(`location.pathname==='/progress'`);await pause(120);assert.equal(await b.evaluate(`document.activeElement.id`),'web-main');
- await keyboard('Tab');assert.ok(await b.evaluate(`document.activeElement!==document.body`));pass('web02-responsive-and-keyboard',{widths:[1366,768,390],screens:6,activeSection:true,enter:true,escapeFocus:true,tab:true});
+ await keyboard('Tab');assert.ok(await b.evaluate(`document.activeElement!==document.body`));
+ assert.ok(await b.evaluate(`document.activeElement.matches(':focus-visible')&&parseFloat(getComputedStyle(document.activeElement).outlineWidth)>=3`),'VISIBLE_KEYBOARD_FOCUS');
+ pass('web02-responsive-and-keyboard',{widths:[1366,768,390],screens:6,activeSection:true,enter:true,escapeFocus:true,tab:true,visibleFocus:true});
 
  step('web02-chat-draft');await b.call('Emulation.setDeviceMetricsOverride',{width:1366,height:900,deviceScaleFactor:1,mobile:false});await pause(120);await b.click('Navegar a Chat');
  assert.equal(await b.evaluate(`!!document.querySelector('[aria-label="Nueva conversación web"]')`),true);await b.click('Nueva conversación web');await b.until(`location.pathname==='/chat'&&!![...document.querySelectorAll('textarea')].find(e=>(${visible})(e)&&!e.readOnly)`);

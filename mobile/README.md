@@ -1,5 +1,9 @@
 # BanuChat Mobile
 
+WEB-03 mejora la presentación del mismo proyecto en navegador, conservando los
+flujos de WEB-02. La comparación visual, validaciones y límites están en el
+[checkpoint WEB-03](../docs/transition/CHECKPOINT-WEB-03.md).
+
 WEB-02 reutiliza este mismo proyecto en navegador. Arranque local:
 `npm run web:export`, luego `npm run web:serve`, y abrir
 `http://127.0.0.1:8085/login`. Requiere Unified en 3004 y una cuenta ficticia

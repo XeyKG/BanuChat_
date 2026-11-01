@@ -17,17 +17,17 @@ export default function Oe2ChangesScreen(){
  const filter=(values:Record<string,string>,selected:string|undefined,onSelect:(value:string|undefined)=>void,label:string)=><View accessibilityRole="radiogroup" style={styles.filters}>{[['all','Todos'],...Object.entries(values)].map(([value,title])=><Pressable key={value} accessibilityRole="radio" accessibilityLabel={`${label}: ${title}`} accessibilityState={{checked:value===(selected??'all')}} style={[styles.chip,value===(selected??'all')&&styles.selected]} onPress={()=>onSelect(value==='all'?undefined:value)}><Text>{title}</Text></Pressable>)}</View>;
  return <SafeAreaView style={styles.safe}>
   <ScreenHeader title="Banu al día" subtitle="Cambios entre publicaciones OE2" onAction={()=>router.replace('/home')}/>
-  <ScrollView contentContainerStyle={styles.container}>
-   <Text style={styles.notice}>Comparación de datos ficticios aprobados. No son documentos CCD ni notificaciones personales de novedades no leídas.</Text>
+  <ScrollView testID="oe2-scroll" contentContainerStyle={styles.container}>
+   <Text testID="demo-notice" style={styles.notice}>Comparación de datos ficticios aprobados. No son documentos CCD ni notificaciones personales de novedades no leídas.</Text>
    <AppButton label="Volver a Publicaciones OE2" variant="secondary" onPress={back}/>
    {filter(CATEGORY_LABELS,category,v=>setCategory(v as ChangeCategory|undefined),'Información')}
    {filter(CHANGE_LABELS,type,v=>setType(v as ChangeType|undefined),'Cambio')}
    {state==='loading'&&<View style={styles.card} accessibilityLiveRegion="polite"><ActivityIndicator accessibilityLabel="Comparando publicaciones OE2"/><Text>Comparando publicaciones...</Text></View>}
    {state==='error'&&<View style={styles.card} accessibilityLiveRegion="polite"><Text style={styles.title}>{error==='session'?'Sesión expirada':'No se pudo comparar la fuente'}</Text><Text>{OE2_ERROR_TEXT[error]}</Text><AppButton label={error==='session'?'Iniciar sesión':'Reintentar'} onPress={()=>error==='session'?router.replace('/login'):setRetry(r=>r+1)}/></View>}
    {state==='success'&&data&&<>
-    <Text selectable style={styles.meta}>Publicación actual en BanuChat: {formatChangeInstant(data.current_published_at)}{'\n'}{data.current_release_id}{data.previous_published_at&&`\nPublicación anterior en BanuChat: ${formatChangeInstant(data.previous_published_at)}\n${data.previous_release_id}`}</Text>
+    <Text selectable testID="source-meta" style={styles.meta}>Publicación actual en BanuChat: {formatChangeInstant(data.current_published_at)}{'\n'}{data.current_release_id}{data.previous_published_at&&`\nPublicación anterior en BanuChat: ${formatChangeInstant(data.previous_published_at)}\n${data.previous_release_id}`}</Text>
     {data.comparison_status==='no_previous'?<View style={styles.card}><Text style={styles.title}>Sin versión anterior comparable</Text><Text>Esta publicación no se presenta como una lista de altas.</Text></View>:<>
-     <View style={styles.card}><Text style={styles.title}>Resumen de la comparación</Text><Text>Añadidos: {data.counts.created} · Modificados: {data.counts.modified} · Retirados: {data.counts.removed}</Text><Text>Sin cambios: {data.counts.unchanged}</Text><Text style={styles.meta}>El resumen corresponde a las tres categorías; los filtros limitan las tarjetas.</Text></View>
+     <View style={styles.card}><Text style={styles.title}>Resumen de la comparación</Text><Text>Añadidos: {data.counts.created} · Modificados: {data.counts.modified} · Retirados: {data.counts.removed}</Text><Text>Sin cambios: {data.counts.unchanged}</Text><Text testID="source-meta" style={styles.meta}>El resumen corresponde a las tres categorías; los filtros limitan las tarjetas.</Text></View>
      {!data.changes.length&&<View style={styles.card} accessibilityLiveRegion="polite"><Text style={styles.title}>Sin cambios{data.counts.created+data.counts.modified+data.counts.removed>0?' con estos filtros':''}</Text><Text>No hay registros afectados para mostrar.</Text></View>}
      {data.changes.map(c=><Oe2ChangeCard key={data.current_release_id+c.id} change={c} onCurrent={()=>router.push({pathname:'/oe2',params:{category:c.category,query:[...c.title].slice(0,100).join('')}})}/>)}
      {data.has_more&&<Text>Mostrando {data.changes.length} de {data.matched_count}. Refina los filtros para consultar otros cambios.</Text>}

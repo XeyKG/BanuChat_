@@ -84,7 +84,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
       </Pressable>
 
       {isExpanded && (
-        <View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} style={styles.list}>
+        <View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} testID="chat-sources" style={styles.list}>
           {citations.map((citation) => {
             const detail = sourceDetail(citation);
             const canOpenDocument = hasOpenableDocument(citation);
@@ -94,7 +94,7 @@ export function ChatSources({ citations }: { citations: Citation[] }) {
                   <Text style={styles.sourceIndex}>{citation.index + 1}</Text>
                 </View>
                 <View style={styles.sourceText}>
-                  <Text style={styles.sourceKind}>{KIND_LABELS[citation.source_kind]}</Text>
+                  <Text testID="source-kind" style={styles.sourceKind}>{KIND_LABELS[citation.source_kind]}</Text>
                   <Text style={styles.sourceLabel}>{readableLabel(citation)}</Text>
                   {detail !== null && <Text style={styles.sourceDetail}>{detail}</Text>}
                   {canOpenDocument && (

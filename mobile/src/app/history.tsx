@@ -149,7 +149,7 @@ export default function HistoryScreen() {
         title={isCcdLocal() ? 'Historial de demostración' : 'Historial'}
       />
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.content}>
+        <View testID="history-content" style={styles.content}>
           {isCcdLocal() && <Text style={styles.stateText}>{CCD_NOTICE} Al recargar o finalizar, se pierde esta lista local; el backend conserva los chats. No se enumeran conversaciones de otras aperturas.</Text>}
           {loadState === 'loading' && (
             <View accessibilityLiveRegion="polite" style={styles.stateCard}>
@@ -200,7 +200,7 @@ export default function HistoryScreen() {
                   accessibilityState={{ busy: isStartingChat }}
                   disabled={isStartingChat}
                   onPress={() => void startNewConversation()}>
-                  <View style={styles.newConversationCard}>
+                  <View testID="history-new" style={styles.newConversationCard}>
                     <View style={styles.newConversationIcon}>
                       <ChatGlyph color={colors.white} size={18} />
                     </View>
@@ -211,10 +211,10 @@ export default function HistoryScreen() {
                 </PressableScale>
               </FadeIn>
 
-              <View style={styles.list}>
+              <View testID="history-list" style={styles.list}>
                 {conversations.map((conversation, index) => (
                   <FadeIn key={conversation.conversation_id} delay={80 + index * 60}>
-                    <View style={styles.conversationCard}>
+                    <View testID="history-card" style={styles.conversationCard}>
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Abrir conversación del ${formatStartedAt(conversation.started_at)}`}

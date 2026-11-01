@@ -334,7 +334,7 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}>
-        <View style={styles.header}>
+        <View testID="chat-header" style={styles.header}>
           <View style={styles.headerIdentity}>
             <View style={styles.banuAvatar}>
               <BrandMark size={38} />
@@ -364,9 +364,9 @@ export default function ChatScreen() {
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
           onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}>
-          <View style={styles.messageColumn}>
+          <View testID="chat-column" style={styles.messageColumn}>
             {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
-            {isCcdAuthenticated() && <Text style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
+            {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
             {conversationState === 'loading' && (
               <View accessibilityLiveRegion="polite" style={styles.conversationStateCard}>
                 <Text style={styles.conversationStateText}>Cargando conversación...</Text>
@@ -415,7 +415,7 @@ export default function ChatScreen() {
                     <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo responder sobre documentación CCD, abrir sus fuentes y consultar tu historial. Cuando estén disponibles, también puedes explorar progreso, calendario y novedades de demostración. ¿Qué quieres consultar?' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
-                <View style={styles.suggestionGrid}>
+                <View testID="chat-suggestions" style={styles.suggestionGrid}>
                   {(isCcdKnowledge() ? ['¿Cuáles son los cursos de Competencias Digitales?', '¿Qué son las pruebas diagnósticas?', '¿Cuál es el correo de contacto del CCD?', '¿Qué puedes hacer?'] : SUGGESTIONS).map((suggestion, index) => (
                     <FadeIn key={suggestion} delay={140 + index * 80}>
                       <Pressable
@@ -439,8 +439,8 @@ export default function ChatScreen() {
             {conversationState === 'ready' && messages.map((message) =>
               message.role === 'user' ? (
                 <BubbleIn key={message.message_id} style={styles.userRow}>
-                  <View style={styles.userBubble}>
-                    <Text style={styles.userText}>{message.content}</Text>
+                  <View testID="chat-user" style={styles.userBubble}>
+                    <Text testID="chat-message" style={styles.userText}>{message.content}</Text>
                   </View>
                 </BubbleIn>
               ) : (
@@ -448,8 +448,8 @@ export default function ChatScreen() {
                   <View style={styles.assistantAvatar}>
                     <BrandMark size={30} />
                   </View>
-                  <View style={styles.assistantBody}>
-                    <Text style={styles.assistantText}>{message.content}</Text>
+                  <View testID="chat-assistant" style={styles.assistantBody}>
+                    <Text testID="chat-message" style={styles.assistantText}>{message.content}</Text>
 
                     {message.insufficient_evidence && (
                       <View accessibilityRole="alert" style={styles.evidenceWarning}>
@@ -482,16 +482,16 @@ export default function ChatScreen() {
           </View>
         </ScrollView>
 
-        <View style={styles.composer}>
+        <View testID="chat-composer" style={styles.composer}>
           {sendError === 'conflict' && (
-            <View accessibilityRole="alert" style={styles.errorBanner}>
+            <View accessibilityRole="alert" testID="chat-error" style={styles.errorBanner}>
               <Text style={styles.errorText}>No se puede continuar esta conversación. La revisión documental pudo cambiar o existe una operación concurrente. El historial se conserva. Abre una conversación nueva para usar la revisión actual; no se trasladarán mensajes.</Text>
               <AppButton label="Abrir conversación nueva" loading={isStartingNew} onPress={() => void openNewConversation()} />
               {newConversationError && <Text style={styles.errorText}>No fue posible crear otra conversación. El historial sigue disponible.</Text>}
             </View>
           )}
           {sendError === 'http' && (
-            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+            <View accessibilityLiveRegion="polite" testID="chat-error" style={styles.errorBanner}>
               <Text style={styles.errorText}>No fue posible obtener una respuesta. Inténtalo de nuevo.</Text>
             </View>
           )}
@@ -569,7 +569,7 @@ export default function ChatScreen() {
           )}
 
           {sendError === 'invalid_response' && (
-            <View accessibilityLiveRegion="polite" style={styles.errorBanner}>
+            <View accessibilityLiveRegion="polite" testID="chat-error" style={styles.errorBanner}>
               <Text style={styles.errorText}>
                 No fue posible interpretar la respuesta confirmada. Vuelve al inicio para continuar
                 de forma segura.
@@ -577,8 +577,8 @@ export default function ChatScreen() {
             </View>
           )}
 
-          <View style={styles.composerRow}>
-            <View style={styles.inputShell}>
+          <View testID="chat-composer-row" style={styles.composerRow}>
+            <View testID="chat-input-shell" style={styles.inputShell}>
               <TextInput
                 accessibilityLabel="Mensaje"
                 editable={!isSending && !isConversationLocked}
