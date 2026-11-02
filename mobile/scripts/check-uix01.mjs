@@ -9,12 +9,13 @@ import {secondaryReview} from './uix02-review.mjs';
 
 const stage = process.argv[2];
 assert.ok(['before', 'after'].includes(stage), 'Use before or after');
-const secondary=process.argv.includes('--secondary');
+const uix04b=process.argv.includes('--uix04b');
+const secondary=process.argv.includes('--secondary')||uix04b;
 const approved=process.argv.includes('--uix04a');
 const brand=process.argv.includes('--brand')||approved;
-const widths=approved?[1440,820,390,360]:[1366,768,390];
-const root = path.resolve(approved?'.expo/uix04a':brand?'.expo/uix03':secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
-if(approved&&stage==='before'){
+const widths=approved||uix04b?[1440,820,390,360]:[1366,768,390];
+const root = path.resolve(uix04b?'.expo/uix04b':approved?'.expo/uix04a':brand?'.expo/uix03':secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
+if((approved||uix04b)&&stage==='before'){
   let exists=false;try{await readFile(path.join(run,'report.json'));exists=true;}catch(error){if(error.code!=='ENOENT')throw error;}
   assert.equal(exists,false,'UIX04A_BASELINE_EXISTS_REFUSE_OVERWRITE');
 }
@@ -32,7 +33,7 @@ const me={principal_id:id,session_id:id,synthetic_uid:'U08000001',session_expire
 const tokenPair={access_token:'A'.repeat(43),refresh_token:'B'.repeat(42)+'A',token_type:'Bearer',expires_in:900,session_expires_at:expires};
 const citation={index:0,source_kind:'document',label:'Documento: Guía sintética de estudio · UIX',locator:'section:1: Orientación de ejemplo',release_id:id,document_version_id:docId,artifact_url:`/api/v2/documents/${docId}/artifact`};
 const normalMessages=[{message_id:id,role:'user',content:'¿Cómo puedo organizar mi semana de estudio? Ejemplo sintético UIX.',created_at:timestamp},{message_id:docId,role:'assistant',content:'Ejemplo visual · contenido 100 % sintético.\n\nOrganiza las tareas en bloques de estudio y reserva un momento para revisar tus avances. Puedes consultar las fuentes de esta respuesta para ampliar la información.\n\nEste texto solo permite evaluar la interfaz; no describe una regla institucional.',created_at:timestamp,insufficient_evidence:false,citations:[citation]}];
-const review=secondary?secondaryReview({id,docId,me,timestamp,pause}):null;
+const review=secondary?secondaryReview({id,docId,me,timestamp,pause,widths,uix04b}):null;
 let mode='normal', agendaMode='empty', loginFault=0, messageFault=0, sequence=0, socket, postCount=0, escapedApi=0;
 const pending=new Map(), shots=[], checks=[], errors=[];
 async function call(method,params={}){const key=++sequence;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(key);reject(Error('CDP_TIMEOUT '+method));},30000);pending.set(key,{resolve,reject,timer});socket.send(JSON.stringify({id:key,method,params}));});}
@@ -77,7 +78,7 @@ try{
  for(const w of widths)await capture('login',w);
  await fill('Usuario',me.synthetic_uid);await fill('Contraseña','Solo UIX sintético');loginFault=401;await click('Iniciar sesión');await until(`document.body.innerText.includes('Usuario o contraseña inválidos.')`);await capture('login-error',390);checks.push('login rejected credentials');
  await fill('Contraseña','Solo UIX sintético');await click('Iniciar sesión');await until(`location.pathname==='/home'`);
- if(review){await review.run({nav,capture,size,click,until,evaluate,key,call,menu,checks,stage});}else{
+ if(review){await review.run({nav,capture,size,click,fill,until,evaluate,key,call,menu,checks,stage});}else{
  for(const w of widths)await capture('home',w);
  await click('Abrir chat con Banu');await until(`document.body.innerText.includes('Ejemplo visual ·')`);
  for(const w of widths){await capture('chat',w);await click('Mostrar 1 fuentes');await capture('sources',w);await click('Ocultar 1 fuentes');}

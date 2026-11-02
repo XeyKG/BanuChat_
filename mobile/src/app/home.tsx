@@ -54,7 +54,10 @@ function QuickAction({ title, description, tint, tintSoft, icon, onPress, disabl
 
 export default function HomeScreen() {
   const router = useRouter();
-  const width=useWindowDimensions().width;
+  const {width,height,fontScale}=useWindowDimensions();
+  // Reclaim spacing on normal Android windows; large text and short windows
+  // retain the roomy composition. Text scaling itself is never overridden.
+  const compactAndroid=Platform.OS==='android'&&height>=600&&width>=340&&fontScale<=1.3;
   const { activeProfile, clearSession } = useSession();
   const {snapshot}=useAuth();
   const canChat=isCcdLocal()||snapshot.me?.capabilities.includes('chat')===true;
@@ -102,16 +105,16 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View testID="home-content" style={styles.content}>
+      <ScrollView contentContainerStyle={[styles.container,compactAndroid&&styles.containerCompact]}>
+        <View testID="home-content" style={[styles.content,compactAndroid&&styles.contentCompact]}>
           {Platform.OS!=='web'&&<View testID="home-topbar" style={styles.topBar}><BanuWordmark compact/></View>}
           <FadeIn><BanuPageHeading eyebrow="TU ESPACIO ACADÉMICO" title={`Hola, ${activeProfile.alias}`} subtitle="Una pregunta es un buen punto de partida." titleTestID="home-greeting"/></FadeIn>
           <View testID="home-layout" style={styles.homeLayout}>
           <FadeIn style={styles.heroSlot}><PressableScale accessibilityLabel="Abrir chat con Banu" accessibilityRole="button" accessibilityState={{busy:isStartingChat,disabled:isStartingChat||!canChat}} disabled={isStartingChat||!canChat} onPress={()=>void startChat()} scaleTo={0.985}>
-            <View testID="home-hero" style={styles.heroCard}>
-              <View testID="home-hero-copy" style={styles.heroCopy}>
+            <View testID="home-hero" style={[styles.heroCard,compactAndroid&&styles.heroCompact]}>
+              <View testID="home-hero-copy" style={[styles.heroCopy,compactAndroid&&styles.heroCopyCompact]}>
                 <Text testID="home-hero-eyebrow" style={styles.heroEyebrow}>UNA CONVERSACIÓN, MUCHAS POSIBILIDADES</Text>
-                <Text testID="home-hero-title" style={[styles.heroTitle,width<760&&{maxWidth:205}]}>{'Tu próxima respuesta\nempieza con Banu.'}</Text>
+                <Text testID="home-hero-title" style={[styles.heroTitle,width<760&&{maxWidth:205},compactAndroid&&{maxWidth:'100%'}]}>{'Tu próxima respuesta\nempieza con Banu.'}</Text>
                 <Text testID="home-hero-body" style={[styles.heroBody,width<760&&{maxWidth:width<375?180:200}]}>{isStartingChat?'Preparando tu conversación…':isCcdKnowledge()?'Consulta el material disponible y explora sus fuentes.':'Progreso, eventos y material del programa, con fuentes que puedes revisar.'}</Text>
                 <View testID="home-hero-cta" style={styles.heroCtaRow}>{isStartingChat&&<ActivityIndicator color={colors.banuNavy} size="small"/>}<Text style={styles.heroCta}>{isStartingChat?'Abriendo…':'Hablar con Banu'}</Text><ChevronGlyph color={colors.banuNavy} size={16}/></View>
               </View>
@@ -218,6 +221,10 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
   container: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingVertical: spacing.xl },
+  containerCompact:{paddingVertical:spacing.md},
+  contentCompact:{gap:spacing.md},
+  heroCompact:{minHeight:320,padding:spacing.lg},
+  heroCopyCompact:{gap:spacing.xs},
   content: { width: '100%', maxWidth: Platform.OS==='web'?1180:layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },

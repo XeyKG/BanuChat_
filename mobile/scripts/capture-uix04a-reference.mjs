@@ -6,8 +6,9 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
-const root=path.resolve('.expo/uix04a'),out=path.join(root,'reference-render'),profile=path.join(root,'reference-edge-'+randomUUID());
-const reference=path.resolve(process.argv[2]??path.join(root,'reference/BanuChat_mockup_refinado_UIX04.html'));
+const secondary=process.argv.includes('--uix04b');
+const root=path.resolve(secondary?'.expo/uix04b':'.expo/uix04a'),out=path.join(root,'reference-render'),profile=path.join(root,'reference-edge-'+randomUUID());
+const reference=path.resolve(process.argv.slice(2).find(arg=>!arg.startsWith('--'))??'.expo/uix04a/reference/BanuChat_mockup_refinado_UIX04.html');
 const sourceSha256=createHash('sha256').update(await readFile(reference)).digest('hex');
 assert.equal(sourceSha256,'7c0a0ebdce8dba32431feba7e2417a3d0cce247d2ec089f3af6a60d53c785927','APPROVED_UIX04_REFERENCE_HASH_MISMATCH');
 await mkdir(out,{recursive:true});
@@ -19,6 +20,6 @@ let port;for(let i=0;i<80;i++){try{port=(await readFile(path.join(profile,'DevTo
 const targets=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();socket=new WebSocket(targets.find(t=>t.type==='page').webSocketDebuggerUrl);await new Promise((resolve,reject)=>{socket.onopen=resolve;socket.onerror=reject;});socket.onmessage=e=>{const d=JSON.parse(String(e.data));if(d.id){const p=pending.get(d.id);if(p){clearTimeout(p.timer);pending.delete(d.id);d.error?p.reject(Error(d.error.message)):p.resolve(d.result);}}else if(d.method==='Runtime.exceptionThrown')errors.push(d.params.exceptionDetails.text);};
 await call('Page.enable');await call('Runtime.enable');await call('Network.enable');await call('Network.setBlockedURLs',{urls:['http://*','https://*']});await call('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
 const url=pathToFileURL(reference).href;
-for(const page of ['login','home','chat'])for(const width of [1440,820,390,360]){await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await call('Page.navigate',{url:url+'#'+page});await pause(700);const result=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const file=page+'-'+width+'.png';await writeFile(path.join(out,file),Buffer.from(result.data,'base64'));shots.push(file);}
+for(const page of secondary?['history','progress','calendar','news','oe2','changes','notifications','document']:['login','home','chat'])for(const width of [1440,820,390,360]){await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await call('Page.navigate',{url:url+'#'+page});await pause(700);const result=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});const file=page+'-'+width+'.png';await writeFile(path.join(out,file),Buffer.from(result.data,'base64'));shots.push(file);}
 if(errors.length)throw Error(errors.join('; '));console.log('REFERENCE_RENDERED '+shots.length+' offline screenshots');
 }finally{await writeFile(path.join(out,'report.json'),JSON.stringify({scope:'Approved HTML reference only, offline; never app/API evidence',reference:path.basename(reference),sourceSha256,shots,errors},null,2));if(socket?.readyState===WebSocket.OPEN){try{await call('Browser.close');}catch{}socket.close();}if(browser.exitCode===null)browser.kill();}

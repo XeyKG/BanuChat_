@@ -11,7 +11,7 @@ import {
 import { AppButton } from '@/components/app-button';
 import { isCcdKnowledge } from '@/config/demo-mode';
 import { ScreenHeader } from '@/components/screen-header';
-import {ContentColumn,ScreenState,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
+import {ContentColumn,ScreenState,SourceMeta,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { colors, radii, spacing, typography } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
@@ -83,7 +83,7 @@ export default function DocumentScreen() {
   }, [documentVersionId, isValidId, retryCount]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="secondary-screen" style={styles.safeArea}>
       <ScreenHeader
         actionLabel="Volver"
         onAction={() => router.back()}
@@ -97,7 +97,7 @@ export default function DocumentScreen() {
         <View style={secondaryStyles.scroll}><ContentColumn reading><ScreenState kind="loading" title="Cargando documento..."/></ContentColumn></View>
       ) : visibleLoadState === 'error' ? (
         <View style={secondaryStyles.scroll}><ContentColumn reading><ScreenState kind="error" title="No fue posible abrir el documento" body={errorMessage(errorKind)}>
-          <AppButton
+          <AppButton tone="banu"
             label="Reintentar"
             onPress={() => setRetryCount((current) => current + 1)}
           />
@@ -107,7 +107,8 @@ export default function DocumentScreen() {
           <View style={styles.notice}>
             <Text style={styles.noticeText}>Revisa la fecha, el periodo y el alcance indicados en la fuente.</Text>
           </View>
-          <SurfaceCard testID="document-card">
+          <SourceMeta>Versión del documento: {documentVersionId}</SourceMeta>
+          <SurfaceCard testID="document-card" style={{boxShadow:'none'}}>
             <Text selectable testID="document-text" style={styles.documentText}>
               {content}
             </Text>
@@ -119,21 +120,21 @@ export default function DocumentScreen() {
 }
 
 const styles = StyleSheet.create({
-safeArea: { flex: 1, backgroundColor: colors.background },
+safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
 notice: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radii.md,
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.banuSoft,
   },
 noticeText: {
-    color: colors.accentStrong,
+    color: colors.banuMagentaStrong,
     fontSize: typography.small,
     fontWeight: '700',
     textAlign: 'center',
   },
 documentText: {
-    color: colors.ink,
+    color: colors.banuInk,
     fontSize: typography.body,
     lineHeight: 25,
   }

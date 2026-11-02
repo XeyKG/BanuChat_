@@ -23,7 +23,9 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
   const {snapshot, client} = useAuth();
   const router = useRouter(), pathname = usePathname();
   const params = useGlobalSearchParams<{conversation_id?:string}>();
-  const desktop = useWindowDimensions().width >= 760;
+  const viewportWidth=useWindowDimensions().width;
+  const desktop = viewportWidth >= 760;
+  const tablet=desktop&&viewportWidth<=1040;
   const [menu,setMenu] = useState(false), [chatMenu,setChatMenu] = useState(false);
   const [starting,setStarting] = useState(false), [error,setError] = useState(false);
   const startingRef = useRef(false);
@@ -64,7 +66,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
   // Keep the screen subtree stable at every breakpoint, preserving chat state.
   return <View nativeID="banu-web-frame" style={[styles.frame, {flexDirection: desktop ? 'row' : 'column'}]}>
     <a className="web-skip" href="#web-main">Saltar al contenido</a>
-    <View nativeID="web-navigation-shell" style={[styles.navigation, desktop ? styles.sidebar : styles.topbar]}>
+    <View nativeID="web-navigation-shell" style={[styles.navigation, desktop ? styles.sidebar : styles.topbar,tablet&&styles.tabletSidebar]}>
       <View style={styles.brandRow}><BanuWordmark compact={!desktop}/>
         {!desktop && <Pressable accessibilityRole="button" accessibilityLabel="Menú de navegación" aria-expanded={menu} aria-controls="web-navigation" style={styles.link} onPress={()=>setMenu(v=>!v)}><Text style={styles.linkText}>{menu?'Cerrar menú':'Menú'}</Text></Pressable>}
       </View>
@@ -88,16 +90,18 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
             </View>}
           </>}
         </View>)}
-        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar sesión web" style={styles.link}
+        {!desktop&&<Pressable accessibilityRole="button" accessibilityLabel="Cerrar sesión web" style={styles.link}
           onPress={() => { void client.logout().finally(() => router.replace('/login')); }}>
           <Text style={styles.linkText}>Cerrar sesión</Text>
-        </Pressable>
+        </Pressable>}
       </ScrollView>}
-      {desktop && <View style={styles.footer}><View style={styles.account}><MonogramAvatar alias={snapshot.me?.profile.alias??'BanuChat'} size={32}/><Text style={styles.accountName}>{snapshot.me?.profile.alias}</Text></View>
+      {desktop && <View style={[styles.footer,tablet&&styles.tabletFooter]}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Cerrar sesión web" style={styles.link} onPress={()=>{void client.logout().finally(()=>router.replace('/login'));}}><Text style={styles.linkText}>Cerrar sesión</Text></Pressable>
+        <View style={styles.account}><MonogramAvatar alias={snapshot.me?.profile.alias??'BanuChat'} size={32}/><Text style={styles.accountName}>{snapshot.me?.profile.alias}</Text></View>
         <Text style={[styles.copy,styles.footerCopy]}>Demostración local · cuenta ficticia</Text>
         <Text style={[styles.copy,styles.footerCopy]}>Al recargar se cierra el acceso en esta pestaña. Usa Cerrar sesión para revocarlo.</Text></View>}
     </View>
-    <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{desktop&&['/home','/chat'].includes(pathname)&&<View testID="core-topline" style={styles.topline}><Text style={styles.copy}>Mi espacio　/　{pathname==='/home'?'Inicio':'Conversar con Banu'}</Text><Text style={styles.localPill}>Demostración local</Text></View>}{children}</View>
+    <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{desktop&&<View testID="core-topline" style={styles.topline}><Text style={styles.copy}>Mi espacio　/　{pathname==='/chat'?'Conversar con Banu':links.find(item=>item.path===pathname)?.label??'Documento'}</Text><Text style={styles.localPill}>Demostración local</Text></View>}{children}</View>
     {!desktop&&<BanuBottomNav active={pathname==='/home'?'home':pathname==='/chat'?'chat':'other'} onHome={()=>go('/home')} onChat={()=>{if(pathname==='/chat')focusContent();else if(lastChat)router.navigate({pathname:'/chat',params:{conversation_id:lastChat}});else void newChat();}} onHistory={()=>go('/history')} onMenu={()=>setMenu(v=>!v)} busy={starting} canChat={can('chat')} canHistory={can('history')}/>}
   </View>;
 }
@@ -107,10 +111,12 @@ const styles = StyleSheet.create({
   main:{flex:1,minWidth:0,minHeight:0},
   navigation:{backgroundColor:colors.surface,borderColor:colors.banuBorder,padding:spacing.md,gap:spacing.md},
   sidebar:{width:246,borderRightWidth:1,borderRightColor:colors.banuBorder,paddingTop:spacing.xl},
+  tabletSidebar:{paddingVertical:spacing.sm,gap:spacing.xs},
+  tabletFooter:{gap:spacing.xxs,paddingTop:spacing.xs},
   topbar:{borderBottomWidth:1,borderBottomColor:colors.banuBorder,padding:12,maxHeight:'65%'},
   brandRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
   brand:{flexDirection:'row',alignItems:'center',gap:spacing.sm},title:{fontSize:20,fontWeight:'800',letterSpacing:-0.6,color:colors.banuNavy},
-  navScroll:{flexShrink:1},links:{gap:4},chatActions:{paddingLeft:12,borderLeftWidth:2,borderColor:colors.banuBorder},
+  navScroll:{flex:1,minHeight:0},links:{gap:4},chatActions:{paddingLeft:12,borderLeftWidth:2,borderColor:colors.banuBorder},
   link:{minHeight:48,justifyContent:'center',paddingVertical:spacing.xs,paddingHorizontal:spacing.sm,borderRadius:radii.sm},
   navLabel:{flexDirection:'row',alignItems:'center',gap:12},
   selected:{backgroundColor:colors.banuSoft},linkText:{color:colors.banuNavy,fontWeight:'400',fontSize:13},

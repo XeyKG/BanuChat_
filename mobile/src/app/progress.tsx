@@ -14,7 +14,7 @@ import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
-import { colors, radii, spacing, typography, textStyles } from '@/ui/tokens';
+import { colors, radii, shadows, spacing, typography, textStyles } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 type ProgressFilter = 'all' | ProgressStatus;
@@ -27,8 +27,8 @@ const FILTERS: { value: ProgressFilter; label: string }[] = [
 ];
 
 const STATUS_META: Record<ProgressStatus, { label: string; tint: string; soft: string }> = {
-  enrolled: { label: 'Inscrito', tint: colors.muted, soft: colors.border },
-  in_progress: { label: 'En progreso', tint: colors.accent, soft: colors.accentSoft },
+  enrolled: { label: 'Inscrito', tint: colors.banuMuted, soft: colors.banuBorder },
+  in_progress: { label: 'En progreso', tint: colors.banuMagenta, soft: colors.banuSoft },
   completed: { label: 'Completado', tint: colors.success, soft: colors.successSoft },
 };
 
@@ -110,7 +110,7 @@ export default function ProgressScreen() {
   const showSummary = loadState === 'success' && filter === 'all' && courses.length > 0;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="secondary-screen" style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
         subtitle={`Perfil activo: ${visibleAlias}`}
@@ -137,12 +137,10 @@ export default function ProgressScreen() {
                     <Text style={styles.summaryStatValue}>{summary.inProgress}</Text>
                     <Text style={styles.summaryStatLabel}>En progreso</Text>
                   </View>
-                  <View style={styles.summaryDivider} />
                   <View style={styles.summaryStat}>
                     <Text style={styles.summaryStatValue}>{summary.completed}</Text>
                     <Text style={styles.summaryStatLabel}>Completados</Text>
                   </View>
-                  <View style={styles.summaryDivider} />
                   <View style={styles.summaryStat}>
                     <Text style={styles.summaryStatValue}>{summary.enrolled}</Text>
                     <Text style={styles.summaryStatLabel}>Inscritos</Text>
@@ -153,7 +151,7 @@ export default function ProgressScreen() {
           )}
 
           {loadState === 'loading' && <ScreenState kind="loading" title="Cargando progreso..."/>}
-          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar el progreso" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>}
+          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar el progreso" body="Comprueba la conexión e intenta nuevamente."><AppButton tone="banu" label="Reintentar" onPress={retry}/></ScreenState>}
           {loadState === 'success' && courses.length === 0 && <ScreenState kind="empty" title="Sin cursos" body="No hay cursos con el estado seleccionado."/>}
 
           {loadState === 'success' && courses.length > 0 && (
@@ -180,8 +178,8 @@ export default function ProgressScreen() {
                             course.status === 'completed'
                               ? colors.success
                               : course.status === 'in_progress'
-                                ? colors.accent
-                                : colors.borderStrong
+                                ? colors.banuMagenta
+                                : colors.banuBorder
                           }
                         />
                       </View>
@@ -215,24 +213,25 @@ export default function ProgressScreen() {
 }
 
 const styles = StyleSheet.create({
-safeArea: { flex: 1, backgroundColor: colors.background },
+safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
 summaryCard: {
     overflow: 'hidden',
     gap: spacing.sm,
-    padding: spacing.md,
+    padding: spacing.xl,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
     borderWidth:1,
-    borderColor:colors.border,
+    borderColor:colors.banuBorder,
+    ...shadows.banuPanel,
   },
 summaryMain: { gap: spacing.xxs },
 summaryLabel: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.small,
     fontWeight: '600',
   },
 summaryValue: {
-    color: colors.brand,
+    color: colors.banuNavy,
     fontSize: typography.heading,
     lineHeight: 30,
     fontWeight: '800',
@@ -240,23 +239,24 @@ summaryValue: {
   },
 summaryStats: {
     flexDirection: 'row',
+    flexWrap:'wrap',
+    gap:spacing.sm,
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.banuBorder,
     paddingTop: spacing.md,
   },
-summaryStat: { flex: 1, alignItems: 'center', gap: 2 },
-summaryStatValue: { color: colors.brand, fontSize: typography.body, fontWeight: '700' },
-summaryStatLabel: { color: colors.textSecondary, fontSize: typography.meta, fontWeight: '600',textAlign:'center' },
-summaryDivider: { width: 1, height: 30, backgroundColor: colors.border },
+summaryStat: { flexGrow:1, flexBasis:'28%', minWidth:110, alignItems: 'center', gap: spacing.xxs },
+summaryStatValue: { color: colors.banuNavy, fontSize: typography.body, fontWeight: '700' },
+summaryStatLabel: { color: colors.banuSecondary, fontSize: typography.meta, fontWeight: '600',textAlign:'center' },
 courseHeading: { gap: spacing.xs, alignItems: 'flex-start' },
-courseName: { ...textStyles.heading, color: colors.ink },
+courseName: { ...textStyles.body, fontWeight:'700', color: colors.banuInk },
 progressBlock: { gap: spacing.xs },
 progressRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-progressLabel: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '600' },
-percent: { color: colors.brand, fontSize: typography.heading, fontWeight: '700', fontVariant: ['tabular-nums'] },
-dateBlock: { gap: spacing.xs, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.border },
-dateText: { color: colors.textSecondary, fontSize: typography.small, lineHeight: 20 },
-dateLabel: { color: colors.ink, fontWeight: '700' }
+progressLabel: { color: colors.banuSecondary, fontSize: typography.small, fontWeight: '600' },
+percent: { color: colors.banuNavy, fontSize: typography.heading, fontWeight: '700', fontVariant: ['tabular-nums'] },
+dateBlock: { gap: spacing.xs, paddingTop: spacing.sm, borderTopWidth: 1, borderTopColor: colors.banuBorder },
+dateText: { color: colors.banuSecondary, fontSize: typography.small, lineHeight: 20 },
+dateLabel: { color: colors.banuInk, fontWeight: '700' }
 });

@@ -4,8 +4,8 @@ export const colors = {
   surface: '#FFFFFF',
   surfaceSoft: '#F8F9FC',
 
-  // UIX-04A approved brand, adopted by the three core screens only.
-  // Existing secondary screens retain their validated UIX-02 tokens.
+  // Approved UIX-04 identity, shared by core and secondary compositions.
+  // Legacy tokens remain stable for callers outside this controlled migration.
   banuInk: '#24283C',
   banuNavy: '#252D4B',
   banuMagenta: '#9B326F',

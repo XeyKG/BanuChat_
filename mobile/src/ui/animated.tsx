@@ -186,7 +186,7 @@ export function AnimatedProgressBar({
   }));
 
   return (
-    <View accessibilityRole="progressbar" accessibilityLabel={accessibilityLabel} accessibilityValue={{ min: 0, max: 100, now: Math.max(0, Math.min(100, percent)) }} style={[styles.track, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>
+    <View accessibilityRole="progressbar" accessibilityLabel={accessibilityLabel} accessibilityValue={{ min: 0, max: 100, now: Math.max(0, Math.min(100, percent)) }} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.max(0, Math.min(100, percent))} style={[styles.track, { backgroundColor: trackColor, height, borderRadius: height / 2 }]}>
       <Animated.View
         style={[styles.fill, { backgroundColor: tint, borderRadius: height / 2 }, animatedStyle]}
       />

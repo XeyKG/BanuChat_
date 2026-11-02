@@ -32,7 +32,7 @@ export default function NotificationsScreen() {
   const notifications = useNotifications();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="secondary-screen" style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
         subtitle="Tus permisos y recordatorios"
@@ -48,7 +48,7 @@ export default function NotificationsScreen() {
             </Text>
             <View style={styles.statusRow}>
               <Text style={styles.statusLabel}>Estado local</Text>
-              <StatusBadge tint={notifications.enabled?colors.success:colors.muted} soft={notifications.enabled?colors.successSoft:colors.surfaceSoft}>
+              <StatusBadge tint={notifications.enabled?colors.success:colors.banuMuted} soft={notifications.enabled?colors.successSoft:colors.banuCanvas}>
                 {notifications.enabled ? 'Activo' : 'Inactivo'}
               </StatusBadge>
             </View>
@@ -62,20 +62,20 @@ export default function NotificationsScreen() {
                 No fue posible completar la operación. Revisa la conexión y vuelve a intentarlo.
               </Text>
             )}
-            <AppButton
+            <AppButton tone="banu"
               label="Activar y sincronizar recordatorios"
               loading={notifications.busy}
               loadingLabel="Sincronizando..."
               onPress={() => void notifications.enable()}
             />
-            <AppButton
+            <AppButton tone="banu"
               disabled={notifications.permission === 'denied'}
               label="Enviar prueba local en 5 segundos"
               loading={notifications.busy}
               onPress={() => void notifications.sendLocalTest()}
               variant="secondary"
             />
-            <AppButton
+            <AppButton tone="banu"
               disabled={!notifications.enabled}
               label="Desactivar y cancelar"
               loading={notifications.busy}
@@ -117,9 +117,9 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-safeArea: { flex: 1, backgroundColor: colors.background },
-cardTitle: { ...textStyles.heading, color: colors.ink },
-cardText: { color: colors.textSecondary, fontSize: typography.body, lineHeight: 24 },
+safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
+cardTitle: { ...textStyles.heading, color: colors.banuInk },
+cardText: { color: colors.banuSecondary, fontSize: typography.body, lineHeight: 24 },
 statusRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -128,17 +128,17 @@ statusRow: {
     paddingVertical: spacing.sm,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.banuBorder,
   },
-statusLabel: { color: colors.ink, fontSize: typography.small, fontWeight: '700' },
+statusLabel: { color: colors.banuInk, fontSize: typography.small, fontWeight: '700' },
 errorText: { color: colors.error, fontSize: typography.small, lineHeight: 20 },
 note: {
-    color: colors.muted,
+    color: colors.banuMuted,
     fontSize: typography.small,
     lineHeight: 21,
     padding: spacing.md,
     borderRadius: radii.md,
-    backgroundColor: colors.surfaceSoft,
+    backgroundColor: colors.banuCanvas,
   },
 successText: { color: colors.success, fontSize: typography.small, fontWeight: '700' }
 });

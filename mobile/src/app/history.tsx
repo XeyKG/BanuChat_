@@ -25,7 +25,7 @@ import { useSession } from '@/session/session-context';
 import { FadeIn } from '@/ui/animated';
 import {CardGrid,ContentColumn,DemoNotice,ScreenState,secondaryStyles} from '@/components/secondary-ui';
 import { ChatGlyph, ChevronGlyph, TrashGlyph } from '@/ui/icons';
-import { colors, layout, radii, spacing, textStyles } from '@/ui/tokens';
+import { colors, layout, radii, shadows, spacing, textStyles } from '@/ui/tokens';
 
 type LoadState = 'loading' | 'error' | 'success';
 
@@ -143,7 +143,7 @@ export default function HistoryScreen() {
   if (activeProfile === null) return null;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="secondary-screen" style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
         subtitle="Tus conversaciones y fuentes"
@@ -157,13 +157,13 @@ export default function HistoryScreen() {
           )}
 
           {loadState === 'error' && (
-            <ScreenState kind="error" title="No fue posible cargar el historial" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>
+            <ScreenState kind="error" title="No fue posible cargar el historial" body="Comprueba la conexión e intenta nuevamente."><AppButton tone="banu" label="Reintentar" onPress={retry}/></ScreenState>
           )}
 
           {loadState === 'success' && conversations.length === 0 && (
             <FadeIn>
               <ScreenState kind="empty" title={isCcdLocal() ? 'No hay conversaciones en esta apertura' : 'Aún no tienes conversaciones'} body="Inicia tu primera conversación con Banu y aparecerá aquí.">
-                <AppButton
+                <AppButton tone="banu"
                   label="Iniciar conversación"
                   loading={isStartingChat}
                   loadingLabel="Creando..."
@@ -177,7 +177,7 @@ export default function HistoryScreen() {
           {loadState === 'success' && conversations.length > 0 && (
             <>
               <FadeIn>
-                <AppButton label="Nueva conversación"
+                <AppButton tone="banu" label="Nueva conversación"
                   accessibilityLabel="Iniciar una nueva conversación"
                   loading={isStartingChat}
                   loadingLabel="Creando conversación..."
@@ -199,7 +199,7 @@ export default function HistoryScreen() {
                           pressed && styles.pressed,
                         ]}>
                         <View style={styles.conversationIcon}>
-                          <ChatGlyph color={colors.accent} size={20} />
+                          <ChatGlyph color={colors.banuMagenta} size={20} />
                         </View>
                         <View style={styles.conversationCopy}>
                           <Text style={styles.conversationDate}>
@@ -213,7 +213,7 @@ export default function HistoryScreen() {
                                 : `${conversation.message_count} mensajes`}
                           </Text>
                         </View>
-                        <ChevronGlyph color={colors.accent} size={16}/>
+                        <ChevronGlyph color={colors.banuMagenta} size={16}/>
                       </Pressable>
                       {!isCcdLocal() && <Pressable
                         accessibilityRole="button"
@@ -245,15 +245,16 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-safeArea: { flex: 1, backgroundColor: colors.background },
+safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
 stateButton: { minWidth: 180 },
 conversationCard: {
     minHeight: 76,
     gap: spacing.xxs,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.banuBorder,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
+    ...shadows.banuPanel,
   },
 openConversationButton: {
     flex: 1,
@@ -270,11 +271,11 @@ conversationIcon: {
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.accentSoft,
+    backgroundColor: colors.banuSoft,
   },
-conversationCopy: { flex: 1, gap: 2 },
-conversationDate: { color: colors.ink, ...textStyles.body, fontWeight: '700' },
-conversationMeta: { color: colors.muted, ...textStyles.small },
+conversationCopy: { flex: 1, minWidth:0, gap: spacing.xxs },
+conversationDate: { color: colors.banuInk, ...textStyles.body, fontWeight: '700' },
+conversationMeta: { color: colors.banuMuted, ...textStyles.small },
 deleteButton: {
     minHeight: layout.minTouchTarget,
     flexDirection:'row',

@@ -1,5 +1,21 @@
 # BanuChat Mobile
 
+UIX-04B extiende la identidad aprobada navy/magenta a Historial, Progreso,
+Calendario, Noticias, OE2, Banu al día, visor y Notificaciones nativas. Reutiliza
+`secondary-ui`, ScreenHeader, AppButton y las primitivas Reanimated; conserva
+datos, transportes, sesión y permisos. Ajusta únicamente el espacio de Home
+Android y el acceso a Cerrar sesión en la sidebar tablet de UIX-04A.
+Los radios y el progreso incluyen ARIA explícito para React Native Web.
+Véase el [checkpoint UIX-04B](../docs/transition/CHECKPOINT-UIX-04B.md).
+
+Evidencia nueva en `.expo/uix04b/`: `node scripts/check-uix01.mjs before --uix04b`
+protege la base contra sobrescritura; después de exportar se ejecutan
+`node scripts/check-uix01.mjs after --uix04b` y
+`node scripts/compare-uix01.mjs --uix04b`. El HTML aprobado se renderiza offline
+con `node scripts/capture-uix04a-reference.mjs --uix04b`. Las galerías usan rutas
+relativas y no sustituyen el recorrido WEB-02 real. La ruta Notificaciones sigue
+protegida y exclusiva de Android: no hay capturas ficticias de esa ruta en web.
+
 UIX-04A reproduce Login, Home y Chat desde `BanuChat_mockup_refinado_UIX04.html`
 aprobado: magenta Banu, hero navy con mascota original, accesos en dos columnas,
 agenda de REST en escritorio y chat continuo con compositor y fuentes. Extiende
@@ -15,7 +31,7 @@ la base; ese baseline se protege contra sobrescritura. Después de exportar,
 el mockup usa `reference-render/` generado localmente desde el ZIP aprobado,
 sin recursos HTTP: `node scripts/capture-uix04a-reference.mjs [ruta-al-HTML]`
 verifica el SHA-256 aprobado antes de renderizar. Las capturas de fixtures y las del HTML no sustituyen WEB-02
-contra la API real ni la validación física Android. No inicia UIX-04B.
+contra la API real ni la validación física Android. Los resultados de esa fase se conservan sin sobrescribir.
 
 UIX-03 incorpora los tres PNG de Banu aportados por el propietario, sin redibujo,
 recorte ni recolor. `BanuAvatar` usa expo-image ya instalado; `BrandMark` conserva

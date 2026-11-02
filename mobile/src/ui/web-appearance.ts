@@ -33,12 +33,14 @@ export const webAppearance = `
 @media (hover:hover) {
   #web-navigation [role="button"]:hover { background:${colors.banuSoft}; }
   #banu-web-frame [data-testid="home-action-card"]:hover { border-color:${colors.banuMagenta};background:${colors.banuCanvas}; }
-  #banu-web-frame [data-testid="history-card"]:hover { border-color:${colors.accent};background:${colors.surfaceSoft}; }
+  #banu-web-frame [data-testid="history-card"]:hover { border-color:${colors.banuMagenta};background:${colors.banuCanvas}; }
   #banu-web-frame [data-testid="home-hero"]:hover { background-color:${colors.banuNavy}; }
   #banu-web-frame [data-testid="app-button-secondary"]:hover { border-color:${colors.accent};background:${colors.surfaceSoft}; }
+  #banu-web-frame [data-testid="secondary-screen"] [data-testid="app-button-secondary"]:hover { border-color:${colors.banuMagenta};background:${colors.banuCanvas}; }
+  #banu-web-frame [data-testid="filter-chip"]:hover { border-color:${colors.banuMagenta}; }
 }
 #banu-web-frame [data-testid="screen-header"] {
-  max-width:1008px;padding:24px;gap:20px;border-bottom-color:${colors.border};
+  max-width:1220px;padding:24px 20px;gap:20px;
 }
 #banu-web-frame [data-testid="screen-title"],
 #banu-web-frame [data-testid="home-greeting"] { font-size:28px;line-height:36px;letter-spacing:-.6px; }
@@ -49,8 +51,13 @@ export const webAppearance = `
   background:${colors.warningSoft};border-radius:10px;border-left:3px solid ${colors.amber};
   padding:12px 16px;font-size:13px;line-height:21px;text-align:left;color:${colors.textSecondary};
 }
+#banu-web-frame [data-testid="secondary-screen"] [data-testid="demo-notice"] { background:${colors.banuSoft};border-left-color:${colors.banuMagenta};color:${colors.banuSecondary}; }
+#banu-web-frame [data-testid="secondary-screen"] :is([data-testid="source-meta"],[data-testid="secondary-card"],[data-testid="history-card"],[data-testid="publication-card"],[data-testid="change-field"]) { overflow-wrap:anywhere; }
+@media (min-width:760px) {
+  #banu-web-frame [data-testid="secondary-screen"] { padding:0 28px 12px !important; }
+}
 
-/* UIX-04A: core compositions from the approved HTML; secondary content keeps UIX-02. */
+/* UIX-04 core compositions from the approved HTML. */
 #banu-web-frame [data-testid="core-page-heading"]:focus { outline:none; }
 #banu-web-frame [data-testid="home-content"] { max-width:1180px;gap:24px; }
 #banu-web-frame [data-testid="home-content"] > div:first-child { margin-bottom:2px; }

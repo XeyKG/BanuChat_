@@ -28,7 +28,7 @@ const FILTERS: { value: AnnouncementFilter; label: string }[] = [
 const STATUS_META: Record<AnnouncementStatus, { label: string; tint: string; soft: string }> = {
   active: { label: 'Vigente', tint: colors.success, soft: colors.successSoft },
   upcoming: { label: 'Próximo', tint: colors.warning, soft: colors.warningSoft },
-  expired: { label: 'Vencido', tint: colors.muted, soft: colors.border },
+  expired: { label: 'Vencido', tint: colors.banuMuted, soft: colors.banuBorder },
 };
 
 const EMPTY_MESSAGES: Record<AnnouncementFilter, string> = {
@@ -94,14 +94,14 @@ export default function AnnouncementsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView testID="secondary-screen" style={styles.safeArea}>
       <ScreenHeader
         onAction={() => router.replace('/home')}
         subtitle="Noticias y convocatorias · hora de Bogotá"
         title="Noticias y novedades"
       />
 
-      {Platform.OS==='web' && <View testID="aux-controls" style={[secondaryStyles.filterBar,styles.search]}><View style={styles.searchInput}><Text style={styles.searchLabel}>Buscar anuncios · mínimo 2 letras</Text><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Título o descripción" placeholderTextColor={colors.muted} value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={secondaryStyles.input}/></View><AppButton label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
+      {Platform.OS==='web' && <View testID="aux-controls" style={[secondaryStyles.filterBar,styles.search]}><View style={styles.searchInput}><Text style={styles.searchLabel}>Buscar anuncios · mínimo 2 letras</Text><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Título o descripción" placeholderTextColor={colors.banuMuted} value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={secondaryStyles.input}/></View><AppButton tone="banu" label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
       <View testID="aux-filters" style={secondaryStyles.filterBar}>
         <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar anuncios ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
@@ -110,7 +110,7 @@ export default function AnnouncementsScreen() {
         <ContentColumn testID="aux-content">
           {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
           {loadState === 'loading' && <ScreenState kind="loading" title="Cargando anuncios..."/>}
-          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar los anuncios" body="Comprueba la conexión e intenta nuevamente."><AppButton label="Reintentar" onPress={retry}/></ScreenState>}
+          {loadState === 'error' && <ScreenState kind="error" title="No fue posible cargar los anuncios" body="Comprueba la conexión e intenta nuevamente."><AppButton tone="banu" label="Reintentar" onPress={retry}/></ScreenState>}
           {loadState === 'success' && announcements.length === 0 && <ScreenState kind="empty" title="Sin anuncios" body={EMPTY_MESSAGES[filter]}/>}
 
           {loadState === 'success' && announcements.length > 0 && (
@@ -152,17 +152,17 @@ export default function AnnouncementsScreen() {
 
 const styles = StyleSheet.create({
 searchInput:{flexGrow:1,minWidth:180,gap:spacing.xs},
-searchLabel:{...textStyles.small,color:colors.textSecondary,fontWeight:'600'},
+searchLabel:{...textStyles.small,color:colors.banuSecondary,fontWeight:'600'},
 search:{flexDirection:'row',alignItems:'flex-end',gap:spacing.sm,flexWrap:'wrap'},
-safeArea: { flex: 1, backgroundColor: colors.background },
+safeArea: { flex: 1, backgroundColor: colors.banuCanvas },
 announcementCard: {
     flexDirection: 'row',
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.banuBorder,
     borderRadius: radii.lg,
     backgroundColor: colors.surface,
-    ...shadows.soft,
+    ...shadows.banuPanel,
   },
 announcementAccent: { width: 4 },
 announcementBody: { flex: 1, gap: spacing.sm, padding: spacing.md },
@@ -174,14 +174,14 @@ announcementHeading: {
   },
 announcementTitle: {
     flex: 1,
-    color: colors.ink,
-    fontSize: typography.heading,
-    lineHeight: 30,
+    color: colors.banuInk,
+    fontSize: typography.body,
+    lineHeight: 25,
     fontWeight: '700',
     letterSpacing: -0.2,
   },
 announcementDescription: {
-    color: colors.textSecondary,
+    color: colors.banuSecondary,
     fontSize: typography.small,
     lineHeight: 23,
   },
@@ -189,7 +189,7 @@ validityBlock: {
     gap: spacing.xxs,
     paddingTop: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
+    borderTopColor: colors.banuBorder,
   },
-validityText: { color: colors.muted, fontSize: typography.caption, lineHeight: 18 }
+validityText: { color: colors.banuMuted, fontSize: typography.caption, lineHeight: 18 }
 });
