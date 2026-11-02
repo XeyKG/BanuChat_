@@ -4,6 +4,7 @@ import {colors, layout, radii, spacing, textStyles, typography, shadows} from '@
 import {BanuAvatar} from '@/components/banu-avatar';
 import Animated from 'react-native-reanimated';
 import {usePressFeedback} from '@/ui/animated';
+import {onFilterKeyDown} from '@/ui/filter-keyboard';
 
 /** Shared secondary-screen surfaces. Layout stays in RN, including on web. */
 export function ContentColumn({children, testID, reading=false, style}: {children:ReactNode;testID?:string;reading?:boolean;style?:StyleProp<ViewStyle>}) {
@@ -24,7 +25,8 @@ export function SourceMeta({children}: {children:ReactNode}) {
 
 export function FilterChip({label, accessibilityLabel, selected, onPress}: {label:string;accessibilityLabel?:string;selected:boolean;onPress:()=>void}) {
   const {animatedStyle,pressIn,pressOut}=usePressFeedback();
-  return <Pressable testID="filter-chip" accessibilityRole="radio" accessibilityLabel={accessibilityLabel??label} accessibilityState={{checked:selected}} aria-checked={selected} onPress={onPress} onPressIn={pressIn} onPressOut={pressOut} style={({pressed})=>[styles.chip,selected&&styles.selected,pressed&&styles.pressed]}>
+  const keyboardProps=Platform.OS==='web'?{onKeyDown:onFilterKeyDown,tabIndex:selected?0 as const:-1 as const}:{};
+  return <Pressable {...keyboardProps} testID="filter-chip" accessibilityRole="radio" accessibilityLabel={accessibilityLabel??label} accessibilityState={{checked:selected}} aria-checked={selected} onPress={onPress} onPressIn={pressIn} onPressOut={pressOut} style={({pressed})=>[styles.chip,selected&&styles.selected,pressed&&styles.pressed]}>
     <Animated.Text style={[styles.chipLabel,selected&&styles.selectedLabel,animatedStyle]}>{label}</Animated.Text>
   </Pressable>;
 }
@@ -71,7 +73,7 @@ const styles=StyleSheet.create({
   chip:{maxWidth:'100%',minHeight:layout.minTouchTarget,justifyContent:'center',paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.sm,backgroundColor:colors.surface},
   selected:{backgroundColor:colors.banuSoft,borderColor:colors.banuMagenta},
   chipLabel:{...textStyles.small,fontWeight:'600',color:colors.banuSecondary,flexShrink:1},
-  selectedLabel:{color:colors.banuMagentaStrong},
+  selectedLabel:{color:colors.banuMagentaStrong,fontWeight:'700',textDecorationLine:'underline'},
   badge:{alignSelf:'flex-start',maxWidth:'100%',paddingHorizontal:spacing.xs,paddingVertical:spacing.xxs,borderRadius:radii.sm},
   badgeLabel:{fontSize:typography.meta,lineHeight:20,fontWeight:'600'},
   state:{width:'100%',alignItems:'center',padding:spacing.xl,gap:spacing.md,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface},

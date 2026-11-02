@@ -85,6 +85,7 @@ export default function ChatScreen() {
   const conversationId = singleParam(params.conversation_id);
   const {client,snapshot}=useAuth();
   const scrollViewRef = useRef<ScrollView>(null);
+  const lastAutoScrollKeyRef=useRef<string|null>(null);
   const isMountedRef = useRef(true);
   const [messages, setMessages] = useChatState<ChatMessage[]>(conversationId,'messages',[]);
   const [conversationLoadResult, setConversationLoadResult] = useChatState<ConversationLoadResult>(conversationId,'load',{
@@ -377,7 +378,14 @@ export default function ChatScreen() {
           style={styles.messageScroll}
           contentContainerStyle={styles.messageList}
           keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: !reducedMotion })}>
+          onContentSizeChange={() => {
+            // Expanding references or changing text size must not move an older
+            // response out of view. Keep the existing scroll for load/new turns.
+            const key=`${conversationId}:${conversationState}:${messages.length}:${messages[messages.length-1]?.message_id??''}:${isSending}`;
+            if(lastAutoScrollKeyRef.current===key)return;
+            lastAutoScrollKeyRef.current=key;
+            scrollViewRef.current?.scrollToEnd({animated:!reducedMotion});
+          }}>
           <View testID="chat-column" style={styles.messageColumn}>
             {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
             {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
@@ -614,6 +622,7 @@ export default function ChatScreen() {
               accessibilityRole="button"
               accessibilityLabel="Enviar mensaje"
               accessibilityState={{ busy: isSending, disabled: !isContentValid || isSending || isConversationLocked }}
+              aria-busy={isSending}
               disabled={!isContentValid || isSending || isConversationLocked}
               onPress={() => void submitMessage()}
               style={({ pressed }) => [

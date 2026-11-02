@@ -6,16 +6,18 @@ import {mkdir, readFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {secondaryReview} from './uix02-review.mjs';
+import {interactionReview} from './uix04c-review.mjs';
 
 const stage = process.argv[2];
 assert.ok(['before', 'after'].includes(stage), 'Use before or after');
 const uix04b=process.argv.includes('--uix04b');
+const uix04c=process.argv.includes('--uix04c');
 const secondary=process.argv.includes('--secondary')||uix04b;
 const approved=process.argv.includes('--uix04a');
 const brand=process.argv.includes('--brand')||approved;
-const widths=approved||uix04b?[1440,820,390,360]:[1366,768,390];
-const root = path.resolve(uix04b?'.expo/uix04b':approved?'.expo/uix04a':brand?'.expo/uix03':secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
-if((approved||uix04b)&&stage==='before'){
+const widths=approved||uix04b||uix04c?[1440,820,390,360]:[1366,768,390];
+const root = path.resolve(uix04c?(process.argv.includes('--text-stress')?'.expo/uix04c/text-stress':process.argv.includes('--scroll-stress')?'.expo/uix04c/scroll-stress':'.expo/uix04c'):uix04b?'.expo/uix04b':approved?'.expo/uix04a':brand?'.expo/uix03':secondary?'.expo/uix02':'.expo/uix01'), run = path.join(root, stage);
+if((approved||uix04b||uix04c)&&stage==='before'){
   let exists=false;try{await readFile(path.join(run,'report.json'));exists=true;}catch(error){if(error.code!=='ENOENT')throw error;}
   assert.equal(exists,false,'UIX04A_BASELINE_EXISTS_REFUSE_OVERWRITE');
 }
@@ -33,7 +35,7 @@ const me={principal_id:id,session_id:id,synthetic_uid:'U08000001',session_expire
 const tokenPair={access_token:'A'.repeat(43),refresh_token:'B'.repeat(42)+'A',token_type:'Bearer',expires_in:900,session_expires_at:expires};
 const citation={index:0,source_kind:'document',label:'Documento: Guía sintética de estudio · UIX',locator:'section:1: Orientación de ejemplo',release_id:id,document_version_id:docId,artifact_url:`/api/v2/documents/${docId}/artifact`};
 const normalMessages=[{message_id:id,role:'user',content:'¿Cómo puedo organizar mi semana de estudio? Ejemplo sintético UIX.',created_at:timestamp},{message_id:docId,role:'assistant',content:'Ejemplo visual · contenido 100 % sintético.\n\nOrganiza las tareas en bloques de estudio y reserva un momento para revisar tus avances. Puedes consultar las fuentes de esta respuesta para ampliar la información.\n\nEste texto solo permite evaluar la interfaz; no describe una regla institucional.',created_at:timestamp,insufficient_evidence:false,citations:[citation]}];
-const review=secondary?secondaryReview({id,docId,me,timestamp,pause,widths,uix04b}):null;
+const review=uix04c?interactionReview({id,docId,me,timestamp,pause}):secondary?secondaryReview({id,docId,me,timestamp,pause,widths,uix04b}):null;
 let mode='normal', agendaMode='empty', loginFault=0, messageFault=0, sequence=0, socket, postCount=0, escapedApi=0;
 const pending=new Map(), shots=[], checks=[], errors=[];
 async function call(method,params={}){const key=++sequence;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(key);reject(Error('CDP_TIMEOUT '+method));},30000);pending.set(key,{resolve,reject,timer});socket.send(JSON.stringify({id:key,method,params}));});}
@@ -74,6 +76,7 @@ try{
  await new Promise((resolve,reject)=>{socket.onopen=resolve;socket.onerror=reject;});
  socket.onmessage=e=>{const d=JSON.parse(String(e.data));if(d.id){const p=pending.get(d.id);if(p){clearTimeout(p.timer);pending.delete(d.id);d.error?p.reject(Error(JSON.stringify(d.error))):p.resolve(d.result);}}else if(d.method==='Fetch.requestPaused')void fixtures(d.params).catch(e=>errors.push(String(e)));else if(d.method==='Runtime.exceptionThrown')errors.push(d.params.exceptionDetails.text);else if(d.method==='Network.responseReceived'&&d.params.response.url.includes('/api/')&&!d.params.response.fromServiceWorker&&d.params.response.remoteIPAddress)escapedApi++;};
  await call('Page.enable');await call('Runtime.enable');await call('Network.enable');await call('Fetch.enable',{patterns:[{urlPattern:origin+'/api/*',requestStage:'Request'}]});
+ if(uix04c)await call('Page.addScriptToEvaluateOnNewDocument',{source:review.bootstrap});
  await size(1366);await call('Page.navigate',{url:origin+'/login'});await until(`!!document.querySelector('[aria-label="Usuario"]')`);
  for(const w of widths)await capture('login',w);
  await fill('Usuario',me.synthetic_uid);await fill('Contraseña','Solo UIX sintético');loginFault=401;await click('Iniciar sesión');await until(`document.body.innerText.includes('Usuario o contraseña inválidos.')`);await capture('login-error',390);checks.push('login rejected credentials');
@@ -117,6 +120,7 @@ try{
  }
  if(brand&&stage==='after'){await until(`[...document.querySelectorAll('[data-testid="banu-avatar"] img')].some(e=>e.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})&&e.complete&&e.naturalWidth>0)`);const logos=await evaluate(`[...document.querySelectorAll('[data-testid="banu-avatar"] img')].filter(e=>e.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})).map(e=>({loaded:e.complete&&e.naturalWidth>0,fit:getComputedStyle(e).objectFit}))`);assert.ok(logos.length>0,'BANU_LOGO_MISSING');assert.ok(logos.every(l=>l.loaded&&l.fit==='contain'),'BANU_LOGO_NOT_LOADED_OR_CROPPED');checks.push('supplied Banu image loaded and contained without crop');}
  assert.equal(escapedApi,0);assert.deepEqual(errors,[]);checks.push('all API traffic intercepted; no backend requests; no runtime exceptions');
+ if(uix04c&&!process.argv.includes('--text-stress')&&!process.argv.includes('--scroll-stress'))assert.equal(postCount,1,'one controlled synthetic send, no automatic retry');
  console.log('UIX_'+stage.toUpperCase()+'_PASSED '+shots.length+' screenshots');
 }catch(e){console.log('UIX_FAILED '+e.message);process.exitCode=1;errors.push(e.message);if(brand){try{await writeFile(path.join(run,'failure.json'),JSON.stringify(await evaluate("({route:location.pathname,text:document.body.innerText.slice(0,800)})"),null,2));}catch{}}}
 finally{await writeFile(path.join(run,'report.json'),JSON.stringify({stage,scope:'UI with 100% synthetic browser-intercepted API; no backend validation',shots,checks,errors,postCount,escapedApi},null,2));if(socket?.readyState===WebSocket.OPEN){try{await call('Browser.close');}catch{}socket.close();}if(browser.exitCode===null)browser.kill();console.log('EVIDENCE '+run);}

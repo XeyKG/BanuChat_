@@ -40,6 +40,7 @@ export function AppButton({
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled: isDisabled }}
+      aria-busy={loading}
       disabled={isDisabled}
       onPress={onPress}
       onPressIn={pressIn}
@@ -54,7 +55,7 @@ export function AppButton({
         style,
       ]}>
       <Animated.View style={[styles.labelRow,animatedStyle]}>
-        {loading && <ActivityIndicator color={indicatorColor} size="small" />}
+        {loading && <ActivityIndicator accessible={false} aria-hidden color={indicatorColor} size="small" />}
         <Text style={[styles.label, styles[`${variant}Label`],tone==='banu'&&variant!=='primary'&&styles.banuLabel]}>{visibleLabel}</Text>
       </Animated.View>
     </Pressable>

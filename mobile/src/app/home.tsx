@@ -58,6 +58,7 @@ export default function HomeScreen() {
   // Reclaim spacing on normal Android windows; large text and short windows
   // retain the roomy composition. Text scaling itself is never overridden.
   const compactAndroid=Platform.OS==='android'&&height>=600&&width>=340&&fontScale<=1.3;
+  const largeNativeText=Platform.OS!=='web'&&fontScale>1.3;
   const { activeProfile, clearSession } = useSession();
   const {snapshot}=useAuth();
   const canChat=isCcdLocal()||snapshot.me?.capabilities.includes('chat')===true;
@@ -111,14 +112,14 @@ export default function HomeScreen() {
           <FadeIn><BanuPageHeading eyebrow="TU ESPACIO ACADÉMICO" title={`Hola, ${activeProfile.alias}`} subtitle="Una pregunta es un buen punto de partida." titleTestID="home-greeting"/></FadeIn>
           <View testID="home-layout" style={styles.homeLayout}>
           <FadeIn style={styles.heroSlot}><PressableScale accessibilityLabel="Abrir chat con Banu" accessibilityRole="button" accessibilityState={{busy:isStartingChat,disabled:isStartingChat||!canChat}} disabled={isStartingChat||!canChat} onPress={()=>void startChat()} scaleTo={0.985}>
-            <View testID="home-hero" style={[styles.heroCard,compactAndroid&&styles.heroCompact]}>
-              <View testID="home-hero-copy" style={[styles.heroCopy,compactAndroid&&styles.heroCopyCompact]}>
+            <View testID="home-hero" style={[styles.heroCard,compactAndroid&&styles.heroCompact,largeNativeText&&styles.heroLargeText]}>
+              <View testID="home-hero-copy" style={[styles.heroCopy,compactAndroid&&styles.heroCopyCompact,largeNativeText&&styles.heroCopyLargeText]}>
                 <Text testID="home-hero-eyebrow" style={styles.heroEyebrow}>UNA CONVERSACIÓN, MUCHAS POSIBILIDADES</Text>
-                <Text testID="home-hero-title" style={[styles.heroTitle,width<760&&{maxWidth:205},compactAndroid&&{maxWidth:'100%'}]}>{'Tu próxima respuesta\nempieza con Banu.'}</Text>
-                <Text testID="home-hero-body" style={[styles.heroBody,width<760&&{maxWidth:width<375?180:200}]}>{isStartingChat?'Preparando tu conversación…':isCcdKnowledge()?'Consulta el material disponible y explora sus fuentes.':'Progreso, eventos y material del programa, con fuentes que puedes revisar.'}</Text>
+                <Text testID="home-hero-title" style={[styles.heroTitle,width<760&&{maxWidth:205},(compactAndroid||largeNativeText)&&{maxWidth:'100%'}]}>{'Tu próxima respuesta\nempieza con Banu.'}</Text>
+                <Text testID="home-hero-body" style={[styles.heroBody,width<760&&{maxWidth:width<375?180:200},largeNativeText&&styles.heroTextLarge]}>{isStartingChat?'Preparando tu conversación…':isCcdKnowledge()?'Consulta el material disponible y explora sus fuentes.':'Progreso, eventos y material del programa, con fuentes que puedes revisar.'}</Text>
                 <View testID="home-hero-cta" style={styles.heroCtaRow}>{isStartingChat&&<ActivityIndicator color={colors.banuNavy} size="small"/>}<Text style={styles.heroCta}>{isStartingChat?'Abriendo…':'Hablar con Banu'}</Text><ChevronGlyph color={colors.banuNavy} size={16}/></View>
               </View>
-              <View testID="home-hero-icon" style={styles.heroIconWrap}><BrandMark size={Platform.OS==='web'&&width>=1100?180:Platform.OS==='web'&&width>=760?132:width<375?96:108} framed={false}/><Text style={styles.artCaption}>Aquí para acompañarte</Text></View>
+              <View testID="home-hero-icon" style={[styles.heroIconWrap,largeNativeText&&styles.heroIconLargeText]}><BrandMark size={Platform.OS==='web'&&width>=1100?180:Platform.OS==='web'&&width>=760?132:width<375?96:108} framed={false}/><Text style={styles.artCaption}>Aquí para acompañarte</Text></View>
             </View>
           </PressableScale></FadeIn>
           {Platform.OS==='web'&&width>=1100&&snapshot.me?.capabilities.includes('calendar')&&<HomeAgenda profileKey={activeProfile.profile_key}/>}
@@ -225,6 +226,11 @@ const styles = StyleSheet.create({
   contentCompact:{gap:spacing.md},
   heroCompact:{minHeight:320,padding:spacing.lg},
   heroCopyCompact:{gap:spacing.xs},
+  // Large native text needs its own space; the mascot stays out of the CTA.
+  heroLargeText:{flexDirection:'column'},
+  heroCopyLargeText:{flex:0},
+  heroTextLarge:{maxWidth:'100%'},
+  heroIconLargeText:{position:'relative',right:0,bottom:0,alignSelf:'flex-end',marginTop:spacing.sm},
   content: { width: '100%', maxWidth: Platform.OS==='web'?1180:layout.maxContentWidth, alignSelf: 'center', gap: spacing.xl },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -239,7 +245,7 @@ const styles = StyleSheet.create({
   heroCopy:{flex:1,minWidth:0,gap:spacing.sm},heroEyebrow:{fontSize:10,lineHeight:16,letterSpacing:1.4,fontWeight:'700',color:colors.banuOnNavyAccent,maxWidth:230},
   heroTitle:{color:colors.white,fontSize:29,lineHeight:34,fontWeight:'600',letterSpacing:-1,maxWidth:310},heroBody:{color:colors.banuOnNavy,fontSize:14,lineHeight:22,maxWidth:285},
   heroIconWrap:{position:'absolute',right:6,bottom:34,alignItems:'center'},artCaption:{display:'none',fontSize:11,color:colors.banuOnNavyAccent,padding:6,borderWidth:1,borderColor:colors.banuOnNavyAccent,borderRadius:radii.pill},
-  heroCtaRow:{minHeight:layout.minTouchTarget,alignSelf:'flex-start',flexDirection:'row',alignItems:'center',gap:spacing.md,marginTop:spacing.sm,paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderRadius:radii.sm,backgroundColor:colors.white,...shadows.soft},heroCta:{color:colors.banuNavy,fontSize:14,fontWeight:'600'},
+  heroCtaRow:{minHeight:layout.minTouchTarget,alignSelf:'flex-start',flexDirection:'row',alignItems:'center',gap:spacing.md,marginTop:spacing.sm,paddingHorizontal:spacing.md,paddingVertical:spacing.sm,borderRadius:radii.sm,backgroundColor:colors.white,...shadows.soft},heroCta:{color:colors.banuNavy,fontSize:14,fontWeight:'600',flexShrink:1},
   errorBanner: {
     gap: spacing.xxs,
     padding: spacing.md,

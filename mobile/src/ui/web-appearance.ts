@@ -40,8 +40,9 @@ export const webAppearance = `
   #banu-web-frame [data-testid="filter-chip"]:hover { border-color:${colors.banuMagenta}; }
 }
 #banu-web-frame [data-testid="screen-header"] {
-  max-width:1220px;padding:24px 20px;gap:20px;
+  max-width:1220px;padding:24px 20px;gap:20px;flex-wrap:wrap;
 }
+#banu-web-frame [data-testid="screen-header"] > div:first-child { min-width:min-content;max-width:100%; }
 #banu-web-frame [data-testid="screen-title"],
 #banu-web-frame [data-testid="home-greeting"] { font-size:28px;line-height:36px;letter-spacing:-.6px; }
 #banu-web-frame [data-testid="source-meta"],
@@ -111,6 +112,7 @@ export const webAppearance = `
   #banu-web-frame [data-testid="home-hero-icon"] { width:135px;margin-left:0; }
 }
 @media (max-width:759px) {
+  #banu-web-frame [data-testid="home-hero-cta"] { max-width:calc(100% - 96px); }
   #banu-web-frame [data-testid="home-greeting"] { font-size:27px;line-height:33px; }
   #banu-web-frame [data-testid="home-hero"] { min-height:356px;padding:24px; }
   #banu-web-frame [data-testid="home-hero-title"] { max-width:min(205px,100%);font-size:29px;line-height:33px; }

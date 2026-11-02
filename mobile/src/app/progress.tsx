@@ -118,7 +118,7 @@ export default function ProgressScreen() {
       />
 
       <View testID="aux-filters" style={secondaryStyles.filterBar}>
-        <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar cursos ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
+        <View accessibilityRole="radiogroup" accessibilityLabel="Estado de los cursos" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar cursos ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>
@@ -172,7 +172,7 @@ export default function ProgressScreen() {
                           <Text style={styles.percent}>{course.progress_percent}%</Text>
                         </View>
                         <AnimatedProgressBar
-                          accessibilityLabel={`${course.course_name}: ${course.progress_percent} por ciento completado`}
+                          accessibilityLabel={`${course.course_name}: avance`}
                           percent={course.progress_percent}
                           tint={
                             course.status === 'completed'

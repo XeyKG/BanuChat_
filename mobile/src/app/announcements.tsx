@@ -103,7 +103,7 @@ export default function AnnouncementsScreen() {
 
       {Platform.OS==='web' && <View testID="aux-controls" style={[secondaryStyles.filterBar,styles.search]}><View style={styles.searchInput}><Text style={styles.searchLabel}>Buscar anuncios · mínimo 2 letras</Text><TextInput accessibilityLabel="Buscar anuncios auxiliares" placeholder="Título o descripción" placeholderTextColor={colors.banuMuted} value={search} onChangeText={setSearch} maxLength={100} onSubmitEditing={searchAnnouncements} style={secondaryStyles.input}/></View><AppButton tone="banu" label="Buscar anuncios" disabled={!canSearch} onPress={searchAnnouncements}/></View>}
       <View testID="aux-filters" style={secondaryStyles.filterBar}>
-        <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar anuncios ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
+        <View accessibilityRole="radiogroup" accessibilityLabel="Vigencia de los anuncios" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar anuncios ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>

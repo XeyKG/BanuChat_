@@ -71,6 +71,7 @@ export function ChatSources({ citations,context=false }: { citations: Citation[]
         accessibilityLabel={`${isExpanded ? 'Ocultar' : 'Mostrar'} ${sourceCount} fuentes`}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}
+        aria-expanded={isExpanded}
         onPress={() => setIsExpanded((current) => !current)}
         style={({ pressed }) => [styles.toggle, pressed && styles.pressed]}>
         <View style={styles.toggleLeft}>

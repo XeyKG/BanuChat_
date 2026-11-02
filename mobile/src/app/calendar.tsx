@@ -161,7 +161,7 @@ export default function CalendarScreen() {
         {!validDate&&<Text accessibilityRole="alert" style={styles.dateError}>Ingresa una fecha válida en formato AAAA-MM-DD.</Text>}
       </View>}
       <View testID="aux-filters" style={secondaryStyles.filterBar}>
-        <View accessibilityRole="radiogroup" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
+        <View accessibilityRole="radiogroup" accessibilityLabel="Tipo de evento" style={secondaryStyles.filters}>{FILTERS.map(option=><FilterChip key={option.value} label={option.label} accessibilityLabel={`Mostrar ${option.label.toLowerCase()}`} selected={filter===option.value} onPress={()=>selectFilter(option.value)}/>)}</View>
       </View>
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>

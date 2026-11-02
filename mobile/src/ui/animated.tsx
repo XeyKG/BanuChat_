@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { AccessibilityInfo, AppState, Pressable, StyleSheet, Text, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   Easing,
@@ -16,18 +16,17 @@ import Animated, {
 
 import { colors, motion } from '@/ui/tokens';
 import { BanuAvatar } from '@/components/banu-avatar';
+import {createMotionPreferenceSource} from '@/ui/motion-preference';
+
+const motionPreference=createMotionPreferenceSource({
+  read:()=>AccessibilityInfo.isReduceMotionEnabled(),
+  listen:listener=>AccessibilityInfo.addEventListener('reduceMotionChanged',listener),
+});
 
 /** Subscribe as well as read: a preference change takes effect without reload. */
 export function useMotionReduced() {
   const initial = useReducedMotion();
-  const [reduced, setReduced] = useState(initial);
-  useEffect(() => {
-    let active = true;
-    void AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) setReduced(value); });
-    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduced);
-    return () => { active = false; subscription.remove(); };
-  }, []);
-  return reduced;
+  return useSyncExternalStore(motionPreference.subscribe,motionPreference.getSnapshot,motionPreference.getServerSnapshot)??initial;
 }
 
 /** Brief opacity entrance; caps legacy delays to keep actions available. */
@@ -83,7 +82,7 @@ export function usePressFeedback(scaleTo=0.99,enabled=true) {
     return () => cancelAnimation(scale);
   }, [reduced, enabled, scale]);
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.get() }],
+    transform: [{ scale: reduced||!enabled?1:scale.get() }],
   }));
   const pressIn=()=>scale.set(withTiming(reduced||!enabled ? 1 : scaleTo, { duration: motion.press, easing: Easing.bezier(0.23, 1, 0.32, 1), reduceMotion: ReduceMotion.System }));
   const pressOut=()=>scale.set(withTiming(1, { duration: motion.press, reduceMotion: ReduceMotion.System }));
@@ -97,6 +96,7 @@ export function PressableScale({ children, scaleTo = 0.99, style, ...rest }: Pre
   return (
     <Pressable
       {...rest}
+      aria-busy={rest['aria-busy']??rest.accessibilityState?.busy}
       style={styles.stretch}
       onPressIn={(event) => {
         pressIn();
@@ -148,8 +148,8 @@ function TypingDot({ index, color, animate }: { index: number; color: string; an
   }, [animate, index, lift]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + 0.6 * lift.get(),
-    transform: [{scale: 0.85 + 0.15 * lift.get()}],
+    opacity: animate?0.4 + 0.6 * lift.get():1,
+    transform: [{scale: animate?0.85 + 0.15 * lift.get():1}],
   }));
 
   return <Animated.View style={[styles.typingDot, { backgroundColor: color }, animatedStyle]} />;
@@ -182,7 +182,7 @@ export function AnimatedProgressBar({
   }, [percent, progress, reduced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scaleX: progress.get() }],
+    transform: [{ scaleX: reduced?Math.max(0,Math.min(100,percent))/100:progress.get() }],
   }));
 
   return (

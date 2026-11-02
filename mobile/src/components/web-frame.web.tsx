@@ -27,11 +27,12 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
   const desktop = viewportWidth >= 760;
   const tablet=desktop&&viewportWidth<=1040;
   const [menu,setMenu] = useState(false), [chatMenu,setChatMenu] = useState(false);
+  const menuTrigger=useRef<HTMLElement|null>(null);
   const [starting,setStarting] = useState(false), [error,setError] = useState(false);
   const startingRef = useRef(false);
   const [lastChat,setLastChat] = useState<string|null>(null);
   useEffect(()=>{
-    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&(menu||chatMenu)){setMenu(false);setChatMenu(false);document.querySelector<HTMLElement>(desktop?'[aria-label="Navegar a Chat"]':'[aria-label="Menú de navegación"]')?.focus();}};
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&(menu||chatMenu)){setMenu(false);setChatMenu(false);const trigger=menuTrigger.current;const fallback=document.querySelector<HTMLElement>(desktop?'[aria-label="Navegar a Chat"]':'[aria-label="Menú de navegación"]');(menu&&!desktop&&trigger?.checkVisibility({checkVisibilityCSS:true})?trigger:fallback)?.focus();}};
     document.addEventListener('keydown',escape);
     return()=>document.removeEventListener('keydown',escape);
   },[menu,chatMenu,desktop]);
@@ -50,6 +51,14 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     {path:'/oe2-changes',label:'Banu al día',enabled:can('progress'),Icon:SparkGlyph},
   ];
   function closeMenu(){setMenu(false);setChatMenu(false);}
+  function toggleMenu(){
+    if(!menu){
+      const active=document.activeElement;
+      menuTrigger.current=active instanceof HTMLElement&&['Menú de navegación','Más en navegación inferior'].includes(active.getAttribute('aria-label')??'')?active:document.querySelector('[aria-label="Menú de navegación"]');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelector<HTMLElement>('#web-navigation [role="button"]')?.focus()));
+    }
+    setMenu(value=>!value);
+  }
   function focusContent(){requestAnimationFrame(()=>requestAnimationFrame(()=>{const heading=[...document.querySelectorAll<HTMLElement>('[data-testid="core-page-heading"]')].find(element=>element.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})&&!element.closest('[aria-hidden="true"]'));(heading??document.getElementById('web-main'))?.focus();}));}
   function go(path:string){if(pathname!==path)router.push(path as Href);closeMenu();focusContent();}
   async function newChat(){
@@ -68,7 +77,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     <a className="web-skip" href="#web-main">Saltar al contenido</a>
     <View nativeID="web-navigation-shell" style={[styles.navigation, desktop ? styles.sidebar : styles.topbar,tablet&&styles.tabletSidebar]}>
       <View style={styles.brandRow}><BanuWordmark compact={!desktop}/>
-        {!desktop && <Pressable accessibilityRole="button" accessibilityLabel="Menú de navegación" aria-expanded={menu} aria-controls="web-navigation" style={styles.link} onPress={()=>setMenu(v=>!v)}><Text style={styles.linkText}>{menu?'Cerrar menú':'Menú'}</Text></Pressable>}
+        {!desktop && <Pressable accessibilityRole="button" accessibilityLabel="Menú de navegación" aria-expanded={menu} aria-controls="web-navigation" style={styles.link} onPress={toggleMenu}><Text style={styles.linkText}>{menu?'Cerrar menú':'Menú'}</Text></Pressable>}
       </View>
       {desktop && <Text style={styles.copy}>Tu compañero académico</Text>}
       {desktop&&can('chat')&&<Pressable accessibilityRole="button" accessibilityLabel="Crear conversación desde navegación" disabled={starting} accessibilityState={{disabled:starting,busy:starting}} onPress={()=>void newChat()} style={styles.newChat}><Text style={styles.newChatText}>{starting?'Creando…':'Nueva conversación'}</Text><Text aria-hidden style={styles.newChatText}>＋</Text></Pressable>}
@@ -102,7 +111,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
         <Text style={[styles.copy,styles.footerCopy]}>Al recargar se cierra el acceso en esta pestaña. Usa Cerrar sesión para revocarlo.</Text></View>}
     </View>
     <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{desktop&&<View testID="core-topline" style={styles.topline}><Text style={styles.copy}>Mi espacio　/　{pathname==='/chat'?'Conversar con Banu':links.find(item=>item.path===pathname)?.label??'Documento'}</Text><Text style={styles.localPill}>Demostración local</Text></View>}{children}</View>
-    {!desktop&&<BanuBottomNav active={pathname==='/home'?'home':pathname==='/chat'?'chat':'other'} onHome={()=>go('/home')} onChat={()=>{if(pathname==='/chat')focusContent();else if(lastChat)router.navigate({pathname:'/chat',params:{conversation_id:lastChat}});else void newChat();}} onHistory={()=>go('/history')} onMenu={()=>setMenu(v=>!v)} busy={starting} canChat={can('chat')} canHistory={can('history')}/>}
+    {!desktop&&<BanuBottomNav active={pathname==='/home'?'home':pathname==='/chat'?'chat':'other'} onHome={()=>go('/home')} onChat={()=>{if(pathname==='/chat')focusContent();else if(lastChat)router.navigate({pathname:'/chat',params:{conversation_id:lastChat}});else void newChat();}} onHistory={()=>go('/history')} onMenu={toggleMenu} menuExpanded={menu} menuControls="web-navigation" busy={starting} canChat={can('chat')} canHistory={can('history')}/>}
   </View>;
 }
 const styles = StyleSheet.create({

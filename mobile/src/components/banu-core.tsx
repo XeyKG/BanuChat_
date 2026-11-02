@@ -16,9 +16,9 @@ export function BanuPageHeading({eyebrow,title,subtitle,action,titleTestID}: {ey
   </View>;
 }
 
-export function BanuBottomNav({active,onHome,onChat,onHistory,onMenu,busy=false,canChat=true,canHistory=true}: {active:'home'|'chat'|'other';onHome:()=>void;onChat:()=>void;onHistory:()=>void;onMenu:()=>void;busy?:boolean;canChat?:boolean;canHistory?:boolean}) {
+export function BanuBottomNav({active,onHome,onChat,onHistory,onMenu,busy=false,canChat=true,canHistory=true,menuExpanded=false,menuControls}: {active:'home'|'chat'|'other';onHome:()=>void;onChat:()=>void;onHistory:()=>void;onMenu:()=>void;busy?:boolean;canChat?:boolean;canHistory?:boolean;menuExpanded?:boolean;menuControls?:string}) {
   const items=[{label:'Inicio',key:'home',Icon:SparkGlyph,onPress:onHome},{label:'Chat',key:'chat',Icon:ChatGlyph,onPress:onChat},{label:'Historial',key:'history',Icon:ClockGlyph,onPress:onHistory},{label:'Más',key:'more',Icon:null,onPress:onMenu}];
-  return <View testID="core-bottom-nav" style={styles.bottom}>{items.filter(item=>(item.key!=='chat'||canChat)&&(item.key!=='history'||canHistory)).map(item=><Pressable key={item.key} accessibilityRole="button" accessibilityLabel={`${item.label} en navegación inferior`} accessibilityState={{selected:active===item.key,disabled:busy}} disabled={busy} onPress={item.onPress} style={styles.tab}>
+  return <View testID="core-bottom-nav" style={styles.bottom}>{items.filter(item=>(item.key!=='chat'||canChat)&&(item.key!=='history'||canHistory)).map(item=><Pressable key={item.key} accessibilityRole="button" accessibilityLabel={`${item.label} en navegación inferior`} accessibilityState={{selected:active===item.key,disabled:busy,expanded:item.key==='more'?menuExpanded:undefined}} aria-current={Platform.OS==='web'&&active===item.key?'page':undefined} aria-expanded={item.key==='more'?menuExpanded:undefined} aria-controls={item.key==='more'?menuControls:undefined} disabled={busy} onPress={item.onPress} style={styles.tab}>
     <View aria-hidden style={[styles.tabIcon,active===item.key&&styles.activeIcon]}>{item.Icon?<item.Icon size={19} color={active===item.key?colors.banuMagenta:colors.banuMuted}/>:<Text style={styles.more}>•••</Text>}</View><Text style={[styles.tabLabel,active===item.key&&styles.magenta]}>{item.label}</Text>
   </Pressable>)}</View>;
 }
@@ -32,7 +32,7 @@ export function NativeCoreNavigation({active,onHome,onChat,busy=false}: {active:
   if(Platform.OS==='web'||keyboard)return null;
   const links=[{label:'Mi progreso',route:'/progress',cap:'progress'},{label:'Calendario',route:'/calendar',cap:'calendar'},{label:'Noticias y convocatorias',route:'/announcements',cap:'announcements'},{label:'Publicaciones OE2',route:'/oe2',cap:'progress'},{label:'Banu al día',route:'/oe2-changes',cap:'progress'},{label:'Recordatorios',route:'/notifications',cap:'progress'}];
   return <View>{menu&&<ScrollView style={styles.menuScroll} contentContainerStyle={styles.menu} accessibilityLabel="Más opciones de BanuChat">{links.filter(l=>snapshot.me?.capabilities.includes(l.cap)).map(item=><Pressable key={item.route} accessibilityRole="button" onPress={()=>{setMenu(false);router.push(item.route as Href);}} style={styles.menuItem}><Text style={styles.menuLabel}>{item.label}</Text></Pressable>)}<Pressable accessibilityRole="button" onPress={()=>setMenu(false)} style={styles.menuItem}><Text style={styles.magenta}>Cerrar menú</Text></Pressable></ScrollView>}
-    <BanuBottomNav active={active} onHome={onHome} onChat={onChat} onHistory={()=>router.push('/history')} onMenu={()=>setMenu(v=>!v)} busy={busy} canChat={!snapshot.me||snapshot.me.capabilities.includes('chat')} canHistory={!snapshot.me||snapshot.me.capabilities.includes('history')}/>
+    <BanuBottomNav active={active} onHome={onHome} onChat={onChat} onHistory={()=>router.push('/history')} onMenu={()=>setMenu(v=>!v)} busy={busy} menuExpanded={menu} canChat={!snapshot.me||snapshot.me.capabilities.includes('chat')} canHistory={!snapshot.me||snapshot.me.capabilities.includes('history')}/>
   </View>;
 }
 

@@ -1,5 +1,24 @@
 # BanuChat Mobile
 
+UIX-04C conserva el diseño aprobado y pule interacción y accesibilidad: preferencia
+de movimiento compartida y reactiva, filtros con teclado, estados ARIA, foco del
+menú compacto y lectura estable al expandir fuentes antiguas. Home y encabezados
+secundarios soportan mejor texto ampliado. No cambia sesión, datos ni transportes.
+Véase el [checkpoint UIX-04C](../docs/transition/CHECKPOINT-UIX-04C.md).
+
+Evidencia focal: `node scripts/check-uix01.mjs after --uix04c`,
+`node scripts/check-uix01.mjs after --uix04c --text-stress` y
+`node scripts/check-uix01.mjs after --uix04c --scroll-stress`, después de exportar
+web. Usan exclusivamente API interceptada; no sustituyen WEB-02 real. La base
+`before --uix04c` se capturó antes de editar y se protege contra sobrescritura;
+no debe regenerarse sobre la implementación final. `node scripts/compare-uix04c.mjs`
+prepara `.expo/uix04c/share/index.html`, con rutas relativas y una selección
+explícita de imágenes sintéticas. Comparaciones focales indican si su antes es una
+iteración intermedia. Compartir solo `share/`, no la carpeta completa: las pruebas
+Android y WEB-02 pueden contener información documental local. Se comprobó fuente
+Android ampliada (1,50 solicitada, 1,45 efectiva en Huawei) y movimiento reducido,
+restaurando los ajustes originales. TalkBack y rendimiento release siguen pendientes.
+
 UIX-04B extiende la identidad aprobada navy/magenta a Historial, Progreso,
 Calendario, Noticias, OE2, Banu al día, visor y Notificaciones nativas. Reutiliza
 `secondary-ui`, ScreenHeader, AppButton y las primitivas Reanimated; conserva
