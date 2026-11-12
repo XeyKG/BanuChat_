@@ -26,6 +26,9 @@ export function buildAcademicFixtures() {
   const students = [];
   const profiles = [];
   const course_attempts = [];
+  const accounts = [];
+  const progress = [];
+  const slug = value => value.normalize('NFD').replace(/\p{Mark}/gu, '').toLowerCase();
 
   for (const family_name of familyNames) {
     for (const given_name of givenNames) {
@@ -37,12 +40,19 @@ export function buildAcademicFixtures() {
         academic_id: 'SIM-' + suffix,
         given_name,
         family_name,
-        email: `student-${suffix}@banuchat.test`,
+        email: `${slug(given_name)}.${slug(family_name)}.${suffix}@banuchat.test`,
         program_key: programs[index % programs.length].program_key,
         current_semester: 2 + index % 7,
         current_period_key: current,
       });
-      profiles.push({ profile_key, alias: `Estudiante ficticio ${suffix}` });
+      profiles.push({ profile_key, alias: `${given_name} ${family_name}` });
+      accounts.push({
+        profile_key, synthetic_uid: 'U9000' + suffix,
+        recovery_email: `demo-u9000${suffix}@banuchat.test`,
+        synthetic_display_name: `${given_name} ${family_name}`,
+      });
+
+      if (index === 31) continue;
 
       // Casos explícitos de prueba, sin derivar aprobación de una nota.
       const repeated = index % 4 === 0;
@@ -57,10 +67,19 @@ export function buildAcademicFixtures() {
         profile_key, course_key: next, attempt_number: 1, period_key: current,
         outcome: 'in_progress', grade_percent: null,
       });
+      progress.push({
+        profile_key, course_key: intro, status: 'completed', progress_percent: 100,
+        started_at: '2026-01-12T14:00:00Z',
+        completed_at: repeated ? '2026-09-01T14:00:00Z' : '2026-05-01T14:00:00Z',
+      });
+      if (!repeated) progress.push({
+        profile_key, course_key: next, status: 'in_progress', progress_percent: 40,
+        started_at: '2026-08-10T14:00:00Z', completed_at: null,
+      });
     }
   }
 
-  return { fixture_version: 1, synthetic: true, programs, periods, profiles, students, course_attempts };
+  return { fixture_version: 2, synthetic: true, programs, periods, profiles, students, course_attempts, accounts, progress };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
