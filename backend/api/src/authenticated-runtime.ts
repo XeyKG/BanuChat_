@@ -1,5 +1,6 @@
 import type {Pool} from 'pg';
 import {AuthService} from './auth/auth-service.js';
+import type {PostgresProfile} from './auth/pg-auth-store.js';
 import {AuthenticatedResources} from './auth/resources.js';
 import {AuthError} from './auth/primitives.js';
 import {PgSqlClient} from './data/pg-client.js';
@@ -35,7 +36,7 @@ export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDepen
 /** Product composition, deliberately no listen/startup or v1 import. Explicit trusted config. */
 export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;
  document_rag:DocumentRagResponder;evidence_mode?:KnowledgeMode;router?:IntentRouter;artifacts?:DocumentArtifactStorage;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>;
- unified?:boolean;mcp_environment?:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader}){
+ unified?:boolean;mcp_environment?:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader;postgres_profile?:PostgresProfile}){
  const auth=await AuthService.create(input);
  const scope=(await input.pool.query('SELECT deployment_id,database_name FROM banuchat_auth.runtime_scope WHERE singleton')).rows[0] as {deployment_id:string;database_name:string}|undefined;
  if(!scope||scope.deployment_id!==input.deploymentId.toLowerCase()||scope.database_name!==input.expectedDatabase)throw new AuthError('DEPENDENCY_UNAVAILABLE');

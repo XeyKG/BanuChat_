@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Pool } from "pg";
 import type { SqlQueryClient } from "../data/sql-client.js";
-import { PgAuthStore, type AccountRow, type SessionRow, type TokenPair } from "./pg-auth-store.js";
+import { PgAuthStore, type AccountRow, type PostgresProfile, type SessionRow, type TokenPair } from "./pg-auth-store.js";
 import { PersistentAuthLimiter, type AuthRequestContext } from "./rate-limiter.js";
 import {knowledgeMode,knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
 import {auxiliaryContext} from './unified-product.js';
@@ -30,12 +30,12 @@ export class AuthService {
   private constructor(private readonly store:PgAuthStore,private readonly deployment:string,
     private readonly hasher:PasswordHasher,private readonly dummyHash:string,private readonly clock:AuthClock,
     private readonly limiter:PersistentAuthLimiter,private readonly evidenceMode:KnowledgeMode,private readonly unified=false,private readonly isolatedPilot?:IsolatedPilotScope) {}
-  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode;unified?:boolean;isolated_pilot?:IsolatedPilotScope}):Promise<AuthService> {
+  static async create(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;hasher?:PasswordHasher;clock?:AuthClock;evidence_mode?:KnowledgeMode;unified?:boolean;isolated_pilot?:IsolatedPilotScope;postgres_profile?:PostgresProfile}):Promise<AuthService> {
     return guarded(async()=>{
       if(input.deploymentId.length!==36 || !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/u.test(input.deploymentId))throw new AuthError("DEPENDENCY_UNAVAILABLE");
       const mode=knowledgeMode(input.evidence_mode);const store=new PgAuthStore(input.pool);
-      if(input.isolated_pilot){if(mode!=='ccd_local'||input.unified)throw new AuthError('DEPENDENCY_UNAVAILABLE');const {assertIsolatedPilotAuthScope}=await import('./isolated-pilot-scope.js');await assertIsolatedPilotAuthScope(input.pool,input.expectedDatabase,input.deploymentId,input.isolated_pilot);}
-      else await store.assertRuntime(input.expectedDatabase,mode,input.unified);
+      if(input.isolated_pilot){if(mode!=='ccd_local'||input.unified||input.postgres_profile==='managed')throw new AuthError('DEPENDENCY_UNAVAILABLE');const {assertIsolatedPilotAuthScope}=await import('./isolated-pilot-scope.js');await assertIsolatedPilotAuthScope(input.pool,input.expectedDatabase,input.deploymentId,input.isolated_pilot);}
+      else await store.assertRuntime(input.expectedDatabase,mode,input.unified,input.postgres_profile);
       const hasher=input.hasher??new Argon2idHasher();const clock=input.clock??postgresClock;
       const dummy=await hasher.hash(randomBytes(32).toString("base64url"));
       return new AuthService(store,input.deploymentId.toLowerCase(),hasher,dummy,clock,new PersistentAuthLimiter(store,Buffer.from(input.rateKey),clock),mode,input.unified,input.isolated_pilot?Object.freeze({...input.isolated_pilot}):undefined);

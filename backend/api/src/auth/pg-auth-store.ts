@@ -4,6 +4,7 @@ import { PgTransactionRunner } from "../data/transaction.js";
 import { AuthError } from "./primitives.js";
 import {knowledgeMode,type KnowledgeMode} from './knowledge-mode.js';
 
+export type PostgresProfile = 'local' | 'managed';
 export interface AccountRow { id:string; synthetic_uid:string; status:string; auth_version:string; password_hash:string|null; }
 export interface SessionRow {
   id:string;principal_id:string;deployment_id:string;auth_version:string;
@@ -17,15 +18,27 @@ export type AuthEvent="account_provisioned"|"login_succeeded"|"login_denied"|"re
 export class PgAuthStore {
   readonly transactions:PgTransactionRunner;
   constructor(readonly pool:Pool) { this.transactions=new PgTransactionRunner(pool); }
-  async assertRuntime(expectedDatabase:string,mode:KnowledgeMode='synthetic',unified=false):Promise<void> {
+  async assertRuntime(expectedDatabase:string,mode:KnowledgeMode='synthetic',unified=false,profile:PostgresProfile='local'):Promise<void> {
     knowledgeMode(mode);
+    const managed=profile==='managed';
+    if(managed&&(mode!=='synthetic'||unified||expectedDatabase!=='postgres'))throw new AuthError('DEPENDENCY_UNAVAILABLE');
+    // Managed PostgreSQL can grant TEMP and template1 CONNECT via PUBLIC.
+    // Memberships and direct grants are still rejected. Privileged SQL uses a fixed search path.
     const result=await this.pool.query(`SELECT current_database() AS database, r.rolsuper, r.rolcreatedb,
       r.rolcreaterole,r.rolreplication,r.rolbypassrls,
-      has_database_privilege(current_database(),'CREATE') OR has_database_privilege(current_database(),'TEMP') AS db_write,
+      has_database_privilege(current_database(),'CREATE') OR
+        ${managed?`EXISTS(SELECT 1 FROM pg_database d CROSS JOIN LATERAL
+          aclexplode(coalesce(d.datacl,acldefault('d',d.datdba))) a
+          WHERE d.datname=current_database() AND a.grantee=r.oid AND a.privilege_type='TEMPORARY')`
+          :`has_database_privilege(current_database(),'TEMP')`} AS db_write,
       has_schema_privilege('banuchat_auth','CREATE') OR has_schema_privilege('banuchat','CREATE') AS ddl,
       EXISTS(SELECT 1 FROM pg_auth_members m WHERE m.member=r.oid) AS memberships,
       EXISTS(SELECT 1 FROM pg_database d WHERE d.datallowconn AND d.datname<>current_database()
-        AND has_database_privilege(d.oid,'CONNECT')) AS other_database,
+        AND has_database_privilege(d.oid,'CONNECT')
+        ${managed?`AND NOT (d.datname='template1' AND d.datistemplate AND d.datdba<>r.oid
+          AND NOT has_database_privilege(d.oid,'CREATE,TEMP')
+          AND NOT EXISTS(SELECT 1 FROM aclexplode(coalesce(d.datacl,acldefault('d',d.datdba))) a
+            WHERE a.grantee=r.oid AND a.privilege_type='CONNECT'))`:''}) AS other_database,
       EXISTS(SELECT 1 FROM pg_class c WHERE c.relnamespace IN ('banuchat'::regnamespace,'banuchat_auth'::regnamespace)
         AND c.relowner=r.oid) AS owns_objects,
       EXISTS(SELECT 1 FROM pg_class c WHERE c.relnamespace='banuchat'::regnamespace AND c.relkind='r'
@@ -33,6 +46,21 @@ export class PgAuthStore {
         AND (has_table_privilege(c.oid,'INSERT,UPDATE,DELETE,TRUNCATE')
           OR has_any_column_privilege(c.oid,'INSERT,UPDATE'))) AS corpus_write,
       has_any_column_privilege('banuchat.conversations','UPDATE') AS conversation_update,
+      ${managed?`(current_user<>session_user OR NOT r.rolcanlogin
+        OR EXISTS(SELECT 1 FROM pg_database d WHERE d.datname=current_database() AND d.datdba=r.oid)
+        OR EXISTS(SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+          WHERE n.nspname IN ('banuchat','banuchat_auth','banuchat_academic') AND p.proowner=r.oid)
+        OR EXISTS(SELECT 1 FROM pg_namespace n WHERE has_schema_privilege(n.oid,'CREATE')
+          AND n.nspname !~ '^pg_(temp|toast_temp)_[0-9]+$')
+        OR to_regnamespace('banuchat_aux') IS NOT NULL
+        OR to_regclass('banuchat.ccd_demo_contexts') IS NOT NULL
+        OR (SELECT count(*) FROM banuchat.datasets)<>1
+        OR EXISTS(SELECT 1 FROM banuchat.dataset_releases
+          WHERE dataset_id<>1 OR manifest->'synthetic' IS DISTINCT FROM 'true'::jsonb)
+        OR EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+          WHERE n.nspname='banuchat_academic' AND c.relkind IN ('r','p','v','m','f')
+          AND (has_table_privilege(c.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER')
+            OR has_any_column_privilege(c.oid,'SELECT,INSERT,UPDATE,REFERENCES'))))`:'false'} AS managed_rejected,
       EXISTS(SELECT 1 FROM banuchat.datasets d JOIN banuchat.dataset_releases v
         ON v.dataset_id=d.id AND v.id=d.current_release_id WHERE d.id=1 AND d.name='banuchat-synthetic'
         AND v.status='ready' AND v.manifest->'synthetic'='true'::jsonb) AS synthetic
@@ -41,6 +69,7 @@ export class PgAuthStore {
     if(!r || !expectedDatabase || r.database!==expectedDatabase ||
       (mode==='synthetic' && (expectedDatabase.toLowerCase().includes("ccd") || !r.synthetic)) ||
       (mode==='ccd_local' && expectedDatabase!==(unified?'banuchat_unified':'banuchat_ccd_auth_i1b_test')) ||
+      (managed&&r.managed_rejected!==false) ||
       ["rolsuper","rolcreatedb","rolcreaterole","rolreplication","rolbypassrls","db_write","ddl","memberships","other_database","owns_objects","corpus_write","conversation_update"].some(k=>r[k]!==false)) throw new AuthError("DEPENDENCY_UNAVAILABLE");
     if(mode==='ccd_local'){
       if(unified){const marker=await this.pool.query('SELECT version FROM banuchat_aux.product_config WHERE singleton');if(marker.rows[0]?.version!==1)throw new AuthError('DEPENDENCY_UNAVAILABLE');}
