@@ -39,7 +39,7 @@ function v2Links<T>(value:T):T {
   return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
-export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'|'oe2Changes'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
+export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'|'oe2Changes'|'academic'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
  async function handle(request:IncomingMessage,response:ServerResponse){
  let allow:string|undefined;
  try{
@@ -73,7 +73,7 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
   const changes=input.oe2_demo&&path==='/api/v2/demo/oe2/changes';
   if(path==='/api/v2/conversations')allow='GET, POST';
   else if(chat)allow=chat[2]?'POST':'GET, DELETE';
-  else if(changes || oe2 || doc || ['/api/v2/me/progress','/api/v2/calendar/events','/api/v2/announcements'].includes(path))allow='GET';
+  else if(changes || oe2 || doc || ['/api/v2/me/progress','/api/v2/me/academic','/api/v2/calendar/events','/api/v2/announcements'].includes(path))allow='GET';
   if(!allow)throw new AuthError('NOT_FOUND');
   const method=request.method??'';if(!allow.split(', ').includes(method))throw new AuthError('METHOD_NOT_ALLOWED');
   const auth=headers.filter(([k])=>k.toLowerCase()==='authorization');const m=auth.length===1?/^Bearer ([A-Za-z0-9_-]{43})$/iu.exec(auth[0]![1]):null;
@@ -114,6 +114,11 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
    else{await resources.remove(token,id);reply(response,204);}return;
   }
   if(doc){if(target.includes('?'))throw new AuthError('INVALID_ARGUMENT');const result=await resources.artifact(token,uuid(doc[1]!));reply(response,200,result.bytes,{'Content-Length':result.bytes.length,'Content-Disposition':`attachment; filename="${result.document_version_id}.bin"`,'X-Content-Type-Options':'nosniff'});return;}
+  if(path==='/api/v2/me/academic'){
+   params(q,[]);
+   if(!resources.academic)throw new AuthError('NOT_FOUND');
+   reply(response,200,await resources.academic(token));return;
+  }
   if(path==='/api/v2/me/progress'){
    params(q,['statuses','limit']);const statuses=repeated<ProfileProgressStatus>(q,'statuses',['enrolled','in_progress','completed']),n=limit(q);
    const r=await resources.progress(token,{...(statuses?{statuses}:{}),...(n?{limit:n}:{})});reply(response,200,{release_id:r.release_id,profile:{profile_key:r.profile.profile_key,alias:r.profile.alias},courses:r.courses.map(({source:_,...course})=>course)});return;

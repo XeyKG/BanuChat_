@@ -76,6 +76,16 @@ export class AuthenticatedResources {
    const answer=this.unified&&aux?unifiedResponder({sql:this.chat.sql,router:this.chat.router,rag:this.chat.document_rag,principal,aux,...this.unified}):undefined;
    let citations:PresentationCitation[]=[];
    return await sendMessage({...this.chat,demo_mode:this.evidenceMode,
+   document_rag:async query=>{
+    const personal=/\bmi\s+(?:perfil acad[eé]mico|expediente|programa acad[eé]mico|semestre|per[ií]odo acad[eé]mico|historial acad[eé]mico|recursamiento|correo acad[eé]mico)\b/iu;
+    if(this.evidenceMode!=='synthetic'||!personal.test(query.query))return this.chat.document_rag(query);
+    const record=await this.academic(token);
+    const s=record.student;
+    const attempts=record.attempts as {course_name:string;attempt_number:number;outcome:string}[];
+    const history=attempts.map(a=>`${a.course_name}, intento ${a.attempt_number}: ${a.outcome==='passed'?'aprobado':a.outcome==='failed'?'reprobado':'en curso'}`).join('\n');
+    return {release_id:query.release_id,content:s?`Expediente ficticio de ${s.given_name} ${s.family_name}. ID ${s.academic_id}, ${s.email}. ${s.program_name}, semestre ${s.current_semester}, ${s.period_label}.\n${history||'Sin intentos registrados.'}`:'Tu cuenta no tiene un expediente académico ficticio asignado.',
+     insufficient_evidence:false,citations:[],citation_records:[]};
+   },
    ...(answer&&aux?{structured_release_id:aux.release_id,answer_responder:async query=>{const result=await answer(query);citations=result.citations;return result;}}:{}),
    read_context:operation=>this.unit(token,c=>operation(c),id,true,true),
    commit_turn:operation=>this.transactions.run(operation),
@@ -83,6 +93,13 @@ export class AuthenticatedResources {
     status text,user_message_id uuid,user_ordinal integer,user_content banuchat.nonblank,user_created_at banuchat.finite_time,
     assistant_message_id uuid,assistant_ordinal integer,assistant_content banuchat.nonblank,assistant_created_at banuchat.finite_time,assistant_insufficient_evidence boolean)`,[token,...values,JSON.stringify(citations),aux.release_id]):c.query('SELECT * FROM banuchat_auth.persist_turn($1,$2,$3,$4,$5,$6,$7,$8)',[token,...values]),
   },{conversation_id:id,content,now});}catch(error){throw resourceError(error);}finally{this.activity.endMessage(id);}
+ }
+ async academic(token:string){
+  if(this.evidenceMode!=='synthetic'||this.unified)throw new AuthError('NOT_FOUND');
+  try {
+   return (await this.pool.query(`SELECT student, attempts FROM banuchat_academic.read_me($1)`,[token])).rows[0]
+    ?? {student:null,attempts:[]};
+  } catch(error){throw resourceError(error);}
  }
  progress(token:string,input:Omit<ProfileProgressInput,'profile_key'>){return this.unit(token,(c,ctx)=>{
   if(this.unified)return auxiliaryContext(c,ctx.principal_id).then(aux=>unifiedProgress(c,aux,{...input,profile_key:aux.profile_key}));

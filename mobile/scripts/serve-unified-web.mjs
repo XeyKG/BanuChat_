@@ -16,6 +16,7 @@ const routes = [
   [new RegExp(`^/conversations/${UUID}$`), ['GET','DELETE'], []],
   [new RegExp(`^/conversations/${UUID}/messages$`), ['POST'], []],
   [/^\/me\/progress$/, ['GET'], ['statuses','limit']],
+  [/^\/me\/academic$/, ['GET'], []],
   [/^\/calendar\/events$/, ['GET'], ['date_from','date_to','event_types','limit']],
   [/^\/announcements$/, ['GET'], ['query','temporal_status','reference_time','limit']],
   [new RegExp(`^/documents/${UUID}/artifact$`), ['GET'], []],

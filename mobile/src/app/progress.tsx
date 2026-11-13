@@ -9,10 +9,11 @@ import {
   type ProgressStatus,
 } from '@/api/progress';
 import { AppButton } from '@/components/app-button';
+import { AcademicRecord } from '@/components/academic-record';
 import {CardGrid,ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
-import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
+import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal,mobileMode} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
 import { colors, radii, shadows, spacing, typography, textStyles } from '@/ui/tokens';
 
@@ -123,6 +124,7 @@ export default function ProgressScreen() {
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>
         <ContentColumn testID="aux-content">
+          {mobileMode()==='synthetic' && <AcademicRecord key={profileKey}/>}
           {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
           {showSummary && (
             <FadeIn>

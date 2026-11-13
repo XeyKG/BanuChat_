@@ -77,7 +77,7 @@ const expected = [
   "POST /conversations", "GET /conversations", "GET /conversations/{conversation_id}",
   "DELETE /conversations/{conversation_id}", "POST /conversations/{conversation_id}/messages",
   "GET /calendar/events", "GET /announcements", "GET /documents/{document_version_id}/artifact", "GET /me/progress",
-  "GET /demo/oe2/programming", "GET /demo/oe2/announcements",
+  "GET /me/academic", "GET /demo/oe2/programming", "GET /demo/oe2/announcements",
   "GET /demo/oe2/changes",
 ];
 const publicIds = new Set(["login", "refresh_session", "request_password_reset", "confirm_password_reset"]);
@@ -88,7 +88,7 @@ function operations(): Array<{ path: string; method: string; value: ObjectValue;
     .map(([method, value]) => ({ path, method, value: object(value), item: object(item) })));
 }
 
-test("v2 retains fifteen existing operations and three authorized read-only OE2 operations without identity bypass", () => {
+test("v2 retains existing operations and adds session-bound academic reads", () => {
   assert.equal(contract.openapi, "3.1.0");
   assert.equal(object(contract.info).version, "5.2.0");
   assert.deepEqual(contract.servers, [{ url: "/api/v2", description: "Base relativa; TLS obligatorio fuera del canal local aislado autorizado." }]);
