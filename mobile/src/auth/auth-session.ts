@@ -80,7 +80,8 @@ export class AuthSession {
  async resource(url:string,options:RequestInit={}):Promise<Response>{
   if(this.snapshot.phase!=='authenticated')throw new SessionError();const epoch=this.epoch,base=this.base();
   const target=url.slice(base.length),oe2=/^\/demo\/oe2\/(?:programming|announcements|changes)(?:\?|$)/u.test(target);
-  if(!url.startsWith(base+'/')||(!oe2&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||(oe2&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
+  const academic=target==='/me/academic'&&(options.method??'GET').toUpperCase()==='GET';
+  if(!url.startsWith(base+'/')||(!academic&&!oe2&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||(oe2&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
   const access=await this.token();this.check(epoch);const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+access);
   const messagePost=options.method?.toUpperCase()==='POST'&&/^\/conversations\/[^/?#]+\/messages$/u.test(url.slice(base.length));
   const diagnosticStart=messagePost?startMessageHttpDiagnostic():undefined;

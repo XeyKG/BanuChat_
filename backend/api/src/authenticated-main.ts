@@ -47,7 +47,10 @@ export async function startAuthenticatedApi(){
   pool=new Pool({host,port:dbPort,database,user,password:requireValue('BANUCHAT_AUTH_RUNTIME_PASSWORD'),...(ssl?{ssl}:{}),connectionTimeoutMillis:5000,statement_timeout:15000});
   pool.on('error',()=>console.error('BanuChat: dependencia de persistencia no disponible.'));
   const runtime=loadGeneratorRuntimeConfig(),sql=new PgSqlClient(pool);
-  const generator=new OllamaGeneratorClient(runtime.base_url),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
+  const generationTimeout = profile === 'managed' && process.env.BANUCHAT_GENERATOR_TIMEOUT_MS !== undefined
+   ? Number(requireValue('BANUCHAT_GENERATOR_TIMEOUT_MS'))
+   : undefined;
+  const generator=new OllamaGeneratorClient(runtime.base_url,generationTimeout),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
   const artifacts=mode==='ccd_local'?ccdArtifactStorage():
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;

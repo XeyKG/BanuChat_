@@ -6,7 +6,7 @@ import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
 export const WEB_ORIGIN = 'http://127.0.0.1:8085';
-const HOST = '127.0.0.1:8085', MAX_BODY = 16384;
+const MAX_BODY = 16384;
 const UUID = '[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}';
 const routes = [
   [/^\/auth\/(?:login|refresh)$/, ['POST'], []],
@@ -38,14 +38,19 @@ function headers(res) {
 }
 function fail(res,status,code,extra={}) {
   res.writeHead(status,{'Content-Type':'application/json; charset=utf-8',...extra});
-  res.end(JSON.stringify({error:{code,message:'No fue posible completar la solicitud local.'}}));
+  res.end(JSON.stringify({error:{code,message:'No fue posible completar la solicitud.'}}));
 }
 function invalidTarget(raw) {
   return raw.length > 8192 || !raw.startsWith('/') || raw.startsWith('//') || /[\\#\u0000-\u0020\u007f]/u.test(raw) || /%(?:2f|5c|00|2e)/iu.test(raw.split('?')[0]) || /(?:^|\/)\.{1,2}(?:\/|$)/u.test(raw.split('?')[0]);
 }
 
 /** The transport seam is only for tests. The CLI always targets 127.0.0.1:3004. No request logging. */
-export function createUnifiedWebServer({directory, transport = http.request}) {
+export function createUnifiedWebServer({directory, transport = http.request, origin = WEB_ORIGIN}) {
+  if (origin !== WEB_ORIGIN && !/^https:\/\/(?:[a-z0-9-]+\.)+[a-z][a-z0-9-]*$/u.test(origin)) {
+    throw new Error('El proxy requiere un origen HTTPS canónico.');
+  }
+  const publicMode = origin !== WEB_ORIGIN;
+  const host = new URL(origin).host;
   const server = http.createServer({maxHeaderSize:16384}, async (req,res) => {
     headers(res);
     try {
@@ -54,17 +59,21 @@ export function createUnifiedWebServer({directory, transport = http.request}) {
         for(let index=0;index<req.rawHeaders.length;index+=2) if(req.rawHeaders[index].toLowerCase()===name) count++;
         if(count>1) return fail(res,400,'INVALID_ARGUMENT');
       }
-      if (req.headers.host !== HOST || (req.headers.origin !== undefined && req.headers.origin !== WEB_ORIGIN) ||
+      if (req.headers.host !== host || (req.headers.origin !== undefined && req.headers.origin !== origin) ||
           (req.headers['sec-fetch-site'] && !['same-origin','none'].includes(req.headers['sec-fetch-site']))) return fail(res,403,'ORIGIN_NOT_ALLOWED');
       const raw = req.url ?? '';
       if (invalidTarget(raw)) return fail(res,400,'INVALID_ARGUMENT');
-      const url = new URL(raw, WEB_ORIGIN), api = url.pathname.startsWith('/api/');
+      const url = new URL(raw, origin), api = url.pathname.startsWith('/api/');
       if (api) {
         if (!url.pathname.startsWith('/api/v2/')) return fail(res,404,'NOT_FOUND');
         const route = routes.find(([pattern]) => pattern.test(url.pathname.slice(7)));
         if (!route) return fail(res,404,'NOT_FOUND');
         if (!route[1].includes(req.method)) return fail(res,405,'METHOD_NOT_ALLOWED',{Allow:route[1].join(', ')});
-        if (['POST','DELETE'].includes(req.method) && req.headers.origin !== WEB_ORIGIN) return fail(res,403,'ORIGIN_NOT_ALLOWED');
+        // Android has no browser Origin. Cloud requests still use bearer tokens or explicit credentials.
+        if (['POST','DELETE'].includes(req.method) && req.headers.origin !== origin &&
+            (!publicMode || req.headers.origin !== undefined || req.headers['sec-fetch-site'] !== undefined)) {
+          return fail(res,403,'ORIGIN_NOT_ALLOWED');
+        }
         const queryAllowed = req.method === 'GET' ? route[2] : [];
         for (const key of url.searchParams.keys()) {
           const count = url.searchParams.getAll(key).length;
@@ -130,7 +139,8 @@ export function createUnifiedWebServer({directory, transport = http.request}) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   const directory = fileURLToPath(new URL('../.expo/unified-web/', import.meta.url));
-  const server = createUnifiedWebServer({directory});
-  server.on('error', () => { process.stderr.write('No fue posible iniciar BanuChat Web local.\n'); process.exitCode = 1; });
-  server.listen(8085,'127.0.0.1', () => process.stdout.write(`BanuChat Web local: ${WEB_ORIGIN}\n`));
+  const origin = process.env.BANUCHAT_WEB_ORIGIN ?? WEB_ORIGIN;
+  const server = createUnifiedWebServer({directory,origin});
+  server.on('error', () => { process.stderr.write('No fue posible iniciar BanuChat Web.\n'); process.exitCode = 1; });
+  server.listen(8085,'127.0.0.1', () => process.stdout.write(`BanuChat Web: ${origin}\n`));
 }

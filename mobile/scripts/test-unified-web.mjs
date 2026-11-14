@@ -60,6 +60,26 @@ test('same-origin proxy preserves REST errors/binary, restricts transport and se
     assert.equal(calls[0].headers.authorization,'Bearer synthetic-not-a-token');assert.equal(calls[0].headers.cookie,undefined);assert.equal(calls[0].body.toString(),'{}');
     r=await request('/api/v2/documents/11111111-1111-4111-8111-111111111111/artifact');assert.equal(r.status,200);assert.deepEqual(r.body,Buffer.from([0,255,60,62]));
     r=await request('/api/v2/auth/logout','POST');assert.equal(r.status,204);assert.equal(r.body.length,0);
+    const origin = 'https://demo.banuchat.test';
+    const publicProxy = createUnifiedWebServer({directory,origin,transport:(options,callback)=>http.request({...options,port:backendPort},callback)});
+    await new Promise(r=>publicProxy.listen(0,'127.0.0.1',r));
+    try {
+      const post = headers => new Promise((resolve,reject) => {
+        const req = http.request({hostname:'127.0.0.1',port:publicProxy.address().port,
+          path:'/api/v2/auth/logout',method:'POST',headers:{Host:'demo.banuchat.test',...headers}}, response => {
+          response.resume();
+          resolve(response.statusCode);
+        });
+        req.on('error',reject).end();
+      });
+      assert.equal(await post({}),204);
+      assert.equal(await post({Origin:origin,'Sec-Fetch-Site':'same-origin'}),204);
+      assert.equal(await post({Origin:'https://other.test'}),403);
+      assert.equal(await post({'Sec-Fetch-Site':'cross-site'}),403);
+    } finally {
+      publicProxy.closeAllConnections();
+      await new Promise(r=>publicProxy.close(r));
+    }
     await new Promise(r=>backend.close(r));r=await request('/api/v2/auth/me');assert.equal(r.status,503);assert.ok(!r.body.toString().includes(directory));
   } finally {
     proxy.closeAllConnections();backend.closeAllConnections();

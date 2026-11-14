@@ -4,6 +4,14 @@ import test from 'node:test';
 import {createMemoryRefreshStore} from '../src/auth/memory-store';
 import {AuthSession, SessionError} from '../src/auth/auth-session';
 import {webApiBaseUrl, LOCAL_WEB_ORIGIN} from '../src/config/web-origin';
+
+test('public web only uses the configured HTTPS origin for authenticated requests', () => {
+  const origin = 'https://demo.banuchat.test';
+  assert.equal(webApiBaseUrl(origin, origin), origin + '/api/v2');
+  assert.throws(() => webApiBaseUrl(LOCAL_WEB_ORIGIN, origin));
+  assert.throws(() => webApiBaseUrl('https://other.test', origin));
+  assert.throws(() => webApiBaseUrl('http://demo.banuchat.test', 'http://demo.banuchat.test'));
+});
 import {Alert} from '../src/ui/confirmation.web';
 
 test('web channel accepts only its exact loopback origin; no remote, credentials or alternate ports', () => {
