@@ -24,10 +24,16 @@ function fixture(handler?:Fetch){const vault=store();const calls:Array<{url:stri
 }
 test.beforeEach(()=>{process.env.EXPO_PUBLIC_DEMO_MODE='synthetic';process.env.EXPO_PUBLIC_API_BASE_URL=base;process.env.EXPO_PUBLIC_AUTH_LOCAL_CHANNEL='adb_reverse';});
 
-test('authenticated transport requires explicit local channel/v2 and rejects anonymous LAN/public/CCD targets',()=>{
+test('authenticated transport accepts synthetic HTTPS v2 and requires an explicit channel for local HTTP',()=>{
  assert.equal(getApiBaseUrl(),base);
- for(const value of ['http://192.168.1.2:3002/api/v2','http://127.0.0.1:3000/api/v1','https://example.test/api/v2','http://user:pass@127.0.0.1:3002/api/v2']){process.env.EXPO_PUBLIC_API_BASE_URL=value;assert.throws(getApiBaseUrl);}
- process.env.EXPO_PUBLIC_API_BASE_URL=base;delete process.env.EXPO_PUBLIC_AUTH_LOCAL_CHANNEL;assert.throws(getApiBaseUrl);
+ delete process.env.EXPO_PUBLIC_AUTH_LOCAL_CHANNEL;
+ const publicUrl='https://example.test/api/v2';
+ process.env.EXPO_PUBLIC_API_BASE_URL=publicUrl;
+ assert.equal(getApiBaseUrl(),publicUrl);
+ for(const value of ['http://192.168.1.2:3002/api/v2','http://127.0.0.1:3000/api/v1','http://example.test/api/v2','https://example.test/api/v1','https://user:pass@example.test/api/v2',base]){
+   process.env.EXPO_PUBLIC_API_BASE_URL=value;
+   assert.throws(getApiBaseUrl);
+ }
 });
 test('login validates me, stores only refresh in vault and exposes no token/password in snapshots',async()=>{
  const f=fixture();await f.client.login(me.synthetic_uid,'contraseña ficticia para prueba');assert.equal(f.vault.inspect(),refresh);assert.equal(f.client.getSnapshot().me?.synthetic_uid,me.synthetic_uid);

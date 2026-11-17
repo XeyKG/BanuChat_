@@ -663,6 +663,7 @@ test("errores de generación se convierten en rag_dependency_unavailable", async
       ),
       expectReason("rag_dependency_unavailable"),
     );
+    assert.equal(sql.calls.length, 1, `generation failure ${reason} must not write a turn`);
   }
 });
 

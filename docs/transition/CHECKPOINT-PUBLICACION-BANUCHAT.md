@@ -1,5 +1,23 @@
 # BanuChat — publicación de demostración
 
+## Validación de rendimiento y publicación del 17 de noviembre de 2026
+
+Desde Windows, `https://banuchat.duckdns.org/login` completó la redirección con TLS válido y devolvió HTTP 200 en el origen `sslip.io`. La serie REST se ejecutó por HTTPS en ese origen, con la misma cuenta sintética, consultas secuenciales y una conversación vacía por envío. Después de cada POST se consultó el historial y se descargaron los cinco artefactos por sus rutas protegidas.
+
+| Orden y pregunta | Tiempo POST | HTTP | Mensajes persistidos | Citas | Descargas |
+| --- | ---: | ---: | ---: | ---: | --- |
+| 1. ¿Qué explica la orientación general del Programa Demo de Aprendizaje Digital sobre sus límites? | 147,06 s | 201 | 2 | 5 | 5 de 5 HTTP 200 |
+| 2. ¿Qué indica el documento de evaluación formativa sobre la entrega de evidencias? | 117,11 s | 201 | 2 | 5 | 5 de 5 HTTP 200 |
+| 3. Misma pregunta del paso 2, en otra conversación nueva | 29,97 s | 201 | 2 | 5 | 5 de 5 HTTP 200 |
+
+La pregunta del paso 1 había agotado el plazo de generación en el ensayo anterior y ahora quedó a unos tres segundos del límite de la API. La repetición del paso 2 fue 3,9 veces más rápida. El resultado es compatible con reutilización del prefijo y con un costo alto al evaluar evidencia nueva. La instrumentación del ensayo anterior sí separó evaluación y generación. En esta serie se midió desde el cliente y quedaron sin observar las métricas internas por consulta, fallos de página, configuración efectiva de la cola y manejo de la cancelación dentro de Ollama. La sesión administrativa de EC2 no estuvo disponible desde las herramientas de esta ejecución, por lo que tampoco hubo reinicio, prueba controlada de hilos o contexto, ni nueva lectura de créditos. El último valor observado sigue siendo US$7,60 de US$50.
+
+Se investigó el formato del prompt. Su evidencia conserva los cinco fragmentos completos, con título y localizador por fragmento. Quitar solo encabezados conserva la información, pero no reduce el cuerpo de los 5 KiB observados en el ensayo anterior. Antes de recortar el contenido o el historial, se requiere una comparación de respuestas, fuentes y seguimiento en el modelo remoto. La prueba de regresión verifica que un error de generación, incluida una respuesta incompleta, no llega a persistir el turno. El historial remoto confirmó exactamente dos mensajes por cada envío exitoso. Esta serie no observó un 503, por lo que no aportó una comprobación remota nueva de persistencia tras cancelación.
+
+En Huawei, con la APK existente, se reabrió un turno documental con cinco fuentes desde Historial, se expandieron las referencias, se cerró sesión y se volvió a iniciar con la cuenta sintética. Desde esa sesión se envió una nueva pregunta documental sobre la entrega de evidencias, se observó la respuesta con cinco fuentes y se abrió el expediente SIM-0001. Evidencia local en `infra/local/BanuChat-Android-RAG-2026-11-17.png`. Metro y la API local estaban apagados, sin túneles ADB reverse. Por REST se comprobaron expedientes distintos para ambas cuentas, HTTP 404 al abrir una conversación ajena, HTTP 204 en logout y HTTP 401 al usar la sesión revocada. La repetición de estas comprobaciones con dos cuentas en el navegador y la captura web siguen pendientes.
+
+Los chequeos de tipos y 107 pruebas de API y 69 de móvil pasaron. La prueba de transporte móvil ahora admite el origen HTTPS sintético que ya permite el código y mantiene la comprobación del canal HTTP local. Se conservan el origen de transición y la APK existente. Las consultas nuevas quedaron cerca de los límites y sobrepasan en algunos casos los 90 s del cliente publicado. La exportación de DuckDNS y el ajuste del cliente de 175 s continúan sin publicar. Para la demostración actual, comprobar el estado de la EC2 y la precarga desde Session Manager, ensayar el turno previsto y conservar su conversación para mostrar evidencia y fuentes desde Historial si Ollama agota el plazo durante la presentación.
+
 ## Estabilización del 17 de noviembre de 2026
 
 Desde Windows, con verificación TLS, DuckDNS respondió HTTP 302 y el origen de transición respondió HTTP 200. La IP elástica conservó el valor 34.239.198.159 al arrancar de nuevo la EC2 existente. El panel del Learner Lab mostró US$7,60 usados de US$50. Los servicios publicados dependen de que el laboratorio mantenga la instancia encendida. Para recuperar la demo, iniciar el Learner Lab, comprobar los servicios con `systemctl is-active ollama banuchat-api banuchat-web banuchat-https` desde Session Manager y confirmar la precarga con `journalctl -u banuchat-ollama-warmup -b`. En el arranque observado, la precarga automática terminó con código 0 y la sonda de generación tardó 21,45 s.
