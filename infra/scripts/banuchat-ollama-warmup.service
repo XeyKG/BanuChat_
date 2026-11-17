@@ -1,0 +1,14 @@
+[Unit]
+Description=Preload BanuChat Ollama models
+Requires=ollama.service
+After=ollama.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/banuchat/infra/scripts/ollama-demo-warmup.sh
+TimeoutStartSec=330
+NoNewPrivileges=true
+DynamicUser=true
+
+[Install]
+WantedBy=multi-user.target

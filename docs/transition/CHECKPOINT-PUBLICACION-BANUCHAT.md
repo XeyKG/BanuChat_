@@ -22,6 +22,16 @@ Desde el cliente de prueba externo, la API HTTPS validó dos cuentas distintas, 
 
 ## Operación
 
+### Precarga de Ollama en EC2
+
+`banuchat-ollama-warmup.service` está habilitado para ejecutar la precarga al arrancar la EC2. Ejecuta una consulta corta de embeddings y otra de generación, con residencia de 15 minutos y comprobación de que ambos modelos siguen cargados. La primera ejecución del servicio en la instancia terminó con código 0 en 10 s. Después quedaron 3.041 MiB de memoria disponible y el servidor seguía sin swap. La prueba se hizo iniciando el servicio en la EC2 activa. Falta validar el siguiente reinicio completo.
+
+Una consulta documental posterior agotó el tiempo de generación incluso después de la precarga. Ollama devolvió HTTP 200 en embeddings en 0,47 s y HTTP 500 en generación tras 2 min 29 s. La API devolvió `DEPENDENCY_UNAVAILABLE`. La residencia de los modelos quedó verificada, pero no garantiza la latencia de una pregunta con evidencia documental.
+
+Desde Session Manager, usar `systemctl is-enabled banuchat-ollama-warmup` y `journalctl -u banuchat-ollama-warmup -b`. Antes de abrir la demo, comprobar residencia con `bash /opt/banuchat/infra/scripts/ollama-demo-warmup.sh --check`. Si devuelve un error porque los modelos se descargaron de memoria, ejecutar `sudo systemctl start banuchat-ollama-warmup` y repetir la comprobación. Esta señal es distinta del estado HTTP de Caddy. El cliente todavía espera 90 s, mientras que la generación administrada puede esperar 150 s y el proxy 180 s.
+
+DuckDNS es un nombre público que se puede asociar a la IP elástica de la demo. La APK existente apunta a `34-239-198-159.sslip.io`. Para servir un segundo nombre hay que registrar el subdominio, configurar HTTPS y verificar el origen web en el proxy y el cliente. El panel DuckDNS pidió iniciar sesión, por lo que el nombre aún no está configurado. [Documentación de DuckDNS](https://www.duckdns.org/about.jsp)
+
 ### Recuperación observada el 17 de noviembre de 2026
 
 El laboratorio estaba terminado y la URL agotaba el tiempo de conexión. Al iniciar otra sesión del Learner Lab, la EC2 existente arrancó con la misma IP pública, 34.239.198.159. Los servicios `banuchat-api`, `banuchat-web`, `banuchat-https` y `ollama` aparecieron activos y habilitados. Ollama reportó 0.35.0. Desde Windows se obtuvo HTTP 200 con TLS válido y se recuperó el expediente SIM-0001 por HTTPS mientras los puertos locales de Metro y la demo estaban cerrados. El tablero mostró US$7,50 usados de US$50.
