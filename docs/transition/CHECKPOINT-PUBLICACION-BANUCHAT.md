@@ -30,7 +30,7 @@ Una consulta documental posterior agotó el tiempo de generación incluso despu�
 
 Desde Session Manager, usar `systemctl is-enabled banuchat-ollama-warmup` y `journalctl -u banuchat-ollama-warmup -b`. Antes de abrir la demo, comprobar residencia con `bash /opt/banuchat/infra/scripts/ollama-demo-warmup.sh --check`. Si devuelve un error porque los modelos se descargaron de memoria, ejecutar `sudo systemctl start banuchat-ollama-warmup` y repetir la comprobación. Esta señal es distinta del estado HTTP de Caddy. El cliente todavía espera 90 s, mientras que la generación administrada puede esperar 150 s y el proxy 180 s.
 
-DuckDNS es un nombre público que se puede asociar a la IP elástica de la demo. La APK existente apunta a `34-239-198-159.sslip.io`. Para servir un segundo nombre hay que registrar el subdominio, configurar HTTPS y verificar el origen web en el proxy y el cliente. El panel DuckDNS pidió iniciar sesión, por lo que el nombre aún no está configurado. [Documentación de DuckDNS](https://www.duckdns.org/about.jsp)
+El usuario registró `banuchat.duckdns.org`. Su registro A apunta a la IP elástica 34.239.198.159. Caddy sirve HTTPS para el nombre y redirige con HTTP 302 al origen `https://34-239-198-159.sslip.io` conservando la ruta. Desde Windows se verificó la resolución pública, TLS válido y HTTP 200 al seguir la redirección de `/login`. La APK publicada usa ese mismo origen de API. El alias está disponible mientras la EC2 sirve HTTPS. [Acceso a BanuChat](https://banuchat.duckdns.org/login) · [Documentación de DuckDNS](https://www.duckdns.org/about.jsp)
 
 ### Recuperación observada el 17 de noviembre de 2026
 
