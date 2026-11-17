@@ -79,9 +79,8 @@ export const webAppearance = `
 #banu-web-frame [data-testid="home-action-card"] [role="button"] { min-width:0; }
 #banu-web-frame [data-testid="home-agenda"] { width:280px;flex-shrink:0; }
 #banu-web-frame [data-testid="home-layout"] { flex-direction:row;gap:22px;align-items:stretch; }
-#banu-web-frame [data-testid="core-chat-screen"] { padding:24px 48px 32px !important;gap:24px; }
+#banu-web-frame [data-testid="core-chat-screen"] { padding:12px 24px 16px !important;gap:12px; }
 #banu-web-frame [data-testid="chat-layout"] { width:100%;max-width:1180px;align-self:center;gap:20px; }
-#banu-web-frame [data-testid="chat-header"] { padding:16px 22px;max-width:none; }
 #banu-web-frame [data-testid="chat-column"] { max-width:744px;gap:24px; }
 #banu-web-frame [data-testid="chat-user"] { padding:12px 16px;max-width:85%;box-shadow:inset 0 1px 0 rgba(255,255,255,.75); }
 #banu-web-frame [data-testid="chat-assistant"] { min-width:0;flex:1;padding:0;gap:10px;background:${colors.surface};border:0;border-radius:0; }
@@ -108,7 +107,7 @@ export const webAppearance = `
 @media (min-width:760px) and (max-width:1040px) {
   #web-navigation-shell { width:216px; }
   #banu-web-frame [data-testid="home-content"] { padding:4px 5px 24px; }
-  #banu-web-frame [data-testid="core-chat-screen"] { padding:24px !important; }
+  #banu-web-frame [data-testid="core-chat-screen"] { padding:12px !important; }
   #banu-web-frame [data-testid="home-hero-icon"] { width:135px;margin-left:0; }
 }
 @media (max-width:759px) {
@@ -122,8 +121,7 @@ export const webAppearance = `
   #banu-web-frame [data-testid="home-action-card"] { min-height:160px;flex-direction:column;align-items:flex-start;padding:16px;gap:12px; }
   #banu-web-frame [data-testid="home-action-card"] > div:last-child { position:absolute;right:12px;top:24px; }
   #banu-web-frame [data-testid="home-layout"] { flex-direction:column; }
-  #banu-web-frame [data-testid="core-chat-screen"] { padding:24px 20px 16px !important;gap:20px; }
-  #banu-web-frame [data-testid="chat-header"] { padding:12px 14px; }
+  #banu-web-frame [data-testid="core-chat-screen"] { padding:8px 10px 8px !important;gap:8px; }
   #banu-web-frame [data-testid="chat-message"] { font-size:14px;line-height:24px; }
   #banu-web-frame [data-testid="chat-composer"] { padding:10px; }
   #banu-web-frame [data-testid="chat-composer-row"] { padding:10px; }

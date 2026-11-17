@@ -16,10 +16,29 @@ export default function Login(){
  const {client,snapshot}=useAuth(),router=useRouter();const [uid,setUid]=useState(''),[password,setPassword]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(false),[errorKind,setErrorKind]=useState<SessionError['kind']>('session');
  const passwordRef=useRef<TextInput>(null);
  const [focused,setFocused]=useState<'uid'|'password'|null>(null);
+ const [validation,setValidation]=useState('');
  if(isCcdLocal())return <Redirect href="/profiles" />;
  if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
- const unavailable=snapshot.phase==='unavailable',valid=[9,13].includes(uid.length)&&/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(uid)&&password.length>0&&[...password].length<=128;
- async function signIn(){if(!valid||busy)return;setBusy(true);setError(false);try{await client.login(uid,password);setPassword('');router.replace('/home');}catch(error){setPassword('');setErrorKind(error instanceof SessionError?error.kind:'session');setError(true);}finally{setBusy(false);}}
+ const unavailable=snapshot.phase==='unavailable';
+ async function signIn(){
+  if(busy||unavailable)return;
+  setError(false);
+  const username=uid.trim().toUpperCase();
+  if(!username||!password){
+   setValidation(!username&&!password?'Ingresa tu usuario y contraseña.':!username?'Ingresa tu usuario.':'Ingresa tu contraseña.');
+   return;
+  }
+  if(!/^(?:BCH-DEMO-[0-9]{4}|U[0-9]{8})$/.test(username)){
+   setValidation('Ingresa un usuario válido, por ejemplo U seguido de ocho dígitos.');
+   return;
+  }
+  if([...password].length>128){setValidation('La contraseña no puede superar los 128 caracteres.');return;}
+  setValidation('');
+  setBusy(true);
+  try{await client.login(username,password);setPassword('');router.replace('/home');}
+  catch(error){setPassword('');setErrorKind(error instanceof SessionError?error.kind:'session');setError(true);}
+  finally{setBusy(false);}
+ }
  return <SafeAreaView style={styles.safe}><KeyboardAvoidingView style={styles.safe} behavior={Platform.OS==='ios'?'padding':'height'}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
  <View testID="login-shell" style={styles.shell}>
  <BanuWordmark/>
@@ -35,9 +54,10 @@ export default function Login(){
   <View style={styles.field}><Text nativeID="login-uid-label" style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" aria-labelledby="login-uid-label" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" placeholderTextColor={colors.muted} style={[styles.input,focused==='uid'&&styles.inputFocused]} onFocus={()=>setFocused('uid')} onBlur={()=>setFocused(null)} returnKeyType="next" submitBehavior="submit" onSubmitEditing={()=>passwordRef.current?.focus()}/></View>
   <View style={styles.field}><Text nativeID="login-password-label" style={styles.label}>Contraseña</Text><TextInput ref={passwordRef} accessibilityLabel="Contraseña" aria-labelledby="login-password-label" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" editable={!busy&&!unavailable} style={[styles.input,focused==='password'&&styles.inputFocused]} onFocus={()=>setFocused('password')} onBlur={()=>setFocused(null)} returnKeyType="go" onSubmitEditing={()=>void signIn()}/></View>
   {unavailable&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'?'La sesión web no está disponible. Abre el origen local autorizado.':'El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.'}</Text>}
-  {error&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'&&errorKind==='credentials'?'Usuario o contraseña inválidos.':Platform.OS==='web'&&errorKind==='unavailable'?'El servicio no está disponible. Inténtalo más tarde.':'No se pudo iniciar sesión. Revisa tus datos y la conexión autorizada.'}</Text>}
+  {validation!==''&&<Text accessibilityRole="alert" style={styles.error}>{validation}</Text>}
+  {error&&<Text accessibilityRole="alert" style={styles.error}>{errorKind==='credentials'?'Usuario o contraseña inválidos.':errorKind==='unavailable'?'El servicio no está disponible. Inténtalo más tarde.':'No se pudo iniciar sesión. Vuelve a intentarlo.'}</Text>}
   {snapshot.logoutRemoteConfirmed===false&&<Text accessibilityRole="alert" style={styles.error}>La sesión se cerró en este dispositivo. No se pudo confirmar la revocación remota.</Text>}
-  <AppButton tone="banu" label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} loadingLabel="Iniciando sesión…" disabled={!valid||unavailable}/>
+  <AppButton tone="banu" label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} loadingLabel="Iniciando sesión…" disabled={unavailable}/>
   <View style={styles.notice}><Text style={styles.noticeTitle}>Demostración local · cuenta ficticia</Text><Text style={styles.noticeCopy}>{Platform.OS==='web'?'La sesión solo vive en esta pestaña; al recargar debes iniciar sesión de nuevo.':'Usa la cuenta de demostración asignada. No corresponde a una identidad institucional.'}</Text></View>
  </View></View></View></ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }

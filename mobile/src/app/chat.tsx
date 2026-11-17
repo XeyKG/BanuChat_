@@ -28,7 +28,7 @@ import { useSession } from '@/session/session-context';
 import {useChatState} from '@/session/use-chat-state';
 import {useAuth} from '@/auth/auth-provider';
 import { BrandMark, BubbleIn, FadeIn, TypingIndicator, useMotionReduced } from '@/ui/animated';
-import {BanuPageHeading,BanuWordmark,NativeCoreNavigation} from '@/components/banu-core';
+import {NativeCoreNavigation} from '@/components/banu-core';
 import { colors, layout, radii, spacing, typography, textStyles, shadows } from '@/ui/tokens';
 
 type ChatMessage = SentUserMessage | SentAssistantMessage;
@@ -341,38 +341,20 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView testID="core-chat-screen" style={styles.safeArea}>
-      {Platform.OS!=='web'&&!keyboardVisible&&<View style={styles.nativeTop}><BanuWordmark compact/></View>}
-      {!keyboardVisible&&(Platform.OS==='web'?<BanuPageHeading eyebrow="CONVERSA CON BANU" title="Tu espacio para preguntar" subtitle="Resuelve tus dudas y explora las fuentes." action={<AppButton tone="banu" label="Nuevo chat" accessibilityLabel="Nueva conversación desde chat" variant="secondary" onPress={()=>void openNewConversation()} loading={isStartingNew} disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/>}/>:<View style={styles.nativeToolbar}><Text accessibilityRole="header" style={styles.nativeToolbarTitle}>Conversa con Banu</Text><AppButton tone="banu" label="Nuevo chat" accessibilityLabel="Nueva conversación desde chat" variant="secondary" onPress={()=>void openNewConversation()} loading={isStartingNew} disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/></View>)}
+      {!keyboardVisible&&(
+        <View style={styles.nativeToolbar}>
+          <Text accessibilityRole="header" style={styles.nativeToolbarTitle}>Chat con Banu</Text>
+          <AppButton tone="banu" label="Nuevo chat" accessibilityLabel="Nueva conversación desde chat" variant="secondary"
+            onPress={()=>void openNewConversation()} loading={isStartingNew}
+            disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/>
+        </View>
+      )}
       {newConversationError&&sendError!=='conflict'&&<Text accessibilityRole="alert" style={styles.errorText}>No fue posible crear otra conversación. Puedes intentarlo de nuevo.</Text>}
       <View testID="chat-layout" style={styles.chatLayout}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'web' ? 'height' : 'padding'}
         keyboardVerticalOffset={Platform.OS==='web'?0:insets.top+spacing.lg}
         style={styles.keyboardView}>
-        <View testID="chat-header" style={styles.header}>
-          <View style={styles.headerIdentity}>
-            <View style={styles.banuAvatar}>
-              <BrandMark size={Platform.OS==='web'?38:32} framed={false} />
-            </View>
-            <View style={styles.headerCopy}>
-              <Text style={styles.headerTitle}>Banu</Text>
-              <Text style={styles.headerSubtitle}>Tu compañero académico</Text>
-            </View>
-          </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ disabled: isSending }}
-            disabled={isSending}
-            onPress={returnHome}
-            style={({ pressed }) => [
-              styles.headerAction,
-              isSending && styles.headerActionDisabled,
-              pressed && !isSending && styles.pressed,
-            ]}>
-            <Text style={styles.headerActionText}>Inicio</Text>
-          </Pressable>
-        </View>
-
         <ScrollView
           ref={scrollViewRef}
           style={styles.messageScroll}
@@ -657,9 +639,9 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea:{flex:1,minHeight:0,backgroundColor:colors.banuCanvas,paddingHorizontal:spacing.lg,paddingTop:spacing.lg,gap:spacing.lg},
+  safeArea:{flex:1,minHeight:0,backgroundColor:colors.banuCanvas,paddingHorizontal:spacing.sm,paddingTop:spacing.sm,gap:spacing.sm},
   nativeToolbar:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:spacing.sm},nativeToolbarTitle:{flex:1,minWidth:0,fontSize:17,lineHeight:24,fontWeight:'600',color:colors.banuInk},
-  nativeTop:{paddingBottom:spacing.xs},chatLayout:{width:'100%',flex:1,minHeight:0,flexDirection:'row',gap:spacing.lg},
+  chatLayout:{width:'100%',flex:1,minHeight:0,flexDirection:'row',gap:spacing.lg},
   keyboardView:{flex:1,width:Platform.OS==='web'?undefined:'100%',minWidth:0,minHeight:0,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,overflow:'hidden',...shadows.banuPanel},
   newChatButton:{minHeight:48,paddingHorizontal:spacing.sm},context:{display:'none',width:244,alignSelf:'flex-start',maxHeight:'100%',borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,...shadows.banuPanel},contextContent:{padding:spacing.lg,gap:spacing.md},contextTitle:{fontSize:16,lineHeight:24,fontWeight:'600',color:colors.banuInk},contextCopy:{fontSize:13,lineHeight:22,color:colors.banuMuted},contextCaption:{fontSize:12,lineHeight:20,color:colors.banuMuted,backgroundColor:colors.banuCanvas,padding:spacing.sm,borderRadius:radii.sm},
   invalidContainer: {
@@ -687,35 +669,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   invalidButton: { minWidth: 180, marginTop: spacing.sm },
-  header: {
-    width: '100%',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    paddingHorizontal: Platform.OS==='web'?spacing.lg:spacing.sm,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.banuBorder,
-  },
-  headerIdentity: { flexDirection: 'row', alignItems: 'center', gap: Platform.OS==='web'?spacing.sm:spacing.xs, flex: 1, minWidth:0 },
-  banuAvatar: { position: 'relative' },
-  headerCopy: { flex: 1 },
-  headerTitle: { color: colors.banuInk, fontSize: 15, fontWeight: '600', letterSpacing: -0.3 },
-  headerSubtitle: { color: colors.banuMuted, fontSize: 12, lineHeight: 18 },
-  headerAction: {
-    minHeight: layout.minTouchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: colors.banuBorder,
-    backgroundColor: colors.surface,
-  },
-  headerActionText: { color: colors.banuInk, fontSize: typography.small, fontWeight: '700' },
-  headerActionDisabled: { opacity: 0.5 },
-  pressed: { opacity: 0.7 },
   messageScroll:{flex:1,minHeight:0},
   messageList: { flexGrow: 1, paddingHorizontal: spacing.md, paddingVertical: spacing.lg },
   messageColumn: { width: '100%', maxWidth: layout.maxReadingWidth, alignSelf: 'center', gap: spacing.md },
