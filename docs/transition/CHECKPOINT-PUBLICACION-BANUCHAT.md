@@ -1,5 +1,46 @@
 # BanuChat — publicación de demostración
 
+## Release 1.0.1 — cierre del 17 de noviembre de 2026
+
+DuckDNS sirve directamente la web y REST v2 desde `https://banuchat.duckdns.org`. La comprobación externa devolvió HTTP 200, TLS válido y ninguna redirección en `/login`. El origen de transición `sslip.io` conserva su proxy anterior para la APK 1.0.0. La misma EC2 ejecuta `banuchat-web-duckdns.service`, habilitado para arrancar automáticamente, con el proxy en loopback 8086 y la exportación `mobile/.expo/release-1.0.1-fixed`. Caddy dirige DuckDNS a ese puerto y conserva 8085 para el origen anterior. Host y Origin mantienen comprobación exacta por origen. Una petición con Origin ajeno recibió 403, una petición anónima a `/auth/me` recibió 401 y el expediente autenticado respondió 200 sin redirección.
+
+El backend de generación que ya estaba desplegado coincide con el SHA-256 del archivo local `ollama-generator-client.ts`, `6d148bc5394af39a97fa30b786ab51111a5e86cd51dcb26a3c93fbaaad5fca19`. La API conserva 150 s para generación, el cliente publicado incorpora 175 s sobre HTTPS y el proxy conserva 180 s. El perfil local mantiene su límite anterior. Los errores 502, 503 y 504 se tratan como resultado incierto porque también pueden producirse al perder el acuse de un COMMIT. El cliente conserva la pregunta y ofrece Comprobar estado, sin reenvío automático. La revisión independiente del cambio confirmó esa recuperación. Los tests simulan respuestas HTTP ambiguas; la pérdida real de un acuse de COMMIT no se provocó.
+
+### Serie remota sobre DuckDNS
+
+Las dos preguntas se enviaron secuencialmente desde un cliente externo, en conversaciones nuevas, con la API remota y Supabase. Cada respuesta dejó exactamente dos mensajes y cinco citas. Las diez descargas de artefactos respondieron HTTP 200.
+
+| Pregunta | HTTP / tiempo total | Tokens entrada / salida | Evaluación del prompt | Generación |
+| --- | --- | --- | --- | --- |
+| ¿Qué explica la orientación general del Programa Demo de Aprendizaje Digital sobre sus límites? | 201 / 145,87 s | 1659 / 78 | 110778 ms | 24125 ms |
+| ¿Qué indica el documento de evaluación formativa sobre la entrega de evidencias? | 201 / 117,41 s | 1614 / 82 | 89883 ms | 25245 ms |
+
+En la primera, embedding tardó 5231 ms y pgvector 74 ms. En la segunda, pgvector tardó 64 ms. El generador recibió dos hilos. Se conservaron los cinco fragmentos completos y los modelos y vectores existentes. La serie previa de preguntas distintas y repetidas permanece documentada abajo. El costo de evaluar prompts nuevos en dos vCPU sigue siendo una limitación. Recortar los documentos o cambiar de modelo requiere una evaluación de calidad adicional y no se aplicó a esta entrega.
+
+Durante la interrupción por créditos de la herramienta, el Learner Lab llegó a 00:00 y detuvo la EC2. Se inició otra sesión del mismo laboratorio. La instancia existente recuperó DuckDNS con la misma IP elástica y HTTP 200. `banuchat-api`, `banuchat-web-duckdns`, `banuchat-https` y `ollama` aparecieron activos, y la precarga terminó con `Result=success` y `ExecMainStatus=0`. Con los modelos cargados se observaron 3013 MiB disponibles y cero swap. El crédito mostrado antes y después de reactivar fue US$7,60 usados de US$50, sujeto al retraso del tablero.
+
+### Web y distribución Android
+
+En el navegador bajo DuckDNS se reabrió una conversación desde Historial, se expandieron sus cinco fuentes y se abrió el contenido completo de un artefacto. Las dos cuentas ficticias mostraron SIM-0003 y SIM-0004, respectivamente. El historial de la segunda estaba vacío y el de la primera conservaba sus turnos. Se verificó el regreso al login al cerrar sesión. Por REST en DuckDNS, logout devolvió 204 y el uso posterior de esa sesión devolvió 401. El aislamiento por conversación ajena con 404 está acreditado en la serie previa.
+
+La APK ARM64 1.0.1 usa `https://banuchat.duckdns.org/api/v2`, conserva `com.anonymous.banuchat` y aumenta `versionCode` a 2. `apksigner` verificó ambas versiones y el mismo certificado SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. La firma sigue siendo la local de debug de esta demostración. El APK tiene SHA-256 `0c1a913cc062048a9289d6b9b93dbff6a8e86cba6a21ba65e983364bd7b3292d`. La inspección del ZIP y del bundle comprobó la URL nueva, ausencia de la URL de API anterior y ausencia de archivos de credenciales, keystores y marcadores de conexión privada o contraseñas de fixtures. El alcance fue una inspección dirigida del artefacto.
+
+La compilación inicial falló por memoria nativa de Java en el PC. Gradle completó el build con un trabajador, heap de 1 GiB y la caché existente. ADB instaló 1.0.1 como actualización y confirmó versión 1.0.1 / código 2. El formulario vacío mostró «Ingresa tu usuario y contraseña». El login permitió abrir SIM-0001 y mostrar el recursamiento con sus dos intentos. Durante estas pruebas Metro y la API local estaban apagados y ADB no tenía túneles reverse.
+
+En el ensayo Android posterior al arranque se envió una pregunta nueva sobre preparación para una sesión, recuperó cinco fragmentos, embedding en 450 ms y pgvector en 127 ms. Ollama agotó 150003 ms y la APK pasó al estado de resultado sin confirmar conservando el texto. Comprobar estado devolvió que el turno no aparecía. La revisión automática rechazó confirmar el aviso de posible duplicado al intentar un reenvío manual. Se canceló esa confirmación y se continuó con una pregunta distinta en una conversación independiente.
+
+La segunda pregunta Android, sobre la entrega de evidencias, respondió con cinco citas. Embedding tardó 246 ms y pgvector 71 ms. La llamada a Ollama terminó con HTTP 200 en 136217 ms, con 1613 tokens de entrada, 96 de salida, evaluación del prompt de 104652 ms y generación de 31415 ms. El cliente recibió la respuesta después de superar los 90 s de la versión anterior. Durante esta generación, tres muestras de un segundo de vmstat reportaron 100 % de CPU de usuario, 2772 MiB disponibles y cero swap. La muestra respalda una limitación de cómputo en esta instancia.
+
+Se expandieron las cinco citas, se descargó y visualizó el documento completo, se reabrió el turno desde Historial y se confirmaron sus fuentes. La verificación REST posterior observó exactamente dos mensajes y cinco citas en `50f0faba-a566-4876-b1b6-62c5783b9e94`, cinco artefactos HTTP 200 y cero mensajes en el intento cancelado `8696d1d4-cc63-4c71-94e5-ce425de2cd59`. La segunda cuenta recibió 404 al solicitar el turno ajeno. El selector académico ajeno recibió 400. Logout revocó el token de la prueba REST con 401. En Android se cerró sesión y el nuevo login de la segunda cuenta mostró Bruno Arcilla. El recorrido de 1.0.1 se completó con Metro y API local apagados.
+
+El visor conserva el subtítulo heredado «Fuente documental CCD» en esta demostración sintética. El contenido descargado está marcado como sintético. La captura permite reconocer esta inconsistencia de rotulado sin atribuir procedencia institucional a los documentos.
+
+### Pruebas y entrega académica
+
+Pasaron los chequeos de tipos, 107 pruebas enfocadas de API, 70 pruebas de móvil y la prueba del proxy web. Esta última necesitó permiso de loopback fuera del sandbox tras un EACCES. La guía compacta, el guion con contingencia mediante Historial y la relación provisional con OE1–OE6 están en [ENTREGA-DEMO-1.0.1.md](ENTREGA-DEMO-1.0.1.md). Las capturas auténticas se conservan en `docs/transition/evidence/release-1.0.1/`. Los criterios académicos de calidad, SUS y latencia requieren sus evaluaciones específicas.
+
+La configuración de Caddy previa al cambio se conserva en `/etc/caddy/Caddyfile.pre-101.batssA`. Para volver temporalmente a la redirección anterior, copiar ese archivo sobre `/etc/caddy/Caddyfile`, validar con `caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile` y recargar Caddy. La APK 1.0.0 y el origen anterior permiten recuperar la demostración previa. No se eliminaron datos ni versiones.
+
 ## Validación de rendimiento y publicación del 17 de noviembre de 2026
 
 Desde Windows, `https://banuchat.duckdns.org/login` completó la redirección con TLS válido y devolvió HTTP 200 en el origen `sslip.io`. La serie REST se ejecutó por HTTPS en ese origen, con la misma cuenta sintética, consultas secuenciales y una conversación vacía por envío. Después de cada POST se consultó el historial y se descargaron los cinco artefactos por sus rutas protegidas.

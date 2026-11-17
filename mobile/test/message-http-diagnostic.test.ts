@@ -66,11 +66,12 @@ function assertSafe(logs: unknown[][]) {
 }
 
 for (const [status, code] of [[400,'INVALID_ARGUMENT'],[429,'RATE_LIMITED'],[500,'INTERNAL_ERROR'],[503,'DEPENDENCY_UNAVAILABLE'],[409,'CONFLICT']] as const) {
-  test(`diagnostic ${status} exposes only allowed metadata and preserves one POST / ${status === 409 ? 'conflict' : 'http'}`, async t => {
+  const kind = status === 409 ? 'conflict' : status === 503 ? 'network' : 'http';
+  test(`diagnostic ${status} exposes only allowed metadata and preserves one POST / ${kind}`, async t => {
     process.env.EXPO_PUBLIC_BANUCHAT_DIAGNOSTIC_HTTP = '1'; const logs = capture(t);
     let now = 1000; t.mock.method(Date, 'now', () => now);
     const f = await fixture(async () => { now += 137; return failure(status, code); });
-    await assert.rejects(sendMessage(id, question), e => e instanceof MessageRequestError && e.kind === (status === 409 ? 'conflict' : 'http'));
+    await assert.rejects(sendMessage(id, question), e => e instanceof MessageRequestError && e.kind === kind);
     await flush(); assert.equal(f.posts(), 1); assert.equal(f.client.getSnapshot().phase, 'authenticated');
     assert.equal(logs.length, 2);
     assert.deepEqual(logs[0]![1], {http_status:status, duration_ms:137});
@@ -105,10 +106,10 @@ test('missing, hostile or malformed error metadata never leaks into a diagnostic
 });
 test('valid optional fields survive independently; original body is not consumed', async t => {
   process.env.EXPO_PUBLIC_BANUCHAT_DIAGNOSTIC_HTTP = '1'; const logs = capture(t);
-  const r = failure(503,'DEPENDENCY_UNAVAILABLE',password); const f = await fixture(async () => r);
+  const r = failure(500,'INTERNAL_ERROR',password); const f = await fixture(async () => r);
   await assert.rejects(sendMessage(id,question)); await flush();
   assert.equal(r.bodyUsed,false); assert.equal((await r.json()).error.message,question);
-  assert.deepEqual(logs[1]![1], {...logs[0]![1] as object, error_code:'DEPENDENCY_UNAVAILABLE'});
+  assert.deepEqual(logs[1]![1], {...logs[0]![1] as object, error_code:'INTERNAL_ERROR'});
   const second = await fixture(async () => failure(400,password)); await assert.rejects(sendMessage(id,question)); await flush();
   assert.deepEqual(logs[3]![1], {...logs[2]![1] as object, request_id:requestId});
   assert.equal(f.posts(),1); assert.equal(second.posts(),1); assertSafe(logs);

@@ -225,6 +225,7 @@ export default function ChatScreen() {
       if (!canApplyResult()) return;
       if (error instanceof MessageRequestError) {
         if (error.kind === 'timeout' || error.kind === 'network') {
+          setContent(outgoing);
           setSendError('uncertain');
           setReconciliationState('awaiting_check');
         } else if (error.kind === 'conflict') {
@@ -508,8 +509,8 @@ export default function ChatScreen() {
 
               {(reconciliationState === 'awaiting_check' || reconciliationState === null) && (
                 <Text style={styles.uncertainText}>
-                  No se pudo confirmar si el mensaje fue procesado. No se reenviará automáticamente
-                  para evitar duplicados.
+                  Banu no pudo confirmar el resultado del envío. Tu pregunta sigue aquí.
+                  Pulsa Comprobar estado para revisar el historial antes de decidir si vuelves a enviarla.
                 </Text>
               )}
 

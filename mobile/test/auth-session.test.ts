@@ -74,6 +74,25 @@ test('existing resource adapters use Bearer, exact v2 bodies/paths and protected
  for(const call of f.calls.slice(2))assert.equal(new Headers(call.init?.headers).get('Authorization'),'Bearer '+access);
  const citation={index:0,source_kind:'document',label:'Ficticio',locator:'document:fixture',release_id:id,document_version_id:id,artifact_url:`/api/v2/documents/${id}/artifact`};assert.equal(isCitation(citation),true);assert.equal(isCitation({...citation,artifact_url:`/api/v1/documents/${id}/artifact`}),false);
 });
+test('dependency and gateway failures preserve reconciliation, including an ambiguous commit acknowledgement', async () => {
+  const replies = [
+    response({error: {code: 'DEPENDENCY_UNAVAILABLE', request_id: id}}, 503),
+    response({error: {code: 'DEPENDENCY_UNAVAILABLE'}}, 503),
+    new Response('Service unavailable', {status: 503}),
+    new Response(null, {status: 502}),
+    new Response(null, {status: 504}),
+  ];
+  let posts = 0;
+  const f = fixture(async () => replies[posts++]!);
+  await f.client.login(me.synthetic_uid, 'ficticio');
+  installAuthSession(f.client);
+  for (const reply of replies) {
+    assert.ok(reply);
+    await assert.rejects(sendMessage(id, 'hola'), error => error instanceof MessageRequestError && error.kind === 'network');
+  }
+  assert.equal(posts, replies.length);
+});
+
 test('logout during a pending refresh discards its result and revokes the returned access once',async()=>{
  let now=1000,release!:()=>void,entered!:()=>void,revokes=0;const held=new Promise<void>(r=>release=r),begun=new Promise<void>(r=>entered=r),vault=store();
  const client=new AuthSession(vault,()=>base,async(url)=>{

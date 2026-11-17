@@ -218,6 +218,11 @@ export async function sendMessage(
     if (response.status === 409) {
       throw new MessageRequestError('conflict');
     }
+    // A dependency error may follow a COMMIT whose acknowledgement was lost.
+    // Preserve reconciliation until the persisted history confirms the outcome.
+    if (response.status === 502 || response.status === 503 || response.status === 504) {
+      throw new MessageRequestError('network');
+    }
     if (response.status !== 201) {
       throw new MessageRequestError('http');
     }
