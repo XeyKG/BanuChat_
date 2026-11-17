@@ -22,6 +22,14 @@ Desde el cliente de prueba externo, la API HTTPS validó dos cuentas distintas, 
 
 ## Operación
 
+### Recuperación observada el 17 de noviembre de 2026
+
+El laboratorio estaba terminado y la URL agotaba el tiempo de conexión. Al iniciar otra sesión del Learner Lab, la EC2 existente arrancó con la misma IP pública, 34.239.198.159. Los servicios `banuchat-api`, `banuchat-web`, `banuchat-https` y `ollama` aparecieron activos y habilitados. Ollama reportó 0.35.0. Desde Windows se obtuvo HTTP 200 con TLS válido y se recuperó el expediente SIM-0001 por HTTPS mientras los puertos locales de Metro y la demo estaban cerrados. El tablero mostró US$7,50 usados de US$50.
+
+La primera consulta documental tras el arranque agotó 150 segundos durante la generación. Con ambos modelos ya cargados, el siguiente turno respondió en 25,26 segundos, con cinco citas y descarga HTTP 200. El turno web anterior que había quedado en curso conservó la conversación vacía. En aquella sesión del navegador se observó el expediente con recursamiento y el envío de la consulta. Tras reactivar el laboratorio, la pestaña anterior ya estaba cerrada. Queda pendiente repetir la consulta visual y verificar el cierre de sesión en web y Android con sesiones autenticadas.
+
+La [web restaurada](https://34-239-198-159.sslip.io/login) conserva el origen del [APK publicado](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.0-e7cd37d/BanuChat-demo-arm64.apk). El APK y su SHA-256 siguen siendo los de la Release documentada abajo.
+
 ### Cierre del 13 de noviembre de 2026
 
 - [Web de demostración](https://34-239-198-159.sslip.io/login). HTTP 200 y TLS válido desde Windows con los puertos locales 3004, 8081 y 8085 sin listeners. ADB no registró túneles reverse.
