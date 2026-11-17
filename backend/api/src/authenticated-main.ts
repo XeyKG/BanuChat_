@@ -50,7 +50,10 @@ export async function startAuthenticatedApi(){
   const generationTimeout = profile === 'managed' && process.env.BANUCHAT_GENERATOR_TIMEOUT_MS !== undefined
    ? Number(requireValue('BANUCHAT_GENERATOR_TIMEOUT_MS'))
    : undefined;
-  const generator=new OllamaGeneratorClient(runtime.base_url,generationTimeout),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
+  const cpuThreads = profile === 'managed' && process.env.BANUCHAT_GENERATOR_CPU_THREADS !== undefined
+   ? Number(requireValue('BANUCHAT_GENERATOR_CPU_THREADS'))
+   : undefined;
+  const generator=new OllamaGeneratorClient(runtime.base_url,generationTimeout,fetch,cpuThreads),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
   const artifacts=mode==='ccd_local'?ccdArtifactStorage():
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;

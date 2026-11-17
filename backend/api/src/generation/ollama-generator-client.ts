@@ -1,3 +1,4 @@
+import {ragMetrics} from '../operations/rag-metrics.js';
 import {
   GeneratorClientError,
   normalizeSha256Digest,
@@ -66,7 +67,11 @@ export class OllamaGeneratorClient implements GeneratorClient {
     baseUrl: string,
     private readonly timeoutMs = 30_000,
     private readonly fetchImplementation: Fetch = fetch,
+    private readonly cpuThreads?: number,
   ) {
+    if (cpuThreads !== undefined && (!Number.isInteger(cpuThreads) || cpuThreads < 1 || cpuThreads > 32)) {
+      reject("generator_unavailable");
+    }
     let parsed: URL;
     try {
       parsed = new URL(baseUrl);
@@ -94,17 +99,21 @@ export class OllamaGeneratorClient implements GeneratorClient {
 
   private async request(path: string, body?: unknown, classifyCapacity = false): Promise<unknown> {
     let response: Response;
+    const startedAt = performance.now();
+    const signal = AbortSignal.timeout(this.timeoutMs);
     try {
       response = await this.fetchImplementation(new URL(path, this.baseUrl), {
         method: body === undefined ? "GET" : "POST",
         headers: { "Content-Type": "application/json" },
         redirect: "error",
-        signal: AbortSignal.timeout(this.timeoutMs),
+        signal,
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
     } catch {
+      if (path === '/api/chat') ragMetrics('ollama_http', startedAt, {result: signal.aborted ? 'timeout' : 'transport_error'});
       return reject("generator_unavailable");
     }
+    if (path === '/api/chat') ragMetrics('ollama_http', startedAt, {status: response.status});
 
     if (response.status >= 300 && response.status < 400) {
       return reject("generator_unavailable");
@@ -197,6 +206,12 @@ export class OllamaGeneratorClient implements GeneratorClient {
     validateExpectedConfig(expected);
     await this.verifyRuntime(expected);
 
+    const startedAt = performance.now();
+    const contextMetrics = {
+      prompt_bytes: Buffer.byteLength(input.system_prompt) + Buffer.byteLength(input.user_prompt),
+      ...(this.cpuThreads === undefined ? {} : {cpu_threads: this.cpuThreads}),
+    };
+    ragMetrics('generation_input', startedAt, contextMetrics);
     const response = record(
       await this.request("/api/chat", {
         model: expected.model,
@@ -206,6 +221,7 @@ export class OllamaGeneratorClient implements GeneratorClient {
         options: {
           temperature: 0,
           num_predict: 256,
+          ...(this.cpuThreads === undefined ? {} : {num_thread: this.cpuThreads}),
         },
         messages: [
           { role: "system", content: input.system_prompt },
@@ -234,6 +250,15 @@ export class OllamaGeneratorClient implements GeneratorClient {
       eval_count: metric(response.eval_count),
       total_duration_ms: metric(response.total_duration) / 1_000_000,
     };
+    ragMetrics('generation', startedAt, {
+      prompt_tokens: result.prompt_eval_count,
+      generated_tokens: result.eval_count,
+      total_ms: result.total_duration_ms,
+      ...(typeof response.prompt_eval_duration === 'number' && Number.isFinite(response.prompt_eval_duration)
+        ? {prompt_eval_ms: response.prompt_eval_duration / 1_000_000} : {}),
+      ...(typeof response.eval_duration === 'number' && Number.isFinite(response.eval_duration)
+        ? {generation_ms: response.eval_duration / 1_000_000} : {}),
+    });
 
     await this.verifyRuntime(expected);
     return result;

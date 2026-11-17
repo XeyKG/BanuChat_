@@ -1,3 +1,4 @@
+import {ragMetrics} from '../operations/rag-metrics.js';
 import {
   retrieveDocumentChunksForQuery,
 } from "../application/document-query-retrieval.js";
@@ -174,6 +175,7 @@ export async function generateDocumentRagAnswer(
     // top-five presented as the complete catalog. Specific questions keep top 5.
     top_k: dependencies.evidence_mode === 'ccd_local' ? 12 : DOCUMENT_RETRIEVAL_TOP_K,
   };
+  const contextStarted = performance.now();
   const retrieved = await retrieveDocumentChunksForQuery(
     {
       sql: dependencies.sql,
@@ -198,6 +200,10 @@ export async function generateDocumentRagAnswer(
     : decision
       ? decision.chunks
       : retrieved;
+  ragMetrics('document_context', contextStarted, {
+    chunks: chunks.length,
+    evidence_bytes: chunks.reduce((total, chunk) => total + Buffer.byteLength(chunk.content), 0),
+  });
 
   if (chunks.length === 0) {
     if (dependencies.evidence_mode === 'ccd_local' && isCourseTopicsFollowUp(input.query)) {

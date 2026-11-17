@@ -1,3 +1,4 @@
+import {ragMetrics} from '../operations/rag-metrics.js';
 import type { SqlQueryClient } from "../data/sql-client.js";
 import {
   QueryEmbeddingClientError,
@@ -147,25 +148,32 @@ export async function retrieveDocumentChunksForQuery(
   const config = validateQueryEmbeddingConfig(configResult.rows[0]);
 
   let vector: number[];
+  const embeddingStarted = performance.now();
   try {
     vector = await dependencies.query_embedding_client.embedQuery(
       validated.query,
       config,
     );
+    ragMetrics('embedding', embeddingStarted, {result: 'ok'});
   } catch (error) {
+    ragMetrics('embedding', embeddingStarted, {result: 'error'});
     if (error instanceof QueryEmbeddingClientError) {
       return reject(error.reason);
     }
     return reject("embedding_unavailable");
   }
 
+  const retrievalStarted = performance.now();
   try {
-    return await (dependencies.retrieve_chunks ?? retrieveDocumentChunks)(dependencies.sql, {
+    const chunks = await (dependencies.retrieve_chunks ?? retrieveDocumentChunks)(dependencies.sql, {
       release_id: validated.release_id,
       query_embedding: vector,
       top_k: validated.top_k,
     });
+    ragMetrics('pgvector', retrievalStarted, {result: 'ok', chunks: chunks.length});
+    return chunks;
   } catch (error) {
+    ragMetrics('pgvector', retrievalStarted, {result: 'error'});
     if (error instanceof DocumentRetrievalError) {
       return reject(
         error.reason === "invalid_argument"

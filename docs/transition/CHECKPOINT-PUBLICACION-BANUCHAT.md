@@ -1,5 +1,24 @@
 # BanuChat — publicación de demostración
 
+## Estabilización del 17 de noviembre de 2026
+
+Desde Windows, con verificación TLS, DuckDNS respondió HTTP 302 y el origen de transición respondió HTTP 200. La IP elástica conservó el valor 34.239.198.159 al arrancar de nuevo la EC2 existente. El panel del Learner Lab mostró US$7,60 usados de US$50. Los servicios publicados dependen de que el laboratorio mantenga la instancia encendida. Para recuperar la demo, iniciar el Learner Lab, comprobar los servicios con `systemctl is-active ollama banuchat-api banuchat-web banuchat-https` desde Session Manager y confirmar la precarga con `journalctl -u banuchat-ollama-warmup -b`. En el arranque observado, la precarga automática terminó con código 0 y la sonda de generación tardó 21,45 s.
+
+La API de la EC2 registra tiempos y tamaños mediante `BANUCHAT_RAG_METRICS=1`. El registro excluye las preguntas, el texto de las fuentes y los tokens de sesión. La configuración de prueba pasó dos hilos a Ollama en la EC2 de dos vCPU. Los dos modelos estaban residentes, ambos con un contexto de 4096, y el sistema tenía 2232 MiB disponibles y cero swap. Se conservaron los modelos, los embeddings y la recuperación de cinco fragmentos.
+
+| Consulta | Extremo a extremo | Embedding / SQL | Evaluación / generación | Resultado |
+| --- | ---: | ---: | ---: | --- |
+| Propósito del Programa Demo de Aprendizaje Digital, después del arranque y la precarga | 137,87 s | 534 / 153 ms | 112010 / 16518 ms | 5 citas, artefacto HTTP 200 |
+| Misma pregunta, nueva conversación con el sistema caliente | 19,17 s | 81 / 71 ms | 326 / 16784 ms | 5 citas, artefacto HTTP 200 |
+| Límites del mismo programa | 150 s hasta el corte de la API | 455 / 82 ms | Sin métricas finales de Ollama | API 503 `DEPENDENCY_UNAVAILABLE`, Ollama HTTP 500 al cancelarse la solicitud |
+| Sonda breve directa de Ollama, 13 tokens de entrada y 2 de salida | 1,30 s | No aplica | 961 / 192 ms | HTTP 200 |
+
+La primera pregunta documental incluyó 5285 bytes de evidencia y 1656 tokens de entrada. La variante fallida recuperó cinco fragmentos y 5219 bytes de evidencia. El temporizador de la API canceló la generación a los 150002 ms y no se observó un evento de falta de memoria. La causa interna exacta del HTTP 500 de Ollama sigue sin determinarse. Los resultados confirman que la latencia de la evaluación del prompt puede dejar la generación fuera del presupuesto incluso con los modelos ya cargados. La repetición caliente solo mide un escenario favorable. Dentro del laboratorio, la mitigación comprobada para la demo es conservar la precarga y comprobar anticipadamente la pregunta del guion. Cualquier cambio de empaquetado de evidencia requiere repetir preguntas distintas y comparar la calidad de las respuestas y las cinco citas.
+
+El código compartido por web y Android fija 175 s para el chat sobre HTTPS, entre el corte de generación de 150 s y el límite de 180 s del proxy. En local conserva 90 s. Pasaron los chequeos de tipos y 106 pruebas de API y 21 de móvil. Se exportó la web de DuckDNS en staging en la misma EC2. La web pública y la APK publicada aún usan la configuración anterior. La migración del origen y la nueva APK quedan condicionadas a respuestas documentales consistentes.
+
+En el navegador real se verificó el login con la cuenta ficticia asociada a SIM-0003, su expediente y progreso, una respuesta documental con cinco fuentes, la expansión de esas referencias, la navegación a Historial y el regreso al login tras cerrar sesión. La descarga del artefacto se comprobó por REST. Siguen pendientes la reapertura del turno desde Historial, la comprobación del segundo usuario desde la interfaz y el nuevo login y logout en Android físico. Las pruebas Android y de aislamiento por REST anteriores se conservan abajo.
+
 ## Entorno
 
 Base de código `8a32c04710b4e911c2f0c5a4623510aac5e6354b`. El Learner Lab muestra US$5,40 usados de US$50 al iniciar. La guía de ese curso indica sesiones de cuatro horas y parada automática de EC2 al vencer. En `us-east-1` se aprovisionó `i-0a726734ca6c6f10d`, Amazon Linux 2023, `m6i.large` de 8 GiB, gp3 cifrado de 24 GiB e IMDSv2 obligatorio. Session Manager administra la instancia. El grupo `sg-0e0b64c1a5bc3e1a6` permite entrada TCP 443. La IP pública asignada por EC2 puede cambiar tras detenerla.

@@ -4,6 +4,7 @@ import {isCcdLocal} from '@/config/demo-mode';
 import { assertConversationAllowed } from '@/session/operator-conversations';
 
 export const MESSAGE_TIMEOUT_MS = 90_000;
+const HTTPS_MESSAGE_TIMEOUT_MS = 175_000;
 
 export type CitationSourceKind =
   | 'document'
@@ -185,18 +186,24 @@ export async function sendMessage(
   content: string,
 ): Promise<SendMessageResponse> {
   assertConversationAllowed(conversationId);
+  let baseUrl: string;
+  try {
+    baseUrl = getApiBaseUrl();
+  } catch {
+    throw new MessageRequestError('network');
+  }
   const controller = new AbortController();
   let didTimeout = false;
   const timeout = setTimeout(() => {
     didTimeout = true;
     controller.abort();
-  }, MESSAGE_TIMEOUT_MS);
+  }, baseUrl.startsWith('https://') ? HTTPS_MESSAGE_TIMEOUT_MS : MESSAGE_TIMEOUT_MS);
 
   try {
     let response: Response;
     try {
       response = await fetch(
-        `${getApiBaseUrl()}/conversations/${encodeURIComponent(conversationId)}/messages`,
+        `${baseUrl}/conversations/${encodeURIComponent(conversationId)}/messages`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
