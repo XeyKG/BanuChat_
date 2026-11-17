@@ -6,6 +6,14 @@
 
 La versión Android usa el paquete `com.anonymous.banuchat`, versión 1.0.1 y código 2, con el mismo certificado de firma que la 1.0.0.
 
+[Descargar APK ARM64 1.0.1](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.1/BanuChat-demo-1.0.1-arm64.apk) · [Release y notas](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1).
+
+La descarga requiere acceso al repositorio privado. El archivo de 47.054.108 bytes fue descargado y su SHA-256 verificado.
+
+```text
+0c1a913cc062048a9289d6b9b93dbff6a8e86cba6a21ba65e983364bd7b3292d
+```
+
 El acceso utiliza cuentas ficticias de BanuChat. El profesor recibe las contraseñas por canal privado. Las cuentas `U90000001` y `U90000002` tienen expedientes diferentes. La primera permite mostrar recursamiento. `U90000032` permite mostrar un estudiante sin intentos.
 
 ## Recorrido de cinco minutos
@@ -60,3 +68,17 @@ bash /opt/banuchat/infra/scripts/ollama-demo-warmup.sh --check
 Si los modelos ya salieron de memoria, ejecutar la precarga existente mediante `sudo systemctl start banuchat-ollama-warmup`. La precarga ayuda al arranque, pero las consultas nuevas pueden requerir una evaluación costosa del prompt en las dos vCPU disponibles.
 
 Los resultados finales, los enlaces de distribución y la evidencia de esta versión se registran en [el checkpoint de publicación](CHECKPOINT-PUBLICACION-BANUCHAT.md).
+
+## Evidencia de la entrega
+
+La prueba final Android observó una generación satisfactoria de 136,22 s con cinco citas, descarga del documento y recuperación desde Historial. Una pregunta distinta agotó el plazo de generación de la API y permitió comprobar la recuperación de errores. Las pruebas web y Android utilizan el backend remoto. Las dos consultas REST bajo DuckDNS tardaron 145,87 s y 117,41 s. AWS Academy puede detener el servidor al finalizar su sesión.
+
+La pantalla del visor conserva el rótulo heredado «Fuente documental CCD». Los documentos de esta demostración contienen la marca sintética y pertenecen al corpus ficticio.
+
+![Cinco fuentes persistidas en web](evidence/release-1.0.1/web-fuentes.jpg)
+
+![Expediente y recursamiento en Android 1.0.1](evidence/release-1.0.1/android-expediente.png)
+
+![Fuentes del turno nuevo en Android 1.0.1](evidence/release-1.0.1/android-rag-fuentes.png)
+
+La carpeta de evidencia incluye además la descarga documental en Android, el estado de envío incierto, el nuevo login y el expediente de la segunda cuenta web.
