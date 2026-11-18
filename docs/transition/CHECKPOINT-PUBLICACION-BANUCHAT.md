@@ -4,6 +4,8 @@
 
 Base: `main` en `9442407`, inicialmente limpio. [Entrega académica consolidada](ENTREGA-FINAL-BANUCHAT.md). No se modificaron arquitectura, contratos REST, autenticación del servidor, RAG, modelos, Supabase ni servicios AWS. Solo se desplegaron las exportaciones del cliente sobre los servicios existentes y se actualizó la APK.
 
+Publicación efectiva: [release `demo-1.0.2`](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.2), creada sobre el commit `aea7ccb`, publicada tras descargar y verificar por SHA-256 el [APK](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.2/BanuChat-demo-1.0.2-arm64.apk). La descarga autenticada coincide con los 47.054.452 bytes instalados en el Huawei. La 1.0.1 se conserva. El acceso a los assets requiere permisos del repositorio privado. La guía final enlaza el paquete académico único; su archivo de sumas permite comprobar la descarga.
+
 ### Cambios y validación efectiva
 
 - `ChatScreen`, `ChatSources`, `WebFrame` y CSS web: eliminación de cabecera y panel documental duplicados en chat web; citas completas disponibles en cada respuesta. Compositor con campo y envío en una fila; instrucciones duplicadas retiradas. Controles conservan mínimos táctiles y texto ampliado. Fuentes multilínea, detalle/localizador conservado y control para contraer al final.
