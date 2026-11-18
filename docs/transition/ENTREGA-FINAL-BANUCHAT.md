@@ -7,18 +7,24 @@ El detalle reproducible, inventario, pruebas nuevas, archivos privados y reversi
 ## Acceso e instalación
 
 - [Web HTTPS](https://banuchat.duckdns.org/login).
-- [APK ARM64 1.0.2](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.2/BanuChat-demo-1.0.2-arm64.apk) · [Release](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.2).
-- [Paquete único para el profesor](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.2/BanuChat-entrega-academica-1.0.2.zip): guía, checkpoint, capturas y APK. GitHub exige acceso al repositorio privado; compartirlo por un canal autorizado.
+- [APK ARM64 1.0.3](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.3/BanuChat-demo-1.0.3-arm64.apk) · [Release](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.3).
+- [Paquete académico 1.0.3](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.3/BanuChat-entrega-academica-1.0.3.zip): guía, checkpoint, APK y capturas sintéticas. GitHub exige acceso al repositorio privado; compartirlo por un canal autorizado. La entrega 1.0.2 se conserva como respaldo.
 
-APK de 47.054.452 bytes, paquete `com.anonymous.banuchat`, versionCode 3. Actualiza 1.0.1 conservando su firma local de debug. No desinstalar para actualizar. [La versión 1.0.1](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1) se conserva; Android puede impedir instalar un versionCode menor sobre el nuevo. No se ensayó downgrade nativo.
+APK de 47.060.204 bytes, paquete `com.anonymous.banuchat`, versionCode 4. Actualiza las versiones anteriores conservando su firma local de debug. No desinstalar para actualizar. [La versión 1.0.1](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1) se conserva; Android puede impedir instalar un versionCode menor sobre el nuevo. No se ensayó downgrade nativo.
 
 SHA-256 del APK:
 
 ```text
-263770f24b17149b73a48b2b37d08167a7faa85480168067e76dea11f3222f90
+48dcdb79660b06e4909e80863c7948442223bacb2cf919af83329975410b27f9
 ```
 
 Cuentas ficticias: `U90000001` y `U90000002`, con expedientes distintos; la primera permite mostrar recursamiento. `U90000032` representa un estudiante sin intentos. Las contraseñas se entregan por canal privado y no están en este paquete. La sesión web vive en la pestaña: al recargar se requiere otro login.
+
+## Cambios actuales del chat
+
+Las respuestas van directamente al contenido; la procedencia queda en las fuentes. El historial original no se reescribe. Tras preguntar por el progreso propio aparece «Ver mi progreso», que abre la pantalla autenticada y permite regresar al mismo chat. Bienvenida breve y sugerencias adaptadas a web y Android. En web, recargar e iniciar sesión de nuevo carga el cliente actualizado.
+
+Web pública y Huawei físico comprobados; 74 pruebas Mobile y 28 backend focales, typechecks correctos. Nueve consultas documentales remotas adicionales respondieron en 1,75–1,97 s, con citas/hashes, historial e aislamiento verificados. Son consultas con extracción documental; no una garantía de tiempo para generación libre ni de estabilidad RAG.
 
 ## Guion de sustentación y contingencia
 
