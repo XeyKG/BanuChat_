@@ -1,4 +1,4 @@
-# BanuChat — entrega académica de demostración 1.0.3
+# BanuChat — entrega académica de demostración 1.0.4
 
 Actualización del 18/11/2026: identidades y expedientes siguen siendo sintéticos. Las consultas documentales generales usan ahora 107 derivados CCD depurados, en un esquema privado separado y autorizados por el dueño del proyecto. Ese permiso no equivale a aval institucional ni garantiza vigencia o aplicación individual. La consulta explícita del material ficticio mantiene el corpus sintético.
 
@@ -7,20 +7,29 @@ El detalle reproducible, inventario, pruebas nuevas, archivos privados y reversi
 ## Acceso e instalación
 
 - [Web HTTPS](https://banuchat.duckdns.org/login).
-- [APK ARM64 1.0.3](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.3/BanuChat-demo-1.0.3-arm64.apk) · [Release](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.3).
-- [Paquete académico 1.0.3](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.3/BanuChat-entrega-academica-1.0.3.zip): guía, checkpoint, APK y capturas sintéticas. GitHub exige acceso al repositorio privado; compartirlo por un canal autorizado. La entrega 1.0.2 se conserva como respaldo.
+- [APK ARM64 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk) · [Release](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4).
+- [Paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip): APK, guía, checkpoint y capturas sintéticas web/Android. Descarga verificada.
+- [Paquete académico anterior 1.0.3](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.3/BanuChat-entrega-academica-1.0.3.zip): guía, checkpoint, APK y capturas sintéticas. GitHub exige acceso al repositorio privado; compartirlo por un canal autorizado. La entrega 1.0.2 se conserva como respaldo.
 
-APK de 47.060.204 bytes, paquete `com.anonymous.banuchat`, versionCode 4. Actualiza las versiones anteriores conservando su firma local de debug. No desinstalar para actualizar. [La versión 1.0.1](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1) se conserva; Android puede impedir instalar un versionCode menor sobre el nuevo. No se ensayó downgrade nativo.
+APK de 47.066.048 bytes, paquete `com.anonymous.banuchat`, versionCode 5. Actualiza las versiones anteriores conservando su firma local de debug. No desinstalar para actualizar. [La versión 1.0.1](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1) se conserva; Android puede impedir instalar un versionCode menor sobre el nuevo. No se ensayó downgrade nativo.
 
 SHA-256 del APK:
 
 ```text
-48dcdb79660b06e4909e80863c7948442223bacb2cf919af83329975410b27f9
+daddd2a9eae5b5036ffb80215e0e9b716696b8240bcbf054fb7e7ed4c862ce36
 ```
 
 Cuentas ficticias: `U90000001` y `U90000002`, con expedientes distintos; la primera permite mostrar recursamiento. `U90000032` representa un estudiante sin intentos. Las contraseñas se entregan por canal privado y no están en este paquete. La sesión web vive en la pestaña: al recargar se requiere otro login.
 
-## Cambios actuales del chat
+## Calendario, noticias y OE2 1.0.4
+
+Calendario mensual con días marcados, agenda seleccionable y navegación de meses. Banu al Día reúne noticias y convocatorias de la demo con búsqueda, filtros y texto completo. Publicaciones OE2 mantiene programación, convocatorias, novedades y procedencia aprobada; Cambios de publicaciones compara versiones. La copia publicada es sintética y de solo lectura: no matrícula ni conexión institucional. Recordatorios configura avisos locales del teléfono, sin push remoto.
+
+Diez pasos Edge contra DuckDNS y ocho comprobaciones REST remotas correctos; Huawei físico con actualización y sesión conservada verificó calendario, noticias, categorías OE2 y comparación. Se conservan capturas auténticas. Mobile 77/77 y API 22/22 focales; typechecks correctos. [Checkpoint 1.0.4](CHECKPOINT-DEMO-1.0.4.md). El RAG no se modificó ni se certificó de nuevo: las mediciones siguientes mantienen su fecha y sus límites.
+
+Recorrido sugerido: Calendario → seleccionar una fecha marcada → Banu al Día y Archivo → Publicaciones OE2 y sus tres categorías → Cambios de publicaciones (una modificación, cinco sin cambios). La procedencia permite explicar el OE2 sin confundir publicación con inscripción.
+
+## Cambios del chat conservados de 1.0.3
 
 Las respuestas van directamente al contenido; la procedencia queda en las fuentes. El historial original no se reescribe. Tras preguntar por el progreso propio aparece «Ver mi progreso», que abre la pantalla autenticada y permite regresar al mismo chat. Bienvenida breve y sugerencias adaptadas a web y Android. En web, recargar e iniciar sesión de nuevo carga el cliente actualizado.
 

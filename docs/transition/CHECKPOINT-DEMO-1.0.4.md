@@ -18,7 +18,7 @@ Edge aislado con PostgreSQL/auth del laboratorio y publicación OE2 real exporta
 
 Revisión visual independiente antes/después: se resolvió el botón de lectura que no aportaba contenido adicional; se compactó la cabecera móvil, se acercó la agenda y se relegó el UUID de publicación a su detalle de procedencia. Reauditoría sin bloqueantes ni hallazgos mayores. Estados de error visuales y lector de pantalla no evaluados en ese recorrido.
 
-Capturas y logs auténticos privados en infra/local/community-web. No se modificó corpus CCD, dataset sintético v1, autenticación, RAG, modelos ni tablas Supabase. Compilación Android 1.0.4/versionCode 5 correcta e instalada mediante adb install -r en Huawei YAL-L21. Paquete com.anonymous.banuchat, mismo certificado SHA-256 fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c. APK SHA-256 daddd2a9eae5b5036ffb80215e0e9b716696b8240bcbf054fb7e7ed4c862ce36. Escaneo dirigido de archivos privados/marcadores de conexión correcto, origen DuckDNS presente. Sesión conservada; calendario remoto, días marcados y selección de actividad comprobados. Capturas auténticas en infra/local/community-android-*.private.png. APK candidata validada; publicación GitHub pendiente al registrar el código. Web nueva activada y comprobada.
+Capturas y logs auténticos privados en infra/local/community-web. No se modificó corpus CCD, dataset sintético v1, autenticación, RAG, modelos ni tablas Supabase. Compilación Android 1.0.4/versionCode 5 correcta e instalada mediante adb install -r en Huawei YAL-L21. Paquete com.anonymous.banuchat, mismo certificado SHA-256 fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c. APK SHA-256 daddd2a9eae5b5036ffb80215e0e9b716696b8240bcbf054fb7e7ed4c862ce36. Escaneo dirigido de archivos privados/marcadores de conexión correcto, origen DuckDNS presente. Sesión conservada; calendario remoto, días marcados y selección de actividad comprobados. Capturas auténticas en infra/local/community-android-*.private.png. APK publicada en GitHub y descargada de nuevo con SHA idéntico. Web nueva activada y comprobada.
 
 ## Activación y pruebas remotas
 
@@ -41,3 +41,9 @@ OE2 es una copia sintética aprobada, no una consulta institucional ni una matr�
 RAG no se modificó ni se volvió a certificar: permanecen las consultas satisfactorias/fallidas y el límite de dos vCPU documentados en la entrega anterior. La disponibilidad sigue condicionada a AWS Academy. Este despliegue no ensayó un downgrade Android.
 
 Reversión preparada con los tres archivos API, api.env y launcher anteriores en el backup citado; reiniciar banuchat-api y banuchat-web-duckdns tras restituir esas copias. La exportación web anterior y APK anteriores se conservan. La salud nueva pasó; no se ejecutó rollback durante este incremento.
+
+## Publicación
+
+Código 5bd4d94 enviado a main. [Release 1.0.4](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4). [APK ARM64](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk), 47.066.048 bytes, SHA-256 daddd2a9eae5b5036ffb80215e0e9b716696b8240bcbf054fb7e7ed4c862ce36. Digest del asset y descarga efectiva verificados. Versiones anteriores conservadas; el repositorio privado exige acceso autorizado. Escaneo de secretos conocidos y paths privados correcto, git diff --check correcto.
+
+[Paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip): APK, guía, checkpoint y seis capturas sintéticas web/Android; sin secretos ni corpus CCD. Descargado y verificado, SHA-256 1f84c119e1d2088e723ed73dd6288524cf863f8ac5e05a20b37205b5cff8c025.
