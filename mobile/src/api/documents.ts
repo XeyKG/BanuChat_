@@ -4,6 +4,13 @@ import {resourceFetch as fetch} from '@/auth/runtime';
 export const DOCUMENT_TIMEOUT_MS = 15_000;
 export const MAX_DOCUMENT_CHARACTERS = 1_000_000;
 
+/** Presentation from the authenticated artifact, never from a chat title/parameter. */
+export function documentProvenanceLabel(content:string,ccdFallback:boolean):string {
+  if(content.startsWith('Procedencia: CCD seleccionado para demostración; sin aval institucional.'))return 'Referencia CCD seleccionada · sin aval institucional';
+  if(/^synthetic:\s*true\s*$/mu.test(content)||content.startsWith('Contenido sintético de demostración;'))return 'Material ficticio de demostración';
+  return ccdFallback?'Fuente documental CCD seleccionada · sin aval institucional':'Material ficticio de demostración';
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

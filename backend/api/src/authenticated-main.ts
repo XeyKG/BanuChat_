@@ -9,6 +9,7 @@ import {OllamaQueryEmbeddingClient} from './retrieval/ollama-query-embedding-cli
 import {knowledgeMode} from './auth/knowledge-mode.js';
 import {loadN8nConversationRuntimeConfig,N8nConversationOrchestrator} from './orchestration/n8n-conversation.js';
 import {loadLocalOe2Reader} from './operations/oe2-local-reader.js';
+import {createApprovedReferences} from './chat/approved-references.js';
 
 /** Static CCD artifact allowlist shared by normal startup and focused checks. */
 export function ccdArtifactStorage(){
@@ -54,6 +55,11 @@ export async function startAuthenticatedApi(){
    ? Number(requireValue('BANUCHAT_GENERATOR_CPU_THREADS'))
    : undefined;
   const generator=new OllamaGeneratorClient(runtime.base_url,generationTimeout,fetch,cpuThreads),embedding=new OllamaQueryEmbeddingClient(runtime.base_url);
+  const ragInput={sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator};
+  const referenceId=process.env.BANUCHAT_APPROVED_REFERENCE_RELEASE;
+  if(referenceId&&(mode!=='synthetic'||unified))throw new Error();
+  const references=referenceId?await createApprovedReferences(ragInput,referenceId,process.env.BANUCHAT_APPROVED_REFERENCE_MANIFEST_SHA256):undefined;
+  const documentRag=await createAuthenticatedDocumentRag(ragInput,mode);
   const artifacts=mode==='ccd_local'?ccdArtifactStorage():
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
@@ -61,7 +67,7 @@ export async function startAuthenticatedApi(){
   const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,postgres_profile:profile,
    ...(oe2?{oe2_reader:oe2}:{}),...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),
-   document_rag:await createAuthenticatedDocumentRag({sql,query_embedding_client:embedding,generator_client:generator,generator_config:runtime.generator},mode),artifacts});
+   ...(references?{references}:{}),document_rag:references?query=>references.respond(query,documentRag):documentRag,artifacts});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
   let stopping=false;const stop=async()=>{if(stopping)return;stopping=true;server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool?.end();};
   process.once('SIGINT',()=>void stop());process.once('SIGTERM',()=>void stop());

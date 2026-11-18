@@ -24,6 +24,8 @@ import {
 } from '@/api/messages';
 import { AppButton } from '@/components/app-button';
 import { ChatSources } from '@/components/chat-sources';
+import { offersOwnProgress, readableChatAnswer } from '@/components/chat-presentation';
+import { ChartGlyph } from '@/ui/icons';
 import { useSession } from '@/session/session-context';
 import {useChatState} from '@/session/use-chat-state';
 import {useAuth} from '@/auth/auth-provider';
@@ -53,7 +55,7 @@ interface ConversationLoadResult {
 }
 
 const CHAT_INTRODUCTION =
-  'Hola, soy Banu. Puedo ayudarte a consultar tu progreso, revisar eventos y anuncios, y responder preguntas basadas en el material disponible. ¿Qué quieres consultar?';
+  'Consulta tus cursos, revisa tu avance o resuelve una duda. ¿Por dónde empezamos?';
 
 const SUGGESTIONS = [
   '¿Cuál es mi progreso?',
@@ -415,8 +417,8 @@ export default function ChatScreen() {
                     <View style={styles.emptyMarkHalo}>
                       <BrandMark size={72} framed={false} />
                     </View>
-                    <Text style={styles.emptyTitle}>Bienvenida de Banu</Text>
-                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Hola, soy Banu. Puedo responder sobre documentación CCD, abrir sus fuentes y consultar tu historial. Cuando estén disponibles, también puedes explorar progreso, calendario y novedades de demostración. ¿Qué quieres consultar?' : CHAT_INTRODUCTION}</Text>
+                    <Text style={styles.emptyTitle}>¿En qué te ayudo hoy?</Text>
+                    <Text style={styles.emptyBody}>{isCcdKnowledge() ? 'Pregúntame sobre cursos, pruebas o trámites. Puedes abrir las fuentes de cada respuesta.' : CHAT_INTRODUCTION}</Text>
                   </View>
                 </FadeIn>
                 <View testID="chat-suggestions" style={styles.suggestionGrid}>
@@ -441,7 +443,7 @@ export default function ChatScreen() {
               </View>
             )}
 
-            {conversationState === 'ready' && messages.map((message) =>
+            {conversationState === 'ready' && messages.map((message, index) =>
               message.role === 'user' ? (
                 <BubbleIn key={message.message_id} style={styles.userRow}>
                   <View testID="chat-user" style={styles.userBubble}>
@@ -452,7 +454,24 @@ export default function ChatScreen() {
                 <BubbleIn key={message.message_id} style={styles.assistantRow}>
                   <View style={styles.assistantAvatar}><BrandMark size={30} framed={false}/></View>
                   <View testID="chat-assistant" style={styles.assistantBody}><Text style={styles.authorLabel}>Banu</Text>
-                    <Text selectable testID="chat-message" style={styles.assistantText}>{message.content}</Text>
+                    <Text selectable testID="chat-message" style={styles.assistantText}>{readableChatAnswer(message.content)}</Text>
+
+                    {!isCcdKnowledge() && offersOwnProgress(message, messages[index - 1]?.role === 'user' ? messages[index - 1]!.content : '') && (
+                      <Pressable
+                        testID="chat-progress-action"
+                        accessibilityRole="button"
+                        accessibilityLabel="Ver mi progreso"
+                        accessibilityHint="Abre tus cursos e intentos académicos. Puedes volver a esta conversación."
+                        onPress={() => router.push('/progress')}
+                        style={({ pressed }) => [styles.progressAction, pressed && styles.progressActionPressed]}>
+                        <View aria-hidden style={styles.progressActionIcon}><ChartGlyph color={colors.banuMagenta} size={22} /></View>
+                        <View style={styles.progressActionCopy}>
+                          <Text style={styles.progressActionTitle}>Ver mi progreso</Text>
+                          <Text style={styles.progressActionDetail}>Tus cursos, avances e intentos</Text>
+                        </View>
+                        <Text aria-hidden style={styles.progressActionArrow}>→</Text>
+                      </Pressable>
+                    )}
 
                     {message.insufficient_evidence && (
                       <View accessibilityRole="alert" style={styles.evidenceWarning}>
@@ -699,7 +718,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   conversationStateActions: { width: '100%', gap: spacing.sm },
-  emptyState: { gap: spacing.xl, paddingVertical: spacing.md },
+  emptyState: { gap: spacing.lg, paddingVertical: spacing.md },
   emptyHero: { alignItems: 'center', gap: spacing.sm, paddingHorizontal: spacing.lg },
   emptyMarkHalo: {
     width: 80,
@@ -717,8 +736,8 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'center',
   },
-  suggestionGrid: { gap: spacing.xs },
-  suggestionItem:{maxWidth:'100%',minWidth:0,flexShrink:1},
+  suggestionGrid: { flexDirection:'row',flexWrap:'wrap',gap:spacing.sm },
+  suggestionItem:{maxWidth:'100%',minWidth:0,flexShrink:1,flexGrow:1,flexBasis:220},
   suggestionChip: {
     maxWidth:'100%',minWidth:0,flexShrink:1,
     paddingHorizontal: spacing.md,
@@ -728,8 +747,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.banuBorder,
-    backgroundColor: colors.banuCanvas,
-    ...shadows.raised,
+    backgroundColor: colors.surface,
   },
   suggestionChipPressed: { opacity: 0.7 },
   suggestionText: { flexShrink:1, color: colors.banuInk, fontSize: typography.small, fontWeight: '600' },
@@ -748,6 +766,13 @@ const styles = StyleSheet.create({
   authorLabel: { color: colors.banuInk, fontSize: typography.meta, fontWeight: '600' },
   assistantBody: { flex:1, minWidth: 0, gap: spacing.sm, backgroundColor: colors.surface },
   assistantText: { color: colors.banuInk, ...textStyles.body },
+  progressAction: { flexDirection:'row',alignItems:'center',gap:spacing.md,padding:spacing.md,minHeight:64,maxWidth:420,width:'100%',borderRadius:radii.md,borderWidth:1,borderColor:colors.banuBorder,backgroundColor:colors.banuSoft },
+  progressActionPressed: { borderColor:colors.banuMagenta,opacity:0.8 },
+  progressActionIcon: { minWidth:40,minHeight:40,borderRadius:radii.sm,backgroundColor:colors.surface,alignItems:'center',justifyContent:'center' },
+  progressActionCopy: { flex:1,minWidth:0,gap:spacing.xxs },
+  progressActionTitle: { color:colors.banuMagentaStrong,fontSize:typography.body,fontWeight:'700' },
+  progressActionDetail: { color:colors.banuSecondary,fontSize:typography.meta,lineHeight:20 },
+  progressActionArrow: { color:colors.banuMagenta,fontSize:24 },
   thinkingBubble: {
     flexDirection: 'row',
     flexWrap: 'wrap',

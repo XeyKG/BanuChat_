@@ -220,6 +220,8 @@ export interface SendMessageDependencies {
   /** Trusted authenticated composition; never selected through request input. */
   answer_responder?: McpAgentResponder;
   structured_release_id?: string;
+  /** Optional server-approved CCD supplement; never accepted from HTTP input. */
+  document_reference_release_id?: string;
   read_context?: MessageTransaction;
   commit_turn?: MessageTransaction;
   persist?: (client: SqlQueryClient, values: readonly unknown[]) => Promise<{ rows: PersistedTurnRow[] }>;
@@ -334,12 +336,15 @@ function validateCitationPair(
   index: number,
   releaseId: string,
   structuredReleaseId?: string,
+  referenceReleaseId?: string,
 ): boolean {
   if (
     citation.index !== index ||
     record.citation_index !== index ||
     citation.source_kind !== record.source_kind ||
-    citation.release_id !== (citation.source_kind === 'document' ? releaseId : structuredReleaseId ?? releaseId) ||
+    !(citation.source_kind === 'document'
+      ? citation.release_id === releaseId || (referenceReleaseId !== undefined && citation.release_id === referenceReleaseId)
+      : citation.release_id === (structuredReleaseId ?? releaseId)) ||
     record.dataset_release_id !== citation.release_id ||
     !isNonblank(citation.label) ||
     !isNonblank(citation.locator) ||
@@ -426,7 +431,7 @@ interface PersistableAnswer {
   citation_records: PersistenceCitation[];
 }
 
-function validateAnswer(answer: PersistableAnswer, structuredReleaseId?:string): void {
+function validateAnswer(answer: PersistableAnswer, structuredReleaseId?:string, referenceReleaseId?:string): void {
   if (
     !isUuid(answer.release_id) ||
     !isNonblank(answer.content) ||
@@ -444,7 +449,7 @@ function validateAnswer(answer: PersistableAnswer, structuredReleaseId?:string):
     if (
       citation === undefined ||
       record === undefined ||
-      !validateCitationPair(citation, record, index, answer.release_id, structuredReleaseId)
+      !validateCitationPair(citation, record, index, answer.release_id, structuredReleaseId, referenceReleaseId)
     ) {
       reject("invalid_database_result");
     }
@@ -611,7 +616,7 @@ export async function sendMessage(
   if (answer.release_id !== context.dataset_release_id) {
     reject("current_release_changed");
   }
-  validateAnswer(answer,dependencies.structured_release_id);
+  validateAnswer(answer,dependencies.structured_release_id,dependencies.document_reference_release_id);
 
   const expectedOrdinal = context.expected_next_ordinal as number;
   const commit: MessageTransaction = dependencies.commit_turn ?? (operation => operation(dependencies.sql));

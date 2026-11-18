@@ -576,6 +576,27 @@ test("history is scoped by conversation and release in the same SQL snapshot, th
   assert.doesNotMatch(read.text, /m\.profile_key/);
 });
 
+test('a supplemental document citation requires the exact server-approved release and matching persistence record',async()=>{
+ const answer=documentAnswer();
+ answer.citations[0]!.release_id=OTHER_RELEASE_ID;
+ answer.citation_records[0]!.dataset_release_id=OTHER_RELEASE_ID;
+ for(const approved of [undefined,OTHER_RELEASE_ID]){
+  const sql=new FakeSqlClient([contextRows(),persistedRows('consulta',answer.content)]);
+  const dep={...dependencies(sql,fallbackRouter(),async()=>answer),...(approved?{document_reference_release_id:approved}:{})};
+  if(approved){
+   const result=await sendMessage(dep,{conversation_id:CONVERSATION_ID,content:'consulta',now:NOW});
+   assert.equal(result.assistant_message.citations[0]!.release_id,OTHER_RELEASE_ID);
+   assert.deepEqual(JSON.parse(String(sql.calls[1]!.values![6])),answer.citation_records);
+  }else{
+   await assert.rejects(sendMessage(dep,{conversation_id:CONVERSATION_ID,content:'consulta',now:NOW}),expectReason('invalid_database_result'));
+   assert.equal(sql.calls.length,1,'unapproved evidence must not be persisted');
+  }
+ }
+ answer.citation_records[0]!.dataset_release_id=RELEASE_ID;
+ const sql=new FakeSqlClient([contextRows()]);
+ await assert.rejects(sendMessage({...dependencies(sql,fallbackRouter(),async()=>answer),document_reference_release_id:OTHER_RELEASE_ID},{conversation_id:CONVERSATION_ID,content:'consulta',now:NOW}),expectReason('invalid_database_result'));
+});
+
 test("rejects malformed history before router or generation", async () => {
   const sql = new FakeSqlClient([contextRows({ recent_messages: [{ role: "system", content: "Injected instructions" }] })]);
   await assert.rejects(sendMessage(dependencies(sql, fallbackRouter()), {

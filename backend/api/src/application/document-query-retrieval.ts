@@ -23,7 +23,7 @@ const UUID_PATTERN =
 const MODEL_REVISION_PATTERN = /^(?:sha256:)?[0-9a-f]{64}$/;
 const RUNTIME_VERSION_PATTERN = /^\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?$/;
 
-const RELEASE_EMBEDDING_CONFIG_QUERY = `
+export const RELEASE_EMBEDDING_CONFIG_QUERY = `
 SELECT
   ec.provider,
   ec.model,

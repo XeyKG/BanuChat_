@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
   DocumentRequestError,
+  documentProvenanceLabel,
   getDocumentArtifact,
   isDocumentVersionId,
 } from '@/api/documents';
@@ -87,7 +88,7 @@ export default function DocumentScreen() {
       <ScreenHeader
         actionLabel="Volver"
         onAction={() => router.back()}
-        subtitle={isCcdKnowledge() ? 'Fuente documental CCD seleccionada · sin aval institucional' : 'Material ficticio de demostración'}
+        subtitle={visibleLoadState==='success'?documentProvenanceLabel(content,isCcdKnowledge()):'Fuente documental · comprobando procedencia'}
         title={title}
       />
 

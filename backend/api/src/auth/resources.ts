@@ -19,6 +19,7 @@ import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.j
 import type {PresentationCitation} from '../chat/chat-types.js';
 import {readOe2Demo,type Oe2PublicationReader,type Oe2DemoKind,type Oe2DemoFilters} from '../application/oe2-demo.js';
 import {readOe2Changes,type ChangeFilters} from '../application/oe2-changes.js';
+import type {ApprovedReferences} from '../chat/approved-references.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -33,7 +34,8 @@ export class AuthenticatedResources {
  private readonly activity=new ConversationActivityCoordinator();
  constructor(private readonly pool:Pool,private readonly chat:Omit<SendMessageDependencies,'demo_mode'|'read_context'|'commit_turn'|'persist'>,
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
-   private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader}){this.transactions=new PgTransactionRunner(pool);}
+   private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader},
+   private readonly references?:ApprovedReferences){this.transactions=new PgTransactionRunner(pool);}
  async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
   if(!this.unified)throw new AuthError('NOT_FOUND');
   // Release the normal product connection before waiting on an optional source.
@@ -58,6 +60,10 @@ export class AuthenticatedResources {
  list(token:string,limit?:number){return this.unit(token,(c,ctx)=>listConversations(c,limit===undefined?{}:{limit},ctx.principal_id));}
  detail(token:string,id:string){return this.unit(token,async c=>{
   const result=await getConversationDetail(c,{conversation_id:id},this.evidenceMode);
+  if(this.references){
+   const sources=await this.references.sources(c,token,id);
+   for(const m of result.messages){const source=sources.find(s=>s.message_id===m.message_id);if(source&&m.role==='assistant')m.citations=source.citations;}
+  }
   if(this.unified){const sources=await c.query<{message_id:string;citations:PresentationCitation[]}>('SELECT t.message_id,t.citations FROM banuchat_aux.turn_sources t JOIN banuchat.messages m ON m.id=t.message_id WHERE m.conversation_id=$1',[id]);
    for(const m of result.messages){const source=sources.rows.find(s=>s.message_id===m.message_id);if(source&&m.role==='assistant')m.citations=source.citations;}}
   return result;
@@ -76,6 +82,7 @@ export class AuthenticatedResources {
    const answer=this.unified&&aux?unifiedResponder({sql:this.chat.sql,router:this.chat.router,rag:this.chat.document_rag,principal,aux,...this.unified}):undefined;
    let citations:PresentationCitation[]=[];
    return await sendMessage({...this.chat,demo_mode:this.evidenceMode,
+   ...(this.references?{document_reference_release_id:this.references.releaseId}:{}),
    document_rag:async query=>{
     const personal=/\bmi\s+(?:perfil acad[eé]mico|expediente|programa acad[eé]mico|semestre|per[ií]odo acad[eé]mico|historial acad[eé]mico|recursamiento|correo acad[eé]mico)\b/iu;
     if(this.evidenceMode!=='synthetic'||!personal.test(query.query))return this.chat.document_rag(query);
@@ -83,13 +90,15 @@ export class AuthenticatedResources {
     const s=record.student;
     const attempts=record.attempts as {course_name:string;attempt_number:number;outcome:string}[];
     const history=attempts.map(a=>`${a.course_name}, intento ${a.attempt_number}: ${a.outcome==='passed'?'aprobado':a.outcome==='failed'?'reprobado':'en curso'}`).join('\n');
-    return {release_id:query.release_id,content:s?`Expediente ficticio de ${s.given_name} ${s.family_name}. ID ${s.academic_id}, ${s.email}. ${s.program_name}, semestre ${s.current_semester}, ${s.period_label}.\n${history||'Sin intentos registrados.'}`:'Tu cuenta no tiene un expediente académico ficticio asignado.',
+    return {release_id:query.release_id,content:s?`Expediente de ${s.given_name} ${s.family_name}. ID ${s.academic_id}, ${s.email}. ${s.program_name}, semestre ${s.current_semester}, ${s.period_label}.\n${history||'Sin intentos registrados.'}`:'Tu cuenta no tiene un expediente académico asignado.',
      insufficient_evidence:false,citations:[],citation_records:[]};
    },
    ...(answer&&aux?{structured_release_id:aux.release_id,answer_responder:async query=>{const result=await answer(query);citations=result.citations;return result;}}:{}),
    read_context:operation=>this.unit(token,c=>operation(c),id,true,true),
    commit_turn:operation=>this.transactions.run(operation),
-   persist:(c,values)=>aux?c.query(`SELECT * FROM banuchat_auth.persist_unified_turn($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS t(
+   persist:(c,values)=>this.references&&JSON.parse(values[6] as string).some((r:{dataset_release_id:string})=>r.dataset_release_id===this.references!.releaseId)
+    ?c.query('SELECT * FROM banuchat_reference.persist_turn($1,$2,$3,$4,$5,$6,$7,$8)',[token,...values])
+    :aux?c.query(`SELECT * FROM banuchat_auth.persist_unified_turn($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS t(
     status text,user_message_id uuid,user_ordinal integer,user_content banuchat.nonblank,user_created_at banuchat.finite_time,
     assistant_message_id uuid,assistant_ordinal integer,assistant_content banuchat.nonblank,assistant_created_at banuchat.finite_time,assistant_insufficient_evidence boolean)`,[token,...values,JSON.stringify(citations),aux.release_id]):c.query('SELECT * FROM banuchat_auth.persist_turn($1,$2,$3,$4,$5,$6,$7,$8)',[token,...values]),
   },{conversation_id:id,content,now});}catch(error){throw resourceError(error);}finally{this.activity.endMessage(id);}
@@ -109,6 +118,7 @@ export class AuthenticatedResources {
  calendar(token:string,input:CalendarEventsInput){return this.unit(token,c=>{if(this.unified)return unifiedCalendar(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getCalendarEvents(c,input);});}
  announcements(token:string,input:AnnouncementsInput){return this.unit(token,c=>{if(this.unified)return unifiedAnnouncements(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getAnnouncements(c,input);});}
  artifact(token:string,id:string){return this.unit(token,async c=>{
+  if(this.references){const artifact=await this.references.artifact(c,token,id);if(artifact)return artifact;}
   // Dataset/release authorization precedes filesystem access; historical ready versions are valid.
   if(!(await c.query(`SELECT v.id FROM banuchat.document_versions v JOIN banuchat.dataset_releases r
    ON r.id=v.dataset_release_id AND r.dataset_id=v.dataset_id WHERE v.id=$1 AND v.dataset_id=1

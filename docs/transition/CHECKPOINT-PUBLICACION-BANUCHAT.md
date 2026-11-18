@@ -1,5 +1,73 @@
 # BanuChat — publicación de demostración
 
+## Chat conversacional y acceso a progreso — 18/11/2026
+
+Cambios solicitados por el dueño: respuestas normales sin la cabecera repetitiva de procedencia y acceso directo al progreso desde el chat. El backend deja de anteponer esa cabecera y usa «Expediente de…» en su presentación académica. No se cambian permisos, corpus, citas, autenticación ni contratos. La procedencia y el carácter ficticio de expedientes siguen disponibles en las fuentes/pantallas de detalle; no se atribuye aval institucional.
+
+El cliente retira únicamente las cabeceras heredadas conocidas al representar conversaciones guardadas; no reescribe mensajes persistidos ni elimina límites documentales de las respuestas. La tarjeta «Ver mi progreso» aparece junto a evidencia de progreso o una pregunta sobre los datos propios. Navega a la ruta fija /progress, sin aceptar un usuario, perfil o URL generados por el modelo. El usuario puede volver a la misma conversación. La bienvenida es más breve y las sugerencias web usan dos columnas, con controles accesibles y adaptación estrecha.
+
+Validación local real: typecheck Mobile/API correctos; 74/74 tests Mobile y 28/28 backend focales. Edge aislado con PostgreSQL/auth del laboratorio existente: login, bienvenida, consulta de progreso, tarjeta de 79 px de alto, navegación al expediente propio, retorno a la misma conversación, consulta documental sin prefijo, ancho 390 px sin overflow y navegación estrecha y expediente sin cabecera repetitiva: nueve pasos PASS. Embedding de consulta registrado y sin generación LLM en este ensayo local; no confundirlo con una validación remota.
+
+Revisión independiente de tres capturas auténticas: sin bloqueantes ni hallazgos mayores; observación menor sobre nombres heredados «Nueva conversación»/«Nuevo chat». Estados de fallo/espera y lectores de pantalla no se evaluaron visualmente en este recorrido. Capturas y reporte en infra/local/chat-polish-web, excluidos de Git.
+
+Publicación efectiva de esta corrección: API y web canónica actualizadas en la EC2 existente mediante SSM, con guardas de SHA y rollback por fallo de salud. Backup /opt/banuchat/backups/chat-polish-20261118; exportación anterior intacta. Los cuatro servicios activos y HTTPS externo HTTP 200; bundle nuevo entry-4af851d98faa7793861b75827fe41340.js. Edge aislado contra el dominio público repitió los nueve pasos con autenticación real, AWS, Supabase y embeddings de consulta remotos: todos PASS. Las generaciones libres del LLM no fueron el objeto de este recorrido; no se declara RAG estable. El origen sslip.io de transición conserva su exportación anterior. APK chat-polish 1.0.3/versionCode 4 compilada correctamente e instalada con adb install -r en Huawei YAL-L21, mismo paquete y firma. SHA-256 48dcdb79660b06e4909e80863c7948442223bacb2cf919af83329975410b27f9. Sesión conservada; consulta de progreso y botón comprobados contra AWS/Supabase; abrió el expediente propio de la misma cuenta, sin API local/Metro. Escaneo dirigido de ZIP/bundle correcto y origen DuckDNS presente. Archivo privado infra/local/BanuChat-demo-1.0.3-chat-polish-arm64.apk; todavía no publicado en GitHub. Exportación web canónica activada: entry-4af851d98faa7793861b75827fe41340.js. Android comprobó también vuelta al mismo chat y respuesta documental sin cabecera; capturas auténticas privadas conservadas.
+
+
+## Actualización operativa 1.0.3 — cobertura CCD y procedencia (18/11/2026)
+
+La consulta «Cuales pruebas debo hacer» fallaba porque el despliegue solo tenía el corpus sintético y seis referencias CCD de costos. El corpus CCD depurado completo seguía local. Con autorización expresa del dueño se copian ahora sus 107 referencias adoptadas; no se subieron PDF originales, expedientes privados ni el árbol externo CCD_DOCUMENTACION.
+
+### Estado instalado y preservación
+
+- Web principal: https://banuchat.duckdns.org/login. HTTPS externo HTTP 200 y bundle 1.0.3 `entry-eb6c831988e8e2b12b4c5f08b70a1267.js`.
+- Transición: https://34-239-198-159.sslip.io/login, HTTPS HTTP 200, bundle `entry-58b880a1d47aa5b5cf40dc83c5bbb22e.js`. Ambas exportaciones anteriores conservadas.
+- API de la misma EC2 activa con el rol restringido existente. Caddy, web canónica y Ollama también activos después de activar. No se reconstruyó EC2 ni la base, no se cambiaron modelos, autenticación, REST, MCP ni n8n.
+- La demo conserva dos releases sintéticas, 32 estudiantes, 62 intentos y 120 vectores. El suplemento privado conserva la release anterior de seis referencias y agrega 107: 113 vectores suplementarios de 1024 dimensiones, independientes de los 120 sintéticos.
+- Release suplementaria activa: `82bf409b-2de8-4250-817d-fe19a167b0c2`; manifiesto PostgreSQL SHA-256 `a6cedd1042fc0f5def1752f35b89a75c34659c8b5184f125682fb68f8ea11e12`.
+- Procedencia: release local `10af4ffd-effb-41fc-bbfe-4dc48cb3398f`, manifiesto `fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852`. Se conservaron contenido de chunk y vectores, con sus hashes; el Markdown derivado tiene su propio SHA-256. Los embeddings documentales se **copiaron**, no se regeneraron. Los embeddings de consulta sí se calculan en Ollama remoto.
+- La carga SQL 016 y los 107 registros se ejecutaron atómicamente mediante pooler de sesión, psql ON_ERROR_STOP, shell set -eu verificado y TLS verify-full con CA oficial. Los errores completos permanecen privados. No se amplió la exposición Data API: anon/authenticated/service_role carecen de USAGE del esquema; runtime solo recibe funciones acotadas. RLS habilitada y executor existente sin login ni BYPASSRLS.
+
+### Comprobaciones realmente ejecutadas
+
+| Consulta nueva contra DuckDNS | HTTP | Segundos | Citas |
+| --- | --- | --- | --- |
+| Cuales pruebas debo hacer | 201 | 3,01 | 1 |
+| Opciones de pruebas diagnósticas del segundo pilar | 201 | 1,81 | 1 |
+| Opciones de pruebas diagnósticas del tercer pilar | 201 | 1,61 | 1 |
+| cuanto cuesta los cursos vacionales | 201 | 1,65 | 1 |
+| cuanto cuesta hacer las pruebas diagnosticas | 201 | 1,64 | 1 |
+| Costo de un curso en 2030 | 201 | 1,73 | 1, límite de tarifa no confirmada |
+| Intensidad de los cursos | 201 | 1,78 | 1 |
+| Inscripción en Cosmos | 201 | 1,65 | 1 |
+| Correo de contacto CCD | 201 | 1,71 | 1 |
+
+Cada turno fue reabierto desde Historial, sus citas comparadas campo a campo y su artefacto descargado/verificado por SHA-256. Otra cuenta obtuvo 404 para cada conversación. Expediente y progreso respondieron 200; logout 204 y reutilización del token 401. Las citas de la release anterior de seis referencias siguen leyéndose con el mismo hash. Control negativo: opciones actuales del primer pilar sin respaldo -> abstención honesta y cero citas. No se inventa una lista ni elegibilidad personal.
+
+Estas nueve respuestas reutilizan el motor CCD existente y sus extractos documentados; no acreditan nueve generaciones libres del LLM ni RAG estable. Se mantuvieron API 150 s, cliente 175 s y proxy 180 s. La limitación de generación de dos vCPU continúa.
+
+PostgreSQL local existente: cinco consultas extractivas, HTTP autenticado, historial, descarga, aislamiento y lectura directa denegada 42501. Se usó un vector de consulta de fixture, **no Ollama real local**. Adulterar contenido hizo fallar la integridad; ROLLBACK recuperó el estado. Un pin incorrecto fue rechazado P0409 y las citas con SHA falso P0400 sin mensajes parciales. Ensayo anterior del migrador administrado sin superusuario conservó los grants originales.
+
+Regresiones: backend typecheck correcto, 91/91 pruebas focales de mensajes/CCD/REST y 2/2 nuevas de pin/procedencia y enrutamiento sintético; Mobile typecheck y 71/71; exportación web de ambos orígenes correcta. No se repitió toda la evaluación RAGAS.
+
+Huawei físico: adb install -r exitoso; sesión y cuenta conservadas, pregunta exacta respondida, fuente expandida con texto ampliado, documento completo abierto con etiqueta CCD correcta y retorno al chat. Sin Metro/API local escuchando los puertos 3000/3002/3004/8081/8085/8086. Capturas auténticas y respuestas CCD se conservan en infra/local, excluidas de Git.
+
+### Drive y orquestación
+
+Carpeta privada creada y releída: [BanuChat — CCD depurado](https://drive.google.com/drive/folders/1xFriAxBwPbYV_SJgscJJxV3VL2E5UMu0). 107 archivos text/markdown verificados mediante listado paginado, sin compartir; MANIFEST.json adicional verificado por metadata, 42.579 bytes. Es una copia de referencias depuradas, no 107 PDF originales. Incluye límites, período, condiciones y diferenciación de confirmaciones de dominio; no aval institucional.
+
+Drive conserva los documentos; Supabase privado conserva vectores y citas. El camino de consulta sigue Web/Android -> API AWS -> Supabase + Ollama. No se sustituyeron referencias por enlaces públicos Drive ni se puso n8n en el camino síncrono. La automatización Drive -> n8n -> validador/ingesta existente requiere una credencial Google propia de n8n y control de publicaciones por manifiesto. **No configurada ni ejecutada en este cierre**; la conexión Google de esta herramienta no acredita acceso OAuth de n8n. No usar un template de 1536 dimensiones ni abrir las tablas a Data API para conectarlo. MCP/ReAct conserva su estado académico previamente documentado.
+
+### Archivos, artefactos y reversión
+
+Se agregaron 015_approved_fee_references.sql y 016_approved_ccd_corpus.sql, el adaptador aprobado de RAG, composición opcional de runtime, persistencia autenticada de citas suplementarias y tests de su frontera. Exportador/constructores de carga en infra/scripts producen archivos privados; no cargan ni regeneran vectores automáticamente. El visor Mobile determina la procedencia del artefacto autenticado; versión 1.0.3, versionCode 4.
+
+APK candidata verificada: 47.055.224 bytes; SHA-256 `f856943b5e7dd2f7a42d664ddb33f902fbf15c69e298a2b17330c3aa84b82d41`; paquete com.anonymous.banuchat y mismo certificado SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. Inspección dirigida ZIP/bundle: sin archivos privados/keystores ni marcadores de conexión/clave privada, origen DuckDNS presente. Firma de debug, no certificado de producción. No es auditoría exhaustiva.
+
+Backup de código/env no secreto previo a activar: /opt/banuchat/backups/approved-ccd-82bf409b. Reversión preparada: restaurar sus dos TS y api.env.before, reiniciar banuchat-api y verificar auth/me=401; no borrar releases. La release de seis fuentes sigue íntegra y funciona con el adaptador anterior. Backup previo de código base y snapshot privado del esquema suplementario de seis referencias conservados; no se declara una restauración del suplemento 107 no ejecutada. El enlace web anterior se guarda en transition-link.before en el mismo backup. Exportaciones 1.0.2 y APK anteriores intactas. No se ejecutó una parada/downgrade para retirar la corrección en servicio.
+
+Riesgos: disponibilidad condicionada a AWS Academy; sin SLA ni permanencia, no se compraron recursos. Último crédito observado durante esta tarea: US$8,10 usados de US$50, lectura anterior con retraso, no saldo actual certificado. Fuentes con vigencia/alcance acotados y sin aval institucional; expedientes sintéticos no prueban situación real. Los resultados históricos y brechas OE1–OE6 de la guía académica se conservan.
+
+
 ## Release 1.0.2 — cierre visual del 17 de noviembre de 2026
 
 Base: `main` en `9442407`, inicialmente limpio. [Entrega académica consolidada](ENTREGA-FINAL-BANUCHAT.md). No se modificaron arquitectura, contratos REST, autenticación del servidor, RAG, modelos, Supabase ni servicios AWS. Solo se desplegaron las exportaciones del cliente sobre los servicios existentes y se actualizó la APK.

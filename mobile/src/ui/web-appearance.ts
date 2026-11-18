@@ -92,9 +92,9 @@ export const webAppearance = `
 #banu-web-frame [data-testid="chat-input-shell"] { min-width:0;border:0;padding:0;background:transparent;box-shadow:none; }
 #banu-web-frame textarea[aria-label="Mensaje"] { font-size:16px;line-height:24px;min-height:48px;padding:4px 0; }
 #banu-web-frame [data-testid="chat-composer-row"]:focus-within { border-color:${colors.banuMagenta}; }
-#banu-web-frame [data-testid="chat-suggestions"] { display:flex;flex-direction:row;flex-wrap:wrap;gap:8px; }
+#banu-web-frame [data-testid="chat-suggestions"] { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
 #banu-web-frame [data-testid="chat-suggestions"] > div { max-width:100%;min-width:0;flex-shrink:1; }
-#banu-web-frame [data-testid="chat-suggestions"] [role="button"] { max-width:100%;min-width:0;white-space:normal;justify-content:center;border-radius:24px; }
+#banu-web-frame [data-testid="chat-suggestions"] [role="button"] { max-width:100%;min-width:0;min-height:56px;white-space:normal;justify-content:center;border-radius:14px;box-shadow:none; }
 #banu-web-frame [data-testid="chat-suggestion"] * { min-width:0;overflow-wrap:anywhere; }
 #banu-web-frame [data-testid="login-shell"] { max-width:960px;gap:28px; }
 #banu-web-frame [data-testid="login-layout"] { max-width:760px; }
@@ -127,6 +127,7 @@ export const webAppearance = `
   #banu-web-frame [data-testid="login-form"] { padding:24px; }
 }
 @media (max-width:370px) {
+  #banu-web-frame [data-testid="chat-suggestions"] { grid-template-columns:minmax(0,1fr); }
   #banu-web-frame [data-testid="home-hero-title"] { max-width:205px;font-size:27px;line-height:32px; }
   #banu-web-frame [data-testid="home-hero-body"] { max-width:180px; }
   #banu-web-frame [data-testid="home-hero-icon"] { right:7px;bottom:38px;width:96px; }

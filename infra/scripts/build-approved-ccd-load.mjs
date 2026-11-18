@@ -1,0 +1,12 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+const root=resolve(import.meta.dirname,'../..');
+const b=JSON.parse(await readFile(resolve(root,'infra/local/approved-ccd.private.json'),'utf8'));
+if(b.documents.length!==107||b.manifest.schema_version!=='banuchat-approved-ccd-1'||b.manifest.source_manifest_sha256!=='fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852')throw Error('Reviewed 107-derivative corpus required');
+const q=x=>"'"+x.replaceAll("'","''")+"'";
+let s="SET LOCAL banuchat_reference.runtime_role='cloud_runtime';\n"+await readFile(resolve(root,'infra/db/016_approved_ccd_corpus.sql'),'utf8');
+s+='\nINSERT INTO banuchat_reference.releases(id,deployment_id,manifest) SELECT '+q(b.release_id)+'::uuid,deployment_id,'+q(JSON.stringify(b.manifest))+'::jsonb FROM banuchat_auth.runtime_scope WHERE singleton;\n';
+for(const d of b.documents)s+='INSERT INTO banuchat_reference.documents(release_id,id,chunk_id,document_id,document_key,title,content,locator,artifact,embedding) VALUES('+[b.release_id,d.id,d.chunk_id,d.document_id,d.document_key,d.title,d.content,d.locator,d.artifact,d.embedding].map(q).join(',')+');\n';
+s+='UPDATE banuchat_reference.releases SET enabled=true WHERE id='+q(b.release_id)+';\n';
+await writeFile(resolve(root,'infra/local/approved-ccd-load.private.sql'),s,'utf8');
+console.log('Private SQL prepared: 107 derivatives; no credentials');

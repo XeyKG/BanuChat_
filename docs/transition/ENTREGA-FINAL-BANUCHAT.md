@@ -1,6 +1,8 @@
-# BanuChat — entrega académica de demostración 1.0.2
+# BanuChat — entrega académica de demostración 1.0.3
 
-Cierre visual del 17/11/2026. Esta guía reúne acceso, recorrido, evidencia y límites. La demo usa datos ficticios; no acredita información, autorización ni aprobación institucional del CCD o la UNAB.
+Actualización del 18/11/2026: identidades y expedientes siguen siendo sintéticos. Las consultas documentales generales usan ahora 107 derivados CCD depurados, en un esquema privado separado y autorizados por el dueño del proyecto. Ese permiso no equivale a aval institucional ni garantiza vigencia o aplicación individual. La consulta explícita del material ficticio mantiene el corpus sintético.
+
+El detalle reproducible, inventario, pruebas nuevas, archivos privados y reversión está en [el checkpoint consolidado](CHECKPOINT-PUBLICACION-BANUCHAT.md). Las mediciones y capturas 1.0.2 de las secciones siguientes conservan su fecha; no se presentan como pruebas nuevas.
 
 ## Acceso e instalación
 
@@ -20,7 +22,7 @@ Cuentas ficticias: `U90000001` y `U90000002`, con expedientes distintos; la prim
 
 ## Guion de sustentación y contingencia
 
-1. Presentar el alcance: demostración sintética, sin identidad académica institucional ni decisiones administrativas.
+1. Presentar el alcance: cuentas y expedientes ficticios; referencias CCD seleccionadas en un corpus separado, sin identidad académica institucional ni decisiones administrativas.
 2. Pulsar Iniciar sesión con campos vacíos: aparece la advertencia. Entrar con una cuenta asignada y abrir Mi progreso; mostrar períodos e intentos del curso, incluido recursamiento.
 3. Abrir Chat. Preguntar «¿Qué indica el documento de evaluación formativa sobre la entrega de evidencias?». La inferencia puede superar dos minutos o fallar. No prometer una respuesta inmediata.
 4. Expandir las cinco fuentes, desplazarse hasta la última y abrir un documento completo. El visor indica «Material ficticio de demostración». Contraer desde el final permite volver a la respuesta sin recorrer toda la lista.
@@ -73,7 +75,7 @@ Se contrastó la guía anterior con la transcripción versionada del anteproyect
 
 | Objetivo y criterio original | Evidencia defendible | Incumplido, no evaluado o pendiente |
 | --- | --- | --- |
-| OE1: RAG PostgreSQL/pgvector sobre documentos CCD oficiales/verificados; banco de 50–80 preguntas y métricas de calidad | Recuperación, citas versionadas e historial demostrados; evaluación CCD local histórica separada | La nube usa corpus ficticio. Banco histórico de 43, inferior a 50; no hay nueva evaluación cloud ni aceptación institucional |
+| OE1: RAG PostgreSQL/pgvector sobre documentos CCD oficiales/verificados; banco de 50–80 preguntas y métricas de calidad | Recuperación, citas versionadas e historial demostrados; evaluación CCD local histórica separada | La nube separa expedientes ficticios y 107 referencias CCD depuradas. Nueve consultas remotas acreditadas en este cierre; banco histórico de 43, inferior a 50; no hay nueva evaluación RAGAS ni aceptación institucional |
 | OE2: ≥3 flujos de scraping automáticos, actualización <24 h y extracción >90 % del universo institucional | Scheduler, snapshots y publicación sobre fixtures acreditados en pruebas locales anteriores | No scraping institucional autorizado ni denominador/reloj institucional; los fixtures no acreditan frescura o exactitud institucional |
 | OE3: agente LLM ReAct multietapa con MCP | MCP y agente adaptativo determinista tienen evidencia local; política LLM experimental parcial | El recorrido público RAG no prueba ReAct productivo ni aceptación del objetivo completo |
 | OE4: BPM/n8n, flujos completos e integración Sheets/calendario ≤30 min | Orquestación local acotada y fixtures comprobados anteriormente | No se acredita sincronización real Google Sheets ni totalidad de flujos institucionales en AWS |
@@ -82,7 +84,7 @@ Se contrastó la guía anterior con la transcripción versionada del anteproyect
 
 La [evaluación OE1 del 29/10](../../eval/rag-quality/results/oe1-cierre02-technical-report.md) registró 43 intentos, 39 respuestas y cuatro abstenciones. Sobre esas 39 respuestas: faithfulness **0,952991** frente a ≥0,80; context precision **0,709402** frente a ≥0,80; context recall **0,713675** frente a ≥0,75; answer relevancy **0,618210** frente a ≥0,80. MRR@5 **0,813953** frente a ≥0,70 (k original por ratificar). Tres medias RAGAS incumplen sus metas. Son mediciones históricas del corpus CCD local, anteriores a mejoras posteriores, con juez exploratorio que comparte modelo del generador; no describen la calidad actual de la demo sintética ni prueban independencia de evaluación.
 
-No se declara ningún objetivo íntegramente aprobado por director, CCD o UNAB. Los nombres, correos de presentación, expedientes y documentos de la cohorte de demostración son ficticios; no representan expedientes ni información institucional real.
+No se declara ningún objetivo íntegramente aprobado por director, CCD o UNAB. Los nombres y expedientes de la cohorte de demostración son ficticios. Las referencias documentales CCD agregadas se identifican separadamente como no sintéticas y no autorizan decisiones individuales ni representan aprobación institucional.
 
 ## Rendimiento, disponibilidad y recuperación
 
