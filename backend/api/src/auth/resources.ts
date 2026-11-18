@@ -35,17 +35,17 @@ export class AuthenticatedResources {
  constructor(private readonly pool:Pool,private readonly chat:Omit<SendMessageDependencies,'demo_mode'|'read_context'|'commit_turn'|'persist'>,
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
    private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader},
-   private readonly references?:ApprovedReferences){this.transactions=new PgTransactionRunner(pool);}
+   private readonly references?:ApprovedReferences,private readonly publications?:Oe2PublicationReader){this.transactions=new PgTransactionRunner(pool);}
  async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
-  if(!this.unified)throw new AuthError('NOT_FOUND');
+  if(!this.unified&&!this.publications)throw new AuthError('NOT_FOUND');
   // Release the normal product connection before waiting on an optional source.
   await this.unit(token,async()=>undefined);
-  return readOe2Demo(this.unified.oe2_reader,kind,filters,now);
+  return readOe2Demo(this.publications??this.unified?.oe2_reader,kind,filters,now);
  }
  async oe2Changes(token:string,filters:ChangeFilters){
-  if(!this.unified)throw new AuthError('NOT_FOUND');
+  if(!this.unified&&!this.publications)throw new AuthError('NOT_FOUND');
   await this.unit(token,async()=>undefined);
-  return readOe2Changes(this.unified.oe2_reader,filters);
+  return readOe2Changes(this.publications??this.unified?.oe2_reader,filters);
  }
  private async unit<T>(token:string,operation:(c:SqlQueryClient,context:ResourceContext)=>Promise<T>,id:string|null=null,binding=false,turn=false):Promise<T>{
   try{return await this.transactions.run(async c=>{

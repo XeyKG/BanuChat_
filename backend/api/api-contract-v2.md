@@ -1,5 +1,20 @@
 # Contrato REST v2 — BanuChat
 
+## Ampliación autorizada 18/11/2026 — disponibilidad OE2 publicada
+
+El propietario autoriza habilitar los tres GET OE2 existentes también en AWS,
+mediante una exportación sintética aprobada de solo lectura. Esta ampliación
+sustituye únicamente la restricción de disponibilidad «Unified local» de las
+revisiones 5.1.0 y 5.2.0 conservadas debajo. No cambia schemas, filtros, Bearer,
+autorización, errores ni comparación. Sin lector explícito, otras composiciones
+siguen devolviendo 404.
+
+El transporte opcional valida SHA-256 fijado por configuración, JSON estricto,
+tamaño máximo, publicación y timeline con los validadores existentes. Conserva
+snapshots, candidato, aprobaciones y procedencia; una fuente ausente o corrupta
+devuelve 503 saneado sin impedir login/chat. La copia no se actualiza sola, no
+acredita oferta institucional, no habilita matrícula ni publica datos CCD.
+
 ## Revisión 5.2.0 — Banu al día
 
 BANU-AL-DIA-01 autoriza un único GET adicional, exclusivamente en Unified local:

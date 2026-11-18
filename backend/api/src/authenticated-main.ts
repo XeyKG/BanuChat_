@@ -8,6 +8,7 @@ import {OllamaGeneratorClient} from './generation/ollama-generator-client.js';
 import {OllamaQueryEmbeddingClient} from './retrieval/ollama-query-embedding-client.js';
 import {knowledgeMode} from './auth/knowledge-mode.js';
 import {loadN8nConversationRuntimeConfig,N8nConversationOrchestrator} from './orchestration/n8n-conversation.js';
+import {publishedOe2Reader} from './operations/oe2-published-reader.js';
 import {loadLocalOe2Reader} from './operations/oe2-local-reader.js';
 import {createApprovedReferences} from './chat/approved-references.js';
 
@@ -63,7 +64,7 @@ export async function startAuthenticatedApi(){
   const artifacts=mode==='ccd_local'?ccdArtifactStorage():
    {root:process.env.BANUCHAT_AUTH_ARTIFACT_ROOT??fileURLToPath(new URL('../../../data/synthetic/',import.meta.url))};
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
-  const oe2=unified?await loadLocalOe2Reader(new URL('../../../infra/local/unified/oe2-reader.json',import.meta.url)):undefined;
+  const oe2=unified?await loadLocalOe2Reader(new URL('../../../infra/local/unified/oe2-reader.json',import.meta.url)):publishedOe2Reader(process.env.BANUCHAT_OE2_PUBLICATION_FILE,process.env.BANUCHAT_OE2_PUBLICATION_SHA256);
   const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,postgres_profile:profile,
    ...(oe2?{oe2_reader:oe2}:{}),...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),

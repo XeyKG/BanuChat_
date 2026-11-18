@@ -1,0 +1,884 @@
+{
+  "schema_version": "banuchat-approved-oe2-1",
+  "synthetic": true,
+  "current": {
+    "valid": true,
+    "release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "published_at": "2026-10-30T14:29:48.727734Z",
+    "candidate": {
+      "policy": "oe2-pipeline-demo-1",
+      "synthetic": true,
+      "content_sha256": "e2f414fdddcc9951d9e0da3f6432354221291d49691bb4cb0d616ae376fa8f2e",
+      "artifacts": [
+        {
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "fixture_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+          "snapshot_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+          "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"academic_offer\",\n  \"source_id\": \"fixture-academic-offer-v1\",\n  \"source_sha256\": \"4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c\",\n  \"available_at\": \"2026-10-30T14:29:48.668Z\",\n  \"records\": [\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-001\",\n      \"title\": \"Interacción digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-01\",\n        \"mode\": \"virtual\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035\"\n    },\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-002\",\n      \"title\": \"Analítica digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-02\",\n        \"mode\": \"teleclase\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303\"\n    }\n  ]\n}\n"
+        },
+        {
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "fixture_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+          "snapshot_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d",
+          "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"calls\",\n  \"source_id\": \"fixture-calls-v1\",\n  \"source_sha256\": \"0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473\",\n  \"available_at\": \"2026-10-30T14:29:48.672Z\",\n  \"records\": [\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-001\",\n      \"title\": \"Inscripción a prueba demostrativa\",\n      \"published_at\": \"2026-10-02T09:15:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"estudiantes de demostración\",\n        \"opens_at\": \"2026-10-02T09:15:00-05:00\",\n        \"closes_at\": \"2026-10-09T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad\"\n    },\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-002\",\n      \"title\": \"Registro a taller demostrativo\",\n      \"published_at\": \"2026-10-04T10:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"comunidad sintética\",\n        \"opens_at\": \"2026-10-04T10:00:00-05:00\",\n        \"closes_at\": \"2026-10-12T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8\"\n    }\n  ]\n}\n"
+        },
+        {
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "fixture_sha256": "e71888023013423604a9378efcaecac9354f36a45b60490cda938ad69887ac8b",
+          "snapshot_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244",
+          "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"news\",\n  \"source_id\": \"fixture-news-v1\",\n  \"source_sha256\": \"e71888023013423604a9378efcaecac9354f36a45b60490cda938ad69887ac8b\",\n  \"available_at\": \"2026-10-30T14:29:48.680Z\",\n  \"records\": [\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-001\",\n      \"title\": \"Nueva guía demostrativa disponible — actualizada por scheduler\",\n      \"published_at\": \"2026-10-05T11:30:00-05:00\",\n      \"source_version\": \"fixture-rollback-concurrency-v3\",\n      \"fields\": {\n        \"summary\": \"Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia.\"\n      },\n      \"content_sha256\": \"a0d67dbe65ca7a0e5cd34facb4e80989952b347c1411882b1c1c4160334540cb\"\n    },\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-003\",\n      \"title\": \"Novedad añadida ficticia\",\n      \"published_at\": \"2026-10-08T14:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v2\",\n      \"fields\": {\n        \"summary\": \"Novedad representativa sin afirmaciones institucionales.\"\n      },\n      \"content_sha256\": \"fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54\"\n    }\n  ]\n}\n"
+        }
+      ],
+      "origins": [
+        {
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "record_id": "OFF-001",
+          "record_sha256": "742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "published_at": "2026-10-01T08:00:00-05:00",
+          "fields": {
+            "period": "DEMO-2026-10",
+            "course_code": "DEMO-CCD-01",
+            "mode": "virtual",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28"
+          }
+        },
+        {
+          "category": "academic_offer",
+          "source_id": "fixture-academic-offer-v1",
+          "record_id": "OFF-002",
+          "record_sha256": "a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "published_at": "2026-10-01T08:00:00-05:00",
+          "fields": {
+            "period": "DEMO-2026-10",
+            "course_code": "DEMO-CCD-02",
+            "mode": "teleclase",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28"
+          }
+        },
+        {
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "record_id": "CALL-001",
+          "record_sha256": "602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "published_at": "2026-10-02T09:15:00-05:00",
+          "fields": {
+            "audience": "estudiantes de demostración",
+            "opens_at": "2026-10-02T09:15:00-05:00",
+            "closes_at": "2026-10-09T17:00:00-05:00"
+          }
+        },
+        {
+          "category": "calls",
+          "source_id": "fixture-calls-v1",
+          "record_id": "CALL-002",
+          "record_sha256": "01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+          "published_at": "2026-10-04T10:00:00-05:00",
+          "fields": {
+            "audience": "comunidad sintética",
+            "opens_at": "2026-10-04T10:00:00-05:00",
+            "closes_at": "2026-10-12T17:00:00-05:00"
+          }
+        },
+        {
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "record_id": "NEWS-001",
+          "record_sha256": "a0d67dbe65ca7a0e5cd34facb4e80989952b347c1411882b1c1c4160334540cb",
+          "source_version": "fixture-rollback-concurrency-v3",
+          "published_at": "2026-10-05T11:30:00-05:00",
+          "fields": {
+            "summary": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia."
+          }
+        },
+        {
+          "category": "news",
+          "source_id": "fixture-news-v1",
+          "record_id": "NEWS-003",
+          "record_sha256": "fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54",
+          "source_version": "fixture-pipeline-02-mvv2hih9-v2",
+          "published_at": "2026-10-08T14:00:00-05:00",
+          "fields": {
+            "summary": "Novedad representativa sin afirmaciones institucionales."
+          }
+        }
+      ],
+      "announcements": [
+        {
+          "key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+          "category": "calls",
+          "record_id": "CALL-001",
+          "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+          "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+          "valid_from": "2026-10-02T09:15:00-05:00",
+          "valid_until": "2026-10-09T17:00:00-05:00",
+          "source_path": "announcements/oe2-calls.snapshot.json",
+          "source_locator": "/records/0",
+          "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+        },
+        {
+          "key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+          "category": "calls",
+          "record_id": "CALL-002",
+          "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+          "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+          "valid_from": "2026-10-04T10:00:00-05:00",
+          "valid_until": "2026-10-12T17:00:00-05:00",
+          "source_path": "announcements/oe2-calls.snapshot.json",
+          "source_locator": "/records/1",
+          "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+        },
+        {
+          "key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+          "category": "news",
+          "record_id": "NEWS-001",
+          "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+          "description": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-rollback-concurrency-v3. Dato ficticio de demostración.",
+          "valid_from": "2026-10-05T11:30:00-05:00",
+          "valid_until": null,
+          "source_path": "announcements/oe2-news.snapshot.json",
+          "source_locator": "/records/0",
+          "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+        },
+        {
+          "key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+          "category": "news",
+          "record_id": "NEWS-003",
+          "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+          "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+          "valid_from": "2026-10-08T14:00:00-05:00",
+          "valid_until": null,
+          "source_path": "announcements/oe2-news.snapshot.json",
+          "source_locator": "/records/1",
+          "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+        }
+      ],
+      "programming": [
+        {
+          "key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+          "category": "academic_offer",
+          "record_id": "OFF-001",
+          "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+          "course_code": "DEMO-CCD-01",
+          "period": "DEMO-2026-10",
+          "mode": "virtual",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-28",
+          "source_path": "programming/oe2-academic_offer.snapshot.json",
+          "source_locator": "/records/0",
+          "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+        },
+        {
+          "key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+          "category": "academic_offer",
+          "record_id": "OFF-002",
+          "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+          "course_code": "DEMO-CCD-02",
+          "period": "DEMO-2026-10",
+          "mode": "teleclase",
+          "start_date": "2026-11-03",
+          "end_date": "2026-11-28",
+          "source_path": "programming/oe2-academic_offer.snapshot.json",
+          "source_locator": "/records/1",
+          "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+        }
+      ]
+    },
+    "programming": [
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "programming_key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+        "category": "academic_offer",
+        "record_id": "OFF-002",
+        "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+        "course_code": "DEMO-CCD-02",
+        "period": "DEMO-2026-10",
+        "mode": "teleclase",
+        "start_date": "2026-11-03",
+        "end_date": "2026-11-28",
+        "source_path": "programming/oe2-academic_offer.snapshot.json",
+        "source_locator": "/records/1",
+        "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+      },
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "programming_key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+        "category": "academic_offer",
+        "record_id": "OFF-001",
+        "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+        "course_code": "DEMO-CCD-01",
+        "period": "DEMO-2026-10",
+        "mode": "virtual",
+        "start_date": "2026-11-03",
+        "end_date": "2026-11-28",
+        "source_path": "programming/oe2-academic_offer.snapshot.json",
+        "source_locator": "/records/0",
+        "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+      }
+    ],
+    "announcements": [
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "announcement_key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+        "category": "calls",
+        "record_id": "CALL-002",
+        "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+        "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+        "valid_from": "2026-10-04T15:00:00+00:00",
+        "valid_until": "2026-10-12T22:00:00+00:00",
+        "source_path": "announcements/oe2-calls.snapshot.json",
+        "source_locator": "/records/1",
+        "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+      },
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "announcement_key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+        "category": "calls",
+        "record_id": "CALL-001",
+        "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+        "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+        "valid_from": "2026-10-02T14:15:00+00:00",
+        "valid_until": "2026-10-09T22:00:00+00:00",
+        "source_path": "announcements/oe2-calls.snapshot.json",
+        "source_locator": "/records/0",
+        "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+      },
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "announcement_key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+        "category": "news",
+        "record_id": "NEWS-001",
+        "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+        "description": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-rollback-concurrency-v3. Dato ficticio de demostración.",
+        "valid_from": "2026-10-05T16:30:00+00:00",
+        "valid_until": null,
+        "source_path": "announcements/oe2-news.snapshot.json",
+        "source_locator": "/records/0",
+        "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+      },
+      {
+        "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "announcement_key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+        "category": "news",
+        "record_id": "NEWS-003",
+        "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+        "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+        "valid_from": "2026-10-08T19:00:00+00:00",
+        "valid_until": null,
+        "source_path": "announcements/oe2-news.snapshot.json",
+        "source_locator": "/records/1",
+        "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+      }
+    ]
+  },
+  "history": {
+    "current_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+    "timeline": [
+      {
+        "release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "published_at": "2026-10-30T14:29:48.727734Z",
+        "content_sha256": "e2f414fdddcc9951d9e0da3f6432354221291d49691bb4cb0d616ae376fa8f2e",
+        "approval_ref": "OE2-PIPELINE-02/explicit-rollback-concurrency"
+      },
+      {
+        "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "published_at": "2026-10-30T14:29:20.148356Z",
+        "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a",
+        "approval_ref": "OE2-PIPELINE-02/operator-v2-mvv2hih9"
+      },
+      {
+        "release_id": "716a3d94-2ad7-4cbe-a282-9f0b00cbc5fe",
+        "published_at": "2026-10-30T14:29:00.501872Z",
+        "content_sha256": "d9173b3aae07e7db0a95dcbe22308f89eb43b7bd8e72b5735a085d1ea113e42d",
+        "approval_ref": "OE2-PIPELINE-02/operator-v1-mvv2hih9"
+      },
+      {
+        "release_id": "6ca83849-14c8-4a2a-8384-1a6b16312508",
+        "published_at": "2026-10-30T07:11:42.966224Z",
+        "content_sha256": "4015f9ec62927fbdab35b44ea4a3260b6660f87bdf28cc6f6e18ffae0b9e8fcf",
+        "approval_ref": "OE2-PIPELINE-02/explicit-rollback-concurrency"
+      },
+      {
+        "release_id": "3346bcb4-5c7c-458a-94df-04444b0ce317",
+        "published_at": "2026-10-30T07:11:10.197941Z",
+        "content_sha256": "437a4ace6c4a8073fc5809002134d6387e3449de6018ef5625881273e223c608",
+        "approval_ref": "OE2-PIPELINE-02/operator-v2-mvumu57l"
+      },
+      {
+        "release_id": "bfa94e14-483a-4e47-a851-f1819df00803",
+        "published_at": "2026-10-30T07:10:50.471948Z",
+        "content_sha256": "b527cf2fe6437f8da1f074a790b3e45359cee7ed689c1997fded39bfcf9b9486",
+        "approval_ref": "OE2-PIPELINE-02/operator-v1-mvumu57l"
+      }
+    ],
+    "publications": [
+      {
+        "valid": true,
+        "release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+        "published_at": "2026-10-30T14:29:20.148356Z",
+        "candidate": {
+          "policy": "oe2-pipeline-demo-1",
+          "synthetic": true,
+          "content_sha256": "c7ef71b66d874edffc890efa518dfcb9bb4e32a806fccea498abbe1e4676284a",
+          "artifacts": [
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "fixture_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+              "snapshot_sha256": "fee2e38232c337cf1695d1481c0afdd139ff7100cb284612b4a7b7859159dfeb",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"academic_offer\",\n  \"source_id\": \"fixture-academic-offer-v1\",\n  \"source_sha256\": \"4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c\",\n  \"available_at\": \"2026-10-30T14:29:00.425Z\",\n  \"records\": [\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-001\",\n      \"title\": \"Interacción digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-01\",\n        \"mode\": \"virtual\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035\"\n    },\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-002\",\n      \"title\": \"Analítica digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-02\",\n        \"mode\": \"teleclase\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303\"\n    }\n  ]\n}\n"
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "fixture_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+              "snapshot_sha256": "d6e2c235b3156bf06f8336401cbee74adc830525ef3b0812bf65276590a03c6c",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"calls\",\n  \"source_id\": \"fixture-calls-v1\",\n  \"source_sha256\": \"0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473\",\n  \"available_at\": \"2026-10-30T14:29:00.411Z\",\n  \"records\": [\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-001\",\n      \"title\": \"Inscripción a prueba demostrativa\",\n      \"published_at\": \"2026-10-02T09:15:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"estudiantes de demostración\",\n        \"opens_at\": \"2026-10-02T09:15:00-05:00\",\n        \"closes_at\": \"2026-10-09T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad\"\n    },\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-002\",\n      \"title\": \"Registro a taller demostrativo\",\n      \"published_at\": \"2026-10-04T10:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"comunidad sintética\",\n        \"opens_at\": \"2026-10-04T10:00:00-05:00\",\n        \"closes_at\": \"2026-10-12T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8\"\n    }\n  ]\n}\n"
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "fixture_sha256": "1854f9bbb16d51fd20fb4285bad0b3c46295d7f3af3c7ec99d83fff702bad606",
+              "snapshot_sha256": "6af535ad9171fbc21dcb39b9fe56d910e1dc526071183418b4954d09be2d1b07",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"news\",\n  \"source_id\": \"fixture-news-v1\",\n  \"source_sha256\": \"1854f9bbb16d51fd20fb4285bad0b3c46295d7f3af3c7ec99d83fff702bad606\",\n  \"available_at\": \"2026-10-30T14:29:10.220Z\",\n  \"records\": [\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-001\",\n      \"title\": \"Nueva guía demostrativa disponible — actualizada por scheduler\",\n      \"published_at\": \"2026-10-05T11:30:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v2\",\n      \"fields\": {\n        \"summary\": \"Contenido sintético para validar extracción y detección de cambios.\"\n      },\n      \"content_sha256\": \"2b10ba1583a9d03eb1d5f593250f456a9e375ef55e0571de7f12ef2302aae858\"\n    },\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-003\",\n      \"title\": \"Novedad añadida ficticia\",\n      \"published_at\": \"2026-10-08T14:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v2\",\n      \"fields\": {\n        \"summary\": \"Novedad representativa sin afirmaciones institucionales.\"\n      },\n      \"content_sha256\": \"fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54\"\n    }\n  ]\n}\n"
+            }
+          ],
+          "origins": [
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "record_id": "OFF-001",
+              "record_sha256": "742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-01T08:00:00-05:00",
+              "fields": {
+                "period": "DEMO-2026-10",
+                "course_code": "DEMO-CCD-01",
+                "mode": "virtual",
+                "start_date": "2026-11-03",
+                "end_date": "2026-11-28"
+              }
+            },
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "record_id": "OFF-002",
+              "record_sha256": "a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-01T08:00:00-05:00",
+              "fields": {
+                "period": "DEMO-2026-10",
+                "course_code": "DEMO-CCD-02",
+                "mode": "teleclase",
+                "start_date": "2026-11-03",
+                "end_date": "2026-11-28"
+              }
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "record_id": "CALL-001",
+              "record_sha256": "602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-02T09:15:00-05:00",
+              "fields": {
+                "audience": "estudiantes de demostración",
+                "opens_at": "2026-10-02T09:15:00-05:00",
+                "closes_at": "2026-10-09T17:00:00-05:00"
+              }
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "record_id": "CALL-002",
+              "record_sha256": "01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-04T10:00:00-05:00",
+              "fields": {
+                "audience": "comunidad sintética",
+                "opens_at": "2026-10-04T10:00:00-05:00",
+                "closes_at": "2026-10-12T17:00:00-05:00"
+              }
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "record_id": "NEWS-001",
+              "record_sha256": "2b10ba1583a9d03eb1d5f593250f456a9e375ef55e0571de7f12ef2302aae858",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v2",
+              "published_at": "2026-10-05T11:30:00-05:00",
+              "fields": {
+                "summary": "Contenido sintético para validar extracción y detección de cambios."
+              }
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "record_id": "NEWS-003",
+              "record_sha256": "fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v2",
+              "published_at": "2026-10-08T14:00:00-05:00",
+              "fields": {
+                "summary": "Novedad representativa sin afirmaciones institucionales."
+              }
+            }
+          ],
+          "announcements": [
+            {
+              "key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+              "category": "calls",
+              "record_id": "CALL-001",
+              "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+              "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+              "valid_from": "2026-10-02T09:15:00-05:00",
+              "valid_until": "2026-10-09T17:00:00-05:00",
+              "source_path": "announcements/oe2-calls.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "d6e2c235b3156bf06f8336401cbee74adc830525ef3b0812bf65276590a03c6c"
+            },
+            {
+              "key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+              "category": "calls",
+              "record_id": "CALL-002",
+              "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+              "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+              "valid_from": "2026-10-04T10:00:00-05:00",
+              "valid_until": "2026-10-12T17:00:00-05:00",
+              "source_path": "announcements/oe2-calls.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "d6e2c235b3156bf06f8336401cbee74adc830525ef3b0812bf65276590a03c6c"
+            },
+            {
+              "key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+              "category": "news",
+              "record_id": "NEWS-001",
+              "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+              "description": "Contenido sintético para validar extracción y detección de cambios. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+              "valid_from": "2026-10-05T11:30:00-05:00",
+              "valid_until": null,
+              "source_path": "announcements/oe2-news.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "6af535ad9171fbc21dcb39b9fe56d910e1dc526071183418b4954d09be2d1b07"
+            },
+            {
+              "key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+              "category": "news",
+              "record_id": "NEWS-003",
+              "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+              "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+              "valid_from": "2026-10-08T14:00:00-05:00",
+              "valid_until": null,
+              "source_path": "announcements/oe2-news.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "6af535ad9171fbc21dcb39b9fe56d910e1dc526071183418b4954d09be2d1b07"
+            }
+          ],
+          "programming": [
+            {
+              "key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+              "category": "academic_offer",
+              "record_id": "OFF-001",
+              "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+              "course_code": "DEMO-CCD-01",
+              "period": "DEMO-2026-10",
+              "mode": "virtual",
+              "start_date": "2026-11-03",
+              "end_date": "2026-11-28",
+              "source_path": "programming/oe2-academic_offer.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "fee2e38232c337cf1695d1481c0afdd139ff7100cb284612b4a7b7859159dfeb"
+            },
+            {
+              "key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+              "category": "academic_offer",
+              "record_id": "OFF-002",
+              "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+              "course_code": "DEMO-CCD-02",
+              "period": "DEMO-2026-10",
+              "mode": "teleclase",
+              "start_date": "2026-11-03",
+              "end_date": "2026-11-28",
+              "source_path": "programming/oe2-academic_offer.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "fee2e38232c337cf1695d1481c0afdd139ff7100cb284612b4a7b7859159dfeb"
+            }
+          ]
+        },
+        "programming": [
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "programming_key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+            "category": "academic_offer",
+            "record_id": "OFF-002",
+            "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+            "course_code": "DEMO-CCD-02",
+            "period": "DEMO-2026-10",
+            "mode": "teleclase",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28",
+            "source_path": "programming/oe2-academic_offer.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "fee2e38232c337cf1695d1481c0afdd139ff7100cb284612b4a7b7859159dfeb"
+          },
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "programming_key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+            "category": "academic_offer",
+            "record_id": "OFF-001",
+            "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+            "course_code": "DEMO-CCD-01",
+            "period": "DEMO-2026-10",
+            "mode": "virtual",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28",
+            "source_path": "programming/oe2-academic_offer.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "fee2e38232c337cf1695d1481c0afdd139ff7100cb284612b4a7b7859159dfeb"
+          }
+        ],
+        "announcements": [
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "announcement_key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+            "category": "calls",
+            "record_id": "CALL-002",
+            "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+            "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+            "valid_from": "2026-10-04T15:00:00+00:00",
+            "valid_until": "2026-10-12T22:00:00+00:00",
+            "source_path": "announcements/oe2-calls.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "d6e2c235b3156bf06f8336401cbee74adc830525ef3b0812bf65276590a03c6c"
+          },
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "announcement_key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+            "category": "calls",
+            "record_id": "CALL-001",
+            "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+            "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+            "valid_from": "2026-10-02T14:15:00+00:00",
+            "valid_until": "2026-10-09T22:00:00+00:00",
+            "source_path": "announcements/oe2-calls.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "d6e2c235b3156bf06f8336401cbee74adc830525ef3b0812bf65276590a03c6c"
+          },
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "announcement_key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+            "category": "news",
+            "record_id": "NEWS-001",
+            "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+            "description": "Contenido sintético para validar extracción y detección de cambios. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+            "valid_from": "2026-10-05T16:30:00+00:00",
+            "valid_until": null,
+            "source_path": "announcements/oe2-news.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "6af535ad9171fbc21dcb39b9fe56d910e1dc526071183418b4954d09be2d1b07"
+          },
+          {
+            "dataset_release_id": "1fb9ef0b-f2b9-458f-889f-8fcf837a84f2",
+            "announcement_key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+            "category": "news",
+            "record_id": "NEWS-003",
+            "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+            "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+            "valid_from": "2026-10-08T19:00:00+00:00",
+            "valid_until": null,
+            "source_path": "announcements/oe2-news.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "6af535ad9171fbc21dcb39b9fe56d910e1dc526071183418b4954d09be2d1b07"
+          }
+        ]
+      },
+      {
+        "valid": true,
+        "release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+        "published_at": "2026-10-30T14:29:48.727734Z",
+        "candidate": {
+          "policy": "oe2-pipeline-demo-1",
+          "synthetic": true,
+          "content_sha256": "e2f414fdddcc9951d9e0da3f6432354221291d49691bb4cb0d616ae376fa8f2e",
+          "artifacts": [
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "fixture_sha256": "4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c",
+              "snapshot_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"academic_offer\",\n  \"source_id\": \"fixture-academic-offer-v1\",\n  \"source_sha256\": \"4c67fc87e5bf0ceb91bf308fbbf3eede79a1e3841197036f6647885dceda618c\",\n  \"available_at\": \"2026-10-30T14:29:48.668Z\",\n  \"records\": [\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-001\",\n      \"title\": \"Interacción digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-01\",\n        \"mode\": \"virtual\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035\"\n    },\n    {\n      \"category\": \"academic_offer\",\n      \"source_id\": \"fixture-academic-offer-v1\",\n      \"source_record_id\": \"OFF-002\",\n      \"title\": \"Analítica digital — grupo demostrativo\",\n      \"published_at\": \"2026-10-01T08:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"period\": \"DEMO-2026-10\",\n        \"course_code\": \"DEMO-CCD-02\",\n        \"mode\": \"teleclase\",\n        \"start_date\": \"2026-11-03\",\n        \"end_date\": \"2026-11-28\"\n      },\n      \"content_sha256\": \"a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303\"\n    }\n  ]\n}\n"
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "fixture_sha256": "0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473",
+              "snapshot_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"calls\",\n  \"source_id\": \"fixture-calls-v1\",\n  \"source_sha256\": \"0e57a901a336c3eabb8cc6af8ea3e679b30e47319eda805b3ea24a615eb1b473\",\n  \"available_at\": \"2026-10-30T14:29:48.672Z\",\n  \"records\": [\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-001\",\n      \"title\": \"Inscripción a prueba demostrativa\",\n      \"published_at\": \"2026-10-02T09:15:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"estudiantes de demostración\",\n        \"opens_at\": \"2026-10-02T09:15:00-05:00\",\n        \"closes_at\": \"2026-10-09T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad\"\n    },\n    {\n      \"category\": \"calls\",\n      \"source_id\": \"fixture-calls-v1\",\n      \"source_record_id\": \"CALL-002\",\n      \"title\": \"Registro a taller demostrativo\",\n      \"published_at\": \"2026-10-04T10:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v1\",\n      \"fields\": {\n        \"audience\": \"comunidad sintética\",\n        \"opens_at\": \"2026-10-04T10:00:00-05:00\",\n        \"closes_at\": \"2026-10-12T17:00:00-05:00\"\n      },\n      \"content_sha256\": \"01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8\"\n    }\n  ]\n}\n"
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "fixture_sha256": "e71888023013423604a9378efcaecac9354f36a45b60490cda938ad69887ac8b",
+              "snapshot_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244",
+              "json": "{\n  \"schema_version\": \"oe2-snapshot-1\",\n  \"category\": \"news\",\n  \"source_id\": \"fixture-news-v1\",\n  \"source_sha256\": \"e71888023013423604a9378efcaecac9354f36a45b60490cda938ad69887ac8b\",\n  \"available_at\": \"2026-10-30T14:29:48.680Z\",\n  \"records\": [\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-001\",\n      \"title\": \"Nueva guía demostrativa disponible — actualizada por scheduler\",\n      \"published_at\": \"2026-10-05T11:30:00-05:00\",\n      \"source_version\": \"fixture-rollback-concurrency-v3\",\n      \"fields\": {\n        \"summary\": \"Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia.\"\n      },\n      \"content_sha256\": \"a0d67dbe65ca7a0e5cd34facb4e80989952b347c1411882b1c1c4160334540cb\"\n    },\n    {\n      \"category\": \"news\",\n      \"source_id\": \"fixture-news-v1\",\n      \"source_record_id\": \"NEWS-003\",\n      \"title\": \"Novedad añadida ficticia\",\n      \"published_at\": \"2026-10-08T14:00:00-05:00\",\n      \"source_version\": \"fixture-pipeline-02-mvv2hih9-v2\",\n      \"fields\": {\n        \"summary\": \"Novedad representativa sin afirmaciones institucionales.\"\n      },\n      \"content_sha256\": \"fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54\"\n    }\n  ]\n}\n"
+            }
+          ],
+          "origins": [
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "record_id": "OFF-001",
+              "record_sha256": "742b2e8becb826beb5547de18ebb107543e5c8d39a24d311286333cc3bf10035",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-01T08:00:00-05:00",
+              "fields": {
+                "period": "DEMO-2026-10",
+                "course_code": "DEMO-CCD-01",
+                "mode": "virtual",
+                "start_date": "2026-11-03",
+                "end_date": "2026-11-28"
+              }
+            },
+            {
+              "category": "academic_offer",
+              "source_id": "fixture-academic-offer-v1",
+              "record_id": "OFF-002",
+              "record_sha256": "a3f7d7dda070c1af10148f83dde4e1798d5268caceaf57e9541853c9c2286303",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-01T08:00:00-05:00",
+              "fields": {
+                "period": "DEMO-2026-10",
+                "course_code": "DEMO-CCD-02",
+                "mode": "teleclase",
+                "start_date": "2026-11-03",
+                "end_date": "2026-11-28"
+              }
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "record_id": "CALL-001",
+              "record_sha256": "602e7e23a770082767035f9f727d5ab39bfb9413feac15dfe9b4d407369a30ad",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-02T09:15:00-05:00",
+              "fields": {
+                "audience": "estudiantes de demostración",
+                "opens_at": "2026-10-02T09:15:00-05:00",
+                "closes_at": "2026-10-09T17:00:00-05:00"
+              }
+            },
+            {
+              "category": "calls",
+              "source_id": "fixture-calls-v1",
+              "record_id": "CALL-002",
+              "record_sha256": "01767777f7e376b87fa18f0fda6a9547561a945b2433be180e3fbb705b7f66e8",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v1",
+              "published_at": "2026-10-04T10:00:00-05:00",
+              "fields": {
+                "audience": "comunidad sintética",
+                "opens_at": "2026-10-04T10:00:00-05:00",
+                "closes_at": "2026-10-12T17:00:00-05:00"
+              }
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "record_id": "NEWS-001",
+              "record_sha256": "a0d67dbe65ca7a0e5cd34facb4e80989952b347c1411882b1c1c4160334540cb",
+              "source_version": "fixture-rollback-concurrency-v3",
+              "published_at": "2026-10-05T11:30:00-05:00",
+              "fields": {
+                "summary": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia."
+              }
+            },
+            {
+              "category": "news",
+              "source_id": "fixture-news-v1",
+              "record_id": "NEWS-003",
+              "record_sha256": "fbbbcbb9d61b913a35b56b21560aea676f1719aedf21658b763fec6145b61d54",
+              "source_version": "fixture-pipeline-02-mvv2hih9-v2",
+              "published_at": "2026-10-08T14:00:00-05:00",
+              "fields": {
+                "summary": "Novedad representativa sin afirmaciones institucionales."
+              }
+            }
+          ],
+          "announcements": [
+            {
+              "key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+              "category": "calls",
+              "record_id": "CALL-001",
+              "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+              "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+              "valid_from": "2026-10-02T09:15:00-05:00",
+              "valid_until": "2026-10-09T17:00:00-05:00",
+              "source_path": "announcements/oe2-calls.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+            },
+            {
+              "key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+              "category": "calls",
+              "record_id": "CALL-002",
+              "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+              "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+              "valid_from": "2026-10-04T10:00:00-05:00",
+              "valid_until": "2026-10-12T17:00:00-05:00",
+              "source_path": "announcements/oe2-calls.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+            },
+            {
+              "key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+              "category": "news",
+              "record_id": "NEWS-001",
+              "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+              "description": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-rollback-concurrency-v3. Dato ficticio de demostración.",
+              "valid_from": "2026-10-05T11:30:00-05:00",
+              "valid_until": null,
+              "source_path": "announcements/oe2-news.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+            },
+            {
+              "key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+              "category": "news",
+              "record_id": "NEWS-003",
+              "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+              "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+              "valid_from": "2026-10-08T14:00:00-05:00",
+              "valid_until": null,
+              "source_path": "announcements/oe2-news.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+            }
+          ],
+          "programming": [
+            {
+              "key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+              "category": "academic_offer",
+              "record_id": "OFF-001",
+              "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+              "course_code": "DEMO-CCD-01",
+              "period": "DEMO-2026-10",
+              "mode": "virtual",
+              "start_date": "2026-11-03",
+              "end_date": "2026-11-28",
+              "source_path": "programming/oe2-academic_offer.snapshot.json",
+              "source_locator": "/records/0",
+              "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+            },
+            {
+              "key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+              "category": "academic_offer",
+              "record_id": "OFF-002",
+              "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+              "course_code": "DEMO-CCD-02",
+              "period": "DEMO-2026-10",
+              "mode": "teleclase",
+              "start_date": "2026-11-03",
+              "end_date": "2026-11-28",
+              "source_path": "programming/oe2-academic_offer.snapshot.json",
+              "source_locator": "/records/1",
+              "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+            }
+          ]
+        },
+        "programming": [
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "programming_key": "oe2-academic_offer-038a8fdf986c89f497b5b11476751062a6d42c0a",
+            "category": "academic_offer",
+            "record_id": "OFF-002",
+            "title": "[PROGRAMACIÓN FICTICIA OE2] Analítica digital — grupo demostrativo",
+            "course_code": "DEMO-CCD-02",
+            "period": "DEMO-2026-10",
+            "mode": "teleclase",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28",
+            "source_path": "programming/oe2-academic_offer.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+          },
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "programming_key": "oe2-academic_offer-b8a239f3bdaa8e016429e5f5bc7aeab261020884",
+            "category": "academic_offer",
+            "record_id": "OFF-001",
+            "title": "[PROGRAMACIÓN FICTICIA OE2] Interacción digital — grupo demostrativo",
+            "course_code": "DEMO-CCD-01",
+            "period": "DEMO-2026-10",
+            "mode": "virtual",
+            "start_date": "2026-11-03",
+            "end_date": "2026-11-28",
+            "source_path": "programming/oe2-academic_offer.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "4328d77b778b9241987dd9a8dfcb3cc36a135d567a88b344a0540e13d2957cec"
+          }
+        ],
+        "announcements": [
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "announcement_key": "oe2-calls-b3577fe441124dcab46f62e8f2c9f2d3f004e47c",
+            "category": "calls",
+            "record_id": "CALL-002",
+            "title": "[CONVOCATORIA FICTICIA OE2] Registro a taller demostrativo",
+            "description": "Población documentada: comunidad sintética. Publicada: 2026-10-04T10:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+            "valid_from": "2026-10-04T15:00:00+00:00",
+            "valid_until": "2026-10-12T22:00:00+00:00",
+            "source_path": "announcements/oe2-calls.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+          },
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "announcement_key": "oe2-calls-d47d1b57c609606bcbb527a57fc228c3f64f4cd4",
+            "category": "calls",
+            "record_id": "CALL-001",
+            "title": "[CONVOCATORIA FICTICIA OE2] Inscripción a prueba demostrativa",
+            "description": "Población documentada: estudiantes de demostración. Publicada: 2026-10-02T09:15:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v1. No determina elegibilidad individual.",
+            "valid_from": "2026-10-02T14:15:00+00:00",
+            "valid_until": "2026-10-09T22:00:00+00:00",
+            "source_path": "announcements/oe2-calls.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "f765f8b9d1f4507b76f2e23ec954b0b5925c5a2a4565ce1f87c38d8ba4b2081d"
+          },
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "announcement_key": "oe2-news-538caed3b965f2f03abe7186e7489c983c9c9b3f",
+            "category": "news",
+            "record_id": "NEWS-001",
+            "title": "[NOVEDAD FICTICIA OE2] Nueva guía demostrativa disponible — actualizada por scheduler",
+            "description": "Contenido sintético para validar extracción y detección de cambios. Cambio de prueba de rollback y concurrencia. Publicada: 2026-10-05T11:30:00-05:00. Versión de origen: fixture-rollback-concurrency-v3. Dato ficticio de demostración.",
+            "valid_from": "2026-10-05T16:30:00+00:00",
+            "valid_until": null,
+            "source_path": "announcements/oe2-news.snapshot.json",
+            "source_locator": "/records/0",
+            "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+          },
+          {
+            "dataset_release_id": "8ed084d9-2d5e-4f90-8011-99912278b27c",
+            "announcement_key": "oe2-news-8eb61cdf74e56ef8afc95c5241000e60b91ed00e",
+            "category": "news",
+            "record_id": "NEWS-003",
+            "title": "[NOVEDAD FICTICIA OE2] Novedad añadida ficticia",
+            "description": "Novedad representativa sin afirmaciones institucionales. Publicada: 2026-10-08T14:00:00-05:00. Versión de origen: fixture-pipeline-02-mvv2hih9-v2. Dato ficticio de demostración.",
+            "valid_from": "2026-10-08T19:00:00+00:00",
+            "valid_until": null,
+            "source_path": "announcements/oe2-news.snapshot.json",
+            "source_locator": "/records/1",
+            "source_sha256": "f82eaf1d3407edf62b17eefb79439e753fcffbae5d0dc1f447a12b2fd5f50244"
+          }
+        ]
+      }
+    ]
+  }
+}

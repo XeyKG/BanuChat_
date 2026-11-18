@@ -1,5 +1,12 @@
 # BanuChat — publicación de demostración
 
+## Calendario, Banu al Día y OE2 — 1.0.4 (18/11/2026)
+
+Web canónica actualizada y verificada por HTTPS. OE2 habilitado con autorización expresa mediante exportación sintética aprobada de solo lectura: dos programaciones, cuatro convocatorias/novedades, comparación con una modificación y cinco registros sin cambios. No matrícula ni integración institucional. Calendario mensual con agenda por fecha, noticias bajo Banu al Día, comparación dentro de Publicaciones OE2 y Recordatorios locales.
+
+Diez pasos Edge contra el dominio público y ocho comprobaciones REST remotas correctos. Huawei físico actualizado a 1.0.4/versionCode 5, misma firma, sesión conservada; calendario, noticias y categorías/comparación OE2 comprobados con backend remoto y sin Metro/API local. Mobile 77/77 y API 22/22 focales; typechecks correctos. Sin cambios RAG, modelos, Supabase ni servicios nuevos. Backup /opt/banuchat/backups/release-104-20261118; versiones anteriores conservadas. APK validada, publicación GitHub pendiente al registrar este código. [Evidencia detallada y límites](CHECKPOINT-DEMO-1.0.4.md).
+
+
 ## Chat conversacional y acceso a progreso — 18/11/2026
 
 Cambios solicitados por el dueño: respuestas normales sin la cabecera repetitiva de procedencia y acceso directo al progreso desde el chat. El backend deja de anteponer esa cabecera y usa «Expediente de…» en su presentación académica. No se cambian permisos, corpus, citas, autenticación ni contratos. La procedencia y el carácter ficticio de expedientes siguen disponibles en las fuentes/pantallas de detalle; no se atribuye aval institucional.

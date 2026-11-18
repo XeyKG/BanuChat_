@@ -21,7 +21,7 @@ export default function Oe2ChangesScreen(){
  const back=()=>router.canGoBack()?router.back():router.replace('/oe2');
  const filter=(values:Record<string,string>,selected:string|undefined,onSelect:(value:string|undefined)=>void,label:string)=><View accessibilityRole="radiogroup" accessibilityLabel={label} style={secondaryStyles.filters}>{[['all','Todos'],...Object.entries(values)].map(([value,title])=><FilterChip key={value} label={title} accessibilityLabel={`${label}: ${title}`} selected={value===(selected??'all')} onPress={()=>onSelect(value==='all'?undefined:value)}/>)}</View>;
  return <SafeAreaView testID="secondary-screen" style={styles.safe}>
-  <ScreenHeader title="Banu al día" subtitle="Cambios entre publicaciones OE2" onAction={()=>router.replace('/home')}/>
+  <ScreenHeader title="Cambios de publicaciones" subtitle="Cambios entre publicaciones OE2" onAction={()=>router.replace('/home')}/>
   <ScrollView testID="oe2-scroll" contentContainerStyle={secondaryStyles.scroll}><ContentColumn style={{gap:spacing.sm}}>
    <DemoNotice>Comparación de datos ficticios aprobados. No son documentos CCD ni notificaciones personales de novedades no leídas.</DemoNotice>
    <AppButton tone="banu" label="Volver a Publicaciones OE2" variant="secondary" style={{alignSelf:'flex-start'}} onPress={back}/>

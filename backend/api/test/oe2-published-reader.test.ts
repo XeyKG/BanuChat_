@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {publishedOe2Reader} from '../src/operations/oe2-published-reader.js';
+import {projectOe2Publication} from '../src/application/oe2-demo.js';
+import {readOe2Changes} from '../src/application/oe2-changes.js';
+const file=fileURLToPath(new URL('../../../infra/fixtures/oe2-approved-publication.json',import.meta.url));
+test('approved persisted OE2 export preserves its records and actual previous-version comparison',async()=>{const bytes=await readFile(file),pin=createHash('sha256').update(bytes).digest('hex'),reader=publishedOe2Reader(file,pin)!;const p=await reader.read();const result=projectOe2Publication(p,'programming',{},'2026-11-18T12:00:00Z');assert.ok('programming'in result);assert.equal(result.programming.length,2);assert.equal(p.announcements.length,4);const diff=await readOe2Changes(reader,{});assert.equal(diff.counts.modified,1);assert.equal(diff.counts.unchanged,5);assert.equal(diff.comparison_status,'compared');});
+test('optional source stays disabled without explicit config and rejects an unpinned, changed or unavailable file',async()=>{assert.equal(publishedOe2Reader(undefined,undefined),undefined);assert.throws(()=>publishedOe2Reader(file,undefined));await assert.rejects(publishedOe2Reader(file,'0'.repeat(64))!.read(),{code:'DEPENDENCY_UNAVAILABLE'});await assert.rejects(publishedOe2Reader(file+'.missing','0'.repeat(64))!.read(),{code:'DEPENDENCY_UNAVAILABLE'});});

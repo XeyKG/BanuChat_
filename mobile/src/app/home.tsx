@@ -156,7 +156,7 @@ export default function HomeScreen() {
               delay={340}
             />}
             {!isCcdLocal()&&snapshot.me?.capabilities.includes('announcements')&&<QuickAction
-              title="Noticias y convocatorias"
+              title="Banu al Día"
               description="Consulta noticias y convocatorias."
               tint={colors.banuMuted}
               tintSoft={colors.banuSoft}
@@ -166,7 +166,7 @@ export default function HomeScreen() {
               delay={400}
             />}
             {!isCcdLocal()&&snapshot.me?.capabilities.includes('progress')&&Platform.OS !== 'web' && <QuickAction
-              title="Notificaciones"
+              title="Recordatorios"
               description="Configura tus permisos y recordatorios."
               tint={colors.banuOrange}
               tintSoft={colors.amberSoft}
@@ -177,7 +177,7 @@ export default function HomeScreen() {
             />}
             {!isCcdLocal()&&snapshot.me?.capabilities.includes('progress')&&<QuickAction
               title="Publicaciones OE2"
-              description="Programación, convocatorias y novedades de demostración."
+              description="Programación, convocatorias y novedades publicadas."
               tint={colors.banuMuted}
               tintSoft={colors.banuSoft}
               icon="doc"

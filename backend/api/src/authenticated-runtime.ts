@@ -44,6 +44,6 @@ export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expected
  const router=input.router??await loadDefaultIntentRouter();if(!router.catalog_valid)throw new AuthError('DEPENDENCY_UNAVAILABLE');
  if(input.unified&&input.evidence_mode!=='ccd_local')throw new AuthError('DEPENDENCY_UNAVAILABLE');
  const resources=new AuthenticatedResources(input.pool,{sql:new PgSqlClient(input.pool),router,document_rag:input.document_rag},input.artifacts,knowledgeMode(input.evidence_mode),
- input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references);
- return createAuthenticatedApiServer({auth,resources,...(input.unified?{oe2_demo:true}:{}),...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
+ input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references,input.oe2_reader);
+ return createAuthenticatedApiServer({auth,resources,...(input.unified||input.oe2_reader?{oe2_demo:true}:{}),...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
 }

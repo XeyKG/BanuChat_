@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppButton } from '@/components/app-button';
 import { ScreenHeader } from '@/components/screen-header';
-import {ContentColumn,DemoNotice,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
+import {ContentColumn,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { useNotifications } from '@/notifications/notification-provider';
 import { colors, radii, spacing, typography, textStyles } from '@/ui/tokens';
 
@@ -16,17 +16,6 @@ const PERMISSION_COPY = {
   unavailable: 'Las notificaciones no están disponibles en esta plataforma o ejecución.',
 } as const;
 
-const REMOTE_COPY = {
-  expo_go:
-    'Push remoto no disponible en Expo Go para este SDK. Requiere un development build y un dispositivo físico.',
-  simulator: 'Push remoto requiere un dispositivo físico; el simulador no acredita recepción.',
-  project_unconfigured:
-    'El development build aún no tiene un projectId/credenciales de push configurados.',
-  backend_unavailable:
-    'El cliente está preparado para recibir, pero REST no tiene un contrato autorizado para registrar, renovar o revocar tokens por cuenta.',
-  platform_unavailable: 'Push remoto no está disponible en esta plataforma.',
-} as const;
-
 export default function NotificationsScreen() {
   const router = useRouter();
   const notifications = useNotifications();
@@ -36,11 +25,11 @@ export default function NotificationsScreen() {
       <ScreenHeader
         onAction={() => router.replace('/home')}
         subtitle="Tus permisos y recordatorios"
-        title="Notificaciones"
+        title="Recordatorios"
       />
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>
         <ContentColumn>
-          <DemoNotice>Recordatorios locales con datos de demostración. La prueba local no es push remoto.</DemoNotice>
+
           <SurfaceCard>
             <Text style={styles.cardTitle}>Permiso y recordatorios</Text>
             <Text accessibilityLiveRegion="polite" style={styles.cardText}>
@@ -63,18 +52,12 @@ export default function NotificationsScreen() {
               </Text>
             )}
             <AppButton tone="banu"
-              label="Activar y sincronizar recordatorios"
+              label="Activar recordatorios"
               loading={notifications.busy}
               loadingLabel="Sincronizando..."
               onPress={() => void notifications.enable()}
             />
-            <AppButton tone="banu"
-              disabled={notifications.permission === 'denied'}
-              label="Enviar prueba local en 5 segundos"
-              loading={notifications.busy}
-              onPress={() => void notifications.sendLocalTest()}
-              variant="secondary"
-            />
+
             <AppButton tone="banu"
               disabled={!notifications.enabled}
               label="Desactivar y cancelar"
@@ -97,19 +80,7 @@ export default function NotificationsScreen() {
             </Text>
           </SurfaceCard>
 
-          <SurfaceCard>
-            <Text style={styles.cardTitle}>Push remoto</Text>
-            <Text style={styles.cardText}>{REMOTE_COPY[notifications.remoteState]}</Text>
-            <Text style={styles.note}>
-              La prueba local no sustituye push remoto. BanuChat no muestra ni persiste tokens en la
-              interfaz y no incluye contraseñas, secretos ni datos personales en el payload.
-            </Text>
-            {notifications.lastReceivedAt !== null && (
-              <Text accessibilityLiveRegion="polite" style={styles.successText}>
-                La aplicación recibió una notificación durante esta apertura.
-              </Text>
-            )}
-          </SurfaceCard>
+
         </ContentColumn>
       </ScrollView>
     </SafeAreaView>
