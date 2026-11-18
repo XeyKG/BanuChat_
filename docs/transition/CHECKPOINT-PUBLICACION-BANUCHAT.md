@@ -1,5 +1,38 @@
 # BanuChat — publicación de demostración
 
+## Release 1.0.2 — cierre visual del 17 de noviembre de 2026
+
+Base: `main` en `9442407`, inicialmente limpio. [Entrega académica consolidada](ENTREGA-FINAL-BANUCHAT.md). No se modificaron arquitectura, contratos REST, autenticación del servidor, RAG, modelos, Supabase ni servicios AWS. Solo se desplegaron las exportaciones del cliente sobre los servicios existentes y se actualizó la APK.
+
+### Cambios y validación efectiva
+
+- `ChatScreen`, `ChatSources`, `WebFrame` y CSS web: eliminación de cabecera y panel documental duplicados en chat web; citas completas disponibles en cada respuesta. Compositor con campo y envío en una fila; instrucciones duplicadas retiradas. Controles conservan mínimos táctiles y texto ampliado. Fuentes multilínea, detalle/localizador conservado y control para contraer al final.
+- `DocumentScreen`: `isCcdKnowledge()` distingue la procedencia; modo sintético muestra «Material ficticio de demostración», modo CCD conserva procedencia y ausencia de aval institucional.
+- `Login`: botón sin condición de campos/formato ni bloqueo por fase unavailable; valida al pulsar. Continúa bloqueado solo mientras la solicitud está en curso para evitar duplicados. La validación no autentica ni modifica contratos. El origen sslip.io conservaba una exportación antigua con botón vacío desactivado: se reemplazó también esa exportación, preservando la anterior.
+- Metadatos Mobile: 1.0.2 / versionCode 3, mismo identificador y certificado.
+
+Pruebas finales: `npm run typecheck` correcto; `npm test` **70/70**; `npm run web:test` **1/1**, incluyendo errores REST y binarios del proxy; `git diff --check` correcto. Revisión independiente visual/código sin bloqueantes; observación inicial sobre captura incorrecta de texto ampliado resuelta con la prueba real del chat. No se repitieron regresiones de backend o nuevas inferencias costosas, porque este cambio no afecta esas implementaciones.
+
+Web real 1366 × 768: misma conversación antes/después, área aproximada de mensajes de 403 a 541 px (+34 %) y pane de 807 a 1071 px (+33 % de ancho). Sin desbordamiento del documento. A 390 × 844 se recorrieron las cinco fuentes y se contrajeron desde abajo. Visor y artefacto completo abiertos, procedencia sintética correcta. Login: ambos campos vacíos, UID inválido, contraseña ausente y credenciales rechazadas muestran sus errores; acceso correcto comprobado. La comprobación HTTPS desde Windows devolvió HTTP 200, TLS verificado y cero redirecciones para `/login` tanto DuckDNS como sslip.io.
+
+Huawei YAL-L21 físico: `adb install -r` correcto, sesión sintética existente conservada; versión instalada 1.0.2/code 3. Se reabrió el turno documental del 17/11 a las 12:06 desde Historial, con cinco fuentes persistidas; se abrió el documento completo con el rótulo corregido. Campo y envío visibles con teclado. A escala de texto 1,5 se recorrió la quinta fuente, se pulsó Contraer fuentes y se confirmó Mostrar 5 fuentes. Se restauró escala original 1,15. Logout, botón activo con campos vacíos/advertencia y nuevo login correcto de `U90000002` comprobados. No había listeners locales en 3000, 8081, 8082, 8085 y 8086 durante la comprobación; el APK usa DuckDNS. No se ensayó lector de pantalla ni se declara accesibilidad integral certificada.
+
+### Artefactos, despliegue y reversión
+
+APK ARM64: **47.054.452 bytes**, SHA-256 `263770f24b17149b73a48b2b37d08167a7faa85480168067e76dea11f3222f90`. `apksigner` verifica el mismo certificado SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c` que 1.0.1; firma local de debug. `aapt` confirma `com.anonymous.banuchat`, versionCode 3, ARM64. Inspección dirigida del ZIP/bundle: URL `https://banuchat.duckdns.org/api/v2` presente, URL antigua de API ausente; no archivos de credenciales/keystores ni marcadores de conexión privada ni contraseñas de fixtures. No equivale a auditoría exhaustiva de dependencias.
+
+En la misma EC2, exportación DuckDNS en `/opt/banuchat/mobile/.expo/release-1.0.2`; bundle `entry-0a1d53778381e8a9ea0bd06d37006f54.js`. Se actualizó la ruta del launcher existente y reinició `banuchat-web-duckdns`, con comprobación HTTP posterior. Archivo previo conservado en `/opt/banuchat/web-launcher.pre-102.jFkVo0` y exportación 1.0.1 intacta. Reversión web canónica: restaurar ese launcher y reiniciar el mismo servicio. No se ejecutó reversión porque retiraría la corrección validada.
+
+Origen sslip.io: exportación separada en `.expo/release-1.0.2-transition`, bundle `entry-e03e2b23fb50d32224c7075548195f54.js`. El servidor 8085 conserva su configuración y `.expo/unified-web` apunta a esa exportación. Directorio previo conservado en `/opt/banuchat/transition.pre-102.3SWRy0/unified-web`; permite revertir el enlace sin reconstruir. No se eliminaron APK ni releases anteriores. Un downgrade Android puede requerir otro procedimiento y no se ensayó.
+
+Archivo de transporte canónico: SHA-256 `592ccd015a23019ab10e723fa3a6c81c96ed6d0cf0cbe776265560cedad4f6c2`. Archivo de transición: `dc67a939734827cceb923f8a8305abdfef593dc36b48127d20f5e5f712a86a65`. Se usaron CloudShell, el bucket privado de transferencia existente y SSM; sin credenciales añadidas al repositorio ni nuevos recursos.
+
+### Evidencia académica y límites
+
+Capturas auténticas antes/después y texto ampliado en [evidence/release-1.0.2](evidence/release-1.0.2/). La entrega final coteja la guía con la transcripción del anteproyecto y la matriz académica vigente: objetivos parcialmente demostrados, métricas históricas insuficientes, estudio SUS no ejecutado y ausencia de aprobación institucional. No se incorporó el PDF privado ni corpus CCD al paquete.
+
+**RAG sigue siendo irregular**: se conservan los éxitos y fallos 1.0.1 siguientes. No se cambia la espera API 150 s / cliente 175 s / proxy 180 s. Dos vCPU y la disponibilidad de AWS Academy siguen siendo límites. No se leyó de nuevo el saldo, no se ensayó otra parada de la instancia y no se declara hosting permanente. La 1.0.1 documenta recuperación real del mismo laboratorio y pruebas previas de aislamiento/revocación/expediente; no se vuelven a presentar como ejecutadas en 1.0.2.
+
 ## Release 1.0.1 — cierre del 17 de noviembre de 2026
 
 [Web principal](https://banuchat.duckdns.org/login) · [Release 1.0.1 publicada](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.1) · [APK ARM64](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.1/BanuChat-demo-1.0.1-arm64.apk).

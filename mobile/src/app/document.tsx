@@ -87,7 +87,7 @@ export default function DocumentScreen() {
       <ScreenHeader
         actionLabel="Volver"
         onAction={() => router.back()}
-        subtitle="Fuente documental CCD"
+        subtitle={isCcdKnowledge() ? 'Fuente documental CCD seleccionada · sin aval institucional' : 'Material ficticio de demostración'}
         title={title}
       />
 

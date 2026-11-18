@@ -190,7 +190,6 @@ export default function ChatScreen() {
   const isContentValid = content.trim().length > 0 && characterCount <= CHARACTER_LIMIT;
   const isConversationLocked =
     conversationState !== 'ready' || sendError === 'conflict' || sendError === 'uncertain' || sendError === 'invalid_response';
-  const latestAnswer=messages.filter((message):message is SentAssistantMessage=>message.role==='assistant').at(-1);
   const showEmptyState = conversationState === 'ready' && messages.length === 0;
 
   async function submitMessage(text?: string) {
@@ -582,6 +581,7 @@ export default function ChatScreen() {
           )}
 
           <View testID="chat-composer-row" style={[styles.composerRow,inputFocused&&styles.composerFocused]}>
+            <View style={styles.composerField}>
             <Text style={styles.composerLabel}>Tu pregunta</Text>
             <View testID="chat-input-shell" style={[styles.inputShell,keyboardVisible&&styles.inputWithKeyboard, inputFocused && styles.inputFocused]}>
               <TextInput
@@ -600,7 +600,7 @@ export default function ChatScreen() {
                 value={content}
               />
             </View>
-            <View style={styles.composerFooter}><Text style={styles.composerInstruction}>{Platform.OS!=='web'?RESPONSE_NOTICE:'Pulsa enviar para preguntar'}</Text>
+            </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Enviar mensaje"
@@ -616,10 +616,10 @@ export default function ChatScreen() {
               <Text aria-hidden style={styles.sendButtonGlyph}>
                 ↑
               </Text>
-            </Pressable></View>
+            </Pressable>
           </View>
 
-          {Platform.OS==='web'&&<Text testID="chat-composer-hint" style={styles.composerHint}>{RESPONSE_NOTICE}</Text>}
+          <Text testID="chat-composer-hint" style={styles.composerHint}>{RESPONSE_NOTICE}</Text>
           {characterCount > CHARACTER_COUNTER_THRESHOLD && (
             <Text
               accessibilityLabel={`${characterCount} de ${CHARACTER_LIMIT} caracteres`}
@@ -632,7 +632,6 @@ export default function ChatScreen() {
           )}
         </View>
       </KeyboardAvoidingView>
-      {Platform.OS==='web'&&<View testID="chat-context" style={styles.context}><ScrollView contentContainerStyle={styles.contextContent}><Text accessibilityRole="header" style={styles.contextTitle}>Detrás de la respuesta</Text><Text style={styles.contextCopy}>Un lugar para consultar las referencias de esta conversación.</Text>{latestAnswer&&latestAnswer.citations.length>0?<ChatSources citations={latestAnswer.citations} context/>:<Text style={styles.contextCaption}>{conversationState==='loading'?'Cargando conversación…':'Las fuentes aparecerán aquí cuando una respuesta incluya referencias.'}</Text>}<Text style={styles.contextCaption}>Consulta la procedencia y el alcance de cada fuente. La disponibilidad de un documento no implica aval institucional.</Text></ScrollView></View>}
       </View>
       <NativeCoreNavigation active="chat" onHome={returnHome} onChat={()=>{}} busy={isSending}/>
     </SafeAreaView>
@@ -644,7 +643,7 @@ const styles = StyleSheet.create({
   nativeToolbar:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:spacing.sm},nativeToolbarTitle:{flex:1,minWidth:0,fontSize:17,lineHeight:24,fontWeight:'600',color:colors.banuInk},
   chatLayout:{width:'100%',flex:1,minHeight:0,flexDirection:'row',gap:spacing.lg},
   keyboardView:{flex:1,width:Platform.OS==='web'?undefined:'100%',minWidth:0,minHeight:0,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,overflow:'hidden',...shadows.banuPanel},
-  newChatButton:{minHeight:48,paddingHorizontal:spacing.sm},context:{display:'none',width:244,alignSelf:'flex-start',maxHeight:'100%',borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,...shadows.banuPanel},contextContent:{padding:spacing.lg,gap:spacing.md},contextTitle:{fontSize:16,lineHeight:24,fontWeight:'600',color:colors.banuInk},contextCopy:{fontSize:13,lineHeight:22,color:colors.banuMuted},contextCaption:{fontSize:12,lineHeight:20,color:colors.banuMuted,backgroundColor:colors.banuCanvas,padding:spacing.sm,borderRadius:radii.sm},
+  newChatButton:{minHeight:48,paddingHorizontal:spacing.sm},
   invalidContainer: {
     flex: 1,
     width: '100%',
@@ -782,8 +781,9 @@ const styles = StyleSheet.create({
     borderTopColor: colors.banuBorder,
     backgroundColor: colors.surface,
   },
-  composerRow:{width:'100%',maxWidth:layout.maxReadingWidth,alignSelf:'center',gap:spacing.xxs,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.md,padding:spacing.sm,backgroundColor:colors.surface,...shadows.banuInset},
-  composerFocused:{borderColor:colors.banuMagenta},composerLabel:{fontSize:12,lineHeight:18,fontWeight:'600',color:colors.banuMuted},composerFooter:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',gap:spacing.xs},composerInstruction:{flex:1,fontSize:11,lineHeight:17,color:colors.banuMuted},
+  composerRow:{width:'100%',maxWidth:layout.maxReadingWidth,alignSelf:'center',flexDirection:'row',alignItems:'flex-end',gap:spacing.sm,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.md,padding:spacing.sm,backgroundColor:colors.surface,...shadows.banuInset},
+  composerField:{flex:1,minWidth:0,gap:spacing.xxs},
+  composerFocused:{borderColor:colors.banuMagenta},composerLabel:{fontSize:12,lineHeight:18,fontWeight:'600',color:colors.banuMuted},
   inputShell:{width:'100%',minWidth:0,minHeight:48,maxHeight:120,justifyContent:'center'},
   inputWithKeyboard:{maxHeight:72},
   inputFocused: { borderColor: colors.banuMagenta },
@@ -798,8 +798,9 @@ const styles = StyleSheet.create({
   },
   inputLocked: { color: colors.banuMuted },
   sendButton: {
-    width: 50,
-    height: 50,
+    minWidth: 50,
+    minHeight: 50,
+    padding: spacing.xs,
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,5 +1,7 @@
 # BanuChat — guía de demostración 1.0.1
 
+Guía histórica de la 1.0.1. La entrega consolidada, las correcciones visuales y el cotejo actualizado con los objetivos originales están en [Entrega final 1.0.2](ENTREGA-FINAL-BANUCHAT.md). Las limitaciones y pruebas siguientes conservan su fecha y alcance.
+
 ## Acceso
 
 [Abrir BanuChat](https://banuchat.duckdns.org/login).

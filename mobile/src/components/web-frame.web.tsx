@@ -110,7 +110,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
         <Text style={[styles.copy,styles.footerCopy]}>Demostración local · cuenta ficticia</Text>
         <Text style={[styles.copy,styles.footerCopy]}>Al recargar se cierra el acceso en esta pestaña. Usa Cerrar sesión para revocarlo.</Text></View>}
     </View>
-    <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{desktop&&<View testID="core-topline" style={styles.topline}><Text style={styles.copy}>Mi espacio　/　{pathname==='/chat'?'Conversar con Banu':links.find(item=>item.path===pathname)?.label??'Documento'}</Text><Text style={styles.localPill}>Demostración local</Text></View>}{children}</View>
+    <View nativeID="web-main" role="main" tabIndex={-1} style={styles.main}>{desktop&&pathname!=='/chat'&&<View testID="core-topline" style={styles.topline}><Text style={styles.copy}>Mi espacio　/　{links.find(item=>item.path===pathname)?.label??'Documento'}</Text><Text style={styles.localPill}>Demostración local</Text></View>}{children}</View>
     {!desktop&&<BanuBottomNav active={pathname==='/home'?'home':pathname==='/chat'?'chat':'other'} onHome={()=>go('/home')} onChat={()=>{if(pathname==='/chat')focusContent();else if(lastChat)router.navigate({pathname:'/chat',params:{conversation_id:lastChat}});else void newChat();}} onHistory={()=>go('/history')} onMenu={toggleMenu} menuExpanded={menu} menuControls="web-navigation" busy={starting} canChat={can('chat')} canHistory={can('history')}/>}
   </View>;
 }

@@ -43,7 +43,7 @@ function readableDocumentLocator(locator: string): string | null {
 
 function sourceDetail(citation: Citation): string | null {
   return citation.source_kind === 'document'
-    ? readableDocumentLocator(citation.locator)
+    ? readableDocumentLocator(citation.locator) ?? citation.locator
     : null;
 }
 
@@ -60,14 +60,14 @@ function hasOpenableDocument(citation: Citation): citation is Citation & {
   );
 }
 
-export function ChatSources({ citations,context=false }: { citations: Citation[];context?:boolean }) {
+export function ChatSources({ citations }: { citations: Citation[] }) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const sourceCount = citations.length;
 
   return (
     <View style={styles.container}>
-      {!context&&<Pressable
+      <Pressable
         accessibilityLabel={`${isExpanded ? 'Ocultar' : 'Mostrar'} ${sourceCount} fuentes`}
         accessibilityRole="button"
         accessibilityState={{ expanded: isExpanded }}
@@ -83,9 +83,9 @@ export function ChatSources({ citations,context=false }: { citations: Citation[]
         <Text aria-hidden style={styles.toggleSymbol}>
           {isExpanded ? '−' : '+'}
         </Text>
-      </Pressable>}
+      </Pressable>
 
-      {(context||isExpanded) && (
+      {isExpanded && (
         <FadeIn><View accessibilityLabel={`${sourceCount} fuentes de la respuesta`} testID="chat-sources" style={styles.list}>
           {citations.map((citation) => {
             const detail = sourceDetail(citation);
@@ -123,6 +123,15 @@ export function ChatSources({ citations,context=false }: { citations: Citation[]
               </View>
             );
           })}
+          <Pressable
+            accessibilityLabel={`Ocultar ${sourceCount} fuentes`}
+            accessibilityRole="button"
+            accessibilityState={{expanded:true}}
+            aria-expanded
+            onPress={() => setIsExpanded(false)}
+            style={({pressed}) => [styles.toggle, pressed && styles.pressed]}>
+            <Text style={styles.toggleText}>Contraer fuentes</Text>
+          </Pressable>
         </View></FadeIn>
       )}
     </View>
@@ -156,15 +165,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.sm,
-    padding: spacing.sm,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.banuBorder,
     backgroundColor: colors.banuCanvas,
   },
   sourceIndexBadge: {
-    width: 22,
-    height: 22,
+    minWidth: 22,
+    minHeight: 22,
+    padding: 2,
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
@@ -190,7 +201,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     justifyContent: 'center',
     marginTop: spacing.xs,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     borderRadius: radii.sm,
     borderWidth: 1,
     borderColor: colors.banuMagenta,

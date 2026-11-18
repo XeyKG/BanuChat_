@@ -21,7 +21,7 @@ export default function Login(){
  if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
  const unavailable=snapshot.phase==='unavailable';
  async function signIn(){
-  if(busy||unavailable)return;
+  if(busy)return;
   setError(false);
   const username=uid.trim().toUpperCase();
   if(!username||!password){
@@ -33,6 +33,7 @@ export default function Login(){
    return;
   }
   if([...password].length>128){setValidation('La contraseña no puede superar los 128 caracteres.');return;}
+  if(unavailable){setValidation('No se pudo preparar la sesión. Vuelve a abrir la aplicación e inténtalo de nuevo.');return;}
   setValidation('');
   setBusy(true);
   try{await client.login(username,password);setPassword('');router.replace('/home');}
@@ -53,11 +54,11 @@ export default function Login(){
   {snapshot.sessionExpired===true&&<Text accessibilityRole="alert" style={styles.error}>Tu sesión expiró. Vuelve a iniciar sesión para consultar tus datos.</Text>}
   <View style={styles.field}><Text nativeID="login-uid-label" style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" aria-labelledby="login-uid-label" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" placeholderTextColor={colors.muted} style={[styles.input,focused==='uid'&&styles.inputFocused]} onFocus={()=>setFocused('uid')} onBlur={()=>setFocused(null)} returnKeyType="next" submitBehavior="submit" onSubmitEditing={()=>passwordRef.current?.focus()}/></View>
   <View style={styles.field}><Text nativeID="login-password-label" style={styles.label}>Contraseña</Text><TextInput ref={passwordRef} accessibilityLabel="Contraseña" aria-labelledby="login-password-label" value={password} onChangeText={setPassword} secureTextEntry autoCapitalize="none" autoCorrect={false} autoComplete="off" editable={!busy&&!unavailable} style={[styles.input,focused==='password'&&styles.inputFocused]} onFocus={()=>setFocused('password')} onBlur={()=>setFocused(null)} returnKeyType="go" onSubmitEditing={()=>void signIn()}/></View>
-  {unavailable&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'?'La sesión web no está disponible. Abre el origen local autorizado.':'El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.'}</Text>}
+  {unavailable&&<Text accessibilityRole="alert" style={styles.error}>{Platform.OS==='web'?'No se pudo preparar la sesión web. Recarga la página e inténtalo de nuevo.':'El almacenamiento seguro nativo no está disponible. Usa un dispositivo Android o iOS compatible.'}</Text>}
   {validation!==''&&<Text accessibilityRole="alert" style={styles.error}>{validation}</Text>}
   {error&&<Text accessibilityRole="alert" style={styles.error}>{errorKind==='credentials'?'Usuario o contraseña inválidos.':errorKind==='unavailable'?'El servicio no está disponible. Inténtalo más tarde.':'No se pudo iniciar sesión. Vuelve a intentarlo.'}</Text>}
   {snapshot.logoutRemoteConfirmed===false&&<Text accessibilityRole="alert" style={styles.error}>La sesión se cerró en este dispositivo. No se pudo confirmar la revocación remota.</Text>}
-  <AppButton tone="banu" label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} loadingLabel="Iniciando sesión…" disabled={unavailable}/>
+  <AppButton tone="banu" label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} loadingLabel="Iniciando sesión…"/>
   <View style={styles.notice}><Text style={styles.noticeTitle}>Demostración local · cuenta ficticia</Text><Text style={styles.noticeCopy}>{Platform.OS==='web'?'La sesión solo vive en esta pestaña; al recargar debes iniciar sesión de nuevo.':'Usa la cuenta de demostración asignada. No corresponde a una identidad institucional.'}</Text></View>
  </View></View></View></ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
