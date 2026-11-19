@@ -1,5 +1,12 @@
 # BanuChat — publicación de demostración
 
+## Pertinencia y cobertura RAG — corrección del backend (18/11/2026)
+
+Corregida la lógica general de intención, selección de pasajes, comparación y respuestas parciales. No hay respuestas memorizadas para el cuestionario. API desplegada en la EC2 existente con respaldo y guardas de SHA; web y APK 1.0.4 usan esa API sin actualización del cliente. Corpus y embeddings documentales conservados, sin nuevas cargas o migraciones.
+
+Typecheck correcto; 192/192 tests CCD y 72/72 de contratos/evidencia. La serie pública de 18 consultas y seis variantes completó HTTP 201 en los 24 casos, con Historial y citas iguales, hashes de 22 documentos verificados, aislamiento 404 y revocación de sesiones 401. Tiempos 1.30–110.28 s. Estos resultados acreditan ejecución e integridad, no 24 respuestas semánticamente aprobadas. Persisten respuestas parciales, lagunas del corpus publicado y la limitación de dos vCPU/AWS Academy; no se declara RAG estable. [Detalle, metodología y límites](CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md).
+
+
 ## Calendario, Banu al Día y OE2 — 1.0.4 (18/11/2026)
 
 Web canónica actualizada y verificada por HTTPS. OE2 habilitado con autorización expresa mediante exportación sintética aprobada de solo lectura: dos programaciones, cuatro convocatorias/novedades, comparación con una modificación y cinco registros sin cambios. No matrícula ni integración institucional. Calendario mensual con agenda por fecha, noticias bajo Banu al Día, comparación dentro de Publicaciones OE2 y Recordatorios locales.

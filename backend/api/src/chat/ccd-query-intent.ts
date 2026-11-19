@@ -1,7 +1,7 @@
 import type {CcdKnowledgeEvidenceMetadata} from './ccd-knowledge.js';
 import type {RetrievedDocumentChunk} from '../application/document-retrieval.js';
 
-const normalize=(s:string)=>s.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\bdijital(es)?\b/gu,'digital$1').replace(/\bprueva(s)?\b/gu,'prueba$1');
+const normalize=(s:string)=>s.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim().replace(/\bdijital(es)?\b/gu,'digital$1').replace(/\bprueva(s)?\b/gu,'prueba$1').replace(/\brepit(\p{L}*)/gu,'repet$1');
 type Metadata=ReadonlyMap<string,CcdKnowledgeEvidenceMetadata>;
 /** A request about a source's warrant is different from asking for live data.
  * Mixed questions still take the availability guard. */
@@ -29,7 +29,7 @@ export function resolveCcdQueryIntent(query:string,metadata:Metadata):CcdQueryIn
   let courses=names.filter(c=>text.includes(normalize(c))||text.includes(normalize(c).replace(/^habilidades en /u,'')));
   const experience=/\b(?:experiencia de aprendizaje|evaluacion docente|evaluacion de experiencia)\b/u.test(text);
   const diagnostic=!experience&&/\b(?:diagnostic\p{L}*|pruebas?)\b/u.test(text);
-  const academicWords=/\b(?:herramientas?|temas?|temarios?|contenidos?|competencias?|aprend\p{L}*|practicas?|syllabus|materia|organizacion|productividad|enfoque|proposito|identidad|privacidad|criterios|explica|describe|compara\p{L}*)\b/u.test(text);
+  const academicWords=/\b(?:herramientas?|temas?|temarios?|contenidos?|competencias?|aprend\p{L}*|estudi\p{L}*|abord\p{L}*|ensen\p{L}*|trat\p{L}*|formul\p{L}*|propon\p{L}*|practicas?|syllabus|materia|organizacion|productividad|enfoque|proposito|identidad|privacidad|criterios|explica|describe|compara\p{L}*)\b/u.test(text);
   const administrative=/\b(?:matricul\p{L}*|inscrib\p{L}*|inscripcion|precio|cuesta|costo|tarifa|creditos|horas|horarios?|cupos?|oferta|profesores?|docentes?)\b/u.test(text);
   if(!courses.length&&academicWords&&!administrative&&!diagnostic){
     // Only an unambiguous acronym from an adopted course name is an alias.
@@ -37,15 +37,19 @@ export function resolveCcdQueryIntent(query:string,metadata:Metadata):CcdQueryIn
     if(aliases.length===1)courses=aliases;
   }
   const periods=[...query.matchAll(/\b(?:19|20)\d{2}(?:(?:10|60))?\b/gu)].map(m=>m[0]);
-  const historical=/\b(?:histor\p{L}*|antigu\p{L}*|transicion|convocatoria|temario de|lineamientos)\b/u.test(text)||(/\b(?:describ\p{L}*|autorizab\p{L}*)\b/u.test(text)&&periods.length>0);
+  const historical=/\b(?:histor\p{L}*|antigu\p{L}*|transicion|convocatoria|temario de|lineamientos)\b/u.test(text)||/\bingres\p{L}*\b.{0,25}\bantes\b/u.test(text)||(/\b(?:aviso|jornada|oportunidad)\b/u.test(text)&&/\bcontinuos\b/u.test(text)&&periods.length>0)||(/\b(?:describ\p{L}*|autorizab\p{L}*)\b/u.test(text)&&periods.length>0);
   const subject=experience?'procedure':ccdDocumentaryQuery(query)==='historical_table'?'operational':academicWords&&!administrative&&!diagnostic&&(courses.length>0||/\bherramientas?\b/u.test(text))?'academic':'operational';
   const aspects:string[]=[];
   if(experience){
     if(/\b(?:dimensiones|preguntas|instrumento|cantidad|cuantas)\b/u.test(text))aspects.push('procedure_dimensions');
+    else if(/\b(?:aplica|aplicable|alcance|modalidad\p{L}*|presencial\p{L}*|virtual\p{L}*)\b/u.test(text))aspects.push('procedure_scope');
   }else if(subject!=='academic'){
     const entities=[/\bruta\b/u,/\bpilar|\bambito/u,/\bopcion\p{L}* diagnost/u,/\bcurso\b/u,/\boferta\b/u].filter(p=>p.test(text)).length;
     const contrast=/\b(?:diferenc\p{L}*|distint\p{L}*|distinc\p{L}*|compar\p{L}*)\b/u.test(text);
-    if(contrast&&entities>=3)aspects.push('entity_structure');
+    const failure=/\b(?:reprob\p{L}*|reprueb\p{L}*|pierde|perder|perdio)\b/u.test(text);
+    const course=/\b(?:cursos?|asignaturas?|materias?)\b/u.test(text);
+    if(failure&&diagnostic&&course&&/\b(?:misma|mismo|diferenc\p{L}*|consecuencia|compar\p{L}*)\b/u.test(text))aspects.push('completion','course_failure');
+    else if(contrast&&entities>=3)aspects.push('entity_structure');
     else if(/\b(?:responsabil\p{L}*|funcion\p{L}*|papel|quien)\b/u.test(text)&&/\bmatricul\p{L}*|\binscripcion\b/u.test(text)&&/\b(?:estudiante|alumno|persona|oficina|ccd)\b/u.test(text)){
       // A contact/platform comparison has its own independent aspects below.
       if(!/\bcosmos\b/u.test(text))aspects.push('orientation','enrollment');
@@ -56,7 +60,7 @@ export function resolveCcdQueryIntent(query:string,metadata:Metadata):CcdQueryIn
       aspects.push('completion');
       if(contrast&&/\b(?:transicion|cursos? antiguos?|informatica)\b/u.test(text))aspects.push('transition');
     }
-    if(!aspects.length&&diagnostic&&historical&&/\b(?:convocatoria|ultima oportunidad|continuos|autorizaba)\b/u.test(text)&&!/\b(?:ahora|hoy|actual\p{L}*|precio|cuesta|tarifa)\b/u.test(text))aspects.push('history');
+    if(!aspects.length&&diagnostic&&historical&&/\b(?:convocatoria|ultima oportunidad|continuos|autorizaba|ingres\p{L}* antes)\b/u.test(text)&&!/\b(?:ahora|hoy|actual\p{L}*|precio|cuesta|tarifa)\b/u.test(text))aspects.push('history');
     if(/\bcosmos\b/u.test(text)&&/\b(?:contacto|canal|consultas?|comunicar\p{L}*)\b/u.test(text)&&/\b(?:inscripcion|inscrib\p{L}*|matricul\p{L}*|pago|pagar)\b/u.test(text)){
       aspects.splice(0,aspects.length,'contact');
       if(/\b(?:inscripcion|inscrib\p{L}*|matricul\p{L}*)\b/u.test(text))aspects.push('cosmos_enrollment');
@@ -77,13 +81,19 @@ export function requestedAcademicRole(query:string,courses:readonly string[]):st
   if(/\b(?:ley|decreto|norma|articulo)\b/u.test(text)&&/\b(?:nombre|numero|exact\p{L}*|cual|dime)\b/u.test(text))return 'academic_contents';
   if(/\b(?:contenidos?|temarios?|temas?|clases|tipos)\b/u.test(text))return 'academic_contents';
   if(/\b(?:competencias?|aprendizajes?)\b/u.test(text))return 'academic_competencies';
+  if(/\b(?:syllabus|practicas?|incluye|incluyen|estudi\p{L}*|abord\p{L}*|ensen\p{L}*|trat\p{L}*|formul\p{L}*|propon\p{L}*)\b/u.test(text))return 'academic_contents';
   return undefined;
 }
 
-const generic=new Set('como cual cuales que el la los las un una unos unas de del al en y o se su sus por para con entre sobre respecto segun hay son tiene tienen hace haceis hacer es uso usar curso cursos materia materias syllabus temario temarios tema temas contenido contenidos digital digitales estudia estudiar describe explica general especifico diferencia diferencias diferencian diferente distintos complementan considera consideran incluye incluyen cubre cubren trata tratamiento relacion relaciona plantea aparecen aparece tipos clases elementos funcion funciones practicas practico criterios criterio limites limite'.split(' '));
-function requestedTerms(query:string,courses:readonly string[]):string[]{
+const generic=new Set('como cual cuales que el la los las un una unos unas de del al en y o se su sus por para con entre sobre respecto segun hay son tiene tienen hace haceis hacer es uso usar curso cursos materia materias syllabus temario temarios tema temas contenido contenidos digital digitales estudia estudiar describe explica general especifico diferencia diferencias diferencian diferente distintos complementan considera consideran incluye incluyen cubre cubren trata tratamiento relacion relaciona plantea aparecen aparece tipos clases elementos funcion funciones practicas practico criterios criterio limites limite concepto conceptos aborda abordan formulacion incluyen ensena ensenan'.split(' '));
+export function requestedTerms(query:string,courses:readonly string[]):string[]{
   let text=normalize(query);for(const course of courses)text=text.split(normalize(course)).join(' ');
   return [...new Set(text.split(/\s+/u).filter(w=>w.length>=4&&!generic.has(w)&&!/^compar\p{L}*$/u.test(w)&&!/^\d+$/u.test(w)).map(w=>w.slice(0,5)))];
+}
+/** Rank only already retrieved, entity-scoped material. Course names alone are
+ * not topical support and unknown attributes must not acquire that support. */
+export function academicEvidenceScore(text:string,query:string,courses:readonly string[]):number {
+  return requestedTerms(query,courses).filter(term=>materialMatches(text,term)).length;
 }
 function materialMatches(text:string,term:string):boolean {
   const normalized=normalize(text);

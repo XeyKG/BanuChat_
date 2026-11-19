@@ -55,3 +55,47 @@ test('solicitar clases o temas conserva una ficha de contenidos dentro del presu
 test('periodos incompatibles o una edición sin fecha no se combinan como comparación compatible',async()=>{for(const soundPeriod of ['2032','edición sin fecha']){const f=fixture({'scenic-privacy':{period:'2031'},'sound-privacy':{period:soundPeriod}}),a=await f.ask('¿Cómo se compara la privacidad en Diseño Escénico y Diseño Sonoro?');assert.equal(a.insufficient_evidence,true);assert.deepEqual(a.citations,[]);}const dated=fixture({'scenic-privacy':{period:'2031'},'sound-privacy':{period:'2031'}}),a=await dated.ask('¿Cómo se compara la privacidad en Diseño Escénico y Diseño Sonoro en 2031?');assert.equal(a.insufficient_evidence,false);});
 test('un periodo histórico solicitado sin fuente compatible se abstiene sin reutilizar otra edición',async()=>{const f=fixture({'past-attempt':{period:'2032'}}),a=await f.ask('¿La convocatoria diagnóstica descrita en 2031 autorizaba repetir de forma indefinida?');assert.equal(a.insufficient_evidence,true);assert.deepEqual(a.citations,[]);});
 test('dos atributos compartidos requieren soporte material para ambos en cada entidad dentro del mismo presupuesto',async()=>{const f=fixture(),retrieve=f.deps.retrieve_scoped_chunks!,extras:RetrievedDocumentChunk[]=[];for(const [i,base]of ['scenic-privacy','sound-privacy'].entries()){const m=f.deps.knowledge.metadata.get(base)!,key=base+'-security';f.deps.knowledge.metadata=new Map(f.deps.knowledge.metadata).set(key,{...m,claim_id:key,presentation_units:[{key:'security',aspects:['academic_competencies'],text:'La seguridad se trata mediante controles de acceso.'}]});const rows=await retrieve(f.deps.sql,{release_id:release,query_embedding:Array<number>(1024).fill(.1),top_k:20},[base]);extras.push({...rows[0]!,document_key:key,chunk_id:`77777777-7777-4777-8777-${String(i).padStart(12,'0')}`,content:'# Referencia\n\nLa seguridad se trata mediante controles de acceso.'});}f.deps.retrieve_scoped_chunks=async(sql,input,keys)=>[...await retrieve(sql,input,keys),...extras.filter(c=>keys.includes(c.document_key))];const a=await f.ask('¿Cómo se comparan privacidad y seguridad en Diseño Escénico y Diseño Sonoro?');assert.equal(a.insufficient_evidence,false);assert.equal(a.selected_claim_ids?.length,4);assert.ok(a.supporting_claim_ids?.includes('scenic-privacy-security'));assert.ok(a.supporting_claim_ids?.includes('sound-privacy-security'));});
+
+test('una palabra compartida no sustituye la pregunta por modalidades de cursos',async()=>{
+ const f=fixture();for(const q of ['¿Qué duración en semanas tienen los cursos regulares e intensivos?','¿La evaluación de experiencia de aprendizaje aplica a modalidad virtual?']){const a=await f.ask(q);assert.equal(a.insufficient_evidence,true);assert.doesNotMatch(a.content,/presencial, virtual o remoto/u);}
+});
+test('los identificadores de oferta futura se rechazan antes de recuperar contenido curricular',async()=>{
+ const f=fixture(),a=await f.ask('¿Qué código de materia exacto debo matricular para IA de Taller el próximo semestre?');assert.equal(a.insufficient_evidence,true);assert.equal(f.calls.length,0);assert.match(a.content,/programación/u);
+});
+test('la consecuencia de una asignatura no hereda la regla diagnóstica',async()=>{
+ const f=fixture(),a=await f.ask('Si repruebo una asignatura, ¿la consecuencia es la misma que cuando repruebo una prueba diagnóstica?');assert.equal(a.insufficient_evidence,true);assert.ok(a.supporting_claim_ids?.includes('pending'));assert.match(a.content,/no determina ese resultado/u);assert.doesNotMatch(a.content,/varias opciones/u);
+});
+test('las palabras interrogativas no se exigen como atributos curriculares de cada curso',async()=>{
+ const f=fixture(),a=await f.ask('¿En qué se diferencia el concepto de privacidad en Diseño Escénico respecto a privacidad en Diseño Sonoro?');assert.equal(a.insufficient_evidence,false);assert.deepEqual(new Set(a.supporting_claim_ids),new Set(['scenic-privacy','sound-privacy']));
+});
+test('una oportunidad de ingreso histórica no se convierte en derecho actual por mencionar repetición',async()=>{
+ const f=fixture(),a=await f.ask('¿Los estudiantes ingresados antes de 2031 tienen derecho indefinido a repetir la prueba en 2040?');assert.deepEqual(a.supporting_claim_ids,['past-attempt']);assert.doesNotMatch(a.content,/esquema ficticio de 2040/u);
+});
+
+test('la relevancia temática conserva un detalle recuperado aunque tres vecinos anteriores tengan el mismo rol',async()=>{
+ const f=fixture(),retrieve=f.deps.retrieve_scoped_chunks!,base=f.deps.knowledge.metadata.get('ai-tools')!;
+ const additions=Array.from({length:3},(_,i)=>({key:'general-'+i,text:'El curso describe historia general de herramientas.'}));
+ const extended=new Map(f.deps.knowledge.metadata);f.deps.knowledge.metadata=extended;for(const d of additions)extended.set(d.key,{...base,claim_id:d.key,presentation_units:[{key:'fact',aspects:['academic_contents'],text:d.text}]});
+ f.deps.retrieve_scoped_chunks=async(sql,input,keys)=>{const rows=await retrieve(sql,input,keys),source=rows.find(c=>c.document_key==='ai-tools')!;return [...additions.map((d,i)=>({...source,document_key:d.key,chunk_id:`88888888-8888-4888-8888-${String(i).padStart(12,'0')}`,content:'# Referencia sintética\n\n'+d.text})),...rows];};
+ await f.ask('¿Qué herramientas de texto y figura estudia IA de Taller?');assert.match(f.prompts[0]!,/texto y figura/u);assert.ok(f.calls.every(c=>c.top_k===20));
+});
+test('dos fuentes con una etiqueta amplia conservan el pasaje pertinente, no el primero',async()=>{
+ const f=fixture(),retrieve=f.deps.retrieve_scoped_chunks!,base=f.deps.knowledge.metadata.get('past-attempt')!;
+ f.deps.knowledge.metadata=new Map(f.deps.knowledge.metadata).set('unrelated-history',{...base,claim_id:'unrelated-history',presentation_units:[{key:'fact',aspects:['history'],text:'Un aviso histórico enumera las plataformas del campus.'}]});
+ f.deps.retrieve_scoped_chunks=async(sql,input,keys)=>{const rows=await retrieve(sql,input,keys),source=rows.find(c=>c.document_key==='past-attempt');return source?[{...source,document_key:'unrelated-history',content:'# Aviso\n\nUn aviso histórico enumera las plataformas del campus.'},...rows]:rows;};
+ const a=await f.ask('¿La convocatoria diagnóstica histórica de 2031 concede un derecho indefinido?');assert.deepEqual(a.supporting_claim_ids,['past-attempt']);assert.doesNotMatch(a.content,/plataformas/u);
+});
+test('la abstención del modelo conserva hechos curriculares como respuesta parcial, no confirma la premisa',async()=>{
+ const f=fixture(),original=f.deps.generator_client;
+ f.deps.generator_client={async generate(input,config){return {...await original.generate(input,config),content:'EVIDENCIA_INSUFICIENTE'};}};
+ const a=await f.ask('¿Qué contenidos incluye IA de Taller?');assert.equal(a.insufficient_evidence,true);assert.match(a.content,/texto y figura/u);assert.match(a.content,/No encuentro respaldo suficiente para confirmar/u);assert.ok(a.citations.length);assert.deepEqual(a.unanswered_aspects,['academic_specific_request']);
+});
+test('un fallo de generación no se oculta con una respuesta extraída',async()=>{
+ const f=fixture();f.deps.generator_client={async generate(){throw Error('generator_unavailable');}};await assert.rejects(f.ask('¿Qué contenidos incluye IA de Taller?'),/generator_unavailable/u);
+});
+test('la asignación de docente no se confunde con organización curricular ni con semestres de matrícula',async()=>{
+ const f=fixture(),a=await f.ask('¿Qué docente me asignarán a IA de Taller el siguiente semestre?');assert.equal(a.insufficient_evidence,true);assert.deepEqual(a.citations,[]);assert.equal(f.calls.length,0);assert.doesNotMatch(a.content,/solicitante registra/u);
+});
+test('las formas irregulares de repetir conservan el aviso histórico y sus límites',async()=>{
+ const f=fixture(),a=await f.ask('¿El aviso de 2031 permite que los continuos repitan indefinidamente el diagnóstico?');assert.deepEqual(a.supporting_claim_ids,['past-attempt']);assert.match(a.content,/histórica limitada/u);assert.doesNotMatch(a.content,/contiene varias opciones/u);
+});

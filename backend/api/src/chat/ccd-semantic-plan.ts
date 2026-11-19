@@ -17,7 +17,7 @@ export function planCcdEvidence(query:string,subjectQuery:string,courses:readonl
   const diagnostic=/\b(?:diagnostic\p{L}*|pruebas?|instrumentos?)\b/u.test(subject);
   const enrollment=/\b(?:inscri\p{L}*|matricul\p{L}*|adicion\p{L}*|cancel\p{L}*)\b/u.test(text);
   const process=/\b(?:plataformas?|sistemas?|portal\p{L}*|procedimiento|pasos?|tramite|como|donde)\b/u.test(text);
-  const duration=/\b(?:dura\p{L}*|tiempo|horas|intensidad)\b/u.test(text);
+  const duration=/\b(?:dura\p{L}*|tiempo|horas|semanas?|semanal\p{L}*|intensidad)\b/u.test(text);
   const fees=/\b(?:cuest\p{L}*|cost\p{L}*|precio|tarif\p{L}*|valor)\b/u.test(text);
   const facets:CcdEvidenceFacet[]=[];
   const add=(aspect:string,label:string,extra:Partial<CcdEvidenceFacet>={})=>{if(!facets.some(f=>f.aspect===aspect))facets.push({aspect,label,...extra});};
@@ -32,8 +32,10 @@ export function planCcdEvidence(query:string,subjectQuery:string,courses:readonl
   }else if(diagnostic&&duration){
     if(/\b(?:proposito|finalidad|objetivo|reconocimiento|para que|que funcion|que utilidad)\b/u.test(text))add('purpose','el propósito de la prueba');
     add('diagnostic_duration','la duración de la prueba diagnóstica');
-  }else if(!diagnostic&&duration&&fees&&(/\b(?:cursos?|asignaturas?|materias?)\b/u.test(subject)||courses.length>0)){
-    add('course_fee','la tarifa del curso');add(courses.length?'hours':'course_intensity','la intensidad y duración del curso');
+  }else if(!diagnostic&&duration&&(/\b(?:cursos?|asignaturas?|materias?|regular\p{L}*|intensiv\p{L}*)\b/u.test(subject)||courses.length>0)){
+    if(fees)add('course_fee','la tarifa del curso');
+    add(courses.length?'hours':'course_intensity','la intensidad del curso');
+    if(/\b(?:semanas?|semanal\p{L}*|regular\p{L}*|intensiv\p{L}*)\b/u.test(text))add('course_schedule_intensity','las semanas y horas semanales de cada formato');
   }else if(!diagnostic&&/\b(?:cuantos|cantidad|total|numero)\b/u.test(text)&&/\b(?:cursos?|materias?|asignaturas?)\b/u.test(text)&&/\b(?:ruta|pilares?|pregrado)\b/u.test(subject)){
     courseCount=true;add('requirement','los pilares que deben completarse');add('completion','los mecanismos para completar cada pilar');
     if(/\bcreditos\b/u.test(text)){add('professional_credits','el aporte de créditos al plan');add('credits','la distinción de créditos operativos');}
@@ -71,7 +73,7 @@ export function ccdCapabilityBoundary(query:string):string|null {
   if(/\b(?:doc|documento|archivo)[\s-]*(?:numero\s+)?\d+\b|\b(?:kc|md|op|can)[ -]\d+\b/iu.test(query)||/\.(?:docx?|pdf|pptx?|xlsx?|md|txt)\b/iu.test(query)||/[A-Z]:[\\/]|documents[\\/]artifacts[\\/]/iu.test(query)||/\b(?:documento|archivo)\s+(?:[«“"]|llamado\b|titulado\b|denominado\b)/iu.test(query))
     return 'No puedo identificar archivos internos por su nombre, código o ruta. Pregúntame por el tema o el procedimiento que necesitas conocer.';
   const privateRecords=/\b(?:mis? (?:notas|calificaciones|promedio|pga|expedientes?)|expedientes? personales?|mi historial academico)\b/u.test(text);
-  const individualTeacher=/\b(?:profesor|docente)\b/u.test(text)&&/\b(?:mi grupo|mi profesor|mi docente|asignado para mi|asignado a mi)\b/u.test(text);
+  const individualTeacher=/\b(?:profesor|docente)\b/u.test(text)&&/\b(?:mi grupo|mi profesor|mi docente|asign\p{L}*|correo personal|horario de atencion)\b/u.test(text);
   if(privateRecords||individualTeacher)return 'No tengo acceso a expedientes personales, calificaciones o promedios de Banner ni a la asignación individual de docentes o grupos. El progreso de demostración de BanuChat usa datos ficticios.';
   const benefit=/\b(?:exenci\p{L}*|exoner\p{L}*|descuent\p{L}*|gratuidad|gratis|gratuito|no (?:tener que )?pagar)\b/u.test(text);
   const authority=/\b(?:autorizame|autoriza|aplicame|aplica|concedeme|concede|otorgame|otorga|apruebame|aprueba|eximeme|exime|exonerame|exonera|hazme|dame)\b/u.test(text)||/\b(?:puedes|podrias|quiero|necesito)\b.{0,40}\b(?:autorizar|aplicar|conceder|otorgar|aprobar)\b/u.test(text);
