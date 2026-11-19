@@ -1,4 +1,22 @@
-# BanuChat Mobile
+# BanuChat — cliente Android y web
+
+Corte vigente: **18/11/2026**, cliente **1.0.4**, Android versionCode 5, paquete `com.anonymous.banuchat`. Expo SDK 57 y TypeScript; se preservan identificador y certificado de firma para actualizar la instalación existente.
+
+- [Web HTTPS](https://banuchat.duckdns.org/login), [APK 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk) y [evidencia de publicación](../docs/transition/CHECKPOINT-DEMO-1.0.4.md).
+- Login con validación visible; sesión y logout; chat con fuentes, visor/descarga e historial propios; progreso y acceso al expediente desde el chat.
+- Calendario mensual con agenda seleccionable; noticias bajo **Banu al Día**; **Publicaciones OE2** con sus tres categorías y comparación; **Recordatorios** locales Android, sin push remoto.
+- La app publicada consume DuckDNS y la API remota. No requiere Metro, adb reverse ni backend en el PC. La corrección RAG posterior se aplica en el servidor; no exige otra APK.
+
+## Desarrollar y comprobar
+
+Desde `mobile`: `npm ci`, `npm run typecheck`, `npm test`. `npm run web:export` exporta el cliente y `npm run web:serve` inicia el proxy **local** 8085, que requiere la API local preparada. `npm start` inicia Metro para desarrollo. Estos comandos no publican la web cloud ni reproducen por sí solos los datos privados.
+
+La exportación canónica usa `EXPO_PUBLIC_DEMO_MODE=synthetic` y `EXPO_PUBLIC_WEB_ORIGIN=https://banuchat.duckdns.org`; la compilación Android usa la URL remota validada. Todo `EXPO_PUBLIC_*` es público: no contiene contraseñas, tokens, conexiones PostgreSQL ni claves de firma. Mantener perfiles de desarrollo separados; no compilar una distribución con fallback a localhost.
+
+Los tests de servicios no acreditan automáticamente interacción visual, TalkBack o todos los dispositivos. El corte 1.0.4 registró 77 tests Mobile, recorrido web y actualización del Huawei conservando sesión/firma. [Estado actual](../docs/estado-vigente.md) y [operación cloud](../docs/operations/cloud-demo.md).
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 UIX-04C conserva el diseño aprobado y pule interacción y accesibilidad: preferencia
 de movimiento compartida y reactiva, filtros con teclado, estados ARIA, foco del
@@ -394,3 +412,5 @@ envío de push remoto, las credenciales/plataformas de distribución y la operac
 producción. Las pruebas humanas se rigen por el
 [protocolo OE5](../eval/mobile/oe5-student-validation-protocol.md) y no se consideran
 ejecutadas por la preparación técnica.
+
+</details>

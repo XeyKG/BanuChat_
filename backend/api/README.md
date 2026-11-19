@@ -1,4 +1,30 @@
-# API REST — contrato y estado implementado
+# API REST de BanuChat — estado actual
+
+Corte: **18/11/2026**, corrección RAG desplegada desde `a30088f`. [REST v2](api-contract-v2.md) y [OpenAPI v2](openapi-v2.yaml) conservan sus schemas; la ampliación autorizada de disponibilidad OE2 está en el contrato. La sesión es BanuChat, no Supabase Auth.
+
+## Publicación y laboratorio local
+
+| Composición | Entrada y dependencias |
+| --- | --- |
+| Cloud actual | `src/authenticated-main.ts` con `managed` y configuración privada del servicio: Supabase PostgreSQL/pgvector, TLS con CA/hostname, rol restringido, Ollama en EC2 y lector OE2 aprobado |
+| Unified local | `npm start` → `scripts/start-unified.mts`; exige `infra/local/unified/application.json` y configuración n8n privada, PostgreSQL 55463/API 3004; puede activar Agent/MCP/n8n acotados |
+
+El perfil administrado no permite `unified`; el arranque habitual local no debe reutilizarse sin adaptación como receta cloud. Los aliases `start:authenticated` y `start:ccd-auth` también remiten actualmente al launcher Unified. Los entrypoints históricos existen para sus escenarios específicos.
+
+## Capacidades y fronteras
+
+Login, refresh/logout, recursos propios, conversaciones e historial, citas/artefactos, progreso/expediente, calendario y anuncios usan REST v2. El usuario no puede escoger un estudiante arbitrario para consultar su expediente. Publicaciones OE2 conserva programación, convocatorias, novedades y comparación mediante una copia sintética validada por hash; no matrícula, escritura institucional ni sincronización automática cloud.
+
+El suplemento CCD preserva su propia release y sus citas sobre expedientes sintéticos. `src/chat/ccd-query-intent.ts` resuelve sujeto/atributos; `ccd-semantic-plan.ts` planifica cobertura; `ccd-knowledge.ts` selecciona evidencia, extrae o sintetiza y conserva límites. La [corrección RAG](../../docs/transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) mejora pertinencia general y respuestas parciales, sin memorizar el cuestionario ni modificar modelos o datos.
+
+## Verificación
+
+Desde `backend/api`: `npm run typecheck` y `npm test`. Las suites `test/*.test.ts` usan fixtures o servidores locales de prueba; los scripts `*.mts` de SQL/auth/integración y los comandos de operación exigen su laboratorio y configuración. No son intercambiables con los tests sin servicios. El último cierre RAG acreditó 192 tests CCD + 72 focales de contratos/evidencia, 24 turnos remotos e integridad/aislamiento; no toda la suite global fue reejecutada allí.
+
+[Arquitectura](../../docs/arquitectura.md) · [Estado](../../docs/estado-vigente.md) · [Operación cloud](../../docs/operations/cloud-demo.md).
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 ## Producto unificado vigente
 
@@ -331,3 +357,5 @@ Con la API normal iniciada y fuente disponible, desde `backend/api`:
 `--expect-unavailable` se usa solo durante una indisponibilidad controlada decidida
 por el operador: el evaluador no detiene servicios y acredita 503 junto con chat
 CCD operativo. Guarda respuestas y huellas exclusivamente en almacenamiento privado.
+
+</details>

@@ -1,4 +1,13 @@
-# MCP Server
+# MCP interno de BanuChat
+
+Corte: **18/11/2026**. Existe servidor **ejecutable stdio**, con seis tools de lectura, cliente y política de agente acotada. Se conserva el contrato congelado; no se requiere otra implementación por lenguaje. Las recetas del servidor sintético y sus límites están debajo.
+
+La integración Agent/MCP/n8n tiene evidencia local, incluida la composición Unified cuando está configurada. El perfil administrado desplegado en AWS no activa esa composición: no debe afirmarse que el chat público pasa por MCP. Tampoco se acredita ReAct dirigido por un LLM como operación productiva ni acceso institucional automático.
+
+[Contrato](tools-contract.md) · [Arquitectura por entornos](../../docs/arquitectura.md) · [Estado vigente](../../docs/estado-vigente.md).
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 Servidor interno de lectura sintética, ejecutable por stdio. El fallback sintético
 de la API REST lo consume mediante el cliente MCP acotado de
@@ -118,3 +127,5 @@ SDK y el transporte stdio reales, usando SQL/embedding dobles explícitos. La
 verificación PostgreSQL/Ollama real continúa condicionada a una credencial MCP de
 lectura con privilegios mínimos; no se reutiliza la cuenta propietaria. MCP para CCD
 permanece fuera del alcance autorizado.
+
+</details>

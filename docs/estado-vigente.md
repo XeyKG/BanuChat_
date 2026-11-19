@@ -1,85 +1,66 @@
-# BanuChat — estado vigente para entrega
+# BanuChat — estado vigente
 
-Corte: 29 de octubre de 2026. Base `17feea92291aa10118b18a1d145b348a7ac60fcd`,
-rama `main`. Estado de entrega: paquete técnico preparado para revisión académica;
-ninguna aceptación del director o del CCD se presume de esta ficha.
+Corte: **18/11/2026**, America/Bogota. Código de referencia `a30088f` en `main`; cliente publicado **1.0.4**, Android versionCode 5. Esta ficha resume implementación y evidencia; no certifica aprobación académica o institucional ni disponibilidad permanente.
 
-## Producto y fuentes
+## Acceso y composición publicada
 
-La experiencia vigente es una app autenticada BanuChat, Expo SDK 57 → REST v2,
-loopback 3004. La identidad es ficticia y propia del prototipo, sin federación UNAB.
-La propiedad de conversaciones depende de la cuenta, no de un perfil compartido.
+- [Web HTTPS](https://banuchat.duckdns.org/login).
+- [APK y paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4), acceso sujeto al repositorio privado.
+- [Checkpoint consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md), [entrega académica](transition/ENTREGA-FINAL-BANUCHAT.md) y [recuperación cloud](operations/cloud-demo.md).
 
-| Fuente | Uso y límites |
+El despliegue utiliza la EC2 existente de AWS Academy, Amazon Linux 2023, m6i.large con dos vCPU y 8 GiB. Caddy publica HTTPS por DuckDNS; Node sirve la web y REST v2, Ollama ejecuta los modelos y Supabase aloja PostgreSQL/pgvector. Se conserva una IP elástica y el origen sslip.io de transición. No se requiere el PC para atender solicitudes; el laboratorio y sus créditos condicionan la disponibilidad.
+
+La API utiliza su perfil `managed`, autenticación BanuChat y rol PostgreSQL restringido. Su proceso escucha en loopback; los clientes solo acceden al origen HTTPS. La conexión al pooler de sesión valida certificado y hostname con CA; no se usa la cuenta administrativa para el servicio habitual.
+
+## Dos composiciones que no deben confundirse
+
+| Composición | Datos y recorrido | Frontera |
+| --- | --- | --- |
+| Publicada: AWS + Supabase | Expedientes sintéticos y suplemento CCD privado; REST v2, fast paths y Document RAG/Ollama en EC2; lector OE2 aprobado opcional | `managed` no activa `unified`; no acredita MCP/n8n en el chat público |
+| Unified local existente | `banuchat_unified`, loopback PostgreSQL 55463 y API 3004; corpus CCD y auxiliares separados; planes multifuente con agente acotado/MCP/n8n según configuración | Requiere archivos privados y servicios locales; no es la receta de arranque de AWS |
+| Otros laboratorios | Puertos, bases y snapshots registrados en checkpoints específicos | Históricos o aislados; no promover ni restaurar por deducción desde un README |
+
+`backend/api/src/authenticated-main.ts` admite las ramas por configuración confiable. El launcher `npm start` usa Unified local; el servicio desplegado configura directamente el entrypoint autenticado. No basta ejecutar el launcher local con una URL remota.
+
+## Funcionalidades y datos
+
+El cliente web/Android ofrece login, sesión y logout; chat, fuentes, artefactos e historial propios; expediente y recursamiento; calendario mensual; noticias bajo **Banu al Día**; **Publicaciones OE2** y comparación de publicaciones; **Recordatorios** locales Android. La cuenta determina el perfil y la release; elegir un perfil no es autenticarse y la UI vigente no ofrece un selector libre de identidad.
+
+| Fuente | Estado documentado y límite |
 | --- | --- |
-| CCD 1.4.0 seleccionado | Document RAG sobre derivados locales con procedencia y restricciones; 107 unidades publicadas. Sin ratificación institucional formal |
-| Auxiliares ficticios | Perfiles, cursos/progreso, calendario y novedades; publicación y schema separados del corpus documental |
-| `data/synthetic` | Demo histórica y fixtures congelados. No es fallback oculto de documentación CCD |
-| Fuentes externas institucionales | Sin adquisición automática real autorizada, federación ni sincronización institucional acreditadas |
+| Demo sintética migrada | Dos releases, 32 estudiantes, 62 intentos, ocho recursamientos y 120 vectores; inventario de la migración y publicación, no conteo SQL nuevo de esta revisión documental |
+| Suplemento CCD | 107 referencias depuradas en release separada; se conservan las seis anteriores: 113 vectores suplementarios, sin mezclar con los 120 sintéticos |
+| Publicaciones OE2 | Copia sintética aprobada de solo lectura, fijada por SHA-256: dos programaciones, cuatro convocatorias/novedades, seis versiones aprobadas; comparación: una modificación y cinco sin cambios |
+| `data/synthetic` | Fuente histórica congelada y fixtures versionados; no se modifica v1 |
+| Fuentes institucionales externas | Sin matrícula, expedientes reales, scraping, Drive/Sheets reales ni federación institucional acreditados |
 
-Unified usa `banuchat_unified`, contenedor `banuchat-unified-postgres`, volumen
-`banuchat-unified-data`, puerto loopback 55463. Current documental:
-`10af4ffd-effb-41fc-bbfe-4dc48cb3398f`; manifest
-`fde23cabe95c83f5bd632d129312ad68c90624e6ebd489e79e98c6a3d0d96852`.
-Son identidades técnicas del corte, no valores para mostrar al usuario final.
+Los originales privados no se publican en Git ni se entregan por un endpoint de archivos libres. Las citas autorizadas conservan procedencia y las descargas se controlan por la API.
 
-## Camino implementado
+## Persistencia y modelos
 
-- Datos estructurados: router → servicios de aplicación → PostgreSQL auxiliar.
-- Documentos: router/política CCD → Document RAG → recuperación exacta coseno en
-  pgvector → selección/presentación o síntesis mediante Ollama → citas e historial.
-- Multifuente acotada: N8N correlaciona una transición → agente determinista →
-  MCP de lectura sobre documentos CCD y auxiliares autorizados. No es ReAct LLM.
-- Ingesta: workflow manual local N8N → `backend/rag`; la lógica de procesamiento,
-  embeddings y publicación permanece en el backend. No prueba scraping periódico.
+- Embeddings documentales: persistentes en PostgreSQL/pgvector, asociados a release y configuración; 1024 dimensiones, coseno exacto. La transferencia conservó contenido, vectores y hashes; no se afirma regeneración completa en cloud.
+- Vectores de consulta: generados por Ollama para buscar; no son nuevos documentos del corpus.
+- Historial: mensajes y citas persistidos y aislados por cuenta.
+- Contexto conversacional: historial acotado para resolver referencias; no es un expediente real ni memoria personal vectorizada.
+- Generador `qwen3:4b-instruct`, embedding `qwen3-embedding:0.6b` y runtime Ollama 0.35.0 verificados en la entrega.
 
-Embeddings: `qwen3-embedding:0.6b`, 1024 dimensiones; generador:
-`qwen3:4b-instruct`; Ollama local. Las revisiones se verifican contra configuración
-privada y release. No se usa un agente para cada pregunta ni N8N para cada turno.
+## Evidencia más reciente
 
-## Evidencia acreditada, con fecha y alcance
+| Corte | Evidencia real | Lo que no acredita |
+| --- | --- | --- |
+| [RAG 18/11](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) | 192 tests CCD + 72 contratos/evidencia; 24 turnos HTTP 201, fuentes/historial, 22 hashes, aislamiento 404 y revocación 401 | No son 24 respuestas completas: seis parciales citadas y cuatro abstenciones; no evaluación ciega ni RAG estable |
+| [Cliente 1.0.4](transition/CHECKPOINT-DEMO-1.0.4.md) | Calendario, noticias y OE2 en web/Huawei; firma y sesión conservadas; 77 tests Mobile y 22 API focales | No SUS, push remoto ni compatibilidad de todos los dispositivos |
+| [Publicación acumulada](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md) | Supabase, HTTPS, RAG remoto, APK, restauraciones y recuperación según sus cortes | No SLA, hosting permanente ni despliegue en servidores UNAB |
+| [OE1 histórico](../eval/rag-quality/results/oe1-cierre02-technical-report.md) | Banco local de 43, resultados RAGAS exploratorios y sus incumplimientos | No nueva medición de calidad para el backend actual ni aprobación del objetivo |
 
-| Evidencia | Resultado y frontera |
-| --- | --- |
-| [OE1-CIERRE-02](../eval/rag-quality/results/oe1-cierre02-technical-report.md), 29/10 | Baseline real de 43; 39 respuestas, cuatro abstenciones, cero errores/timeouts. Cierre técnico con aceptación académica pendiente |
-| [FLOW-01/02](../eval/rag-quality/CHECKPOINT-CCD-FLOW-01-02.md), 29/10 | Interpretación y evidencia por atributos; regresión de desarrollo conocida, sin nueva evaluación ciega |
-| [CCD-INTEGRATION-01](../eval/integration/results/ccd-integration-01-summary.md), 29/10 | FLOW-03/04 y entrada documental; 157 pruebas API, 41 Mobile; REST y adaptadores con fuentes/historial/sesión |
-| [Android CCD 1.4.0](../eval/mobile/results/android-mvp-ccd14-validation.md), 29/10 | Seis turnos físicos, dos aperturas de fuente, historial, restauración y logout; 21 capturas privadas, un YAL-L21/Android 10 |
-| [Aplicación unificada](transition/banuchat-unified-application-checkpoint.md) | Integración MCP/N8N y auxiliares con evidencia local previa; sus números de corpus y banners pertenecen a aquel corte |
-
-Las métricas OE1 describen la implementación anterior congelada. Las mejoras y
-la demo posteriores no reemplazan esas métricas ni demuestran mejora cuantitativa
-general. Las pruebas anteriores no se presentan como reejecutadas en ENTREGA-01.
-
-## Contradicciones resueltas para la presentación
-
-| Lectura anterior | Lectura vigente y evidencia |
-| --- | --- |
-| Todo es sintético y se selecciona perfil libremente | Documentos CCD privados + auxiliares ficticios; login v2, owners y perfil asignado |
-| MCP solo contrato y N8N siempre fuera del chat | MCP y agente acotado implementados; N8N solo en ciertos planes multifuente, según `backend/api/src/auth/unified-product.ts` |
-| No hay RAGAS/banco aceptado o falta ejecutar todo OE1 | Existe baseline de 43 y RAGAS exploratorio; faltan aceptación académica, suficiencia de muestra y validación independiente |
-| Android físico pendiente | Antecedente verdadero en CCD-INTEGRATION-01; la validación física posterior CCD 1.4.0 lo resuelve para ese dispositivo y recorrido |
-| Demo requiere alternar v1 Docker y v2 separados | El procedimiento vigente usa Unified v2 y el build existente por USB |
-| Laboratorios 55443/55453 o API 3003 como operación normal | Antecedentes históricos; este procedimiento exige 55463/3004 y sus identidades exactas |
-
-No se reescriben checkpoints, resultados ni el anteproyecto para borrar esas
-diferencias temporales. AGENTS.md conserva restricciones de seguridad/datos y
-resúmenes arquitectónicos de incrementos anteriores; para composición vigente
-rigen el código y contratos específicos, esta ficha y las evidencias fechadas.
-La matriz A4.1 conserva el compromiso escrito; la
-[matriz vigente](academic/oe1-oe6-current-status.md) compara ese compromiso con la
-evidencia actual sin sustituir objetivos.
+Los ensayos remotos RAG tardaron 1,30–110,28 s. Se conservan los límites API 150 s, cliente HTTPS 175 s y proxy 180 s, así como fallos históricos; una serie satisfactoria no elimina la limitación de dos vCPU.
 
 ## Pendientes reales
 
-La aceptación académica de OE1, su muestra de 43, MRR@5 y el juez sigue pendiente.
-OE2–OE6 conservan brechas respecto del alcance original. SUS no se ejecutó ni está
-autorizado; [la decisión canónica](academic/oe5-human-validation-closure-decision.md)
-mantiene sus criterios originales no cumplidos. La alternativa del autor es una
-propuesta pendiente, no una aprobación.
+Faltan datos o alcances en algunos derivados publicados, incluida la duración semanal regular/intensiva y el alcance completo del instructivo por modalidad. Las respuestas parciales deben seguir declarándolo. No se agregan respuestas esperadas de otra herramienta como si fueran hechos verificados.
 
-El preflight de ENTREGA-01 comprueba dependencias, sin login ni preguntas nuevas.
-En la ejecución registrada API, Metro, PostgreSQL/Ollama, modelos y USB pasaron;
-N8N 15679 no aceptaba TCP. La demo documental puede prepararse; una demostración
-multifuente exige restaurar y comprobar su servicio existente por separado.
-No se arrancó ni se recreó infraestructura para cambiar ese resultado.
+Siguen sin acreditarse ReAct LLM productivo, conectores institucionales reales, aceptación académica completa, estudio con estudiantes/SUS, metas globales de latencia y continuidad ni hosting independiente permanente. La [matriz OE1–OE6](academic/oe1-oe6-current-status.md) conserva los compromisos originales y sus brechas.
+
+## Precedencia documental
+
+Código/configuración y contratos específicos describen la implementación. Esta ficha y el [consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md) orientan el estado actual; cada checkpoint y ADR conserva el alcance de su fecha. Las propuestas `*.proposed.sql` no prueban una migración ejecutada. Una prueba local no acredita cloud y una descarga publicada no acredita usabilidad o aprobación institucional.

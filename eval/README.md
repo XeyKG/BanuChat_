@@ -1,5 +1,19 @@
 # Evaluaciones de BanuChat
 
+Corte del índice: **18/11/2026**. El repositorio contiene evidencia sintética, CCD local y cloud; sus resultados no se mezclan como si fueran un único benchmark. Tests, contratos, latencia, calidad semántica, seguridad y usabilidad responden preguntas diferentes.
+
+| Evidencia | Resultado acreditado y límite |
+| --- | --- |
+| [RAG 18/11](../docs/transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) | Typecheck, 192 tests CCD + 72 de contratos/evidencia; 24 turnos remotos, 22 hashes y aislamiento. Seis parciales citados y cuatro abstenciones; HTTP 201 no es aprobación semántica |
+| [Cliente 1.0.4](../docs/transition/CHECKPOINT-DEMO-1.0.4.md) | 77 tests Mobile y 22 API focales de ese corte, recorridos web/Huawei y actualización con firma/sesión conservadas; no SUS ni todos los dispositivos |
+| [OE1-CIERRE-02](rag-quality/results/oe1-cierre02-technical-report.md) | Banco local histórico de 43, RAGAS exploratorio con desempeño desigual; tres medias bajo sus referencias, sin nueva evaluación ciega del backend actual |
+| [OE1–OE6](../docs/academic/oe1-oe6-current-status.md) | Compromisos académicos originales y brechas; no declaración de aprobación institucional |
+
+No se afirma que RAGAS siga totalmente sin ejecutar: existen resultados históricos. Tampoco se presentan como métricas actuales. SUS/estudio con estudiantes, ReAct LLM productivo, objetivos institucionales y metas generales de latencia/disponibilidad mantienen sus pendientes. Los registros siguientes son un **índice histórico de primeras etapas** y conservan su alcance original.
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
+
 Índice de metodología y evidencias versionadas sobre el corpus 100 % sintético.
 Los archivos `results/*.md` y `results/*.json` son registros históricos de cada
 revisión, release, entorno y muestra; no describen automáticamente el HEAD actual.
@@ -31,3 +45,5 @@ la métrica context precision de RAGAS ni prueba integral de OE1.
 Los umbrales académicos son objetivos, no resultados. No se combinan estadísticamente
 corridas con distinta revisión, metodología, entorno o receta. El historial de
 experimentos se conserva, incluidos sus versiones antiguas y pendientes de entonces.
+
+</details>

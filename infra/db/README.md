@@ -1,4 +1,16 @@
-# Base de datos de BanuChat
+# Base de datos de BanuChat — entornos y recetas
+
+Corte: **18/11/2026**. El despliegue publicado ya utiliza PostgreSQL/pgvector administrado en Supabase; los laboratorios locales y sus migraciones se conservan con destinos específicos. La autenticación sigue siendo propia de BanuChat. No existe autorización para aplicar cualquier SQL histórico al destino cloud por el solo hecho de estar versionado.
+
+- [CLOUD-01B.3](../../docs/transition/CHECKPOINT-CLOUD-01B-3.md): conexión validada, restauración sintética, permisos y validación del perfil administrado en su corte.
+- [Consolidado de publicación](../../docs/transition/CHECKPOINT-PUBLICACION-BANUCHAT.md): evolución posterior y suplemento CCD separado.
+- [Receta académica sintética](cloud-01a/) y [preflight/propuestas administradas](cloud-01b/): distinguir propuesta de ejecución; conservar v1 y respaldos.
+- [Infraestructura vigente](../README.md), [estado](../../docs/estado-vigente.md) y [permisos de autenticación](auth-permissions.md).
+
+El inventario migrado documentado conserva dos releases, 32 estudiantes, 62 intentos y 120 vectores sintéticos. Las referencias CCD tienen release/manifiesto y permisos separados. No se repitió el inventario SQL ni una restauración durante esta actualización documental. Los procedimientos anteriores que siguen pertenecen a sus laboratorios y fechas.
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 BCH-03 incremento 2 aplicó `001_initial_schema.sql` sin modificar y
 `002_ccd_local_manifest.sql` exclusivamente sobre `banuchat_ccd_dev`, vacía y con
@@ -307,3 +319,5 @@ de la imagen pgvector para futuras ejecuciones (digest observado registrado en
 tests), aprovisionar roles mínimos y definir retención/privacidad de sesiones.
 Autenticación de usuario final y push siguen pendientes; el generador ya está
 implementado en la API. No se modifica SQL en esta actualización documental.
+
+</details>

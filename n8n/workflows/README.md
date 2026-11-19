@@ -1,4 +1,20 @@
-# Workflow lógico de ingesta
+# Workflows de BanuChat
+
+Corte: **18/11/2026**. Catálogo versionado; implementación e importación no implican ejecución continua ni despliegue cloud.
+
+| Workflow | Alcance |
+| --- | --- |
+| [ingestion-manual-v1](ingestion-manual-v1.json) | Ingesta manual local con validación/publicación gobernadas por TypeScript |
+| [oe2-academic-offer-fixture-v1](oe2-academic-offer-fixture-v1.json) | Programación sintética representativa |
+| [oe2-calls-fixture-v1](oe2-calls-fixture-v1.json) | Convocatorias sintéticas |
+| [oe2-news-fixture-v1](oe2-news-fixture-v1.json) | Novedades sintéticas |
+| [oe4-conversation-v1](oe4-conversation-v1.json) | Correlación/admisión de planes conversacionales acotados locales |
+| [oe4-calendar-sync-fixture-v1](oe4-calendar-sync-fixture-v1.json) | Sincronización local de calendario por fixture y release |
+
+[Runbook OE2](oe2-fixtures-v1-runbook.md) · [Runbook de ingesta manual](ingestion-manual-v1-runbook.md). El perfil administrado de AWS no activa Unified/n8n; la publicación OE2 cloud es una copia de solo lectura aprobada. No hay integración Google Drive/Sheets real ni scraping institucional acreditados. El recorrido inicial y sus detalles técnicos se conservan debajo.
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 Estado: existe `ingestion-manual-v1.json`, importado en N8N 2.40.5 e inactivo como
 automatización. Su ejecución manual N3 validó `/execute` y el camino E2E local con
@@ -107,3 +123,5 @@ usa un fixture local y no acredita Google Sheets ni latencia institucional ≤30
 
 Runbooks, resultados y bloqueos están en
 [`docs/transition/banuchat-oe4-checkpoint.md`](../../docs/transition/banuchat-oe4-checkpoint.md).
+
+</details>

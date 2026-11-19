@@ -1,4 +1,13 @@
-# N8N
+# n8n en BanuChat
+
+Corte: **18/11/2026**. Hay workflows implementados para ingesta manual, fixtures OE2 de programación/convocatorias/novedades, conversación OE4 y sincronización de calendario por fixture. Su evidencia es local; el perfil cloud administrado no activa la composición Unified ni requiere n8n para el chat publicado.
+
+n8n orquesta; el backend TypeScript mantiene validación, reglas, procesamiento, embeddings y publicación. Los fixtures no prueban scraping institucional, frescura de una fuente real o conectores Google Drive/Sheets. La copia OE2 desplegada se lee por hash y no se actualiza automáticamente desde n8n.
+
+[Workflows y runbooks](workflows/README.md) · [Arquitectura actual](../docs/arquitectura.md) · [Estado](../docs/estado-vigente.md). Las secciones siguientes conservan el recorrido inicial de ingesta manual y sus pendientes de entonces; no describen por sí solas todos los workflows posteriores.
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 Estado: N8N 2.40.5 se levantó localmente mediante el Compose vigente. El workflow
 manual v1 está implementado e importado y permanece `active=false`; N3 lo ejecutó
@@ -44,3 +53,5 @@ atómica, no una latencia de calendario de 30 minutos. Véase el
 y [N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). N3 acredita workflow
 manual, `/execute` y E2E local; no acredita Linux, despliegue institucional,
 producción ni retry/recover/scheduled.
+
+</details>

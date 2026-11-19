@@ -1,351 +1,95 @@
 # Arquitectura técnica de BanuChat
 
-## Alcance vigente
+Corte: **18/11/2026**, código de referencia `a30088f`. [Estado vigente](estado-vigente.md) y [checkpoint consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md). El anteproyecto y los ADR históricos describen compromisos y decisiones de sus fechas; no prueban que todos sus componentes estén desplegados ni aceptados.
 
-Actualización BCH-03 incremento 1 (2026-10-21): ADR 0006 permite preparar M01/M12
-con información CCD seleccionada para pruebas locales. `backend/rag/src/ccd`
-implementa validación de contrato/procedencia y derivados en memoria; el contenido
-local de `data/ccd` queda fuera de Git. Ese fue el alcance del incremento 1.
-Incremento 2 ya publicó M01/M12 en PostgreSQL CCD aislado y validó tres consultas
-por Document RAG directo con Ollama, incluyendo abstención por evidencia insuficiente.
-Ese incremento no acreditaba el chat HTTP, Mobile ni identidad institucional. Véase el
-[checkpoint BCH-03/2](transition/bch03-increment-2-checkpoint.md).
-Incremento 3 conecta el chat REST existente a CCD con un contexto técnico local,
-router, citas persistidas y relectura de historial. Sigue sin memoria generativa,
-Mobile CCD ni autenticación institucional; el contexto no representa un estudiante.
-Véase [BCH-03/3](transition/bch03-increment-3-checkpoint.md).
-La persistencia CCD será aislada. El alcance sintético descrito a continuación
-corresponde al runtime de demostración conservado, no a una prohibición de la nueva
-preparación autorizada. Véase [ADR 0006](adr/0006-corpus-ccd-seleccionado-local.md).
+## Composición publicada
 
-BanuChat es un proyecto académico cuyo MVP está en implementación incremental. Todo
-dato funcional (documentos, cursos, calendarios, convocatorias y perfiles) es
-sintético y tiene
-su fuente de verdad versionada en `/data/synthetic`. PostgreSQL conserva una
-representación procesada y reconstruible desde esos archivos.
+```mermaid
+flowchart TD
+    Clients[Web / Android Expo SDK 57] --> Edge[DuckDNS / HTTPS / Caddy]
+    Edge --> Proxy[Proxy y web Node]
+    Proxy --> API[REST v2 autenticado en EC2]
+    API --> Auth[Identidad, sesión y propiedad]
+    Auth --> Router[Router y política conversacional]
+    Router --> Fast[Servicios y respuestas estructuradas]
+    Router --> RAG[Document RAG: selección y cobertura]
+    Fast --> DB[(Supabase PostgreSQL + pgvector)]
+    RAG --> DB
+    RAG --> Emb[Ollama: embedding de consulta]
+    RAG --> Gen[Ollama: síntesis cuando corresponde]
+    API --> OE2[Exportación OE2 aprobada de solo lectura]
+    RAG --> Persist[Mensajes, citas y artefactos autorizados]
+    Fast --> Persist
+    Persist --> DB
+```
 
-Este documento aplica las decisiones de `AGENTS.md` y del
-[ADR 0001](adr/0001-alcance-sintetico-y-despliegue-local.md).
-El anteproyecto es una referencia histórica: su despliegue en servidores UNAB,
-scraping del CCD e integraciones institucionales fueron descartados.
-Para la demo no se accede a datos, APIs, páginas ni infraestructura UNAB/CCD.
-La excepción CCD usa únicamente archivos externos seleccionados, sin scraping ni APIs.
+EC2 existente de AWS Academy, Amazon Linux 2023, m6i.large de dos vCPU/8 GiB. Caddy termina HTTPS y el cliente usa el origen canónico `https://banuchat.duckdns.org`. API y Ollama escuchan en la frontera interna del servidor; los clientes no conectan directamente a la base ni al modelo. El PC se utiliza para desarrollo y validación, no para atender la demostración publicada.
 
 ## Componentes y responsabilidades
 
-| Componente | Responsabilidad | Ubicación |
-| --- | --- | --- |
-| Mobile App | Expo SDK 57, React Native + TypeScript; consume únicamente la API REST pública. MVP de demostración M1–M5 validado manualmente en Android físico. | `mobile/` |
-| REST Backend API | Entrada síncrona; fija contexto, evalúa Intent Router y persiste respuesta/citas de la misma release. | `backend/api/` |
-| Intent Router | Catálogo determinista: fast path seguro o fallback. El fallback sintético usa Agent/MCP; CCD conserva Document RAG directo. Clasifica sin LLM, embeddings ni N8N. | Especificación en `docs/enrutamiento-intenciones.md`; catálogo en `backend/api/` |
-| Application Services | Lógica compartida con acceso consistente a PostgreSQL, reutilizada por fast paths y las seis tools MCP. | `backend/api/` |
-| Agent/RAG | Política sintética acotada de selección, ejecución, observación y decisión; máximo dos tools. CCD conserva RAG directo. | `backend/api/src/agent/` |
-| MCP Server interno | Servidor sintético stdio de seis tools de solo lectura, consumido por el fallback de la API. | `backend/mcp-server/` |
-| PostgreSQL + pgvector | Una instancia para información relacional y embeddings, separados por el modelo de datos. | `infra/db/` |
-| N8N | Ingesta asíncrona existente; en OE4 coordina una transición conversacional sintética multifuente y un sincronizador de calendario con fixture local. | `n8n/workflows/` |
-| Datos sintéticos | Fuente de verdad versionada, con origen simulado explícito. | `data/synthetic/` |
-| Docker Compose local | Entorno de desarrollo y demostraciones iniciales. | `infra/docker-compose.yml` |
+| Componente | Implementación y responsabilidad |
+| --- | --- |
+| Web/Android | `mobile/`, Expo SDK 57 + React Native + TypeScript; un cliente REST v2 con navegación, sesión, chat y fuentes |
+| API y autenticación | `backend/api/`; login BanuChat, autorización por propietario, límites de solicitud, servicios y persistencia |
+| Router y política documental | `src/routing` y `src/chat` dentro de API; fast paths, alcance, contexto acotado, recuperación y composición de respuesta |
+| RAG/ingesta | `backend/rag/`; preparación, validación, embeddings, aprobación y publicación de releases; no es el servidor web |
+| PostgreSQL + pgvector | Supabase en el despliegue; SQL explícito y funciones/roles restringidos, sin acceso directo de clientes |
+| Ollama | `qwen3-embedding:0.6b` y `qwen3:4b-instruct`; runtime 0.35.0 en el despliegue validado |
+| OE2 publicado | Lector opcional de exportación sintética validada por hash; programación, anuncios y comparación sin matrícula |
+| MCP y n8n | Servidor/herramientas y workflows implementados con evidencia local; no activados como composición Unified en la API administrada |
 
 ## Consulta síncrona
 
-### Arquitectura objetivo
+1. REST v2 valida sesión y propiedad del recurso. La cuenta determina perfil y contexto; los identificadores enviados por el cliente no autorizan acceso a otro estudiante.
+2. Las consultas estructuradas usan servicios PostgreSQL y renderers. El progreso sintético y el chat tienen fronteras propias; un perfil no sustituye la autenticación.
+3. Document RAG resuelve el sujeto y las referencias del historial acotado, delimita fuentes y obtiene el vector de consulta de Ollama. PostgreSQL recupera por coseno exacto sobre los chunks de la release autorizada.
+4. La política considera atributos, pertinencia dentro del top-k, rol curricular y límites de período/población. Puede extraer hechos o solicitar síntesis al modelo, con protocolo de fuentes. Una coincidencia de palabras no acredita una respuesta completa.
+5. Si falta información, produce una respuesta parcial con sus citas o se abstiene. Las preguntas causales/de resultados, registros personales y oferta no acreditada no se convierten en hechos por el mero nombre del curso.
+6. La API persiste mensajes y referencias autorizadas. Historial reconstruye contenido y citas; el visor/descarga comprueba autorización e integridad de artefactos.
 
-```mermaid
-flowchart LR
-    mobile["Mobile App"] -->|"REST"| api["Backend API"]
-    api --> router["Intent Router determinista"]
-    router -->|"Fast path estructurado"| services["Application Services"]
-    router -->|"Fallback"| agent["Agent/RAG"]
-    agent -->|"Cliente MCP"| mcp["MCP Server interno"]
-    mcp --> services
-    services --> db[("PostgreSQL + pgvector")]
-    services -->|"Datos y procedencia para fast path"| renderer["Renderer determinista"]
-    services -->|"Evidencia para fallback"| mcp
-    mcp -->|"Evidencia"| agent
-    router -->|"Ayuda, social o límite conocido"| renderer
-    renderer --> reply["Validación y persistencia de respuesta y citas"]
-    agent --> reply
-    reply -->|"Mismo contrato REST"| mobile
-```
+La [corrección de pertinencia](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) no contiene un mapa de las preguntas de evaluación a respuestas, no cambia el modelo y no crea un agente ReAct. La generación sigue limitada por capacidad y por la evidencia publicada.
 
-N8N queda fuera de fast paths y de `ccd_local`. Desde OE4, solo el fallback sintético
-multifuente solicita una transición correlacionada a N8N antes de ejecutar el agente
-MCP acotado. La app no consume MCP, N8N ni PostgreSQL directamente. CCD continúa con
-Document RAG directo y sin servidor MCP autorizado. Embeddings usa Ollama
-local con `qwen3-embedding:0.6b`, 1024 dimensiones y coseno
-([ADR 0003](adr/0003-embedding-local-qwen3.md)).
+## Persistencia y separación de fuentes
 
-El [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md) introduce el router.
-El fast path no llama a MCP ni al LLM generador; usa servicios compartidos y renderers.
-El fallback sintético se deriva a la política Agent/MCP; el fallback CCD sigue en
-Document RAG directo para preservar su aislamiento y autorizaciones.
-El diagrama muestra dependencias lógicas y retornos, no nuevos contenedores ni código.
-Las consultas REST directas siguen pudiendo utilizar servicios sin router ni agente.
-
-Las respuestas documentales y estructuradas citan evidencia verificable del corpus sintético,
-y declaran evidencia insuficiente cuando corresponda. Mantienen una release por turno.
-No presentan la simulación como información institucional vigente. Los documentos con
-`retrieval_mode=full_document` no se fragmentan ni vectorizan; se resuelven como
-artefactos completos verificados por la ruta REST interna aprobada, no URLs externas.
-
-### Estado de implementación actual
-
-El vertical slice conversacional fue validado inicialmente al commit
-`f47ec9e29b8c161a2c88a4eadf641dab2359a964` y comprobado después por J1 y J2.
-El HEAD actual incorpora además M3.1 y M3.2; catálogo `1.2.0-draft` y schema con
-`$id` de esa versión. El recorrido implementado es:
-
-```mermaid
-flowchart LR
-    mobile["Mobile App Expo / React Native"] -->|"REST"| api["Backend API"]
-    api --> router["Intent Router determinista"]
-    router -->|"Fast path"| fast["Catálogo, progreso, calendario, anuncios o documentos"]
-    router -->|"Social, ayuda o fuera de alcance"| static["Renderer estático"]
-    router -->|"Fallback sintético simple"| agent["Agente MCP acotado"]
-    router -->|"Fallback sintético multifuente"| n8n["N8N: transición correlacionada"]
-    n8n --> agent
-    router -->|"Fallback CCD"| rag["Document RAG directo"]
-    agent --> mcp["MCP stdio sintético"]
-    mcp --> db
-    fast --> db[("PostgreSQL + pgvector")]
-    rag --> db
-    rag --> ollama["Ollama local"]
-    fast --> reply["Persistencia y respuesta REST"]
-    agent --> reply
-    rag --> reply
-    static --> reply
-```
-
-La API expone actualmente `GET /api/v1/profiles`,
-`POST /api/v1/conversations`,
-`GET /api/v1/conversations`,
-`GET /api/v1/conversations/{conversation_id}`,
-`DELETE /api/v1/conversations/{conversation_id}`,
-`POST /api/v1/conversations/{conversation_id}/messages`,
-`GET /api/v1/documents/{document_version_id}/artifact`,
-`GET /api/v1/calendar/events`,
-`GET /api/v1/profiles/{profile_key}/progress` y
-`GET /api/v1/announcements`.
-
-El dispatcher resuelve `course_catalog`, `profile_progress`, `calendar_events`,
-`announcements` y `document_lookup` con servicios de aplicación y renderers.
-`basic_social`, `capabilities_help` y
-`known_out_of_scope` usan renderers estáticos sin SQL de dominio ni generador.
-M8.1 implementa `course_catalog` como fast path estructurado sobre `banuchat.courses`
-de la release vigente: oferta general sin perfil requerido por el dispatcher,
-filtros `available`/`closed`/`archived` y citas `course` con `course_key` y procedencia.
-No añade endpoint REST de cursos. Sus pruebas usan SQL controlado y cubren
-persistencia/relectura de citas por HTTP; la prueba operacional local queda pendiente.
-M8.2 implementa `document_lookup` por coincidencia exacta del título canónico en la
-release vigente. No usa embeddings ni generación, permite descubrir documentos
-`full_document` sin chunks y deriva el artifact documental para abrirlo desde Mobile.
-En sintético, las preguntas que alcanzan `agent_fallback` pasan por Agent/MCP;
-`search_knowledge` conserva el retrieval documental existente. CCD mantiene
-Document RAG directo.
-
-Document RAG genera el embedding de la pregunta con `qwen3-embedding:0.6b` mediante
-Ollama, recupera hasta cinco fragmentos con búsqueda exacta por coseno en
-PostgreSQL + pgvector y genera con `qwen3:4b-instruct` mediante Ollama. Después
-construye citas de los fragmentos recuperados y persiste el turno. Ollama es el
-runtime de modelos; pgvector almacena y compara vectores, no genera embeddings.
-Si no hay fragmentos o el generador declara evidencia insuficiente, devuelve una
-respuesta de insuficiencia sin citas. La procedencia facilita verificación y no
-demuestra por sí sola faithfulness o exactitud. El E2E real obtuvo HTTP 201.
-
-OE3 incorpora un ciclo acotado y trazable de hasta dos tools MCP en el fallback
-sintético. La validación PostgreSQL/Ollama real del cliente sigue pendiente de una
-identidad sintética de lectura con privilegios mínimos.
-El cliente móvil M1–M5 está implementado y fue validado manualmente en Android
-físico. Historial y anuncios también están implementados; el estado de las etapas
-móviles posteriores y sus validaciones está en [Mobile](../mobile/README.md).
-J1 comprobó operacionalmente la ruta REST con PostgreSQL/pgvector y Ollama
-reales; J2 comprobó mediante HTTP en proceso el router real con SQL controlado y
-Document RAG simulado. Sus límites constan en el
-[checkpoint J3](../eval/integration/results/j3-checkpoint-2026-10-03.md).
-
-## Ingesta asíncrona de releases sintéticas completas
-
-```mermaid
-flowchart LR
-    orchestrator["N8N: manual v1; retry/recover/scheduled pendientes"] -->|"HTTP privado de control"| ingestion["Componente TypeScript: implementation_revision"]
-    source["Source checkout read-only: source_git_revision"] -->|"Bytes verificados de /data/synthetic"| ingestion
-    ingestion -->|"Embeddings de chunked"| ollama["Ollama local: qwen3-embedding:0.6b"]
-    ingestion -->|"Release completa y publish_release"| storage[("PostgreSQL + pgvector")]
-```
-
-El [ADR 0005](adr/0005-ingesta-reproducible-n8n.md) define esta frontera. El core
-TypeScript, transporte HTTP interno y su composición/startup operacional están
-implementados. N0 validó localmente `/status`; N2 versionó e importó
-`n8n/workflows/ingestion-manual-v1.json`; N3 ejecutó el workflow manual E2E desde
-N8N 2.40.5: `not_started` llevó a `/execute` y publicó una release `ready/current`;
-la segunda ejecución fue `already_current`. Véase [evidencia N3](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md).
-El workflow permanece inactivo como automatización. Retry/recover/scheduled y una
-topología portable siguen pendientes. En el recorrido implementado, N8N orquesta
-triggers, llamada y resumen; TypeScript valida revisión/aprobación, schemas,
-hashes y relaciones, procesa documentos y gobierna intentos/publicación. El runtime
-de `backend/rag` y el checkout fuente son raíces separadas configuradas por el servidor,
-nunca paths enviados por HTTP. El operador prepara la fuente en un worktree o checkout
-equivalente read-only; no se crea aquí. N8N no ejecuta checkout, pull, fetch ni red Git.
-
-HEAD del source checkout debe coincidir con source_git_revision aprobada; sus bytes,
-manifest y schemas se validan allí. Para v1 es
-`af7ac711e1da3426e1f5fbe8b2892cec1344ce8b`, registrado en dataset_releases.git_revision.
-El código/build ejecutado tiene su propia implementation_revision en pipeline_config,
-que puede ser posterior. approval_ref aprueba la fuente, no automáticamente el runtime.
-Cambiar solo implementación puede producir otra release por pipeline_sha256 sin
-alterar ni volver a aprobar el contenido. No se exige un checkout en dos revisiones.
-
-El calendario base se carga desde `/data/synthetic/calendars`. OE4 añade un adaptador
-separado de fixture representativo de Google Sheets: publica otra release completa sin
-modificar v1, detecta cambios/cancelaciones y conserva `current` ante fallos. No existe
-conexión a Google Sheets ni fuente institucional acreditada. Full_document
-produce versiones sin chunks/embeddings y conserva el artefacto exacto para REST.
-Chunked v1 usa secciones H2, sin overlap: la receta produce 60 chunks, validados en
-PostgreSQL; la E2E real de Implementación 3 generó sus 60 embeddings. Estos conteos
-no acreditan calidad RAG.
-
-Se conservan 76 items por intento exitoso, incluidos skipped verificados. Solo
-publish_release promueve atómicamente; un fallo mantiene current. Ready actual es
-no-op y una ready histórica no se reactiva mediante ingesta normal. La
-[especificación](ingesta-reproducible.md) detalla receta, locking, retry y fallos.
-El workflow manual está versionado en JSON y la ejecución N3 se documenta en
-[su evidencia](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md). Retry/recover/
-scheduled siguen pendientes; no se versionan secretos ni valores operacionales.
-
-## Despliegue local
-
-```mermaid
-flowchart TB
-    M["App móvil Expo"] -->|"REST"| B["Backend API e Intent Router"]
-    subgraph LOCAL["Equipo local; Compose solo PostgreSQL y N8N"]
-        B -->|"Fast paths"| S["Servicios de aplicación"]
-        B -->|"Fallback sintético simple"| A["Agente + MCP stdio"]
-        B -->|"Fallback sintético multifuente"| N
-        N -->|"Directiva correlacionada"| A
-        B -->|"Fallback CCD"| R["Document RAG directo"]
-        A --> P
-        A --> O
-        R --> P
-        R --> O
-        S --> P[("Única instancia PostgreSQL + pgvector")]
-        N["N8N 2.40.5; workflows acotados"] -->|"HTTP privado; status/execute"| I["Componente de ingesta backend/rag"]
-        N -->|"status/sync de calendario fixture"| C["Adaptador OE4 backend/rag"]
-        C -->|"Release completa"| P
-        I -->|"Publicación completa"| P
-        I -->|"Embeddings"| O["Ollama local"]
-        D["Source checkout read-only separado"] -->|"/data/synthetic verificado"| I
-    end
-```
-
-Este diagrama describe límites lógicos, no fija un contenedor por módulo.
-El Compose actual solo declara PostgreSQL con una imagen que incluye pgvector y N8N.
-El SQL vigente ya incluye `CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;`
-y la migración fue ejecutada en PostgreSQL local desechable. Compose por sí solo no
-aplica automáticamente esa migración; disponer de la imagen no significa que toda
-base nueva esté migrada. No hay servicios backend o mobile en el Compose actual.
-
-El HTTP interno implementa `Authorization: Bearer <service-token>` con token fuera
-de Git, mínimo 32 caracteres, sin whitespace ni logging, y comparación SHA-256 con
-`timingSafeEqual`. N0 validó `/status` y N3 validó el recorrido manual con `/execute`
-desde N8N en Windows + Docker Desktop; no es autenticación de usuarios. N3 usó
-`host.docker.internal`, observado solo en ese entorno y no portable por definición.
-Retry/recover/scheduled, topología/bind para futuros despliegues y permisos/roles
-mínimos siguen pendientes. No existe despliegue institucional.
-
-## Perfiles, usabilidad y funcionalidades pendientes
-
-Los perfiles para historial y personalización son totalmente sintéticos. La estrategia
-de autenticación local está pendiente; no habrá autenticación institucional.
-
-Los datos que puedan recogerse posteriormente en pruebas de usabilidad con personas
-son distintos del corpus funcional. Su consentimiento, minimización, anonimización,
-almacenamiento y acceso requieren diseño previo; no deben alimentar `/data/synthetic`.
-
-Las notificaciones mediante un proveedor push real son una funcionalidad deseable
-pendiente de diseño explícito y no se incorpora un proveedor en esta iteración.
-
-## Trazabilidad y evaluación
-
-Esta tabla organiza el trabajo técnico del repositorio de forma provisional y no
-constituye por sí sola una modificación aprobada de los objetivos académicos del
-anteproyecto. La alineación definitiva de OE1–OE6 con el documento académico y las
-decisiones del director del Proyecto de Grado sigue pendiente.
-
-| Objetivo | Interpretación técnica de trabajo |
+| Tipo | Tratamiento |
 | --- | --- |
-| OE1 | RAG sobre corpus sintético: faithfulness ≥ 0,80; context precision ≥ 0,80; context recall ≥ 0,75; answer relevancy ≥ 0,80; MRR ≥ 0,70. |
-| OE2 — propuesta técnica provisional | Ingesta de revisión sintética aprobada: objetivo <24h desde disponibilidad para ingesta y éxito >90 %, no medidos; separar espera y duración trigger→publicación del trabajo humano previo. |
-| OE3 | Selección controlada y dinámica de herramientas MCP por el agente. |
-| OE4 | Flujo conversacional N8N acotado y sincronización de calendario por release. El fixture acredita comportamiento técnico, no Google Sheets real ni el máximo de 30 min. Cobertura y límites en el checkpoint OE4. |
-| OE5 | SUS promedio > 70/100, ningún resultado < 50/100 y completación de tareas > 85 %. |
-| OE6 | Estabilidad de contenedores locales, sin caídas > 5 minutos, y respuesta promedio < 5 segundos. |
+| Documentos y embeddings | Persistentes y asociados a release/configuración; dimensión 1024 y distancia coseno. No se acreditan índices HNSW/IVFFlat |
+| Vector de consulta | Temporal para recuperar evidencia; no representa un nuevo documento ni el historial del estudiante |
+| Historial y citas | Mensajes, propiedad y referencias persistidas; accesibles por la API autorizada |
+| Contexto conversacional | Historial acotado de preguntas y respuestas; no reemplaza registros académicos ni crea memoria personal vectorizada |
+| `full_document` | Artefactos completos con integridad; no se fragmentan ni vectorizan |
 
-Estos son criterios académicos, no resultados acreditados. Las evaluaciones
-versionadas cubren alcances parciales y no demuestran su cumplimiento integral.
+La conversación y los expedientes de cloud siguen en el contexto sintético. El suplemento CCD conserva **su propia release, manifiesto, artefactos y citas**; no se presentan sus vectores como parte de las releases sintéticas ni se borra su procedencia al mostrar una respuesta.
 
-Como antecedente histórico, G2 observó cinco solicitudes HTTP warm
-exitosas y registró media de 12195.50 ms, mediana de 12353.39 ms, mínimo de 10820.68 ms
-y máximo de 13511.09 ms; 0/5 estuvieron por debajo de 5000 ms. La referencia
-histórica de OE6 no se cumplió en esa muestra. No es un benchmark exhaustivo y no se
-modifica ni se acredita OE6. Véase
-[la evidencia G2](../eval/generation/results/g2-rag-e2e-smoke-2026-10-01.md).
+La migración documentó dos releases sintéticas, 32 estudiantes, 62 intentos y 120 vectores. La ampliación CCD adoptó 107 referencias depuradas y conservó las seis anteriores: 113 vectores suplementarios. Se copiaron embeddings documentales previamente validados; los embeddings de consulta sí se calculan en runtime. No se afirma regeneración completa del corpus desde cero en AWS.
 
-La evidencia posterior [L1-B](../eval/generation/results/l1-b-rag-latency-2026-10-03.md)
-observó diez POST warm secuenciales: media wall 4013.57 ms, mediana 3956.78 ms,
-mínimo 1883.42 ms y máximo/p95 nearest rank 6485.59 ms; 8/10 por debajo de 5000 ms.
-La generación tuvo media 3622.38 ms y la consulta vectorial DB 3.03 ms. Con n=10,
-el p95 coincide con el máximo y no es una estimación poblacional robusta. L1-B
-no acredita formalmente OE6 ni SLA; no se mezcla estadísticamente con G2 o L1.
+## Identidad, permisos y conexión
 
-[K2 v1](../eval/retrieval/results/k2-v1-2026-10-01.md) midió retrieval sobre 18 casos
-chunked, top_k=5: MRR@5≈0.8519, Precision@5≈0.2222, Recall@5=Hit@5=1 (18/18 hits).
-La precisión coincide con el máximo teórico agregado del gold; no mide faithfulness,
-answer relevancy, UX ni latencia completa. Full_document quedó fuera del retrieval
-vectorial. [M3.2-D](../eval/intent-routing/results/m3-2-reserved-first-run.md) obtuvo
-14/14 route correct y exact correct en `reserved_primary`, cero fast paths
-inesperados (0 %). Todos esos casos eran negativos/fallback: no demuestra accuracy
-poblacional, recall positivo ni generalización. Véase [eval](../eval/README.md).
+La autenticación propia vive en BanuChat; Supabase presta PostgreSQL administrado, no reemplaza la sesión por Supabase Auth. El código controla la relación cuenta → perfil/release → estudiante académico y la propiedad de conversaciones. Los esquemas de autenticación, dominio académico y referencias tienen funciones y permisos específicos; el rol habitual de API es restringido, no `postgres`.
 
-## Estado validado y trabajo pendiente
+El perfil `managed` admite la base/host/pooler previstos, verifica CA y hostname y comprueba `runtime_scope`. No se elimina TLS para superar incompatibilidades. Las credenciales son configuración privada del servidor, nunca variables públicas de Expo o argumentos de herramientas MCP.
 
-La migración inicial `infra/db/001_initial_schema.sql` ya fue ejecutada sobre PostgreSQL
-local desechable y la suite A–K fue ejecutada. El core de ingesta implementa preflight,
-carga de 64 registros estructurados sintéticos, documentos/chunking, embeddings,
-publicación atómica y recovery/retry. También están implementados Approval Registry,
-vínculos approval↔source, procedencia del runtime checkout, operaciones internas
-`execute`/`retry`/`recover`/`status`, observación del WriterLease, transporte HTTP,
-Bearer service token y parser de configuración operacional. Véanse
-[documentación física](../infra/db/README.md) y [evidencia/límites](../infra/db/tests/README.md).
-La E2E real de Implementación 3 acreditó 76 items procesados, 12 versiones ready,
-60 chunks, 60 embeddings reales y `already_current`, pero usó una
-`implementation_revision` TEST/sintética. Recovery/retry fue validado después con
-PostgreSQL real y embeddings TEST_ONLY; son ejecuciones separadas.
+## Unified local y composición agéntica
 
-Los contratos `backend/mcp-server/tools-contract.md` y
-`backend/mcp-server/tools.contract.json`, versión `2.0.0-draft`, están congelados para
-implementación. La eliminación de Google Sheets, identidad sintética y diseño de
-evidencia/enlaces fue una decisión anterior. OE4 reintroduce solo un adaptador de
-fixture compatible con una futura fuente autorizada; Google Sheets real y su métrica
-continúan pendientes. El sufijo draft
-se conserva hasta disponer de implementación validada.
+`npm start` en API ejecuta `scripts/start-unified.mts`. El laboratorio existente usa `banuchat_unified` en loopback 55463 y REST v2 en 3004, con configuración privada y datos auxiliares separados. Puede activar un agente determinista acotado, herramientas MCP de lectura y admisión n8n para planes multifuente. No todos los turnos pasan por ellos y no es ReAct LLM productivo.
 
-- SQL: pendientes pruebas de permisos con roles no propietarios, concurrencia y
-  reintentos avanzados descritos en su documentación; no repetir como pendiente A–K.
-- Operación de ingesta: N0 validó startup/status; N2 versionó e importó el workflow
-  manual; N3 validó ejecución E2E manual, publicación `ready/current` y no-op
-  `already_current` ([evidencia](../eval/ingestion/results/n3-n8n-e2e-2026-10-02.md)).
-  Retry/recover/scheduled, topología futura y permisos/roles mínimos siguen pendientes.
-- Consulta implementada: Intent Router determinista, fast paths de catálogo de cursos,
-  progreso, calendario, anuncios y localización documental, renderers
-  social/ayuda/fuera de alcance, M3.1/M3.2,
-  los endpoints REST descritos arriba, retrieval exacto,
-  Document RAG, citas y persistencia; Agent/MCP sintético acotado y servidor stdio
-  ejecutable. El vertical slice RAG previo obtuvo HTTP 201. La integración OE3 tiene
-  cobertura SDK/stdio con dobles declarados; PostgreSQL/Ollama real del cliente MCP
-  queda pendiente de credencial mínima. J1 cubre una ruta operacional concreta, no
-  todas las variantes o condiciones de concurrencia REST.
-- Producto/evaluación: autenticación de usuario final, RAGAS completa, SUS formal,
-  pruebas formales con usuarios y notificaciones push reales. El MVP móvil de
-  demostración M1–M5 ya existe; no hay despliegue institucional acreditado.
+El entrypoint `authenticated-main.ts` impide activar `unified` con el perfil `managed`. Por tanto, la evidencia de MCP/n8n local no debe atribuirse a la web pública. El servidor MCP stdio ejecutable y su contrato se conservan; no se requiere reimplementarlo en otro lenguaje para describir el despliegue.
 
-Las decisiones confirmadas en `AGENTS.md` prevalecen sobre referencias históricas.
+[Runbook Unified local](operations/final-integrated-demonstration.md) · [MCP](../backend/mcp-server/README.md) · [n8n](../n8n/README.md).
+
+## Ingesta asíncrona y publicaciones
+
+Las recetas conservan validación de manifest, bytes/hash, procedencia, aprobación y precondiciones de destino. El backend TypeScript gobierna procesamiento, embeddings, relaciones y publicación; n8n orquesta llamadas autorizadas, no mueve la lógica académica a nodos de workflow.
+
+El repositorio incluye ingesta manual y workflows de fixtures OE2, conversación OE4 y calendario OE4. Son evidencias locales; no acreditan scraping institucional ni conectores reales Google Drive/Sheets. La copia OE2 publicada es estática, aprobada y fijada por SHA-256. Un cambio exige nueva exportación aprobada y asociación explícita de su hash; no se actualiza sola ni formaliza inscripciones.
+
+No se modifica `data/synthetic` v1 ni se suben originales institucionales para completar automáticamente un dato faltante. El corpus privado conserva sus límites y permanece fuera de Git por defecto. [Ingesta reproducible](ingesta-reproducible.md) · [Recetas y ejemplos](../infra/README.md).
+
+## Operación, trazabilidad y límites
+
+- [Operación cloud](operations/cloud-demo.md): recuperación de la instancia existente, servicios y precarga; no requiere reconstruir datos por una parada de Academy.
+- [Publicación 1.0.4](transition/CHECKPOINT-DEMO-1.0.4.md): evidencia web/Android, firma y compatibilidad de actualización.
+- [RAG 18/11](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md): 24 turnos remotos, fuentes/historial/aislamiento y límites de completitud. Tiempos 1,30–110,28 s; se conservan 150/175/180 s para API/cliente/proxy.
+- [Matriz académica](academic/oe1-oe6-current-status.md): compromisos originales y brechas. No se acredita SUS, aceptación institucional, on-prem UNAB, disponibilidad permanente ni mejora cuantitativa general a partir de una regresión conocida.
+
+La operación en AWS depende del Learner Lab, sus créditos y Supabase. Permanecen respuestas parciales y lagunas en los derivados publicados. No se declara RAG estable ni se confunde una muestra HTTP satisfactoria con aprobación semántica, académica o institucional.

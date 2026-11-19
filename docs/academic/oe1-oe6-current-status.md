@@ -1,5 +1,23 @@
 # BanuChat — matriz vigente OE1–OE6
 
+Actualización **18/11/2026**. No modifica los objetivos del anteproyecto ni acredita aceptación del director, CCD o UNAB. [Estado vigente](../estado-vigente.md), [entrega académica](../transition/ENTREGA-FINAL-BANUCHAT.md) y [consolidado](../transition/CHECKPOINT-PUBLICACION-BANUCHAT.md).
+
+| Objetivo | Evidencia actual y frontera respecto del compromiso original |
+| --- | --- |
+| OE1 | RAG con PostgreSQL/pgvector, citas, fuentes e historial en cloud; correcciones de intención/selección y regresión de 24 turnos. Banco histórico 43 y RAGAS exploratorio con incumplimientos; no nueva evaluación ciega ni suficiencia muestral/aceptación acreditadas |
+| OE2 | Pipeline y publicaciones sintéticas aprobadas, procedencia/comparación; copia de solo lectura disponible en AWS. No matrícula ni tres fuentes institucionales reales con frescura/extracción medidas |
+| OE3 | MCP ejecutable y agente determinista acotado comprobados localmente. No ReAct LLM productivo ni participación MCP acreditada en el recorrido cloud actual |
+| OE4 | Workflows n8n y calendario por fixture con evidencia local. No conectores institucionales ni Google Sheets/Drive reales; no garantía de latencia institucional |
+| OE5 | Cliente web/Android 1.0.4, actualización Huawei y recorridos técnicos. Sin estudio de al menos diez estudiantes ni resultados SUS/tareas que acrediten los criterios originales |
+| OE6 | AWS Academy + Supabase, HTTPS/DuckDNS, APK y recuperación documentada. No on-prem UNAB, hosting permanente, SLA o meta general de cinco segundos; RAG remoto 1,30–110,28 s en la última muestra |
+
+La serie RAG del 18/11 conservó seis respuestas parciales con citas y cuatro abstenciones; 24 HTTP 201 no son 24 respuestas aprobadas. Los [resultados y límites](../transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) no reemplazan las mediciones académicas anteriores.
+
+Los cortes de octubre siguientes conservan compromisos y decisiones pendientes de sus fechas. Sus títulos internos «vigente» y «próximos trabajos» deben leerse en ese corte, no como un nuevo plan aprobado para el despliegue actual.
+
+<details>
+<summary>Matrices y decisiones históricas de octubre de 2026</summary>
+
 Corte **OE1-OE6-CLOSURE-GAP-01, 31/10/2026**, America/Bogota.
 Base de la auditoría: `72f4b3e8908fa6e7483ad1fe8a2cdf3628b3e7f3`.
 Los compromisos se sintetizan sin cambiar el anteproyecto. Ningún objetivo se
@@ -390,5 +408,7 @@ disponible, con brechas explícitas. Acotar compromisos, aceptar instrumentos
 alternativos o diferir componentes requiere decisión académica. El
 [paquete para el director](entrega-01-director-brief.md) organiza esas decisiones;
 no registra ninguna como aprobada ni modifica el anteproyecto.
+
+</details>
 
 </details>

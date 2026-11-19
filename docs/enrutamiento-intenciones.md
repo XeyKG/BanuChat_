@@ -1,11 +1,20 @@
 # Intent Router determinista — estado y especificación v1.2
 
-Estado: catálogo `1.2.0-draft` y schema con `$id` de esa versión. El Intent Router está
+Nota de vigencia (18/11/2026): esta especificación conserva el catálogo y sus
+valores; no sustituye la composición del runtime. El despliegue administrado usa
+fast paths y Document RAG; Unified local también dispone de agente determinista,
+MCP ejecutable y n8n para planes acotados. ReAct LLM productivo no está acreditado.
+La política CCD de intención, pertinencia y cobertura evoluciona en los módulos
+de `backend/api/src/chat`, sin cambiar este catálogo. Véanse la
+[arquitectura actual](arquitectura.md) y la
+[corrección RAG del 18/11](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md).
+
+Estado del catálogo: `1.2.0-draft` y schema con `$id` de esa versión. El Intent Router está
 implementado. El dispatcher ejecuta fast paths para `profile_progress`,
 `calendar_events` y `announcements`, con sus servicios de aplicación y renderers.
 También ejecuta renderers estáticos para `basic_social`, `capabilities_help` y
-`known_out_of_scope`. El fallback implementado es Document RAG directo; Agent/ReAct
-y el servidor MCP ejecutable siguen pendientes como arquitectura objetivo.
+`known_out_of_scope`. La selección del fallback depende de la composición descrita
+arriba; no debe inferirse de esta especificación un MCP universal para cada turno.
 M3.1 léxico y M3.2 ponderado están implementados.
 Aplica [ADR 0004](adr/0004-enrutamiento-determinista-intenciones.md). Las reglas y
 valores versionados residen en el [catálogo](../backend/api/intent-routing.catalog.json);

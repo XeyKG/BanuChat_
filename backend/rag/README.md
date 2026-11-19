@@ -1,4 +1,15 @@
-# RAG e ingesta — estado implementado
+# RAG e ingesta — alcance actual
+
+Corte: **18/11/2026**. Este paquete implementa preparación, validación de fuentes, procesamiento, embeddings y publicación. El servidor conversacional y la política de recuperación/respuesta están en [backend/api](../api/README.md), no en este entrypoint de ingesta.
+
+La demostración cloud consulta PostgreSQL/pgvector de Supabase y Ollama en EC2. Los embeddings documentales se conservan por release/configuración, 1024 dimensiones y coseno; la migración copió vectores validados. Los vectores de consulta se generan en runtime. `full_document` sigue fuera de fragmentación/vectorización. No se acredita una regeneración completa del corpus desde cero en cloud en el último cierre.
+
+Las recetas y servicios descritos debajo son **locales o de laboratorio** y mantienen sus precondiciones. `npm start` aquí inicia el servicio de ingesta compilado, no la API pública. `npm run typecheck` y `npm test` son las comprobaciones focales; `test:db` y `test:e2e:ingestion` requieren PostgreSQL/Ollama y destino aislado.
+
+[Arquitectura actual](../../docs/arquitectura.md) · [Ingesta reproducible](../../docs/ingesta-reproducible.md) · [Corrección del RAG conversacional](../../docs/transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md).
+
+<details>
+<summary>Antecedentes y recetas locales conservados; comprobar el corte antes de ejecutarlos</summary>
 
 ## Piloto CCD operativo aislado
 
@@ -307,7 +318,7 @@ No DROP SCHEMA, DROP DATABASE ni TRUNCATE. No ejecutar sobre una base existente.
 
 ```powershell
 # Únicamente contra una base desechable vacía preparada por el operador:
-$env:BANUCHAT_TEST_DATABASE_URL = 'postgresql://banuchat_test:TEST_ONLY_LOCAL@127.0.0.1:PUERTO/banuchat_rag_test_impl2'
+$env:BANUCHAT_TEST_DATABASE_URL = '<URL_POSTGRESQL_PRIVADA_DEL_ENTORNO_LOCAL>'
 npm run test:db
 ```
 
@@ -403,7 +414,7 @@ La E2E real exige otra base desechable vacía y el modelo aprobado instalado por
 operador. Falla explícitamente si falta; nunca transforma ese bloqueo en PASS/SKIP.
 
 ```powershell
-$env:BANUCHAT_TEST_DATABASE_URL = 'postgresql://banuchat_test:TEST_ONLY_LOCAL@127.0.0.1:PUERTO/banuchat_rag_test_e2e'
+$env:BANUCHAT_TEST_DATABASE_URL = '<URL_POSTGRESQL_PRIVADA_DEL_ENTORNO_LOCAL>'
 $env:OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
 npm run test:e2e:ingestion
 ```
@@ -506,3 +517,5 @@ Para futuros despliegues quedan topología portable, montajes read-only y permis
 mínimos operacionales pendientes. Recovery requiere decisión explícita;
 no hay scheduler, cola, timeout automático ni reconciliación automática de COMMIT incierto.
 N8N ya orquesta el recorrido manual; no posee reglas de negocio ni genera contenido funcional.
+
+</details>
