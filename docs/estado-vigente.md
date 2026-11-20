@@ -1,11 +1,11 @@
 # BanuChat — estado vigente
 
-Corte: **20/11/2026**, America/Bogota. HEAD de partida `2e31128`; RAG conservado desde `a30088f`, integración MCP/n8n desplegada y cambios de este incremento todavía sin commit. Cliente publicado **1.0.4**, Android versionCode 5. Esta ficha resume implementación y evidencia; no certifica aprobación académica o institucional ni disponibilidad permanente.
+Corte: **20/11/2026**, America/Bogota. RAG conservado desde `a30088f`, integración MCP/n8n desplegada y código registrado en `2331c1a`. Cliente publicado **1.0.4**, Android versionCode 5. Esta ficha resume la implementación y sus pruebas fechadas.
 
 ## Acceso y composición publicada
 
 - [Web HTTPS](https://banuchat.duckdns.org/login).
-- [APK y paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4), acceso sujeto al repositorio privado.
+- [APK y paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4).
 - [Checkpoint consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md), [entrega académica](transition/ENTREGA-FINAL-BANUCHAT.md) y [recuperación cloud](operations/cloud-demo.md).
 
 El despliegue utiliza la EC2 existente de AWS Academy, Amazon Linux 2023, m6i.large con dos vCPU y 8 GiB. Caddy publica HTTPS por DuckDNS; Node sirve la web y REST v2, Ollama ejecuta los modelos y Supabase aloja PostgreSQL/pgvector. Se conserva una IP elástica y el origen sslip.io de transición. No se requiere el PC para atender solicitudes; el laboratorio y sus créditos condicionan la disponibilidad.
@@ -24,9 +24,13 @@ La API utiliza su perfil `managed`, autenticación BanuChat y rol PostgreSQL res
 
 Desde el 20/11 se comprobó la rama administrada MCP con su lector de mínimo privilegio y n8n privado en la misma EC2. [Checkpoint del ensayo](transition/CHECKPOINT-MCP-AWS-2026-11-20.md). El editor está en `https://n8n.banuchat.duckdns.org`; sus webhooks solo se usan por loopback.
 
+En la revisión operativa del 20/11 se repuso el nodo de respuesta del webhook conversacional de n8n. Se conservaron las revisiones y los nodos de ingesta manual. Se comprobaron las directivas internas de admisión y aclaración. Una consulta pública sobre progreso y convocatorias respondió en 3,702 s con cuatro citas. El contenido y los campos de las cuatro citas coincidieron al reabrir desde Historial.
+
 ## Funcionalidades y datos
 
 El cliente web/Android ofrece login, sesión y logout; chat, fuentes, artefactos e historial propios; expediente y recursamiento; calendario mensual; noticias bajo **Banu al Día**; **Publicaciones OE2** y comparación de publicaciones; **Recordatorios** locales Android. La cuenta determina el perfil y la release; elegir un perfil no es autenticarse y la UI vigente no ofrece un selector libre de identidad.
+
+La API publicada aplica un filtro de respeto antes de procesar la consulta. El 20/11 se verificó el aviso, el marcador de mensaje omitido en Historial y el envío posterior de una consulta normal. La comprobación con dos cuentas ficticias confirmó el acceso al expediente propio, el rechazo del acceso a la conversación ajena y la revocación de ambas sesiones al cerrar sesión.
 
 | Fuente | Estado documentado y límite |
 | --- | --- |

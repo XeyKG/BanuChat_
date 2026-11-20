@@ -2,14 +2,16 @@
 
 Actualización **20/11/2026**. No modifica los objetivos del anteproyecto ni acredita aceptación del director, CCD o UNAB. [Estado vigente](../estado-vigente.md), [entrega académica](../transition/ENTREGA-FINAL-BANUCHAT.md) y [consolidado](../transition/CHECKPOINT-PUBLICACION-BANUCHAT.md).
 
-| Objetivo | Evidencia actual y frontera respecto del compromiso original |
-| --- | --- |
-| OE1 | RAG con PostgreSQL/pgvector, citas, fuentes e historial en cloud; correcciones de intención/selección y regresión de 24 turnos. Banco histórico 43 y RAGAS exploratorio con incumplimientos; no nueva evaluación ciega ni suficiencia muestral/aceptación acreditadas |
-| OE2 | Pipeline y publicaciones sintéticas aprobadas, procedencia/comparación; copia de solo lectura disponible en AWS. No matrícula ni tres fuentes institucionales reales con frescura/extracción medidas |
-| OE3 | MCP ejecutable y agente determinista acotado también comprobados en AWS para consultas estructuradas multifuente. No ReAct LLM productivo, evaluación académica completa ni aceptación acreditadas |
-| OE4 | Workflow conversacional n8n publicado en AWS, admisión y persistencia tras reinicio probadas; ingesta/calendario por fixture conservan evidencia local. Sin conectores institucionales, Drive/Sheets ni garantías institucionales |
-| OE5 | Cliente web/Android 1.0.4, actualización Huawei y recorridos técnicos. Sin estudio de al menos diez estudiantes ni resultados SUS/tareas que acrediten los criterios originales |
-| OE6 | AWS Academy + Supabase, HTTPS/DuckDNS, APK y recuperación documentada. No on-prem UNAB, hosting permanente, SLA o meta general de cinco segundos; RAG remoto 1,30–110,28 s en la última muestra |
+| Objetivo | Evidencia disponible | Pendiente | Sustitución propuesta al director |
+| --- | --- | --- | --- |
+| OE1 · RAG | Citas, fuentes e historial en cloud. Banco histórico de 43 casos y ensayo de 24 turnos. | Evaluación independiente, banco final y criterios no alcanzados en RAGAS. | Aceptar la muestra breve de 12 consultas como evidencia de la sustentación y conservar la evaluación formal pendiente. |
+| OE2 · Publicaciones | Pipeline y copia sintética aprobada en AWS con procedencia y comparación. | Tres fuentes institucionales y mediciones de frescura y extracción. | Demostrar el pipeline controlado con publicaciones sintéticas y documentar su frontera institucional. |
+| OE3 · MCP | Consulta estructurada en AWS con agente acotado y dos herramientas MCP. | ReAct dirigido por un LLM y aceptación del objetivo. | Evaluar el agente determinista con la consulta multifuente y sus trazas. |
+| OE4 · Orquestación | Workflow conversacional n8n publicado y persistencia tras reinicio verificada. Evidencia local de ingesta y calendario por fixture. | Conectores institucionales y validación real del piloto Drive. | Evaluar el workflow conversacional y la ingesta reproducible por fixture como contribuciones separadas. |
+| OE5 · Cliente | Web y APK 1.0.4 con recorridos técnicos previos en Huawei. | Autorizar un estudio de al menos diez estudiantes y ejecutar SUS y tareas observadas. | Aceptar el recorrido técnico para la sustentación. Si el estudio es viable, conservarlo como evaluación separada. |
+| OE6 · Operación | AWS Academy, Supabase, HTTPS, APK y recuperación documentada. | Infraestructura UNAB, continuidad y criterio general de cinco segundos. El RAG remoto observado tardó 1,30–110,28 s. | Aceptar AWS Academy como entorno de demostración temporal y reportar tiempos por ruta junto con sus límites. |
+
+Todas las sustituciones de la última columna están pendientes de decisión del director.
 
 El [ensayo del 20/11](../transition/CHECKPOINT-MCP-AWS-2026-11-20.md) agrega evidencia técnica cloud; no declara objetivos aprobados ni elimina las métricas históricas incumplidas. Una generación nueva tardó 100,029 s.
 

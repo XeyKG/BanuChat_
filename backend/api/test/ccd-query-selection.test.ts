@@ -11,6 +11,13 @@ const definitions:Definition[]=[
  {id:'route',text:'La ruta contiene ámbitos; una prueba evalúa un ámbito y un curso es formación. Una oferta es una programación.',topics:['structure'],aspect:'entity_structure'},
  {id:'structure',text:'La ruta ficticia contiene cuatro ámbitos.',topics:['structure'],aspect:'structure'},
  {id:'diagnostic-structure',text:'El diagnóstico ficticio contiene varias opciones.',topics:['diagnostic'],aspect:'diagnostic_structure'},
+ {id:'center-diagnostic',text:'La prueba diagnóstica identifica competencias que ya se poseen.',topics:['diagnostic'],aspect:'purpose'},
+ {id:'center-framework',text:'La ruta se alinea con el marco de referencia de la fixture.',topics:['digcomp'],aspect:'digcomp'},
+ {id:'center-requirement',text:'Los ámbitos se completan por diagnóstico, cursos o una combinación de ambos.',topics:['completion'],aspect:'requirement'},
+ {id:'center-badge',text:'Al completar los ámbitos se obtiene un reconocimiento.',topics:['badge'],aspect:'badge'},
+ {id:'center-catalog-one',text:'El primer ámbito tiene un curso introductorio.',topics:['catalog'],aspect:'catalog_one'},
+ {id:'center-catalog-two',text:'El segundo ámbito incluye un curso de contenidos.',topics:['catalog'],aspect:'catalog_two'},
+ {id:'center-catalog-three',text:'El tercer ámbito incluye un curso de tecnologías.',topics:['catalog'],aspect:'catalog_three'},
  {id:'pending',text:'Después de no validar, el escenario ficticio describe una actividad formativa para el ámbito pendiente.',topics:['completion'],aspect:'completion'},
  {id:'past-attempt',text:'El aviso de 2031 describe una jornada histórica limitada; no concede un derecho indefinido.',topics:['diagnostic','history'],aspect:'history',period:'2031',historical:true},
  {id:'present-retry',text:'El esquema ficticio de 2040 no contempla repetir ese diagnóstico.',topics:['diagnostic','retry_limits'],aspect:'retry_limits',period:'2040'},
@@ -40,6 +47,23 @@ test('herramientas y organización conservan el sujeto académico, no la selecci
  const f=fixture();for(const [q,course]of [['¿Qué herramientas de IA se consideran para selección crítica?','IA de Taller'],['¿Qué organización incluye Taller de Objetos?','Taller de Objetos']]){const scope=ccdKnowledgeQueryScope(q!,f.deps.knowledge.metadata);assert.deepEqual(scope.topics,['academic']);assert.deepEqual(scope.courses,[course]);await f.ask(q!);assert.ok(f.calls.at(-1)!.keys.some(k=>f.deps.knowledge.metadata.get(k)?.course===course));assert.ok(f.calls.at(-1)!.keys.every(k=>f.deps.knowledge.metadata.get(k)?.course===course));}
 });
 test('un instrumento de experiencia conserva procedimiento en la llamada real de recuperación',async()=>{const f=fixture(),a=await f.ask('Según el instructivo de experiencia de aprendizaje, ¿cuántas preguntas y dimensiones tiene el instrumento?');assert.deepEqual(a.supporting_claim_ids,['experience']);assert.match(a.content,/cuatro dimensiones/u);assert.ok(!f.calls[0]!.keys.includes('diagnostic-structure'));});
+test('la descripción del Centro cita su orientación en la ruta y requiere respaldo explícito', async () => {
+ const f=fixture({enrol:{text:'El CCD te orienta para elegir cursos según los resultados del diagnóstico.'}});
+ for(const query of ['que es el centro de competencias digitales','¿Qué hace el CCDigital?','¿Cuál es la función del Centro de Competencias Digitales de la UNAB?']){
+  const answer=await f.ask(query);
+  assert.equal(answer.insufficient_evidence,false);
+  assert.match(answer.content,/Centro de Competencias Digitales.*orienta para elegir cursos/u);
+  assert.match(answer.content,/prueba diagnóstica.*identifica/u);
+  assert.deepEqual(answer.supporting_claim_ids,['enrol','structure','center-requirement','center-framework','center-catalog-one','center-catalog-two','center-catalog-three','center-diagnostic','center-badge']);
+  assert.equal(answer.citations.length,9);
+  assert.ok(!f.calls.at(-1)!.keys.includes('contact'));
+ }
+ assert.deepEqual(f.prompts,[]);
+ const unsupported=await fixture().ask('¿Qué es el CCD?');
+ assert.equal(unsupported.insufficient_evidence,true);
+ assert.deepEqual(unsupported.unanswered_aspects,['center_orientation']);
+ assert.doesNotMatch(unsupported.content,/CCD significa/u);
+});
 test('opciones para completar después de no validar no se convierten en opciones de diagnóstico',async()=>{const f=fixture(),a=await f.ask('¿Qué opciones hay para completar un ámbito pendiente que no se validó en el diagnóstico?');assert.deepEqual(a.supporting_claim_ids,['pending']);assert.match(a.content,/Después de no validar/u);});
 test('un aviso histórico no se sustituye por una regla actual de repetición',async()=>{const f=fixture(),a=await f.ask('¿La convocatoria diagnóstica descrita en 2031 autorizaba repetir de forma indefinida?');assert.deepEqual(a.supporting_claim_ids,['past-attempt']);assert.match(a.content,/2031/u);assert.doesNotMatch(a.content,/2040/u);});
 test('dos funciones conservan contacto, inscripción y pago con sus fuentes',async()=>{const f=fixture(),a=await f.ask('¿Qué función tienen el contacto de la oficina y Cosmos para inscripción y pago? ¿Cuál es la fuente?');assert.ok(a.supporting_claim_ids?.includes('contact'));assert.ok(a.supporting_claim_ids?.includes('platform-enrol'));assert.ok(a.supporting_claim_ids?.includes('platform-payment'));assert.equal(a.citations.length,3);assert.match(a.content,/confirmación de dominio/u);assert.match(a.content,/documentación citada/u);});

@@ -153,8 +153,13 @@ async function semanticEvidence(deps:CcdKnowledgeDependencies,input:DocumentRagI
   const c=eligible.find(c=>admits(deps.knowledge.metadata.get(c.document_key)!,facet));
   if(!c){missing.push(facet.aspect);paragraphs.push(`No tengo evidencia suficiente para precisar ${facet.label}.`);continue;}
   const m=deps.knowledge.metadata.get(c.document_key)!,unit=m.presentation_units!.find(u=>matchesCcdFacet(facet,u))!;
-  const value=facet.aspect.startsWith('catalog')?canonicalCcdCatalogText(unit.text,retrievedNames):unit.text;
-  if(value!==unit.text)for(const source of eligible.filter(c=>retrievedNames.has(c.document_key)&&value.includes(retrievedNames.get(c.document_key)!.course!)))if(!support.includes(source))support.push(source);
+  let value=unit.text;
+  if(facet.aspect==='center_orientation'){
+    value=`CCD significa Centro de Competencias Digitales. En la Ruta de Competencias Digitales, ${unit.text.charAt(0).toLowerCase()}${unit.text.slice(1)}`;
+  }else if(facet.aspect.startsWith('catalog')){
+    value=canonicalCcdCatalogText(unit.text,retrievedNames);
+    if(value!==unit.text)for(const source of eligible.filter(c=>retrievedNames.has(c.document_key)&&value.includes(retrievedNames.get(c.document_key)!.course!)))if(!support.includes(source))support.push(source);
+  }
   if(!paragraphs.includes(value))paragraphs.push(value);
   if(!support.includes(c))support.push(c);units.push({claim_id:m.claim_id,key:unit.key});
  }

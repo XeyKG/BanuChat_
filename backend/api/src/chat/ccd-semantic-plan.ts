@@ -23,7 +23,17 @@ export function planCcdEvidence(query:string,subjectQuery:string,courses:readonl
   const add=(aspect:string,label:string,extra:Partial<CcdEvidenceFacet>={})=>{if(!facets.some(f=>f.aspect===aspect))facets.push({aspect,label,...extra});};
   let catalog=false,courseCount=false;
   // Processes take precedence over incidental words such as courses or modality.
-  if(enrollment&&process&&!diagnostic&&/\b(?:cursos?|asignaturas?|materias?|cosmos)\b/u.test(subject)){
+  if(/^(?:(?:que es|que hace|que funcion cumple)(?: el)?|cual es la funcion del) (?:ccd(?:igital)?|centro de competencias digitales)(?: de la unab)?$/u.test(text)){
+    add('center_orientation','la función del Centro de Competencias Digitales en la ruta',{aliases:['orientation'],material:/\bccd (?:te )?orienta\b/u});
+    add('structure','la estructura de la ruta');
+    add('requirement','cómo se completan los pilares');
+    add('digcomp','el marco de competencias digitales');
+    for(const [aspect,pillar] of [['catalog_one','Competencias Digitales Básicas'],['catalog_two','Analítica y Contenido Digital'],['catalog_three','Tecnologías Transformativas']] as const){
+      add(aspect,`los cursos de ${pillar}`);
+    }
+    add('purpose','el propósito de la prueba diagnóstica',{material:/\b(?:prueba diagnostica|diagnostico)\b/u});
+    add('badge','el reconocimiento al completar los pilares');
+  }else if(enrollment&&process&&!diagnostic&&/\b(?:cursos?|asignaturas?|materias?|cosmos)\b/u.test(subject)){
     add('cosmos_enrollment','el procedimiento de inscripción, adición o cancelación');
     if(/\b(?:pago|pagar|cupon)\b/u.test(text))add('cosmos_payment','la generación del cupón de pago');
   }else if(diagnostic&&/\b(?:plataformas?|lms|sistemas?|monitor\p{L}*|supervis\p{L}*)\b/u.test(text)){

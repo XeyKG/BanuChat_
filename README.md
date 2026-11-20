@@ -13,7 +13,7 @@ Asistente académico para consultar documentación, revisar el progreso de demos
 - [Paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip): APK, guía, checkpoint y capturas auténticas del corte de publicación.
 - [Guía de presentación](docs/transition/ENTREGA-FINAL-BANUCHAT.md) · [Estado actual](docs/estado-vigente.md) · [Índice documental](docs/README.md).
 
-El repositorio es privado: GitHub exige acceso autorizado para descargar los artefactos. Las credenciales de demostración se entregan por canal privado. La APK mantiene paquete y firma de las versiones anteriores; actualizar sin desinstalar. La corrección del backend beneficia a la web y a la APK existentes, sin otra instalación.
+El enlace directo de la APK respondió HTTP 200 en la comprobación del 20/11/2026. La guía de sustentación incluye una copia local para contingencias. Las credenciales de demostración se entregan por canal privado. La APK conserva paquete y firma y se puede instalar como actualización.
 
 La disponibilidad depende de internet, Supabase y de que el Learner Lab mantenga la EC2 activa. Los servicios públicos no necesitan Metro ni una API ejecutándose en el PC. [Recuperación de la demostración](docs/operations/cloud-demo.md).
 
