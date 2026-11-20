@@ -4,7 +4,7 @@
 
 Asistente académico para consultar documentación, revisar el progreso de demostración y conversar con respuestas acompañadas de fuentes. Proyecto de grado de Ingeniería de Sistemas, con clientes **web y Android**, API REST propia, PostgreSQL/pgvector en **Supabase** y **Ollama en AWS Academy**.
 
-**Corte documental: 18 de noviembre de 2026.** Cliente publicado **1.0.4**; corrección posterior del RAG desplegada desde `a30088f`. La demostración funciona con cuentas y expedientes ficticios y referencias CCD seleccionadas y depuradas. No constituye un sistema institucional ni acredita aprobación del CCD o de la universidad.
+**Corte documental: 20 de noviembre de 2026.** Cliente publicado **1.0.4**; RAG conservado desde `a30088f` e integración administrada MCP/n8n validada en AWS. La demostración funciona con cuentas y expedientes ficticios y referencias CCD seleccionadas y depuradas. No constituye un sistema institucional ni acredita aprobación del CCD o de la universidad.
 
 ## Abrir la demostración
 
@@ -16,6 +16,8 @@ Asistente académico para consultar documentación, revisar el progreso de demos
 El repositorio es privado: GitHub exige acceso autorizado para descargar los artefactos. Las credenciales de demostración se entregan por canal privado. La APK mantiene paquete y firma de las versiones anteriores; actualizar sin desinstalar. La corrección del backend beneficia a la web y a la APK existentes, sin otra instalación.
 
 La disponibilidad depende de internet, Supabase y de que el Learner Lab mantenga la EC2 activa. Los servicios públicos no necesitan Metro ni una API ejecutándose en el PC. [Recuperación de la demostración](docs/operations/cloud-demo.md).
+
+Para preparar la sustentación: [guía paso a paso de encendido y presentación](docs/operations/GUIA-PRESENTACION-BANUCHAT.md), con recorrido de pantallas, n8n/MCP publicados en AWS e inventario Docker histórico. Incluye una advertencia sobre temporizadores de pruebas encontrados en el n8n local; revisarla antes de arrancarlo.
 
 ## Funcionalidades disponibles
 
@@ -41,11 +43,15 @@ flowchart LR
     API --> DB[(Supabase PostgreSQL + pgvector)]
     API --> Ollama[Ollama en EC2]
     API --> OE2[Publicación OE2 aprobada de solo lectura]
+    API --> N8N[n8n interno: admisión multifuente]
+    N8N --> Agent[Agente determinista acotado en API]
+    Agent --> MCP[MCP stdio de solo lectura]
+    MCP --> DB
 ```
 
 La API controla identidad, propiedad de recursos, enrutamiento, recuperación y persistencia. El cliente consume REST; no accede directamente a tablas Supabase, MCP, n8n u Ollama. **La autenticación es de BanuChat; no se reemplazó por Supabase Auth.**
 
-El servidor MCP ejecutable, el agente determinista acotado y las orquestaciones n8n tienen implementación y evidencia **locales**. El perfil administrado desplegado no activa la composición Unified: no debe afirmarse que MCP o n8n participan en el recorrido público. ReAct dirigido por un LLM sigue sin acreditarse como operación de producción. [Arquitectura y separación de entornos](docs/arquitectura.md).
+Desde el 20/11, las consultas estructuradas multifuente del despliegue administrado usan **n8n → agente determinista acotado → MCP stdio** en la EC2. El lector comprueba principal, perfil, release y despliegue, con rol de solo lectura separado en Supabase. Los fast paths y el RAG documental conservan sus recorridos. No se activa Unified ni se acredita ReAct dirigido por un LLM. [Evidencia y límites](docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md). [Arquitectura y separación de entornos](docs/arquitectura.md).
 
 | Tecnología | Uso |
 | --- | --- |
@@ -55,7 +61,7 @@ El servidor MCP ejecutable, el agente determinista acotado y las orquestaciones 
 | Qwen3 `qwen3-embedding:0.6b` | Embeddings de 1024 dimensiones |
 | Qwen3 `qwen3:4b-instruct`, Ollama 0.35.0 | Síntesis documental en la EC2 existente |
 | AWS Academy, Caddy, DuckDNS | Servidor de demostración y origen HTTPS canónico |
-| MCP y n8n | Integración y orquestación acotadas comprobadas en laboratorios locales |
+| MCP y n8n | Admisión y agente acotados en AWS para consultas estructuradas multifuente; laboratorio local conservado |
 
 ## Datos, procedencia y límites
 
@@ -99,7 +105,7 @@ Para ejecutar el producto local existente, consultar [el procedimiento Unified](
 | [backend/mcp-server](backend/mcp-server/README.md) | Servidor interno stdio y contrato de herramientas de lectura |
 | [mobile](mobile/README.md) | Cliente compartido Android/web y pruebas de servicios |
 | [infra](infra/README.md) | SQL, Compose, ejemplos y herramientas operativas |
-| [n8n](n8n/README.md) | Workflows y runbooks de orquestación local |
+| [n8n](n8n/README.md) | Workflow conversacional en AWS y antecedentes locales |
 | [eval](eval/README.md) | Metodología y resultados con fecha y alcance |
 | [docs](docs/README.md) | Estado actual, arquitectura, decisiones, operación y trazabilidad académica |
 

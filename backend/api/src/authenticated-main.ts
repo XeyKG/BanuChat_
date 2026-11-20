@@ -11,6 +11,7 @@ import {loadN8nConversationRuntimeConfig,N8nConversationOrchestrator} from './or
 import {publishedOe2Reader} from './operations/oe2-published-reader.js';
 import {loadLocalOe2Reader} from './operations/oe2-local-reader.js';
 import {createApprovedReferences} from './chat/approved-references.js';
+import type {ManagedMcpRuntime} from './agent/managed-mcp-agent.js';
 
 /** Static CCD artifact allowlist shared by normal startup and focused checks. */
 export function ccdArtifactStorage(){
@@ -66,7 +67,24 @@ export async function startAuthenticatedApi(){
   const n8n=unified?loadN8nConversationRuntimeConfig():undefined;
   const oe2=unified?await loadLocalOe2Reader(new URL('../../../infra/local/unified/oe2-reader.json',import.meta.url)):publishedOe2Reader(process.env.BANUCHAT_OE2_PUBLICATION_FILE,process.env.BANUCHAT_OE2_PUBLICATION_SHA256);
   const mcp=unified?Object.fromEntries(['MCP_POSTGRES_DB','MCP_POSTGRES_USER','MCP_POSTGRES_PASSWORD','MCP_POSTGRES_PORT','BANUCHAT_OLLAMA_BASE_URL'].map(k=>[k,requireValue(k)])):undefined;
+  const agentMode=process.env.BANUCHAT_AUTH_AGENT;
+  if(agentMode!==undefined&&agentMode!=='managed_mcp')throw new Error();
+  let managedAgent:ManagedMcpRuntime|undefined;
+  if(agentMode==='managed_mcp'){
+   if(profile!=='managed'||unified||mode!=='synthetic'||host!=='aws-0-us-west-2.pooler.supabase.com')throw new Error();
+   const config=loadN8nConversationRuntimeConfig();if(!config)throw new Error();
+   managedAgent={deployment_id:deploymentId,environment:{
+    MCP_POSTGRES_DB:database,MCP_POSTGRES_HOST:host,MCP_POSTGRES_PORT:String(dbPort),
+    MCP_PROJECT_REF:requireValue('BANUCHAT_AUTH_DB_PROJECT_REF'),
+    MCP_POSTGRES_USER:`cloud_mcp_reader.${requireValue('BANUCHAT_AUTH_DB_PROJECT_REF')}`,
+    MCP_POSTGRES_PASSWORD:requireValue('BANUCHAT_MCP_READER_PASSWORD'),MCP_SSLMODE:'verify-full',
+    MCP_POSTGRES_CA_FILE:requireValue('BANUCHAT_AUTH_DB_CA_FILE'),BANUCHAT_OLLAMA_BASE_URL:runtime.base_url
+   },orchestrator:new N8nConversationOrchestrator({...config,trace:r=>console.log(JSON.stringify({event:'managed_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))}),
+   trace:({operation_id,trace})=>console.log(JSON.stringify({event:'managed_agent',operation_id,
+    selected_tools:trace.selected_tools,call_count:trace.call_count,terminal_reason:trace.terminal_reason}))};
+  }
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,postgres_profile:profile,
+   ...(managedAgent?{managed_agent:managedAgent}:{}),
    ...(oe2?{oe2_reader:oe2}:{}),...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),
    ...(references?{references}:{}),document_rag:references?query=>references.respond(query,documentRag):documentRag,artifacts});
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});

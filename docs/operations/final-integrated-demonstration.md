@@ -1,5 +1,7 @@
 # BanuChat — demostración integral local vigente
 
+**Advertencia operativa del 19/11/2026:** este es el runbook del laboratorio del 31/10, no la demo cloud. Antes de seguir su instrucción de iniciar n8n, leer la [guía de presentación actual](GUIA-PRESENTACION-BANUCHAT.md): la inspección del contenedor detenido encontró dos temporizadores OE2 de pruebas todavía activos. No arrancarlo hasta resolverlos de forma controlada. Las etiquetas de noticias/recordatorios de este documento también son históricas.
+
 Revisión OE6-DEMO-READINESS-01, 31/10/2026, America/Bogota. Procedimiento para
 el computador habitual ya preparado. No instala un entorno nuevo ni acredita
 portabilidad, despliegue UNAB o cumplimiento completo de OE6.

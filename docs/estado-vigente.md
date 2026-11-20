@@ -1,6 +1,6 @@
 # BanuChat — estado vigente
 
-Corte: **18/11/2026**, America/Bogota. Código de referencia `a30088f` en `main`; cliente publicado **1.0.4**, Android versionCode 5. Esta ficha resume implementación y evidencia; no certifica aprobación académica o institucional ni disponibilidad permanente.
+Corte: **20/11/2026**, America/Bogota. HEAD de partida `2e31128`; RAG conservado desde `a30088f`, integración MCP/n8n desplegada y cambios de este incremento todavía sin commit. Cliente publicado **1.0.4**, Android versionCode 5. Esta ficha resume implementación y evidencia; no certifica aprobación académica o institucional ni disponibilidad permanente.
 
 ## Acceso y composición publicada
 
@@ -16,11 +16,13 @@ La API utiliza su perfil `managed`, autenticación BanuChat y rol PostgreSQL res
 
 | Composición | Datos y recorrido | Frontera |
 | --- | --- | --- |
-| Publicada: AWS + Supabase | Expedientes sintéticos y suplemento CCD privado; REST v2, fast paths y Document RAG/Ollama en EC2; lector OE2 aprobado opcional | `managed` no activa `unified`; no acredita MCP/n8n en el chat público |
+| Publicada: AWS + Supabase | Expedientes sintéticos y suplemento CCD privado; REST v2, fast paths y Document RAG/Ollama en EC2; lector OE2 aprobado opcional | `managed_mcp` admite consultas estructuradas multifuente por n8n/agente/MCP; no activa `unified` ni sustituye el RAG documental |
 | Unified local existente | `banuchat_unified`, loopback PostgreSQL 55463 y API 3004; corpus CCD y auxiliares separados; planes multifuente con agente acotado/MCP/n8n según configuración | Requiere archivos privados y servicios locales; no es la receta de arranque de AWS |
 | Otros laboratorios | Puertos, bases y snapshots registrados en checkpoints específicos | Históricos o aislados; no promover ni restaurar por deducción desde un README |
 
 `backend/api/src/authenticated-main.ts` admite las ramas por configuración confiable. El launcher `npm start` usa Unified local; el servicio desplegado configura directamente el entrypoint autenticado. No basta ejecutar el launcher local con una URL remota.
+
+Desde el 20/11 se comprobó la rama administrada MCP con su lector de mínimo privilegio y n8n privado en la misma EC2. [Checkpoint del ensayo](transition/CHECKPOINT-MCP-AWS-2026-11-20.md). El editor está en `https://n8n.banuchat.duckdns.org`; sus webhooks solo se usan por loopback.
 
 ## Funcionalidades y datos
 
@@ -48,6 +50,7 @@ Los originales privados no se publican en Git ni se entregan por un endpoint de 
 
 | Corte | Evidencia real | Lo que no acredita |
 | --- | --- | --- |
+| [MCP/n8n AWS 20/11](transition/CHECKPOINT-MCP-AWS-2026-11-20.md) | Dos cuentas, consulta MCP, cuatro citas preservadas; nueva consulta documental en 100,029 s, tres artefactos por SHA; reversión de composición y persistencia n8n | No nuevo ensayo Android físico, ReAct LLM ni reinicio completo de EC2 con esta composición |
 | [RAG 18/11](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md) | 192 tests CCD + 72 contratos/evidencia; 24 turnos HTTP 201, fuentes/historial, 22 hashes, aislamiento 404 y revocación 401 | No son 24 respuestas completas: seis parciales citadas y cuatro abstenciones; no evaluación ciega ni RAG estable |
 | [Cliente 1.0.4](transition/CHECKPOINT-DEMO-1.0.4.md) | Calendario, noticias y OE2 en web/Huawei; firma y sesión conservadas; 77 tests Mobile y 22 API focales | No SUS, push remoto ni compatibilidad de todos los dispositivos |
 | [Publicación acumulada](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md) | Supabase, HTTPS, RAG remoto, APK, restauraciones y recuperación según sus cortes | No SLA, hosting permanente ni despliegue en servidores UNAB |

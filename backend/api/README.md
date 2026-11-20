@@ -1,6 +1,6 @@
 # API REST de BanuChat — estado actual
 
-Corte: **18/11/2026**, corrección RAG desplegada desde `a30088f`. [REST v2](api-contract-v2.md) y [OpenAPI v2](openapi-v2.yaml) conservan sus schemas; la ampliación autorizada de disponibilidad OE2 está en el contrato. La sesión es BanuChat, no Supabase Auth.
+Corte: **20/11/2026**, corrección RAG desplegada desde `a30088f`. [REST v2](api-contract-v2.md) y [OpenAPI v2](openapi-v2.yaml) conservan sus schemas; la ampliación autorizada de disponibilidad OE2 está en el contrato. La sesión es BanuChat, no Supabase Auth.
 
 ## Publicación y laboratorio local
 
@@ -10,6 +10,12 @@ Corte: **18/11/2026**, corrección RAG desplegada desde `a30088f`. [REST v2](api
 | Unified local | `npm start` → `scripts/start-unified.mts`; exige `infra/local/unified/application.json` y configuración n8n privada, PostgreSQL 55463/API 3004; puede activar Agent/MCP/n8n acotados |
 
 El perfil administrado no permite `unified`; el arranque habitual local no debe reutilizarse sin adaptación como receta cloud. Los aliases `start:authenticated` y `start:ccd-auth` también remiten actualmente al launcher Unified. Los entrypoints históricos existen para sus escenarios específicos.
+
+## Agente administrado publicado
+
+`BANUCHAT_AUTH_AGENT=managed_mcp` activa solo consultas estructuradas multifuente en `managed`/synthetic. Reutiliza el webhook interno OE4 y el agente determinista con máximo dos herramientas del entrypoint MCP administrado. El principal y perfil proceden de la sesión autorizada, no del cuerpo HTTP. El proceso hijo recibe únicamente la configuración del lector; no credenciales de usuario. Las preguntas documentales y fast paths conservan sus rutas.
+
+El drop-in [`banuchat-api-managed-mcp.conf`](../../infra/scripts/banuchat-api-managed-mcp.conf) añade los archivos privados del lector y de activación, sin modificar `api.env`/`api.secret`. La API de ensayo tuvo que reutilizar ambos archivos originales. El estado de `managed_mcp` no admite el texto `disabled`: para revertir se retira su drop-in, se recarga systemd y se reinicia únicamente la API. No se revierte la base. [Ensayo real y límites](../../docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
 
 ## Capacidades y fronteras
 

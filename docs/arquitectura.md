@@ -1,6 +1,6 @@
 # Arquitectura técnica de BanuChat
 
-Corte: **18/11/2026**, código de referencia `a30088f`. [Estado vigente](estado-vigente.md) y [checkpoint consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md). El anteproyecto y los ADR históricos describen compromisos y decisiones de sus fechas; no prueban que todos sus componentes estén desplegados ni aceptados.
+Corte: **20/11/2026**; RAG conservado desde `a30088f` e integración administrada MCP/n8n validada por su checkpoint. [Estado vigente](estado-vigente.md) y [checkpoint consolidado](transition/CHECKPOINT-PUBLICACION-BANUCHAT.md). El anteproyecto y los ADR históricos describen compromisos y decisiones de sus fechas; no prueban que todos sus componentes estén desplegados ni aceptados.
 
 ## Composición publicada
 
@@ -13,6 +13,10 @@ flowchart TD
     Auth --> Router[Router y política conversacional]
     Router --> Fast[Servicios y respuestas estructuradas]
     Router --> RAG[Document RAG: selección y cobertura]
+    Router --> N8N[n8n: admisión estructurada multifuente]
+    N8N --> Agent[Agente determinista acotado en API]
+    Agent --> MCP[MCP stdio con contexto autenticado]
+    MCP --> DB
     Fast --> DB[(Supabase PostgreSQL + pgvector)]
     RAG --> DB
     RAG --> Emb[Ollama: embedding de consulta]
@@ -36,7 +40,7 @@ EC2 existente de AWS Academy, Amazon Linux 2023, m6i.large de dos vCPU/8 GiB. Ca
 | PostgreSQL + pgvector | Supabase en el despliegue; SQL explícito y funciones/roles restringidos, sin acceso directo de clientes |
 | Ollama | `qwen3-embedding:0.6b` y `qwen3:4b-instruct`; runtime 0.35.0 en el despliegue validado |
 | OE2 publicado | Lector opcional de exportación sintética validada por hash; programación, anuncios y comparación sin matrícula |
-| MCP y n8n | Servidor/herramientas y workflows implementados con evidencia local; no activados como composición Unified en la API administrada |
+| MCP y n8n | Admisión n8n y agente/MCP stdio en AWS para consultas estructuradas multifuente; no activa Unified |
 
 ## Consulta síncrona
 
@@ -73,7 +77,7 @@ El perfil `managed` admite la base/host/pooler previstos, verifica CA y hostname
 
 `npm start` en API ejecuta `scripts/start-unified.mts`. El laboratorio existente usa `banuchat_unified` en loopback 55463 y REST v2 en 3004, con configuración privada y datos auxiliares separados. Puede activar un agente determinista acotado, herramientas MCP de lectura y admisión n8n para planes multifuente. No todos los turnos pasan por ellos y no es ReAct LLM productivo.
 
-El entrypoint `authenticated-main.ts` impide activar `unified` con el perfil `managed`. Por tanto, la evidencia de MCP/n8n local no debe atribuirse a la web pública. El servidor MCP stdio ejecutable y su contrato se conservan; no se requiere reimplementarlo en otro lenguaje para describir el despliegue.
+El entrypoint `authenticated-main.ts` sigue impidiendo activar `unified` con `managed`. La opción independiente `BANUCHAT_AUTH_AGENT=managed_mcp` habilita la rama estructurada administrada comprobada el 20/11: admisión n8n, agente determinista y `managed-main.ts` por stdio. Su rol `cloud_mcp_reader` no recibe tokens de sesión ni acceso a cuentas o tablas académicas completas; cada herramienta verifica la asociación principal/perfil/release/despliegue en una transacción de solo lectura. El RAG CCD permanece directo, y se conserva el contrato MCP. [Pruebas y fronteras](transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
 
 [Runbook Unified local](operations/final-integrated-demonstration.md) · [MCP](../backend/mcp-server/README.md) · [n8n](../n8n/README.md).
 

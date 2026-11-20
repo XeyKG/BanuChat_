@@ -1,0 +1,154 @@
+{
+  "name": "BanuChat - Muestra manual de Markdown desde Drive",
+  "nodes": [
+    {
+      "name": "Inicio manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "id": "7af4f3df-2010-47af-822a-7428e52ad7e1",
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Listar carpeta privada",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "id": "c8aba318-d596-4d96-86be-5524272f5819",
+      "position": [
+        480,
+        300
+      ],
+      "parameters": {
+        "resource": "fileFolder",
+        "operation": "search",
+        "searchMethod": "query",
+        "queryString": "'__PRIVATE_DRIVE_FOLDER_ID__' in parents and trashed = false",
+        "returnAll": true,
+        "filter": {},
+        "options": {
+          "fields": [
+            "*"
+          ]
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat Drive Intake"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "name": "Filtrar Markdown y seleccionar muestra",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "8af8c9a4-b84e-4f0c-86de-f20bd0c29495",
+      "position": [
+        720,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const approvedNames = new Set([]); // Añade hasta tres nombres de archivo exactos.\nif (approvedNames.size < 1 || approvedNames.size > 3) {\n  throw new Error('Configura de uno a tres archivos aprobados para la muestra.');\n}\nconst selected = $input.all().filter(({ json }) =>\n  typeof json.name === 'string' && /\\.md$/iu.test(json.name) &&\n  json.mimeType === 'text/markdown' && json.trashed !== true &&\n  typeof json.id === 'string' && /^[A-Za-z0-9_-]+$/u.test(json.id) &&\n  approvedNames.has(json.name) &&\n  Number.isSafeInteger(Number(json.size)) && Number(json.size) > 0 &&\n  Number(json.size) <= 65536\n);\nif (selected.length !== approvedNames.size ||\n    new Set(selected.map(({ json }) => json.name)).size !== approvedNames.size) {\n  throw new Error('Archivo Markdown faltante, duplicado o fuera del límite.');\n}\nreturn selected;"
+      }
+    },
+    {
+      "name": "Descargar muestra Markdown",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "id": "00ee0bc5-9348-4752-a7d4-b8e0ab47f72b",
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "__RELINK_AFTER_IMPORT__",
+          "name": "BanuChat Drive Intake"
+        }
+      }
+    },
+    {
+      "name": "Comprobar bytes UTF-8",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "id": "bf0076a8-0e4f-4cd9-a5b9-ef5f7b20e011",
+      "position": [
+        1200,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\nconst sizes = [];\nfor (let index = 0; index < inputs.length; index += 1) {\n  const bytes = await this.helpers.getBinaryDataBuffer(index, 'data');\n  const markdown = bytes.toString('utf8');\n  if (bytes.length < 1 || bytes.length > 65536 || !markdown.trim() ||\n      markdown.includes('\\u0000') || !Buffer.from(markdown, 'utf8').equals(bytes)) {\n    throw new Error('La muestra contiene un archivo inválido.');\n  }\n  sizes.push(bytes.length);\n}\nreturn [{ json: { checked: sizes.length, bytes: sizes, published: false } }];"
+      }
+    }
+  ],
+  "connections": {
+    "Inicio manual": {
+      "main": [
+        [
+          {
+            "node": "Listar carpeta privada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listar carpeta privada": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Markdown y seleccionar muestra",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Markdown y seleccionar muestra": {
+      "main": [
+        [
+          {
+            "node": "Descargar muestra Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar muestra Markdown": {
+      "main": [
+        [
+          {
+            "node": "Comprobar bytes UTF-8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
+  "pinData": {}
+}

@@ -1,6 +1,6 @@
 # Documentación de BanuChat
 
-Corte del índice: **18/11/2026**. Empezar por el estado actual; los registros históricos conservan su fecha y no se convierten en nuevas pruebas al actualizar este índice.
+Corte del índice: **20/11/2026**. Empezar por el estado actual; los registros históricos conservan su fecha y no se convierten en nuevas pruebas al actualizar este índice.
 
 ## Para conocer y presentar el producto
 
@@ -9,6 +9,7 @@ Corte del índice: **18/11/2026**. Empezar por el estado actual; los registros h
 3. [Entrega académica y guion](transition/ENTREGA-FINAL-BANUCHAT.md).
 4. [Release 1.0.4 y descargas](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4).
 5. [Recuperación de AWS Academy y operación cloud](operations/cloud-demo.md).
+6. [Guía paso a paso para encender y presentar BanuChat](operations/GUIA-PRESENTACION-BANUCHAT.md): web, Android, n8n/MCP en AWS y Docker histórico; revisión del 20/11.
 
 ## Diseño e implementación
 
@@ -20,10 +21,12 @@ Corte del índice: **18/11/2026**. Empezar por el estado actual; los registros h
 | [API](../backend/api/README.md), [Mobile](../mobile/README.md) | Entrypoints, configuración y pruebas; separar arranque local y aplicación publicada |
 | [RAG/ingesta](../backend/rag/README.md), [ingesta reproducible](ingesta-reproducible.md) | Preparación, validación, publicación y recuperación según receta |
 | [Enrutamiento](enrutamiento-intenciones.md) | Catálogo determinista y antecedentes de evolución; política documental en el código de API |
-| [MCP](../backend/mcp-server/README.md), [n8n](../n8n/README.md) | Implementación y evidencia locales; no son dependencias activas del chat público |
+| [MCP](../backend/mcp-server/README.md), [n8n](../n8n/README.md) | Servidor stdio y workflow publicados en AWS para consultas estructuradas multifuente; recetas locales separadas |
 | [Infraestructura](../infra/README.md), [SQL](../infra/db/README.md) | Entornos, migraciones, ejemplos y límites de operación |
 
 ## Evidencias recientes
+
+- [MCP y n8n en AWS, 20/11](transition/CHECKPOINT-MCP-AWS-2026-11-20.md): integración real, permisos, persistencia, reversión y regresión pública; sin cambios de frontend o corpus.
 
 - [RAG: pertinencia y cobertura, 18/11](transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md): pruebas, consultas reales, respuestas parciales y lagunas documentales.
 - [Cliente 1.0.4](transition/CHECKPOINT-DEMO-1.0.4.md): calendario mensual, Banu al Día, OE2, Android y descargas.

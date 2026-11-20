@@ -1,0 +1,118 @@
+{
+  "observed_at": "2026-11-20T01:02:52.4145961-05:00",
+  "origin": "https://banuchat.duckdns.org",
+  "result": "passed",
+  "protected_reads": [
+    {
+      "route": "/auth/me",
+      "account": 1,
+      "status": 200
+    },
+    {
+      "route": "/me/progress",
+      "account": 1,
+      "status": 200
+    },
+    {
+      "route": "/me/academic",
+      "account": 1,
+      "status": 200
+    },
+    {
+      "route": "/conversations",
+      "account": 1,
+      "status": 200
+    },
+    {
+      "route": "/auth/me",
+      "account": 2,
+      "status": 200
+    },
+    {
+      "route": "/me/progress",
+      "account": 2,
+      "status": 200
+    },
+    {
+      "route": "/me/academic",
+      "account": 2,
+      "status": 200
+    },
+    {
+      "route": "/conversations",
+      "account": 2,
+      "status": 200
+    }
+  ],
+  "turns": [
+    {
+      "status": 201,
+      "phase": "structured_agent",
+      "citations": 4,
+      "seconds": 4.123
+    },
+    {
+      "phase": "documentary_generation",
+      "history": true,
+      "seconds": 100.029,
+      "citations": 3,
+      "verified_artifacts": 3,
+      "insufficient": false
+    }
+  ],
+  "history": true,
+  "foreign_conversation_http": 404,
+  "arbitrary_profile_http": 400,
+  "revoked_token_http": 401,
+  "artifact_checks": [
+    {
+      "id": "3484becd-b0b1-43d7-85b9-14244928a42b",
+      "sha256": "4d6ed710673a95c4369e56a1f49de779c6a6fcf84f4a3380405188f98666937c"
+    },
+    {
+      "id": "c0a8c2ad-2a1f-42fa-86ee-271ca7a363c0",
+      "sha256": "61b5d524425b6c17c07842ad0173debcca16558140000b86831d19722d27ae9f"
+    },
+    {
+      "id": "f8171009-6713-4e75-9543-71beba785b8e",
+      "sha256": "2f33513fac5f91b4be95bd73fd1a90205abf2cfa340fd3bd147f09e65a3c4509"
+    }
+  ],
+  "tls": {
+    "certificate_hostname_validation": true,
+    "web_http": 200,
+    "anonymous_api_http": 401,
+    "anonymous_editor_http": 401,
+    "public_webhook_after_editor_auth_http": 404
+  },
+  "mcp_trace": {
+    "operation_id": "d10888aa-d685-4994-a551-49c4ed5b27e6",
+    "events": [
+      "managed_n8n",
+      "managed_agent"
+    ],
+    "tools": [
+      "get_profile_progress",
+      "get_announcements"
+    ],
+    "call_count": 2,
+    "terminal_reason": "answered"
+  },
+  "n8n_restart_preserved_workflow_and_credential": true,
+  "api_composition_rollback_and_reactivation": true,
+  "local_checks": {
+    "api_typecheck": "passed",
+    "mcp_typecheck": "passed",
+    "api_focal_tests": 72,
+    "mcp_focal_tests": 17
+  },
+  "limitations": [
+    "No complete EC2 reboot after activating the new composition",
+    "No new physical Android run for this backend-only change",
+    "No production LLM ReAct agent",
+    "Documentary RAG retains its direct approved CCD route",
+    "A new generated answer took 100.029 seconds; no stable latency claim",
+    "Only the structured multifuente branch invokes n8n/MCP; no cloud ingestion or Drive connector",
+    "Existing database counts were not remeasured in this increment"
+  ]
+}

@@ -1,5 +1,16 @@
 # BanuChat — publicación de demostración
 
+## MCP, agente acotado y n8n en AWS — 20/11/2026
+
+Integración administrada activada en la EC2 existente. Solo las consultas estructuradas multifuente usan admisión n8n → agente determinista → MCP stdio con lector Supabase restringido; los fast paths y el RAG CCD conservan sus rutas. Sin cambios de cliente, modelos, corpus ni contrato REST/MCP.
+
+Ensayo público real: dos cuentas, ocho lecturas protegidas 200; agente en 4,123 s con cuatro citas idénticas en Historial; aislamiento 404/400 y revocación 401. Una generación documental nueva tardó 100,029 s con tres fuentes y tres hashes de artefactos correctos. Se observaron el workflow Published y el chat/fuentes/Historial en navegador real. n8n conservó workflow y credencial tras reinicio; se ensayó reversión y reactivación de la composición API sin cambiar datos. Cinco servicios activos/habilitados. No nuevo ensayo Android físico ni reinicio completo de EC2 con esta composición; no RAG estable ni ReAct LLM.
+
+API/MCP typecheck correctos; 72 tests API y 17 MCP focales. Se corrigieron la carga privada del unit de ensayo y las etiquetas de citas del adaptador administrado. Se respetó el límite de login al alcanzarlo. Learner Lab Ready: US$13,40 usados de US$50 observados; disponibilidad temporal.
+
+[Checkpoint completo](CHECKPOINT-MCP-AWS-2026-11-20.md) · [Evidencia saneada](../../eval/integration/results/managed-mcp-aws-2026-11-20.json) · [Guía actualizada Markdown/PDF](../operations/GUIA-PRESENTACION-BANUCHAT.md). No commit ni push de este incremento.
+
+
 ## Pertinencia y cobertura RAG — corrección del backend (18/11/2026)
 
 Corregida la lógica general de intención, selección de pasajes, comparación y respuestas parciales. No hay respuestas memorizadas para el cuestionario. API desplegada en la EC2 existente con respaldo y guardas de SHA; web y APK 1.0.4 usan esa API sin actualización del cliente. Corpus y embeddings documentales conservados, sin nuevas cargas o migraciones.

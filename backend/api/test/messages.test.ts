@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { containsOffensiveLanguage, FILTERED_MESSAGE, RESPECT_REPLY } from "../src/chat/respect-filter.js";
 
 import {
   sendMessage,
@@ -164,6 +165,31 @@ function expectReason(reason: SendMessageError["reason"]): (error: unknown) => b
   return (error: unknown) =>
     error instanceof SendMessageError && error.reason === reason;
 }
+
+test("modera groserías fuertes sin confundir vocabulario académico", () => {
+  for (const message of ["Eres un IMBÉCIL.", "hijo... de la puta", "¡Malparido!"]) {
+    assert.equal(containsOffensiveLanguage(message), true);
+  }
+  for (const message of ["¿Qué pruebas debo hacer?", "Computación e imputación", "La consulta no me sirvió"]) {
+    assert.equal(containsOffensiveLanguage(message), false);
+  }
+});
+
+test("un turno ofensivo pide respeto sin invocar herramientas ni guardar el insulto", async () => {
+  const sql = new FakeSqlClient([contextRows(), persistedRows(FILTERED_MESSAGE, RESPECT_REPLY)]);
+  const result = await sendMessage({
+    ...dependencies(sql, {
+      ...fallbackRouter(),
+      route() { throw new Error("unexpected intent routing"); },
+    }),
+    answer_responder: async () => { throw new Error("unexpected agent call"); },
+  }, { conversation_id: CONVERSATION_ID, content: "Eres un imbécil", now: NOW });
+  assert.equal(result.user_message.content, FILTERED_MESSAGE);
+  assert.equal(result.assistant_message.content, RESPECT_REPLY);
+  assert.deepEqual(result.assistant_message.citations, []);
+  assert.equal(sql.calls.length, 2);
+  assert.equal(sql.calls[1]?.values?.[3], FILTERED_MESSAGE);
+});
 
 test("rechaza UUID y contenido inválidos antes de consultar SQL", async () => {
   for (const input of [

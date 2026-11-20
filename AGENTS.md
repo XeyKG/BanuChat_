@@ -32,18 +32,19 @@ No modificar el dataset v1 congelado salvo autorización explícita.
 
 ## Implementación actual
 
-Resumen técnico actualizado al 18/11/2026. La ficha de referencia es
+Resumen técnico actualizado al 20/11/2026. La ficha de referencia es
 `docs/estado-vigente.md`; distinguir siempre la composición publicada de Unified local.
 
 Flujo conversacional publicado:
 
-`Mobile (Expo + React Native + TypeScript) → REST Backend API → Intent Router determinista → fast path estructurado o Document RAG directo`
+`Mobile (Expo + React Native + TypeScript) → REST Backend API → Intent Router determinista → fast path, Document RAG directo o agente acotado/MCP estructurado multifuente`
 
 Los fast paths usan servicios de aplicación y PostgreSQL. Document RAG usa
 PostgreSQL + pgvector en Supabase y Ollama en la EC2 existente. El perfil
-`managed` no activa Unified, Agent/MCP ni n8n en el recorrido público.
-Unified local sí tiene agente determinista acotado, MCP ejecutable y orquestación
-n8n para ciertos planes multifuente. Esa evidencia local no acredita su uso en AWS.
+`managed` sigue sin activar Unified. La opción `managed_mcp` añade admisión n8n,
+agente determinista acotado y MCP stdio para consultas estructuradas multifuente
+en AWS, con evidencia del 20/11. Las consultas documentales conservan su RAG
+directo. Unified local mantiene su composición separada.
 
 Los perfiles son sintéticos; seleccionar un perfil no equivale a autenticarse.
 
@@ -52,11 +53,13 @@ Los perfiles son sintéticos; seleccionar un perfil no equivale a autenticarse.
 `Mobile → REST Backend API → Intent Router → fast path o Agent/RAG → MCP interno cuando corresponda`
 
 MCP y el agente determinista acotado están implementados con evidencia local.
-ReAct dirigido por un LLM y su uso productivo siguen sin acreditarse.
+ReAct dirigido por un LLM sigue sin acreditarse. El agente determinista tiene
+evidencia cloud acotada; no extenderla a todas las herramientas ni consultas.
 
 N8N tiene workflows locales de ingesta manual, fixtures OE2, conversación y
 calendario OE4. Delega validación, procesamiento y embeddings en `backend/rag`.
-No asumir conectores institucionales, Drive/Sheets reales o automatización cloud.
+Solo el workflow conversacional fue publicado en AWS; no asumir ingesta cloud,
+conectores institucionales ni Drive/Sheets reales.
 
 Persistencia:
 

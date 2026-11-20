@@ -1,6 +1,12 @@
 # n8n en BanuChat
 
-Corte: **18/11/2026**. Hay workflows implementados para ingesta manual, fixtures OE2 de programación/convocatorias/novedades, conversación OE4 y sincronización de calendario por fixture. Su evidencia es local; el perfil cloud administrado no activa la composición Unified ni requiere n8n para el chat publicado.
+**Operación, 20/11/2026:** el editor publicado es **https://n8n.banuchat.duckdns.org**, con protección HTTPS adicional y cuenta propietaria de n8n. Usa la EC2 existente, servicio `banuchat-n8n`, instalación npm 2.40.5, usuario Linux separado y datos persistentes en `/var/lib/banuchat-n8n/.n8n`. No utiliza un contenedor del PC.
+
+Solo se importó y publicó **BanuChat OE4 - Conversational orchestration v1**, con cinco nodos y sin timers. Recibe por loopback una solicitud autenticada de la API; decide admisión o aclaración y devuelve una directiva correlacionada. El agente de la API ejecuta las herramientas MCP, no un nodo LLM/ReAct de n8n. Los webhooks públicos están bloqueados en Caddy. La credencial y la clave de cifrado son privadas; no están en este repositorio.
+
+Las pruebas reales verificaron dos fuentes admitidas, tres con aclaración, 403 sin token y conservación del workflow/credencial después de reiniciar el servicio. El workflow no guarda payloads de ejecución; la correlación se acredita con eventos `managed_n8n` y `managed_agent` de la API. [Guía para mostrarlo](../docs/operations/GUIA-PRESENTACION-BANUCHAT.md#7-mostrar-n8n-y-mcp-en-aws) · [Pruebas y límites](../docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
+
+El n8n **local** `banuchat-unified-n8n` conserva nueve workflows y dos timers de pruebas activos en su SQLite, aunque su contenedor estaba detenido el 19/11. No arrancarlo para demostrar la composición cloud. Las ingestas, fixtures OE2 y calendario locales no se copiaron ni automatizaron en AWS.
 
 n8n orquesta; el backend TypeScript mantiene validación, reglas, procesamiento, embeddings y publicación. Los fixtures no prueban scraping institucional, frescura de una fuente real o conectores Google Drive/Sheets. La copia OE2 desplegada se lee por hash y no se actualiza automáticamente desde n8n.
 

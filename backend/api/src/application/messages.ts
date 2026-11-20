@@ -19,6 +19,7 @@ import { CalendarEventsError } from "./calendar-events-errors.js";
 import { CurrentReleaseError } from "./current-release-errors.js";
 import { CourseCatalogError } from "./course-catalog-errors.js";
 import { SendMessageError } from "./messages-errors.js";
+import { containsOffensiveLanguage, FILTERED_MESSAGE, RESPECT_REPLY } from "../chat/respect-filter.js";
 import { ProfileProgressError } from "./profile-progress-errors.js";
 import { DocumentLookupError } from "./document-lookup-errors.js";
 import type { DemoMode } from "./demo-mode.js";
@@ -508,11 +509,15 @@ export async function sendMessage(
       !("role" in message) || (message.role !== "user" && message.role !== "assistant") ||
       !("content" in message) || typeof message.content !== "string",
   )) reject("invalid_database_result");
-  const history = boundConversationContext(context.recent_messages as ConversationMessage[]);
+  const history = boundConversationContext((context.recent_messages as ConversationMessage[]).filter(
+    ({ role, content }) => role === "user" ? content !== FILTERED_MESSAGE : content !== RESPECT_REPLY,
+  ));
+  const filtered = containsOffensiveLanguage(input.content);
+  const userContent = filtered ? FILTERED_MESSAGE : input.content;
 
-  let dispatched;
+  let dispatched: Awaited<ReturnType<typeof dispatchChatQuery>> | null;
   try {
-    dispatched = dependencies.answer_responder ? {kind:'agent_fallback' as const} : await dispatchChatQuery(
+    dispatched = filtered ? null : dependencies.answer_responder ? {kind:'agent_fallback'} : await dispatchChatQuery(
       { sql: dependencies.sql, router: dependencies.router, demo_mode: dependencies.demo_mode ?? "synthetic" },
       {
         content: input.content,
@@ -548,7 +553,15 @@ export async function sendMessage(
   }
 
   let answer: PersistableAnswer;
-  if (dispatched.kind === "answered") {
+  if (dispatched === null) {
+    answer = {
+      release_id: context.dataset_release_id,
+      content: RESPECT_REPLY,
+      insufficient_evidence: false,
+      citations: [],
+      citation_records: [],
+    };
+  } else if (dispatched.kind === "answered") {
     answer = dispatched;
   } else {
     try {
@@ -629,7 +642,7 @@ export async function sendMessage(
         input.conversation_id,
         context.dataset_release_id,
         expectedOrdinal,
-        input.content,
+        userContent,
         answer.content,
         answer.insufficient_evidence,
         JSON.stringify(answer.citation_records),
@@ -665,7 +678,7 @@ export async function sendMessage(
   if (
     !isUuid(row.user_message_id) ||
     row.user_ordinal !== expectedOrdinal ||
-    row.user_content !== input.content ||
+    row.user_content !== userContent ||
     userCreatedAt === undefined ||
     !isUuid(row.assistant_message_id) ||
     row.assistant_ordinal !== expectedOrdinal + 1 ||

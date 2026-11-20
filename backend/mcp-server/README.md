@@ -1,8 +1,10 @@
 # MCP interno de BanuChat
 
-Corte: **18/11/2026**. Existe servidor **ejecutable stdio**, con seis tools de lectura, cliente y política de agente acotada. Se conserva el contrato congelado; no se requiere otra implementación por lenguaje. Las recetas del servidor sintético y sus límites están debajo.
+Corte: **20/11/2026**. Existe servidor **ejecutable stdio**, con seis tools de lectura, cliente y política de agente acotada. Se conserva el contrato congelado; no se requiere otra implementación por lenguaje. Las recetas del servidor sintético y sus límites están debajo.
 
-La integración Agent/MCP/n8n tiene evidencia local, incluida la composición Unified cuando está configurada. El perfil administrado desplegado en AWS no activa esa composición: no debe afirmarse que el chat público pasa por MCP. Tampoco se acredita ReAct dirigido por un LLM como operación productiva ni acceso institucional automático.
+`src/managed-main.ts` se ejecuta por stdio desde la API en AWS para consultas estructuradas multifuente. `managed-runtime.ts` fija el pooler de sesión autorizado, TLS con CA/hostname y rol `cloud_mcp_reader`; comprueba permisos y asociación principal/perfil/release/despliegue. Cada herramienta usa un snapshot de solo lectura. Se probaron realmente `get_profile_progress` y `get_announcements` desde el chat público con admisión n8n; la evidencia local previa también cubre las otras lecturas estructuradas. Esto no acredita las dos herramientas documentales en AWS ni ReAct LLM: el RAG CCD publicado conserva su recorrido directo. [Checkpoint del despliegue](../../docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
+
+Unified local se conserva separado. No se modificó el contrato ni se agregó un puerto MCP público.
 
 [Contrato](tools-contract.md) · [Arquitectura por entornos](../../docs/arquitectura.md) · [Estado vigente](../../docs/estado-vigente.md).
 

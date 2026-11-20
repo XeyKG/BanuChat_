@@ -1,0 +1,23 @@
+[Unit]
+Description=BanuChat MCP standby validation only
+After=network-online.target banuchat-n8n.service
+Requires=banuchat-n8n.service
+
+[Service]
+Type=simple
+User=banuchat
+Group=banuchat
+WorkingDirectory=/opt/banuchat/backend/api
+EnvironmentFile=/etc/banuchat/api.env
+EnvironmentFile=/etc/banuchat/api.secret
+EnvironmentFile=/etc/banuchat/managed-mcp.env
+EnvironmentFile=/etc/banuchat/mcp-check.override.env
+ExecStart=/usr/local/bin/node --import tsx src/authenticated-main.ts
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+MemoryMax=600M
+RuntimeMaxSec=1800
+TimeoutStopSec=30
+UMask=0077

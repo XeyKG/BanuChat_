@@ -20,6 +20,8 @@ import type {PresentationCitation} from '../chat/chat-types.js';
 import {readOe2Demo,type Oe2PublicationReader,type Oe2DemoKind,type Oe2DemoFilters} from '../application/oe2-demo.js';
 import {readOe2Changes,type ChangeFilters} from '../application/oe2-changes.js';
 import type {ApprovedReferences} from '../chat/approved-references.js';
+import {createManagedMcpResponder,type ManagedMcpRuntime} from '../agent/managed-mcp-agent.js';
+import type {DocumentRagResponder} from '../application/messages.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -35,7 +37,8 @@ export class AuthenticatedResources {
  constructor(private readonly pool:Pool,private readonly chat:Omit<SendMessageDependencies,'demo_mode'|'read_context'|'commit_turn'|'persist'>,
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
    private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader},
-   private readonly references?:ApprovedReferences,private readonly publications?:Oe2PublicationReader){this.transactions=new PgTransactionRunner(pool);}
+   private readonly references?:ApprovedReferences,private readonly publications?:Oe2PublicationReader,
+   private readonly managedAgent?:ManagedMcpRuntime){this.transactions=new PgTransactionRunner(pool);}
  async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
   if(!this.unified&&!this.publications)throw new AuthError('NOT_FOUND');
   // Release the normal product connection before waiting on an optional source.
@@ -76,14 +79,13 @@ export class AuthenticatedResources {
  }
  async send(token:string,id:string,content:string,now:string){
   // Authorization and owner check precede the activity gate (foreign UUID must remain 404).
-  const principal=await this.unit(token,async(_c,ctx)=>ctx.principal_id,id,true,true);
+  const turnContext=await this.unit(token,async(_c,ctx)=>ctx,id,true,true);
+  const principal=turnContext.principal_id;
   if(!this.activity.tryBeginMessage(id))throw new AuthError('CONFLICT');
   try{const aux=this.unified?await auxiliaryContext(this.chat.sql,principal):undefined;
    const answer=this.unified&&aux?unifiedResponder({sql:this.chat.sql,router:this.chat.router,rag:this.chat.document_rag,principal,aux,...this.unified}):undefined;
    let citations:PresentationCitation[]=[];
-   return await sendMessage({...this.chat,demo_mode:this.evidenceMode,
-   ...(this.references?{document_reference_release_id:this.references.releaseId}:{}),
-   document_rag:async query=>{
+   const documentRagForTurn:DocumentRagResponder=async query=>{
     const personal=/\bmi\s+(?:perfil acad[eé]mico|expediente|programa acad[eé]mico|semestre|per[ií]odo acad[eé]mico|historial acad[eé]mico|recursamiento|correo acad[eé]mico)\b/iu;
     if(this.evidenceMode!=='synthetic'||!personal.test(query.query))return this.chat.document_rag(query);
     const record=await this.academic(token);
@@ -92,7 +94,14 @@ export class AuthenticatedResources {
     const history=attempts.map(a=>`${a.course_name}, intento ${a.attempt_number}: ${a.outcome==='passed'?'aprobado':a.outcome==='failed'?'reprobado':'en curso'}`).join('\n');
     return {release_id:query.release_id,content:s?`Expediente de ${s.given_name} ${s.family_name}. ID ${s.academic_id}, ${s.email}. ${s.program_name}, semestre ${s.current_semester}, ${s.period_label}.\n${history||'Sin intentos registrados.'}`:'Tu cuenta no tiene un expediente académico asignado.',
      insufficient_evidence:false,citations:[],citation_records:[]};
-   },
+   };
+   if(this.managedAgent&&!turnContext.profile_key)throw new AuthError('FORBIDDEN');
+   const managed=this.managedAgent?createManagedMcpResponder({...this.managedAgent,
+    principal,profile_key:turnContext.profile_key!,rag:documentRagForTurn}):undefined;
+   return await sendMessage({...this.chat,demo_mode:this.evidenceMode,
+   ...(this.references?{document_reference_release_id:this.references.releaseId}:{}),
+   document_rag:documentRagForTurn,
+   ...(managed?{agent_fallback:managed}:{}),
    ...(answer&&aux?{structured_release_id:aux.release_id,answer_responder:async query=>{const result=await answer(query);citations=result.citations;return result;}}:{}),
    read_context:operation=>this.unit(token,c=>operation(c),id,true,true),
    commit_turn:operation=>this.transactions.run(operation),

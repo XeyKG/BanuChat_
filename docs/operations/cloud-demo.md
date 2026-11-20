@@ -1,6 +1,6 @@
 # Operar y recuperar la demostración cloud
 
-Corte: **18/11/2026**. Procedimiento para el despliegue existente de BanuChat, no para crear infraestructura, migrar datos o desplegar en una cuenta distinta.
+Corte: **20/11/2026**. Procedimiento para el despliegue existente de BanuChat, no para crear infraestructura, migrar datos o desplegar en una cuenta distinta.
 
 ## Topología y acceso
 
@@ -17,8 +17,8 @@ DuckDNS es el nombre estable que usan web y APK. La IP elástica conserva la dir
 3. Abrir Session Manager en esa instancia y comprobar servicios:
 
 ```sh
-systemctl is-active ollama banuchat-api banuchat-web-duckdns banuchat-https
-systemctl is-enabled ollama banuchat-api banuchat-web-duckdns banuchat-https
+systemctl is-active ollama banuchat-api banuchat-web-duckdns banuchat-https banuchat-n8n
+systemctl is-enabled ollama banuchat-api banuchat-web-duckdns banuchat-https banuchat-n8n
 ```
 
 4. Si falta un servicio, revisar su estado y arrancar únicamente el componente afectado. Ejemplo para la API existente:
@@ -40,6 +40,8 @@ Si es necesario, `sudo systemctl start banuchat-ollama-warmup`. El modo `--check
 
 Si la web no abre, separar estado de EC2, asociación de IP, resolución DuckDNS, Caddy y servicios. Si abre pero falla la consulta, separar autenticación, conexión a Supabase, recuperación y generación. La API no debe operar habitualmente como `postgres` ni degradar TLS para superar un error.
 
+El editor cloud se abre en `https://n8n.banuchat.duckdns.org`, con dos accesos distintos: protección del servidor y cuenta propietaria de n8n. El acceso inicial está en el archivo privado del operador indicado en la guía; no se necesita Docker. El workflow conversacional debe aparecer Published. La API activa `managed_mcp` solo para consultas estructuradas multifuente; no es una migración de Unified.
+
 ## Disponibilidad y rendimiento
 
 Los servicios públicos y datos persisten fuera del PC, pero AWS Academy es temporal. Terminar o agotar el laboratorio puede detener la demostración; el dominio no evita esa condición. No se acredita funcionamiento permanente, SLA institucional ni presupuesto restante en tiempo real.
@@ -54,6 +56,12 @@ Cada publicación registra archivos, hashes y respaldo en el [checkpoint consoli
 
 El paquete académico publicado refleja su fecha. La corrección del backend posterior está en [su checkpoint](../transition/CHECKPOINT-RAG-PERTINENCIA-2026-11-18.md); no requiere otra APK. Este runbook se revisó contra scripts y evidencias existentes: no se volvió a detener la EC2 ni se ejecutó una reversión durante la revisión documental.
 
-## Comprobación durante la revisión documental
+## Comprobación actual de la integración, 20/11
+
+La EC2 conservó IP y cinco servicios habilitados/activos. El propietario recuperó el laboratorio mediante la guía. Se probó la rama MCP en API aislada y por DuckDNS, citas/Historial, dos cuentas, aislamiento y revocación; una generación nueva tardó 100,029 s con tres fuentes y tres hashes correctos. n8n conservó workflow y credencial tras su reinicio. La composición de API se revirtió y reactivó sin tocar datos; no se reinició toda la EC2.
+
+Learner Lab: Ready, US$13,40 usados de US$50 observados; es una lectura fechada del panel, susceptible de retraso. No equivale a hosting permanente. [Checkpoint completo](../transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
+
+## Comprobación histórica durante la revisión documental
 
 En el sondeo puntual del 18/11/2026, la conexión a la URL de login agotó su tiempo sin obtener respuesta HTTP. No se determinó la causa ni se modificó infraestructura; no debe atribuirse automáticamente a EC2, DNS o Supabase. Los resultados funcionales anteriores mantienen sus fechas y no acreditan disponibilidad en ese instante. Este dato no sustituye una revisión del laboratorio y sus servicios.

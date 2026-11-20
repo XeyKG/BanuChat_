@@ -121,7 +121,7 @@ function calendarRange(query: string, now: string): { date_from: string; date_to
   return { date_from: today, date_to: addDays(today, 30) };
 }
 
-function planningSubject(query: string, history: readonly ConversationMessage[] = []): string {
+export function planningSubject(query: string, history: readonly ConversationMessage[] = []): string {
   const current = normalized(query);
   const followUp = /^(?:y|tambien|ademas|entonces|cuales|esas|esos|ellos|ellas)\b/u.test(
     current.replace(/^[^\p{L}\p{N}]+/u, ""),

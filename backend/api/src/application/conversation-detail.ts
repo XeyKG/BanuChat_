@@ -209,7 +209,7 @@ function isSourceKind(value: unknown): value is ConversationDetailSourceKind {
   );
 }
 
-function labelPrefix(sourceKind: ConversationDetailSourceKind): string {
+export function labelPrefix(sourceKind: ConversationDetailSourceKind): string {
   switch (sourceKind) {
     case "document":
       return "Documento";
