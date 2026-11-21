@@ -1,0 +1,6 @@
+[
+  {"course_key":"course-001","name":"Interacción Digital","description":"Curso de referencia del pilar Competencias Digitales Básicas. Los registros académicos asociados son ficticios.","status":"available"},
+  {"course_key":"course-002","name":"Habilidades en Analítica Digital","description":"Curso de referencia del pilar Analítica y Contenido Digital. Los registros académicos asociados son ficticios.","status":"available"},
+  {"course_key":"course-013","name":"Marca Personal Digital","description":"Curso de referencia del pilar Analítica y Contenido Digital. Catálogo de demostración.","status":"available"},
+  {"course_key":"course-014","name":"IA Generativa","description":"Curso de referencia del pilar Tecnologías Transformativas. Catálogo de demostración.","status":"available"}
+]

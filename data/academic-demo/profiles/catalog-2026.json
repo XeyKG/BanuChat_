@@ -1,0 +1,16 @@
+{
+  "synthetic": true,
+  "sources": [
+    "https://unab.edu.co/programas/ingenieria-de-sistemas/",
+    "https://unab.edu.co/programas/ingenieria-industrial/",
+    "https://unab.edu.co/cursos-intensivos-de-competencias-digitales-para-estudiantes-de-6o-semestre-en-adelante-15-de-abril-a-15-de-mayo-de-2026/"
+  ],
+  "programs": [
+    {"program_key":"sim-digital","name":"Ingeniería de Sistemas"},
+    {"program_key":"sim-media","name":"Ingeniería Industrial"}
+  ],
+  "periods": [
+    {"period_key":"sim-2026-a","label":"202610"},
+    {"period_key":"sim-2026-b","label":"202660"}
+  ]
+}

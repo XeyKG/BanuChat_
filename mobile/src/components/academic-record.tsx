@@ -50,8 +50,9 @@ export function AcademicRecord({result,retry}:{result:LoadResult|undefined;retry
     <Text style={textStyles.body}>{student.given_name} {student.family_name}</Text>
     <Text style={textStyles.body}>{student.academic_id} · {student.email}</Text>
     <Text style={textStyles.body}>Programa · {student.program_name}</Text>
+    <Text style={textStyles.body}>Semestre · {student.current_semester}</Text>
     <Text style={textStyles.body}>Período · {student.period_label}</Text>
-    <Text style={[textStyles.small,{color:colors.banuMuted}]}>Datos de demostración</Text>
+    <Text style={[textStyles.small,{color:colors.banuMuted}]}>Expediente ficticio de demostración</Text>
     <Text accessibilityRole="header" style={[textStyles.body,{fontWeight:'700'}]}>Cursos e intentos</Text>
     {!result.attempts.length && <Text style={textStyles.body}>Sin intentos registrados.</Text>}
     {result.attempts.map(attempt=><View key={`${attempt.course_key}/${attempt.attempt_number}`} style={styles.attempt}>
