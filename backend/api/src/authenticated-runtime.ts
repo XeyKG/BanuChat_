@@ -48,7 +48,7 @@ export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expected
  if(input.unified&&input.evidence_mode!=='ccd_local')throw new AuthError('DEPENDENCY_UNAVAILABLE');
  if(input.managed_agent&&(input.unified||input.evidence_mode!=='synthetic'||input.postgres_profile!=='managed'))throw new AuthError('DEPENDENCY_UNAVAILABLE');
  const resources=new AuthenticatedResources(input.pool,{sql:new PgSqlClient(input.pool),router,document_rag:input.document_rag},input.artifacts,knowledgeMode(input.evidence_mode),
- input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references,input.oe2_reader,input.managed_agent,input.chat_observer,Boolean(input.editorial_origin));
+ input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references,input.oe2_reader,input.managed_agent,input.chat_observer,Boolean(input.editorial_origin),input.postgres_profile==='managed');
  const editorial=input.editorial_origin?await createEditorialHandler(input.pool,input.editorial_origin,token=>auth.verifyAccess(token)):undefined;
  return createAuthenticatedApiServer({auth,resources,...(editorial?{editorial}:{}),...(input.unified||input.oe2_reader?{oe2_demo:true}:{}),...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
 }

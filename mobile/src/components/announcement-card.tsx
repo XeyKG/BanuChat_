@@ -2,6 +2,7 @@ import {StyleSheet,Text,View} from 'react-native';
 import type {Announcement,AnnouncementStatus} from '@/api/announcements';
 import {StatusBadge} from '@/components/secondary-ui';
 import {EditorialAttachment} from '@/components/editorial-attachment';
+import {EditorialImage} from '@/components/editorial-image';
 import {colors,radii,spacing,textStyles} from '@/ui/tokens';
 const status:Record<AnnouncementStatus,{label:string;tint:string;soft:string}>={active:{label:'Vigente',tint:colors.success,soft:colors.successSoft},upcoming:{label:'Por venir',tint:colors.warning,soft:colors.warningSoft},expired:{label:'En el archivo',tint:colors.banuMuted,soft:colors.banuBorder}};
 const date=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',day:'numeric',month:'short',year:'numeric'});
@@ -10,8 +11,9 @@ export function AnnouncementCard({announcement}:{announcement:Announcement}){
  return <View testID="announcement-card" style={styles.card}>
   <View style={styles.top}><Text style={styles.date}>{date.format(new Date(announcement.valid_from))}</Text><StatusBadge tint={meta.tint} soft={meta.soft}>{meta.label}</StatusBadge></View>
   <Text selectable accessibilityRole="header" style={styles.title}>{announcement.title}</Text>
+  {announcement.temporal_status==='active'&&<EditorialImage itemKey={announcement.announcement_key} label={'Imagen de '+announcement.title}/>}
   <Text selectable testID="announcement-body" style={styles.body}>{announcement.description}</Text>
-  <EditorialAttachment announcementKey={announcement.announcement_key}/>
+  {announcement.temporal_status==='active'&&<EditorialAttachment announcementKey={announcement.announcement_key}/>}
   {announcement.valid_until!==null&&<Text style={styles.deadline}>Hasta el {date.format(new Date(announcement.valid_until))}</Text>}
  </View>;
 }

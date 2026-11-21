@@ -14,3 +14,15 @@ El backend activa el panel administrado con `BANUCHAT_EDITORIAL_ORIGIN=https://b
 Si la EC2 está detenida, inicia la instancia existente desde AWS Academy. El panel vuelve con la API, y las noticias, los adjuntos y las cuentas permanecen en Supabase. [Guía de arranque](GUIA-PRESENTACION-BANUCHAT.md)
 
 El 20/11/2026 se verificaron por HTTPS el acceso separado, el rechazo de un origen externo, la privacidad del borrador, la publicación en el listado estudiantil, la descarga de dos versiones de un archivo Markdown, el archivo de la noticia y la revocación de la sesión. La noticia ficticia de prueba terminó archivada. La EC2 pasó a estado `stopped` después de la comprobación por solicitud del propietario.
+
+## Noticias y eventos con fechas
+
+En la revisión local, **Noticias** y **Eventos** muestran también las publicaciones existentes de la release activa. Selecciona una fila para ver sus fechas y editarla. El panel permite filtrar por vigencia, programación, vencimiento, borrador y archivo. Las ediciones quedan en el esquema editorial y se preserva la publicación de origen.
+
+Para noticias, la fecha inicial abre la vigencia y la final la cierra. El texto vencido queda en el filtro **Archivo** de Banu al Día. La acción **Archivar** retira la publicación del listado de estudiantes. Los eventos conservan su historial en el calendario y aparecen en todos los días que cubre su intervalo. Las fechas del panel se editan en hora de Bogotá. Puedes adjuntar una portada PNG, JPG o WebP de hasta 1 MB, además del PDF o Markdown habitual.
+
+Antes de desplegar esta revisión, aplica [002_editorial_schedule.sql](../../infra/db/editorial/002_editorial_schedule.sql) sobre la base que tiene la migración 001. Luego actualiza la API y el cliente. Se probaron ambas migraciones y las rutas HTTP en una base PostgreSQL desechable en memoria. AWS y la base administrada quedaron fuera de esta ejecución.
+
+## Nombres de la cohorte en Mi progreso
+
+La API administrada muestra Ingeniería de Sistemas o Ingeniería Industrial para la cohorte, con los nombres Interacción Digital y Habilidades de Analítica Digital en los dos cursos de prueba. La UI usa períodos de seis dígitos y NRC ficticios por curso y período, por ejemplo **NRC 99101 · Interacción Digital**. Los intentos, las cuentas y las claves de la release permanecen en su sitio. [Programas de pregrado UNAB](https://unab.edu.co/pregrados/) · [Oferta del Centro de Competencias Digitales](https://unab.edu.co/asi-funciona-la-formacion-en-competencias-digitales-de-la-unab/)

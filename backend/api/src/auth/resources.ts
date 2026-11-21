@@ -11,6 +11,7 @@ import {sendMessage,type SendMessageDependencies} from '../application/messages.
 import {getProfileProgress,type ProfileProgressInput} from '../application/profile-progress.js';
 import {getCalendarEvents,type CalendarEventsInput} from '../application/calendar-events.js';
 import {getAnnouncements,type AnnouncementsInput} from '../application/announcements.js';
+import {cloudAcademicDisplay,cloudCourseLabel,isCloudStudent} from '../application/cloud-academic-display.js';
 import {getDocumentArtifact,type DocumentArtifactStorage} from '../application/document-artifact.js';
 import {ConversationActivityCoordinator} from '../http/conversation-activity.js';
 import {knowledgeDefinition,type KnowledgeMode} from './knowledge-mode.js';
@@ -40,7 +41,7 @@ export class AuthenticatedResources {
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
    private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader},
    private readonly references?:ApprovedReferences,private readonly publications?:Oe2PublicationReader,
-   private readonly managedAgent?:ManagedMcpRuntime,private readonly chatObserver?:ChatTurnObserver,private readonly editorialNews=false){this.transactions=new PgTransactionRunner(pool);}
+   private readonly managedAgent?:ManagedMcpRuntime,private readonly chatObserver?:ChatTurnObserver,private readonly editorialNews=false,private readonly cloudAcademicLabels=false){this.transactions=new PgTransactionRunner(pool);}
  async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
   if(!this.unified&&!this.publications)throw new AuthError('NOT_FOUND');
   // Release the normal product connection before waiting on an optional source.
@@ -131,16 +132,19 @@ export class AuthenticatedResources {
  async academic(token:string){
   if(this.evidenceMode!=='synthetic'||this.unified)throw new AuthError('NOT_FOUND');
   try {
-   return (await this.pool.query(`SELECT student, attempts FROM banuchat_academic.read_me($1)`,[token])).rows[0]
+   const record=(await this.pool.query(`SELECT student, attempts FROM banuchat_academic.read_me($1)`,[token])).rows[0]
     ?? {student:null,attempts:[]};
+   return this.cloudAcademicLabels?cloudAcademicDisplay(record):record;
   } catch(error){throw resourceError(error);}
  }
- progress(token:string,input:Omit<ProfileProgressInput,'profile_key'>){return this.unit(token,(c,ctx)=>{
+ progress(token:string,input:Omit<ProfileProgressInput,'profile_key'>){return this.unit(token,async(c,ctx)=>{
   if(this.unified)return auxiliaryContext(c,ctx.principal_id).then(aux=>unifiedProgress(c,aux,{...input,profile_key:aux.profile_key}));
   if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');
-  if(!ctx.profile_key)throw new AuthError('FORBIDDEN');return getProfileProgress(c,{...input,profile_key:ctx.profile_key});
+  if(!ctx.profile_key)throw new AuthError('FORBIDDEN');
+  const result=await getProfileProgress(c,{...input,profile_key:ctx.profile_key});
+  return this.cloudAcademicLabels&&isCloudStudent(ctx.profile_key)?{...result,courses:result.courses.map(cloudCourseLabel)}:result;
  },null,true);}
- calendar(token:string,input:CalendarEventsInput){return this.unit(token,c=>{if(this.unified)return unifiedCalendar(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getCalendarEvents(c,input);});}
+ calendar(token:string,input:CalendarEventsInput){return this.unit(token,c=>{if(this.unified)return unifiedCalendar(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getCalendarEvents(c,input,this.editorialNews);});}
  announcements(token:string,input:AnnouncementsInput){return this.unit(token,c=>{if(this.unified)return unifiedAnnouncements(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getAnnouncements(c,input,this.editorialNews);});}
  artifact(token:string,id:string){return this.unit(token,async c=>{
   if(this.references){const artifact=await this.references.artifact(c,token,id);if(artifact)return artifact;}

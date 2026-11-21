@@ -7,15 +7,22 @@ import {AppButton} from '@/components/app-button';
 import {ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,secondaryStyles} from '@/components/secondary-ui';
 import {ScreenHeader} from '@/components/screen-header';
 import {MonthCalendar} from '@/components/month-calendar';
+import {EditorialImage} from '@/components/editorial-image';
+import {EditorialAttachment} from '@/components/editorial-attachment';
 import {useSession} from '@/session/session-context';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal} from '@/config/demo-mode';
 import {colors,radii,spacing,textStyles} from '@/ui/tokens';
 import {getBogotaCivilToday} from '@/utils/bogota-date';
-import {calendarDays,eventDay,monthStart,moveMonth} from '@/utils/calendar-month';
+import {calendarDays,eventDay,eventOverlapsDay,monthStart,moveMonth} from '@/utils/calendar-month';
 type EventFilter='all'|CalendarEventType;
 const filters:[EventFilter,string][]=[['all','Todas'],['course_session','Sesiones'],['announcement_deadline','Cierres'],['general','Otras actividades']];
 const meta:Record<CalendarEventType,{label:string;tint:string;soft:string}>={course_session:{label:'Sesión de curso',tint:colors.banuMagenta,soft:colors.banuSoft},announcement_deadline:{label:'Cierre',tint:colors.amber,soft:colors.amberSoft},general:{label:'Actividad',tint:colors.violet,soft:colors.violetSoft}};
 const time=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',hour:'numeric',minute:'2-digit'});
+const dateTime=new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+function eventTime(event:CalendarEvent){
+ const format=event.ends_at&&eventDay(event.starts_at)!==eventDay(event.ends_at)?dateTime:time;
+ return format.format(new Date(event.starts_at))+(event.ends_at?' – '+format.format(new Date(event.ends_at)):'');
+}
 const selectedLabel=new Intl.DateTimeFormat('es-CO',{timeZone:'UTC',weekday:'long',day:'numeric',month:'long'});
 export default function CalendarScreen(){
  const router=useRouter(),{activeProfile}=useSession(),{width}=useWindowDimensions();
@@ -26,8 +33,8 @@ export default function CalendarScreen(){
  const [result,setResult]=useState<{key:string;events?:CalendarEvent[];error?:boolean}>();
  const state=result?.key!==key?'loading':result.error?'error':'success',events=result?.key===key?result.events??[]:[];
  useEffect(()=>{if(!activeProfile){router.replace(isCcdLocal()?'/profiles':'/login');return;}let live=true;void getCalendarEvents({dateFrom:cells[0],dateTo:cells[cells.length-1],eventTypes:filter==='all'?undefined:[filter]}).then(data=>{if(live)setResult({key,events:data.events});}).catch(()=>{if(live)setResult({key,error:true});});return()=>{live=false;};},[activeProfile,key,cells,filter,router]);
- const counts=useMemo(()=>{const map=new Map<string,number>();for(const event of events){const day=eventDay(event.starts_at);map.set(day,(map.get(day)??0)+1);}return map;},[events]);
- const daily=events.filter(event=>eventDay(event.starts_at)===selected);
+ const counts=useMemo(()=>new Map(cells.map(day=>[day,events.filter(event=>eventOverlapsDay(event.starts_at,event.ends_at,day)).length])),[cells,events]);
+ const daily=events.filter(event=>eventOverlapsDay(event.starts_at,event.ends_at,selected));
  const choose=(day:string,showAgenda=false)=>{setSelected(day);if(monthStart(day)!==month)setMonth(monthStart(day));if(showAgenda&&columnWidth<850)requestAnimationFrame(()=>scroll.current?.scrollTo({y:agendaY.current,animated:false}));};
  const changeMonth=(offset:number)=>{const next=moveMonth(month,offset);setMonth(next);setSelected(next===monthStart(today)?today:next);};
  if(!activeProfile)return null;
@@ -44,8 +51,10 @@ export default function CalendarScreen(){
      {state==='error'&&<ScreenState kind="error" title="No fue posible cargar las actividades" body="Puedes cambiar de mes o volver a intentarlo."><AppButton tone="banu" label="Reintentar calendario" onPress={()=>setRetry(r=>r+1)}/></ScreenState>}
      {state==='success'&&!daily.length&&<ScreenState kind="empty" title="Un día sin actividades" body="Selecciona una fecha marcada para ver lo que hay programado."/>}
      {state==='success'&&daily.map(event=><View testID="calendar-event" key={event.event_key} style={styles.event}>
-      <View style={styles.eventHeading}><StatusBadge tint={meta[event.event_type].tint} soft={meta[event.event_type].soft}>{meta[event.event_type].label}</StatusBadge><Text style={styles.time}>{time.format(new Date(event.starts_at))}{event.ends_at?' – '+time.format(new Date(event.ends_at)):''}</Text></View>
+      <View style={styles.eventHeading}><StatusBadge tint={meta[event.event_type].tint} soft={meta[event.event_type].soft}>{meta[event.event_type].label}</StatusBadge><Text style={styles.time}>{eventTime(event)}</Text></View>
       <Text selectable style={styles.eventTitle}>{event.title}</Text><Text selectable style={styles.description}>{event.description}</Text>
+      <EditorialImage itemKey={event.event_key} label={'Imagen de '+event.title}/>
+      <EditorialAttachment announcementKey={event.event_key}/>
      </View>)}
     </View>
    </View>{isCcdAuthenticated()&&<DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}</ContentColumn>

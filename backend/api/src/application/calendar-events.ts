@@ -34,6 +34,26 @@ WHERE ce.dataset_release_id = $1
   )
 `;
 
+const EDITORIAL_CALENDAR_QUERY = `
+WITH combined AS (
+ SELECT ce.event_key::text,ce.title::text,ce.description::text,ce.event_type::text,ce.starts_at,ce.ends_at,
+        ce.course_key::text,ce.announcement_key::text,ce.source_path::text,ce.source_locator::text,ce.source_sha256::text
+ FROM banuchat.calendar_events ce WHERE ce.dataset_release_id=$1
+   AND NOT EXISTS (SELECT 1 FROM banuchat_editorial.news n WHERE n.kind='event' AND n.state<>'draft'
+     AND n.id=md5('event:'||ce.dataset_release_id||':'||ce.event_key)::uuid)
+ UNION ALL
+ SELECT 'editorial-'||(CASE WHEN n.image_name IS NOT NULL THEN 'image-' ELSE '' END)||
+        (CASE WHEN n.file_name IS NOT NULL THEN 'file-' ELSE '' END)||n.id,
+        n.title,n.body,COALESCE(b.event_type,'general'),n.starts_at,n.ends_at,b.course_key,b.announcement_key,
+        'editorial/events/'||n.id,'revision:'||n.revision,encode(sha256(convert_to(n.title||chr(10)||n.body,'UTF8')),'hex')
+ FROM banuchat_editorial.news n
+ LEFT JOIN banuchat_editorial.base_items b ON b.id=n.id AND b.kind='event' AND b.dataset_release_id=$1
+ WHERE n.kind='event' AND n.state='published' AND n.published_at<=now()
+)
+SELECT * FROM combined ce WHERE COALESCE(ce.ends_at,ce.starts_at)>=($2::date::timestamp AT TIME ZONE 'America/Bogota')
+ AND ce.starts_at<(($3::date+1)::timestamp AT TIME ZONE 'America/Bogota')
+`;
+
 export type CalendarEventType =
   | "course_session"
   | "announcement_deadline"
@@ -309,14 +329,16 @@ export function normalizeCalendarRow(row: unknown): CalendarEventResult {
 export async function getCalendarEvents(
   client: SqlQueryClient,
   input: CalendarEventsInput,
+  includeEditorial = false,
 ): Promise<CalendarEventsResult> {
   const { eventTypes, limit } = validateCalendarInput(input);
   const release = await resolveCurrentRelease(client);
 
   const hasEventTypeFilter = eventTypes !== undefined;
+  const base = includeEditorial ? EDITORIAL_CALENDAR_QUERY : CALENDAR_QUERY_BASE;
   const query = hasEventTypeFilter
-    ? `${CALENDAR_QUERY_BASE}  AND ce.event_type = ANY($4::text[])\nORDER BY ce.starts_at ASC, ce.event_key ASC\nLIMIT $5\n`
-    : `${CALENDAR_QUERY_BASE}ORDER BY ce.starts_at ASC, ce.event_key ASC\nLIMIT $4\n`;
+    ? `${base}  AND ce.event_type = ANY($4::text[])\nORDER BY ce.starts_at ASC, ce.event_key ASC\nLIMIT $5\n`
+    : `${base}ORDER BY ce.starts_at ASC, ce.event_key ASC\nLIMIT $4\n`;
   const values = hasEventTypeFilter
     ? [release.release_id, input.date_from, input.date_to, eventTypes, limit]
     : [release.release_id, input.date_from, input.date_to, limit];

@@ -7,8 +7,9 @@ import {Argon2idHasher,AuthError} from '../auth/primitives.js';
 const base='/api/v2/editorial';
 const cookieName='__Secure-banu-editor';
 const maxFile=2*1024*1024;
+const maxImage=1024*1024;
 const uuid=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/u;
-export const editorialColumns='id, revision, title, body, state, updated_at, published_at, file_name';
+const editorialColumns='id, revision, title, body, state, updated_at, published_at, file_name, kind, starts_at, ends_at, image_name';
 const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
 class EditorialError extends Error {
  constructor(readonly status:number,message:string){super(message);}
@@ -60,6 +61,28 @@ function parseFile(value:unknown):{name:string;bytes:Buffer}|null|undefined{
  }
  return {name:file,bytes};
 }
+function parseImage(value:unknown){
+ if(value==null)return value;
+ if(typeof value!=='object'||Array.isArray(value))invalid();
+ const {name,data}=value as Record<string,unknown>;
+ const imageName=field(name,120);
+ if(/[/\\]/u.test(imageName)||typeof data!=='string'||data.length>Math.ceil(maxImage/3)*4)invalid();
+ const bytes=Buffer.from(data,'base64');
+ if(!bytes.length||bytes.length>maxImage||bytes.toString('base64')!==data)invalid();
+ let mime:string;
+ if(bytes.length>=24&&bytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))&&bytes.toString('ascii',12,16)==='IHDR'&&/\.png$/iu.test(imageName))mime='image/png';
+ else if(bytes.length>=12&&bytes.subarray(0,3).equals(Buffer.from('ffd8ff','hex'))&&bytes.subarray(-2).equals(Buffer.from('ffd9','hex'))&&/\.jpe?g$/iu.test(imageName))mime='image/jpeg';
+ else if(bytes.length>=16&&bytes.toString('ascii',0,4)==='RIFF'&&bytes.toString('ascii',8,12)==='WEBP'&&bytes.readUInt32LE(4)===bytes.length-8&&/\.webp$/iu.test(imageName))mime='image/webp';
+ else throw new EditorialError(400,'Selecciona una imagen PNG, JPG o WebP válida.');
+ return {name:imageName,mime,bytes};
+}
+function date(value:unknown):string|null{
+ if(value==null||value==='')return null;
+ if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(value))invalid();
+ const parsed=new Date(value);
+ if(!Number.isFinite(parsed.getTime())||parsed.getUTCFullYear()<1||parsed.toISOString()!==value)invalid();
+ return value;
+}
 function cookie(token:string,maxAge:number){
  return `${cookieName}=${token}; Path=${base}; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
 }
@@ -97,7 +120,7 @@ export async function createEditorialHandler(pool:Pool,origin:string,verifyStude
    const asset=files.get(suffix===''||suffix==='/'?'index.html':suffix.slice(1));
    if(method==='GET'&&asset){
     response(res,200,asset.content,{'Content-Type':asset.type,'X-Frame-Options':'DENY',
-     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"});
+     'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob: data:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"});
     return;
    }
    if(method!=='GET'&&req.headers.origin!==origin)throw new EditorialError(403,'Abre el panel desde su dirección oficial.');
@@ -126,8 +149,8 @@ export async function createEditorialHandler(pool:Pool,origin:string,verifyStude
     return;
    }
    const username=await session(req);
-   const file= /^\/attachments\/([^/]+)$/u.exec(suffix);
-   if(method==='GET'&&file&&uuid.test(file[1]!)){
+   const file= /^\/(attachments|images)\/([^/]+)$/u.exec(suffix);
+   if(method==='GET'&&file&&uuid.test(file[2]!)){
     if(!username){
      const token=/^Bearer ([A-Za-z0-9_-]{43})$/u.exec(req.headers.authorization??'')?.[1];
      if(!token)throw new EditorialError(401,'Inicia sesión para descargar el archivo.');
@@ -136,38 +159,57 @@ export async function createEditorialHandler(pool:Pool,origin:string,verifyStude
       throw error;
      }
     }
-    const row=(await pool.query<{file_name:string;file_bytes:Buffer}>(`
-     SELECT file_name,file_bytes FROM banuchat_editorial.news
-     WHERE id=$1 AND file_bytes IS NOT NULL AND ($2::boolean OR state='published')
-    `,[file[1],Boolean(username)])).rows[0];
+    const isImage=file[1]==='images';
+    const selection=isImage?'image_name AS file_name,image_bytes AS file_bytes,image_mime AS mime':'file_name,file_bytes,NULL::text AS mime';
+    const row=(await pool.query<{file_name:string;file_bytes:Buffer;mime:string|null}>(`
+     SELECT ${selection} FROM banuchat_editorial.news
+     WHERE id=$1 AND ${isImage?'image_bytes':'file_bytes'} IS NOT NULL AND ($2::boolean OR (
+       state='published' AND published_at<=now()
+       AND (kind='event' OR (COALESCE(starts_at,published_at)<=now() AND (ends_at IS NULL OR ends_at>=now())))
+     ))
+    `,[file[2],Boolean(username)])).rows[0];
     if(!row)notFound();
+    if(isImage){response(res,200,{mime:row.mime,data:row.file_bytes.toString('base64')});return;}
     response(res,200,row.file_bytes,{'Content-Disposition':"attachment; filename*=UTF-8''"+encodeURIComponent(row.file_name).replace(/[!'()*]/gu,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase()),'Content-Length':String(row.file_bytes.length)});
     return;
    }
    if(!username)throw new EditorialError(401,'Inicia sesión con una cuenta de administración.');
    if(method==='GET'&&suffix==='/session'){response(res,200,{username});return;}
    if(method==='GET'&&suffix==='/news'){
-    const result=await pool.query(`SELECT ${editorialColumns} FROM banuchat_editorial.news ORDER BY updated_at DESC,id DESC LIMIT 200`);
+    const result=await pool.query(`
+     SELECT ${editorialColumns},false AS from_release FROM banuchat_editorial.news
+     UNION ALL
+     SELECT b.id,0,b.title,b.body,'published',b.starts_at,b.starts_at,NULL,b.kind,b.starts_at,b.ends_at,NULL,true
+     FROM banuchat_editorial.base_items b
+     JOIN banuchat.datasets d ON d.id=1 AND d.current_release_id=b.dataset_release_id
+     WHERE NOT EXISTS (SELECT 1 FROM banuchat_editorial.news n WHERE n.id=b.id)
+     ORDER BY updated_at DESC,id DESC
+    `);
     response(res,200,{news:result.rows});return;
    }
    if(method!=='POST'||suffix!=='/news')notFound();
-   const data=await body(req,Math.ceil(maxFile*4/3)+50000);
+   const data=await body(req,Math.ceil((maxFile+maxImage)*4/3)+50000);
    const {id,revision,state}=data;
+   const kind=data.kind??'news';
    if(typeof id!=='string'||!uuid.test(id)||typeof revision!=='number'||!Number.isSafeInteger(revision)||revision<0||
-      (state!=='draft'&&state!=='published'&&state!=='archived')||(revision===0&&state==='archived'))invalid();
-   const title=field(data.title,160),text=field(data.body,8000),attachment=parseFile(data.attachment);
-   const values=[id,title,text,state,username,attachment?.name??null,attachment?.bytes??null];
+      (state!=='draft'&&state!=='published'&&state!=='archived')||(kind!=='news'&&kind!=='event'))invalid();
+   const starts=date(data.starts_at),ends=date(data.ends_at);
+   if((kind==='event'&&!starts)||(ends&&(!starts||ends<starts)))throw new EditorialError(400,'Indica la fecha de inicio. La fecha final debe ser igual o posterior.');
+   const title=field(data.title,160),text=field(data.body,8000),attachment=parseFile(data.attachment),image=parseImage(data.image);
+   const values=[id,title,text,state,username,attachment?.name??null,attachment?.bytes??null,kind,starts,ends,image?.name??null,image?.mime??null,image?.bytes??null];
    const result=revision===0?await pool.query(`
-    INSERT INTO banuchat_editorial.news (id,title,body,state,updated_by,published_at,file_name,file_bytes)
-    VALUES($1,$2,$3,$4,$5,CASE WHEN $4='published' THEN now() END,$6,$7)
+    INSERT INTO banuchat_editorial.news (id,title,body,state,updated_by,published_at,file_name,file_bytes,kind,starts_at,ends_at,image_name,image_mime,image_bytes)
+    VALUES($1,$2,$3,$4,$5,CASE WHEN $4='published' THEN now() END,$6,$7,$8,$9,$10,$11,$12,$13)
     ON CONFLICT (id) DO NOTHING RETURNING ${editorialColumns}
    `,values):await pool.query(`
     UPDATE banuchat_editorial.news SET title=$2,body=$3,state=$4,updated_by=$5,updated_at=now(),
       published_at=CASE WHEN $4='published' AND state<>'published' THEN now() ELSE published_at END,
-      file_name=CASE WHEN $9 THEN $6 ELSE file_name END,file_bytes=CASE WHEN $9 THEN $7 ELSE file_bytes END,
+      file_name=CASE WHEN $15 THEN $6 ELSE file_name END,file_bytes=CASE WHEN $15 THEN $7 ELSE file_bytes END,
+      starts_at=$9,ends_at=$10,
+      image_name=CASE WHEN $16 THEN $11 ELSE image_name END,image_mime=CASE WHEN $16 THEN $12 ELSE image_mime END,image_bytes=CASE WHEN $16 THEN $13 ELSE image_bytes END,
       revision=revision+1
-    WHERE id=$1 AND revision=$8 RETURNING ${editorialColumns}
-   `,[...values,revision,attachment!==undefined]);
+    WHERE id=$1 AND kind=$8 AND revision=$14 RETURNING ${editorialColumns}
+   `,[...values,revision,attachment!==undefined,image!==undefined]);
    if(!result.rows[0])throw new EditorialError(409,'La publicación cambió. Vuelve a cargarla antes de guardar.');
    response(res,revision===0?201:200,result.rows[0]);
   }catch(error){

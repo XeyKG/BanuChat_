@@ -9,13 +9,14 @@ import {
   type ProgressStatus,
 } from '@/api/progress';
 import { AppButton } from '@/components/app-button';
-import { AcademicRecord } from '@/components/academic-record';
+import { AcademicRecord, useAcademicRecord } from '@/components/academic-record';
 import {CardGrid,ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal,mobileMode} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
 import { colors, radii, shadows, spacing, typography, textStyles } from '@/ui/tokens';
+import { academicCourseLabel } from '@/utils/academic-course-label';
 
 type LoadState = 'loading' | 'error' | 'success';
 type ProgressFilter = 'all' | ProgressStatus;
@@ -49,6 +50,8 @@ export default function ProgressScreen() {
   const { activeProfile } = useSession();
   const profileKey = activeProfile?.profile_key ?? null;
   const profileAlias = activeProfile?.alias ?? null;
+  const showAcademic = mobileMode()==='synthetic';
+  const academic = useAcademicRecord(showAcademic ? profileKey : null);
 
   const [filter, setFilter] = useState<ProgressFilter>('all');
   const [retryCount, setRetryCount] = useState(0);
@@ -124,7 +127,7 @@ export default function ProgressScreen() {
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>
         <ContentColumn testID="aux-content">
-          {mobileMode()==='synthetic' && <AcademicRecord key={profileKey}/>}
+          {showAcademic && <AcademicRecord {...academic}/>}
           {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
           {showSummary && (
             <FadeIn>
@@ -160,11 +163,15 @@ export default function ProgressScreen() {
             <CardGrid testID="course-list">
               {courses.map((course, index) => {
                 const meta = STATUS_META[course.status];
+                const attempt = academic.result && academic.result!=='error' ? academic.result.attempts
+                  .filter(item=>item.course_key===course.course_key)
+                  .reduce<typeof academic.result.attempts[number]|undefined>((latest,item)=>!latest||item.attempt_number>latest.attempt_number?item:latest,undefined) : undefined;
+                const label = attempt ? academicCourseLabel(course.course_key,course.course_name,attempt.period_label) : course.course_name;
                 return (
                   <FadeIn key={course.course_key} delay={Math.min(index, 6) * 70}>
                     <SurfaceCard>
                       <View style={styles.courseHeading}>
-                        <Text style={styles.courseName}>{course.course_name}</Text>
+                        <Text style={styles.courseName}>{label}</Text>
                         <StatusBadge tint={meta.tint} soft={meta.soft}>{meta.label}</StatusBadge>
                       </View>
 

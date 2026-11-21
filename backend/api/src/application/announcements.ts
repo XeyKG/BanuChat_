@@ -28,11 +28,17 @@ WITH combined AS (
  SELECT a.announcement_key::text, a.title::text, a.description::text, a.valid_from, a.valid_until,
         a.source_path::text, a.source_locator::text, a.source_sha256::text
  FROM banuchat.announcements a WHERE a.dataset_release_id=$1
+   AND NOT EXISTS (
+     SELECT 1 FROM banuchat_editorial.news n WHERE n.kind='news' AND n.state<>'draft'
+       AND n.id=md5('news:'||a.dataset_release_id||':'||a.announcement_key)::uuid
+   )
  UNION ALL
- SELECT (CASE WHEN n.file_name IS NULL THEN 'editorial-' ELSE 'editorial-file-' END)||n.id,
-        n.title,n.body,n.published_at,NULL,'editorial/news/'||n.id,'revision:'||n.revision,
+ SELECT 'editorial-'||(CASE WHEN n.image_name IS NOT NULL THEN 'image-' ELSE '' END)||
+        (CASE WHEN n.file_name IS NOT NULL THEN 'file-' ELSE '' END)||n.id,
+        n.title,n.body,COALESCE(n.starts_at,n.published_at),n.ends_at,'editorial/news/'||n.id,'revision:'||n.revision,
         encode(sha256(convert_to(n.title||chr(10)||n.body,'UTF8')),'hex')
- FROM banuchat_editorial.news n WHERE n.state='published' AND n.published_at<=now()
+ FROM banuchat_editorial.news n WHERE n.kind='news' AND n.state='published'
+   AND n.published_at<=now() AND COALESCE(n.starts_at,n.published_at)<=now()
 )
 SELECT * FROM combined a WHERE true
 `;

@@ -8,7 +8,7 @@ import { colors } from '@/ui/tokens';
 export function EditorialAttachment({ announcementKey }: { announcementKey: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  const id = /^editorial-file-([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/u.exec(announcementKey)?.[1];
+  const id = /^editorial-(?:image-)?file-([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/u.exec(announcementKey)?.[1];
   if (!id) return null;
 
   async function download() {

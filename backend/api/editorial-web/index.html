@@ -11,7 +11,7 @@
  <header class="top"><div class="brand"><strong>Banu<span>Chat</span></strong><span>Centro de Competencias Digitales</span></div><a href="/announcements">Abrir Banu al Día</a><button type="button" id="logout" class="secondary" hidden>Cerrar sesión</button></header>
  <main>
   <section id="access" class="access" aria-labelledby="access-title">
-   <div><p class="eyebrow">Banu al Día</p><h1 id="access-title">Panel editorial</h1><p class="lead">Publica noticias y documentos del Centro de Competencias Digitales.</p></div>
+   <div><p class="eyebrow">BanuChat</p><h1 id="access-title">Panel editorial</h1><p class="lead">Administra las noticias de Banu al Día y el calendario del Centro de Competencias Digitales.</p></div>
    <form id="login" class="card">
     <h2>Acceso de administración</h2>
     <label for="username">Usuario</label><input id="username" name="username" autocomplete="username" required maxlength="64">
@@ -21,14 +21,17 @@
    </form>
   </section>
   <section id="workspace" hidden aria-labelledby="workspace-title">
-   <div class="workspace-title"><div><p class="eyebrow">Panel editorial</p><h1 id="workspace-title">Banu al Día</h1></div><button type="button" id="new">Nueva noticia</button></div>
+   <div class="workspace-title"><h1 id="workspace-title">Publicaciones del CCD</h1><button type="button" id="new">Nueva noticia</button></div>
+   <nav class="sections" aria-label="Tipo de publicación"><button type="button" id="news-tab" aria-pressed="true">Noticias</button><button type="button" id="event-tab" aria-pressed="false">Eventos</button></nav>
    <p id="feedback" role="status" aria-live="polite"></p>
    <div class="columns">
-    <section class="card listings" aria-labelledby="list-title"><h2 id="list-title">Noticias</h2><div id="list"></div></section>
+    <section class="card listings" aria-labelledby="list-title"><h2 id="list-title">Noticias</h2><label for="state-filter">Estado</label><select id="state-filter"><option value="all">Todos</option><option value="active">Vigentes</option><option value="scheduled">Programadas</option><option value="expired">Vencidas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select><div id="list"></div></section>
     <form id="editor" class="card" aria-labelledby="editor-title">
-     <div class="editor-title"><h2 id="editor-title">Nueva noticia</h2><span id="state" class="pill">Borrador</span></div>
+     <div class="editor-title"><h2 id="editor-title" tabindex="-1">Nueva noticia</h2><span id="state" class="pill">Borrador</span></div>
      <label for="title">Título</label><input id="title" required maxlength="160">
-     <label for="message">Contenido</label><textarea id="message" required maxlength="8000" rows="11"></textarea>
+     <fieldset><legend id="dates-title">Vigencia de la noticia</legend><p class="hint">Hora de Colombia. La fecha final es opcional.</p><div class="date-fields"><div><label for="starts" id="starts-label">Visible desde</label><input id="starts" type="datetime-local"></div><div><label for="ends" id="ends-label">Visible hasta</label><input id="ends" type="datetime-local"></div></div></fieldset>
+     <label for="message">Contenido</label><textarea id="message" required maxlength="8000" rows="7"></textarea>
+     <fieldset><legend>Imagen de portada</legend><p class="hint" id="image-hint">PNG, JPG o WebP de hasta 1 MB.</p><img id="image-preview" alt="Vista previa de la imagen de portada" hidden><label for="cover" class="input-label">Seleccionar imagen</label><input id="cover" type="file" aria-describedby="image-hint" accept="image/png,image/jpeg,image/webp"><label class="check" id="image-remove-label" hidden><input type="checkbox" id="remove-image"> Quitar la imagen actual</label></fieldset>
      <label for="attachment">Archivo adjunto <span class="muted">(opcional)</span></label>
      <p class="hint" id="file-hint">PDF o Markdown de hasta 2 MB.</p>
      <div id="current-file" hidden><a id="file-link">Descargar adjunto</a><label class="check"><input type="checkbox" id="remove"> Quitar el adjunto actual</label></div>
