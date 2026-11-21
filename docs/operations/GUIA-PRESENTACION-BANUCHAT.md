@@ -2,7 +2,7 @@
 
 Preparada para el responsable del proyecto. **Revisión: 20 de noviembre de 2026.** Cliente publicado 1.0.4; backend RAG registrado desde `a30088f`. Referencia documental inicial `2e31128`.
 
-[Abrir la edición PDF anterior con capturas y diagrama](GUIA-PRESENTACION-BANUCHAT.pdf). El apartado 7 de esta guía incorpora la auditoría del 21/11.
+El apartado 7 contiene el recorrido vigente de observabilidad en AWS. La edición PDF conserva las capturas y el diagrama de la publicación anterior. [Edición PDF anterior](GUIA-PRESENTACION-BANUCHAT.pdf).
 
 Esta guía permite preparar la sustentación sin recordar comandos de desarrollo. Presenta la aplicación y el n8n publicados en AWS. El laboratorio Unified local se conserva como antecedente opcional y no es necesario para esa demostración. Las contraseñas y la configuración privada no forman parte de este documento.
 
@@ -177,26 +177,28 @@ El modelo generador es `qwen3:4b-instruct`; los embeddings son `qwen3-embedding:
 1. Comprueba los cinco servicios del apartado 3. El servidor sigue siendo la EC2 existente; no crees otro n8n, volumen ni cuenta cloud.
 2. Abre **https://n8n.banuchat.duckdns.org**. La primera ventana es la protección HTTPS del servidor. Su acceso está en el archivo privado `%APPDATA%\BanuChatManagedMcp\acceso-n8n-privado.txt`; ábrelo antes de proyectar y no lo compartas.
 3. Si aparece una segunda pantalla con correo y contraseña, usa la cuenta propietaria que configuraste dentro de n8n. Es distinta de la primera protección y de las cuentas de BanuChat. No crees otro propietario si olvidaste el acceso.
-4. En **Overview → Workflows** abre **BanuChat - Ejecuciones del chat** y su pestaña **Executions**. En el inventario del 21/11 figuraba como publicado con dos nodos y guardado al cierre. Si el editor muestra solo esos dos nodos, usa el recorrido de cierre y cita el alcance observado.
+4. En **Overview → Workflows** abre **BanuChat - Ejecuciones del chat**. En **Executions**, las filas del ensayo correlacionado muestran la versión `6360ea8c`. En su lienzo puedes señalar entrada privada, validación, resumen de ruta y métricas, confirmación y las dos respuestas de rechazo.
 5. Para la admisión, localiza el workflow por el ID `BanuChatOe4Conversation1`. En AWS figuraba como **BanuChat - Manual ingestion v1**, con dos ramas independientes en el lienzo. Muestra los cinco nodos de la rama de admisión y deja los nodos manuales de ingesta sin ejecutar.
 
 ### Cómo mostrar las ejecuciones de BanuChat en n8n
 
-1. Inicia **AWS Academy → Learner Lab → Start Lab** y verifica que la EC2 existente esté activa. Abre **n8n → BanuChat - Ejecuciones del chat → Executions** y **https://banuchat.duckdns.org/login** en otra pestaña. Con una cuenta sintética autorizada, envía **«¿Qué es el Centro de Competencias Digitales?»** en un chat nuevo. Abre las citas documentales y vuelve al turno desde Historial.
-2. En **Executions**, filtra por workflow y hora de envío. En la revisión correlacionada, abre **Registrar ruta y estado técnico** y copia el `operation_id`. Compara ese UUID en las filas del mismo intervalo y ordena los eventos por `sequence`. En la revisión anterior, abre **Ruta, duración y resultado** al finalizar. Un estado verde en n8n indica que registró el evento. `status` indica el estado de la consulta.
-3. Para un recorrido rápido, envía **«Calendario de esta semana»**. El fast path realiza la lectura estructurada y debe aparecer como `direct` en el colector.
-4. En otro chat prueba **«Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?»**. Revisa fuentes e Historial. La API pide admisión por loopback, inicia MCP por stdio y combina como máximo dos herramientas. El ensayo público mostró citas de `get_profile_progress` y `get_announcements`.
-5. Abre la rama de admisión OE4 en el editor. Sus ajustes deshabilitan el guardado de ejecuciones exitosas, fallidas y manuales para proteger la credencial. Muestra sus trazas en el journal. El UUID enlaza esas trazas al colector en la versión nueva.
-6. Para mostrar un fallo, usa un error de chat observado o provócalo en un entorno aislado con el mismo colector. Muestra `error_code`, ruta, última etapa y duración. Si falta el cierre, presenta la etapa como el último estado observado. Evita detener dependencias de la EC2 durante la sustentación.
-7. Antes de guardar capturas, revisa que trigger y resumen solo muestren metadatos técnicos. Mantén fuera de pantalla Credentials, tokens, identificadores de cuenta y contenido privado. Separa los ensayos internos del webhook de las consultas hechas en BanuChat.
+1. Inicia **AWS Academy → Learner Lab → Start Lab** y verifica la EC2 y el crédito disponible. Abre una pestaña en **n8n → BanuChat - Ejecuciones del chat → Executions** y otra en BanuChat. Inicia sesión con una cuenta ficticia autorizada antes de proyectar. [BanuChat](https://banuchat.duckdns.org/login) · [Colector de n8n](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1).
+2. En un chat nuevo envía **«¿Qué es el Centro de Competencias Digitales?»** y anota la hora. Abre las citas y vuelve al turno desde **Historial**. En el ensayo público hubo ocho citas coincidentes. [Cierre documental, ejecución 64](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/64).
+3. En **Executions**, usa **Auto refresh** y acota la lista al intervalo del envío con el filtro de fecha. Abre una fila, haz doble clic en **Registrar ruta y estado técnico** y lee **Output → JSON**. Copia el `operation_id` y comprueba ese valor en otras filas del intervalo. Ordena por `sequence`: 0 es el inicio, luego aparecen la ruta, las etapas aplicables y el cierre. Lee `duration_ms` para el tiempo del turno y `citation_count` para cotejar las citas. La duración de la fila mide el procesamiento del evento en n8n.
+4. En `document_rag`, la API TypeScript recupera evidencia con pgvector y usa Ollama para embeddings y, cuando hace falta, para generar. Una respuesta desde evidencia directa puede cerrar después de `pgvector`. Si ves `started` sin cierre, el estado es el último recibido. El turno podría seguir en curso o el envío asíncrono podría haber perdido el evento. Contrasta con BanuChat o Historial antes de repetir la pregunta.
+5. En otro chat envía **«Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?»**. Busca la ruta `structured_mcp`, abre las citas y revisa Historial. Usa el mismo UUID en el journal para mostrar la admisión OE4 y las herramientas ejecutadas. El ensayo público registró `get_profile_progress` y `get_announcements`. Abre solamente el lienzo de OE4 para explicar la rama publicada. Esa rama tiene desactivado el guardado de ejecuciones para proteger la credencial. [Cierre MCP, ejecución 68](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/68) · [Workflow OE4](https://n8n.banuchat.duckdns.org/workflow/BanuChatOe4Conversation1).
+6. Para explicar errores, abre el cierre de la consulta lenta existente. Una ejecución verde que pasó por **Confirmar recepción**, con `status=error` y `error_code=DEPENDENCY_UNAVAILABLE` en el resumen, indica que el colector guardó un error del chat. Para un fallo del colector, busca **Confirmar error del registro** o un nodo marcado como fallido. **Rechazar evento inválido** corresponde a un 422 del colector. La ejecución 74 muestra una llamada de generación que superó 150 s. Usa esa evidencia para evitar repetir la consulta lenta en directo. [Generación, ejecución 73](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/73) · [Error del chat, ejecución 74](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/74).
+7. Proyecta el **Output** del nodo y oculta credenciales, sesiones, cuentas y datos privados. Las ejecuciones se podan a los siete días o al superar el límite de 2.000. Si los enlaces ya caducaron, usa los IDs y resultados del checkpoint como evidencia histórica o repite solo los dos turnos breves de la guía.
 
 Si necesitas mostrar las trazas, en **Session Manager de la EC2**, sin abrir archivos privados:
 
 ```sh
-journalctl -u banuchat-api --since '-10 min' --no-pager -o cat | grep '"event":"managed_'
+journalctl -u banuchat-api --since '-10 min' --no-pager -o cat |
+  grep -E '"event":"managed_(n8n|agent)"' |
+  grep -F 'PEGA_AQUI_EL_UUID_DEL_TURNO'
 ```
 
-Busca `managed_n8n` y `managed_agent` con el mismo `operation_id`, herramientas seleccionadas y `terminal_reason`. El detalle de n8n se consulta desde **Ejecuciones del chat**. El [diagrama y checkpoint del 21/11](../transition/CHECKPOINT-N8N-RAG-OBSERVABILIDAD.md) documentan la versión verificada en AWS y el alcance de la instrumentación preparada.
+En `managed_n8n` busca `authorized`. En `managed_agent` revisa `selected_tools`, `call_count` y `terminal_reason`. El checkpoint documenta el corte de AWS y su diagnóstico del timeout. [Diagrama y checkpoint del 21/11](../transition/CHECKPOINT-N8N-RAG-OBSERVABILIDAD.md).
 
 ### Qué está desplegado y qué sigue siendo local
 
@@ -311,7 +313,7 @@ Propuesta de orden; ajusta los minutos al tiempo concedido por el profesor:
 2. **Producto web:** login, expediente con recursamiento, pregunta documental, citas, descarga e Historial.
 3. **Producto móvil:** demostrar la misma cuenta desde el Huawei y abrir una fuente; mostrar calendario, noticias y publicaciones. Explicar recordatorios locales sin prometer push.
 4. **Persistencia y aislamiento:** reabrir una conversación, cambiar a la segunda cuenta y mostrar su historial propio; vincular con las pruebas técnicas documentadas.
-5. **Implementación técnica:** panel de Supabase sin secretos y, solo si fue preparado, editor n8n y prueba multifuente local con MCP. Explicar expresamente que no es el camino del chat publicado.
+5. **Implementación técnica:** mostrar en n8n un turno documental, uno estructurado y la admisión OE4 según el apartado 7. Usar el circuito local del apartado 8 únicamente si se presenta el laboratorio Unified.
 6. **Cierre académico:** mostrar evidencia por objetivo y reconocer los pendientes. No presentar una animación, una captura o un HTTP 201 como aprobación de calidad semántica.
 
 | Problema | Qué haces | Qué debes explicar |
@@ -354,4 +356,4 @@ Referencias de detalle:
 
 El [runbook Unified del 31/10](final-integrated-demonstration.md) conserva el laboratorio histórico; sus etiquetas de UI no corresponden enteramente a 1.0.4. Para la presentación normal usa los apartados cloud de esta guía.
 
-La versión imprimible acompaña esta guía. Las imágenes reutilizadas en ella corresponden a la publicación 1.0.4 y están rotuladas como evidencia anterior; no son capturas de un ensayo nuevo.
+La edición PDF anterior conserva las imágenes rotuladas de la publicación 1.0.4. Para mostrar las ejecuciones correlacionadas usa el apartado 7 de esta guía.

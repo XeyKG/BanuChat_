@@ -2,6 +2,38 @@
 
 **21/11/2026.** La auditoría partió de `main` en `6134fb3c042a2d775dd0990052b0a4d5a904099e`. La implementación correlacionada quedó en `d162b94d629dbb06466f7510cca49b4b3e32d816`.
 
+## Estado efectivo y evidencia de cierre
+
+La consulta de solo lectura de Systems Manager `520c1619-c3ea-4718-a680-5234016d9149` verificó los cinco servicios activos en la EC2 existente, la bandera `BANUCHAT_N8N_CHAT_EXECUTIONS=1` en el proceso real de la API y las revisiones efectivas en `workflow_published_version`. El colector `BanuChatChatExecution1` sirve la revisión `6360ea8c-f1bc-4ddf-8112-5217133a3dc2`. El workflow combinado OE4 `BanuChatOe4Conversation1` conserva `60a7577b-30b1-4d52-87d9-dbaf28642def`. Los 21 IDs de ejecución del colector presentes en el respaldo previo seguían en SQLite durante esta comprobación.
+
+El respaldo privado `/opt/banuchat/backups/observability-20261121-04` contiene 20 archivos con SHA-256 verificados y un snapshot de SQLite con `quick_check` satisfactorio. Incluye el estado, los workflows y la configuración necesaria para recuperar n8n y la API. La publicación efectiva se hizo desde el editor. En n8n 2.40.5 el CLI legado había actualizado la revisión que informaba sin cambiar el grafo que resolvía el webhook. Tras la primera activación se recuperaron los modos originales de siete fuentes y se verificó que el usuario de la API podía leerlas antes del reinicio. El comando `24e7cd68-b6b6-4cae-865d-1615b915e148` confirmó el servicio activo.
+
+Durante la publicación se acreditaron `202` para inicio, error y esquema anterior, `422` para eventos inválidos o demasiado grandes, y el bloqueo de las rutas internas desde el origen público. Se configuró poda a 168 horas y hasta 2.000 ejecuciones y un límite HTTP de 1 MiB para n8n. La rama de fallo de proyección quedó revisada en el grafo. En este cierre se usó el 503 natural del chat y se evitó interrumpir producción para forzar fallos del colector o desconexiones.
+
+### Turnos públicos correlacionados
+
+Cada fila corresponde a un turno autenticado enviado por la API pública con una cuenta ficticia. La duración de BanuChat y la que aparece en **Executions** como duración del webhook son medidas distintas. Usa `duration_ms` del resumen técnico para leer el tiempo del turno.
+
+| Turno | `operation_id` | Secuencia en n8n | Resultado verificado |
+| --- | --- | --- | --- |
+| ¿Qué es el Centro de Competencias Digitales? | `80bb6ce5-60db-48a1-b4e1-96148f2e2e68` | [60, inicio](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/60) → 61, ruta → 62, embedding → 63, pgvector → [64, cierre](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/64) | HTTP 201, `answered`, 1.075 ms internos, 8 citas conservadas en Historial. Embedding 348 ms y recuperación 86 ms. La respuesta usó evidencia directa, con cero llamadas de generación. |
+| Cursos completados y convocatorias | `bae608da-937f-40b8-b04f-b350daf4f2ee` | 65, inicio → 66, ruta → [68, cierre](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/68) | HTTP 201, `structured_mcp`, `answered`, 4.019 ms internos y 3 citas conservadas en Historial. El journal registró admisión `authorized` y dos llamadas, `get_profile_progress` y `get_announcements`, con el mismo UUID. |
+| Calendario de esta semana | `4eaec440-bd53-4fc8-a185-22b98fdde3ff` | 75, inicio → 76, ruta → 77, cierre | HTTP 201, `direct`, `answered`, 562 ms internos y 1 cita de calendario conservada en Historial. |
+
+Las entregas son asíncronas y de mejor esfuerzo, sin cola duradera previa al envío. Un turno puede producir varias ejecuciones, llegar fuera de orden o perder un evento. Si falta el cierre, el resultado aún es desconocido desde n8n. Contrasta con la respuesta, Historial o el journal antes de atribuirlo a una espera o a una entrega fallida.
+
+En el recorrido corto posterior, ambos turnos volvieron a responder HTTP 201 por la API pública. La pregunta del director devolvió ocho citas documentales en 6.732 ms y la estructurada tres citas de progreso y convocatorias en 3.845 ms. Historial coincidió para ambas y el cierre de sesión devolvió 204. La inspección de UUID y secuencias de la tabla corresponde al ensayo anterior. La verificación posterior se hizo por HTTPS con la cuenta ficticia y no desde el formulario web.
+
+### Timeout de generación
+
+«¿Qué es la ruta de competencias digitales?» devolvió HTTP `503` con `DEPENDENCY_UNAVAILABLE` en 151,621 s de cara al cliente. El UUID `dd72d22d-cdb1-4f3f-9aa0-81f3b7bbea29` tiene secuencia completa 0–5: ejecuciones 69, 70, 71, 72, [73, generación](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/73) y [74, error terminal](https://n8n.banuchat.duckdns.org/workflow/BanuChatChatExecution1/executions/74). La ejecución 74 aparece verde porque n8n recibió y registró el evento. Su resumen tiene `status=error`, `stage=generation`, cero citas y `duration_ms=150862`. El cierre sí llegó a n8n.
+
+El journal de la API y el evento terminal coinciden en 321 ms de embeddings, 212 ms de pgvector y una llamada HTTP de generación que agotó el plazo impuesto por la API (`BANUCHAT_GENERATOR_TIMEOUT_MS=150000`, `ollama_http_ms=150001`, `ollama_calls=1`, `ollama_timeouts=1`). `generation_ms` quedó nulo porque la API no validó una respuesta de generación. Las comprobaciones de versión y etiquetas registradas en esa ventana respondieron HTTP 200 en microsegundos o hasta 1,51 ms del lado de Ollama. La espera dominante está acreditada en la llamada `/api/chat`.
+
+La EC2 reportó 2 vCPU y 7.779 MiB de RAM, 6.551 MiB disponibles en la inspección posterior. Esa lectura no reconstruye los recursos durante la inferencia. Los registros examinados no demostraron si el runner estaba evaluando el prompt, produciendo tokens, esperando memoria, CPU u otra solicitud, ni si canceló el cómputo al cortarse el cliente HTTP. La consulta de residencia de modelos por CLI falló en el entorno no interactivo de Systems Manager. **El mecanismo del 503 quedó identificado y la causa interna de la latencia sigue sin determinarse.** Se conservaron el modelo y los plazos, y no se repitió la consulta lenta para obtener capturas.
+
+El editor mostró el lienzo, la lista **Executions** y la ejecución 74 con su UUID y su versión. Computer Use interrumpió la navegación al volver a verificar la URL de Brave. Las capturas restantes de inicio, etapa, MCP y OE4 se sustituyen en este corte por los enlaces, IDs y registros técnicos. Los enlaces requieren sesión de n8n, EC2 operativa y que las ejecuciones sigan dentro de la ventana de retención.
+
 ## Continuación del despliegue
 
 Learner Lab mostraba estado Ready y US$14,60 de US$50 usados. Systems Manager listaba la EC2 existente `i-0a726734ca6c6f10d` como Online y running. Se observó la sesión propietaria de n8n abierta antes de la última ejecución administrativa.
@@ -15,7 +47,7 @@ Learner Lab mostraba estado Ready y US$14,60 de US$50 usados. Systems Manager li
 
 Al recuperar acceso se comprobó BanuChat por HTTPS y el editor autenticado de n8n. Las pruebas de publicación usan eventos sintéticos de infraestructura para distinguir la confirmación HTTP del resultado de un turno real.
 
-## Inventario observado en AWS
+## Inventario anterior a la publicación
 
 La EC2 existente reportó activos Ollama, API, web, HTTPS y n8n. El editor era n8n 2.40.5 y escuchaba en `127.0.0.1:15679`. BanuChat respondió 200 por HTTPS. Los endpoints públicos de producción y prueba del colector y de OE4 devolvieron 401 en acceso anónimo y 404 con la primera autenticación del editor. La API en ejecución tenía la bandera `BANUCHAT_N8N_CHAT_EXECUTIONS=1`. SQLite ocupaba 2.678.784 bytes y tenía 13 ejecuciones exitosas del colector en el momento del inventario. La configuración global de guardado era `none` para éxito y error, con guardado manual deshabilitado. El colector sobreescribía los dos primeros a `all`. El inventario del servicio carecía de límites de poda explícitos.
 
@@ -26,7 +58,7 @@ La EC2 existente reportó activos Ollama, API, web, HTTPS y n8n. El editor era n
 
 La rama de admisión conserva Webhook autenticado → validación → decisión → respuesta correlacionada, con rechazo alterno. Su guardado de éxito, error y manual estaba desactivado. La ausencia de filas en Executions para esa rama concuerda con su configuración. La consulta MCP pública del mismo corte devolvió citas de progreso y convocatorias. Equivalencia histórica de trazas por operación y reinicio con credencial cifrada se acreditó en el corte del 20/11. El identificador del colector anterior no permite atribuir retrospectivamente una fila a esa admisión.
 
-El comando de inventario fue `2fa531db-161f-4fbb-85ce-988eb862e17b`. Registró nombres, revisiones, conexiones, tipos de credencial y totales. Las capturas del editor y de Executions para la versión nueva quedaron pendientes.
+El comando de inventario fue `2fa531db-161f-4fbb-85ce-988eb862e17b`. Registró nombres, revisiones, conexiones, tipos de credencial y totales antes de la publicación correlacionada.
 
 ## Arquitectura y fronteras
 
@@ -49,7 +81,7 @@ flowchart LR
         OE4 -->|"Directiva"| AGENT
         AGENT -->|"stdio · hasta dos herramientas"| MCP["Servidor MCP TypeScript"]
         MCP --> CITE
-        API -. "Inicio, ruta, etapa y cierre · propuesta" .-> OBS["n8n · Ejecuciones del chat"]
+        API -. "Inicio, ruta, etapa y cierre" .-> OBS["n8n · Ejecuciones del chat"]
         OBS --> SQLITE["SQLite de n8n"]
     end
     RET --- DOC["Supabase PostgreSQL · referencias CCD autorizadas"]
@@ -64,14 +96,14 @@ En la composición administrada, las preguntas documentales pasan por RAG direct
 
 El agente solo invoca herramientas tras admisión y en el contexto autorizado por la API. Usa el rol lector propio en Supabase con transacciones de solo lectura. Fija principal, perfil, release y despliegue desde el servidor. El SDK usa stdio, validación de entradas con los contratos de herramientas y tiempos de conexión y llamada configurables (10 s y 15 s de forma predeterminada). El servidor define `search_knowledge`, `find_documents`, `get_courses`, `get_calendar_events`, `get_announcements` y `get_profile_progress`. El corte público de MCP acredita progreso y convocatorias. Las citas se forman con datos devueltos por las herramientas y la aplicación conserva la procedencia al persistir el turno. [Contrato MCP](../../backend/mcp-server/tools-contract.md) · [SDK TypeScript](https://github.com/modelcontextprotocol/typescript-sdk) · [API de Ollama](https://docs.ollama.com/api/chat).
 
-## Instrumentación preparada
+## Instrumentación publicada
 
 - La API emite `started` al admitir un turno autenticado y autorizado. `operation_id` es opaco y se comparte con OE4 y las trazas del agente. `sequence` ordena el inicio, la ruta seleccionada, las etapas y el cierre incluso si las entregas llegan en orden distinto. Un intento rechazado antes de la admisión queda fuera del colector.
 - El cierre registra `answered`, `partial`, `insufficient_evidence`, `error` o `cancelled`. Este último indica que el socket HTTP se cerró antes de entregar la respuesta al proxy o cliente, detectado al completar el trabajo. El backend puede terminar y persistir un turno cuyo cliente se desconectó.
 - El remitente usa loopback, 1 KiB por evento, hasta 16 envíos simultáneos y 3 s por llamada. La API sigue aunque el colector rechace o pierda un evento. Los avisos de fallo de entrega son genéricos. El último evento de etapa recibido ayuda a ubicar una espera. Cuando falta el cierre, solo se puede afirmar que aún no se ha observado. Una terminación brusca puede dejar eventos sin pareja.
 - El flujo proyecta tiempos UTC y duración monotónica, etapa, ruta, cantidad de citas y códigos técnicos predefinidos. La latencia de embeddings y recuperación se acumula por turno. `generation_ms` mide el tiempo transcurrido hasta validar la respuesta de generación. `ollama_http_ms`, `ollama_calls` y `ollama_timeouts` conservan el registro del transporte de generación, incluidos fallos. Los metadatos excluyen contenido, identificadores de cuenta y credenciales.
 - La entrada se restringe a loopback y Caddy bloquea los webhooks internos en el origen público. El colector devuelve 202 para un evento válido, 422 para uno inválido y 500 ante fallo controlado de proyección. Un `error_chat` aceptado puede verse como una ejecución verde de n8n. n8n conserva también los datos del trigger al guardar una ejecución. Por eso el emisor envía exclusivamente el evento permitido y la ruta debe mantenerse privada. El JSON facilita revertir la API al aceptar el esquema anterior.
-- La configuración preparada fija siete días y 2.000 filas de ejecución para la poda automática de la instancia, con tope HTTP de 1 MiB para el cuerpo JSON en n8n. SQLite puede reutilizar páginas liberadas. El tamaño del archivo físico puede tardar en reflejar la poda. OE4 sigue sin guardar payloads. [Configuración de ejecuciones](https://docs.n8n.io/hosting/configuration/environment-variables/executions/) · [Webhook en n8n 2.40.5](https://github.com/n8n-io/n8n/blob/n8n%402.40.5/packages/nodes-base/nodes/Webhook/Webhook.node.ts).
+- La configuración desplegada fija siete días y 2.000 filas de ejecución para la poda automática de la instancia, con tope HTTP de 1 MiB para el cuerpo JSON en n8n. SQLite puede reutilizar páginas liberadas. El tamaño del archivo físico puede tardar en reflejar la poda. OE4 sigue sin guardar payloads. [Configuración de ejecuciones](https://docs.n8n.io/hosting/configuration/environment-variables/executions/) · [Webhook en n8n 2.40.5](https://github.com/n8n-io/n8n/blob/n8n%402.40.5/packages/nodes-base/nodes/Webhook/Webhook.node.ts).
 
 ## Prueba pública del backend anterior
 
@@ -96,7 +128,7 @@ El chequeo inicial de igualdad en Historial comparó el JSON serializado. El cot
 ## Validación local
 
 - API y MCP pasaron `npm run typecheck`.
-- API pasó 229 pruebas focales de telemetría, chat, historial, contratos HTTP, clasificación documental, recuperación, citas, Ollama y adaptador administrado. La prueba de loopback requirió salir de la restricción de red del entorno. La validación de expresiones y conexiones del JSON se hizo en pruebas de repositorio. La ejecución del colector actualizado con el motor de n8n en AWS sigue pendiente.
+- API pasó 229 pruebas focales de telemetría, chat, historial, contratos HTTP, clasificación documental, recuperación, citas, Ollama y adaptador administrado en la validación de implementación. La prueba de loopback requirió salir de la restricción de red del entorno. Las pruebas de repositorio validaron expresiones y conexiones del JSON. La evidencia posterior de ejecución en el motor de AWS figura al inicio de este checkpoint.
 - MCP pasó las 17 pruebas de runtime administrado, con destinos restringidos, asociación y permisos de contexto, y arranque seguro ante configuración incompleta.
 - `git diff --check` pasó. Se excluyeron los archivos de operación privada y la edición previa de `panel-editorial.md`.
 
@@ -115,6 +147,6 @@ Antes de cambiar la EC2, confirmar el ID y revisión activa de ambos workflows, 
 
 Importar el colector en una ventana controlada y verificar conexiones y parámetros guardados antes de publicar. Después de publicar, comprobar revisión activa, Caddy, valores efectivos de poda y un evento interno sintético de inicio, otro de error y uno inválido. Etiquetar estos ensayos como validación del colector. Actualizar luego la API y ejecutar la secuencia web de la guía, con una pregunta nueva y el mismo UUID en el colector, OE4 y journal. Contar también un fast path. Para evidencia del fallo de aplicación, reproducir una falla de dependencia en una composición temporal aislada o conservar un fallo natural verificado del chat. Mantener separados un 422 provocado en el webhook y un error de aplicación. Revisar un detalle del trigger y del resumen antes de capturar, con el operador fuera de pantalla.
 
-Si el colector o la nueva API fallan, recuperar primero las fuentes API del respaldo validado y reiniciar la unidad API. Replicar la revisión anterior del colector desde su historial o export sobre el mismo ID y retirar el cambio de retención si participa en el fallo. Comprobar salud, bloqueo público y publicación OE4. Reservar la restauración de SQLite para cuando la reversión puntual resulte insuficiente. La restauración con n8n detenido reemplaza el estado posterior al snapshot. Ningún paso requiere recrear servicios, cambiar el corpus ni modificar contratos.
+Si el colector o la API fallan después de un cambio, recuperar las fuentes y la configuración afectada del respaldo validado. Restaurar sus modos y comprobar lectura con el usuario `banuchat` antes de reiniciar la unidad API. Para revertir el colector, publicar la revisión anterior desde el editor sobre el mismo ID y confirmar el resultado en `workflow_published_version` y en una ejecución interna. Retirar el cambio de retención si participa en el fallo. Comprobar salud, bloqueo público y publicación OE4. Reservar la restauración de SQLite para cuando la reversión puntual resulte insuficiente. La restauración con n8n detenido reemplaza el estado posterior al snapshot.
 
-La [guía de sustentación](../operations/GUIA-PRESENTACION-BANUCHAT.md) contiene la secuencia y el criterio para distinguir la versión actualmente observada de la versión preparada.
+La guía de sustentación contiene el recorrido web y la lectura de las trazas. [Guía de presentación](../operations/GUIA-PRESENTACION-BANUCHAT.md).
