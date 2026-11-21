@@ -475,9 +475,9 @@ export default function ChatScreen() {
 
                     {message.insufficient_evidence && (
                       <View accessibilityRole="alert" style={styles.evidenceWarning}>
-                        <Text style={styles.evidenceWarningTitle}>Evidencia insuficiente</Text>
+                        <Text style={styles.evidenceWarningTitle}>{message.citations.length ? 'Respuesta parcial' : 'Evidencia insuficiente'}</Text>
                         <Text style={styles.evidenceWarningText}>
-                          La respuesta no cuenta con respaldo documental suficiente.
+                          {message.citations.length ? 'Las fuentes cubren parte de tu pregunta.' : 'No encontré fuentes suficientes para responder.'}
                         </Text>
                       </View>
                     )}

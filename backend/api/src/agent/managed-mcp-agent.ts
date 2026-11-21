@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import type {McpAgentResponder,DocumentRagResponder} from '../application/messages.js';
+import type {McpAgentResponder,DocumentRagResponder,ChatTurnRoute} from '../application/messages.js';
 import {StdioMcpClientFactory,type McpToolSessionFactory} from './mcp-client.js';
 import {runBoundedMcpAgent,requiresConversationalOrchestration,requiredMcpSources,clarifyMcpSources,mcpQueryRestriction,planningSubject,type McpAgentTrace,type McpAgentInput} from './bounded-mcp-agent.js';
 import type {ConversationOrchestrator} from '../orchestration/n8n-conversation.js';
@@ -23,10 +23,11 @@ export function usesManagedStructuredMcp(query:McpAgentInput):boolean {
 
 export function createManagedMcpResponder(input:{principal:string;profile_key:string;deployment_id:string;
  environment:Readonly<Record<string,string>>;orchestrator:ConversationOrchestrator;rag:DocumentRagResponder;
- sessions?:McpToolSessionFactory;trace?:(entry:{operation_id:string;trace:McpAgentTrace})=>void}):McpAgentResponder {
+ sessions?:McpToolSessionFactory;onRoute?:(route:ChatTurnRoute)=>void;trace?:(entry:{operation_id:string;trace:McpAgentTrace})=>void}):McpAgentResponder {
  return async query=>{
   if(query.profile_key!==input.profile_key)throw new AuthError('FORBIDDEN');
   if(!usesManagedStructuredMcp(query))return input.rag(query);
+  input.onRoute?.('structured_mcp');
   const restriction=mcpQueryRestriction(query.query,query.history);
   if(restriction)return {release_id:query.release_id,content:restriction,insufficient_evidence:true,citations:[],citation_records:[]};
   const operation_id=randomUUID();

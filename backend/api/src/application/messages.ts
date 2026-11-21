@@ -457,9 +457,12 @@ function validateAnswer(answer: PersistableAnswer, structuredReleaseId?:string, 
   }
 }
 
+export type ChatTurnRoute = 'filtered' | 'direct' | 'document_rag' | 'structured_mcp' | 'unified';
+
 export async function sendMessage(
   dependencies: SendMessageDependencies,
   input: SendMessageInput,
+  onRoute?: (route: ChatTurnRoute) => void,
 ): Promise<SendMessageResult> {
   if (
     input === null ||
@@ -554,6 +557,7 @@ export async function sendMessage(
 
   let answer: PersistableAnswer;
   if (dispatched === null) {
+    onRoute?.('filtered');
     answer = {
       release_id: context.dataset_release_id,
       content: RESPECT_REPLY,
@@ -562,8 +566,10 @@ export async function sendMessage(
       citation_records: [],
     };
   } else if (dispatched.kind === "answered") {
+    onRoute?.('direct');
     answer = dispatched;
   } else {
+    onRoute?.(dependencies.answer_responder ? 'unified' : 'document_rag');
     try {
       const agentInput: McpAgentInput = {
         release_id: context.dataset_release_id,

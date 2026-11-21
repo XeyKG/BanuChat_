@@ -1,0 +1,106 @@
+{
+  "name": "BanuChat - Ejecuciones del chat",
+  "id": "BanuChatChatExecution1",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "banuchat/internal/chat-executions",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "0c30d339-18a4-4f2f-bb3d-9052147b2732",
+      "name": "Turno de chat finalizado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        300
+      ],
+      "webhookId": "d68fb2a2-954d-49a4-a70c-82eb746248e6"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588800",
+              "name": "operation_id",
+              "type": "string",
+              "value": "={{ $json.body.operation_id }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588801",
+              "name": "route",
+              "type": "string",
+              "value": "={{ $json.body.route }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588802",
+              "name": "duration_ms",
+              "type": "number",
+              "value": "={{ $json.body.duration_ms }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588803",
+              "name": "status",
+              "type": "string",
+              "value": "={{ $json.body.status }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588804",
+              "name": "citation_count",
+              "type": "number",
+              "value": "={{ $json.body.citation_count ?? 0 }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588805",
+              "name": "error_code",
+              "type": "string",
+              "value": "={{ $json.body.error_code ?? '' }}"
+            },
+            {
+              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588806",
+              "name": "rag",
+              "type": "object",
+              "value": "={{ $json.body.rag ?? {} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "10e3bbab-4d01-41f1-a1c3-d0c4049b815a",
+      "name": "Ruta, duración y resultado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Turno de chat finalizado": {
+      "main": [
+        [
+          {
+            "node": "Ruta, duración y resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": false
+  },
+  "versionId": "9cffc3c3-735b-4461-9f75-c7ef1dad0dce",
+  "tags": []
+}

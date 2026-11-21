@@ -2,9 +2,20 @@
 
 **Operación, 20/11/2026:** el editor publicado es **https://n8n.banuchat.duckdns.org**, con protección HTTPS adicional y cuenta propietaria de n8n. Usa la EC2 existente, servicio `banuchat-n8n`, instalación npm 2.40.5, usuario Linux separado y datos persistentes en `/var/lib/banuchat-n8n/.n8n`. No utiliza un contenedor del PC.
 
-Solo se importó y publicó **BanuChat OE4 - Conversational orchestration v1**, con cinco nodos y sin timers. Recibe por loopback una solicitud autenticada de la API; decide admisión o aclaración y devuelve una directiva correlacionada. El agente de la API ejecuta las herramientas MCP, no un nodo LLM/ReAct de n8n. Los webhooks públicos están bloqueados en Caddy. La credencial y la clave de cifrado son privadas; no están en este repositorio.
+**BanuChat OE4 - Conversational orchestration v1** recibe por loopback una solicitud autenticada de la API para las consultas estructuradas multifuente. Devuelve una directiva de admisión o aclaración. El agente de la API ejecuta las herramientas MCP. Los webhooks públicos están bloqueados en Caddy. La credencial y la clave de cifrado son privadas.
 
-Las pruebas reales verificaron dos fuentes admitidas, tres con aclaración, 403 sin token y conservación del workflow/credencial después de reiniciar el servicio. El workflow no guarda payloads de ejecución; la correlación se acredita con eventos `managed_n8n` y `managed_agent` de la API. [Guía para mostrarlo](../docs/operations/GUIA-PRESENTACION-BANUCHAT.md#7-mostrar-n8n-y-mcp-en-aws) · [Pruebas y límites](../docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
+Las pruebas de OE4 verificaron dos fuentes admitidas, tres con aclaración, 403 sin token y conservación del workflow y la credencial después de reiniciar el servicio. OE4 conserva deshabilitado el historial de datos de ejecución. Las trazas de admisión y herramientas están en eventos `managed_n8n` y `managed_agent` de la API. [Pruebas y límites](../docs/transition/CHECKPOINT-MCP-AWS-2026-11-20.md).
+
+### Ver consultas del chat en Executions
+
+1. Abre [n8n de BanuChat en AWS](https://n8n.banuchat.duckdns.org) con tu acceso de operador.
+2. En **Workflows**, abre **BanuChat - Ejecuciones del chat** y selecciona **Executions**.
+3. Envía una consulta en [BanuChat](https://banuchat.duckdns.org), por ejemplo «¿Qué son competencias digitales?». Espera el resultado del chat y actualiza la lista de ejecuciones.
+4. Abre la fila más reciente y selecciona **Ruta, duración y resultado**. `document_rag` identifica una respuesta documental. `structured_mcp` indica paso por el flujo de consultas estructuradas. `direct` identifica respuestas directas de la aplicación y `filtered` el filtro de respeto.
+
+Cada turno aceptado se registra al finalizar. El flujo recibe un identificador aleatorio, ruta, duración en milisegundos, estado y número de citas o código de error. El estado verde de n8n significa que el registro se guardó. `status` en el nodo indica el resultado real del chat. La API publica este evento de manera asíncrona y el chat puede seguir cuando n8n no está disponible. El flujo usa un webhook accesible por loopback y el evento omite preguntas, respuestas, perfiles, expedientes y credenciales.
+
+La revisión local agrega `partial` para atribuir las respuestas con evidencia incompleta y el objeto `rag` al nodo **Ruta, duración y resultado**. Sus campos miden el tiempo de embedding (`embedding_ms`), consulta vectorial (`retrieval_ms`) y espera del endpoint de generación de Ollama (`ollama_http_ms`), además del número de llamadas y timeouts. Un tiempo `null` indica que la etapa no se ejecutó y `ollama_calls: 0` indica que no se llamó al endpoint de generación. El flujo nuevo acepta emisores anteriores mediante `rag: {}`. Esta revisión quedó en el repositorio local, con la EC2 apagada. [Resultados y uso](../eval/rag-quality/results/revision-local-2026-11-20.md)
 
 El n8n **local** `banuchat-unified-n8n` conserva nueve workflows y dos timers de pruebas activos en su SQLite, aunque su contenedor estaba detenido el 19/11. No arrancarlo para demostrar la composición cloud. Las ingestas, fixtures OE2 y calendario locales no se copiaron ni automatizaron en AWS.
 

@@ -23,6 +23,20 @@ FROM banuchat.announcements a
 WHERE a.dataset_release_id = $1
 `;
 
+const EDITORIAL_FEED_QUERY = `
+WITH combined AS (
+ SELECT a.announcement_key::text, a.title::text, a.description::text, a.valid_from, a.valid_until,
+        a.source_path::text, a.source_locator::text, a.source_sha256::text
+ FROM banuchat.announcements a WHERE a.dataset_release_id=$1
+ UNION ALL
+ SELECT (CASE WHEN n.file_name IS NULL THEN 'editorial-' ELSE 'editorial-file-' END)||n.id,
+        n.title,n.body,n.published_at,NULL,'editorial/news/'||n.id,'revision:'||n.revision,
+        encode(sha256(convert_to(n.title||chr(10)||n.body,'UTF8')),'hex')
+ FROM banuchat_editorial.news n WHERE n.state='published' AND n.published_at<=now()
+)
+SELECT * FROM combined a WHERE true
+`;
+
 export type AnnouncementTemporalStatus =
   | "active"
   | "upcoming"
@@ -291,11 +305,12 @@ export function normalizeAnnouncementRow(
 export async function getAnnouncements(
   client: SqlQueryClient,
   input: AnnouncementsInput,
+  includeEditorial = false,
 ): Promise<AnnouncementsResult> {
   const validated = validateAnnouncementsInput(input);
   const release = await resolveCurrentRelease(client);
   const values: unknown[] = [release.release_id];
-  let query = ANNOUNCEMENTS_QUERY_BASE;
+  let query = includeEditorial ? EDITORIAL_FEED_QUERY : ANNOUNCEMENTS_QUERY_BASE;
 
   if (validated.temporalStatus !== "all") {
     values.push(validated.referenceTime);
@@ -320,7 +335,7 @@ export async function getAnnouncements(
   }
 
   values.push(validated.limit);
-  query += `ORDER BY a.valid_from ASC, a.announcement_key ASC\nLIMIT $${values.length}\n`;
+  query += `ORDER BY a.valid_from ${includeEditorial && validated.temporalStatus !== 'upcoming' ? 'DESC' : 'ASC'}, a.announcement_key ASC\nLIMIT $${values.length}\n`;
   const result = await client.query<unknown>(query, values);
 
   return {

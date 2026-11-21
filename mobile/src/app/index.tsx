@@ -1,260 +1,81 @@
-import { useRef, useState } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import { isCcdLocal } from '@/config/demo-mode';
-import {useAuth} from '@/auth/auth-provider';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/auth/auth-provider';
 import { AppButton } from '@/components/app-button';
-import { BrandMark, FadeIn } from '@/ui/animated';
-import { CalendarGlyph, ChartGlyph, SparkGlyph } from '@/ui/icons';
-import { colors, layout, shadows, spacing, typography } from '@/ui/tokens';
+import { BanuWordmark } from '@/components/banu-core';
+import { isCcdLocal } from '@/config/demo-mode';
+import { BrandMark } from '@/ui/animated';
+import { CalendarGlyph, ChartGlyph, ChatGlyph } from '@/ui/icons';
+import { colors, radii, spacing } from '@/ui/tokens';
 
-interface OnboardingSlide {
-  key: string;
-  eyebrow: string;
-  title: string;
-  body: string;
-  accent: string;
-  accentSoft: string;
-}
-
-const SLIDES: OnboardingSlide[] = [
-  {
-    key: 'assistant',
-    eyebrow: 'Asistente académico',
-    title: 'Pregunta. Banu responde con evidencia.',
-    body: 'BanuChat consulta el material disponible y muestra las fuentes asociadas cuando corresponde.',
-    accent: colors.accent,
-    accentSoft: colors.accentSoft,
-  },
-  {
-    key: 'progress',
-    eyebrow: 'Avance de demostración',
-    title: 'Tu progreso, siempre a la mano.',
-    body: 'Explora cursos, porcentajes de avance y fechas de demostración. No corresponden a un expediente académico real.',
-    accent: colors.success,
-    accentSoft: colors.successSoft,
-  },
-  {
-    key: 'calendar',
-    eyebrow: 'Agenda de demostración',
-    title: 'Eventos y cierres, sin sorpresas.',
-    body: 'Consulta sesiones, fechas de cierre y anuncios ficticios del contexto de demostración.',
-    accent: colors.violet,
-    accentSoft: colors.violetSoft,
-  },
+const FEATURES = [
+  { Icon: ChatGlyph, name: 'Chat con Banu', detail: 'Pregunta por cursos, pruebas diagnósticas, requisitos y costos. Abre las fuentes desde la respuesta.' },
+  { Icon: ChartGlyph, name: 'Mi progreso', detail: 'Consulta el avance de tu cuenta de demostración.' },
+  { Icon: CalendarGlyph, name: 'Calendario y Banu al Día', detail: 'Encuentra actividades, fechas y novedades de la demostración.' },
 ];
 
-function SlideGlyph({ slide }: { slide: OnboardingSlide }) {
-  const glyphProps = { color: slide.accent, size: 44 };
-  return (
-    <View style={[styles.glyphHalo, { backgroundColor: slide.accentSoft }]}>
-      <View style={[styles.glyphHaloInner, { backgroundColor: colors.surface }, shadows.soft]}>
-        {slide.key === 'assistant' && <SparkGlyph {...glyphProps} />}
-        {slide.key === 'progress' && <ChartGlyph {...glyphProps} />}
-        {slide.key === 'calendar' && <CalendarGlyph {...glyphProps} />}
-      </View>
-    </View>
-  );
-}
-
-export default function OnboardingScreen() {
-  const slides=SLIDES;
-  const {snapshot}=useAuth();
+export default function WelcomeScreen() {
+  const { snapshot } = useAuth();
   const router = useRouter();
-  const scrollRef = useRef<ScrollView>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
+  const wide = useWindowDimensions().width >= 840;
 
-  const isLastSlide = activeIndex === slides.length - 1;
   if (isCcdLocal()) return <Redirect href="/profiles" />;
-  if(snapshot.phase==='authenticated')return <Redirect href="/home" />;
-
-  function goToProfiles() {
-    router.replace('/login');
-  }
-
-  function handleScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
-    if (viewportWidth <= 0) return;
-    const index = Math.round(event.nativeEvent.contentOffset.x / viewportWidth);
-    if (index !== activeIndex && index >= 0 && index < slides.length) {
-      setActiveIndex(index);
-    }
-  }
-
-  function advance() {
-    if (isLastSlide) {
-      goToProfiles();
-      return;
-    }
-    const nextIndex = activeIndex + 1;
-    scrollRef.current?.scrollTo({ x: nextIndex * viewportWidth, animated: true });
-    setActiveIndex(nextIndex);
-  }
+  if (snapshot.phase === 'authenticated') return <Redirect href="/home" />;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View
-        style={styles.container}
-        onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}>
-        <View style={styles.topBar}>
-          <View style={styles.brandRow}>
-            <BrandMark size={34} />
-            <Text style={styles.brandName}>BanuChat</Text>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.page}>
+        <View style={styles.content}>
+          <BanuWordmark />
+          <View style={[styles.hero, wide && styles.wideHero]}>
+            <View style={styles.introduction}>
+              <Text style={styles.subject}>Centro de Competencias Digitales (CCD)</Text>
+              <Text accessibilityRole="header" style={[styles.title, wide && styles.wideTitle]}>
+                Tu guía para Competencias Digitales
+              </Text>
+              <Text style={styles.body}>
+                BanuChat te ayuda a entender la ruta de formación, resolver dudas y encontrar qué paso sigue.
+              </Text>
+              <AppButton label="Iniciar sesión" tone="banu" onPress={() => router.replace('/login')} style={styles.button} />
+            </View>
+            {wide && <View aria-hidden style={styles.illustration}><BrandMark size={144} framed={false} /></View>}
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Omitir introducción"
-            onPress={goToProfiles}
-            style={({ pressed }) => [styles.skipButton, pressed && styles.pressed]}>
-            <Text style={styles.skipText}>Omitir</Text>
-          </Pressable>
-        </View>
-
-        {viewportWidth > 0 && (
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            bounces={false}
-            onMomentumScrollEnd={handleScroll}
-            scrollEventThrottle={16}
-            showsHorizontalScrollIndicator={false}
-            style={styles.pager}>
-            {slides.map((slide) => (
-              <View key={slide.key} style={[styles.slide, { width: viewportWidth }]}>
-                <View style={styles.slideContent}>
-                  <FadeIn delay={80}>
-                    <SlideGlyph slide={slide} />
-                  </FadeIn>
-                  <FadeIn delay={170}>
-                    <Text style={[styles.eyebrow, { color: slide.accent }]}>{slide.eyebrow}</Text>
-                    <Text style={styles.title}>{slide.title}</Text>
-                  </FadeIn>
-                  <FadeIn delay={260}>
-                    <Text style={styles.body}>{slide.body}</Text>
-                  </FadeIn>
+          <View style={styles.features}>
+            {FEATURES.map(({ Icon, name, detail }) => (
+              <View key={name} style={styles.feature}>
+                <View aria-hidden style={styles.icon}><Icon size={21} color={colors.banuMagenta} /></View>
+                <View style={styles.featureText}>
+                  <Text accessibilityRole="header" style={styles.featureTitle}>{name}</Text>
+                  <Text style={styles.detail}>{detail}</Text>
                 </View>
               </View>
             ))}
-          </ScrollView>
-        )}
-
-        <View style={styles.footer}>
-          <View accessibilityLabel={`Paso ${activeIndex + 1} de ${slides.length}`} style={styles.dots}>
-            {slides.map((slide, index) => (
-              <View
-                key={slide.key}
-                style={[
-                  styles.dot,
-                  index === activeIndex
-                    ? [styles.dotActive, { backgroundColor: slide.accent }]
-                    : styles.dotIdle,
-                ]}
-              />
-            ))}
           </View>
-
-          <AppButton
-            label={isLastSlide ? 'Comenzar' : 'Continuar'}
-            onPress={advance}
-            style={styles.nextButton}
-          />
-          <Text style={styles.demoNote}>
-            BanuChat
-          </Text>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  container: { flex: 1 },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  brandName: { color: colors.ink, fontSize: 17, fontWeight: '800', letterSpacing: -0.2 },
-  skipButton: {
-    minHeight: layout.minTouchTarget,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    borderRadius: 19,
-  },
-  skipText: { color: colors.textSecondary, fontSize: typography.small, fontWeight: '700' },
-  pressed: { opacity: 0.65 },
-  pager: { flexGrow: 0 },
-  slide: { paddingHorizontal: spacing.lg },
-  slideContent: {
-    width: '100%',
-    maxWidth: layout.maxContentWidth,
-    alignSelf: 'center',
-    gap: spacing.lg,
-    paddingTop: spacing.xxl,
-  },
-  glyphHalo: {
-    width: 148,
-    height: 148,
-    borderRadius: 74,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  glyphHaloInner: {
-    width: 96,
-    height: 96,
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eyebrow: {
-    fontSize: typography.caption,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: spacing.xs,
-  },
-  title: {
-    color: colors.ink,
-    fontSize: typography.display,
-    lineHeight: 40,
-    fontWeight: '800',
-    letterSpacing: -0.8,
-  },
-  body: {
-    color: colors.textSecondary,
-    fontSize: typography.body,
-    lineHeight: 25,
-    maxWidth: 460,
-  },
-  footer: {
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  dots: { flexDirection: 'row', justifyContent: 'center', gap: spacing.xs },
-  dot: { height: 8, borderRadius: 4 },
-  dotIdle: { width: 8, backgroundColor: colors.borderStrong },
-  dotActive: { width: 26 },
-  nextButton: { width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center' },
-  demoNote: {
-    color: colors.muted,
-    fontSize: typography.caption,
-    textAlign: 'center',
-  },
+  safe: { flex: 1, backgroundColor: colors.banuCanvas },
+  page: { flexGrow: 1, padding: spacing.lg },
+  content: { width: '100%', maxWidth: 960, alignSelf: 'center', gap: spacing.xl, paddingVertical: spacing.md },
+  hero: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.banuBorder, borderRadius: radii.lg, padding: spacing.xl },
+  wideHero: { flexDirection: 'row', alignItems: 'stretch', padding: spacing.xxl, gap: spacing.xl },
+  introduction: { flex: 1, minWidth: 0, gap: spacing.md, alignItems: 'flex-start' },
+  subject: { color: colors.banuMagenta, fontSize: 14, lineHeight: 20, fontWeight: '700' },
+  title: { color: colors.banuInk, fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.9 },
+  wideTitle: { fontSize: 48, lineHeight: 53, letterSpacing: -1.5 },
+  body: { color: colors.banuMuted, fontSize: 16, lineHeight: 24, maxWidth: 490 },
+  button: { width: '100%', maxWidth: 270, marginTop: spacing.xs },
+  illustration: { width: 240, backgroundColor: colors.banuNavy, borderRadius: radii.lg, alignItems: 'center', justifyContent: 'center' },
+  features: { borderTopWidth: 1, borderColor: colors.banuBorder },
+  feature: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md, borderBottomWidth: 1, borderColor: colors.banuBorder, paddingVertical: spacing.md },
+  icon: { width: 32, minHeight: 24, alignItems: 'center' },
+  featureText: { flex: 1, gap: spacing.xxs },
+  featureTitle: { color: colors.banuInk, fontSize: 16, fontWeight: '700' },
+  detail: { color: colors.banuMuted, fontSize: 14, lineHeight: 21 },
 });

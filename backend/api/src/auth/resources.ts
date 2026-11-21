@@ -21,7 +21,9 @@ import {readOe2Demo,type Oe2PublicationReader,type Oe2DemoKind,type Oe2DemoFilte
 import {readOe2Changes,type ChangeFilters} from '../application/oe2-changes.js';
 import type {ApprovedReferences} from '../chat/approved-references.js';
 import {createManagedMcpResponder,type ManagedMcpRuntime} from '../agent/managed-mcp-agent.js';
-import type {DocumentRagResponder} from '../application/messages.js';
+import type {ChatTurnRoute,DocumentRagResponder} from '../application/messages.js';
+import type {ChatTurnObserver} from '../orchestration/n8n-chat-execution.js';
+import {withRagTurnMetrics,type RagTurnMetrics} from '../operations/rag-metrics.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -38,7 +40,7 @@ export class AuthenticatedResources {
    private readonly artifacts?:DocumentArtifactStorage,private readonly evidenceMode:KnowledgeMode='synthetic',
    private readonly unified?:{mcp_environment:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader},
    private readonly references?:ApprovedReferences,private readonly publications?:Oe2PublicationReader,
-   private readonly managedAgent?:ManagedMcpRuntime){this.transactions=new PgTransactionRunner(pool);}
+   private readonly managedAgent?:ManagedMcpRuntime,private readonly chatObserver?:ChatTurnObserver,private readonly editorialNews=false){this.transactions=new PgTransactionRunner(pool);}
  async demoOe2(token:string,kind:Oe2DemoKind,filters:Oe2DemoFilters,now:string){
   if(!this.unified&&!this.publications)throw new AuthError('NOT_FOUND');
   // Release the normal product connection before waiting on an optional source.
@@ -82,6 +84,10 @@ export class AuthenticatedResources {
   const turnContext=await this.unit(token,async(_c,ctx)=>ctx,id,true,true);
   const principal=turnContext.principal_id;
   if(!this.activity.tryBeginMessage(id))throw new AuthError('CONFLICT');
+  const start=performance.now();
+  const span:{route:ChatTurnRoute|'unknown'}={route:'unknown'};
+  const rag:RagTurnMetrics|undefined=this.chatObserver?{ollama_calls:0,ollama_timeouts:0}:undefined;
+  const onRoute=(route:ChatTurnRoute)=>{span.route=route;};
   try{const aux=this.unified?await auxiliaryContext(this.chat.sql,principal):undefined;
    const answer=this.unified&&aux?unifiedResponder({sql:this.chat.sql,router:this.chat.router,rag:this.chat.document_rag,principal,aux,...this.unified}):undefined;
    let citations:PresentationCitation[]=[];
@@ -97,8 +103,8 @@ export class AuthenticatedResources {
    };
    if(this.managedAgent&&!turnContext.profile_key)throw new AuthError('FORBIDDEN');
    const managed=this.managedAgent?createManagedMcpResponder({...this.managedAgent,
-    principal,profile_key:turnContext.profile_key!,rag:documentRagForTurn}):undefined;
-   return await sendMessage({...this.chat,demo_mode:this.evidenceMode,
+    principal,profile_key:turnContext.profile_key!,rag:documentRagForTurn,onRoute}):undefined;
+   const send=()=>sendMessage({...this.chat,demo_mode:this.evidenceMode,
    ...(this.references?{document_reference_release_id:this.references.releaseId}:{}),
    document_rag:documentRagForTurn,
    ...(managed?{agent_fallback:managed}:{}),
@@ -110,7 +116,17 @@ export class AuthenticatedResources {
     :aux?c.query(`SELECT * FROM banuchat_auth.persist_unified_turn($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS t(
     status text,user_message_id uuid,user_ordinal integer,user_content banuchat.nonblank,user_created_at banuchat.finite_time,
     assistant_message_id uuid,assistant_ordinal integer,assistant_content banuchat.nonblank,assistant_created_at banuchat.finite_time,assistant_insufficient_evidence boolean)`,[token,...values,JSON.stringify(citations),aux.release_id]):c.query('SELECT * FROM banuchat_auth.persist_turn($1,$2,$3,$4,$5,$6,$7,$8)',[token,...values]),
-  },{conversation_id:id,content,now});}catch(error){throw resourceError(error);}finally{this.activity.endMessage(id);}
+  },{conversation_id:id,content,now},onRoute);
+   const result=await (rag?withRagTurnMetrics(rag,send):send());
+   const citationCount=result.assistant_message.citations.length;
+   this.chatObserver?.({route:span.route,duration_ms:Math.round(performance.now()-start),...(rag?{rag}:{}),
+    status:result.assistant_message.insufficient_evidence?(citationCount?'partial':'insufficient_evidence'):'answered',citation_count:citationCount});
+   return result;
+  }catch(error){
+   const failure=resourceError(error);
+   this.chatObserver?.({route:span.route,duration_ms:Math.round(performance.now()-start),...(rag?{rag}:{}),status:'error',error_code:failure.code});
+   throw failure;
+  }finally{this.activity.endMessage(id);}
  }
  async academic(token:string){
   if(this.evidenceMode!=='synthetic'||this.unified)throw new AuthError('NOT_FOUND');
@@ -125,7 +141,7 @@ export class AuthenticatedResources {
   if(!ctx.profile_key)throw new AuthError('FORBIDDEN');return getProfileProgress(c,{...input,profile_key:ctx.profile_key});
  },null,true);}
  calendar(token:string,input:CalendarEventsInput){return this.unit(token,c=>{if(this.unified)return unifiedCalendar(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getCalendarEvents(c,input);});}
- announcements(token:string,input:AnnouncementsInput){return this.unit(token,c=>{if(this.unified)return unifiedAnnouncements(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getAnnouncements(c,input);});}
+ announcements(token:string,input:AnnouncementsInput){return this.unit(token,c=>{if(this.unified)return unifiedAnnouncements(c,input);if(this.evidenceMode==='ccd_local')throw new AuthError('FORBIDDEN');return getAnnouncements(c,input,this.editorialNews);});}
  artifact(token:string,id:string){return this.unit(token,async c=>{
   if(this.references){const artifact=await this.references.artifact(c,token,id);if(artifact)return artifact;}
   // Dataset/release authorization precedes filesystem access; historical ready versions are valid.

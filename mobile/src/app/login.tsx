@@ -43,13 +43,13 @@ export default function Login(){
  return <SafeAreaView style={styles.safe}><KeyboardAvoidingView style={styles.safe} behavior={Platform.OS==='ios'?'padding':'height'}><ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
  <View testID="login-shell" style={styles.shell}>
  <BanuWordmark/>
- {Platform.OS==='web'&&<BanuPageHeading eyebrow="TU ESPACIO ACADÉMICO" title="Un buen comienzo" subtitle="Una pregunta es un buen punto de partida."/>}
+ {Platform.OS==='web'&&<BanuPageHeading eyebrow="BanuChat" title="Centro de Competencias Digitales" subtitle="Consulta cursos, pruebas diagnósticas y requisitos con Banu."/>}
  <View testID="login-layout" style={[styles.layout,wideWeb&&styles.wideLayout]}>
  <View testID="login-story" style={[styles.story,wideWeb?styles.wideStory:styles.compactStory]}>
-  {Platform.OS==='web'?<><BrandMark size={wideWeb?180:88} framed={false}/><Text style={[styles.storyTitle,!wideWeb&&styles.compactStoryTitle]}>{'Una pregunta.\nUn buen comienzo.'}</Text><Text style={styles.storyCopy}>Tu compañero para explorar la información.</Text></>:<View style={styles.nativeWelcome}><BrandMark size={72} framed={false}/><View style={styles.nativeWelcomeCopy}><Text style={styles.nativeWelcomeTitle}>Hola, soy Banu.</Text><Text style={styles.nativeWelcomeBody}>Tu compañero para explorar la información.</Text></View></View>}
+  {Platform.OS==='web'?<><BrandMark size={wideWeb?180:88} framed={false}/><Text style={[styles.storyTitle,!wideWeb&&styles.compactStoryTitle]}>Chat con Banu</Text><Text style={styles.storyCopy}>Pregunta sobre la ruta y consulta las fuentes de la respuesta.</Text></>:<View style={styles.nativeWelcome}><BrandMark size={72} framed={false}/><View style={styles.nativeWelcomeCopy}><Text style={styles.nativeWelcomeTitle}>Hola, soy Banu.</Text><Text style={styles.nativeWelcomeBody}>Tu guía para Competencias Digitales.</Text></View></View>}
  </View>
  <View testID="login-form" style={styles.card}>
-  <View style={styles.heading}><Text accessibilityRole="header" style={styles.title}>{Platform.OS==='web'?'Bienvenido a tu espacio':'Inicia sesión'}</Text>
+  <View style={styles.heading}><Text accessibilityRole="header" style={styles.title}>Inicia sesión</Text>
   <Text style={styles.copy}>Ingresa con tu usuario y contraseña de BanuChat.</Text></View>
   {snapshot.sessionExpired===true&&<Text accessibilityRole="alert" style={styles.error}>Tu sesión expiró. Vuelve a iniciar sesión para consultar tus datos.</Text>}
   <View style={styles.field}><Text nativeID="login-uid-label" style={styles.label}>Usuario</Text><TextInput accessibilityLabel="Usuario" aria-labelledby="login-uid-label" value={uid} onChangeText={setUid} autoCapitalize="characters" autoCorrect={false} maxLength={13} editable={!busy&&!unavailable} placeholder="U + ocho dígitos" placeholderTextColor={colors.muted} style={[styles.input,focused==='uid'&&styles.inputFocused]} onFocus={()=>setFocused('uid')} onBlur={()=>setFocused(null)} returnKeyType="next" submitBehavior="submit" onSubmitEditing={()=>passwordRef.current?.focus()}/></View>
@@ -59,7 +59,7 @@ export default function Login(){
   {error&&<Text accessibilityRole="alert" style={styles.error}>{errorKind==='credentials'?'Usuario o contraseña inválidos.':errorKind==='unavailable'?'El servicio no está disponible. Inténtalo más tarde.':'No se pudo iniciar sesión. Vuelve a intentarlo.'}</Text>}
   {snapshot.logoutRemoteConfirmed===false&&<Text accessibilityRole="alert" style={styles.error}>La sesión se cerró en este dispositivo. No se pudo confirmar la revocación remota.</Text>}
   <AppButton tone="banu" label="Iniciar sesión" onPress={()=>void signIn()} loading={busy} loadingLabel="Iniciando sesión…"/>
-  <View style={styles.notice}><Text style={styles.noticeTitle}>Demostración local · cuenta ficticia</Text><Text style={styles.noticeCopy}>{Platform.OS==='web'?'La sesión solo vive en esta pestaña; al recargar debes iniciar sesión de nuevo.':'Usa la cuenta de demostración asignada. No corresponde a una identidad institucional.'}</Text></View>
+  <View style={styles.notice}><Text style={styles.noticeTitle}>Cuenta de demostración</Text><Text style={styles.noticeCopy}>{Platform.OS==='web'?'La sesión solo vive en esta pestaña; al recargar debes iniciar sesión de nuevo.':'Usa la cuenta de demostración asignada.'}</Text></View>
  </View></View></View></ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
 const styles=StyleSheet.create({

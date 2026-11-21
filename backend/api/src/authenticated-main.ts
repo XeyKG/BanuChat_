@@ -12,6 +12,7 @@ import {publishedOe2Reader} from './operations/oe2-published-reader.js';
 import {loadLocalOe2Reader} from './operations/oe2-local-reader.js';
 import {createApprovedReferences} from './chat/approved-references.js';
 import type {ManagedMcpRuntime} from './agent/managed-mcp-agent.js';
+import {createN8nChatObserver} from './orchestration/n8n-chat-execution.js';
 
 /** Static CCD artifact allowlist shared by normal startup and focused checks. */
 export function ccdArtifactStorage(){
@@ -84,6 +85,8 @@ export async function startAuthenticatedApi(){
     selected_tools:trace.selected_tools,call_count:trace.call_count,terminal_reason:trace.terminal_reason}))};
   }
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,postgres_profile:profile,
+   ...(profile==='managed'&&process.env.BANUCHAT_EDITORIAL_ORIGIN?{editorial_origin:process.env.BANUCHAT_EDITORIAL_ORIGIN}:{}),
+   ...(managedAgent&&process.env.BANUCHAT_N8N_CHAT_EXECUTIONS==='1'?{chat_observer:createN8nChatObserver()}:{}),
    ...(managedAgent?{managed_agent:managedAgent}:{}),
    ...(oe2?{oe2_reader:oe2}:{}),...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),
    ...(references?{references}:{}),document_rag:references?query=>references.respond(query,documentRag):documentRag,artifacts});

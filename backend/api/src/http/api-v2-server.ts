@@ -10,6 +10,7 @@ import type {ProfileProgressStatus} from '../application/profile-progress.js';
 import type {AnnouncementTemporalStatus} from '../application/announcements.js';
 import {validateOe2Filters,type Oe2DemoFilters} from '../application/oe2-demo.js';
 import {validateChangeFilters,type ChangeFilters} from '../application/oe2-changes.js';
+import type {EditorialHandler} from '../editorial/api.js';
 
 const common={'Cache-Control':'no-store',Vary:'Authorization'};
 const jsonType='application/json; charset=utf-8';
@@ -39,7 +40,7 @@ function v2Links<T>(value:T):T {
   return result as T;}return value;
 }
 /** Explicit v2-only composition. No listener/start script, v1 import, CCD mode or auth bypass. */
-export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'|'oe2Changes'|'academic'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>}){
+export function createAuthenticatedApiServer(input:{auth:AuthService;resources:Pick<AuthenticatedResources,'create'|'list'|'detail'|'remove'|'send'|'artifact'|'progress'|'calendar'|'announcements'>&Partial<Pick<AuthenticatedResources,'demoOe2'|'oe2Changes'|'academic'>>;oe2_demo?:boolean;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>;editorial?:EditorialHandler}){
  async function handle(request:IncomingMessage,response:ServerResponse){
  let allow:string|undefined;
  try{
@@ -134,7 +135,11 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
   reply(response,200,{release_id:r.release_id,reference_time:r.reference_time,announcements:r.announcements.map(({source:_,...a})=>a)});
  }catch(error){request.resume();if(response.headersSent)response.destroy();else failure(response,error,allow);}
  }
- const server=createServer({maxHeaderSize:16384,headersTimeout:15000,requestTimeout:30000},(req,res)=>void handle(req,res));
+ const server=createServer({maxHeaderSize:16384,headersTimeout:15000,requestTimeout:30000},(req,res)=>{
+  const path=req.url?.split('?')[0];
+  if(input.editorial&&(path==='/api/v2/editorial'||path?.startsWith('/api/v2/editorial/')))void input.editorial(req,res);
+  else void handle(req,res);
+ });
  server.maxHeadersCount=0; // Never silently discard extra header fields.
  server.on('clientError',(error,socket)=>{
   if(!socket.writable)return;

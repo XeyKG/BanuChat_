@@ -33,6 +33,11 @@ export function planCcdEvidence(query:string,subjectQuery:string,courses:readonl
     }
     add('purpose','el propósito de la prueba diagnóstica',{material:/\b(?:prueba diagnostica|diagnostico)\b/u});
     add('badge','el reconocimiento al completar los pilares');
+  }else if(/^(?:que es|en que consiste|como (?:es|funciona)) la ruta (?:de formacion transversal en|de formacion en|de) competencias digitales(?: (?:en|de) la unab)?(?: por favor)?$/u.test(text)){
+    add('structure','la estructura de la ruta');
+    add('requirement','cómo se completa la ruta');
+  }else if(/^(?:(?:me puedes |puedes )?explica(?:me|r)? (?:brevemente )?que son|que (?:son|significan)|en que consisten|define) (?:las )?(?:competencias|habilidades) digitales(?: (?:en|de) (?:la unab|la ruta|el ccd))?(?: por favor)?$/u.test(text)){
+    add('digital_competencies','qué son las competencias digitales',{aliases:['structure'],material:/\bcompetencias digitales basicas\b.*\banalitica y contenido digital\b.*\btecnologias transformativas\b/u});
   }else if(enrollment&&process&&!diagnostic&&/\b(?:cursos?|asignaturas?|materias?|cosmos)\b/u.test(subject)){
     add('cosmos_enrollment','el procedimiento de inscripción, adición o cancelación');
     if(/\b(?:pago|pagar|cupon)\b/u.test(text))add('cosmos_payment','la generación del cupón de pago');

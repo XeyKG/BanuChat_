@@ -47,6 +47,31 @@ test('herramientas y organización conservan el sujeto académico, no la selecci
  const f=fixture();for(const [q,course]of [['¿Qué herramientas de IA se consideran para selección crítica?','IA de Taller'],['¿Qué organización incluye Taller de Objetos?','Taller de Objetos']]){const scope=ccdKnowledgeQueryScope(q!,f.deps.knowledge.metadata);assert.deepEqual(scope.topics,['academic']);assert.deepEqual(scope.courses,[course]);await f.ask(q!);assert.ok(f.calls.at(-1)!.keys.some(k=>f.deps.knowledge.metadata.get(k)?.course===course));assert.ok(f.calls.at(-1)!.keys.every(k=>f.deps.knowledge.metadata.get(k)?.course===course));}
 });
 test('un instrumento de experiencia conserva procedimiento en la llamada real de recuperación',async()=>{const f=fixture(),a=await f.ask('Según el instructivo de experiencia de aprendizaje, ¿cuántas preguntas y dimensiones tiene el instrumento?');assert.deepEqual(a.supporting_claim_ids,['experience']);assert.match(a.content,/cuatro dimensiones/u);assert.ok(!f.calls[0]!.keys.includes('diagnostic-structure'));});
+test('la definición de competencias digitales usa evidencia acotada sin generar texto con el LLM', async () => {
+ const f=fixture({structure:{text:'La ruta contiene Competencias Digitales Básicas, Analítica y Contenido Digital y Tecnologías Transformativas.'}});
+ for(const query of ['¿Qué son competencias digitales?', '¿En qué consisten las habilidades digitales?', '¿Me puedes explicar brevemente qué son las competencias digitales en la UNAB?']){
+  const answer=await f.ask(query);
+  assert.match(answer.content,/Son habilidades.*trabajar con datos/u);
+  assert.deepEqual(answer.supporting_claim_ids,['structure']);
+  assert.equal(answer.citations.length,1);
+  assert.equal(answer.insufficient_evidence,false);
+ }
+ assert.deepEqual(f.prompts,[]);
+ const unsupported=await fixture().ask('¿Qué son las competencias digitales?');
+ assert.equal(unsupported.insufficient_evidence,true);
+ assert.equal(unsupported.citations.length,0);
+});
+test('las preguntas introductorias sobre la ruta recuperan estructura y formas de completarla',async()=>{
+ const f=fixture();
+ for(const query of ['¿Qué es la ruta de competencias digitales?', '¿En qué consiste la Ruta de Formación Transversal en Competencias Digitales?', '¿Cómo es la ruta de competencias digitales en la UNAB?']){
+  const answer=await f.ask(query);
+  assert.equal(answer.insufficient_evidence,false);
+  assert.deepEqual(answer.supporting_claim_ids,['structure','center-requirement']);
+  assert.match(answer.content,/diagnóstico, cursos o una combinación/u);
+  assert.equal(answer.citations.length,2);
+ }
+ assert.deepEqual(f.prompts,[]);
+});
 test('la descripción del Centro cita su orientación en la ruta y requiere respaldo explícito', async () => {
  const f=fixture({enrol:{text:'El CCD te orienta para elegir cursos según los resultados del diagnóstico.'}});
  for(const query of ['que es el centro de competencias digitales','¿Qué hace el CCDigital?','¿Cuál es la función del Centro de Competencias Digitales de la UNAB?']){
@@ -113,6 +138,25 @@ test('la abstención del modelo conserva hechos curriculares como respuesta parc
  const f=fixture(),original=f.deps.generator_client;
  f.deps.generator_client={async generate(input,config){return {...await original.generate(input,config),content:'EVIDENCIA_INSUFICIENTE'};}};
  const a=await f.ask('¿Qué contenidos incluye IA de Taller?');assert.equal(a.insufficient_evidence,true);assert.match(a.content,/texto y figura/u);assert.match(a.content,/No encuentro respaldo suficiente para confirmar/u);assert.ok(a.citations.length);assert.deepEqual(a.unanswered_aspects,['academic_specific_request']);
+});
+test('una salida curricular con referencias inválidas conserva solo hechos parciales con citas reales',async()=>{
+ for(const content of ['El curso exige una certificación inventada.', 'El curso exige una certificación inventada.\nFUENTES: [99]']){
+  const f=fixture(),original=f.deps.generator_client;
+  f.deps.generator_client={async generate(input,config){return {...await original.generate(input,config),content};}};
+  const answer=await f.ask('¿Qué contenidos incluye IA de Taller?');
+  assert.equal(answer.insufficient_evidence,true);
+  assert.match(answer.content,/texto y figura/u);
+  assert.doesNotMatch(answer.content,/certificación inventada/u);
+  assert.deepEqual(answer.supporting_claim_ids,['ai-tools']);
+  assert.deepEqual(answer.unanswered_aspects,['academic_specific_request']);
+ }
+});
+test('una referencia inválida no convierte una descripción curricular en prueba de un resultado',async()=>{
+ const f=fixture(),original=f.deps.generator_client;
+ f.deps.generator_client={async generate(input,config){return {...await original.generate(input,config),content:'Ese resultado está demostrado.\nFUENTES: [99]'};}};
+ const answer=await f.ask('¿Qué resultados demuestra el contenido de IA de Taller?');
+ assert.equal(answer.insufficient_evidence,true);
+ assert.deepEqual(answer.citations,[]);
 });
 test('un fallo de generación no se oculta con una respuesta extraída',async()=>{
  const f=fixture();f.deps.generator_client={async generate(){throw Error('generator_unavailable');}};await assert.rejects(f.ask('¿Qué contenidos incluye IA de Taller?'),/generator_unavailable/u);

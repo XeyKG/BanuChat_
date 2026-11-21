@@ -11,6 +11,7 @@ import type {DocumentArtifactStorage} from './application/document-artifact.js';
 import {createAuthenticatedApiServer} from './http/api-v2-server.js';
 import type {RecoveryService} from './auth/recovery-service.js';
 import {generateDocumentRagAnswer,type DocumentRagDependencies} from './chat/document-rag.js';
+import type {ChatTurnObserver} from './orchestration/n8n-chat-execution.js';
 import {assertAuthenticatedDocumentReads,retrieveAuthenticatedDocumentChunks} from './application/authenticated-document-retrieval.js';
 import {knowledgeMode,type KnowledgeMode} from './auth/knowledge-mode.js';
 import type {ConversationOrchestrator} from './orchestration/n8n-conversation.js';
@@ -20,6 +21,7 @@ import {retrieveCcdKnowledgeChunks} from './application/ccd-knowledge-retrieval.
 import type {Oe2PublicationReader} from './application/oe2-demo.js';
 import type {ApprovedReferences} from './chat/approved-references.js';
 import type {ManagedMcpRuntime} from './agent/managed-mcp-agent.js';
+import {createEditorialHandler} from './editorial/api.js';
 /** Permanent authenticated RAG composition; callers cannot select corpus or SQL through HTTP. */
 export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDependencies,'evidence_mode'|'retrieve_chunks'>,mode:KnowledgeMode='synthetic'):Promise<DocumentRagResponder>{
  knowledgeMode(mode);
@@ -38,7 +40,7 @@ export async function createAuthenticatedDocumentRag(input:Omit<DocumentRagDepen
 /** Product composition, deliberately no listen/startup or v1 import. Explicit trusted config. */
 export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expectedDatabase:string;deploymentId:string;rateKey:Buffer;
  document_rag:DocumentRagResponder;evidence_mode?:KnowledgeMode;router?:IntentRouter;artifacts?:DocumentArtifactStorage;now?:()=>string;recovery?:Pick<RecoveryService,'request'|'confirm'>;
- unified?:boolean;mcp_environment?:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader;postgres_profile?:PostgresProfile;references?:ApprovedReferences;managed_agent?:ManagedMcpRuntime}){
+ unified?:boolean;mcp_environment?:Record<string,string>;orchestrator?:ConversationOrchestrator;oe2_reader?:Oe2PublicationReader;postgres_profile?:PostgresProfile;references?:ApprovedReferences;managed_agent?:ManagedMcpRuntime;chat_observer?:ChatTurnObserver;editorial_origin?:string}){
  const auth=await AuthService.create(input);
  const scope=(await input.pool.query('SELECT deployment_id,database_name FROM banuchat_auth.runtime_scope WHERE singleton')).rows[0] as {deployment_id:string;database_name:string}|undefined;
  if(!scope||scope.deployment_id!==input.deploymentId.toLowerCase()||scope.database_name!==input.expectedDatabase)throw new AuthError('DEPENDENCY_UNAVAILABLE');
@@ -46,6 +48,7 @@ export async function createAuthenticatedRuntimeServer(input:{pool:Pool;expected
  if(input.unified&&input.evidence_mode!=='ccd_local')throw new AuthError('DEPENDENCY_UNAVAILABLE');
  if(input.managed_agent&&(input.unified||input.evidence_mode!=='synthetic'||input.postgres_profile!=='managed'))throw new AuthError('DEPENDENCY_UNAVAILABLE');
  const resources=new AuthenticatedResources(input.pool,{sql:new PgSqlClient(input.pool),router,document_rag:input.document_rag},input.artifacts,knowledgeMode(input.evidence_mode),
- input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references,input.oe2_reader,input.managed_agent);
- return createAuthenticatedApiServer({auth,resources,...(input.unified||input.oe2_reader?{oe2_demo:true}:{}),...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
+ input.unified?{mcp_environment:input.mcp_environment??{},...(input.orchestrator?{orchestrator:input.orchestrator}:{}),...(input.oe2_reader?{oe2_reader:input.oe2_reader}:{})}:undefined,input.references,input.oe2_reader,input.managed_agent,input.chat_observer,Boolean(input.editorial_origin));
+ const editorial=input.editorial_origin?await createEditorialHandler(input.pool,input.editorial_origin,token=>auth.verifyAccess(token)):undefined;
+ return createAuthenticatedApiServer({auth,resources,...(editorial?{editorial}:{}),...(input.unified||input.oe2_reader?{oe2_demo:true}:{}),...(input.now?{now:input.now}:{}),...(input.recovery?{recovery:input.recovery}:{})});
 }

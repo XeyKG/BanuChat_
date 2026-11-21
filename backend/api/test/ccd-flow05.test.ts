@@ -11,8 +11,8 @@ test('FLOW-05: a valid explicit relation survives generator, source parser and r
 test('FLOW-05: an exact model abstention remains an abstention with evidence selected and no fabricated citations',async()=>{
  const f=replay(0,'EVIDENCIA_INSUFICIENTE'),a=await f.ask();assert.equal(f.calls.length,1);assert.ok(a.selected_claim_ids?.length);assert.equal(a.insufficient_evidence,true);assert.deepEqual(a.citations,[]);assert.equal(a.pilot_strategy,undefined);
 });
-test('FLOW-05: invalid source syntax is distinguishable from a model abstention; academic fallback only extracts evidence',async()=>{
- for(const raw of ['AFIRMACION_NO_RESPALDADA','AFIRMACION_NO_RESPALDADA\nFUENTES: [9]']){const f=replay(0,raw),a=await f.ask();assert.equal(parseGroundedAnswer(raw,1),undefined);assert.equal(a.pilot_strategy,'scoped_extract');assert.equal(a.insufficient_evidence,false);assert.doesNotMatch(a.content,/AFIRMACION_NO_RESPALDADA/u);assert.match(a.content,/No cuantifica/u);}
+test('FLOW-05: invalid source syntax cannot establish a requested relation',async()=>{
+ for(const raw of ['AFIRMACION_NO_RESPALDADA','AFIRMACION_NO_RESPALDADA\nFUENTES: [9]']){const f=replay(0,raw),a=await f.ask();assert.equal(parseGroundedAnswer(raw,1),undefined);assert.ok(a.selected_claim_ids?.length);assert.equal(a.insufficient_evidence,true);assert.deepEqual(a.citations,[]);assert.doesNotMatch(a.content,/AFIRMACION_NO_RESPALDADA/u);}
 });
 test('FLOW-05: a partial answer can retain the supported relation and explicitly leave the missing quantity unknown',async()=>{
  const f=replay(2,'La revisión detecta errores y su corrección mejora la exactitud en el ensayo. No hay un porcentaje documentado.\nFUENTES: [1]'),a=await f.ask();assert.equal(a.insufficient_evidence,false);assert.match(a.content,/No hay un porcentaje documentado/u);assert.equal(a.citations.length,1);

@@ -30,6 +30,12 @@ En la revisión operativa del 20/11 se repuso el nodo de respuesta del webhook c
 
 El cliente web/Android ofrece login, sesión y logout; chat, fuentes, artefactos e historial propios; expediente y recursamiento; calendario mensual; noticias bajo **Banu al Día**; **Publicaciones OE2** y comparación de publicaciones; **Recordatorios** locales Android. La cuenta determina el perfil y la release; elegir un perfil no es autenticarse y la UI vigente no ofrece un selector libre de identidad.
 
+La portada web publicada explica desde la primera pantalla el alcance de BanuChat en el Centro de Competencias Digitales. El chat tiene prioridad. Progreso, calendario y Banu al Día aparecen como funciones complementarias de la demostración.
+
+Hay una APK local **1.0.5**, `versionCode 6`, con la misma firma y paquete que 1.0.4. Se instaló como actualización y arrancó en el Huawei de pruebas. Reutiliza los binarios nativos de la APK validada 1.0.4 y actualiza el bundle, el manifiesto y la configuración de versión. GitHub conserva la publicación 1.0.4. SHA-256 de la APK local 1.0.5 `d22d903f5b53065a5ef8b2d5957082a28f477b41ff3bca99003855f6ea4b09b1`.
+
+La definición de competencias digitales ahora usa una respuesta breve basada en la estructura recuperada de la ruta y conserva la cita. En AWS, la pregunta exacta pasó de 154,885 s a 1,637 s en una medición antes y otra después. Otras cuatro consultas produjeron respuestas en 1,636–5,353 s. Las cinco quedaron en el nuevo workflow de [ejecuciones del chat](../n8n/README.md#ver-consultas-del-chat-en-executions), con ruta, duración y resultado. Son mediciones puntuales. Preguntas de síntesis más abiertas todavía pueden depender del modelo generativo.
+
 La API publicada aplica un filtro de respeto antes de procesar la consulta. El 20/11 se verificó el aviso, el marcador de mensaje omitido en Historial y el envío posterior de una consulta normal. La comprobación con dos cuentas ficticias confirmó el acceso al expediente propio, el rechazo del acceso a la conversación ajena y la revocación de ambas sesiones al cerrar sesión.
 
 | Fuente | Estado documentado y límite |
