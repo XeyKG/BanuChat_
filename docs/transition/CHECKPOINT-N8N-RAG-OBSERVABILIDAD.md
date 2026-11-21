@@ -1,6 +1,19 @@
 # Auditoría de n8n, RAG, MCP y observabilidad
 
-**21/11/2026.** La revisión partió de `main` en `6134fb3c042a2d775dd0990052b0a4d5a904099e`, comprobado también en GitHub. AWS conservaba el colector anterior, que registra el turno al finalizar. La versión de inicio, etapas y cierre se implementó en el repositorio. Su publicación y la captura del nuevo recorrido quedaron pendientes al interrumpirse Computer Use durante la navegación a Run Command. El diagnóstico remoto se completó por Systems Manager antes de esa interrupción.
+**21/11/2026.** La auditoría partió de `main` en `6134fb3c042a2d775dd0990052b0a4d5a904099e`. La implementación correlacionada quedó en `d162b94d629dbb06466f7510cca49b4b3e32d816`.
+
+## Continuación del despliegue
+
+Learner Lab mostraba estado Ready y US$14,60 de US$50 usados. Systems Manager listaba la EC2 existente `i-0a726734ca6c6f10d` como Online y running. Se observó la sesión propietaria de n8n abierta antes de la última ejecución administrativa.
+
+| Ejecución de Systems Manager | Resultado observado |
+| --- | --- |
+| `8eb91417-b314-4386-bd87-1f987307f28b` | Los cinco servicios estaban activos. El preflight detectó que el observador instalado correspondía a una revisión anterior a la base del parche. Se detuvo antes del respaldo y de los cambios. |
+| `a3df0ddd-3c67-41e7-a8c2-16b9e91e695a` | Coincidió el SHA-256 del observador con el artefacto previo. Se verificó el respaldo privado `/opt/banuchat/backups/observability-20261121-01` con 20 archivos, manifiesto de hashes, SQLite con `quick_check` y 21 ejecuciones históricas. Se comprobó en SQLite la publicación de la revisión `a4407080-4800-489f-b973-55f8af9b7a07` y la igualdad del workflow combinado OE4. El webhook devolvió 404 inmediatamente después del arranque y el comando confirmó `ROLLBACK_OK`. El cambio de API todavía no se había aplicado. |
+| `047499ee-c3ad-4c81-91af-41451ae0d98d` | Respaldo `observability-20261121-02`, 20 archivos y 21 ejecuciones. n8n guardó la revisión `05b6ab45-4d25-42ec-94a8-2639792aa87f` y el webhook se registró tras cinco segundos. El primer evento recibió 200 donde se esperaba 202. Se confirmó `ROLLBACK_OK`, antes de actualizar la API. |
+| `1a8a1170-5798-452f-b48e-0cc33b22e16b` | Los cinco servicios estaban activos. SQLite confirmó las revisiones `4e654a8d-8f30-45c9-b654-3c37ac805a56` del colector y `60a7577b-30b1-4d52-87d9-dbaf28642def` de OE4, con sus dos webhooks registrados. |
+
+Al recuperar acceso se comprobó BanuChat por HTTPS y el editor autenticado de n8n. Las pruebas de publicación usan eventos sintéticos de infraestructura para distinguir la confirmación HTTP del resultado de un turno real.
 
 ## Inventario observado en AWS
 
