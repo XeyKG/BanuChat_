@@ -7,87 +7,212 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "banuchat/internal/chat-executions",
-        "responseMode": "onReceived",
+        "responseMode": "responseNode",
         "options": {
-          "responseCode": 202
+          "ipWhitelist": "127.0.0.1"
         }
       },
       "id": "0c30d339-18a4-4f2f-bb3d-9052147b2732",
-      "name": "Turno de chat finalizado",
+      "name": "Recibir evento interno",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        240,
-        300
+        0,
+        220
       ],
       "webhookId": "d68fb2a2-954d-49a4-a70c-82eb746248e6"
     },
     {
       "parameters": {
-        "assignments": {
-          "assignments": [
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
             {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588800",
-              "name": "operation_id",
-              "type": "string",
-              "value": "={{ $json.body.operation_id }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588801",
-              "name": "route",
-              "type": "string",
-              "value": "={{ $json.body.route }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588802",
-              "name": "duration_ms",
-              "type": "number",
-              "value": "={{ $json.body.duration_ms }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588803",
-              "name": "status",
-              "type": "string",
-              "value": "={{ $json.body.status }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588804",
-              "name": "citation_count",
-              "type": "number",
-              "value": "={{ $json.body.citation_count ?? 0 }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588805",
-              "name": "error_code",
-              "type": "string",
-              "value": "={{ $json.body.error_code ?? '' }}"
-            },
-            {
-              "id": "09c7a362-fb36-4e4f-acd0-d1c9b6588806",
-              "name": "rag",
-              "type": "object",
-              "value": "={{ $json.body.rag ?? {} }}"
+              "id": "4e3d1d6c-88d2-43c8-9f6a-f72e49e1451f",
+              "leftValue": "={{ (() => {\n  const body = $json.body;\n  const headers = $json.headers ?? {};\n  const size = Number(headers[\"content-length\"]);\n  const object = value => value !== null && typeof value === \"object\" && !Array.isArray(value);\n  const keys = (value, allowed) => Object.keys(value).every(key => allowed.includes(key));\n  const integer = (value, max) => Number.isSafeInteger(value) && value >= 0 && value <= max;\n  const timestamp = value => typeof value === \"string\" && /^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d\\.\\d{3}Z$/.test(value) && Number.isFinite(Date.parse(value));\n  if (!object(body) || !integer(size, 1024) || size === 0 || headers[\"content-type\"] !== \"application/json\" || headers.authorization || headers.cookie || Object.keys($json.query ?? {}).length) return false;\n  const base = [\"operation_id\", \"route\", \"duration_ms\", \"status\", \"citation_count\", \"error_code\", \"rag\"];\n  const legacy = body.sequence === undefined;\n  if (!keys(body, legacy ? base : [...base, \"sequence\", \"started_at\", \"finished_at\", \"stage\"])) return false;\n  if (typeof body.operation_id !== \"string\" || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(body.operation_id)) return false;\n  if (![\"unknown\", \"filtered\", \"direct\", \"document_rag\", \"structured_mcp\", \"unified\"].includes(body.route) || !integer(body.duration_ms, 86400000)) return false;\n  const terminal = [\"answered\", \"partial\", \"insufficient_evidence\", \"error\"];\n  const errors = [\"INVALID_RESET\", \"CONFLICT\", \"INVALID_ARGUMENT\", \"UNAUTHENTICATED\", \"FORBIDDEN\", \"NOT_FOUND\", \"METHOD_NOT_ALLOWED\", \"PAYLOAD_TOO_LARGE\", \"RATE_LIMITED\", \"DEPENDENCY_UNAVAILABLE\", \"INTERNAL_ERROR\"];\n  if (!(legacy ? terminal : [...terminal, \"started\", \"cancelled\"]).includes(body.status)) return false;\n  if (body.status === \"error\" ? !errors.includes(body.error_code) : (legacy ? body.error_code !== undefined : body.error_code !== null)) return false;\n  if (!integer(body.citation_count ?? (legacy && body.status === \"error\" ? 0 : -1), 1000)) return false;\n  if (!legacy) {\n    if (!integer(body.sequence, 1000) || !timestamp(body.started_at) || ![null, \"embedding\", \"pgvector\", \"generation\"].includes(body.stage)) return false;\n    if (body.status === \"started\" ? body.finished_at !== null || body.citation_count !== 0 : !timestamp(body.finished_at)) return false;\n  }\n  if (body.rag === undefined) return true;\n  const times = [\"embedding_ms\", \"retrieval_ms\", \"ollama_http_ms\", ...(!legacy ? [\"generation_ms\"] : [])];\n  return object(body.rag) && keys(body.rag, [...times, \"ollama_calls\", \"ollama_timeouts\"]) &&\n    times.every(key => body.rag[key] === null || integer(body.rag[key], 86400000)) &&\n    integer(body.rag.ollama_calls, 1000) && integer(body.rag.ollama_timeouts, body.rag.ollama_calls);\n})() }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
-          ]
+          ],
+          "combinator": "and"
         },
         "options": {}
       },
+      "id": "776eaee2-1dfe-4852-ac3a-1b8c69ad7352",
+      "name": "Validar estructura y procedencia",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ (() => {\n  const { operation_id, sequence, started_at, finished_at, route, stage, duration_ms, status, citation_count, error_code, rag } = $json.body;\n  return JSON.stringify({ operation_id, sequence: sequence ?? null, started_at: started_at ?? null, finished_at: finished_at ?? null,\n    route, stage: stage ?? null, duration_ms, status, citation_count: citation_count ?? 0, error_code: error_code ?? null,\n    rag: rag ?? null, event: status === \"started\" ? (stage ? \"etapa\" : sequence === 0 ? \"inicio\" : \"ruta\") :\n      status === \"error\" ? \"error_chat\" : \"finalizacion\" });\n})() }}",
+        "options": {}
+      },
       "id": "10e3bbab-4d01-41f1-a1c3-d0c4049b815a",
-      "name": "Ruta, duración y resultado",
+      "name": "Registrar ruta y estado técnico",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        520,
-        300
+        490,
+        120
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { operation_id: $json.operation_id, sequence: $json.sequence } }}",
+        "options": {
+          "responseCode": 202
+        }
+      },
+      "id": "5d6a134a-22bc-43e5-95f6-59d1d773dac8",
+      "name": "Confirmar recepción",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        750,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error_code: 'INVALID_EVENT' } }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "id": "ea575b91-06f9-4917-b472-2a8d0416ec7f",
+      "name": "Rechazar evento inválido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        490,
+        350
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { error_code: 'COLLECTOR_ERROR' } }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "3b6672b2-cd84-48fd-8bd3-66ff41c17681",
+      "name": "Confirmar error del registro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        750,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "width": 460,
+        "height": 420,
+        "color": 7,
+        "content": "## 1 · Entrada privada\nLa API envía estados por loopback. Caddy bloquea las rutas públicas. El webhook verifica origen, y el siguiente nodo valida tamaño y campos."
+      },
+      "id": "5d369020-6786-4a04-816c-5dba297d36b5",
+      "name": "Nota de entrada",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -95
+      ]
+    },
+    {
+      "parameters": {
+        "width": 525,
+        "height": 375,
+        "color": 5,
+        "content": "## 2 · Resumen en Executions\nLa API determina la ruta. El resumen distingue inicio, ruta, etapa y resultado. La secuencia ordena los eventos del mismo `operation_id`."
+      },
+      "id": "3cd3f964-6d43-41b7-8671-4b1d2f96523a",
+      "name": "Nota de ejecución",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "width": 525,
+        "height": 250,
+        "color": 3,
+        "content": "## 3 · Rechazos\n422 indica un evento inválido. 500 indica un fallo al preparar el resumen. `error_chat` en una ejecución aceptada corresponde a la API."
+      },
+      "id": "39ab7f23-f7e4-4f90-abb5-bbcf3af6bbd4",
+      "name": "Nota de errores",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        230
       ]
     }
   ],
   "connections": {
-    "Turno de chat finalizado": {
+    "Recibir evento interno": {
       "main": [
         [
           {
-            "node": "Ruta, duración y resultado",
+            "node": "Validar estructura y procedencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar estructura y procedencia": {
+      "main": [
+        [
+          {
+            "node": "Registrar ruta y estado técnico",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rechazar evento inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar ruta y estado técnico": {
+      "main": [
+        [
+          {
+            "node": "Confirmar recepción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Confirmar error del registro",
             "type": "main",
             "index": 0
           }
@@ -99,8 +224,10 @@
     "executionOrder": "v1",
     "saveDataSuccessExecution": "all",
     "saveDataErrorExecution": "all",
-    "saveManualExecutions": false
+    "saveManualExecutions": false,
+    "saveExecutionProgress": false,
+    "executionTimeout": 10
   },
-  "versionId": "9cffc3c3-735b-4461-9f75-c7ef1dad0dce",
+  "versionId": "dd0f86c5-568f-4240-ac87-6224f432f696",
   "tags": []
 }

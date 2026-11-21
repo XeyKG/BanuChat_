@@ -23,14 +23,17 @@ export function usesManagedStructuredMcp(query:McpAgentInput):boolean {
 
 export function createManagedMcpResponder(input:{principal:string;profile_key:string;deployment_id:string;
  environment:Readonly<Record<string,string>>;orchestrator:ConversationOrchestrator;rag:DocumentRagResponder;
- sessions?:McpToolSessionFactory;onRoute?:(route:ChatTurnRoute)=>void;trace?:(entry:{operation_id:string;trace:McpAgentTrace})=>void}):McpAgentResponder {
+ sessions?:McpToolSessionFactory;operationId?:string;onRoute?:(route:ChatTurnRoute)=>void;trace?:(entry:{operation_id:string;trace:McpAgentTrace})=>void}):McpAgentResponder {
  return async query=>{
   if(query.profile_key!==input.profile_key)throw new AuthError('FORBIDDEN');
-  if(!usesManagedStructuredMcp(query))return input.rag(query);
+  if(!usesManagedStructuredMcp(query)){
+   input.onRoute?.('document_rag');
+   return input.rag(query);
+  }
   input.onRoute?.('structured_mcp');
   const restriction=mcpQueryRestriction(query.query,query.history);
   if(restriction)return {release_id:query.release_id,content:restriction,insufficient_evidence:true,citations:[],citation_records:[]};
-  const operation_id=randomUUID();
+  const operation_id=input.operationId??randomUUID();
   const admission=await input.orchestrator.orchestrate({operation_id,release_id:query.release_id,
    required_sources:requiredMcpSources(query),demo_mode:'synthetic',route:'agent_fallback',requested_capability:'bounded_mcp_agent'});
   if(admission.directive==='request_clarification')return clarifyMcpSources(query.release_id);

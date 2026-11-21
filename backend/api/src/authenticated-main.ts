@@ -86,7 +86,7 @@ export async function startAuthenticatedApi(){
   }
   const server=await createAuthenticatedRuntimeServer({pool,expectedDatabase:database,deploymentId,rateKey:Buffer.from(key,'hex'),evidence_mode:mode,unified,postgres_profile:profile,
    ...(profile==='managed'&&process.env.BANUCHAT_EDITORIAL_ORIGIN?{editorial_origin:process.env.BANUCHAT_EDITORIAL_ORIGIN}:{}),
-   ...(managedAgent&&process.env.BANUCHAT_N8N_CHAT_EXECUTIONS==='1'?{chat_observer:createN8nChatObserver()}:{}),
+   ...(profile==='managed'&&process.env.BANUCHAT_N8N_CHAT_EXECUTIONS==='1'?{chat_observer:createN8nChatObserver()}:{}),
    ...(managedAgent?{managed_agent:managedAgent}:{}),
    ...(oe2?{oe2_reader:oe2}:{}),...(mcp?{mcp_environment:mcp}:{}),...(n8n?{orchestrator:new N8nConversationOrchestrator({...n8n,trace:r=>console.log(JSON.stringify({event:'unified_n8n',operation_id:r.operation_id,workflow:r.workflow,state:r.state,release_id:r.release_id}))})}:{}),
    ...(references?{references}:{}),document_rag:references?query=>references.respond(query,documentRag):documentRag,artifacts});

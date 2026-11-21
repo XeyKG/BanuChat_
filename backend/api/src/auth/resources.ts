@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import type {Pool} from 'pg';
 import type {SqlQueryClient} from '../data/sql-client.js';
 import {PgTransactionRunner} from '../data/transaction.js';
@@ -23,8 +24,8 @@ import {readOe2Changes,type ChangeFilters} from '../application/oe2-changes.js';
 import type {ApprovedReferences} from '../chat/approved-references.js';
 import {createManagedMcpResponder,type ManagedMcpRuntime} from '../agent/managed-mcp-agent.js';
 import type {ChatTurnRoute,DocumentRagResponder} from '../application/messages.js';
-import type {ChatTurnObserver} from '../orchestration/n8n-chat-execution.js';
-import {withRagTurnMetrics,type RagTurnMetrics} from '../operations/rag-metrics.js';
+import type {ChatTurnObserver,ChatTurnOutcome} from '../orchestration/n8n-chat-execution.js';
+import {withRagTurnMetrics,type RagStage,type RagTurnMetrics} from '../operations/rag-metrics.js';
 interface ResourceContext {principal_id:string;session_id:string;profile_key:string|null;release_id:string|null;}
 export function resourceError(error:unknown):AuthError {
  if(error instanceof AuthError)return error;
@@ -80,15 +81,30 @@ export class AuthenticatedResources {
    try{await deleteConversation(c,{conversation_id:id});}finally{this.activity.endDelete(id);}
   },id);
  }
- async send(token:string,id:string,content:string,now:string){
+ async send(token:string,id:string,content:string,now:string,disconnected?:AbortSignal){
   // Authorization and owner check precede the activity gate (foreign UUID must remain 404).
   const turnContext=await this.unit(token,async(_c,ctx)=>ctx,id,true,true);
   const principal=turnContext.principal_id;
   if(!this.activity.tryBeginMessage(id))throw new AuthError('CONFLICT');
-  const start=performance.now();
-  const span:{route:ChatTurnRoute|'unknown'}={route:'unknown'};
+  const start=performance.now(), started_at=new Date().toISOString();
+  const operation_id=this.chatObserver||this.managedAgent?randomUUID():undefined;
+  let route:ChatTurnRoute|'unknown'='unknown';
+  let sequence=0;
+  let stage:RagStage|undefined;
   const rag:RagTurnMetrics|undefined=this.chatObserver?{ollama_calls:0,ollama_timeouts:0}:undefined;
-  const onRoute=(route:ChatTurnRoute)=>{span.route=route;};
+  const timing=()=>({duration_ms:Math.round(performance.now()-start),...(stage?{stage}:{}),
+   ...(stage&&rag?{rag}:{})});
+  const observe=(event:ChatTurnOutcome)=>{
+   if(!this.chatObserver||!operation_id)return;
+   try{this.chatObserver({operation_id,sequence:sequence++,started_at,route,...timing(),...event});}
+   catch{console.warn('BanuChat: no se pudo preparar un evento de chat para n8n.');}
+  };
+  const onRoute=(selected:ChatTurnRoute)=>{
+   if(route===selected)return;
+   route=selected;
+   observe({status:'started'});
+  };
+  observe({status:'started'});
   try{const aux=this.unified?await auxiliaryContext(this.chat.sql,principal):undefined;
    const answer=this.unified&&aux?unifiedResponder({sql:this.chat.sql,router:this.chat.router,rag:this.chat.document_rag,principal,aux,...this.unified}):undefined;
    let citations:PresentationCitation[]=[];
@@ -104,7 +120,8 @@ export class AuthenticatedResources {
    };
    if(this.managedAgent&&!turnContext.profile_key)throw new AuthError('FORBIDDEN');
    const managed=this.managedAgent?createManagedMcpResponder({...this.managedAgent,
-    principal,profile_key:turnContext.profile_key!,rag:documentRagForTurn,onRoute}):undefined;
+    principal,profile_key:turnContext.profile_key!,rag:documentRagForTurn,onRoute,
+    ...(operation_id?{operationId:operation_id}:{})}):undefined;
    const send=()=>sendMessage({...this.chat,demo_mode:this.evidenceMode,
    ...(this.references?{document_reference_release_id:this.references.releaseId}:{}),
    document_rag:documentRagForTurn,
@@ -117,15 +134,23 @@ export class AuthenticatedResources {
     :aux?c.query(`SELECT * FROM banuchat_auth.persist_unified_turn($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) AS t(
     status text,user_message_id uuid,user_ordinal integer,user_content banuchat.nonblank,user_created_at banuchat.finite_time,
     assistant_message_id uuid,assistant_ordinal integer,assistant_content banuchat.nonblank,assistant_created_at banuchat.finite_time,assistant_insufficient_evidence boolean)`,[token,...values,JSON.stringify(citations),aux.release_id]):c.query('SELECT * FROM banuchat_auth.persist_turn($1,$2,$3,$4,$5,$6,$7,$8)',[token,...values]),
-  },{conversation_id:id,content,now},onRoute);
-   const result=await (rag?withRagTurnMetrics(rag,send):send());
+  },{conversation_id:id,content,now},selected=>{
+   if(!managed||selected!=='document_rag'||this.evidenceMode==='ccd_local')onRoute(selected);
+  });
+   const result=await (rag?withRagTurnMetrics(rag,send,active=>{
+    stage=active;
+    observe({status:'started'});
+   }):send());
    const citationCount=result.assistant_message.citations.length;
-   this.chatObserver?.({route:span.route,duration_ms:Math.round(performance.now()-start),...(rag?{rag}:{}),
-    status:result.assistant_message.insufficient_evidence?(citationCount?'partial':'insufficient_evidence'):'answered',citation_count:citationCount});
+   observe({finished_at:new Date().toISOString(),
+    status:disconnected?.aborted?'cancelled':result.assistant_message.insufficient_evidence?
+     (citationCount?'partial':'insufficient_evidence'):'answered',citation_count:citationCount});
    return result;
   }catch(error){
    const failure=resourceError(error);
-   this.chatObserver?.({route:span.route,duration_ms:Math.round(performance.now()-start),...(rag?{rag}:{}),status:'error',error_code:failure.code});
+   const finished_at=new Date().toISOString();
+   observe(disconnected?.aborted?{finished_at,status:'cancelled',citation_count:0}:
+    {finished_at,status:'error',error_code:failure.code});
    throw failure;
   }finally{this.activity.endMessage(id);}
  }

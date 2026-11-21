@@ -2,7 +2,7 @@
 
 Preparada para el responsable del proyecto. **Revisión: 20 de noviembre de 2026.** Cliente publicado 1.0.4; backend RAG registrado desde `a30088f`. Referencia documental inicial `2e31128`.
 
-[Abrir la versión PDF con capturas y diagrama](GUIA-PRESENTACION-BANUCHAT.pdf).
+[Abrir la edición PDF anterior con capturas y diagrama](GUIA-PRESENTACION-BANUCHAT.pdf). El apartado 7 de esta guía incorpora la auditoría del 21/11.
 
 Esta guía permite preparar la sustentación sin recordar comandos de desarrollo. Presenta la aplicación y el n8n publicados en AWS. El laboratorio Unified local se conserva como antecedente opcional y no es necesario para esa demostración. Las contraseñas y la configuración privada no forman parte de este documento.
 
@@ -28,7 +28,7 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 3. Conserva dos cuentas de demostración autorizadas y sus contraseñas en tu medio privado habitual. No las pongas en diapositivas o en el repositorio. Las cuentas del laboratorio local pueden ser diferentes de las de Supabase.
 4. Enciende el laboratorio y comprueba el recorrido web del apartado 4 y el móvil del apartado 5. Guarda una conversación propia con una respuesta documental y sus fuentes para contingencia mediante Historial.
 5. Carga el Huawei y comprueba su conexión a internet. La APK publicada no necesita cable USB, Metro ni el computador encendido.
-6. Abre el n8n de AWS siguiendo el apartado 7 y comprueba que el workflow conversacional aparece Published. Guarda el acceso privado sin proyectarlo; no hace falta Docker.
+6. Abre el n8n de AWS siguiendo el apartado 7. Comprueba el colector del chat y la rama de admisión publicada. Inicia sesión antes de proyectar.
 7. Descarga esta guía, las capturas y el paquete académico para poder consultarlos sin depender del sitio. Las capturas son evidencia fechada; no sustituyen una prueba en vivo.
 
 Descargas existentes:
@@ -81,7 +81,7 @@ Debes observar un resultado por servicio. Lo esperado es `active` para ejecució
 | `banuchat-api` | Autenticación, progreso, conversaciones y RAG |
 | `banuchat-web-duckdns` | Sirve el cliente y su proxy del origen principal |
 | `banuchat-https` | Caddy y HTTPS público |
-| `banuchat-n8n` | Editor protegido y admisión interna de consultas multifuente |
+| `banuchat-n8n` | Editor protegido, admisión interna de consultas multifuente y registro técnico de chat |
 
 Si **uno** está detenido, consulta su estado y arranca solo ese servicio, sustituyendo el nombre cuando corresponda:
 
@@ -177,16 +177,18 @@ El modelo generador es `qwen3:4b-instruct`; los embeddings son `qwen3-embedding:
 1. Comprueba los cinco servicios del apartado 3. El servidor sigue siendo la EC2 existente; no crees otro n8n, volumen ni cuenta cloud.
 2. Abre **https://n8n.banuchat.duckdns.org**. La primera ventana es la protección HTTPS del servidor. Su acceso está en el archivo privado `%APPDATA%\BanuChatManagedMcp\acceso-n8n-privado.txt`; ábrelo antes de proyectar y no lo compartas.
 3. Si aparece una segunda pantalla con correo y contraseña, usa la cuenta propietaria que configuraste dentro de n8n. Es distinta de la primera protección y de las cuentas de BanuChat. No crees otro propietario si olvidaste el acceso.
-4. En Overview → Workflows abre **BanuChat OE4 - Conversational orchestration v1**. Debe aparecer **Published**. Se observó realmente este lienzo en Brave el 20/11.
-5. Muestra los cinco nodos: recepción autenticada, validación, decisión, devolución de directiva y rechazo. No abras Credentials ni headers privados y no pulses Execute para simular un mensaje.
+4. En **Overview → Workflows** abre **BanuChat - Ejecuciones del chat** y su pestaña **Executions**. En el inventario del 21/11 figuraba como publicado con dos nodos y guardado al cierre. Si el editor muestra solo esos dos nodos, usa el recorrido de cierre y cita el alcance observado.
+5. Para la admisión, localiza el workflow por el ID `BanuChatOe4Conversation1`. En AWS figuraba como **BanuChat - Manual ingestion v1**, con dos ramas independientes en el lienzo. Muestra los cinco nodos de la rama de admisión y deja los nodos manuales de ingesta sin ejecutar.
 
 ### Provocar el recorrido desde el chat
 
-1. Abre **https://banuchat.duckdns.org/login** y usa una cuenta sintética autorizada.
-2. En un chat nuevo pregunta: **«Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?»**.
-3. Revisa la respuesta y las fuentes, y reabre la conversación desde Historial. La prueba pública comprobó cuatro citas y conservación de sus campos; la cantidad depende de la evidencia disponible.
-4. Explica el recorrido: la API comprueba sesión y propietario, pide admisión a n8n por loopback, el agente inicia MCP mediante stdio y combina como máximo dos herramientas de lectura. En esta prueba fueron `get_profile_progress` y `get_announcements`.
-5. El editor puede mostrar **cero ejecuciones guardadas**: el workflow no conserva payloads exitosos, fallidos ni manuales. Eso evita guardar headers con credenciales. No cambies la retención para llenar el panel. La prueba de uso son las trazas correlacionadas de la API, no el contador del editor.
+1. Abre **https://banuchat.duckdns.org/login** en otra pestaña. Usa una cuenta sintética autorizada y una conversación nueva. Envía **«¿Qué es el Centro de Competencias Digitales?»**. Abre las citas documentales y vuelve al turno desde Historial.
+2. Vuelve a **Executions**. En la versión anterior, actualiza al finalizar y abre **Ruta, duración y resultado**. Después de la publicación y validación de la versión nueva, busca **Registrar ruta y estado técnico** mientras la consulta sigue abierta. Localiza el mismo `operation_id` en `inicio`, `ruta`, las etapas RAG que se ejecuten y el cierre, ordenados por `sequence`. Un estado verde en n8n significa que registró el evento. `status` indica el estado de la consulta.
+3. Para un recorrido rápido, envía **«Calendario de esta semana»**. El fast path realiza la lectura estructurada y debe aparecer como `direct` en el colector.
+4. En otro chat prueba **«Según mis cursos completados, ¿qué convocatorias activas podrían interesarme?»**. Revisa fuentes e Historial. La API pide admisión por loopback, inicia MCP por stdio y combina como máximo dos herramientas. El ensayo público mostró citas de `get_profile_progress` y `get_announcements`.
+5. Abre la rama de admisión OE4 en el editor. Sus ajustes deshabilitan el guardado de ejecuciones exitosas, fallidas y manuales para proteger la credencial. Muestra sus trazas en el journal. El UUID enlaza esas trazas al colector en la versión nueva.
+6. Para mostrar un fallo, usa un error de chat observado o provócalo en un entorno aislado con el mismo colector. Muestra `error_code`, ruta, última etapa y duración. Si falta el cierre, presenta la etapa como el último estado observado. Evita detener dependencias de la EC2 durante la sustentación.
+7. Antes de guardar capturas, revisa que trigger y resumen solo muestren metadatos técnicos. Mantén fuera de pantalla Credentials, tokens, identificadores de cuenta y contenido privado. Separa los ensayos internos del webhook de las consultas hechas en BanuChat.
 
 Si necesitas mostrar las trazas, en **Session Manager de la EC2**, sin abrir archivos privados:
 
@@ -194,7 +196,7 @@ Si necesitas mostrar las trazas, en **Session Manager de la EC2**, sin abrir arc
 journalctl -u banuchat-api --since '-10 min' --no-pager -o cat | grep '"event":"managed_'
 ```
 
-Busca `managed_n8n` y `managed_agent` con el mismo `operation_id`, dos herramientas y `terminal_reason: answered`. Estos eventos no contienen contraseñas, preguntas ni identificadores de cuenta. Una respuesta documental directa no acredita una llamada MCP.
+Busca `managed_n8n` y `managed_agent` con el mismo `operation_id`, herramientas seleccionadas y `terminal_reason`. El detalle de n8n se consulta desde **Ejecuciones del chat**. El [diagrama y checkpoint del 21/11](../transition/CHECKPOINT-N8N-RAG-OBSERVABILIDAD.md) documentan la versión verificada en AWS y el alcance de la instrumentación preparada.
 
 ### Qué está desplegado y qué sigue siendo local
 

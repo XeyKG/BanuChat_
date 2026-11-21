@@ -1,4 +1,4 @@
-import {ragMetrics} from '../operations/rag-metrics.js';
+import {ragMetrics,startRagStage} from '../operations/rag-metrics.js';
 import type { SqlQueryClient } from "../data/sql-client.js";
 import {
   QueryEmbeddingClientError,
@@ -148,6 +148,7 @@ export async function retrieveDocumentChunksForQuery(
   const config = validateQueryEmbeddingConfig(configResult.rows[0]);
 
   let vector: number[];
+  startRagStage('embedding');
   const embeddingStarted = performance.now();
   try {
     vector = await dependencies.query_embedding_client.embedQuery(
@@ -163,6 +164,7 @@ export async function retrieveDocumentChunksForQuery(
     return reject("embedding_unavailable");
   }
 
+  startRagStage('pgvector');
   const retrievalStarted = performance.now();
   try {
     const chunks = await (dependencies.retrieve_chunks ?? retrieveDocumentChunks)(dependencies.sql, {

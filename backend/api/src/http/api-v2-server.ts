@@ -110,7 +110,15 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
    else{if(target.includes('?'))throw new AuthError('INVALID_ARGUMENT');exactObject(parsed,[]);const result=await resources.create(token);reply(response,201,result,{Location:'/api/v2/conversations/'+result.conversation_id});}return;
   }
   if(chat){params(q,[]);if(target.includes('?'))throw new AuthError('INVALID_ARGUMENT');const id=uuid(chat[1]!);
-   if(chat[2]){const x=exactObject(parsed,['content']);if(typeof x.content!=='string'||/[\uD800-\uDFFF]/u.test(x.content)||[...x.content].length<1||[...x.content].length>4000||! /\S/u.test(x.content))throw new AuthError('INVALID_ARGUMENT');reply(response,201,v2Links(await resources.send(token,id,x.content,now)));}
+   if(chat[2]){
+    const x=exactObject(parsed,['content']);
+    if(typeof x.content!=='string'||/[\uD800-\uDFFF]/u.test(x.content)||[...x.content].length<1||[...x.content].length>4000||! /\S/u.test(x.content))throw new AuthError('INVALID_ARGUMENT');
+    const disconnected=new AbortController();
+    if(response.destroyed)disconnected.abort();
+    else response.once('close',()=>{if(!response.writableFinished)disconnected.abort();});
+    const result=await resources.send(token,id,x.content,now,disconnected.signal);
+    if(!disconnected.signal.aborted)reply(response,201,v2Links(result));
+   }
    else if(method==='GET')reply(response,200,v2Links(await resources.detail(token,id)));
    else{await resources.remove(token,id);reply(response,204);}return;
   }
@@ -133,7 +141,7 @@ export function createAuthenticatedApiServer(input:{auth:AuthService;resources:P
   if(temporal_status!==undefined&&!['active','upcoming','expired','all'].includes(temporal_status))throw new AuthError('INVALID_ARGUMENT');
   const r=await resources.announcements(token,{...(query!==undefined?{query}:{}),...(temporal_status?{temporal_status:temporal_status as AnnouncementTemporalStatus}:{}),reference_time,...(n?{limit:n}:{})});
   reply(response,200,{release_id:r.release_id,reference_time:r.reference_time,announcements:r.announcements.map(({source:_,...a})=>a)});
- }catch(error){request.resume();if(response.headersSent)response.destroy();else failure(response,error,allow);}
+ }catch(error){request.resume();if(response.destroyed)return;if(response.headersSent)response.destroy();else failure(response,error,allow);}
  }
  const server=createServer({maxHeaderSize:16384,headersTimeout:15000,requestTimeout:30000},(req,res)=>{
   const path=req.url?.split('?')[0];

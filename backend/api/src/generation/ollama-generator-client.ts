@@ -1,4 +1,4 @@
-import {ragMetrics} from '../operations/rag-metrics.js';
+import {ragMetrics,startRagStage} from '../operations/rag-metrics.js';
 import {
   GeneratorClientError,
   normalizeSha256Digest,
@@ -204,6 +204,7 @@ export class OllamaGeneratorClient implements GeneratorClient {
       return reject("invalid_generator_response");
     }
     validateExpectedConfig(expected);
+    startRagStage('generation');
     await this.verifyRuntime(expected);
 
     const startedAt = performance.now();

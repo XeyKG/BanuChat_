@@ -29,6 +29,10 @@ Environment=N8N_PUBLIC_API_DISABLED=true
 Environment=EXECUTIONS_DATA_SAVE_ON_SUCCESS=none
 Environment=EXECUTIONS_DATA_SAVE_ON_ERROR=none
 Environment=EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS=false
+Environment=EXECUTIONS_DATA_PRUNE=true
+Environment=EXECUTIONS_DATA_MAX_AGE=168
+Environment=EXECUTIONS_DATA_PRUNE_MAX_COUNT=2000
+Environment=N8N_PAYLOAD_SIZE_MAX=1
 Environment=GENERIC_TIMEZONE=America/Bogota
 Environment=TZ=America/Bogota
 Environment=NODE_OPTIONS=--max-old-space-size=512
