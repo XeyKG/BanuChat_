@@ -138,9 +138,9 @@ Abre una ventana normal para la primera cuenta y una ventana privada para la seg
 | 6 | Historial | Salir del chat, reabrir la conversación propia y volver a abrir una fuente. Es persistencia, no una generación nueva |
 | 7 | Chat sobre tu progreso | Pedir ver tu progreso; cuando la respuesta incluya el acceso, abrir Mi progreso desde allí |
 | 8 | Calendario | Mostrar cuadrícula mensual, cambiar de mes, elegir un día marcado y leer su agenda. Un mes sin eventos puede quedar vacío |
-| 9 | Noticias | Buscar, filtrar y abrir el texto de una noticia o convocatoria. Es el nombre del espacio de noticias |
-| 10 | Publicaciones OE2 | Abrir Programación, Convocatorias y Novedades; revisar procedencia y versión. Son consultas, no matrícula ni pagos |
-| 11 | Cambios de publicaciones | Abrir la comparación de versiones de OE2 y un registro Antes/Ahora. El conteo previo fue una modificación y cinco sin cambios; no forzar esos números si cambia la publicación |
+| 9 | Noticias | Busca por título, contenido o código. Recorre Noticias, Convocatorias y Programación, y combina la categoría con un estado |
+| 10 | Lectura | Abre **Leer noticia** o **Ver detalles**. Muestra el texto completo, las fechas, la procedencia y los adjuntos disponibles. Usa **Cerrar publicación**, Escape en web o Atrás en Android |
+| 11 | Demostración técnica local | En la edición Unified autenticada, abre **Comparación técnica OE2** al final de Noticias. Consulta los dos cortes y el detalle Antes/Ahora |
 | 12 | Segunda cuenta | Revisar su progreso y su Historial. La conversación privada de la primera no debe aparecer. Esta observación visual no reemplaza una prueba técnica de autorización |
 | 13 | Logout y nueva autenticación | Cerrar sesión, comprobar pantalla de acceso y volver a ingresar cuando corresponda |
 
@@ -162,7 +162,7 @@ Con una cuenta editorial autorizada, muestra los contadores, la búsqueda y los 
 2. Si necesitas instalarla, descarga la APK del apartado 2. Actualiza la existente manteniendo la firma. Los avisos y permisos de Android se revisan personalmente en el dispositivo; no cambies políticas de seguridad globales para la demo.
 3. Repite Login → Inicio → Mi progreso → curso con intentos/recursamiento, si la cuenta lo tiene.
 4. En Chat envía una consulta documental nueva. Desplázate hasta la respuesta, expande y contrae Fuentes, abre una cita y prueba la descarga. Revisa que el teclado no impida llegar al compositor ni a los mensajes.
-5. Abre Historial y reabre la conversación. Luego muestra Calendario, Noticias y las tres categorías de Publicaciones OE2. Abre Cambios de publicaciones desde OE2.
+5. Abre Historial y reabre la conversación. Luego muestra Calendario y Noticias. En Noticias filtra por **Programación**, abre un registro y comprueba fechas, modalidad y procedencia. Cierra con el botón Atrás del Huawei.
 6. Abre **Recordatorios** si aparece en Android. Su propósito es configurar avisos **locales del teléfono** sobre la información de demostración. Revisa permiso y estado antes de habilitar nada. No hay push remoto acreditado, ni un recordatorio inmediato garantizado, ni sincronización del permiso con la web. La versión 1.0.4 no incluye el antiguo botón de prueba a cinco segundos.
 7. Cierra sesión y vuelve a autenticarte. Si activaste recordatorios de prueba, revísalos y desactiva solo los tuyos cuando corresponda; no canceles notificaciones de otras aplicaciones.
 

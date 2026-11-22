@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 import { SessionProvider,useSession } from '@/session/session-context';
-import { isCcdLocal } from '@/config/demo-mode';
+import { isCcdAuthenticated,isCcdLocal } from '@/config/demo-mode';
 import {AuthProvider,useAuth} from '@/auth/auth-provider';
 import {NotificationProvider} from '@/notifications/notification-provider';
 import {ActivityIndicator,Platform,View} from 'react-native';
@@ -30,14 +30,16 @@ function Navigation(){
         </Stack.Protected>
         <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
           <Stack.Screen name="progress" />
-          <Stack.Screen name="oe2" />
-          <Stack.Screen name="oe2-changes" />
         </Stack.Protected>
         <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('calendar')===true}>
           <Stack.Screen name="calendar" />
         </Stack.Protected>
         <Stack.Protected guard={!ccd&&authenticated&&snapshot.me?.capabilities.includes('announcements')===true}>
           <Stack.Screen name="announcements" />
+          <Stack.Screen name="oe2" />
+        </Stack.Protected>
+        <Stack.Protected guard={isCcdAuthenticated()&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
+          <Stack.Screen name="oe2-changes" />
         </Stack.Protected>
         <Stack.Protected guard={Platform.OS!=='web'&&!ccd&&authenticated&&snapshot.me?.capabilities.includes('progress')===true}>
           <Stack.Screen name="notifications" />

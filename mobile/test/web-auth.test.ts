@@ -55,6 +55,12 @@ test('web memory session rotates once on demand and logout clears both tokens th
   },()=>now);
   await client.login(me.synthetic_uid,'ficticio');now+=901000;
   await Promise.all([client.resource(base+'/me/progress'),client.resource(base+'/announcements')]);
+  const media=base+'/editorial/attachments/'+id;
+  assert.equal((await client.resource(media)).status,200);
+  for(const url of [base+'/editorial/news',base+'/editorial/login',media+'?redirect=anything',base+'/editorial/images/../news']){
+    await assert.rejects(client.resource(url),SessionError);
+  }
+  await assert.rejects(client.resource(media,{method:'POST'}),SessionError);
   assert.equal(refreshes,1);assert.equal(await store.get(),'C'.repeat(42)+'A');
   assert.equal(await client.logout(),true);assert.equal(revocations,1);assert.equal(await store.get(),null);
   await assert.rejects(client.resource(base+'/me/progress'));assert.equal(client.getSnapshot().me,null);

@@ -20,6 +20,7 @@ const routes = [
   [/^\/calendar\/events$/, ['GET'], ['date_from','date_to','event_types','limit']],
   [/^\/announcements$/, ['GET'], ['query','temporal_status','reference_time','limit']],
   [new RegExp(`^/documents/${UUID}/artifact$`), ['GET'], []],
+  [new RegExp(`^/editorial/(?:attachments|images)/${UUID}$`), ['GET'], []],
   [/^\/demo\/oe2\/programming$/, ['GET'], ['query','mode','limit']],
   [/^\/demo\/oe2\/announcements$/, ['GET'], ['query','type','temporal_status','limit']],
   [/^\/demo\/oe2\/changes$/, ['GET'], ['category','change_type','limit']],

@@ -24,8 +24,8 @@ export function parseOe2Response(value:unknown,category:Oe2Category):Oe2Response
  }
  return value as unknown as Oe2Response;
 }
-export async function getOe2Demo(category:Oe2Category,query='',status='all'):Promise<Oe2Response>{
- const filters=new URLSearchParams({limit:'20'});if(query.trim())filters.set('query',query.trim());
+export async function getOe2Demo(category:Oe2Category,query='',status='all',limit=20):Promise<Oe2Response>{
+ const filters=new URLSearchParams({limit:String(limit)});if(query.trim())filters.set('query',query.trim());
  if(category!=='programming'){filters.set('type',category);filters.set('temporal_status',status);}
  return requestOe2(`${category==='programming'?'programming':'announcements'}?${filters}`,value=>parseOe2Response(value,category));
 }

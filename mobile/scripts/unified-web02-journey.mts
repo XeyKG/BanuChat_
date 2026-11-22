@@ -92,29 +92,37 @@ export async function runWeb02(b:Browser){
  await inject({path:'/api/v2/calendar/events'});await b.click('Mostrar sesiones');await wait('No fue posible cargar el calendario');await clear();await b.click('Reintentar');await ready('Cargando calendario');
  pass('web02-calendar',{realEventsInYear:calendar.events.length,bogotaTime:true,civilInputValidation:true,filters:3,futureEmpty:true,controlledErrorRecovered:true});
 
- step('web02-announcements');await nav('Anuncios y convocatorias','/announcements');await ready('Cargando anuncios');
- for(const status of ['all','active','upcoming','expired']){const label={all:'todos',active:'vigentes',upcoming:'próximos',expired:'vencidos'}[status]!;await b.click('Mostrar anuncios '+label);await ready('Cargando anuncios');const data=await api('/announcements?temporal_status='+status);for(const row of data.announcements)await assertText(row.title);}
- await b.click('Mostrar anuncios todos');await ready('Cargando anuncios');const announcements=await api('/announcements?temporal_status=all');assert.ok(announcements.announcements.length);
- await b.fill('Buscar anuncios auxiliares',announcements.announcements[0].title.slice(0,24));await b.click('Buscar anuncios');await ready('Cargando anuncios');await assertText(announcements.announcements[0].title);
- await b.fill('Buscar anuncios auxiliares','ZZZWEB02SINRESULTADOS');await b.click('Buscar anuncios');await ready('Cargando anuncios');await assertText('Sin anuncios');
- await b.fill('Buscar anuncios auxiliares','');await b.click('Buscar anuncios');await ready('Cargando anuncios');await b.snapshot('05-announcements');
- await inject({path:'/api/v2/announcements'});await b.click('Mostrar anuncios vigentes');await wait('No fue posible cargar los anuncios');await clear();await b.click('Reintentar');await ready('Cargando anuncios');
- pass('web02-announcements',{realRows:announcements.announcements.length,filters:4,search:true,empty:true,controlledErrorRecovered:true});
+ step('web02-announcements');await nav('Noticias','/announcements');await ready('Cargando publicaciones');
+ const announcements=await api('/announcements?temporal_status=all&limit=50');
+ assert.ok(announcements.announcements.length);
+ assert.equal(await b.evaluate(`!!document.querySelector('[aria-label="Navegar a Publicaciones OE2"]')`),false);
+ const firstNews=announcements.announcements[0];
+ await b.fill('Buscar en Noticias',firstNews.title);await assertText(firstNews.title);
+ const opener=await b.evaluate(`[...document.querySelectorAll('[data-testid="announcement-open"]')].filter(${visible})[0]?.getAttribute('aria-label')`);
+ assert.ok(opener);
+ assert.equal(await b.evaluate(`!!document.querySelector('[data-testid="announcement-body"]')`),false);
+ await b.evaluate(`[...document.querySelectorAll('[data-testid="announcement-open"]')].find(e=>e.getAttribute('aria-label')===${JSON.stringify(opener)})?.focus()`);
+ await b.click(opener);
+ await b.until(`!!document.querySelector('dialog[open] [data-testid="announcement-body"]')`);
+ await assertText(firstNews.description.trim().split(/\r?\n/u)[0]);
+ assert.equal(await b.evaluate(`document.activeElement.textContent`),'Cerrar publicación');
+ await keyboard('Escape');
+ await b.until(`!document.querySelector('dialog[open]')`);
+ assert.equal(await b.evaluate(`document.activeElement.getAttribute('aria-label')`),opener);
+ await b.fill('Buscar en Noticias','ZZZWEB02SINRESULTADOS');await assertText('No hay publicaciones con estos filtros');
+ await b.click('Limpiar filtros');
+ await b.snapshot('05-announcements');
+ const oe2=await api('/demo/oe2/programming?limit=50');
+ assert.equal(oe2.evidence_mode,'fictional_auxiliary');assert.ok(oe2.programming.length);
+ await b.click('Programación');
+ for(const row of oe2.programming)await assertText(row.title);
+ await b.fill('Buscar en Noticias',oe2.programming[0].course_code);await assertText(oe2.programming[0].title);
+ await b.fill('Buscar en Noticias','');await b.click('Todas');
+ pass('web02-announcements',{realRows:announcements.announcements.length,programming:oe2.programming.length,
+   search:true,empty:true,modal:true,escape:true,restoredFocus:true});
 
- step('web02-oe2');await nav('Publicaciones OE2','/oe2');await ready('Cargando publicaciones OE2');
- const oe2=await api('/demo/oe2/programming?limit=20');assert.equal(oe2.evidence_mode,'fictional_auxiliary');assert.ok(oe2.programming.length);
- for(const row of oe2.programming){await assertText(row.title);await assertText(row.source.source_id);await assertText(row.source.source_version);const [y,m,d]=row.start_date.split('-');await assertText(`${d}/${m}/${y}`);}
- await b.fill('Buscar publicaciones OE2',oe2.programming[0].course_code);await b.click('Buscar');await ready('Cargando publicaciones OE2');await assertText(oe2.programming[0].title);
- await b.fill('Buscar publicaciones OE2','ZZZWEB02SINRESULTADOS');await b.click('Buscar');await ready('Cargando publicaciones OE2');await assertText('Sin registros');await b.click('Limpiar filtros');await ready('Cargando publicaciones OE2');
- for(const [kind,label,filters]of [['calls','Convocatorias',['Todos','Próxima','Abierta','Cerrada']],['news','Novedades',['Todos','Próxima','Publicada · sin vencimiento documentado']]] as const){
-  await b.click('OE2 '+label);await ready('Cargando publicaciones OE2');const real=await api('/demo/oe2/announcements?type='+kind+'&temporal_status=all&limit=20');for(const row of real.announcements)await assertText(row.title);
-  for(const f of filters){await b.click('OE2 filtro '+f);await ready('Cargando publicaciones OE2');}
- }
- await b.click('OE2 Programación');await ready('Cargando publicaciones OE2');await b.snapshot('06-oe2');
- await inject({path:'/api/v2/demo/oe2/announcements'});await b.click('OE2 Convocatorias');await wait('Fuente de demostración no disponible');await clear();await b.click('Reintentar');await ready('Cargando publicaciones OE2');await assertText('Última release publicada');
- pass('web02-oe2',{programming:oe2.programming.length,categories:3,metadata:true,search:true,civilDates:true,controlledOptionalSourceFailureRecovered:true});
-
- step('web02-changes');await nav('Banu al día','/oe2-changes');await ready('Comparando publicaciones OE2');const changes=await api('/demo/oe2/changes?limit=20');assert.equal(changes.comparison_status,'compared');
+ step('web02-changes');await b.click('Comparación técnica OE2');await b.until(`location.pathname==='/oe2-changes'`);
+ await ready('Comparando publicaciones OE2');const changes=await api('/demo/oe2/changes?limit=20');assert.equal(changes.comparison_status,'compared');
  // UIX-02 separates value/label visually and exposes each statistic as one
  // accessible group. Check every count against REST, not its text layout.
  for(const [key,label] of [['created','Añadidos'],['modified','Modificados'],['removed','Retirados'],['unchanged','Sin cambios']] as const){const name=label+': '+changes.counts[key];assert.equal(await b.evaluate(`[...document.querySelectorAll('[aria-label]')].some(e=>e.getAttribute('aria-label')===${JSON.stringify(name)})`),true,'CHANGE_COUNT_'+key);}
@@ -131,7 +139,7 @@ export async function runWeb02(b:Browser){
  step('web02-responsive-and-keyboard');
  for(const width of [1366,768,390]){
   await b.call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await pause(180);
-  for(const [label,path]of [['Inicio','/home'],['Progreso','/progress'],['Calendario','/calendar'],['Anuncios y convocatorias','/announcements'],['Publicaciones OE2','/oe2'],['Banu al día','/oe2-changes']]){
+  for(const [label,path]of [['Inicio','/home'],['Progreso','/progress'],['Calendario','/calendar'],['Noticias','/announcements']]){
    await nav(label,path);await pause(180);const shot=await b.snapshot('responsive-'+width+'-'+path.slice(1));assert.equal(shot.overflow,false,'ROOT_OVERFLOW_'+width+'_'+path);
    await menu();assert.equal(await b.evaluate(`(()=>{const v=${visible};return [...document.querySelectorAll('[aria-current="page"]')].filter(v).length})()`),1,'ACTIVE_SECTION');
    const compactMenu=await b.evaluate(`(()=>{const v=${visible};return [...document.querySelectorAll('[aria-label="Menú de navegación"]')].some(v)})()`);

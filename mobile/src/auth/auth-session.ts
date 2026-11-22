@@ -81,7 +81,8 @@ export class AuthSession {
   if(this.snapshot.phase!=='authenticated')throw new SessionError();const epoch=this.epoch,base=this.base();
   const target=url.slice(base.length),oe2=/^\/demo\/oe2\/(?:programming|announcements|changes)(?:\?|$)/u.test(target);
   const academic=target==='/me/academic'&&(options.method??'GET').toUpperCase()==='GET';
-  if(!url.startsWith(base+'/')||(!academic&&!oe2&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||(oe2&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
+  const editorialMedia=/^\/editorial\/(?:attachments|images)\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/u.test(target);
+  if(!url.startsWith(base+'/')||(!academic&&!oe2&&!editorialMedia&&!/^(?:\/conversations(?:\?|\/|$)|\/me\/progress(?:\?|$)|\/calendar\/events\?|\/announcements(?:\?|$)|\/documents\/[a-f0-9-]+\/artifact$)/i.test(target))||((oe2||editorialMedia)&&(options.method??'GET').toUpperCase()!=='GET'))throw new SessionError();
   const access=await this.token();this.check(epoch);const headers=new Headers(options.headers);headers.set('Authorization','Bearer '+access);
   const messagePost=options.method?.toUpperCase()==='POST'&&/^\/conversations\/[^/?#]+\/messages$/u.test(url.slice(base.length));
   const diagnosticStart=messagePost?startMessageHttpDiagnostic():undefined;
@@ -91,6 +92,11 @@ export class AuthSession {
   const json=response.json.bind(response),text=response.text.bind(response);
   response.json=async()=>{const result:unknown=await json();this.check(epoch);return result;};
   response.text=async()=>{const result=await text();this.check(epoch);return result;};
+  if(editorialMedia){
+   const arrayBuffer=response.arrayBuffer.bind(response),blob=response.blob.bind(response);
+   response.arrayBuffer=async()=>{const result=await arrayBuffer();this.check(epoch);return result;};
+   response.blob=async()=>{const result=await blob();this.check(epoch);return result;};
+  }
   return response;
  }
  async logout():Promise<boolean>{

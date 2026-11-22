@@ -11,6 +11,7 @@ export interface Announcement {
   valid_from: string;
   valid_until: string | null;
   temporal_status: AnnouncementStatus;
+  source?: {source_kind:'announcement';source_path:string;source_locator:string;source_sha256:string};
 }
 
 export interface AnnouncementsResponse {
@@ -22,6 +23,7 @@ export interface AnnouncementsResponse {
 export interface AnnouncementsInput {
   temporalStatus: AnnouncementFilter;
   query?: string;
+  limit?:number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -57,6 +59,12 @@ function parseAnnouncement(value: unknown): Announcement {
     throw new Error('ANNOUNCEMENTS_RESPONSE_INVALID');
   }
 
+  const source = value.source;
+  if (source !== undefined && (!isRecord(source) || source.source_kind !== 'announcement' ||
+      !isNonemptyString(source.source_path) || !isNonemptyString(source.source_locator) ||
+      typeof source.source_sha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(source.source_sha256))) {
+    throw new Error('ANNOUNCEMENTS_RESPONSE_INVALID');
+  }
   return {
     announcement_key: value.announcement_key,
     title: value.title,
@@ -64,6 +72,7 @@ function parseAnnouncement(value: unknown): Announcement {
     valid_from: value.valid_from,
     valid_until: value.valid_until,
     temporal_status: value.temporal_status,
+    ...(source ? {source:source as Announcement['source']} : {}),
   };
 }
 
@@ -88,6 +97,7 @@ export async function getAnnouncements(
   input: AnnouncementsInput,
 ): Promise<AnnouncementsResponse> {
   const query = new URLSearchParams({ temporal_status: input.temporalStatus });
+  if (input.limit!==undefined) query.set('limit',String(input.limit));
   if (input.query?.trim()) query.set('query', input.query.trim());
   const response = await fetch(`${getApiBaseUrl()}/announcements?${query.toString()}`, {
     method: 'GET',

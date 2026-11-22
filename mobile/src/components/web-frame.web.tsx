@@ -47,7 +47,6 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     {path:'/progress',label:'Progreso',enabled:can('progress'),Icon:ChartGlyph},
     {path:'/calendar',label:'Calendario',enabled:can('calendar'),Icon:CalendarGlyph},
     {path:'/announcements',label:'Noticias',enabled:can('announcements'),Icon:DocGlyph},
-    {path:'/oe2',label:'Publicaciones OE2',enabled:can('progress'),Icon:DocGlyph},
   ];
   function closeMenu(){setMenu(false);setChatMenu(false);}
   function toggleMenu(){

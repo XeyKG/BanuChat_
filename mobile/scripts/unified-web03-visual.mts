@@ -51,7 +51,7 @@ export async function runWeb03(b:Browser,stage:'before'|'after'){
    }
   }
  }
- const routes=[['Inicio','/home','home'],['Progreso','/progress','progress'],['Calendario','/calendar','calendar'],['Anuncios y convocatorias','/announcements','announcements'],['Publicaciones OE2','/oe2','oe2'],['Banu al día','/oe2-changes','changes'],['Historial','/history','history']] as const;
+ const routes=[['Inicio','/home','home'],['Progreso','/progress','progress'],['Calendario','/calendar','calendar'],['Noticias','/announcements','announcements'],['Historial','/history','history']] as const;
  for(const width of [1366,768,390]){
   await b.call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});
   for(const [label,route,name]of routes){await nav(label,route);if(name==='history')await b.evaluate(`window.__banuVisualFixture='/history'`);await capture(name,width);}

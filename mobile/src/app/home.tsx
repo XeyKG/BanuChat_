@@ -157,7 +157,7 @@ export default function HomeScreen() {
             />}
             {!isCcdLocal()&&snapshot.me?.capabilities.includes('announcements')&&<QuickAction
               title="Noticias"
-              description="Consulta noticias y convocatorias."
+              description="Consulta novedades, convocatorias y programación."
               tint={colors.banuMuted}
               tintSoft={colors.banuSoft}
               icon="doc"
@@ -174,16 +174,6 @@ export default function HomeScreen() {
               onPress={() => router.push('/notifications' as Href)}
               disabled={isStartingChat}
               delay={430}
-            />}
-            {!isCcdLocal()&&snapshot.me?.capabilities.includes('progress')&&<QuickAction
-              title="Publicaciones OE2"
-              description="Programación, convocatorias y novedades publicadas."
-              tint={colors.banuMuted}
-              tintSoft={colors.banuSoft}
-              icon="doc"
-              onPress={() => router.push('/oe2' as Href)}
-              disabled={isStartingChat}
-              delay={450}
             />}
           </View>
 
