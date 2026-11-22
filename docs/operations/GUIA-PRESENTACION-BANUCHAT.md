@@ -1,6 +1,6 @@
 # Guía para encender y presentar BanuChat
 
-Preparada para el responsable del proyecto. **Revisión del 21 de noviembre de 2026.** Cliente y panel editorial 1.0.7 publicados desde `2380299`. [Evidencia de la publicación y reversión](../transition/CHECKPOINT-PANEL-EDITORIAL-1.0.7.md).
+Preparada para el responsable del proyecto. **Revisión del 22 de noviembre de 2026.** Noticias 1.0.8 reúne el catálogo, el panel editorial y las fuentes versionadas de OE2. [Evidencia de la publicación y reversión](../transition/CHECKPOINT-NOTICIAS-1.0.8.md).
 
 El apartado 7 contiene el recorrido vigente de observabilidad en AWS. La edición PDF conserva las capturas y el diagrama de la publicación anterior. [Edición PDF anterior](GUIA-PRESENTACION-BANUCHAT.pdf).
 
@@ -24,7 +24,7 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 ## 2 Preparación el día anterior
 
 1. Comprueba que puedes iniciar sesión personalmente en Canvas/AWS Academy, GitHub y Supabase. Resuelve MFA antes de presentar; nunca proyectes contraseñas, tokens ni archivos de configuración.
-2. Para el recorrido usa la APK ARM64 1.0.7 comprobada en el Huawei. Conserva la APK 1.0.6 como referencia del corte previo. [Release 1.0.7](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.7).
+2. Para el recorrido usa la APK ARM64 1.0.8 comprobada en el Huawei. Conserva la APK 1.0.7 como referencia del corte previo. [Release 1.0.8](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.8).
 3. Conserva dos cuentas de demostración autorizadas y sus contraseñas en tu medio privado habitual. No las pongas en diapositivas o en el repositorio. Las cuentas del laboratorio local pueden ser diferentes de las de Supabase.
 4. Enciende el laboratorio y comprueba el recorrido web del apartado 4 y el móvil del apartado 5. Guarda una conversación propia con una respuesta documental y sus fuentes para contingencia mediante Historial.
 5. Carga el Huawei y comprueba su conexión a internet. La APK publicada no necesita cable USB, Metro ni el computador encendido.
@@ -33,7 +33,8 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 
 Descargas existentes:
 
-- [APK Android ARM64 1.0.7](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.7/BanuChat-demo-1.0.7-arm64.apk).
+- [APK Android ARM64 1.0.8](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.8/BanuChat-demo-1.0.8-arm64.apk).
+- [APK Android ARM64 1.0.7, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.7/BanuChat-demo-1.0.7-arm64.apk).
 - [APK Android ARM64 1.0.6, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.6/BanuChat-demo-1.0.6-arm64.apk).
 - [APK Android ARM64 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk).
 - [Paquete académico 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip).
@@ -41,10 +42,10 @@ Descargas existentes:
 En Windows puedes verificar la APK descargada:
 
 ```powershell
-Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.7-arm64.apk" -Algorithm SHA256
+Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.8-arm64.apk" -Algorithm SHA256
 ```
 
-La APK 1.0.7 tiene SHA-256 `0f2e48ed71ef0ca43bae7cac020e3cce6e019ae8b4c269ce4cd0be647af70f5f` y `versionCode=8`. Instálala sobre BanuChat para conservar el paquete, la firma y los datos de la aplicación.
+La APK 1.0.8 tiene SHA-256 `b4a5b257906ec393fa99fe7b64032af08e53cc9bfd747de801fa8f24da6229f0` y `versionCode=9`. Instálala sobre BanuChat para conservar el paquete, la firma y los datos de la aplicación.
 
 ## 3 Encender la demostración publicada
 
@@ -148,7 +149,7 @@ Pregunta documental sugerida para ensayar: **«¿Cuáles pruebas debo hacer?»**
 
 Una consulta puede tardar bastante en dos vCPU. Los límites existentes son **API 150 s, cliente 175 s y proxy 180 s**. Envía una vez y espera el resultado; no abras varias generaciones paralelas. Si queda incierto, consulta Historial antes de repetir.
 
-### Recorrido del cliente 1.0.7
+### Expediente y transparencia en el chat
 
 En **Mi progreso**, coteja el UID del expediente con la cuenta ficticia utilizada para entrar. Por ejemplo, la cuenta de Celia Arcilla muestra **UID · U99000001**. Los rótulos muestran el nombre del curso seguido de **NRC** y el número. El expediente conserva la advertencia general sobre los datos ficticios.
 

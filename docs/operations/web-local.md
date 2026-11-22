@@ -42,8 +42,7 @@ el límite móvil de 1.000.000 caracteres. Las capacidades auxiliares mantienen 
 avisos de datos ficticios; el material CCD seleccionado no implica aval institucional.
 
 En escritorio se ofrece navegación lateral con Inicio, Chat, Historial, Progreso,
-Calendario, Anuncios y convocatorias, Publicaciones OE2, Noticias y Cerrar
-sesión. Las secciones respetan las capacidades vigentes. Chat permite crear una
+Calendario, Noticias y Cerrar sesión. Las secciones respetan las capacidades vigentes. Chat permite crear una
 conversación o retomar el historial y el chat abierto; no fabrica un identificador.
 Bajo 1024 px se usa el botón Menú; Escape lo cierra y devuelve el foco al botón.
 Al activar una sección, el foco pasa al contenido. Hay foco visible y un enlace
@@ -56,8 +55,10 @@ estado y descarta actualizaciones tardías. Una recarga lo pierde deliberadament
 y exige login. Android conserva su estado local de componente y SecureStore.
 
 Calendario web permite consultar 30 días desde una fecha civil `AAAA-MM-DD` y volver
-a Hoy, sin desplazar el día por UTC ni alterar el reloj. Anuncios admite búsqueda;
-sus datos auxiliares siguen separados de Publicaciones OE2 y del material CCD.
+a Hoy, sin desplazar el día por UTC ni alterar el reloj. Noticias reúne los datos
+auxiliares del catálogo y OE2, conserva su procedencia y abre el texto completo en
+un modal. El entorno Unified autenticado ofrece **Comparación técnica OE2** al final
+de Noticias. [Validación de Noticias](../transition/CHECKPOINT-NOTICIAS-1.0.8.md)
 
 Las notificaciones nativas no aparecen en web y su ruta está protegida por plataforma.
 El proxy devuelve 404 al intentar abrir `/notifications`. No se solicita permiso

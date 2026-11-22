@@ -28,7 +28,7 @@ En la revisión operativa del 20/11 se repuso el nodo de respuesta del webhook c
 
 ## Funcionalidades y datos
 
-El cliente web/Android ofrece login, sesión y logout; chat, fuentes, artefactos e historial propios; expediente y recursamiento; calendario mensual; noticias bajo **Banu al Día**; **Publicaciones OE2** y comparación de publicaciones; **Recordatorios** locales Android. La cuenta determina el perfil y la release; elegir un perfil no es autenticarse y la UI vigente no ofrece un selector libre de identidad.
+El cliente web y Android ofrece sesión, chat con fuentes, historial propio, expediente académico, calendario, Noticias y recordatorios locales en Android. Noticias integra el catálogo, las publicaciones editoriales y las fuentes versionadas de OE2. La comparación técnica de OE2 se consulta en Unified local. La cuenta autenticada determina el perfil y la release. [Checkpoint de Noticias 1.0.8](transition/CHECKPOINT-NOTICIAS-1.0.8.md)
 
 La portada web publicada explica desde la primera pantalla el alcance de BanuChat en el Centro de Competencias Digitales. El chat tiene prioridad. Progreso, calendario y Banu al Día aparecen como funciones complementarias de la demostración.
 
