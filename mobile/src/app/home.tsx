@@ -156,7 +156,7 @@ export default function HomeScreen() {
               delay={340}
             />}
             {!isCcdLocal()&&snapshot.me?.capabilities.includes('announcements')&&<QuickAction
-              title="Banu al Día"
+              title="Noticias"
               description="Consulta noticias y convocatorias."
               tint={colors.banuMuted}
               tintSoft={colors.banuSoft}

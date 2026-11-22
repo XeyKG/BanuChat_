@@ -1,11 +1,12 @@
-# Panel editorial Banu al Día
+# Panel editorial de Noticias y Eventos
 
 El [panel editorial web](https://banuchat.duckdns.org/api/v2/editorial) permite a personal autorizado del Centro de Competencias Digitales preparar y mantener noticias con adjuntos. Usa una cuenta administrativa aprovisionada por el responsable técnico. Las cuentas de estudiantes conservan su propio acceso.
 
-1. Abre el panel y elige **Nueva noticia**.
-2. Escribe un título y el contenido. Si necesitas adjuntar un documento, selecciona un PDF o Markdown de hasta 2 MB.
-3. Selecciona **Guardar borrador** para conservar el trabajo o **Publicar noticia** para que aparezca en Banu al Día.
-4. Abre una noticia de la lista para actualizarla. Puedes mantener, reemplazar o quitar el adjunto. **Archivar** retira la noticia y el acceso estudiantil al adjunto. Puedes volver a publicarla.
+1. Inicia sesión y selecciona **Noticias** o **Eventos**. Los contadores muestran los registros de esa sección por estado. Usa un contador o el filtro de estado y busca por título o contenido.
+2. Abre un registro de la lista o crea uno nuevo. Escribe el título y el contenido, ajusta las fechas en hora de Colombia y añade una portada o un adjunto si hace falta.
+3. Abre **Vista previa** para revisar el contenido, la portada, el adjunto y las fechas. Cierra la vista con **Escape** o con su botón. La vista conserva el estado de la publicación.
+4. Selecciona **Guardar borrador** o confirma **Publicar noticia**. Para un evento futuro, confirma **Programar evento**. Si sales del editor con cambios pendientes, el panel pide confirmar que quieres descartarlos.
+5. Abre un registro para editarlo. Puedes mantener, reemplazar o quitar la portada y el adjunto. **Archivar** retira la publicación y el acceso estudiantil al adjunto tras una confirmación. Puedes volver a publicarla.
 
 Los estudiantes con sesión iniciada ven las noticias en el listado habitual. En web pueden descargar los adjuntos publicados desde la tarjeta correspondiente. El panel administrativo es independiente y se abre solamente en navegador. Las noticias históricas de la release se conservan como contenido de solo lectura. Los adjuntos editoriales se distribuyen como descargas y quedan fuera de la indexación del RAG.
 
@@ -19,7 +20,7 @@ El 20/11/2026 se verificaron por HTTPS el acceso separado, el rechazo de un orig
 
 **Noticias** y **Eventos** muestran también las publicaciones existentes de la release activa. Selecciona una fila para ver sus fechas y editarla. El panel permite filtrar por vigencia, programación, vencimiento, borrador y archivo. Las ediciones quedan en el esquema editorial y se preserva la publicación de origen.
 
-Para noticias, la fecha inicial abre la vigencia y la final la cierra. El texto vencido queda en el filtro **Archivo** de Banu al Día. La acción **Archivar** retira la publicación del listado de estudiantes. Los eventos conservan su historial en el calendario y aparecen en todos los días que cubre su intervalo. Las fechas del panel se editan en hora de Bogotá. Puedes adjuntar una portada PNG, JPG o WebP de hasta 1 MB, además del PDF o Markdown habitual.
+Para noticias, la fecha inicial abre la vigencia y la final la cierra. El texto vencido queda en el filtro **Archivo** de Noticias. La acción **Archivar** retira la publicación del listado de estudiantes. Los eventos conservan su historial en el calendario y aparecen en todos los días que cubre su intervalo. Las fechas del panel se editan en hora de Bogotá. Puedes adjuntar una portada PNG, JPG o WebP de hasta 1 MB, además del PDF o Markdown habitual.
 
 La revisión de `6134fb3` está publicada en DuckDNS. Se aplicó [002_editorial_schedule.sql](../../infra/db/editorial/002_editorial_schedule.sql) en Supabase y se desplegaron la API y el cliente web en la EC2 existente. La vista editorial conserva 60 registros de origen y su lectura está concedida al rol de la API. Por HTTPS se comprobó el listado con sesión editorial, la aparición y el vencimiento de una noticia, el acceso a su portada y la presencia de un evento en dos fechas del calendario de Bogotá. Las publicaciones ficticias de la prueba quedaron archivadas desde el panel.
 

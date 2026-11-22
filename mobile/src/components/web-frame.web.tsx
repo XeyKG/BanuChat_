@@ -46,7 +46,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
     {path:'/history',label:'Historial',enabled:can('history'),Icon:ClockGlyph},
     {path:'/progress',label:'Progreso',enabled:can('progress'),Icon:ChartGlyph},
     {path:'/calendar',label:'Calendario',enabled:can('calendar'),Icon:CalendarGlyph},
-    {path:'/announcements',label:'Banu al Día',enabled:can('announcements'),Icon:DocGlyph},
+    {path:'/announcements',label:'Noticias',enabled:can('announcements'),Icon:DocGlyph},
     {path:'/oe2',label:'Publicaciones OE2',enabled:can('progress'),Icon:DocGlyph},
   ];
   function closeMenu(){setMenu(false);setChatMenu(false);}
@@ -86,7 +86,7 @@ function AuthenticatedFrame({children}: {children: ReactNode}) {
           {index===2 && <Text style={styles.groupLabel}>EXPLORAR</Text>}
           <Pressable accessibilityRole="button" accessibilityLabel={`Navegar a ${item.label}`} aria-current={pathname===item.path?'page':undefined}
             onPress={() => go(item.path)} style={[styles.link, pathname === item.path && styles.selected]}>
-            <View style={styles.navLabel}><item.Icon size={18} color={pathname===item.path?colors.banuMagenta:colors.banuMuted}/><Text style={styles.linkText}>{item.path==='/history'?'Mis conversaciones':item.path==='/progress'?'Mi progreso':item.path==='/announcements'?'Banu al Día':item.label}</Text></View>
+            <View style={styles.navLabel}><item.Icon size={18} color={pathname===item.path?colors.banuMagenta:colors.banuMuted}/><Text style={styles.linkText}>{item.path==='/history'?'Mis conversaciones':item.path==='/progress'?'Mi progreso':item.label}</Text></View>
           </Pressable>
           {index===0 && can('chat') && <>
             <Pressable accessibilityRole="button" accessibilityLabel="Navegar a Chat" aria-expanded={chatMenu} aria-current={pathname==='/chat'?'page':undefined} style={[styles.link,pathname==='/chat'&&styles.selected]} onPress={()=>setChatMenu(v=>!v)}><View style={styles.navLabel}><ChatGlyph size={18} color={pathname==='/chat'?colors.banuMagenta:colors.banuMuted}/><Text style={styles.linkText}>Conversar con Banu</Text></View></Pressable>

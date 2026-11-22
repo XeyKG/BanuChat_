@@ -9,6 +9,6 @@ export function academicCourseLabel(courseKey: string, courseName: string, perio
   const offset = sectionOffset[courseKey];
   const base = periodBase[period];
   return offset !== undefined && base !== undefined
-    ? `${courseName} · NRC ficticio ${base + offset}`
+    ? `${courseName} · NRC ${base + offset}`
     : courseName;
 }

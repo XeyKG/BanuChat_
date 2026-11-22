@@ -13,6 +13,7 @@ import { AcademicRecord, useAcademicRecord } from '@/components/academic-record'
 import {CardGrid,ContentColumn,DemoNotice,FilterChip,ScreenState,StatusBadge,SurfaceCard,secondaryStyles} from '@/components/secondary-ui';
 import { ScreenHeader } from '@/components/screen-header';
 import { useSession } from '@/session/session-context';
+import { useAuth } from '@/auth/auth-provider';
 import {CCD_AUXILIARY_NOTICE,isCcdAuthenticated,isCcdLocal,mobileMode} from '@/config/demo-mode';
 import { AnimatedProgressBar, FadeIn } from '@/ui/animated';
 import { colors, radii, shadows, spacing, typography, textStyles } from '@/ui/tokens';
@@ -46,12 +47,18 @@ function formatBogotaDate(timestamp: string): string {
 }
 
 export default function ProgressScreen() {
+  const { snapshot } = useAuth();
+  const session = snapshot.phase === 'authenticated' ? snapshot.me : null;
+  return <ProgressContent key={session?.session_id ?? 'local'} sessionId={session?.session_id ?? null} uid={session?.synthetic_uid ?? null}/>;
+}
+
+function ProgressContent({sessionId, uid}:{sessionId:string|null;uid:string|null}) {
   const router = useRouter();
   const { activeProfile } = useSession();
   const profileKey = activeProfile?.profile_key ?? null;
   const profileAlias = activeProfile?.alias ?? null;
   const showAcademic = mobileMode()==='synthetic';
-  const academic = useAcademicRecord(showAcademic ? profileKey : null);
+  const academic = useAcademicRecord(showAcademic ? sessionId : null);
 
   const [filter, setFilter] = useState<ProgressFilter>('all');
   const [retryCount, setRetryCount] = useState(0);
@@ -127,7 +134,7 @@ export default function ProgressScreen() {
 
       <ScrollView contentContainerStyle={secondaryStyles.scroll}>
         <ContentColumn testID="aux-content">
-          {showAcademic && <AcademicRecord {...academic}/>}
+          {showAcademic && <AcademicRecord {...academic} uid={uid}/>}
           {isCcdAuthenticated() && <DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
           {showSummary && (
             <FadeIn>

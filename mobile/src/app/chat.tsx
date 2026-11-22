@@ -24,6 +24,7 @@ import {
 } from '@/api/messages';
 import { AppButton } from '@/components/app-button';
 import { ChatSources } from '@/components/chat-sources';
+import { ChatAiNotice } from '@/components/chat-ai-notice';
 import { offersOwnProgress, readableChatAnswer } from '@/components/chat-presentation';
 import { ChartGlyph } from '@/ui/icons';
 import { useSession } from '@/session/session-context';
@@ -79,6 +80,7 @@ export default function ChatScreen() {
   const reducedMotion = useMotionReduced();
   const insets=useSafeAreaInsets();
   const [inputFocused, setInputFocused] = useState(false);
+  const [noticeOpenFor, setNoticeOpenFor] = useState<string | null>(null);
   const [keyboardVisible,setKeyboardVisible]=useState(false);
   useEffect(()=>{if(Platform.OS==='web')return;const show=Keyboard.addListener('keyboardDidShow',()=>setKeyboardVisible(true)),hide=Keyboard.addListener('keyboardDidHide',()=>setKeyboardVisible(false));return()=>{show.remove();hide.remove();};},[]);
   const router = useRouter();
@@ -193,6 +195,7 @@ export default function ChatScreen() {
   const isConversationLocked =
     conversationState !== 'ready' || sendError === 'conflict' || sendError === 'uncertain' || sendError === 'invalid_response';
   const showEmptyState = conversationState === 'ready' && messages.length === 0;
+  const noticeOpen = noticeOpenFor !== null && noticeOpenFor === conversationId;
 
   async function submitMessage(text?: string) {
     const outgoing = (text ?? content).trim();
@@ -351,6 +354,16 @@ export default function ChatScreen() {
             disabled={isSending||sendError==='uncertain'||sendError==='invalid_response'} style={styles.newChatButton}/>
         </View>
       )}
+      {!keyboardVisible && !showEmptyState && conversationState === 'ready' && conversationId && (
+        <Pressable accessibilityRole="button" accessibilityState={{expanded:noticeOpen}}
+          style={styles.noticeControl}
+          onPress={() => {
+            setNoticeOpenFor(noticeOpen ? null : conversationId);
+            if (!noticeOpen) scrollViewRef.current?.scrollTo({y:0,animated:!reducedMotion});
+          }}>
+          <Text style={styles.noticeControlLabel}>{noticeOpen ? 'Ocultar aviso sobre IA' : 'Aviso sobre IA'}</Text>
+        </Pressable>
+      )}
       {newConversationError&&sendError!=='conflict'&&<Text accessibilityRole="alert" style={styles.errorText}>No fue posible crear otra conversación. Puedes intentarlo de nuevo.</Text>}
       <View testID="chat-layout" style={styles.chatLayout}>
       <KeyboardAvoidingView
@@ -368,9 +381,11 @@ export default function ChatScreen() {
             const key=`${conversationId}:${conversationState}:${messages.length}:${messages[messages.length-1]?.message_id??''}:${isSending}`;
             if(lastAutoScrollKeyRef.current===key)return;
             lastAutoScrollKeyRef.current=key;
+            if(showEmptyState)return;
             scrollViewRef.current?.scrollToEnd({animated:!reducedMotion});
           }}>
           <View testID="chat-column" style={styles.messageColumn}>
+            {(showEmptyState || noticeOpen) && <ChatAiNotice/>}
             {isCcdLocal() && <Text style={styles.conversationStateText}>{CCD_NOTICE} Solo se abren chats creados en esta apertura.</Text>}
             {isCcdAuthenticated() && <Text testID="demo-notice" style={styles.conversationStateText}>{CCD_AUTH_NOTICE}</Text>}
             {conversationState === 'loading' && (
@@ -660,6 +675,8 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   safeArea:{flex:1,minHeight:0,backgroundColor:colors.banuCanvas,paddingHorizontal:spacing.sm,paddingTop:spacing.sm,gap:spacing.sm},
   nativeToolbar:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:spacing.sm},nativeToolbarTitle:{flex:1,minWidth:0,fontSize:17,lineHeight:24,fontWeight:'600',color:colors.banuInk},
+  noticeControl:{alignSelf:'flex-start',justifyContent:'center',minHeight:44,paddingHorizontal:spacing.sm},
+  noticeControlLabel:{...textStyles.small,color:colors.banuMagenta,fontWeight:'700',textDecorationLine:'underline'},
   chatLayout:{width:'100%',flex:1,minHeight:0,flexDirection:'row',gap:spacing.lg},
   keyboardView:{flex:1,width:Platform.OS==='web'?undefined:'100%',minWidth:0,minHeight:0,borderWidth:1,borderColor:colors.banuBorder,borderRadius:radii.lg,backgroundColor:colors.surface,overflow:'hidden',...shadows.banuPanel},
   newChatButton:{minHeight:48,paddingHorizontal:spacing.sm},

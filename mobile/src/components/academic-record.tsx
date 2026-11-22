@@ -16,31 +16,31 @@ type RecordData = {
 const outcomes = { passed:'Aprobado', failed:'Reprobado', in_progress:'En curso' };
 
 type LoadResult = RecordData | 'error';
-export function useAcademicRecord(profileKey: string | null) {
-  const [state, setState] = useState<{profileKey:string; result:LoadResult}>();
+export function useAcademicRecord(sessionId: string | null) {
+  const [state, setState] = useState<{sessionId:string; result:LoadResult}>();
   const [retry, setRetry] = useState(0);
   useEffect(() => {
-    if (profileKey===null) return;
+    if (sessionId===null) return;
     const controller = new AbortController();
     void (async () => {
       try {
         const response = await resourceFetch(getApiBaseUrl()+'/me/academic',{signal:controller.signal});
         if (!response.ok) throw new Error('ACADEMIC_UNAVAILABLE');
         const data = await response.json() as RecordData;
-        if (!controller.signal.aborted) setState({profileKey,result:data});
+        if (!controller.signal.aborted) setState({sessionId,result:data});
       } catch {
-        if (!controller.signal.aborted) setState({profileKey,result:'error'});
+        if (!controller.signal.aborted) setState({sessionId,result:'error'});
       }
     })();
     return () => controller.abort();
-  },[profileKey,retry]);
+  },[sessionId,retry]);
   return {
-    result:state?.profileKey===profileKey?state.result:undefined,
+    result:state?.sessionId===sessionId?state.result:undefined,
     retry:()=>{setState(undefined);setRetry(n=>n+1);},
   };
 }
 
-export function AcademicRecord({result,retry}:{result:LoadResult|undefined;retry:()=>void}) {
+export function AcademicRecord({result,retry,uid}:{result:LoadResult|undefined;retry:()=>void;uid:string|null}) {
   if (!result) return <ScreenState kind="loading" title="Cargando expediente…"/>;
   if (result==='error') return <ScreenState kind="error" title="No fue posible cargar el expediente"><AppButton tone="banu" label="Reintentar expediente" onPress={retry}/></ScreenState>;
   if (!result.student) return <ScreenState kind="empty" title="Sin expediente ficticio asignado"/>;
@@ -48,11 +48,11 @@ export function AcademicRecord({result,retry}:{result:LoadResult|undefined;retry
   return <SurfaceCard>
     <Text accessibilityRole="header" style={[textStyles.body,{color:colors.banuNavy,fontWeight:'700'}]}>Expediente académico</Text>
     <Text style={textStyles.body}>{student.given_name} {student.family_name}</Text>
-    <Text style={textStyles.body}>{student.academic_id} · {student.email}</Text>
+    {uid && <Text selectable style={textStyles.body}>UID · {uid}</Text>}
     <Text style={textStyles.body}>Programa · {student.program_name}</Text>
     <Text style={textStyles.body}>Semestre · {student.current_semester}</Text>
     <Text style={textStyles.body}>Período · {student.period_label}</Text>
-    <Text style={[textStyles.small,{color:colors.banuMuted}]}>Expediente ficticio de demostración</Text>
+    <Text style={[textStyles.small,{color:colors.banuMuted}]}>Los expedientes, las inscripciones y los NRC de esta demostración son ficticios.</Text>
     <Text accessibilityRole="header" style={[textStyles.body,{fontWeight:'700'}]}>Cursos e intentos</Text>
     {!result.attempts.length && <Text style={textStyles.body}>Sin intentos registrados.</Text>}
     {result.attempts.map(attempt=><View key={`${attempt.course_key}/${attempt.attempt_number}`} style={styles.attempt}>

@@ -13,7 +13,7 @@ import { colors, radii, spacing } from '@/ui/tokens';
 const FEATURES = [
   { Icon: ChatGlyph, name: 'Chat con Banu', detail: 'Pregunta por cursos, pruebas diagnósticas, requisitos y costos. Abre las fuentes desde la respuesta.' },
   { Icon: ChartGlyph, name: 'Mi progreso', detail: 'Consulta el avance de tu cuenta de demostración.' },
-  { Icon: CalendarGlyph, name: 'Calendario y Banu al Día', detail: 'Encuentra actividades, fechas y novedades de la demostración.' },
+  { Icon: CalendarGlyph, name: 'Calendario y Noticias', detail: 'Encuentra actividades, fechas y novedades de la demostración.' },
 ];
 
 export default function WelcomeScreen() {

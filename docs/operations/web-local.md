@@ -42,7 +42,7 @@ el límite móvil de 1.000.000 caracteres. Las capacidades auxiliares mantienen 
 avisos de datos ficticios; el material CCD seleccionado no implica aval institucional.
 
 En escritorio se ofrece navegación lateral con Inicio, Chat, Historial, Progreso,
-Calendario, Anuncios y convocatorias, Publicaciones OE2, Banu al día y Cerrar
+Calendario, Anuncios y convocatorias, Publicaciones OE2, Noticias y Cerrar
 sesión. Las secciones respetan las capacidades vigentes. Chat permite crear una
 conversación o retomar el historial y el chat abierto; no fabrica un identificador.
 Bajo 1024 px se usa el botón Menú; Escape lo cierra y devuelve el foco al botón.

@@ -116,7 +116,13 @@ try {
     currentStep='login-real';await fill('Contraseña',accounts[0].password);await click('Iniciar sesión');
     await until(`location.pathname==='/home'&&document.body.innerText.includes('Hola,')`);
     const home=await snapshot('02-home');pass(currentStep,{overflow:home.overflow,storageEmpty:home.localStorageKeys.length===0&&home.sessionStorageKeys.length===0});
+    currentStep='news-navigation';await click('Navegar a Noticias');
+    await until(`location.pathname==='/announcements'&&[...document.querySelectorAll('h1,[role="heading"]')].some(heading=>heading.textContent.trim()==='Noticias')`);
+    await snapshot('02-noticias');await click('Navegar a Inicio');pass(currentStep);
     currentStep='create-conversation';await click('Abrir chat con Banu');await until(`location.pathname==='/chat'&&!!document.querySelector('textarea:not([readonly])')`);
+    await until(`document.querySelector('[data-testid="chat-ai-notice"] [role="heading"], [data-testid="chat-ai-notice"] h1')?.textContent==='Antes de conversar con Banu'&&!!document.querySelector('[data-testid="chat-ai-notice"] a[href^="https://sedeelectronica.sic.gov.co/"]')`);
+    if(requestCounts.messagePosts!==0||await evaluate(`!!document.querySelector('[data-testid="chat-message"]')`))throw new Error('AI_NOTICE_RECORDED_AS_MESSAGE');
+    await snapshot('02-aviso-ia');
     const conversationId=await evaluate(`new URLSearchParams(location.search).get('conversation_id')`);
     await writeFile(path.join(run,'own-conversation.json'),JSON.stringify({conversation_id:conversationId}));pass(currentStep);
     let emptyId=conversationId;
@@ -139,6 +145,13 @@ try {
     currentStep='history';await click('Navegar a Historial');await until(`location.pathname==='/history'&&!!document.querySelector('[aria-label^="Abrir conversación del "]')`);
     await snapshot('05-history');const openLabel=await evaluate(`document.querySelector('[aria-label^="Abrir conversación del "]').getAttribute('aria-label')`);await click(openLabel);
     await until(`location.pathname==='/chat'&&document.body.innerText.includes('¿Qué temas se estudian')`);pass(currentStep,{reopened:true});
+    currentStep='history-ai-notice';
+    const messagesBeforeNotice=await evaluate(`document.querySelectorAll('[data-testid="chat-message"]').length`);
+    const postsBeforeNotice=requestCounts.messagePosts;
+    await click('Aviso sobre IA');await until(`!!document.querySelector('[data-testid="chat-ai-notice"]')`);
+    await click('Ocultar aviso sobre IA');await until(`!document.querySelector('[data-testid="chat-ai-notice"]')`);
+    if(requestCounts.messagePosts!==postsBeforeNotice||messagesBeforeNotice!==await evaluate(`document.querySelectorAll('[data-testid="chat-message"]').length`))throw new Error('AI_NOTICE_CHANGED_HISTORY');
+    pass(currentStep);
     currentStep='responsive';for(const width of [1366,768,390]){
       await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await pause(450);
       const state=await snapshot('06-chat-'+width);if(state.overflow)throw new Error('HORIZONTAL_OVERFLOW');

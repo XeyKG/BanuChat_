@@ -33,6 +33,7 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 
 Descargas existentes:
 
+- [APK Android ARM64 1.0.6](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.6/BanuChat-demo-1.0.6-arm64.apk).
 - [APK Android ARM64 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk).
 - [Paquete académico 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip).
 
@@ -136,7 +137,7 @@ Abre una ventana normal para la primera cuenta y una ventana privada para la seg
 | 6 | Historial | Salir del chat, reabrir la conversación propia y volver a abrir una fuente. Es persistencia, no una generación nueva |
 | 7 | Chat sobre tu progreso | Pedir ver tu progreso; cuando la respuesta incluya el acceso, abrir Mi progreso desde allí |
 | 8 | Calendario | Mostrar cuadrícula mensual, cambiar de mes, elegir un día marcado y leer su agenda. Un mes sin eventos puede quedar vacío |
-| 9 | Banu al Día | Buscar, filtrar y abrir el texto de una noticia o convocatoria. Es el nombre del espacio de noticias |
+| 9 | Noticias | Buscar, filtrar y abrir el texto de una noticia o convocatoria. Es el nombre del espacio de noticias |
 | 10 | Publicaciones OE2 | Abrir Programación, Convocatorias y Novedades; revisar procedencia y versión. Son consultas, no matrícula ni pagos |
 | 11 | Cambios de publicaciones | Abrir la comparación de versiones de OE2 y un registro Antes/Ahora. El conteo previo fue una modificación y cinco sin cambios; no forzar esos números si cambia la publicación |
 | 12 | Segunda cuenta | Revisar su progreso y su Historial. La conversación privada de la primera no debe aparecer. Esta observación visual no reemplaza una prueba técnica de autorización |
@@ -146,13 +147,21 @@ Pregunta documental sugerida para ensayar: **«¿Cuáles pruebas debo hacer?»**
 
 Una consulta puede tardar bastante en dos vCPU. Los límites existentes son **API 150 s, cliente 175 s y proxy 180 s**. Envía una vez y espera el resultado; no abras varias generaciones paralelas. Si queda incierto, consulta Historial antes de repetir.
 
+### Recorrido del cliente 1.0.7
+
+En **Mi progreso**, coteja el UID del expediente con la cuenta ficticia utilizada para entrar. Por ejemplo, la cuenta de Celia Arcilla muestra **UID · U99000001**. Los rótulos muestran el nombre del curso seguido de **NRC** y el número. El expediente conserva la advertencia general sobre los datos ficticios.
+
+Abre una conversación nueva para mostrar **Antes de conversar con Banu**. En una conversación previa puedes recuperar el texto con **Aviso sobre IA**. El aviso identifica al asistente, advierte sobre errores y datos sensibles y enlaza la referencia oficial sobre tratamiento de datos personales en IA. [Circular Externa 002 de 2024 de la SIC](https://sedeelectronica.sic.gov.co/transparencia/normativa/circular-externa-2-de-2024-de-la-superintendencia-de-industria-y-comercio-lineamientos-sobre-el-tratamiento-de-datos).
+
+Con una cuenta editorial autorizada, muestra los contadores, la búsqueda y los filtros de **Noticias** y **Eventos**. Usa **Vista previa** para mostrar el resultado sin publicar contenido de ensayo durante la sustentación. [Guía del panel editorial](panel-editorial.md).
+
 ## 5 Recorrido visual en el Huawei
 
 1. Conecta el teléfono a internet y abre la **APK publicada BanuChat**, no Expo Go ni una versión de desarrollo que solicite Metro.
 2. Si necesitas instalarla, descarga la APK del apartado 2. Actualiza la existente manteniendo la firma. Los avisos y permisos de Android se revisan personalmente en el dispositivo; no cambies políticas de seguridad globales para la demo.
 3. Repite Login → Inicio → Mi progreso → curso con intentos/recursamiento, si la cuenta lo tiene.
 4. En Chat envía una consulta documental nueva. Desplázate hasta la respuesta, expande y contrae Fuentes, abre una cita y prueba la descarga. Revisa que el teclado no impida llegar al compositor ni a los mensajes.
-5. Abre Historial y reabre la conversación. Luego muestra Calendario, Banu al Día y las tres categorías de Publicaciones OE2. Abre Cambios de publicaciones desde OE2.
+5. Abre Historial y reabre la conversación. Luego muestra Calendario, Noticias y las tres categorías de Publicaciones OE2. Abre Cambios de publicaciones desde OE2.
 6. Abre **Recordatorios** si aparece en Android. Su propósito es configurar avisos **locales del teléfono** sobre la información de demostración. Revisa permiso y estado antes de habilitar nada. No hay push remoto acreditado, ni un recordatorio inmediato garantizado, ni sincronización del permiso con la web. La versión 1.0.4 no incluye el antiguo botón de prueba a cinco segundos.
 7. Cierra sesión y vuelve a autenticarte. Si activaste recordatorios de prueba, revísalos y desactiva solo los tuyos cuando corresponda; no canceles notificaciones de otras aplicaciones.
 

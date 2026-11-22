@@ -18,12 +18,12 @@ export default function AnnouncementsScreen(){
  const canSearch=[...search.trim()].length!==1;
  const applySearch=()=>{if(canSearch){setQuery(search.trim());setRetry(r=>r+1);}};
  return <SafeAreaView testID="secondary-screen" style={styles.safe}>
-  <ScreenHeader title="Banu al Día" subtitle="Noticias y convocatorias, en un solo lugar" onAction={()=>router.replace('/home')}/>
+  <ScreenHeader title="Noticias" subtitle="Noticias y convocatorias, en un solo lugar" onAction={()=>router.replace('/home')}/>
   <ScrollView contentContainerStyle={secondaryStyles.scroll} keyboardShouldPersistTaps="handled"><ContentColumn testID="aux-content">
-   <View style={styles.controls}><View style={styles.searchField}><Text style={styles.label}>¿Qué te interesa?</Text><TextInput accessibilityLabel="Buscar en Banu al Día" placeholder="Busca un tema o una convocatoria" value={search} onChangeText={setSearch} onSubmitEditing={applySearch} maxLength={100} style={secondaryStyles.input}/></View><AppButton tone="banu" label="Buscar novedades" disabled={!canSearch} onPress={applySearch}/></View>
+   <View style={styles.controls}><View style={styles.searchField}><Text style={styles.label}>¿Qué te interesa?</Text><TextInput accessibilityLabel="Buscar en Noticias" placeholder="Busca un tema o una convocatoria" value={search} onChangeText={setSearch} onSubmitEditing={applySearch} maxLength={100} style={secondaryStyles.input}/></View><AppButton tone="banu" label="Buscar novedades" disabled={!canSearch} onPress={applySearch}/></View>
    {query.length>0&&<AppButton tone="banu" label="Limpiar búsqueda" variant="quiet" onPress={()=>{setSearch('');setQuery('');}}/>}
    {!canSearch&&<Text accessibilityRole="alert" style={styles.copy}>Escribe al menos dos letras o deja el campo vacío para ver todo.</Text>}
-   <View accessibilityRole="radiogroup" accessibilityLabel="Publicaciones de Banu al Día" style={secondaryStyles.filters}>{filters.map(([value,label])=><FilterChip key={value} label={label} accessibilityLabel={'Banu al Día: '+label} selected={filter===value} onPress={()=>setFilter(value)}/>)}</View>
+   <View accessibilityRole="radiogroup" accessibilityLabel="Publicaciones de Noticias" style={secondaryStyles.filters}>{filters.map(([value,label])=><FilterChip key={value} label={label} accessibilityLabel={'Noticias: '+label} selected={filter===value} onPress={()=>setFilter(value)}/>)}</View>
    {isCcdAuthenticated()&&<DemoNotice>{CCD_AUXILIARY_NOTICE}</DemoNotice>}
    {state==='loading'&&<ScreenState kind="loading" title="Buscando novedades…"/>}
    {state==='error'&&<ScreenState kind="error" title="No pudimos cargar las novedades" body="Comprueba la conexión y vuelve a intentarlo."><AppButton tone="banu" label="Reintentar novedades" onPress={()=>setRetry(r=>r+1)}/></ScreenState>}

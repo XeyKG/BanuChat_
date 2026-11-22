@@ -8,10 +8,17 @@
  <script type="module" src="/api/v2/editorial/editor.js"></script>
 </head>
 <body>
- <header class="top"><div class="brand"><strong>Banu<span>Chat</span></strong><span>Centro de Competencias Digitales</span></div><a href="/announcements">Abrir Banu al Día</a><button type="button" id="logout" class="secondary" hidden>Cerrar sesión</button></header>
- <main>
+ <a class="skip" href="#main">Saltar al contenido</a>
+ <header class="top">
+  <div class="top-inner">
+   <div class="brand"><strong>Banu<span>Chat</span></strong><span>Administración editorial</span></div>
+   <a id="public-news" href="/announcements">Ver Noticias</a>
+   <button type="button" id="logout" class="secondary" hidden>Cerrar sesión</button>
+  </div>
+ </header>
+ <main id="main">
   <section id="access" class="access" aria-labelledby="access-title">
-   <div><p class="eyebrow">BanuChat</p><h1 id="access-title">Panel editorial</h1><p class="lead">Administra las noticias de Banu al Día y el calendario del Centro de Competencias Digitales.</p></div>
+   <div class="access-intro"><h1 id="access-title">Panel editorial</h1><p class="lead">Gestiona las noticias y los eventos del Centro de Competencias Digitales.</p></div>
    <form id="login" class="card">
     <h2>Acceso de administración</h2>
     <label for="username">Usuario</label><input id="username" name="username" autocomplete="username" required maxlength="64">
@@ -21,13 +28,28 @@
    </form>
   </section>
   <section id="workspace" hidden aria-labelledby="workspace-title">
-   <div class="workspace-title"><h1 id="workspace-title">Publicaciones del CCD</h1><button type="button" id="new">Nueva noticia</button></div>
+   <div class="workspace-title"><h1 id="workspace-title" tabindex="-1">Publicaciones del CCD</h1><button type="button" id="new">Nueva noticia</button></div>
    <nav class="sections" aria-label="Tipo de publicación"><button type="button" id="news-tab" aria-pressed="true">Noticias</button><button type="button" id="event-tab" aria-pressed="false">Eventos</button></nav>
-   <p id="feedback" role="status" aria-live="polite"></p>
+   <div class="metrics" aria-label="Publicaciones por estado">
+    <button type="button" data-filter="active" aria-pressed="false"><span>Vigentes</span><strong>0</strong></button>
+    <button type="button" data-filter="scheduled" aria-pressed="false"><span>Programadas</span><strong>0</strong></button>
+    <button type="button" data-filter="expired" aria-pressed="false"><span id="expired-metric">Vencidas</span><strong>0</strong></button>
+    <button type="button" data-filter="draft" aria-pressed="false"><span>Borradores</span><strong>0</strong></button>
+    <button type="button" data-filter="archived" aria-pressed="false"><span>Archivadas</span><strong>0</strong></button>
+   </div>
+   <p id="feedback" role="status"></p>
    <div class="columns">
-    <section class="card listings" aria-labelledby="list-title"><h2 id="list-title">Noticias</h2><label for="state-filter">Estado</label><select id="state-filter"><option value="all">Todos</option><option value="active">Vigentes</option><option value="scheduled">Programadas</option><option value="expired">Vencidas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select><div id="list"></div></section>
+    <section class="card listings" aria-labelledby="list-title">
+     <div class="list-heading"><h2 id="list-title">Noticias</h2><button type="button" id="reload" class="secondary">Recargar</button></div>
+     <label for="search">Buscar publicaciones</label>
+     <input id="search" type="search" placeholder="Título o contenido" maxlength="160">
+     <label for="state-filter">Estado</label>
+     <select id="state-filter"><option value="all">Todos</option><option value="active">Vigentes</option><option value="scheduled">Programadas</option><option value="expired">Vencidas</option><option value="draft">Borradores</option><option value="archived">Archivadas</option></select>
+     <p id="list-count" class="hint" role="status"></p><div id="list"></div>
+    </section>
     <form id="editor" class="card" aria-labelledby="editor-title">
      <div class="editor-title"><h2 id="editor-title" tabindex="-1">Nueva noticia</h2><span id="state" class="pill">Borrador</span></div>
+     <p id="changes" class="changes" role="status" hidden>Cambios sin guardar</p>
      <label for="title">Título</label><input id="title" required maxlength="160">
      <fieldset><legend id="dates-title">Vigencia de la noticia</legend><p class="hint">Hora de Colombia. La fecha final es opcional.</p><div class="date-fields"><div><label for="starts" id="starts-label">Visible desde</label><input id="starts" type="datetime-local"></div><div><label for="ends" id="ends-label">Visible hasta</label><input id="ends" type="datetime-local"></div></div></fieldset>
      <label for="message">Contenido</label><textarea id="message" required maxlength="8000" rows="7"></textarea>
@@ -36,11 +58,21 @@
      <p class="hint" id="file-hint">PDF o Markdown de hasta 2 MB.</p>
      <div id="current-file" hidden><a id="file-link">Descargar adjunto</a><label class="check"><input type="checkbox" id="remove"> Quitar el adjunto actual</label></div>
      <input id="attachment" type="file" aria-describedby="file-hint" accept="application/pdf,text/markdown,.pdf,.md">
-     <div class="actions"><button type="button" id="archive" class="secondary" hidden>Archivar</button><button type="button" id="draft" class="secondary">Guardar borrador</button><button type="submit" id="publish">Publicar noticia</button></div>
+     <div class="actions"><button type="button" id="archive" class="secondary archive" hidden>Archivar</button><button type="button" id="draft" class="secondary">Guardar borrador</button><button type="button" id="preview" class="secondary">Vista previa</button><button type="submit" id="publish">Publicar noticia</button></div>
      <p id="editor-error" role="alert"></p>
     </form>
    </div>
   </section>
  </main>
+ <dialog id="preview-dialog" aria-labelledby="preview-heading">
+  <div class="preview-bar"><h2 id="preview-heading">Vista previa</h2><form method="dialog"><button class="secondary" autofocus>Cerrar vista previa</button></form></div>
+  <p id="preview-dates" class="hint"></p>
+  <article>
+   <h3 id="preview-title"></h3>
+   <img id="preview-cover" alt="Portada de la publicación" hidden>
+   <p id="preview-text"></p>
+   <p id="preview-file" class="preview-file" hidden></p>
+  </article>
+ </dialog>
 </body>
 </html>
