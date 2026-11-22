@@ -1,0 +1,31 @@
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Segoe UI, Arial, sans-serif","fontSize":"16px","primaryColor":"#edf0f8","primaryTextColor":"#192444","primaryBorderColor":"#4a5978","lineColor":"#334465","actorBkg":"#192444","actorBorder":"#192444","actorTextColor":"#ffffff","actorLineColor":"#8190ab","signalColor":"#334465","signalTextColor":"#192444","labelBoxBkgColor":"#f5e5f0","labelBoxBorderColor":"#a42a72","labelTextColor":"#192444","loopTextColor":"#192444","noteBkgColor":"#fcf0f7","noteBorderColor":"#a42a72","noteTextColor":"#192444"},"sequence":{"actorMargin":18,"width":100,"height":43,"boxMargin":8,"diagramMarginX":15,"diagramMarginY":12,"messageMargin":19,"noteMargin":8,"mirrorActors":false,"useMaxWidth":false,"actorFontFamily":"Segoe UI, Arial, sans-serif","actorFontSize":16,"messageFontFamily":"Segoe UI, Arial, sans-serif","messageFontSize":16,"noteFontFamily":"Segoe UI, Arial, sans-serif","noteFontSize":15},"themeCSS":"text,tspan{font-family:Arial,sans-serif}.actor-man,.actor-man tspan{fill:#192444!important}"}}%%
+sequenceDiagram
+    participant B as API REST v2
+    participant N as n8n<br/>Admisión OE4
+    participant A as Agente TS<br/>en el backend
+    participant M as Servidor MCP<br/>stdio
+    participant D as Supabase<br/>PostgreSQL
+
+    B->>B: Detecta progreso + anuncios
+    B->>N: Pide admisión<br/>ID, versión y número de fuentes
+    N->>N: Valida y aplica el límite
+    N-->>B: Directiva correlacionada<br/>o rechazo
+    alt Admisión verificada y autorización de invocación
+        rect rgb(242, 245, 253)
+            B->>A: Invoca con cuenta, perfil y versión
+            A->>A: Selecciona herramientas
+            loop Por cada herramienta autorizada, hasta dos
+                A->>M: get_profile_progress<br/>o get_announcements
+                M->>D: Valida el vínculo y consulta<br/>en solo lectura
+                D-->>M: Datos y procedencia
+                M-->>A: Resultado estructurado
+                A->>A: Verifica la evidencia
+            end
+            A-->>B: Combina resultados admisibles y citas
+        end
+    else Directiva de aclaración válida
+        B->>B: Pide acotar las fuentes
+    else Rechazo operativo o fallo de la admisión
+        B->>B: Devuelve error de dependencia
+    end
+    Note over B,D: La API persiste el turno cuando hay respuesta. El colector de eventos es un workflow separado.

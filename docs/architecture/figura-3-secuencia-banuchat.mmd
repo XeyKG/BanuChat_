@@ -1,0 +1,58 @@
+%%{init: {"theme":"base","themeVariables":{"fontFamily":"Segoe UI, Arial, sans-serif","fontSize":"16px","primaryColor":"#edf0f8","primaryTextColor":"#192444","primaryBorderColor":"#4a5978","lineColor":"#334465","actorBkg":"#192444","actorBorder":"#192444","actorTextColor":"#ffffff","actorLineColor":"#8190ab","signalColor":"#334465","signalTextColor":"#192444","labelBoxBkgColor":"#f5e5f0","labelBoxBorderColor":"#a42a72","labelTextColor":"#192444","loopTextColor":"#192444","noteBkgColor":"#fcf0f7","noteBorderColor":"#a42a72","noteTextColor":"#192444"},"sequence":{"actorMargin":16,"width":94,"height":43,"boxMargin":5,"diagramMarginX":15,"diagramMarginY":12,"messageMargin":7,"noteMargin":6,"mirrorActors":false,"useMaxWidth":false,"actorFontFamily":"Segoe UI, Arial, sans-serif","actorFontSize":16,"messageFontFamily":"Segoe UI, Arial, sans-serif","messageFontSize":16,"noteFontFamily":"Segoe UI, Arial, sans-serif","noteFontSize":15},"themeCSS":"text,tspan{font-family:Arial,sans-serif}.actor-man,.actor-man tspan{fill:#192444!important}"}}%%
+sequenceDiagram
+    participant U as Usuario
+    participant C as BanuChat<br/>Web / Android
+    participant B as API REST v2
+    participant R as Motor RAG
+    participant O as Ollama
+    participant D as Supabase<br/>PostgreSQL + pgvector
+    participant N as n8n
+    participant M as Agente TS<br/>y MCP stdio
+
+    U->>C: Pregunta
+    C->>B: POST con token
+    B->>D: Valida sesión, propiedad y contexto autorizado
+    B->>B: Selecciona ruta
+    par Procesamiento del turno
+        alt A · Consulta documental
+            rect rgb(242, 245, 253)
+                B->>R: Delimita la consulta
+                opt Recuperación vectorial
+                    R->>R: Receta de la versión
+                    R->>O: Genera vector
+                    O-->>R: Vector
+                    R->>D: Busca por coseno<br/>con filtros de versión y alcance
+                    D-->>R: Fragmentos y procedencia
+                end
+                opt Síntesis
+                    R->>O: Síntesis con<br/>evidencia
+                    O-->>R: Resultado
+                end
+                R-->>B: Respuesta y citas<br/>o abstención
+            end
+        else B · Consulta estructurada directa
+            rect rgb(239, 248, 246)
+                B->>D: Consulta estructurada con perfil y versión autorizados
+                D-->>B: Datos para respuesta por reglas
+            end
+        else C · Consulta estructurada multifuente
+            rect rgb(252, 241, 248)
+                B->>N: Solicita admisión para las fuentes requeridas
+                N-->>B: Directiva correlacionada
+                opt Directiva válida que autoriza invocación
+                    B->>M: Selecciona herramientas MCP y solicita lecturas
+                    M-->>B: Respuesta y citas
+                end
+            end
+        end
+        alt El turno produce una respuesta válida
+            B->>D: Guarda mensajes y citas en una transacción
+            B-->>C: HTTP 201 · mensajes
+            C-->>U: Respuesta<br/>y fuentes
+        else Fallo de sesión, acceso o del turno
+            B-->>C: Error HTTP aplicable
+        end
+    and Observabilidad · turno aceptado y colector habilitado
+        B-)N: Inicio, ruta, etapas y cierre
+        Note over B,N: Envíos asíncronos de mejor esfuerzo.<br/>La API emite el cierre exitoso después de guardar.
+    end
