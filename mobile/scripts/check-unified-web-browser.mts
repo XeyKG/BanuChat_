@@ -64,6 +64,7 @@ async function snapshot(name:string) {
   return dom;
 }
 function pass(name:string,details:Record<string,unknown>={}) {report.steps.push({name,result:'PASS',at:new Date().toISOString(),...details});console.log('PASS '+name);}
+const visible = (selector:string) => `[...document.querySelectorAll(${JSON.stringify(selector)})].filter(element=>element.checkVisibility({checkVisibilityCSS:true,checkOpacity:true})&&!element.closest('[aria-hidden="true"]'))`;
 try {
   let debugPort='';
   for(let i=0;i<80;i++){try{debugPort=(await readFile(path.join(profile,'DevToolsActivePort'),'utf8')).split('\n')[0];break;}catch{await pause(250);}}
@@ -117,11 +118,11 @@ try {
     await until(`location.pathname==='/home'&&document.body.innerText.includes('Hola,')`);
     const home=await snapshot('02-home');pass(currentStep,{overflow:home.overflow,storageEmpty:home.localStorageKeys.length===0&&home.sessionStorageKeys.length===0});
     currentStep='news-navigation';await click('Navegar a Noticias');
-    await until(`location.pathname==='/announcements'&&[...document.querySelectorAll('h1,[role="heading"]')].some(heading=>heading.textContent.trim()==='Noticias')`);
+    await until(`location.pathname==='/announcements'&&${visible('[data-testid="screen-title"]')}.some(heading=>heading.textContent.trim()==='Noticias')`);
     await snapshot('02-noticias');await click('Navegar a Inicio');pass(currentStep);
     currentStep='create-conversation';await click('Abrir chat con Banu');await until(`location.pathname==='/chat'&&!!document.querySelector('textarea:not([readonly])')`);
-    await until(`document.querySelector('[data-testid="chat-ai-notice"] [role="heading"], [data-testid="chat-ai-notice"] h1')?.textContent==='Antes de conversar con Banu'&&!!document.querySelector('[data-testid="chat-ai-notice"] a[href^="https://sedeelectronica.sic.gov.co/"]')`);
-    if(requestCounts.messagePosts!==0||await evaluate(`!!document.querySelector('[data-testid="chat-message"]')`))throw new Error('AI_NOTICE_RECORDED_AS_MESSAGE');
+    await until(`${visible('[data-testid="chat-ai-notice"]')}.some(notice=>notice.querySelector('[role="heading"],h1,h2,h3')?.textContent==='Antes de conversar con Banu'&&notice.querySelector('a[href^="https://sedeelectronica.sic.gov.co/"]'))`);
+    if(requestCounts.messagePosts!==0||await evaluate(`${visible('[data-testid="chat-message"]')}.length`))throw new Error('AI_NOTICE_RECORDED_AS_MESSAGE');
     await snapshot('02-aviso-ia');
     const conversationId=await evaluate(`new URLSearchParams(location.search).get('conversation_id')`);
     await writeFile(path.join(run,'own-conversation.json'),JSON.stringify({conversation_id:conversationId}));pass(currentStep);
@@ -146,11 +147,11 @@ try {
     await snapshot('05-history');const openLabel=await evaluate(`document.querySelector('[aria-label^="Abrir conversación del "]').getAttribute('aria-label')`);await click(openLabel);
     await until(`location.pathname==='/chat'&&document.body.innerText.includes('¿Qué temas se estudian')`);pass(currentStep,{reopened:true});
     currentStep='history-ai-notice';
-    const messagesBeforeNotice=await evaluate(`document.querySelectorAll('[data-testid="chat-message"]').length`);
+    const messagesBeforeNotice=await evaluate(`${visible('[data-testid="chat-message"]')}.length`);
     const postsBeforeNotice=requestCounts.messagePosts;
-    await click('Aviso sobre IA');await until(`!!document.querySelector('[data-testid="chat-ai-notice"]')`);
-    await click('Ocultar aviso sobre IA');await until(`!document.querySelector('[data-testid="chat-ai-notice"]')`);
-    if(requestCounts.messagePosts!==postsBeforeNotice||messagesBeforeNotice!==await evaluate(`document.querySelectorAll('[data-testid="chat-message"]').length`))throw new Error('AI_NOTICE_CHANGED_HISTORY');
+    await click('Aviso sobre IA');await until(`${visible('[data-testid="chat-ai-notice"]')}.length===1`);
+    await click('Ocultar aviso sobre IA');await until(`${visible('[data-testid="chat-ai-notice"]')}.length===0`);
+    if(requestCounts.messagePosts!==postsBeforeNotice||messagesBeforeNotice!==await evaluate(`${visible('[data-testid="chat-message"]')}.length`))throw new Error('AI_NOTICE_CHANGED_HISTORY');
     pass(currentStep);
     currentStep='responsive';for(const width of [1366,768,390]){
       await call('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:false});await pause(450);
