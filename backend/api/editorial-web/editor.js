@@ -8,6 +8,7 @@ const statusFilter = byId('state-filter');
 let items = [];
 let current;
 let kind = 'news';
+const categoryLabels = {news:'Noticia o novedad',calls:'Convocatoria',programming:'Programación de cursos'};
 let previewUrl;
 let savedImageUrl;
 let dirty = false;
@@ -40,7 +41,7 @@ async function request(path, data) {
  return reply;
 }
 function busy(form, value) {
- form.querySelectorAll('button, input, textarea').forEach(control => { control.disabled = value; });
+ form.querySelectorAll('button, input, select, textarea').forEach(control => { control.disabled = value; });
  form.setAttribute('aria-busy', String(value));
 }
 function setWorkspaceBusy(value) {
@@ -66,6 +67,8 @@ function openEditor(item) {
  byId('state').textContent = stateLabels[visualState(current)];
  byId('state').dataset.state = visualState(current);
  byId('title').value = current.title;
+ byId('publication-category-field').hidden = isEvent;
+ byId('publication-category').value = current.publication_category ?? 'news';
  byId('message').value = current.body;
  byId('starts').value = civil(current.starts_at ?? current.published_at);
  byId('ends').value = civil(current.ends_at);
@@ -137,6 +140,11 @@ function renderList() {
   status.dataset.state = state;
   status.textContent = stateLabels[state];
   button.append(title, status);
+  if (item.kind === 'news') {
+   const category = document.createElement('small');
+   category.textContent = categoryLabels[item.publication_category] ?? categoryLabels.news;
+   button.append(category);
+  }
   const start=item.starts_at??item.published_at;
   if(start){
    const dates=document.createElement('small');
@@ -250,6 +258,8 @@ byId('preview').addEventListener('click', () => {
  const startsAt = outgoing(byId('starts').value);
  const endsAt = outgoing(byId('ends').value);
  byId('preview-title').textContent = byId('title').value.trim() || 'Publicación sin título';
+ byId('preview-category').hidden = kind === 'event';
+ byId('preview-category').textContent = categoryLabels[byId('publication-category').value];
  byId('preview-text').textContent = byId('message').value.trim() || 'Aún no hay contenido.';
  byId('preview-dates').textContent = startsAt
   ? displayDate.format(new Date(startsAt)) + (endsAt ? ' — ' + displayDate.format(new Date(endsAt)) : '')
@@ -288,6 +298,7 @@ async function save(state) {
   const endsAt = archiving ? item.ends_at ?? null : outgoing(byId('ends').value);
   if(endsAt&&(!startsAt||endsAt<startsAt))throw new Error('Escribe una fecha de inicio y una fecha final igual o posterior.');
   const saved = await request('/news', { id: item.id, revision: item.revision, state, kind: item.kind,
+   publication_category: item.kind === 'news' ? (archiving ? item.publication_category : byId('publication-category').value) : undefined,
    title: archiving ? item.title : byId('title').value, body: archiving ? item.body : byId('message').value,
    starts_at:startsAt,ends_at:endsAt,
    attachment: archiving ? undefined : await fileForSave('attachment','remove',/\.(pdf|md)$/i,2*1024*1024,'Elige un PDF o Markdown de hasta 2 MB.'),

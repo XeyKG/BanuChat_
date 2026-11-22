@@ -20,6 +20,7 @@ export type NewsItem = {
   publishedAt?:string;
   programming?:Programming;
   editorialKey?:string;
+  editorialCategory?:Announcement['publication_category'];
   origins:NewsOrigin[];
 };
 
@@ -40,13 +41,14 @@ export function announcementsToNews(feed:AnnouncementsResponse):NewsItem[] {
       /^convocatoria\b/u.test(normalize(record.description));
     return {
       key:'announcements:'+record.announcement_key,
-      category:isCall?'calls':'news',
+      category:record.publication_category ?? (isCall?'calls':'news'),
       title:record.title,
       description:record.description,
       starts:record.valid_from,
       ends:record.valid_until,
       status:record.temporal_status,
       editorialKey:editorial?record.announcement_key:undefined,
+      editorialCategory:record.publication_category,
       origins:[{kind:editorial?'editorial':'catalog',releaseId:feed.release_id,record}],
     };
   });
@@ -78,14 +80,18 @@ const originKey = (origin:NewsOrigin) => JSON.stringify([origin.kind,origin.rele
 
 export function mergeNews(sources:NewsItem[][]):NewsItem[] {
   const items = new Map<string,NewsItem>();
-  const content = new Map<string,string>();
+  const content = new Map<string,string[]>();
   for (const item of sources.flat()) {
     const match = fingerprint(item);
-    const key = (match ? content.get(match) : undefined) ?? item.key;
+    const matches = match ? content.get(match) : undefined;
+    const key = items.has(item.key) ? item.key : matches?.find(candidate=>{
+      const category = items.get(candidate)?.editorialCategory;
+      return !category || !item.editorialCategory || category===item.editorialCategory;
+    }) ?? item.key;
     const prior = items.get(key);
     if (!prior) {
       items.set(key,item);
-      if (match) content.set(match,key);
+      if (match) content.set(match,[...(matches??[]),key]);
       continue;
     }
     const priorKeys = new Set(prior.origins.map(originKey));
@@ -93,7 +99,8 @@ export function mergeNews(sources:NewsItem[][]):NewsItem[] {
     if (!added.length) continue;
     const presentation = item.editorialKey&&!prior.editorialKey ? item : prior;
     const classified = item.origins.some(origin=>origin.kind==='oe2') ? item : prior;
-    items.set(key,{...presentation,key,category:classified.category,publishedAt:prior.publishedAt??item.publishedAt,
+    const editorialCategory = prior.editorialCategory ?? item.editorialCategory;
+    items.set(key,{...presentation,key,editorialCategory,category:editorialCategory??classified.category,publishedAt:prior.publishedAt??item.publishedAt,
       origins:[...prior.origins,...added]});
   }
   return [...items.values()].sort((a,b)=>b.starts.localeCompare(a.starts)||a.title.localeCompare(b.title,'es'));

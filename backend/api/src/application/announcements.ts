@@ -26,7 +26,8 @@ WHERE a.dataset_release_id = $1
 const EDITORIAL_FEED_QUERY = `
 WITH combined AS (
  SELECT a.announcement_key::text, a.title::text, a.description::text, a.valid_from, a.valid_until,
-        a.source_path::text, a.source_locator::text, a.source_sha256::text
+        a.source_path::text, a.source_locator::text, a.source_sha256::text,
+        NULL::text AS publication_category
  FROM banuchat.announcements a WHERE a.dataset_release_id=$1
    AND NOT EXISTS (
      SELECT 1 FROM banuchat_editorial.news n WHERE n.kind='news' AND n.state<>'draft'
@@ -36,7 +37,7 @@ WITH combined AS (
  SELECT 'editorial-'||(CASE WHEN n.image_name IS NOT NULL THEN 'image-' ELSE '' END)||
         (CASE WHEN n.file_name IS NOT NULL THEN 'file-' ELSE '' END)||n.id,
         n.title,n.body,COALESCE(n.starts_at,n.published_at),n.ends_at,'editorial/news/'||n.id,'revision:'||n.revision,
-        encode(sha256(convert_to(n.title||chr(10)||n.body,'UTF8')),'hex')
+        encode(sha256(convert_to(n.title||chr(10)||n.body,'UTF8')),'hex'), n.publication_category
  FROM banuchat_editorial.news n WHERE n.kind='news' AND n.state='published'
    AND n.published_at<=now() AND COALESCE(n.starts_at,n.published_at)<=now()
 )
@@ -72,6 +73,7 @@ export interface AnnouncementResult {
   valid_from: string;
   valid_until: string | null;
   temporal_status: DerivedAnnouncementStatus;
+  publication_category?: "news" | "calls" | "programming";
   source: AnnouncementSource;
 }
 
@@ -281,6 +283,10 @@ export function normalizeAnnouncementRow(
 
   const validFrom = normalizeTimestamp(row.valid_from);
   const validUntil = normalizeNullableTimestamp(row.valid_until);
+  const category = row.publication_category;
+  if (category != null && category !== "news" && category !== "calls" && category !== "programming") {
+    return reject("invalid_database_result");
+  }
   if (
     validUntil.instant !== null &&
     validUntil.instant < validFrom.instant
@@ -294,6 +300,7 @@ export function normalizeAnnouncementRow(
     description: row.description,
     valid_from: validFrom.text,
     valid_until: validUntil.text,
+    ...(category == null ? {} : { publication_category: category }),
     temporal_status: deriveStatus(
       referenceInstant,
       validFrom.instant,

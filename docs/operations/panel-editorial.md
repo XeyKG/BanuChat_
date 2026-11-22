@@ -3,12 +3,14 @@
 El [panel editorial web](https://banuchat.duckdns.org/api/v2/editorial) permite a personal autorizado del Centro de Competencias Digitales preparar y mantener noticias con adjuntos. Usa una cuenta administrativa aprovisionada por el responsable técnico. Las cuentas de estudiantes conservan su propio acceso.
 
 1. Inicia sesión y selecciona **Noticias** o **Eventos**. Los contadores muestran los registros de esa sección por estado. Usa un contador o el filtro de estado y busca por título o contenido.
-2. Abre un registro de la lista o crea uno nuevo. Escribe el título y el contenido, ajusta las fechas en hora de Colombia y añade una portada o un adjunto si hace falta.
-3. Abre **Vista previa** para revisar el contenido, la portada, el adjunto y las fechas. Cierra la vista con **Escape** o con su botón. La vista conserva el estado de la publicación.
+2. Abre un registro de la lista o crea uno nuevo. En la sección Noticias, elige **Tipo de publicación**: Noticia o novedad, Convocatoria o Programación de cursos. Escribe el título y el contenido, ajusta las fechas en hora de Colombia y añade una portada o un adjunto si hace falta.
+3. Abre **Vista previa** para revisar la categoría, el contenido, la portada, el adjunto y las fechas. Cierra la vista con **Escape** o con su botón. La vista conserva el estado de la publicación.
 4. Selecciona **Guardar borrador** o confirma **Publicar noticia**. Para un evento futuro, confirma **Programar evento**. Si sales del editor con cambios pendientes, el panel pide confirmar que quieres descartarlos.
 5. Abre un registro para editarlo. Puedes mantener, reemplazar o quitar la portada y el adjunto. **Archivar** retira la publicación y el acceso estudiantil al adjunto tras una confirmación. Puedes volver a publicarla.
 
 Los estudiantes con sesión iniciada abren la publicación en el lector de Noticias. Desde allí pueden descargar un adjunto disponible en web o elegir la carpeta de destino en Android. El panel administrativo se abre en el navegador. Las noticias históricas de la release se conservan como contenido de solo lectura. Los adjuntos editoriales quedan fuera de la indexación del RAG.
+
+La categoría se conserva al guardar el borrador, editar, programar o publicar. Las noticias existentes reciben la categoría **Noticia o novedad**. Para que una actividad aparezca en Calendario, créala desde la sección **Eventos** del panel.
 
 El backend activa el panel administrado con `BANUCHAT_EDITORIAL_ORIGIN=https://banuchat.duckdns.org`. Aplica la [migración editorial](../../infra/db/editorial/001_editorial.sql) antes de habilitar la variable. El esquema está separado de las releases del RAG. El responsable técnico aprovisiona cada cuenta por un canal privado, con un hash Argon2id en `banuchat_editorial.accounts`. Deshabilitar una cuenta bloquea también sus cookies de sesión vigentes. Las sesiones administrativas caducan a las ocho horas.
 
@@ -24,7 +26,7 @@ Para noticias, la fecha inicial abre la vigencia y la final la cierra. El texto 
 
 La revisión de `6134fb3` está publicada en DuckDNS. Se aplicó [002_editorial_schedule.sql](../../infra/db/editorial/002_editorial_schedule.sql) en Supabase y se desplegaron la API y el cliente web en la EC2 existente. La vista editorial conserva 60 registros de origen y su lectura está concedida al rol de la API. Por HTTPS se comprobó el listado con sesión editorial, la aparición y el vencimiento de una noticia, el acceso a su portada y la presencia de un evento en dos fechas del calendario de Bogotá. Las publicaciones ficticias de la prueba quedaron archivadas desde el panel.
 
-La copia para revertir API y web está en `/opt/banuchat/backups/editorial-schedule-6134fb3-r2`. Para una instalación nueva, aplica en orden las migraciones 001 y 002 antes de activar el panel.
+La copia de la publicación histórica `6134fb3` está en `/opt/banuchat/backups/editorial-schedule-6134fb3-r2`. Para una instalación nueva, aplica en orden las migraciones 001, 002 y [003 de categoría editorial](../../infra/db/editorial/003_editorial_publication_category.sql) antes de activar el panel.
 
 ## Nombres de la cohorte en Mi progreso
 

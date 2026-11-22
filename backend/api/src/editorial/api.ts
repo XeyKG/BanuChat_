@@ -9,7 +9,7 @@ const cookieName='__Secure-banu-editor';
 const maxFile=2*1024*1024;
 const maxImage=1024*1024;
 const uuid=/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/u;
-const editorialColumns='id, revision, title, body, state, updated_at, published_at, file_name, kind, starts_at, ends_at, image_name';
+const editorialColumns='id, revision, title, body, state, updated_at, published_at, file_name, kind, starts_at, ends_at, image_name, publication_category';
 const digest=(value:string)=>createHash('sha256').update(value).digest('hex');
 class EditorialError extends Error {
  constructor(readonly status:number,message:string){super(message);}
@@ -179,7 +179,7 @@ export async function createEditorialHandler(pool:Pool,origin:string,verifyStude
     const result=await pool.query(`
      SELECT ${editorialColumns},false AS from_release FROM banuchat_editorial.news
      UNION ALL
-     SELECT b.id,0,b.title,b.body,'published',b.starts_at,b.starts_at,NULL,b.kind,b.starts_at,b.ends_at,NULL,true
+     SELECT b.id,0,b.title,b.body,'published',b.starts_at,b.starts_at,NULL,b.kind,b.starts_at,b.ends_at,NULL,'news',true
      FROM banuchat_editorial.base_items b
      JOIN banuchat.datasets d ON d.id=1 AND d.current_release_id=b.dataset_release_id
      WHERE NOT EXISTS (SELECT 1 FROM banuchat_editorial.news n WHERE n.id=b.id)
@@ -191,25 +191,28 @@ export async function createEditorialHandler(pool:Pool,origin:string,verifyStude
    const data=await body(req,Math.ceil((maxFile+maxImage)*4/3)+50000);
    const {id,revision,state}=data;
    const kind=data.kind??'news';
+   const category=data.publication_category;
    if(typeof id!=='string'||!uuid.test(id)||typeof revision!=='number'||!Number.isSafeInteger(revision)||revision<0||
-      (state!=='draft'&&state!=='published'&&state!=='archived')||(kind!=='news'&&kind!=='event'))invalid();
+      (state!=='draft'&&state!=='published'&&state!=='archived')||(kind!=='news'&&kind!=='event')||
+      (category!==undefined&&category!=='news'&&(kind!=='news'||(category!=='calls'&&category!=='programming'))))invalid();
    const starts=date(data.starts_at),ends=date(data.ends_at);
    if((kind==='event'&&!starts)||(ends&&(!starts||ends<starts)))throw new EditorialError(400,'Indica la fecha de inicio. La fecha final debe ser igual o posterior.');
    const title=field(data.title,160),text=field(data.body,8000),attachment=parseFile(data.attachment),image=parseImage(data.image);
    const values=[id,title,text,state,username,attachment?.name??null,attachment?.bytes??null,kind,starts,ends,image?.name??null,image?.mime??null,image?.bytes??null];
    const result=revision===0?await pool.query(`
-    INSERT INTO banuchat_editorial.news (id,title,body,state,updated_by,published_at,file_name,file_bytes,kind,starts_at,ends_at,image_name,image_mime,image_bytes)
-    VALUES($1,$2,$3,$4,$5,CASE WHEN $4='published' THEN now() END,$6,$7,$8,$9,$10,$11,$12,$13)
+    INSERT INTO banuchat_editorial.news (id,title,body,state,updated_by,published_at,file_name,file_bytes,kind,starts_at,ends_at,image_name,image_mime,image_bytes,publication_category)
+    VALUES($1,$2,$3,$4,$5,CASE WHEN $4='published' THEN now() END,$6,$7,$8,$9,$10,$11,$12,$13,COALESCE($14,'news'))
     ON CONFLICT (id) DO NOTHING RETURNING ${editorialColumns}
-   `,values):await pool.query(`
+   `,[...values,category??null]):await pool.query(`
     UPDATE banuchat_editorial.news SET title=$2,body=$3,state=$4,updated_by=$5,updated_at=now(),
       published_at=CASE WHEN $4='published' AND state<>'published' THEN now() ELSE published_at END,
       file_name=CASE WHEN $15 THEN $6 ELSE file_name END,file_bytes=CASE WHEN $15 THEN $7 ELSE file_bytes END,
       starts_at=$9,ends_at=$10,
       image_name=CASE WHEN $16 THEN $11 ELSE image_name END,image_mime=CASE WHEN $16 THEN $12 ELSE image_mime END,image_bytes=CASE WHEN $16 THEN $13 ELSE image_bytes END,
+      publication_category=COALESCE($17,publication_category),
       revision=revision+1
     WHERE id=$1 AND kind=$8 AND revision=$14 RETURNING ${editorialColumns}
-   `,[...values,revision,attachment!==undefined,image!==undefined]);
+   `,[...values,revision,attachment!==undefined,image!==undefined,category??null]);
    if(!result.rows[0])throw new EditorialError(409,'La publicación cambió. Vuelve a cargarla antes de guardar.');
    response(res,revision===0?201:200,result.rows[0]);
   }catch(error){

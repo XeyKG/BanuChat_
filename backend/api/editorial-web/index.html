@@ -51,6 +51,14 @@
      <div class="editor-title"><h2 id="editor-title" tabindex="-1">Nueva noticia</h2><span id="state" class="pill">Borrador</span></div>
      <p id="changes" class="changes" role="status" hidden>Cambios sin guardar</p>
      <label for="title">Título</label><input id="title" required maxlength="160">
+     <div id="publication-category-field">
+      <label for="publication-category">Tipo de publicación</label>
+      <select id="publication-category">
+       <option value="news">Noticia o novedad</option>
+       <option value="calls">Convocatoria</option>
+       <option value="programming">Programación de cursos</option>
+      </select>
+     </div>
      <fieldset><legend id="dates-title">Vigencia de la noticia</legend><p class="hint">Hora de Colombia. La fecha final es opcional.</p><div class="date-fields"><div><label for="starts" id="starts-label">Visible desde</label><input id="starts" type="datetime-local"></div><div><label for="ends" id="ends-label">Visible hasta</label><input id="ends" type="datetime-local"></div></div></fieldset>
      <label for="message">Contenido</label><textarea id="message" required maxlength="8000" rows="7"></textarea>
      <fieldset><legend>Imagen de portada</legend><p class="hint" id="image-hint">PNG, JPG o WebP de hasta 1 MB.</p><img id="image-preview" alt="Vista previa de la imagen de portada" hidden><label for="cover" class="input-label">Seleccionar imagen</label><input id="cover" type="file" aria-describedby="image-hint" accept="image/png,image/jpeg,image/webp"><label class="check" id="image-remove-label" hidden><input type="checkbox" id="remove-image"> Quitar la imagen actual</label></fieldset>
@@ -69,6 +77,7 @@
   <p id="preview-dates" class="hint"></p>
   <article>
    <h3 id="preview-title"></h3>
+   <p id="preview-category" class="hint" hidden></p>
    <img id="preview-cover" alt="Portada de la publicación" hidden>
    <p id="preview-text"></p>
    <p id="preview-file" class="preview-file" hidden></p>

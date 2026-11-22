@@ -1091,6 +1091,11 @@
           "description": {
             "$ref": "#/components/schemas/nonblank"
           },
+          "publication_category": {
+            "description": "Tipo elegido en el panel editorial. Se omite para los registros del catálogo.",
+            "type": "string",
+            "enum": ["news", "calls", "programming"]
+          },
           "valid_from": {
             "$ref": "#/components/schemas/date_time"
           },

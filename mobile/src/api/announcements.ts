@@ -3,6 +3,7 @@ import {resourceFetch as fetch} from '@/auth/runtime';
 
 export type AnnouncementStatus = 'active' | 'upcoming' | 'expired';
 export type AnnouncementFilter = AnnouncementStatus | 'all';
+export type EditorialPublicationCategory = 'news' | 'calls' | 'programming';
 
 export interface Announcement {
   announcement_key: string;
@@ -11,6 +12,7 @@ export interface Announcement {
   valid_from: string;
   valid_until: string | null;
   temporal_status: AnnouncementStatus;
+  publication_category?: EditorialPublicationCategory;
   source?: {source_kind:'announcement';source_path:string;source_locator:string;source_sha256:string};
 }
 
@@ -60,6 +62,10 @@ function parseAnnouncement(value: unknown): Announcement {
   }
 
   const source = value.source;
+  const category = value.publication_category;
+  if (category !== undefined && category !== 'news' && category !== 'calls' && category !== 'programming') {
+    throw new Error('ANNOUNCEMENTS_RESPONSE_INVALID');
+  }
   if (source !== undefined && (!isRecord(source) || source.source_kind !== 'announcement' ||
       !isNonemptyString(source.source_path) || !isNonemptyString(source.source_locator) ||
       typeof source.source_sha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(source.source_sha256))) {
@@ -72,6 +78,7 @@ function parseAnnouncement(value: unknown): Announcement {
     valid_from: value.valid_from,
     valid_until: value.valid_until,
     temporal_status: value.temporal_status,
+    ...(category === undefined ? {} : {publication_category:category}),
     ...(source ? {source:source as Announcement['source']} : {}),
   };
 }
