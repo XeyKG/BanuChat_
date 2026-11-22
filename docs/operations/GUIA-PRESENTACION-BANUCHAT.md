@@ -1,6 +1,6 @@
 # Guía para encender y presentar BanuChat
 
-Preparada para el responsable del proyecto. **Revisión del 22 de noviembre de 2026.** Noticias 1.0.8 reúne el catálogo, el panel editorial y las fuentes versionadas de OE2. [Evidencia de la publicación y reversión](../transition/CHECKPOINT-NOTICIAS-1.0.8.md).
+Preparada para el responsable del proyecto. **Revisión del 22 de noviembre de 2026.** BanuChat 1.0.9 permite elegir el tipo de publicación en el panel editorial. [Registro de publicación y respaldos](../transition/CHECKPOINT-CATEGORIAS-EDITORIALES-1.0.9.md).
 
 El apartado 7 contiene el recorrido vigente de observabilidad en AWS. La edición PDF conserva las capturas y el diagrama de la publicación anterior. [Edición PDF anterior](GUIA-PRESENTACION-BANUCHAT.pdf).
 
@@ -24,7 +24,7 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 ## 2 Preparación el día anterior
 
 1. Comprueba que puedes iniciar sesión personalmente en Canvas/AWS Academy, GitHub y Supabase. Resuelve MFA antes de presentar; nunca proyectes contraseñas, tokens ni archivos de configuración.
-2. Para el recorrido usa la APK ARM64 1.0.8 comprobada en el Huawei. Conserva la APK 1.0.7 como referencia del corte previo. [Release 1.0.8](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.8).
+2. Descarga la APK ARM64 1.0.9 para el recorrido. Conserva la APK 1.0.8 como respaldo. [Release 1.0.9](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.9).
 3. Conserva dos cuentas de demostración autorizadas y sus contraseñas en tu medio privado habitual. No las pongas en diapositivas o en el repositorio. Las cuentas del laboratorio local pueden ser diferentes de las de Supabase.
 4. Enciende el laboratorio y comprueba el recorrido web del apartado 4 y el móvil del apartado 5. Guarda una conversación propia con una respuesta documental y sus fuentes para contingencia mediante Historial.
 5. Carga el Huawei y comprueba su conexión a internet. La APK publicada no necesita cable USB, Metro ni el computador encendido.
@@ -33,7 +33,8 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 
 Descargas existentes:
 
-- [APK Android ARM64 1.0.8](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.8/BanuChat-demo-1.0.8-arm64.apk).
+- [APK Android ARM64 1.0.9](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.9/BanuChat-demo-1.0.9-arm64.apk).
+- [APK Android ARM64 1.0.8, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.8/BanuChat-demo-1.0.8-arm64.apk).
 - [APK Android ARM64 1.0.7, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.7/BanuChat-demo-1.0.7-arm64.apk).
 - [APK Android ARM64 1.0.6, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.6/BanuChat-demo-1.0.6-arm64.apk).
 - [APK Android ARM64 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk).
@@ -42,10 +43,10 @@ Descargas existentes:
 En Windows puedes verificar la APK descargada:
 
 ```powershell
-Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.8-arm64.apk" -Algorithm SHA256
+Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.9-arm64.apk" -Algorithm SHA256
 ```
 
-La APK 1.0.8 tiene SHA-256 `b4a5b257906ec393fa99fe7b64032af08e53cc9bfd747de801fa8f24da6229f0` y `versionCode=9`. Instálala sobre BanuChat para conservar el paquete, la firma y los datos de la aplicación.
+La APK 1.0.9 tiene SHA-256 `74d6f5b20406f876f0b056490791273e217d67b2dff61b6999df856218e9cdd3` y `versionCode=10`. Instálala sobre BanuChat para conservar el paquete, la firma y los datos de la aplicación.
 
 ## 3 Encender la demostración publicada
 
