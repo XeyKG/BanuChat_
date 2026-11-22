@@ -1,6 +1,6 @@
 # Guía para encender y presentar BanuChat
 
-Preparada para el responsable del proyecto. **Revisión: 20 de noviembre de 2026.** Cliente publicado 1.0.4; backend RAG registrado desde `a30088f`. Referencia documental inicial `2e31128`.
+Preparada para el responsable del proyecto. **Revisión: 21 de noviembre de 2026.** Web y catálogo académico sincronizados con `3dfdf67`. [Evidencia de la publicación y reversión](../transition/CHECKPOINT-DATOS-ACADEMICOS-RELEASE-FINAL.md).
 
 El apartado 7 contiene el recorrido vigente de observabilidad en AWS. La edición PDF conserva las capturas y el diagrama de la publicación anterior. [Edición PDF anterior](GUIA-PRESENTACION-BANUCHAT.pdf).
 
@@ -24,7 +24,7 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 ## 2 Preparación el día anterior
 
 1. Comprueba que puedes iniciar sesión personalmente en Canvas/AWS Academy, GitHub y Supabase. Resuelve MFA antes de presentar; nunca proyectes contraseñas, tokens ni archivos de configuración.
-2. En GitHub abre la [Release 1.0.4](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4). Descarga la APK y el paquete académico. El repositorio es privado: el profesor necesitará acceso si descarga directamente.
+2. Para el recorrido usa la APK ARM64 1.0.6 comprobada en el Huawei. Conserva el paquete de 1.0.4 como respaldo del corte anterior. [Release anterior](https://github.com/XeyKG/BanuChat_/releases/tag/demo-1.0.4).
 3. Conserva dos cuentas de demostración autorizadas y sus contraseñas en tu medio privado habitual. No las pongas en diapositivas o en el repositorio. Las cuentas del laboratorio local pueden ser diferentes de las de Supabase.
 4. Enciende el laboratorio y comprueba el recorrido web del apartado 4 y el móvil del apartado 5. Guarda una conversación propia con una respuesta documental y sus fuentes para contingencia mediante Historial.
 5. Carga el Huawei y comprueba su conexión a internet. La APK publicada no necesita cable USB, Metro ni el computador encendido.
@@ -33,16 +33,16 @@ Esta guía permite preparar la sustentación sin recordar comandos de desarrollo
 
 Descargas existentes:
 
-- [APK Android ARM64 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk).
-- [Paquete académico 1.0.4](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip).
+- [APK Android ARM64 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-demo-1.0.4-arm64.apk).
+- [Paquete académico 1.0.4, respaldo](https://github.com/XeyKG/BanuChat_/releases/download/demo-1.0.4/BanuChat-entrega-academica-1.0.4.zip).
 
 En Windows puedes verificar la APK descargada:
 
 ```powershell
-Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.4-arm64.apk" -Algorithm SHA256
+Get-FileHash "$env:USERPROFILE\Downloads\BanuChat-demo-1.0.6-arm64.apk" -Algorithm SHA256
 ```
 
-SHA-256 esperado de esa APK: `daddd2a9eae5b5036ffb80215e0e9b716696b8240bcbf054fb7e7ed4c862ce36`. Es un archivo publicado previamente; no se reconstruyó ni se volvió a descargar para esta guía. Conserva 1.0.4 y las versiones anteriores. No desinstales la aplicación para actualizarla: debe conservar paquete y firma.
+La APK 1.0.6 tiene SHA-256 `5caef0ec57bc060155db903e175b47e6ec31e01a19b9915f50182f2979309c98` y `versionCode=7`. Instálala sobre BanuChat para conservar el paquete, la firma y los datos de la aplicación.
 
 ## 3 Encender la demostración publicada
 
@@ -130,7 +130,7 @@ Abre una ventana normal para la primera cuenta y una ventana privada para la seg
 | --- | --- | --- |
 | 1 | Login. Primero intenta con campos vacíos; luego usa tu cuenta autorizada | Advertencia visible; después Inicio autenticado. No mostrar la contraseña |
 | 2 | Inicio | Accesos disponibles y navegación del producto |
-| 3 | Mi progreso | Expediente de la cuenta, cursos, estado e intentos. En una cuenta preparada, mostrar un recursamiento; no todas tienen historial |
+| 3 | Mi progreso | Señala el rótulo de expediente ficticio, programa, semestre y período. En la cuenta de recursamiento, compara los intentos de Interacción Digital y sus NRC ficticios. Abre la tarjeta del mismo curso y coteja el nombre |
 | 4 | Chat | Enviar una pregunta documental del corpus. Leer respuesta y distinguir una respuesta completa, parcial o falta de evidencia |
 | 5 | Fuentes del mensaje | Expandir las citas, abrir el documento y descargar el artefacto. Mostrar título, contenido y correspondencia con la respuesta |
 | 6 | Historial | Salir del chat, reabrir la conversación propia y volver a abrir una fuente. Es persistencia, no una generación nueva |
@@ -322,7 +322,7 @@ Propuesta de orden; ajusta los minutos al tiempo concedido por el profesor:
 | La web abre pero login falla | Revisar campos, internet y estado de API; no repetir contraseñas en público | El formulario visible no prueba acceso a la base |
 | La generación tarda o falla | Esperar una sola solicitud; consultar Historial antes de reintentar | Dos vCPU limitan inferencia; no se declara RAG estable |
 | Falta evidencia o la respuesta es parcial | Abrir las fuentes disponibles y explicar el alcance documental | No inventar tarifas, reglas o requisitos para cubrir el vacío |
-| La APK pide Metro | Abrir la APK publicada 1.0.4, no el cliente de desarrollo | No hace falta iniciar Metro para el producto publicado |
+| La APK pide Metro | Abrir la APK de entrega 1.0.6 | La compilación de entrega funciona sin Metro |
 | n8n no abre | Revisar el subdominio HTTPS, sus dos accesos y `banuchat-n8n` en AWS; no encender Docker por deducción | El editor y los contenedores locales son instalaciones diferentes |
 | Se acaba el Learner Lab | Volver a activar por el procedimiento autorizado si aún hay crédito/tiempo | No hay disponibilidad permanente acreditada |
 | No hay internet o no se recupera AWS | Abrir capturas y paquete descargados; mostrar código y registros fechados | Declarar que es contingencia con evidencia anterior, no una consulta en vivo |
